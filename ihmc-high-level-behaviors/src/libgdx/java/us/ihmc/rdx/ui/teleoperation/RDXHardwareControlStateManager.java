@@ -263,4 +263,18 @@ public class RDXHardwareControlStateManager
       highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.EXIT_WALKING.toByte());
       controllerHelper.publishToController(highLevelStateMessage);
    }
+
+   public void sendRLRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.RL_CONTROL.toByte());
+      controllerHelper.publishToController(highLevelStateMessage);
+   }
+
+   public void sendWalkingRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.WALKING.toByte());
+      controllerHelper.publishToController(highLevelStateMessage);
+   }
 }

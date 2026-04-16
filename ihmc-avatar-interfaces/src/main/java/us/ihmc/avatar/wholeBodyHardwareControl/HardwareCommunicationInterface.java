@@ -1,9 +1,11 @@
 package us.ihmc.avatar.wholeBodyHardwareControl;
 
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import java.util.function.Consumer;
 
 /**
  * General interface for passing measured and desired robot data to and from
@@ -43,4 +45,8 @@ public interface HardwareCommunicationInterface
    boolean hasRobotFaulted();
 
    void addFaultListener(YoVariableChangedListener listener);
+
+   void addRequestedHighLevelControlStateConsumer(Consumer<HighLevelControllerName> highLevelControllerNameConsumer);
+
+   void setCurrentHighLevelControllerState(HighLevelControllerName currentHighLevelControllerName);
 }

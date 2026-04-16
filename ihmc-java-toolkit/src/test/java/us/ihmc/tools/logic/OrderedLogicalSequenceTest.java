@@ -214,7 +214,7 @@ public class OrderedLogicalSequenceTest
    {
       OrderedLogicalSequence orderedLogicalSequence = new OrderedLogicalSequence();
 
-      AtomicBoolean logicalElement1 = new AtomicBoolean(true);
+      AtomicBoolean logicalElement1 = new AtomicBoolean(false);
       AtomicBoolean logicalElement2 = new AtomicBoolean(false);
 
       // Set up logical sequence
@@ -277,7 +277,89 @@ public class OrderedLogicalSequenceTest
       assertEquals(25, logicalElement2.get(), "Value of Logical Element 2 should be 25, instead it is: " + logicalElement2.get());
 
       // Make sure we are finishing on the correct logical element index
-      assertEquals(2, orderedLogicalSequence.getCurrentLogicalElement(), "Current logical element should be 3, instead it is: " + orderedLogicalSequence.getCurrentLogicalElement());
+      assertEquals(2, orderedLogicalSequence.getCurrentLogicalElement(), "Current logical element should be 2, instead it is: " + orderedLogicalSequence.getCurrentLogicalElement());
+
+      // Ensure sequence has finished
+      assertTrue(orderedLogicalSequence.hasFinished(), "Logical sequence has not finished, but it should have!");
+
+      // Reset logical sequence and ensure that worked
+      orderedLogicalSequence.reset();
+      assertFalse(orderedLogicalSequence.hasStarted(), "Logical sequence hasStarted() returns true, despite logical sequence being reset");
+      assertFalse(orderedLogicalSequence.hasFinished(), "Logical sequence hasFinished() returns true, despite logical sequence being reset");
+   }
+
+   @Test
+   public void testPreventUnnecessaryExecution1()
+   {
+      OrderedLogicalSequence orderedLogicalSequence = new OrderedLogicalSequence();
+
+      AtomicBoolean logicalElement1Finished = new AtomicBoolean(true);
+      AtomicInteger logicalElement1 = new AtomicInteger(0);
+      AtomicInteger logicalElement2 = new AtomicInteger(0);
+
+      // Set up logical sequence
+      orderedLogicalSequence.addLogicalElement(() -> logicalElement1.set(logicalElement1.get() + 1), null, logicalElement1Finished::get, true);
+      orderedLogicalSequence.addLogicalElement(() -> logicalElement2.set(logicalElement2.get() + 1),
+                                               logicalElement1Finished::get,
+                                               () -> logicalElement2.get() == 7,
+                                               true);
+
+      // Start sequence and check if it started
+      orderedLogicalSequence.start();
+      assertTrue(orderedLogicalSequence.hasStarted(), "Logical sequence has not started, but it should have!");
+
+      for (int i = 0; i < 60; i ++)
+         orderedLogicalSequence.update();
+
+      // Make sure value of logical element 1 is still = 0, because its completion condition was true from the start so its logic should never run
+      assertEquals(0, logicalElement1.get(), "Value of Logical Element 1 should be 0, instead it is: " + logicalElement1.get());
+
+      // Make sure value of logical element 2 is = 3, regardless of how many times the sequence is updated
+      assertEquals(7, logicalElement2.get(), "Value of Logical Element 2 should be 7, instead it is: " + logicalElement2.get());
+
+      // Make sure we are finishing on the correct logical element index
+      assertEquals(2, orderedLogicalSequence.getCurrentLogicalElement(), "Current logical element should be 2, instead it is: " + orderedLogicalSequence.getCurrentLogicalElement());
+
+      // Ensure sequence has finished
+      assertTrue(orderedLogicalSequence.hasFinished(), "Logical sequence has not finished, but it should have!");
+
+      // Reset logical sequence and ensure that worked
+      orderedLogicalSequence.reset();
+      assertFalse(orderedLogicalSequence.hasStarted(), "Logical sequence hasStarted() returns true, despite logical sequence being reset");
+      assertFalse(orderedLogicalSequence.hasFinished(), "Logical sequence hasFinished() returns true, despite logical sequence being reset");
+   }
+
+   @Test
+   public void testPreventUnnecessaryExecution2()
+   {
+      OrderedLogicalSequence orderedLogicalSequence = new OrderedLogicalSequence();
+
+      AtomicInteger logicalElement1 = new AtomicInteger(0);
+      AtomicInteger logicalElement2 = new AtomicInteger(0);
+      AtomicBoolean logicalElement2Finished = new AtomicBoolean(true);
+
+      // Set up logical sequence
+      orderedLogicalSequence.addLogicalElement(() -> logicalElement1.set(logicalElement1.get() + 1), null, () -> logicalElement1.get() == 7, true);
+      orderedLogicalSequence.addLogicalElement(() -> logicalElement2.set(logicalElement2.get() + 1),
+                                               () -> logicalElement1.get() == 7,
+                                               logicalElement2Finished::get,
+                                               true);
+
+      // Start sequence and check if it started
+      orderedLogicalSequence.start();
+      assertTrue(orderedLogicalSequence.hasStarted(), "Logical sequence has not started, but it should have!");
+
+      for (int i = 0; i < 60; i ++)
+         orderedLogicalSequence.update();
+
+      // Make sure value of logical element 1 is still = 0, because its completion condition was true from the start so its logic should never run
+      assertEquals(7, logicalElement1.get(), "Value of Logical Element 1 should be 7, instead it is: " + logicalElement1.get());
+
+      // Make sure value of logical element 2 is = 3, regardless of how many times the sequence is updated
+      assertEquals(0, logicalElement2.get(), "Value of Logical Element 2 should be 0, instead it is: " + logicalElement2.get());
+
+      // Make sure we are finishing on the correct logical element index
+      assertEquals(2, orderedLogicalSequence.getCurrentLogicalElement(), "Current logical element should be 2, instead it is: " + orderedLogicalSequence.getCurrentLogicalElement());
 
       // Ensure sequence has finished
       assertTrue(orderedLogicalSequence.hasFinished(), "Logical sequence has not finished, but it should have!");
