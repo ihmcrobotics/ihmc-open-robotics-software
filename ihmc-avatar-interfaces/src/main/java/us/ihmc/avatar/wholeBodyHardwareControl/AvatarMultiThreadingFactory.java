@@ -632,6 +632,9 @@ public class AvatarMultiThreadingFactory
          controllerFactory.addRequestableTransition(STAND_TRANSITION_STATE, STAND_PREP_STATE);
          controllerFactory.addRequestableTransition(FREEZE_STATE, STAND_PREP_STATE);
          controllerFactory.addRequestableTransition(WALKING, EXIT_WALKING);
+         controllerFactory.addRequestableTransition(RL_CONTROL, FALLING_STATE);
+         controllerFactory.addRequestableTransition(WALKING, FALLING_STATE);
+         controllerFactory.addRequestableTransition(FALLING_STATE, STAND_PREP_STATE);
 
          // Always be able to request to go to freeze, since that's often a good failure state. Also add this as a failure transition for all states
          for (HighLevelControllerName highLevelControllerName : HighLevelControllerName.values)
@@ -657,23 +660,6 @@ public class AvatarMultiThreadingFactory
          controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE,
                                                                                controllerFactory,
                                                                                !highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady()));
-
-         // Transition to DO_NOTHING in the event of a fault
-         hardwareCommunicationInterface.addFaultListener(change ->
-                                                         {
-                                                            if (hardwareCommunicationInterface.hasRobotFaulted())
-                                                               controllerFactory.getRequestedControlStateEnum().set(DO_NOTHING_BEHAVIOR);
-                                                         });
-
-         // Add fault listener to unservo robot quickly in the event of a fault
-         hardwareCommunicationInterface.addFaultListener(change ->
-                                                         {
-                                                            if (hardwareCommunicationInterface.hasRobotFaulted())
-                                                               lowLevelOutputProcessor.unservoRobotQuickly();
-                                                         });
-
-         // Unservo robot if Estopping
-         hardwareCommunicationInterface.addSoftEStopListener(change -> lowLevelOutputProcessor.unservoRobotQuickly());
 
          // Transition to DO_NOTHING when the robot is unservoed
          lowLevelOutputProcessor.addMasterGainListener(change ->
