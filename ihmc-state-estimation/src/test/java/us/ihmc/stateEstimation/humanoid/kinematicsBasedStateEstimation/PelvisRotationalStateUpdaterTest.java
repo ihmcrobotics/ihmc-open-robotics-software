@@ -125,7 +125,7 @@ public class PelvisRotationalStateUpdaterTest
 
       // This must be false, otherwise the test fails. When the variable is true, the future updates are done relative to the initial yaw, which causes the
       // estimate to effectively be in the wrong frame.
-      ((YoBoolean) registry.findVariable("zeroEstimatedRootYawAtInitialization")).set(false);
+      ((YoBoolean) registry.findVariable("zeroEstimatedRootYawAtInitialization")).set(true);
 
       Quaternion rotationExpected = new Quaternion();
       Twist twistExpected = new Twist();
