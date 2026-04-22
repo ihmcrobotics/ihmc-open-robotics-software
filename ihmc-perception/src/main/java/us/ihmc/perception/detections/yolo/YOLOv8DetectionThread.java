@@ -60,7 +60,7 @@ public class YOLOv8DetectionThread extends RepeatingTaskThread
             colorImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
          }
 
-         yoloExecutor.runNextModel(colorImage, depthImage);
+         yoloExecutor.runNextEnabledModel(colorImage, depthImage);
 
          colorImage.release();
          depthImage.release();

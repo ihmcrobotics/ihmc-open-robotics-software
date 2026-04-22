@@ -9,18 +9,15 @@ import us.ihmc.perception.detections.InstantDetection;
 import java.time.Instant;
 import java.util.List;
 
-/**
- * Extends {@link InstantDetection} by holding onto the depth points that coorespond to
- * the detected segmentation of the object. This has already undergone segmentation erosion
- * and outlier points removed.
- */
-public class YOLOv8InstantDetection extends InstantDetection
+public class YOLOv8InstantDetection extends InstantDetection implements TrackableDetection
 {
    private final RawImage colorImage;
    private final RawImage depthImage;
    private final RawImage objectMask;
    private final BoundingBox2DReadOnly boundingBox;
    private final List<Point3D32> objectPointCloud;
+
+   private int trackId = -1;
 
    public YOLOv8InstantDetection(String detectedObjectClass,
                                  double confidence,
@@ -41,18 +38,98 @@ public class YOLOv8InstantDetection extends InstantDetection
       this.objectPointCloud = objectPointCloud;
    }
 
+   // ---------------- TrackableDetection ----------------
+
+   @Override
+   public String getObjectClass()
+   {
+      return getDetectedObjectClass();
+   }
+
+   @Override
+   public double getConfidence()
+   {
+      return super.getConfidence();
+   }
+
+   @Override
+   public float getX1()
+   {
+      return (float) boundingBox.getMinX();
+   }
+
+   @Override
+   public float getY1()
+   {
+      return (float) boundingBox.getMinY();
+   }
+
+   @Override
+   public float getX2()
+   {
+      return (float) boundingBox.getMaxX();
+   }
+
+   @Override
+   public float getY2()
+   {
+      return (float) boundingBox.getMaxY();
+   }
+
+   @Override
+   public boolean has3D()
+   {
+      // Pose should always exist, but keep it safe
+      return getPose() != null;
+   }
+
+   @Override
+   public float getCx()
+   {
+      return (float) getPose().getPosition().getX();
+   }
+
+   @Override
+   public float getCy()
+   {
+      return (float) getPose().getPosition().getY();
+   }
+
+   @Override
+   public float getCz()
+   {
+      return (float) getPose().getPosition().getZ();
+   }
+
+   @Override
+   public int getTrackId()
+   {
+      return trackId;
+   }
+
+   @Override
+   public void setTrackId(int trackId)
+   {
+      this.trackId = trackId;
+   }
+
+   // ---------------- existing YOLO getters ----------------
+
    public List<Point3D32> getObjectPointCloud()
    {
       return objectPointCloud;
    }
+
    public RawImage getColorImage()
    {
       return colorImage;
    }
+
    public RawImage getDepthImage()
    {
       return depthImage;
    }
+
    public RawImage getObjectMask()
    {
       return objectMask;

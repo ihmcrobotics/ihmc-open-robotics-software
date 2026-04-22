@@ -15,6 +15,7 @@ import sensor_msgs.msg.dds.CameraInfo;
 import sensor_msgs.msg.dds.Image;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Int64;
+import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,6 +35,11 @@ public final class PerceptionAPI
 
    public static final ROS2Topic<?> BEST_EFFORT = IHMC_ROOT.withQoS(ROS2QosProfile.BEST_EFFORT());
    public static final ROS2Topic<?> RELIABLE = IHMC_ROOT.withQoS(ROS2QosProfile.RELIABLE());
+
+   /*
+    * Detection manager
+    */
+   public static final StoredPropertySetROS2TopicPair DETECTION_MANAGER_SETTINGS = new StoredPropertySetROS2TopicPair("detections", "settings");
 
    /*
     * ZED SVO
@@ -57,6 +63,9 @@ public final class PerceptionAPI
                                                                             .withSuffix("vlm/image")
                                                                             .withType(Image.class)
                                                                             .withQoS(ROS2QosProfile.RELIABLE());
+   public static final ROS2Topic<ImageMessage> YOLO_ANNOTATED_IMAGE = PERCEPTION_MODULE.withModule("yolo")
+                                                                                       .withType(ImageMessage.class)
+                                                                                       .withSuffix("annotated_image");
    public static final ROS2Topic<CameraInfo> YOLO_VML_ANNOTATED_IMAGE_CAMERA_INFO = IHMC_ROOT.withModule("yolo")
                                                                                              .withSuffix("vlm/camera_Info")
                                                                                              .withType(CameraInfo.class)

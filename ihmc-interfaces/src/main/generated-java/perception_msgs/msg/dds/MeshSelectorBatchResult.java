@@ -1,0 +1,123 @@
+package perception_msgs.msg.dds;
+
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
+import us.ihmc.pubsub.TopicDataType;
+
+public class MeshSelectorBatchResult extends Packet<MeshSelectorBatchResult> implements Settable<MeshSelectorBatchResult>, EpsilonComparable<MeshSelectorBatchResult>
+{
+   /**
+            * Frame ID of the image
+            */
+   public long frame_id_;
+   /**
+            * Array of Mesh Selector Batch Items
+            */
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.MeshSelectorBatchResultItem>  items_;
+
+   public MeshSelectorBatchResult()
+   {
+      items_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.MeshSelectorBatchResultItem> (100, new perception_msgs.msg.dds.MeshSelectorBatchResultItemPubSubType());
+
+   }
+
+   public MeshSelectorBatchResult(MeshSelectorBatchResult other)
+   {
+      this();
+      set(other);
+   }
+
+   public void set(MeshSelectorBatchResult other)
+   {
+      frame_id_ = other.frame_id_;
+
+      items_.set(other.items_);
+   }
+
+   /**
+            * Frame ID of the image
+            */
+   public void setFrameId(long frame_id)
+   {
+      frame_id_ = frame_id;
+   }
+   /**
+            * Frame ID of the image
+            */
+   public long getFrameId()
+   {
+      return frame_id_;
+   }
+
+
+   /**
+            * Array of Mesh Selector Batch Items
+            */
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.MeshSelectorBatchResultItem>  getItems()
+   {
+      return items_;
+   }
+
+
+   public static Supplier<MeshSelectorBatchResultPubSubType> getPubSubType()
+   {
+      return MeshSelectorBatchResultPubSubType::new;
+   }
+
+   @Override
+   public Supplier<TopicDataType> getPubSubTypePacket()
+   {
+      return MeshSelectorBatchResultPubSubType::new;
+   }
+
+   @Override
+   public boolean epsilonEquals(MeshSelectorBatchResult other, double epsilon)
+   {
+      if(other == null) return false;
+      if(other == this) return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.frame_id_, other.frame_id_, epsilon)) return false;
+
+      if (this.items_.size() != other.items_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.items_.size(); i++)
+         {  if (!this.items_.get(i).epsilonEquals(other.items_.get(i), epsilon)) return false; }
+      }
+
+
+      return true;
+   }
+
+   @Override
+   public boolean equals(Object other)
+   {
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof MeshSelectorBatchResult)) return false;
+
+      MeshSelectorBatchResult otherMyClass = (MeshSelectorBatchResult) other;
+
+      if(this.frame_id_ != otherMyClass.frame_id_) return false;
+
+      if (!this.items_.equals(otherMyClass.items_)) return false;
+
+      return true;
+   }
+
+   @Override
+   public java.lang.String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("MeshSelectorBatchResult {");
+      builder.append("frame_id=");
+      builder.append(this.frame_id_);      builder.append(", ");
+      builder.append("items=");
+      builder.append(this.items_);
+      builder.append("}");
+      return builder.toString();
+   }
+}

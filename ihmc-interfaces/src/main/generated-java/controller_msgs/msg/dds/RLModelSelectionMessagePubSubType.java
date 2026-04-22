@@ -1,23 +1,23 @@
 package controller_msgs.msg.dds;
 
 /**
+* 
+* Topic data type of the struct "RLModelSelectionMessage" defined in "RLModelSelectionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* Topic data type of the struct "RLModelSelectionMessage" defined in "RLModelSelectionMessage_.idl". Use this class to provide the TopicDataType to a Participant.
-*
-* This file was automatically generated from RLModelSelectionMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
+* This file was automatically generated from RLModelSelectionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
 * Do not update this file directly, edit RLModelSelectionMessage_.idl instead.
 *
 */
 public class RLModelSelectionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.RLModelSelectionMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::RLModelSelectionMessage_";
-
+   
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4f6975567ec3c314bf2c98f11b29daca72826498aafcee39145fef1edfa9d12f";
+   		return "ae45cdcf08b814fdf9b15830dd1e17aa3cf27fb2f9266ff0e99e4685cd23ff7d";
    }
-
+   
    @Override
    public final java.lang.String getDefinitionVersion()
    {
@@ -90,9 +90,9 @@ public class RLModelSelectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    public static void read(controller_msgs.msg.dds.RLModelSelectionMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setDesiredModel(cdr.read_type_9());
-
+      	
       data.setExecuteDesiredModel(cdr.read_type_7());
-
+      	
 
    }
 
@@ -120,7 +120,6 @@ public class RLModelSelectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       return new controller_msgs.msg.dds.RLModelSelectionMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -132,7 +131,7 @@ public class RLModelSelectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.RLModelSelectionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -142,7 +141,7 @@ public class RLModelSelectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.RLModelSelectionMessage src, controller_msgs.msg.dds.RLModelSelectionMessage dest)
    {
       staticCopy(src, dest);
