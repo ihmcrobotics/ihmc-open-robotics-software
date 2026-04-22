@@ -357,7 +357,8 @@ public class AvatarMultiThreadingFactory
                                                                             masterRobotModel.getHumanoidRobotKinematicsCollisionModel(),
                                                                             ikStreamingParameters));
 
-      yoVariableServer.addRegistry(avatarIKStreaming.get().getYoVariableRegistry(), avatarIKStreaming.get().getSCS2YoGraphics());
+      if (yoVariableServer != null && avatarIKStreaming.get().isYoVariableServerEnabled())
+         yoVariableServer.addRegistry(avatarIKStreaming.get().getYoVariableRegistry(), avatarIKStreaming.get().getSCS2YoGraphics());
 
       setupIKStreamingTaskAndThread(avatarIKStreaming.get(), yoVariableServer);
 

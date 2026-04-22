@@ -56,12 +56,20 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class IKStreamingRTPluginFactory
 {
+   private static final boolean PUBLISH_IK_YO_VARIABLES = Boolean.parseBoolean(System.getProperty("publish.ik.yovariables", "false"));
+
    private IKStreamingRTThread ikStreamingRTThread;
    private IKStreamingRTTask ikStreamingRTTask;
+   private final boolean enableYoVariableServer;
 
    public IKStreamingRTPluginFactory()
    {
+      this(false);
+   }
 
+   public IKStreamingRTPluginFactory(boolean enableYoVariableServer)
+   {
+      this.enableYoVariableServer = enableYoVariableServer;
    }
 
    public IKStreamingRTThread createRTThread(String robotName,
@@ -81,7 +89,8 @@ public class IKStreamingRTPluginFactory
                                                        robotModel,
                                                        contextDataFactory,
                                                        collisionModel,
-                                                       parameters);
+                                                       parameters,
+                                                       enableYoVariableServer);
       return ikStreamingRTThread;
    }
 
@@ -129,8 +138,8 @@ public class IKStreamingRTPluginFactory
          controllerResolver = new CrossRobotCommandResolver(ikStreamingThread.getFullRobotModel());
 
          String prefix = "IKStreaming";
-         timer = new ThreadTimer(prefix, schedulerDt * divisor, ikStreamingThread.getYoVariableRegistry());
-         ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", ikStreamingThread.getYoVariableRegistry());
+         timer = new ThreadTimer(prefix, schedulerDt * divisor, ikStreamingThread.getInternalYoVariableRegistry());
+         ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", ikStreamingThread.getInternalYoVariableRegistry());
       }
 
       @Override
@@ -181,6 +190,7 @@ public class IKStreamingRTPluginFactory
    public static class IKStreamingRTThread implements AvatarControllerThreadInterface
    {
       private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+      private final YoRegistry hiddenRegistry = new YoRegistry(getClass().getSimpleName() + "Hidden");
       private final CommandInputManager commandInputManager;
       private final StatusMessageOutputManager statusOutputManager;
       private final KinematicsStreamingToolboxController kinematicsStreamingToolboxController;
@@ -191,6 +201,7 @@ public class IKStreamingRTPluginFactory
       private final AtomicReference<ToolboxState> newToolboxStateRequestedRef = new AtomicReference<>();
       private final YoEnum<ToolboxState> toolboxState = new YoEnum<>("toolboxState", registry, ToolboxState.class);
       private final HumanoidRobotContextData humanoidRobotContextData;
+      private final boolean enableYoVariableServer;
 
       public IKStreamingRTThread(String robotName,
                                  ROS2Node ros2Node,
@@ -199,8 +210,10 @@ public class IKStreamingRTPluginFactory
                                  DRCRobotModel robotModel,
                                  HumanoidRobotContextDataFactory contextDataFactory,
                                  RobotCollisionModel collisionModel,
-                                 KinematicsStreamingToolboxParameters parameters)
+                                 KinematicsStreamingToolboxParameters parameters,
+                                 boolean enableYoVariableServer)
       {
+         this.enableYoVariableServer = enableYoVariableServer;
          timeOfLastInput.set(Double.NEGATIVE_INFINITY);
          timeWithoutInputsBeforeGoingToSleep.set(parameters.getTimeThresholdForSleeping());
 
@@ -355,6 +368,11 @@ public class IKStreamingRTPluginFactory
       @Override
       public YoRegistry getYoVariableRegistry()
       {
+         return PUBLISH_IK_YO_VARIABLES ? registry : hiddenRegistry;
+      }
+
+      YoRegistry getInternalYoVariableRegistry()
+      {
          return registry;
       }
 
@@ -373,9 +391,17 @@ public class IKStreamingRTPluginFactory
       @Override
       public YoGraphicGroupDefinition getSCS2YoGraphics()
       {
+         if (!PUBLISH_IK_YO_VARIABLES)
+            return new YoGraphicGroupDefinition(getClass().getSimpleName());
+
          YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
          group.addChild(kinematicsStreamingToolboxController.getSCS2YoGraphics());
          return group;
+      }
+
+      public boolean isYoVariableServerEnabled()
+      {
+         return enableYoVariableServer;
       }
    }
 
