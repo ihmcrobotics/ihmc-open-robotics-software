@@ -73,7 +73,7 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       LogTools.info("RGB topic: {}", topics.rgbImage());
 
       ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName() + "_" + sanitize(target.key()));
-      imagePublisher = new RawImagePublisher(ros2Node, 0.5);
+      imagePublisher = new RawImagePublisher(ros2Node, 1.0);
 
       resetRequestPublisher = ros2Node.createPublisher(topics.reset());
       resultRelayPublisher = ros2Node.createPublisher(topics.ihmcResult());
