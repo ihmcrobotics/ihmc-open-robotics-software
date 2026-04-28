@@ -29,6 +29,15 @@ import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.ROS2Topic;
 import vision_msgs.msg.dds.Detection3D;
 import vision_msgs.msg.dds.Detection3DArray;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.sensors.CameraIntrinsics;
+
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Locale;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -63,6 +72,11 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
    private final List<Consumer<CategoryLevelFoundationPoseInstantDetection>> resultCallbacks = new ArrayList<>();
 
    private boolean wasEnabled = false;
+
+   private static final boolean EXPORT_FOUNDATIONPOSE_INPUTS = true;
+   private static final String EXPORT_ROOT = System.getProperty("user.home") + "/foundationpose_topic_dump";
+
+   private long exportIndex = 0;
 
    public CategoryLevelFoundationPoseCommunicator(CategoryLevelFoundationPoseTarget target, CRDTInfo crdtInfo)
    {
@@ -217,7 +231,7 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       RawImage rgbImage = RawImageTools.convertColor(colorImage, PixelFormat.RGB8);
 
       GpuMat depth32Mat = new GpuMat();
-      depthImage.getGpuImageMat().convertTo(depth32Mat, opencv_core.CV_32FC1, depthImage.getDepthDiscretization());
+      depthImage.getGpuImageMat().convertTo(depth32Mat, opencv_core.CV_32FC1);
       RawImage depth32FImage = depthImage.replaceImage(depth32Mat, PixelFormat.GRAY_F32);
 
       RawImage resizedSegmentation = RawImageTools.resize(segmentation, depth32FImage.getWidth(), depth32FImage.getHeight());
@@ -232,6 +246,8 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       ROS2Topic<Image> depthTopic = topics.depthImage();
       ROS2Topic<Image> segmentationTopic = topics.segmentation();
       ROS2Topic<CameraInfo> cameraInfoTopic = topics.cameraInfo();
+
+      // exportFoundationPoseInputs(rgbImage, depth32FImage);
 
       imagePublisher.publishImage(rgbTopic, rgbImage, sensorFrame);
       imagePublisher.publishImage(depthTopic, depth32FImage, sensorFrame);
@@ -291,6 +307,75 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
    public SyncedCategoryLevelFoundationPoseParameters getParameters()
    {
       return parameters;
+   }
+
+   private void exportFoundationPoseInputs(RawImage rgbImage, RawImage depthImage)
+   {
+      if (!EXPORT_FOUNDATIONPOSE_INPUTS)
+         return;
+
+      RawImage rgbExport = null;
+      RawImage depthExport = null;
+
+      Mat bgrMat = null;
+      Mat depthU16 = null;
+
+      try
+      {
+         rgbExport = rgbImage.get();
+         depthExport = depthImage.get();
+
+         if (rgbExport == null || depthExport == null)
+            return;
+
+         String safeTargetName = sanitize(target.key());
+         Path targetDirectory = Path.of(EXPORT_ROOT, safeTargetName);
+         Path rgbDirectory = targetDirectory.resolve("rgb");
+         Path depthDirectory = targetDirectory.resolve("depth");
+
+         Files.createDirectories(rgbDirectory);
+         Files.createDirectories(depthDirectory);
+
+         String frameName = String.format("%06d", exportIndex++);
+
+         Mat rgbCpu = rgbExport.getCpuImageMat();
+         Mat depthCpu = depthExport.getCpuImageMat();
+
+         bgrMat = new Mat();
+         opencv_imgproc.cvtColor(rgbCpu, bgrMat, opencv_imgproc.COLOR_RGB2BGR);
+         opencv_imgcodecs.imwrite(rgbDirectory.resolve(frameName + ".png").toString(), bgrMat);
+
+         depthU16 = new Mat();
+         depthCpu.convertTo(depthU16, opencv_core.CV_16UC1);
+         opencv_imgcodecs.imwrite(depthDirectory.resolve(frameName + ".png").toString(), depthU16);
+
+         CameraIntrinsics intrinsics = rgbExport.getIntrinsicsCopy();
+
+         try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(targetDirectory.resolve("cam_K.txt"))))
+         {
+            writer.printf(Locale.US, "%.18e %.18e %.18e%n", intrinsics.getFx(), 0.0, intrinsics.getCx());
+            writer.printf(Locale.US, "%.18e %.18e %.18e%n", 0.0, intrinsics.getFy(), intrinsics.getCy());
+            writer.printf(Locale.US, "%.18e %.18e %.18e%n", 0.0, 0.0, 1.0);
+         }
+      }
+      catch (Exception exception)
+      {
+         LogTools.error("Failed to export FoundationPose inputs for {}", target.key(), exception);
+      }
+      finally
+      {
+         if (depthU16 != null)
+            depthU16.release();
+
+         if (bgrMat != null)
+            bgrMat.release();
+
+         if (depthExport != null)
+            depthExport.release();
+
+         if (rgbExport != null)
+            rgbExport.release();
+      }
    }
 
    @Override
