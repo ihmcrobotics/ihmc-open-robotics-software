@@ -47,8 +47,8 @@ public class RDX3DPanelNotificationManager
 
          // Render remaining notifications
          int index = 0;
-         for (RDX3DPanelNotification notification : notificationDeque)
-            notification.render(index++);
+//         for (RDX3DPanelNotification notification : notificationDeque)
+//            notification.render(index++);
       }
    }
 }
