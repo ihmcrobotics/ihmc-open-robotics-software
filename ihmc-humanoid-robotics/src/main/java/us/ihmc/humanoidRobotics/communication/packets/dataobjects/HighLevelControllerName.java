@@ -37,7 +37,8 @@ public enum HighLevelControllerName
    EXTERNAL,
    RL_CONTROL,
    EXIT_RL,
-   RL_TRANSITION_STATE;
+   RL_TRANSITION_STATE,
+   MPC_CONTROL;
 
    public static final HighLevelControllerName[] values = values();
 
