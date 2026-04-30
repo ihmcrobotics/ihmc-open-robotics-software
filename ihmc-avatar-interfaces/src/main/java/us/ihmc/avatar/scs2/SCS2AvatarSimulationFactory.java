@@ -110,7 +110,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
 
 public class SCS2AvatarSimulationFactory
 {
@@ -151,7 +152,7 @@ public class SCS2AvatarSimulationFactory
          "simulationThreadOutputWriterFactory");
    protected final OptionalFactoryField<HighLevelControllerName> initialState = new OptionalFactoryField<>(
          "initialControllerState",
-         RL_CONTROL);
+         WALKING);
    protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded",
                                                                                                false);
    protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>(
