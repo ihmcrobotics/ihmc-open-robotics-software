@@ -624,6 +624,7 @@ public class AvatarMultiThreadingFactory
          controllerFactory.useDefaultStandTransitionControlState(STAND_PREP_STATE, WALKING);
          controllerFactory.useDefaultWalkingControlState();
          controllerFactory.useDefaultDoNothingControlState();
+         controllerFactory.useDefaultFallingControlState();
          controllerFactory.useDefaultExitWalkingTransitionControlState(STAND_PREP_STATE);
 
          // setup transitions
