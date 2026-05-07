@@ -7,8 +7,7 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.jros2.ROS2Node;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -38,7 +37,7 @@ public class RDXROS2PeerClockTest
             baseUI.create();
             baseUI.getImGuiPanelManager().addPanel("Main", this::renderImGuiWidgets);
 
-            ros2Node = new ROS2NodeBuilder().build("peer_clock_test");
+            ros2Node = new ROS2Node("peer_clock_test");
             clockEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
          }
 

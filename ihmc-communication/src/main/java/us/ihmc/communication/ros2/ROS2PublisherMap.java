@@ -1,12 +1,12 @@
 package us.ihmc.communication.ros2;
 
-import std_msgs.msg.dds.Bool;
-import std_msgs.msg.dds.Empty;
+import std_msgs.Bool;
+import std_msgs.Empty;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.HashMap;
 

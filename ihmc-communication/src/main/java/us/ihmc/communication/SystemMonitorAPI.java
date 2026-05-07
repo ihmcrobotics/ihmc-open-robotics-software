@@ -1,12 +1,11 @@
 package us.ihmc.communication;
 
-import std_msgs.msg.dds.Empty;
-import system_monitor_msgs.msg.dds.SystemResourceUsageMessage;
-import system_monitor_msgs.msg.dds.SystemServiceActionMessage;
-import system_monitor_msgs.msg.dds.SystemServiceLogRefreshMessage;
-import system_monitor_msgs.msg.dds.SystemServiceStatusMessage;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
+import std_msgs.Empty;
+import system_monitor_msgs.SystemResourceUsageMessage;
+import system_monitor_msgs.SystemServiceActionMessage;
+import system_monitor_msgs.SystemServiceLogRefreshMessage;
+import system_monitor_msgs.SystemServiceStatusMessage;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.UUID;
 
@@ -20,7 +19,7 @@ public final class SystemMonitorAPI
    public static ROS2Topic<SystemResourceUsageMessage> getSystemResourceUsageTopic(UUID instanceId)
    {
       String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
-      return ROS2Tools.IHMC_ROOT.withModule("system_monitor").withSuffix(topicId).withTypeName(SystemResourceUsageMessage.class);
+      return ROS2Tools.IHMC_ROOT.appendedWith("system_monitor").appendedWith(topicId).withType(SystemResourceUsageMessage.class);
    }
 
    /**
@@ -31,24 +30,24 @@ public final class SystemMonitorAPI
    public static ROS2Topic<SystemServiceStatusMessage> getSystemServiceStatusTopic(UUID instanceId)
    {
       String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
-      return ROS2Tools.IHMC_ROOT.withModule("system_monitor").withSuffix(topicId).withQoS(ROS2QosProfile.RELIABLE()).withTypeName(SystemServiceStatusMessage.class);
+      return ROS2Tools.IHMC_ROOT.appendedWith("system_monitor").appendedWith(topicId).withType(SystemServiceStatusMessage.class);
    }
 
    public static ROS2Topic<SystemServiceActionMessage> getSystemServiceActionTopic(UUID instanceId)
    {
       String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
-      return ROS2Tools.IHMC_ROOT.withModule("system_monitor").withSuffix(topicId).withTypeName(SystemServiceActionMessage.class);
+      return ROS2Tools.IHMC_ROOT.appendedWith("system_monitor").appendedWith(topicId).withType(SystemServiceActionMessage.class);
    }
 
    public static ROS2Topic<Empty> getSystemRebootTopic(UUID instanceId)
    {
       String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
-      return ROS2Tools.IHMC_ROOT.withModule("system_monitor").withSuffix(topicId).withTypeName(Empty.class);
+      return ROS2Tools.IHMC_ROOT.appendedWith("system_monitor").appendedWith(topicId).withType(Empty.class);
    }
 
    public static ROS2Topic<SystemServiceLogRefreshMessage> getSystemServiceLogRefreshTopic(UUID instanceId)
    {
       String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
-      return ROS2Tools.IHMC_ROOT.withModule("system_monitor").withSuffix(topicId).withTypeName(SystemServiceLogRefreshMessage.class);
+      return ROS2Tools.IHMC_ROOT.appendedWith("system_monitor").appendedWith(topicId).withType(SystemServiceLogRefreshMessage.class);
    }
 }

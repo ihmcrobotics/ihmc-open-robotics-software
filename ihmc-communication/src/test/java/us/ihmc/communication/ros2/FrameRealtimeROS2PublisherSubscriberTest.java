@@ -1,24 +1,22 @@
 package us.ihmc.communication.ros2;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import controller_msgs.RobotConfigurationData;
+import controller_msgs.RobotConfigurationDataPubSubType;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.QueuedROS2Subscription;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Subscription;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.AsyncROS2Node;
 
 public class FrameRealtimeROS2PublisherSubscriberTest
 {
-   private RealtimeROS2Node realtimeROS2Node;
+   private AsyncROS2Node realtimeROS2Node;
    private ROS2Publisher<RobotConfigurationData> publisher;
 
    public FrameRealtimeROS2PublisherSubscriberTest()
    {
-      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("frameTest");
+      realtimeROS2Node = new AsyncROS2Node("frameTest");
       String topic = "FrameData";
       LogTools.info("Publishing to {}", topic);
       RobotConfigurationDataPubSubType topicDataType = RobotConfigurationData.getPubSubType().get();

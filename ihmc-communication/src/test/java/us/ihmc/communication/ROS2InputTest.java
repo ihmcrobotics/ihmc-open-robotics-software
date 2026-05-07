@@ -2,23 +2,22 @@ package us.ihmc.communication;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import std_msgs.msg.dds.Empty;
+import std_msgs.Empty;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 public class ROS2InputTest
 {
    @Test
    public void test()
    {
-      ROS2Node ros2Node = new ROS2NodeBuilder().build("test_input");
+      ROS2Node ros2Node = new ROS2Node("test_input");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      ROS2Topic<Empty> inputTestTopic = ROS2Tools.IHMC_ROOT.withSuffix("input_test_topic").withType(Empty.class);
+      ROS2Topic<Empty> inputTestTopic = ROS2Tools.IHMC_ROOT.appendedWith("input_test_topic").withType(Empty.class);
 
       ROS2Input<?> subscription = ros2Helper.subscribe(inputTestTopic);
 

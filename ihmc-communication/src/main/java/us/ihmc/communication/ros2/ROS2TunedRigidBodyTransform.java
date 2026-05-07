@@ -1,6 +1,6 @@
 package us.ihmc.communication.ros2;
 
-import controller_msgs.msg.dds.RigidBodyTransformMessage;
+import controller_msgs.RigidBodyTransformMessage;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;

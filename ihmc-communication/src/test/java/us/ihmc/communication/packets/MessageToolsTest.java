@@ -1,7 +1,7 @@
 package us.ihmc.communication.packets;
 
-import ihmc_common_msgs.msg.dds.PoseListMessage;
-import ihmc_common_msgs.msg.dds.UUIDMessage;
+import ihmc_common_msgs.PoseListMessage;
+import ihmc_common_msgs.UUIDMessage;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;

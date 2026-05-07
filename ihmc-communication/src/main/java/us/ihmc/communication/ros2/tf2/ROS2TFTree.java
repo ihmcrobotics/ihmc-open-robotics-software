@@ -1,15 +1,13 @@
 package us.ihmc.communication.ros2.tf2;
 
-import geometry_msgs.msg.dds.TransformStamped;
+import geometry_msgs.TransformStamped;
 import tf2_msgs.msg.dds.TFMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Subscription;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -17,9 +15,9 @@ import java.util.concurrent.ConcurrentSkipListMap;
 @SuppressWarnings("ForLoopReplaceableByForEach")
 public class ROS2TFTree
 {
-   public static final ROS2Topic<TFMessage> TF_TOPIC = new ROS2Topic<>().withModule("tf").withQoS(ROS2QosProfile.RELIABLE()).withType(TFMessage.class);
-   public static final ROS2Topic<TFMessage> TF_STATIC_TOPIC = new ROS2Topic<>().withModule("tf_static")
-                                                                               .withQoS(ROS2QosProfile.KEEP_HISTORY(1))
+   public static final ROS2Topic<TFMessage> TF_TOPIC = new ROS2Topic<>().appendedWith("tf").withType(TFMessage.class);
+   public static final ROS2Topic<TFMessage> TF_STATIC_TOPIC = new ROS2Topic<>().appendedWith("tf_static")
+                                                                               
                                                                                .withType(TFMessage.class);
 
    private static ROS2TFTree instance = null;
@@ -49,7 +47,7 @@ public class ROS2TFTree
 
       transforms = new ConcurrentSkipListMap<>(CharSequence::compare);
 
-      ros2Node = new ROS2NodeBuilder().build("TFNode");
+      ros2Node = new ROS2Node("TFNode");
 
       tfMessage = new TFMessage();
       tfSubscription = ros2Node.createSubscription(TF_TOPIC, subscriber -> receiveTFMessage(subscriber, tfMessage));

@@ -1,11 +1,10 @@
 package us.ihmc.communication.ros2log;
 
-import toolbox_msgs.msg.dds.ROS2LogMessage;
+import toolbox_msgs.ROS2LogMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +40,7 @@ public class ROS2LogRecord
                         ROS2LogSerialization serialization,
                         boolean subscribeToTopics)
    {
-      ros2Node = new ROS2NodeBuilder().build("ihmc_ros2_logger");
+      ros2Node = new ROS2Node("ihmc_ros2_logger");
       this.serialization = serialization;
 
       ros2Node.createSubscription(getROS2LogTopic(), s ->
@@ -136,7 +135,7 @@ public class ROS2LogRecord
 
    public static ROS2Topic<ROS2LogMessage> getROS2LogTopic()
    {
-      return ROS2Tools.IHMC_ROOT.withModule(MODULE_NAME).withTypeName(ROS2LogMessage.class);
+      return ROS2Tools.IHMC_ROOT.appendedWith(MODULE_NAME).withType(ROS2LogMessage.class);
    }
 
    @SuppressWarnings("unchecked")

@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Timeout;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder.SpecialTransportMode;
 
 import java.time.Duration;

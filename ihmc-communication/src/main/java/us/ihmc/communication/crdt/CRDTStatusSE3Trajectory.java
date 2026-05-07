@@ -1,6 +1,6 @@
 package us.ihmc.communication.crdt;
 
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;

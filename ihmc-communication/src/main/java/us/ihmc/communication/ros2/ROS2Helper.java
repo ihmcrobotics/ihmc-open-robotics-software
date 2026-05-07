@@ -1,9 +1,9 @@
 package us.ihmc.communication.ros2;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import std_msgs.msg.dds.Bool;
-import std_msgs.msg.dds.Empty;
-import std_msgs.msg.dds.Int32;
+import std_msgs.Bool;
+import std_msgs.Empty;
+import std_msgs.Int32;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
@@ -13,10 +13,8 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2TopicNameTools;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.tools.thread.SwapReference;
 
 import java.util.function.Consumer;
@@ -34,7 +32,7 @@ public class ROS2Helper
 
    public ROS2Helper(String nodeName)
    {
-      this(new ROS2NodeBuilder().build(nodeName));
+      this(new ROS2Node(nodeName));
    }
 
    public ROS2Helper(ROS2Node ros2Node)
@@ -155,9 +153,9 @@ public class ROS2Helper
       ros2PublisherMap.publish(topic, message);
    }
 
-   public void publish(ROS2Topic<std_msgs.msg.dds.String> topic, String message)
+   public void publish(ROS2Topic<std_msgs.String_> topic, String message)
    {
-      std_msgs.msg.dds.String stringMessage = new std_msgs.msg.dds.String();
+      std_msgs.String_ stringMessage = new std_msgs.String_();
       stringMessage.setData(message);
       ros2PublisherMap.publish(topic, stringMessage);
    }

@@ -1,8 +1,8 @@
 package us.ihmc.communication;
 
-import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
+import ihmc_common_msgs.TextToSpeechPacket;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Topic;
 
 public final class HumanoidControllerAPI
 {
@@ -10,7 +10,7 @@ public final class HumanoidControllerAPI
    public static final String HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME = "kinematics_ihmc_controller";
    public static final String HUMANOID_CONTROL_MODULE_NAME = "humanoid_control";
 
-   public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = ROS2Tools.IHMC_ROOT.withTypeName(TextToSpeechPacket.class);
+   public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = ROS2Tools.IHMC_ROOT.withType(TextToSpeechPacket.class);
 
    public static ROS2Topic<?> getBaseTopic(String robotName)
    {
@@ -19,7 +19,7 @@ public final class HumanoidControllerAPI
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return getBaseTopic(robotName).withOutput();
+      return getBaseTopic(robotName).appendedWith("output");
    }
 
    public static ROS2Topic<?> getInputTopic(String robotName)

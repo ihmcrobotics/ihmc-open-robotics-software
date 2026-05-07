@@ -2,8 +2,8 @@ package us.ihmc.communication.ros2log;
 
 import gnu.trove.list.array.TLongArrayList;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.List;

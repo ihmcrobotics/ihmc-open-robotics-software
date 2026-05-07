@@ -10,9 +10,9 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.idl.serializers.extra.AbstractSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.io.File;
 import java.io.FileInputStream;

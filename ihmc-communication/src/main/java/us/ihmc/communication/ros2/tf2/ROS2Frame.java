@@ -1,12 +1,12 @@
 package us.ihmc.communication.ros2.tf2;
 
 import builtin_interfaces.msg.dds.Time;
-import geometry_msgs.msg.dds.TransformStamped;
+import geometry_msgs.TransformStamped;
 import tf2_msgs.msg.dds.TFMessage;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 
 import static us.ihmc.communication.ros2.tf2.ROS2FrameTools.*;
 

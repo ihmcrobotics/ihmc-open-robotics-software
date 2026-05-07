@@ -1,6 +1,6 @@
 package us.ihmc.communication.ros2;
 
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Topic;
 
 /**
  * A class to group a bidirectional topic. We used the terminology "command" and "status"
@@ -15,8 +15,8 @@ public class ROS2IOTopicPair<T>
 
    public ROS2IOTopicPair(ROS2Topic<T> baseTopic)
    {
-      commandTopic = baseTopic.withIOQualifier("command");
-      statusTopic = baseTopic.withIOQualifier("status");
+      commandTopic = baseTopic.appendedWith("command");
+      statusTopic = baseTopic.appendedWith("status");
    }
 
    public ROS2Topic<T> getCommandTopic()

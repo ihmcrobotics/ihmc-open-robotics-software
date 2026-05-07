@@ -8,8 +8,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.jros2.ROS2Node;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,7 +22,7 @@ public class ROS2FrameTest
    @Test
    public void testConstructingStaticFrame()
    {
-      ROS2Node node = new ROS2NodeBuilder().build("test_node");
+      ROS2Node node = new ROS2Node("test_node");
 
       // Test basic static frame
       String id = "test_static_frame_0";
@@ -64,7 +63,7 @@ public class ROS2FrameTest
    @Test
    public void testConstructingMutableFrame()
    {
-      ROS2Node node = new ROS2NodeBuilder().build("test_node");
+      ROS2Node node = new ROS2Node("test_node");
 
       String id = "test_mutable_frame";
       ReferenceFrame parentFrame = ReferenceFrameTools.getWorldFrame();
@@ -88,7 +87,7 @@ public class ROS2FrameTest
    @Test
    public void testUpdatingMutableFrame()
    {
-      ROS2Node node = new ROS2NodeBuilder().build("test_node");
+      ROS2Node node = new ROS2Node("test_node");
 
       // We're going to run multiple update
       final int updatesToRun = 10;
@@ -153,7 +152,7 @@ public class ROS2FrameTest
    @Test
    public void testPublishingMixedTree() throws InterruptedException
    {
-      ROS2Node ros2Node = new ROS2NodeBuilder().build("test_node");
+      ROS2Node ros2Node = new ROS2Node("test_node");
 
       // Message counters to ensure correct messages
       AtomicInteger messagesReceived = new AtomicInteger(0);

@@ -1,6 +1,6 @@
 package us.ihmc.communication.property;
 
-import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
+import ihmc_common_msgs.PrimitiveDataVectorMessage;
 import us.ihmc.idl.IDLSequence.Boolean;
 import us.ihmc.tools.property.BooleanStoredPropertyKey;
 import us.ihmc.tools.property.DoubleStoredPropertyKey;

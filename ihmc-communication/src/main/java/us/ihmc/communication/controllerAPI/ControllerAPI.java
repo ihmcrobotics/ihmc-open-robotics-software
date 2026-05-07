@@ -1,15 +1,14 @@
 package us.ihmc.communication.controllerAPI;
 
-import controller_msgs.msg.dds.*;
-import ihmc_common_msgs.msg.dds.MessageCollection;
-import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
-import ihmc_common_msgs.msg.dds.Point2DMessage;
-import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
-import toolbox_msgs.msg.dds.*;
+import controller_msgs.*;
+import ihmc_common_msgs.MessageCollection;
+import ihmc_common_msgs.MessageCollectionNotification;
+import ihmc_common_msgs.Point2DMessage;
+import ihmc_common_msgs.TextToSpeechPacket;
+import toolbox_msgs.*;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -155,22 +154,22 @@ public final class ControllerAPI
 
    public static ROS2Topic<?> getBaseTopic(String controlModuleName, String robotName)
    {
-      return ROS2Tools.IHMC_ROOT.withModule(controlModuleName).withRobot(robotName);
+      return ROS2Tools.IHMC_ROOT.appendedWith(controlModuleName).withRobot(robotName);
    }
 
    public static <T> ROS2Topic<T> getTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
    {
       if (inputMessageClasses.contains(messageClass))
-         return baseTopic.withInput().withTypeName(messageClass).withQoS(getQoS(messageClass));
+         return baseTopic.withInput().withType(messageClass);
       else if (outputMessageClasses.contains(messageClass))
-         return baseTopic.withOutput().withTypeName(messageClass).withQoS(getQoS(messageClass));
+         return baseTopic.appendedWith("output").withType(messageClass);
       else
-         return baseTopic.withTypeName(messageClass).withQoS(getQoS(messageClass));
+         return baseTopic.withType(messageClass);
    }
 
    public static <T> ROS2Topic<T> getLowFrequencyTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
    {
-      return getTopic(baseTopic, messageClass).withSuffix("lf");
+      return getTopic(baseTopic, messageClass).appendedWith("lf");
    }
 
    public static ROS2QosProfile getQoS(Class<?> messageClass)

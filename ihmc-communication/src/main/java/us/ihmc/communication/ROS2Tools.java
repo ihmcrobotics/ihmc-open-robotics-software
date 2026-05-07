@@ -3,11 +3,9 @@ package us.ihmc.communication;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2TopicNameTools;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.tools.thread.SwapReference;
 
 import java.util.function.Consumer;
@@ -30,7 +28,7 @@ import java.util.function.Consumer;
  * </ul>
  *
  * This class used to have methods to create publishers and subscribers. Most of those have been
- * moved to the upstream API. Please use {@link ROS2Node} or {@link RealtimeROS2Node} directly
+ * moved to the upstream API. Please use {@link ROS2Node} or {@link AsyncROS2Node} directly
  * instead now to create those. The API has been improved and it no longer throws useless exceptions.
  *
  * There is a default QoS setting is used when we don't specify the QoS. It is now defined in {@link ROS2QosProfile}
@@ -40,7 +38,7 @@ public final class ROS2Tools
 {
    public static final String IHMC_TOPIC_PREFIX = "ihmc";
 
-   public static final ROS2Topic<?> IHMC_ROOT = new ROS2Topic<>().withPrefix(IHMC_TOPIC_PREFIX);
+   public static final ROS2Topic<?> IHMC_ROOT = new ROS2Topic<>().prependedWith(IHMC_TOPIC_PREFIX);
 
    /**
     * Allocation free callback where the user only has access to the message in the callback.

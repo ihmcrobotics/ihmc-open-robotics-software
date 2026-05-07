@@ -1,15 +1,14 @@
 package us.ihmc.communication.ros2log;
 
 import com.google.common.base.CaseFormat;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.RobotConfigurationData;
 import gnu.trove.list.array.TLongArrayList;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,8 +26,8 @@ public class ROS2LogTest
       for (ROS2LogSerialization serialization : ROS2LogSerialization.values())
       {
          ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
-         ROS2Topic<RobotConfigurationData> robotConfigurationData = controllerOutputTopic.withTypeName(RobotConfigurationData.class);
-         ROS2Node ros2Node = new ROS2NodeBuilder().build("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "test_node"));
+         ROS2Topic<RobotConfigurationData> robotConfigurationData = controllerOutputTopic.withType(RobotConfigurationData.class);
+         ROS2Node ros2Node = new ROS2Node("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "test_node"));
 
          // Test record/writing
          List<RecordTopicManager<?>> rosTopicManagers = new ArrayList<>();

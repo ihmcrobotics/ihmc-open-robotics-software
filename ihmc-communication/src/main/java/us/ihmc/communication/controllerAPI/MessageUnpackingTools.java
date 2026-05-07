@@ -1,8 +1,8 @@
 package us.ihmc.communication.controllerAPI;
 
-import controller_msgs.msg.dds.*;
-import ihmc_common_msgs.msg.dds.*;
-import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
+import controller_msgs.*;
+import ihmc_common_msgs.*;
+import toolbox_msgs.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.interfaces.Settable;

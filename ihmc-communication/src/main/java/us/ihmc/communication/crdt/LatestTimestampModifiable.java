@@ -1,6 +1,6 @@
 package us.ihmc.communication.crdt;
 
-import ihmc_common_msgs.msg.dds.LatestModificationMessage;
+import ihmc_common_msgs.LatestModificationMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimatorPeer;
 import us.ihmc.log.LogTools;

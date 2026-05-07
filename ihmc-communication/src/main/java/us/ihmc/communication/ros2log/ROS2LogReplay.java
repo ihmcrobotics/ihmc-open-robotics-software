@@ -3,9 +3,8 @@ package us.ihmc.communication.ros2log;
 import com.google.common.base.CaseFormat;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.io.File;
 import java.util.HashMap;
@@ -39,7 +38,7 @@ public class ROS2LogReplay
       this.timeSource = timeSource;
       this.loggedTopics = loggedTopics;
 
-      ros2Node = new ROS2NodeBuilder().build("ihmc_ros2_log_replay");
+      ros2Node = new ROS2Node("ihmc_ros2_log_replay");
       timestampSupplier = timeSource.createTimestampProvider(robotName, ros2Node);
    }
 
@@ -48,7 +47,7 @@ public class ROS2LogReplay
       this.timeSource = timeSource;
       this.loggedTopics = loggedTopics;
 
-      ros2Node = new ROS2NodeBuilder().build("ihmc_ros2_log_replay");
+      ros2Node = new ROS2Node("ihmc_ros2_log_replay");
       topicManagers = ROS2LogIOTools.loadLogFile(ros2Node, loggedTopics, logFile);
       timestampSupplier = timeSource.createTimestampProvider(robotName, ros2Node);
 

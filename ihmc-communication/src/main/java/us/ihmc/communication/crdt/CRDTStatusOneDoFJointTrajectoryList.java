@@ -1,7 +1,7 @@
 package us.ihmc.communication.crdt;
 
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.OneDoFJointTrajectoryMessage;
+import ihmc_common_msgs.TrajectoryPoint1DMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;

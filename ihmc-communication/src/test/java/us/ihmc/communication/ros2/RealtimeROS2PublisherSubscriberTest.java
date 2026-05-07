@@ -1,27 +1,25 @@
 package us.ihmc.communication.ros2;
 
-import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.ImageMessagePubSubType;
+import perception_msgs.ImageMessage;
+import perception_msgs.ImageMessagePubSubType;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.QueuedROS2Subscription;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Subscription;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 public class RealtimeROS2PublisherSubscriberTest
 {
-   private RealtimeROS2Node realtimeROS2Node;
+   private AsyncROS2Node realtimeROS2Node;
    private ROS2Publisher<ImageMessage> publisher;
 
    public RealtimeROS2PublisherSubscriberTest()
    {
-      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("videotest");
+      realtimeROS2Node = new AsyncROS2Node("videotest");
       String topic = "/ihmc/image/test";
       LogTools.info("Publishing to {}", topic);
       ImageMessagePubSubType topicDataType = ImageMessage.getPubSubType().get();
@@ -64,10 +62,10 @@ public class RealtimeROS2PublisherSubscriberTest
          }
       }, "Publisher");
 
-      ROS2Topic<?> typedTopic = new ROS2Topic<>().withPrefix("/ihmc/image/test").withType(ImageMessage.class).withQoS(ROS2QosProfile.BEST_EFFORT());
+      ROS2Topic<?> typedTopic = new ROS2Topic<>().prependedWith("/ihmc/image/test").withType(ImageMessage.class);
       LogTools.info("Subscribing to {}", typedTopic.toString());
       FrequencyStatisticPrinter hz = new FrequencyStatisticPrinter();
-      ROS2Node node = new ROS2NodeBuilder().build("hz");
+      ROS2Node node = new ROS2Node("hz");
       node.createSubscription2(typedTopic, message -> hz.ping());
 
       ThreadTools.sleepForever();

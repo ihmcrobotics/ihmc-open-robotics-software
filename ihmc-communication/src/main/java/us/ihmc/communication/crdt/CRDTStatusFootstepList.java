@@ -1,6 +1,6 @@
 package us.ihmc.communication.crdt;
 
-import behavior_msgs.msg.dds.WalkActionFootstepDefinitionMessage;
+import behavior_msgs.WalkActionFootstepDefinitionMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;

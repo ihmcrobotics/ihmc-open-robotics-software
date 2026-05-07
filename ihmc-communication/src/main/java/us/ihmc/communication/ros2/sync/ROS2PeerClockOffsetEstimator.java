@@ -1,6 +1,6 @@
 package us.ihmc.communication.ros2.sync;
 
-import ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage;
+import ihmc_common_msgs.PeerClockOffsetEstimatorPingMessage;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.RepeatingTaskThread;
@@ -9,10 +9,10 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.pubsub.common.Guid;
 import us.ihmc.pubsub.common.SampleInfo;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Subscription;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ import java.util.concurrent.Executors;
  */
 public class ROS2PeerClockOffsetEstimator
 {
-   private static final ROS2Topic<PeerClockOffsetEstimatorPingMessage> TOPIC = ROS2Tools.IHMC_ROOT.withModule("peer_clock_offset_estimator")
+   private static final ROS2Topic<PeerClockOffsetEstimatorPingMessage> TOPIC = ROS2Tools.IHMC_ROOT.appendedWith("peer_clock_offset_estimator")
                                                                                                   .withType(PeerClockOffsetEstimatorPingMessage.class);
 
    private final HashMap<Guid, ROS2PeerClockOffsetEstimatorPeer> peerMap = new HashMap<>();

@@ -1,11 +1,11 @@
 package us.ihmc.communication.ros2log;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.RobotConfigurationData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.time.Clock;
 import java.util.concurrent.atomic.AtomicLong;
@@ -31,7 +31,7 @@ public enum ROS2LogTimeSource
          if (ros2Node != null)
          {
             ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
-            ROS2Topic<RobotConfigurationData> robotConfigurationData = controllerOutputTopic.withTypeName(RobotConfigurationData.class);
+            ROS2Topic<RobotConfigurationData> robotConfigurationData = controllerOutputTopic.withType(RobotConfigurationData.class);
             ros2Node.createSubscription(robotConfigurationData, s -> timestamp.set(Conversions.nanosecondsToMilliseconds(s.takeNextData().getSyncTimestamp())));
          }
 

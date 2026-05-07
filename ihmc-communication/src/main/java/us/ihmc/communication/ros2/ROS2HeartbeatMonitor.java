@@ -1,13 +1,13 @@
 package us.ihmc.communication.ros2;
 
-import std_msgs.msg.dds.Empty;
+import std_msgs.Empty;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.tools.Timer;
 
 import java.util.function.Consumer;
