@@ -101,6 +101,12 @@ public class ZuluPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOv
    }
 
    @Override
+   protected double getForwardPushPercentWeight()
+   {
+      return 0.20;
+   }
+
+   @Override
    @Test
    public void testWalkingOverSteppingStonesForwardPush()
    {
