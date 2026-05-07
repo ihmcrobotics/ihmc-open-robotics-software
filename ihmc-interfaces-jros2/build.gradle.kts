@@ -6,6 +6,8 @@ plugins {
    id("us.ihmc.jros2.generator") version "1.5.0"
 }
 
+apply(from = "../gradle/java-compile-encoding.gradle.kts")
+
 ihmc {
    loadProductProperties("../product.properties")
 
