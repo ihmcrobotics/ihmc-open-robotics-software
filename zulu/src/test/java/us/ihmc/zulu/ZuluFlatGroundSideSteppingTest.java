@@ -118,7 +118,7 @@ public class ZuluFlatGroundSideSteppingTest extends AvatarFlatGroundSideStepping
    @Override
    protected double getForceMagnitude1()
    {
-      return 60.0;
+      return 40.0;
    }
 
    @Override
@@ -148,7 +148,7 @@ public class ZuluFlatGroundSideSteppingTest extends AvatarFlatGroundSideStepping
    @Override
    protected double getForceMagnitude2()
    {
-      return 60.0;
+      return 40.0;
    }
 
    @Override

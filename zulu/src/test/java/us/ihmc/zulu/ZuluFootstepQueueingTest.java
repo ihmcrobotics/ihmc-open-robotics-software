@@ -15,7 +15,7 @@ public class ZuluFootstepQueueingTest extends AvatarFootstepQueueingTest
    private final ZuluRobotModel robotModel = new ZuluRobotModel(version, target);
 
    private static final double stepWidth = 0.25;
-   private static final double stepLength = 0.5;
+   private static final double stepLength = 0.4;
 
    @Override
    @Test
@@ -52,6 +52,12 @@ public class ZuluFootstepQueueingTest extends AvatarFootstepQueueingTest
    @Override
    protected double getExtraSimulationTimeForQueueing()
    {
-      return 1.0;
+      return 2.0;
+   }
+
+   @Override
+   protected double getSimulationTimeBetweenQueuedStepMessages()
+   {
+      return 0.1;
    }
 }

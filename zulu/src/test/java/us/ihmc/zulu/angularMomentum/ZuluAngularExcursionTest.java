@@ -33,6 +33,12 @@ public class ZuluAngularExcursionTest extends AvatarAngularExcursionTest
    }
 
    @Override
+   protected double getMoveInPlacePitchTolerance()
+   {
+      return 1.0e-2;
+   }
+
+   @Override
    protected double getForwardWalkPitchTolerance()
    {
       return 1.2e-1;

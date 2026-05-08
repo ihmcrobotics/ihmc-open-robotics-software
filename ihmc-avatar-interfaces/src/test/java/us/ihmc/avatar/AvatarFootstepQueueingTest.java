@@ -47,6 +47,11 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       return 0.0;
    }
 
+   protected double getSimulationTimeBetweenQueuedStepMessages()
+   {
+      return 0.05;
+   }
+
    @Test
    public void testTwoPlans() throws SimulationExceededMaximumTimeException
    {
@@ -261,7 +266,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
          side = side.getOppositeSide();
 
          simulationTestHelper.publishToController(footMessage);
-         simulationTestHelper.simulateNow(0.05);
+         simulationTestHelper.simulateNow(getSimulationTimeBetweenQueuedStepMessages());
 
          stepX += stepLength;
       }
