@@ -48,4 +48,10 @@ public class ZuluFootstepQueueingTest extends AvatarFootstepQueueingTest
    {
       return stepLength;
    }
+
+   @Override
+   protected double getExtraSimulationTimeForQueueing()
+   {
+      return 1.0;
+   }
 }

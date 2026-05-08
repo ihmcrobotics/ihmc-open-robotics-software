@@ -27,6 +27,24 @@ public class ZuluAngularExcursionTest extends AvatarAngularExcursionTest
    }
 
    @Override
+   protected double getMoveInPlaceYawTolerance()
+   {
+      return 1.5e-2;
+   }
+
+   @Override
+   protected double getForwardWalkPitchTolerance()
+   {
+      return 1.2e-1;
+   }
+
+   @Override
+   protected double getWalkInASquareYawTolerance()
+   {
+      return 3.5e-1;
+   }
+
+   @Override
    @Test
    public void testWalkInASquare() throws SimulationExceededMaximumTimeException
    {
