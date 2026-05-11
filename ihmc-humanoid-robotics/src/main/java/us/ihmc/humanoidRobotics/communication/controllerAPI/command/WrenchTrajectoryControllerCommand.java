@@ -3,9 +3,9 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import java.util.List;
 import java.util.Random;
 
-import ihmc_common_msgs.msg.dds.FrameInformation;
-import controller_msgs.msg.dds.WrenchTrajectoryMessage;
-import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
+import ihmc_common_msgs.FrameInformation;
+import controller_msgs.WrenchTrajectoryMessage;
+import controller_msgs.WrenchTrajectoryPointMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
@@ -139,7 +139,7 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
       }
       setQueueableCommandVariables(message.getQueueingProperties());
       useCustomControlFrame = message.getUseCustomControlFrame();
-      message.getControlFramePose().get(controlFramePoseInBodyFrame);
+      message.getControlFramePose().getPose().get(controlFramePoseInBodyFrame);
    }
 
    /**

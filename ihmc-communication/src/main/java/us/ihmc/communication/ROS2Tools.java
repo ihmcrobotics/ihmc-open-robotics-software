@@ -2,9 +2,9 @@ package us.ihmc.communication;
 
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.tools.thread.SwapReference;
 
@@ -30,61 +30,52 @@ import java.util.function.Consumer;
  * This class used to have methods to create publishers and subscribers. Most of those have been
  * moved to the upstream API. Please use {@link ROS2Node} or {@link AsyncROS2Node} directly
  * instead now to create those. The API has been improved and it no longer throws useless exceptions.
- *
- * There is a default QoS setting is used when we don't specify the QoS. It is now defined in {@link ROS2QosProfile}
- * and changable via the "ROS_DEFAULT_QOS" environment variable.
  */
 public final class ROS2Tools
 {
    public static final String IHMC_TOPIC_PREFIX = "ihmc";
 
-   public static final ROS2Topic<?> IHMC_ROOT = new ROS2Topic<>().prependedWith(IHMC_TOPIC_PREFIX);
+   public static final ROS2Topic<?> IHMC_ROOT = new ROS2Topic<>("/").prependedWith(IHMC_TOPIC_PREFIX);
 
    /**
-    * Allocation free callback where the user only has access to the message in the callback.
-    * The user should not take up any significant time in the callback to not slow down the ROS 2
-    * thread.
+    * Volatile callback where the user only has access to the message in the callback.
+    * The message is only valid within the callback.
     */
-   public static <T> void createVolatileCallbackSubscription(ROS2Node ros2Node, ROS2Topic<T> topic, Consumer<T> callback)
+   public static <T extends ROS2Message<T>> void createVolatileCallbackSubscription(ROS2Node ros2Node, ROS2Topic<T> topic, Consumer<T> callback)
    {
-      TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(topic.getType());
-      T data = topicDataType.createData();
-      ros2Node.createSubscription(topicDataType, subscriber ->
+      ros2Node.createSubscription(topic, reader ->
       {
-         if (subscriber.takeNextData(data, null))
-         {
-            callback.accept(data);
-         }
-      }, topic.getName(), topic.getQoS());
+         T message = reader.read();
+         callback.accept(message);
+      });
    }
 
-   /** Use when you only need the latest message and need allocation free. */
-   public static <T> SwapReference<T> createSwapReferenceSubscription(ROS2Node ros2Node, ROS2Topic<T> topic, Consumer<T> callback)
+   /** Use when you only need the latest message with swap reference pattern. */
+   public static <T extends ROS2Message<T>> SwapReference<T> createSwapReferenceSubscription(ROS2Node ros2Node, ROS2Topic<T> topic, Consumer<T> callback)
    {
-      TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(topic.getType());
-      SwapReference<T> swapReference = new SwapReference<>(topicDataType::createData);
-      ros2Node.createSubscription(topicDataType, subscriber ->
+      SwapReference<T> swapReference = new SwapReference<>(() -> ROS2Message.createInstance(topic.getType()));
+
+      ros2Node.createSubscription(topic, reader ->
       {
          T messageToPack = swapReference.getForThreadOne();
-         if (subscriber.takeNextData(messageToPack, null))
-         {
-            swapReference.swap();
-            callback.accept(messageToPack);
-         }
-      }, topic.getName(), topic.getQoS());
+         T readMessage = reader.read();
+         messageToPack.set(readMessage);
+         swapReference.swap();
+         callback.accept(messageToPack);
+      });
       return swapReference;
    }
 
    /** Use when you only need the latest message and need allocation free. */
-   public static <T> SwapReference<T> createSwapReferenceSubscription(ROS2Node ros2Node, ROS2Topic<T> topic, Notification callback)
+   public static <T extends ROS2Message<T>> SwapReference<T> createSwapReferenceSubscription(ROS2Node ros2Node, ROS2Topic<T> topic, Notification callback)
    {
       return createSwapReferenceSubscription(ros2Node, topic, message -> callback.set());
    }
 
-   public static <T> TypedNotification<T> createNotificationSubscription(ROS2Node ros2Node, ROS2Topic<T> topic)
+   public static <T extends ROS2Message<T>> TypedNotification<T> createNotificationSubscription(ROS2Node ros2Node, ROS2Topic<T> topic)
    {
       TypedNotification<T> typedNotification = new TypedNotification<>();
-      ros2Node.createSubscription2(topic, typedNotification::set);
+      ros2Node.createSubscription(topic, reader -> typedNotification.set(reader.read()));
       return typedNotification;
    }
 }

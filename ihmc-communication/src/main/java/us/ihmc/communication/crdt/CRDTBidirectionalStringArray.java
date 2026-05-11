@@ -1,6 +1,6 @@
 package us.ihmc.communication.crdt;
 
-import us.ihmc.idl.IDLSequence.StringBuilderHolder;
+import us.ihmc.fastddsjava.cdr.idl.IDLStringSequence;
 
 /**
  * Represents a String array that can be modified by both the
@@ -41,7 +41,7 @@ public class CRDTBidirectionalStringArray extends CRDTBidirectionalMutableField<
       }
    }
 
-   public void toMessage(StringBuilderHolder message)
+   public void toMessage(IDLStringSequence message)
    {
       message.clear();
       for (int i = 0; i < getLength(); ++i)
@@ -61,13 +61,13 @@ public class CRDTBidirectionalStringArray extends CRDTBidirectionalMutableField<
       }
    }
 
-   public void fromMessage(StringBuilderHolder message)
+   public void fromMessage(IDLStringSequence message)
    {
       if (isModificationIncoming())
       {
          for (int i = 0; i < getLength() && i < message.size(); ++i)
          {
-            getValueInternal()[i] = message.getString(i);
+            getValueInternal()[i] = message.get(i).toString();
          }
       }
    }

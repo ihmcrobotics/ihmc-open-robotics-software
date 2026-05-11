@@ -42,14 +42,14 @@ public class FoundationPoseResult implements ROS2Message<FoundationPoseResult>
    /**
       Pose of the object
    */
-   private final geometry_msgs.Pose object_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage object_pose_;
 
    public FoundationPoseResult()
    {
       timestamp_ = new ihmc_common_msgs.InstantMessage();
       object_id_ = new StringBuilder();
       mesh_file_ = new StringBuilder();
-      object_pose_ = new geometry_msgs.Pose();
+      object_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
 
    }
 
@@ -133,7 +133,7 @@ public class FoundationPoseResult implements ROS2Message<FoundationPoseResult>
       this.mesh_file_.delete(0, this.mesh_file_.length());
       this.mesh_file_.insert(0, s);
    }
-   public geometry_msgs.Pose getObjectPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getObjectPose()
    {
       return object_pose_;
    }

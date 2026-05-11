@@ -57,7 +57,7 @@ public class AI2RStatusMessage implements ROS2Message<AI2RStatusMessage>
       Mid point between footsoles and facing the direction of the pelvis in world frame.
       Z always points straight up.
    */
-   private final geometry_msgs.Pose robot_mid_feet_under_pelvis_pose_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage robot_mid_feet_under_pelvis_pose_in_world_;
    /**
       List of objects in the scene
    */
@@ -90,7 +90,7 @@ public class AI2RStatusMessage implements ROS2Message<AI2RStatusMessage>
    /**
       Relative transform of the grasped object in hand frame
    */
-   private final geometry_msgs.Pose transform_grasped_object_hand_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage transform_grasped_object_hand_;
    /**
       Name of the object that the robot has released
    */
@@ -98,7 +98,7 @@ public class AI2RStatusMessage implements ROS2Message<AI2RStatusMessage>
 
    public AI2RStatusMessage()
    {
-      robot_mid_feet_under_pelvis_pose_in_world_ = new geometry_msgs.Pose();
+      robot_mid_feet_under_pelvis_pose_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       objects_ = new IDLObjectSequence<behavior_msgs.AI2RObjectMessage>(200, behavior_msgs.AI2RObjectMessage.class);
       available_behaviors_ = new IDLStringSequence(200);
       behavior_in_progress_ = new StringBuilder();
@@ -107,7 +107,7 @@ public class AI2RStatusMessage implements ROS2Message<AI2RStatusMessage>
       failure_ = new behavior_msgs.AI2RActionFailureMessage();
       object_grasped_ = new StringBuilder();
       grasp_side_ = (byte) 255;
-      transform_grasped_object_hand_ = new geometry_msgs.Pose();
+      transform_grasped_object_hand_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       object_placed_ = new StringBuilder();
 
    }
@@ -188,7 +188,7 @@ public class AI2RStatusMessage implements ROS2Message<AI2RStatusMessage>
 
    }
 
-   public geometry_msgs.Pose getRobotMidFeetUnderPelvisPoseInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getRobotMidFeetUnderPelvisPoseInWorld()
    {
       return robot_mid_feet_under_pelvis_pose_in_world_;
    }
@@ -278,7 +278,7 @@ public class AI2RStatusMessage implements ROS2Message<AI2RStatusMessage>
       this.grasp_side_ = grasp_side_;
    }
 
-   public geometry_msgs.Pose getTransformGraspedObjectHand()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getTransformGraspedObjectHand()
    {
       return transform_grasped_object_hand_;
    }

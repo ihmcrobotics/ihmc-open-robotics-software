@@ -2,9 +2,9 @@ package us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI;
 
 import java.util.Map;
 
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
-import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
-import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
+import toolbox_msgs.KinematicsPlanningToolboxCenterOfMassMessage;
+import ihmc_common_msgs.SelectionMatrix3DMessage;
+import ihmc_common_msgs.WeightMatrix3DMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;

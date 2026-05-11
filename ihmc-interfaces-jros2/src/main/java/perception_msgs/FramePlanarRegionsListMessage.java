@@ -44,11 +44,11 @@ public class FramePlanarRegionsListMessage implements ROS2Message<FramePlanarReg
    /**
       Position of sensor when the planar region list was generated
    */
-   private final geometry_msgs.Point sensor_position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage sensor_position_;
    /**
       Orientation of sensor when the planar region list was generated
    */
-   private final geometry_msgs.Quaternion sensor_orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage sensor_orientation_;
    /**
       The PlanarRegionsList associated with the message.
    */
@@ -56,8 +56,8 @@ public class FramePlanarRegionsListMessage implements ROS2Message<FramePlanarReg
 
    public FramePlanarRegionsListMessage()
    {
-      sensor_position_ = new geometry_msgs.Point();
-      sensor_orientation_ = new geometry_msgs.Quaternion();
+      sensor_position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      sensor_orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
       planar_regions_ = new perception_msgs.PlanarRegionsListMessage();
 
    }
@@ -115,12 +115,12 @@ public class FramePlanarRegionsListMessage implements ROS2Message<FramePlanarReg
       this.sequence_id_ = sequence_id_;
    }
 
-   public geometry_msgs.Point getSensorPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getSensorPosition()
    {
       return sensor_position_;
    }
 
-   public geometry_msgs.Quaternion getSensorOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getSensorOrientation()
    {
       return sensor_orientation_;
    }

@@ -62,7 +62,7 @@ public class ActionNodeStateMessage implements ROS2Message<ActionNodeStateMessag
    /**
       Current pose
    */
-   private final geometry_msgs.Pose current_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage current_pose_;
    /**
       Desired jointspace trajectories
    */
@@ -84,7 +84,7 @@ public class ActionNodeStateMessage implements ROS2Message<ActionNodeStateMessag
    {
       state_ = new behavior_msgs.LeafNodeStateMessage();
       commanded_trajectory_ = new IDLObjectSequence<ihmc_common_msgs.SE3TrajectoryPointMessage>(500, ihmc_common_msgs.SE3TrajectoryPointMessage.class);
-      current_pose_ = new geometry_msgs.Pose();
+      current_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       commanded_joint_trajectories_ = new IDLObjectSequence<controller_msgs.OneDoFJointTrajectoryMessage>(7, controller_msgs.OneDoFJointTrajectoryMessage.class);
       current_joint_angles_ = new double[7];
 
@@ -192,7 +192,7 @@ public class ActionNodeStateMessage implements ROS2Message<ActionNodeStateMessag
       return commanded_trajectory_;
    }
 
-   public geometry_msgs.Pose getCurrentPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getCurrentPose()
    {
       return current_pose_;
    }

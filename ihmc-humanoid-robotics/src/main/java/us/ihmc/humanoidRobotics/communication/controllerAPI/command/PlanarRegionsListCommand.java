@@ -1,12 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.PlanarRegionsListMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.idl.IDLSequence.Object;
+
+import java.util.List;
 
 public class PlanarRegionsListCommand implements Command<PlanarRegionsListCommand, PlanarRegionsListMessage>
 {
@@ -37,7 +38,7 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
       int vertexIndex = 0;
       int convexPolygonIndexStart = 0;
 
-      Object<Point3D> vertexBuffer = message.getVertexBuffer();
+      List<Point3D> vertexBuffer = message.getVertexBuffer();
 
       for (int regionIndex = 0; regionIndex < message.getRegionId().size(); regionIndex++)
       {

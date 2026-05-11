@@ -21,11 +21,11 @@ public class PoseListMessage implements ROS2Message<PoseListMessage>
    /**
       A list of poses
    */
-   private final IDLObjectSequence<geometry_msgs.Pose> poses_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> poses_;
 
    public PoseListMessage()
    {
-      poses_ = new IDLObjectSequence<geometry_msgs.Pose>(geometry_msgs.Pose.class);
+      poses_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage>(us.ihmc.euclid.jros2.messages.EuclidPose3DMessage.class);
 
    }
 
@@ -60,7 +60,7 @@ public class PoseListMessage implements ROS2Message<PoseListMessage>
 
    }
 
-   public IDLObjectSequence<geometry_msgs.Pose> getPoses()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> getPoses()
    {
       return poses_;
    }

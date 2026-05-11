@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
+import toolbox_msgs.KinematicsStreamingToolboxInitialConfigurationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.JointHashCodeResolver;

@@ -85,11 +85,11 @@ public class RobotConfigurationData implements ROS2Message<RobotConfigurationDat
    private final IDLFloatSequence joint_angles_;
    private final IDLFloatSequence joint_velocities_;
    private final IDLFloatSequence joint_torques_;
-   private final geometry_msgs.Point root_position_;
-   private final geometry_msgs.Quaternion root_orientation_;
-   private final geometry_msgs.Vector3 pelvis_linear_velocity_;
-   private final geometry_msgs.Vector3 pelvis_angular_velocity_;
-   private final geometry_msgs.Vector3 pelvis_linear_acceleration_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage root_position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage root_orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage pelvis_linear_velocity_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage pelvis_angular_velocity_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage pelvis_linear_acceleration_;
    private final IDLObjectSequence<controller_msgs.SpatialVectorMessage> force_sensor_data_;
    private final IDLObjectSequence<controller_msgs.IMUPacket> imu_sensor_data_;
    private byte robot_motion_status_;
@@ -102,11 +102,11 @@ public class RobotConfigurationData implements ROS2Message<RobotConfigurationDat
       joint_angles_ = new IDLFloatSequence(50);
       joint_velocities_ = new IDLFloatSequence(50);
       joint_torques_ = new IDLFloatSequence(50);
-      root_position_ = new geometry_msgs.Point();
-      root_orientation_ = new geometry_msgs.Quaternion();
-      pelvis_linear_velocity_ = new geometry_msgs.Vector3();
-      pelvis_angular_velocity_ = new geometry_msgs.Vector3();
-      pelvis_linear_acceleration_ = new geometry_msgs.Vector3();
+      root_position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      root_orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
+      pelvis_linear_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      pelvis_angular_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      pelvis_linear_acceleration_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
       force_sensor_data_ = new IDLObjectSequence<controller_msgs.SpatialVectorMessage>(50, controller_msgs.SpatialVectorMessage.class);
       imu_sensor_data_ = new IDLObjectSequence<controller_msgs.IMUPacket>(50, controller_msgs.IMUPacket.class);
       robot_motion_status_ = (byte) 255;
@@ -281,27 +281,27 @@ public class RobotConfigurationData implements ROS2Message<RobotConfigurationDat
       return joint_torques_;
    }
 
-   public geometry_msgs.Point getRootPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getRootPosition()
    {
       return root_position_;
    }
 
-   public geometry_msgs.Quaternion getRootOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getRootOrientation()
    {
       return root_orientation_;
    }
 
-   public geometry_msgs.Vector3 getPelvisLinearVelocity()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getPelvisLinearVelocity()
    {
       return pelvis_linear_velocity_;
    }
 
-   public geometry_msgs.Vector3 getPelvisAngularVelocity()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getPelvisAngularVelocity()
    {
       return pelvis_angular_velocity_;
    }
 
-   public geometry_msgs.Vector3 getPelvisLinearAcceleration()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getPelvisLinearAcceleration()
    {
       return pelvis_linear_acceleration_;
    }

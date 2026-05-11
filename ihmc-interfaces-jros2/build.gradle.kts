@@ -35,6 +35,15 @@ tasks.register<jros2GenTask>("generateMessages") {
    )
 
    outputDir = sourceSets["main"].java.srcDirs.find { it.name == "java" }!!.absolutePath
+
+   // Map standard geometry_msgs types to custom Euclid wrapper classes
+   typeToClass = mapOf(
+      "geometry_msgs/Point" to "us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage",
+      "geometry_msgs/Vector3" to "us.ihmc.euclid.jros2.messages.EuclidVector3DMessage",
+      "geometry_msgs/Quaternion" to "us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage",
+      "geometry_msgs/Pose" to "us.ihmc.euclid.jros2.messages.EuclidPose3DMessage",
+      "geometry_msgs/Transform" to "us.ihmc.euclid.jros2.messages.EuclidTransformMessage"
+   )
 }
 
 // Make compileJava depend on message generation

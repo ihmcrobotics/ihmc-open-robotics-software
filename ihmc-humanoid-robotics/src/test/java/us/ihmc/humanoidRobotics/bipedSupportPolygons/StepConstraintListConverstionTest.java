@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.bipedSupportPolygons;
 
-import controller_msgs.msg.dds.StepConstraintMessage;
-import controller_msgs.msg.dds.StepConstraintsListMessage;
+import controller_msgs.StepConstraintMessage;
+import controller_msgs.StepConstraintsListMessage;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;

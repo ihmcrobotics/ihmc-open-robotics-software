@@ -234,7 +234,7 @@ public class ROS2LogReplay
 
    public void destroy()
    {
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    public void setReplaySpeed(double replaySpeed)
@@ -253,7 +253,7 @@ public class ROS2LogReplay
       return replaySpeed;
    }
 
-   public <T> void addReplayMutator(ROS2Topic<T> topic, ObjLongConsumer<T> mutator)
+   public <T extends us.ihmc.jros2.ROS2Message<T>> void addReplayMutator(ROS2Topic<T> topic, ObjLongConsumer<T> mutator)
    {
       ReplayTopicManager<?> topicManager = topicManagersMap.get(topic.getName());
       if (topicManager == null)

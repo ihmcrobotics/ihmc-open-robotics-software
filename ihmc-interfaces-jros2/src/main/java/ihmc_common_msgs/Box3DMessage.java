@@ -28,16 +28,16 @@ public class Box3DMessage implements ROS2Message<Box3DMessage>
    /**
       Size of the box, see Box3D.
    */
-   private final geometry_msgs.Vector3 size_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage size_;
    /**
       Pose of the box
    */
-   private final geometry_msgs.Pose pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage pose_;
 
    public Box3DMessage()
    {
-      size_ = new geometry_msgs.Vector3();
-      pose_ = new geometry_msgs.Pose();
+      size_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
 
    }
 
@@ -76,12 +76,12 @@ public class Box3DMessage implements ROS2Message<Box3DMessage>
 
    }
 
-   public geometry_msgs.Vector3 getSize()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getSize()
    {
       return size_;
    }
 
-   public geometry_msgs.Pose getPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getPose()
    {
       return pose_;
    }

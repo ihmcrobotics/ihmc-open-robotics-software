@@ -52,7 +52,7 @@ public class KinematicsPlanningToolboxCenterOfMassMessage implements ROS2Message
       Specifies the desired center of mass position.
       The data is assumed to be expressed in world frame.
    */
-   private final IDLObjectSequence<geometry_msgs.Point> desired_way_point_positions_in_world_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> desired_way_point_positions_in_world_;
    /**
       The selection matrix is used to determinate which degree of freedom of the center of mass
       should be controlled.
@@ -73,7 +73,7 @@ public class KinematicsPlanningToolboxCenterOfMassMessage implements ROS2Message
    public KinematicsPlanningToolboxCenterOfMassMessage()
    {
       way_point_times_ = new IDLDoubleSequence();
-      desired_way_point_positions_in_world_ = new IDLObjectSequence<geometry_msgs.Point>(geometry_msgs.Point.class);
+      desired_way_point_positions_in_world_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
       selection_matrix_ = new ihmc_common_msgs.SelectionMatrix3DMessage();
       weights_ = new ihmc_common_msgs.WeightMatrix3DMessage();
 
@@ -141,7 +141,7 @@ public class KinematicsPlanningToolboxCenterOfMassMessage implements ROS2Message
       return way_point_times_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getDesiredWayPointPositionsInWorld()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getDesiredWayPointPositionsInWorld()
    {
       return desired_way_point_positions_in_world_;
    }

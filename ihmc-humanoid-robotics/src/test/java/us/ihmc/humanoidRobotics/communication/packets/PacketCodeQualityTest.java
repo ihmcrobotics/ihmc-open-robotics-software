@@ -11,8 +11,8 @@ import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import ihmc_common_msgs.msg.dds.FrameInformation;
-import toolbox_msgs.msg.dds.FootstepPlannerStatusMessage;
+import ihmc_common_msgs.FrameInformation;
+import toolbox_msgs.FootstepPlannerStatusMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
@@ -21,7 +21,7 @@ import org.reflections.Reflections;
 
 import com.google.common.base.CaseFormat;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.*;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;

@@ -1,12 +1,12 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
-import ihmc_common_msgs.msg.dds.RobotFrameData;
+import ihmc_common_msgs.RobotFrameData;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
 
 /**
  * ROS2 Publisher for {@link RobotFrameData}
@@ -24,15 +24,15 @@ public class RobotFrameDataPublisher
    private final ReferenceFrame myReferenceFrame;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
-   public RobotFrameDataPublisher(ReferenceFrame referenceFrame, RealtimeROS2Node realtimeROS2Node, ROS2Topic<?> outputTopic)
+   public RobotFrameDataPublisher(ReferenceFrame referenceFrame, ROS2Node ros2Node, ROS2Topic<?> outputTopic)
    {
       myReferenceFrame = referenceFrame;
       robotFrameData.getFrameName().append(referenceFrame.getName());
 
       if (ENABLE_ROBOT_FRAME_DATA_PUBLISHERS)
       {
-         ROS2Topic<RobotFrameData> ros2Topic = outputTopic.withSuffix(referenceFrame.getName()).withType(RobotFrameData.class);
-         ros2Publisher = realtimeROS2Node.createPublisher(ros2Topic);
+         ROS2Topic<RobotFrameData> ros2Topic = outputTopic.appendedWith(referenceFrame.getName()).withType(RobotFrameData.class);
+         ros2Publisher = ros2Node.createPublisher(ros2Topic);
       }
       else
       {
@@ -45,8 +45,9 @@ public class RobotFrameDataPublisher
       if (ENABLE_ROBOT_FRAME_DATA_PUBLISHERS)
       {
          myReferenceFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-         robotFrameData.getFramePoseInWorld().set(tempTransform);
-         return ros2Publisher.publish(robotFrameData);
+         robotFrameData.getFramePoseInWorld().getPose().set(tempTransform);
+         ros2Publisher.publish(robotFrameData);
+         return true;
       }
       else
       {
@@ -61,6 +62,6 @@ public class RobotFrameDataPublisher
 
    public static ROS2Topic<RobotFrameData> getTopic(String robotName, String referenceFrameName)
    {
-      return HumanoidControllerAPI.getOutputTopic(robotName).withType(RobotFrameData.class).withSuffix(referenceFrameName);
+      return HumanoidControllerAPI.getOutputTopic(robotName).withType(RobotFrameData.class).appendedWith(referenceFrameName);
    }
 }

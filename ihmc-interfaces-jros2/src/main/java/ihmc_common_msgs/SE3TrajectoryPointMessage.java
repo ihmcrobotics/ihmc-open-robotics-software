@@ -49,26 +49,26 @@ public class SE3TrajectoryPointMessage implements ROS2Message<SE3TrajectoryPoint
    /**
       Define the desired 3D position to be reached at this trajectory point.
    */
-   private final geometry_msgs.Point position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage position_;
    /**
       Define the desired 3D orientation to be reached at this trajectory point.
    */
-   private final geometry_msgs.Quaternion orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage orientation_;
    /**
       Define the desired 3D linear velocity to be reached at this trajectory point.
    */
-   private final geometry_msgs.Vector3 linear_velocity_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage linear_velocity_;
    /**
       Define the desired 3D angular velocity to be reached at this trajectory point.
    */
-   private final geometry_msgs.Vector3 angular_velocity_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage angular_velocity_;
 
    public SE3TrajectoryPointMessage()
    {
-      position_ = new geometry_msgs.Point();
-      orientation_ = new geometry_msgs.Quaternion();
-      linear_velocity_ = new geometry_msgs.Vector3();
-      angular_velocity_ = new geometry_msgs.Vector3();
+      position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
+      linear_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      angular_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -143,22 +143,22 @@ public class SE3TrajectoryPointMessage implements ROS2Message<SE3TrajectoryPoint
       this.time_ = time_;
    }
 
-   public geometry_msgs.Point getPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getPosition()
    {
       return position_;
    }
 
-   public geometry_msgs.Quaternion getOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getOrientation()
    {
       return orientation_;
    }
 
-   public geometry_msgs.Vector3 getLinearVelocity()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getLinearVelocity()
    {
       return linear_velocity_;
    }
 
-   public geometry_msgs.Vector3 getAngularVelocity()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getAngularVelocity()
    {
       return angular_velocity_;
    }

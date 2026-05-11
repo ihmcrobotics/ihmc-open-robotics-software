@@ -77,7 +77,7 @@ public class KinematicsPlanningToolboxRigidBodyMessage implements ROS2Message<Ki
    /**
       This is the list of desired key frames for end effector.
    */
-   private final IDLObjectSequence<geometry_msgs.Pose> key_frame_poses_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> key_frame_poses_;
    /**
       The selection frames coming along with the given selection matrix are used to determine to
       what reference frame the selected axes are referring to. For instance, if only the hand height
@@ -111,12 +111,12 @@ public class KinematicsPlanningToolboxRigidBodyMessage implements ROS2Message<Ki
       By default, the control frame is coincident to endEffector.getBodyFixedFrame().
       The control frame is rigidly attached to the end-effector.
    */
-   private final geometry_msgs.Point control_frame_position_in_end_effector_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage control_frame_position_in_end_effector_;
    /**
       This is the orientation of the control frame expressed in endEffector.getBodyFixedFrame().
       By default, the control frame is coincident to endEffector.getBodyFixedFrame().
    */
-   private final geometry_msgs.Quaternion control_frame_orientation_in_end_effector_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage control_frame_orientation_in_end_effector_;
    /**
       This is the allowable displacement of the position for each key frame.
       By default, the solver will try to find a solution without modifying the position of the key frames.
@@ -133,13 +133,13 @@ public class KinematicsPlanningToolboxRigidBodyMessage implements ROS2Message<Ki
    public KinematicsPlanningToolboxRigidBodyMessage()
    {
       key_frame_times_ = new IDLDoubleSequence();
-      key_frame_poses_ = new IDLObjectSequence<geometry_msgs.Pose>(geometry_msgs.Pose.class);
+      key_frame_poses_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage>(us.ihmc.euclid.jros2.messages.EuclidPose3DMessage.class);
       angular_selection_matrix_ = new ihmc_common_msgs.SelectionMatrix3DMessage();
       linear_selection_matrix_ = new ihmc_common_msgs.SelectionMatrix3DMessage();
       angular_weight_matrix_ = new ihmc_common_msgs.WeightMatrix3DMessage();
       linear_weight_matrix_ = new ihmc_common_msgs.WeightMatrix3DMessage();
-      control_frame_position_in_end_effector_ = new geometry_msgs.Point();
-      control_frame_orientation_in_end_effector_ = new geometry_msgs.Quaternion();
+      control_frame_position_in_end_effector_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      control_frame_orientation_in_end_effector_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
       allowable_position_displacement_ = new IDLDoubleSequence();
       allowable_orientation_displacement_ = new IDLDoubleSequence();
 
@@ -245,7 +245,7 @@ public class KinematicsPlanningToolboxRigidBodyMessage implements ROS2Message<Ki
       return key_frame_times_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Pose> getKeyFramePoses()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> getKeyFramePoses()
    {
       return key_frame_poses_;
    }
@@ -270,12 +270,12 @@ public class KinematicsPlanningToolboxRigidBodyMessage implements ROS2Message<Ki
       return linear_weight_matrix_;
    }
 
-   public geometry_msgs.Point getControlFramePositionInEndEffector()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getControlFramePositionInEndEffector()
    {
       return control_frame_position_in_end_effector_;
    }
 
-   public geometry_msgs.Quaternion getControlFrameOrientationInEndEffector()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getControlFrameOrientationInEndEffector()
    {
       return control_frame_orientation_in_end_effector_;
    }

@@ -24,20 +24,20 @@ public class StepConstraintMessage implements ROS2Message<StepConstraintMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::StepConstraintMessage_";
 
-   private final geometry_msgs.Point region_origin_;
-   private final geometry_msgs.Quaternion region_orientation_;
-   private final geometry_msgs.Vector3 region_normal_;
-   private final IDLObjectSequence<geometry_msgs.Point> vertex_buffer_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage region_origin_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage region_orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage region_normal_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> vertex_buffer_;
    private int concave_hull_size_;
    private int number_of_holes_in_region_;
    private final IDLIntSequence hole_polygons_size_;
 
    public StepConstraintMessage()
    {
-      region_origin_ = new geometry_msgs.Point();
-      region_orientation_ = new geometry_msgs.Quaternion();
-      region_normal_ = new geometry_msgs.Vector3();
-      vertex_buffer_ = new IDLObjectSequence<geometry_msgs.Point>(1000, geometry_msgs.Point.class);
+      region_origin_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      region_orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
+      region_normal_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      vertex_buffer_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(1000, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
       hole_polygons_size_ = new IDLIntSequence(20);
 
    }
@@ -97,22 +97,22 @@ public class StepConstraintMessage implements ROS2Message<StepConstraintMessage>
 
    }
 
-   public geometry_msgs.Point getRegionOrigin()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getRegionOrigin()
    {
       return region_origin_;
    }
 
-   public geometry_msgs.Quaternion getRegionOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getRegionOrientation()
    {
       return region_orientation_;
    }
 
-   public geometry_msgs.Vector3 getRegionNormal()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getRegionNormal()
    {
       return region_normal_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getVertexBuffer()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getVertexBuffer()
    {
       return vertex_buffer_;
    }

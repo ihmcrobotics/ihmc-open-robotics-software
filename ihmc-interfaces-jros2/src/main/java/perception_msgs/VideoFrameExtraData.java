@@ -47,12 +47,12 @@ public class VideoFrameExtraData implements ROS2Message<VideoFrameExtraData>
    /**
       Sensor pose at time of acquisition
    */
-   private final geometry_msgs.Pose sensor_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage sensor_pose_;
 
    public VideoFrameExtraData()
    {
       acquisition_time_ = new ihmc_common_msgs.InstantMessage();
-      sensor_pose_ = new geometry_msgs.Pose();
+      sensor_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
 
    }
 
@@ -110,7 +110,7 @@ public class VideoFrameExtraData implements ROS2Message<VideoFrameExtraData>
       return acquisition_time_;
    }
 
-   public geometry_msgs.Pose getSensorPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getSensorPose()
    {
       return sensor_pose_;
    }

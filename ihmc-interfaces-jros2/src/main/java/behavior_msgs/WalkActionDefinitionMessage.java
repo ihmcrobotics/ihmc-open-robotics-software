@@ -128,7 +128,7 @@ public class WalkActionDefinitionMessage implements ROS2Message<WalkActionDefini
    /**
       Pose waypoints to hit along the way (may be none)
    */
-   private final IDLObjectSequence<geometry_msgs.Pose> waypoints_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> waypoints_;
    /**
       The footsteps, with a maximum of 50
    */
@@ -136,11 +136,11 @@ public class WalkActionDefinitionMessage implements ROS2Message<WalkActionDefini
    /**
       The position to which the goal stance is aligned
    */
-   private final geometry_msgs.Point goal_stance_point_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage goal_stance_point_;
    /**
       The point that the robot should be facing in the goal stance
    */
-   private final geometry_msgs.Point goal_focal_point_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage goal_focal_point_;
    /**
       Left goal foot X to the goal pose
    */
@@ -219,10 +219,10 @@ public class WalkActionDefinitionMessage implements ROS2Message<WalkActionDefini
       definition_ = new behavior_msgs.ActionNodeDefinitionMessage();
       parent_frame_name_ = new StringBuilder();
       is_manually_placed_ = (boolean) false;
-      waypoints_ = new IDLObjectSequence<geometry_msgs.Pose>(40, geometry_msgs.Pose.class);
+      waypoints_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage>(40, us.ihmc.euclid.jros2.messages.EuclidPose3DMessage.class);
       footsteps_ = new IDLObjectSequence<behavior_msgs.WalkActionFootstepDefinitionMessage>(50, behavior_msgs.WalkActionFootstepDefinitionMessage.class);
-      goal_stance_point_ = new geometry_msgs.Point();
-      goal_focal_point_ = new geometry_msgs.Point();
+      goal_stance_point_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      goal_focal_point_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
       planner_walk_with_goal_orientation_ = (boolean) false;
       planner_plan_with_body_path_ = (boolean) false;
       planner_parameters_ = new ihmc_common_msgs.PrimitiveDataVectorMessage();
@@ -455,7 +455,7 @@ public class WalkActionDefinitionMessage implements ROS2Message<WalkActionDefini
       this.is_manually_placed_ = is_manually_placed_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Pose> getWaypoints()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> getWaypoints()
    {
       return waypoints_;
    }
@@ -465,12 +465,12 @@ public class WalkActionDefinitionMessage implements ROS2Message<WalkActionDefini
       return footsteps_;
    }
 
-   public geometry_msgs.Point getGoalStancePoint()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getGoalStancePoint()
    {
       return goal_stance_point_;
    }
 
-   public geometry_msgs.Point getGoalFocalPoint()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getGoalFocalPoint()
    {
       return goal_focal_point_;
    }

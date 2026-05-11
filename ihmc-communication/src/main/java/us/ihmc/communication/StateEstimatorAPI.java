@@ -27,7 +27,7 @@ public final class StateEstimatorAPI
       return outputTopic.withType(RobotConfigurationData.class);
    }
 
-   public static <T> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
+   public static <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
    {
       // Input types
       if (messageClass.equals(StampedPosePacket.class)

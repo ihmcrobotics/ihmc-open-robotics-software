@@ -1,10 +1,9 @@
 package us.ihmc.communication.ros2.tf2;
 
 import geometry_msgs.TransformStamped;
-import tf2_msgs.msg.dds.TFMessage;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import tf2_msgs.TFMessage;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.pubsub.subscriber.Subscriber;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Subscription;
 import us.ihmc.jros2.ROS2Topic;
@@ -66,24 +65,25 @@ public class ROS2TFTree
       return ros2Node;
    }
 
-   private void receiveTFMessage(@SuppressWarnings("deprecation") Subscriber<TFMessage> subscriber, TFMessage tfMessage)
+   private void receiveTFMessage(us.ihmc.jros2.ROS2MessageReader<TFMessage> reader, TFMessage tfMessage)
    {
       // Read the new message
-      subscriber.takeNextData(tfMessage, null);
+      reader.read(tfMessage);
 
       // Ignore null or empty messages
       if (tfMessage == null || tfMessage.getTransforms().isEmpty())
          return;
 
       // Update the transforms
-      RecyclingArrayList<TransformStamped> receivedTransforms = tfMessage.getTransforms();
+      IDLObjectSequence<TransformStamped> receivedTransforms = tfMessage.getTransforms();
       for (int i = 0; i < receivedTransforms.size(); ++i)
       {
          TransformStamped receivedMessage = receivedTransforms.get(i);
          TransformStamped recordedTransform = transforms.get(receivedMessage.getChildFrameId());
          if (recordedTransform == null)
          {
-            recordedTransform = new TransformStamped(receivedMessage);
+            recordedTransform = new TransformStamped();
+            recordedTransform.set(receivedMessage);
             transforms.put(recordedTransform.getChildFrameId(), recordedTransform);
          }
          else if (MessageTools.compareTime(recordedTransform.getHeader().getStamp(), receivedMessage.getHeader().getStamp()) < 0)
@@ -96,10 +96,10 @@ public class ROS2TFTree
    private void close()
    {
       if (tfSubscription != null)
-         tfSubscription.remove();
+         ros2Node.destroySubscription(tfSubscription);
       if (tfStaticSubscription != null)
-         tfStaticSubscription.remove();
+         ros2Node.destroySubscription(tfStaticSubscription);
       if (ros2Node != null)
-         ros2Node.destroy();
+         ros2Node.close();
    }
 }

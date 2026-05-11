@@ -69,19 +69,19 @@ public class FootstepStatusMessage implements ROS2Message<FootstepStatusMessage>
    /**
       Specifies the desired position of the foot sent to the controller as opposed to where the foot actually landed.
    */
-   private final geometry_msgs.Point desired_foot_position_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage desired_foot_position_in_world_;
    /**
       Specifies the desired orientation of the foot sent to the controller as opposed to where the foot actually landed.
    */
-   private final geometry_msgs.Quaternion desired_foot_orientation_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage desired_foot_orientation_in_world_;
    /**
       Specifies the position of where the foot actually landed.
    */
-   private final geometry_msgs.Point actual_foot_position_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage actual_foot_position_in_world_;
    /**
       Specifies the orientation of where the foot actually landed.
    */
-   private final geometry_msgs.Quaternion actual_foot_orientation_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage actual_foot_orientation_in_world_;
    /**
       This is the swing duration of the step.
    */
@@ -91,10 +91,10 @@ public class FootstepStatusMessage implements ROS2Message<FootstepStatusMessage>
    {
       footstep_status_ = (byte) 255;
       robot_side_ = (byte) 255;
-      desired_foot_position_in_world_ = new geometry_msgs.Point();
-      desired_foot_orientation_in_world_ = new geometry_msgs.Quaternion();
-      actual_foot_position_in_world_ = new geometry_msgs.Point();
-      actual_foot_orientation_in_world_ = new geometry_msgs.Quaternion();
+      desired_foot_position_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      desired_foot_orientation_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
+      actual_foot_position_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      actual_foot_orientation_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
 
    }
 
@@ -201,22 +201,22 @@ public class FootstepStatusMessage implements ROS2Message<FootstepStatusMessage>
       this.robot_side_ = robot_side_;
    }
 
-   public geometry_msgs.Point getDesiredFootPositionInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getDesiredFootPositionInWorld()
    {
       return desired_foot_position_in_world_;
    }
 
-   public geometry_msgs.Quaternion getDesiredFootOrientationInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getDesiredFootOrientationInWorld()
    {
       return desired_foot_orientation_in_world_;
    }
 
-   public geometry_msgs.Point getActualFootPositionInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getActualFootPositionInWorld()
    {
       return actual_foot_position_in_world_;
    }
 
-   public geometry_msgs.Quaternion getActualFootOrientationInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getActualFootOrientationInWorld()
    {
       return actual_foot_orientation_in_world_;
    }

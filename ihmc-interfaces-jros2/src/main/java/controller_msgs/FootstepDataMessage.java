@@ -124,11 +124,11 @@ public class FootstepDataMessage implements ROS2Message<FootstepDataMessage>
    /**
       Specifies the position of the footstep (sole frame) in world frame.
    */
-   private final geometry_msgs.Point location_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage location_;
    /**
       Specifies the orientation of the footstep (sole frame) in world frame.
    */
-   private final geometry_msgs.Quaternion orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage orientation_;
    /**
       Predicted contact points represent the vertices of the expected contact polygon between the foot and the world.
       An empty list will request the controller to use the default foot support polygon.
@@ -140,7 +140,7 @@ public class FootstepDataMessage implements ROS2Message<FootstepDataMessage>
       - x: -0.5 * foot_length, y: 0.5 * heel_width
       Note: The z coordinate of each point is ignored.
    */
-   private final IDLObjectSequence<geometry_msgs.Point> predicted_contact_points_2d_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> predicted_contact_points_2d_;
    /**
       This contains information on what the swing trajectory should be for each step. Recommended is TRAJECTORY_TYPE_DEFAULT.
    */
@@ -165,7 +165,7 @@ public class FootstepDataMessage implements ROS2Message<FootstepDataMessage>
       If full control over the swing trajectory is desired use the trajectory type TRAJECTORY_TYPE_WAYPOINTS instead.
       The position waypoints are expected in the trajectory frame.
    */
-   private final IDLObjectSequence<geometry_msgs.Point> custom_position_waypoints_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> custom_position_waypoints_;
    /**
       In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, swing waypoints can be specified here.
       The waypoints do not include the start point (which is set to the current foot state at lift-off) and the touch down point
@@ -229,13 +229,13 @@ public class FootstepDataMessage implements ROS2Message<FootstepDataMessage>
    public FootstepDataMessage()
    {
       robot_side_ = (byte) 255;
-      location_ = new geometry_msgs.Point();
-      orientation_ = new geometry_msgs.Quaternion();
-      predicted_contact_points_2d_ = new IDLObjectSequence<geometry_msgs.Point>(10, geometry_msgs.Point.class);
+      location_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
+      predicted_contact_points_2d_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(10, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
       trajectory_type_ = (byte) 0;
       swing_height_ = (double) -1.0;
       custom_waypoint_proportions_ = new IDLDoubleSequence(2);
-      custom_position_waypoints_ = new IDLObjectSequence<geometry_msgs.Point>(12, geometry_msgs.Point.class);
+      custom_position_waypoints_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(12, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
       swing_trajectory_ = new IDLObjectSequence<ihmc_common_msgs.SE3TrajectoryPointMessage>(12, ihmc_common_msgs.SE3TrajectoryPointMessage.class);
       swing_trajectory_blend_duration_ = (double) 0.0;
       swing_duration_ = (double) -1.0;
@@ -377,17 +377,17 @@ public class FootstepDataMessage implements ROS2Message<FootstepDataMessage>
       this.robot_side_ = robot_side_;
    }
 
-   public geometry_msgs.Point getLocation()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getLocation()
    {
       return location_;
    }
 
-   public geometry_msgs.Quaternion getOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getOrientation()
    {
       return orientation_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getPredictedContactPoints2d()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getPredictedContactPoints2d()
    {
       return predicted_contact_points_2d_;
    }
@@ -417,7 +417,7 @@ public class FootstepDataMessage implements ROS2Message<FootstepDataMessage>
       return custom_waypoint_proportions_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getCustomPositionWaypoints()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getCustomPositionWaypoints()
    {
       return custom_position_waypoints_;
    }

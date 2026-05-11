@@ -57,7 +57,7 @@ public class KinematicsToolboxCenterOfMassMessage implements ROS2Message<Kinemat
       Specifies the desired center of mass position.
       The data is assumed to be expressed in world frame.
    */
-   private final geometry_msgs.Point desired_position_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage desired_position_in_world_;
    /**
       Whether the desired linear velocity is defined.
    */
@@ -65,7 +65,7 @@ public class KinematicsToolboxCenterOfMassMessage implements ROS2Message<Kinemat
    /**
       The desired linear velocity of the control frame's origin.
    */
-   private final geometry_msgs.Vector3 desired_linear_velocity_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage desired_linear_velocity_in_world_;
    /**
       The selection matrix is used to determinate which degree of freedom of the center of mass
       should be controlled.
@@ -92,9 +92,9 @@ public class KinematicsToolboxCenterOfMassMessage implements ROS2Message<Kinemat
 
    public KinematicsToolboxCenterOfMassMessage()
    {
-      desired_position_in_world_ = new geometry_msgs.Point();
+      desired_position_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
       has_desired_linear_velocity_ = (boolean) false;
-      desired_linear_velocity_in_world_ = new geometry_msgs.Vector3();
+      desired_linear_velocity_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
       selection_matrix_ = new ihmc_common_msgs.SelectionMatrix3DMessage();
       weights_ = new ihmc_common_msgs.WeightMatrix3DMessage();
       linear_rate_limitation_ = (double) -1.0;
@@ -166,7 +166,7 @@ public class KinematicsToolboxCenterOfMassMessage implements ROS2Message<Kinemat
       this.sequence_id_ = sequence_id_;
    }
 
-   public geometry_msgs.Point getDesiredPositionInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getDesiredPositionInWorld()
    {
       return desired_position_in_world_;
    }
@@ -181,7 +181,7 @@ public class KinematicsToolboxCenterOfMassMessage implements ROS2Message<Kinemat
       this.has_desired_linear_velocity_ = has_desired_linear_velocity_;
    }
 
-   public geometry_msgs.Vector3 getDesiredLinearVelocityInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getDesiredLinearVelocityInWorld()
    {
       return desired_linear_velocity_in_world_;
    }

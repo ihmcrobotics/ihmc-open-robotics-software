@@ -25,14 +25,14 @@ public class ArUcoMarkerPoses implements ROS2Message<ArUcoMarkerPoses>
       ID of arUco marker
    */
    private final IDLIntSequence marker_id_;
-   private final IDLObjectSequence<geometry_msgs.Point> position_;
-   private final IDLObjectSequence<geometry_msgs.Quaternion> orientation_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> position_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage> orientation_;
 
    public ArUcoMarkerPoses()
    {
       marker_id_ = new IDLIntSequence();
-      position_ = new IDLObjectSequence<geometry_msgs.Point>(geometry_msgs.Point.class);
-      orientation_ = new IDLObjectSequence<geometry_msgs.Quaternion>(geometry_msgs.Quaternion.class);
+      position_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      orientation_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage>(us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage.class);
 
    }
 
@@ -80,12 +80,12 @@ public class ArUcoMarkerPoses implements ROS2Message<ArUcoMarkerPoses>
       return marker_id_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getPosition()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getPosition()
    {
       return position_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Quaternion> getOrientation()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage> getOrientation()
    {
       return orientation_;
    }

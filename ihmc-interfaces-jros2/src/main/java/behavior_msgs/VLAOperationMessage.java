@@ -55,11 +55,11 @@ public class VLAOperationMessage implements ROS2Message<VLAOperationMessage>
    /**
       The latest action hand poses
    */
-   private final geometry_msgs.Pose[] action_hand_poses_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage[] action_hand_poses_;
    /**
       The latest action forearm poses
    */
-   private final geometry_msgs.Pose[] action_forearm_poses_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage[] action_forearm_poses_;
    /**
       Status message from robot thread to show to the operator
    */
@@ -70,17 +70,17 @@ public class VLAOperationMessage implements ROS2Message<VLAOperationMessage>
       latest_timestamp_modifiable_ = new ihmc_common_msgs.LatestModificationMessage();
       running_ = (boolean) false;
       control_robot_ = (boolean) false;
-      action_hand_poses_ = new geometry_msgs.Pose[2];
+      action_hand_poses_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage[2];
       // action_hand_poses is defined as a fixed-size array, so it is pre-allocated.
       for (int i = 0; i < action_hand_poses_.length; ++i)
       {
-         action_hand_poses_[i] = new geometry_msgs.Pose();
+         action_hand_poses_[i] = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       }
-      action_forearm_poses_ = new geometry_msgs.Pose[2];
+      action_forearm_poses_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage[2];
       // action_forearm_poses is defined as a fixed-size array, so it is pre-allocated.
       for (int i = 0; i < action_forearm_poses_.length; ++i)
       {
-         action_forearm_poses_[i] = new geometry_msgs.Pose();
+         action_forearm_poses_[i] = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       }
       status_message_ = new StringBuilder();
 
@@ -201,12 +201,12 @@ public class VLAOperationMessage implements ROS2Message<VLAOperationMessage>
       this.control_robot_ = control_robot_;
    }
 
-   public geometry_msgs.Pose[] getActionHandPoses()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage[] getActionHandPoses()
    {
       return action_hand_poses_;
    }
 
-   public geometry_msgs.Pose[] getActionForearmPoses()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage[] getActionForearmPoses()
    {
       return action_forearm_poses_;
    }

@@ -45,16 +45,16 @@ public class SO3TrajectoryPointMessage implements ROS2Message<SO3TrajectoryPoint
    /**
       Define the desired 3D orientation to be reached at this trajectory point.
    */
-   private final geometry_msgs.Quaternion orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage orientation_;
    /**
       Define the desired 3D angular velocity to be reached at this trajectory point.
    */
-   private final geometry_msgs.Vector3 angular_velocity_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage angular_velocity_;
 
    public SO3TrajectoryPointMessage()
    {
-      orientation_ = new geometry_msgs.Quaternion();
-      angular_velocity_ = new geometry_msgs.Vector3();
+      orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
+      angular_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -121,12 +121,12 @@ public class SO3TrajectoryPointMessage implements ROS2Message<SO3TrajectoryPoint
       this.time_ = time_;
    }
 
-   public geometry_msgs.Quaternion getOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getOrientation()
    {
       return orientation_;
    }
 
-   public geometry_msgs.Vector3 getAngularVelocity()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getAngularVelocity()
    {
       return angular_velocity_;
    }

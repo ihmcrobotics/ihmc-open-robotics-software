@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.bipedSupportPolygons;
 
-import controller_msgs.msg.dds.StepConstraintMessage;
-import controller_msgs.msg.dds.StepConstraintsListMessage;
+import controller_msgs.StepConstraintMessage;
+import controller_msgs.StepConstraintsListMessage;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -11,7 +11,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
@@ -34,7 +33,7 @@ public class StepConstraintMessageConverter
       message.setConcaveHullSize(constraintRegion.getConcaveHullSize());
       message.setNumberOfHolesInRegion(constraintRegion.getNumberOfHolesInRegion());
 
-      Object<Point3D> vertexBuffer = message.getVertexBuffer();
+      List<Point3D> vertexBuffer = message.getVertexBuffer();
       vertexBuffer.clear();
 
       for (int vertexIndex = 0; vertexIndex < constraintRegion.getConcaveHullSize(); vertexIndex++)
@@ -70,10 +69,10 @@ public class StepConstraintMessageConverter
       message.getRegionOrigin().clear();
       message.getRegionOrientation().clear();
       message.getRegionNormal().clear();
-      message.getConcaveHullsSize().reset();
-      message.getNumberOfHolesInRegion().reset();
-      message.getHolePolygonsSize().reset();
-      Object<Point3D> vertexBuffer = message.getVertexBuffer();
+      message.getConcaveHullsSize().clear();
+      message.getNumberOfHolesInRegion().clear();
+      message.getHolePolygonsSize().clear();
+      List<Point3D> vertexBuffer = message.getVertexBuffer();
       vertexBuffer.clear();
       for (int i = 0; i < constraintRegions.size(); i++)
       {
@@ -107,7 +106,7 @@ public class StepConstraintMessageConverter
    {
       StepConstraintsListMessage message = new StepConstraintsListMessage();
 
-      Object<Point3D> vertexBuffer = message.getVertexBuffer();
+      List<Point3D> vertexBuffer = message.getVertexBuffer();
       vertexBuffer.clear();
       for (PlanarRegion constraintRegion : constraintRegions)
       {
@@ -138,7 +137,7 @@ public class StepConstraintMessageConverter
       message.setConcaveHullSize(constraintRegion.getConcaveHullSize());
       message.setNumberOfHolesInRegion(0);
 
-      Object<Point3D> vertexBuffer = message.getVertexBuffer();
+      List<Point3D> vertexBuffer = message.getVertexBuffer();
       vertexBuffer.clear();
 
       for (int vertexIndex = 0; vertexIndex < constraintRegion.getConcaveHullSize(); vertexIndex++)
@@ -153,18 +152,18 @@ public class StepConstraintMessageConverter
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
-      if (Math.abs(AngleTools.trimAngleMinusPiToPi(message.getRegionOrientation().getAngle())) < 1.0e-3)
+      if (Math.abs(AngleTools.trimAngleMinusPiToPi(message.getRegionOrientation().getQuaternion().getAngle())) < 1.0e-3)
       {
-         Vector3D regionNormal = new Vector3D(message.getRegionNormal());
+         Vector3D regionNormal = new Vector3D(message.getRegionNormal().getVector());
          AxisAngle regionOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(regionNormal);
-         transformToWorld.set(regionOrientation, message.getRegionOrigin());
+         transformToWorld.set(regionOrientation, message.getRegionOrigin().getPoint());
       }
       else
       {
-         transformToWorld.set(message.getRegionOrientation(), message.getRegionOrigin());
+         transformToWorld.set(message.getRegionOrientation().getQuaternion(), message.getRegionOrigin().getPoint());
       }
 
-      Object<Point3D> vertexBuffer = message.getVertexBuffer();
+      var vertexBuffer = message.getVertexBuffer();
 
       List<Point2D> concaveHullVertices = new ArrayList<>();
       int vertexIndex = 0;
@@ -172,7 +171,7 @@ public class StepConstraintMessageConverter
 
       for (; vertexIndex < upperBound; vertexIndex++)
       {
-         concaveHullVertices.add(new Point2D(vertexBuffer.get(vertexIndex)));
+         concaveHullVertices.add(new Point2D(vertexBuffer.get(vertexIndex).getPoint()));
       }
 
       List<ConcavePolygon2DReadOnly> holes = new ArrayList<>();
@@ -183,7 +182,7 @@ public class StepConstraintMessageConverter
          ConcavePolygon2D convexPolygon = new ConcavePolygon2D();
 
          for (; vertexIndex < upperBound; vertexIndex++)
-            convexPolygon.addVertex(vertexBuffer.get(vertexIndex));
+            convexPolygon.addVertex(vertexBuffer.get(vertexIndex).getPoint());
          convexPolygon.update();
          holes.add(convexPolygon);
       }
@@ -197,10 +196,10 @@ public class StepConstraintMessageConverter
          return null;
 
       int vertexIndex = 0;
-      Object<Vector3D> normals = message.getRegionNormal();
-      Object<Point3D> origins = message.getRegionOrigin();
+      var normals = message.getRegionNormal();
+      var origins = message.getRegionOrigin();
 
-      Object<Point3D> vertexBuffer = message.getVertexBuffer();
+      var vertexBuffer = message.getVertexBuffer();
 
       List<StepConstraintRegion> stepConstraintRegions = new ArrayList<>();
 
@@ -211,14 +210,14 @@ public class StepConstraintMessageConverter
       {
          RigidBodyTransform transformToWorld = new RigidBodyTransform();
          if (message.getRegionOrientation().isEmpty()
-             || Math.abs(AngleTools.trimAngleMinusPiToPi(message.getRegionOrientation().get(regionIndex).getAngle())) < 1.0e-3)
+             || Math.abs(AngleTools.trimAngleMinusPiToPi(message.getRegionOrientation().get(regionIndex).getQuaternion().getAngle())) < 1.0e-3)
          {
-            AxisAngle regionOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normals.get(regionIndex));
-            transformToWorld.set(regionOrientation, origins.get(regionIndex));
+            AxisAngle regionOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normals.get(regionIndex).getVector());
+            transformToWorld.set(regionOrientation, origins.get(regionIndex).getPoint());
          }
          else
          {
-            transformToWorld.set(message.getRegionOrientation().get(regionIndex), message.getRegionOrigin().get(regionIndex));
+            transformToWorld.set(message.getRegionOrientation().get(regionIndex).getQuaternion(), message.getRegionOrigin().get(regionIndex).getPoint());
          }
 
          upperBound += message.getConcaveHullsSize().get(regionIndex);
@@ -226,7 +225,7 @@ public class StepConstraintMessageConverter
 
          for (; vertexIndex < upperBound; vertexIndex++)
          {
-            concaveHullVertices.add(new Point2D(vertexBuffer.get(vertexIndex)));
+            concaveHullVertices.add(new Point2D(vertexBuffer.get(vertexIndex).getPoint()));
          }
 
          List<ConcavePolygon2DReadOnly> holes = new ArrayList<>();
@@ -238,7 +237,7 @@ public class StepConstraintMessageConverter
             ConcavePolygon2D convexPolygon = new ConcavePolygon2D();
 
             for (; vertexIndex < upperBound; vertexIndex++)
-               convexPolygon.addVertex(vertexBuffer.get(vertexIndex));
+               convexPolygon.addVertex(vertexBuffer.get(vertexIndex).getPoint());
             convexPolygon.update();
             holes.add(convexPolygon);
          }

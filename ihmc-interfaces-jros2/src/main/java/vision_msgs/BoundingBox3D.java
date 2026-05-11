@@ -33,17 +33,17 @@ public class BoundingBox3D implements ROS2Message<BoundingBox3D>
    /**
       The 3D position and orientation of the bounding box center
    */
-   private final geometry_msgs.Pose center_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage center_;
    /**
       The total size of the bounding box, in meters, surrounding the object's center
       pose.
    */
-   private final geometry_msgs.Vector3 size_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage size_;
 
    public BoundingBox3D()
    {
-      center_ = new geometry_msgs.Pose();
-      size_ = new geometry_msgs.Vector3();
+      center_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
+      size_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -82,12 +82,12 @@ public class BoundingBox3D implements ROS2Message<BoundingBox3D>
 
    }
 
-   public geometry_msgs.Pose getCenter()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getCenter()
    {
       return center_;
    }
 
-   public geometry_msgs.Vector3 getSize()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getSize()
    {
       return size_;
    }

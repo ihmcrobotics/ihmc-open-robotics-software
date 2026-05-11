@@ -3,9 +3,9 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import java.util.List;
 import java.util.Random;
 
-import ihmc_common_msgs.msg.dds.FrameInformation;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
+import ihmc_common_msgs.FrameInformation;
+import ihmc_common_msgs.SO3TrajectoryMessage;
+import ihmc_common_msgs.SO3TrajectoryPointMessage;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -110,14 +110,14 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
       sequenceId = message.getSequenceId();
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
 
-      List<SO3TrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
+      var trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
          SO3TrajectoryPointMessage so3TrajectoryPointMessage = trajectoryPointMessages.get(i);
-         trajectoryPointList.addTrajectoryPoint(so3TrajectoryPointMessage.getTime(), so3TrajectoryPointMessage.getOrientation(),
-                                                so3TrajectoryPointMessage.getAngularVelocity());
+         trajectoryPointList.addTrajectoryPoint(so3TrajectoryPointMessage.getTime(), so3TrajectoryPointMessage.getOrientation().getQuaternion(),
+                                                so3TrajectoryPointMessage.getAngularVelocity().getVector());
       }
       setQueueableCommandVariables(message.getQueueingProperties());
       selectionMatrix.resetSelection();
@@ -125,7 +125,7 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
       weightMatrix.clear();
       weightMatrix.setWeights(message.getWeightMatrix().getXWeight(), message.getWeightMatrix().getYWeight(), message.getWeightMatrix().getZWeight());
       useCustomControlFrame = message.getUseCustomControlFrame();
-      message.getControlFramePose().get(controlFramePoseInBodyFrame);
+      message.getControlFramePose().getPose().get(controlFramePoseInBodyFrame);
 
       if (resolver != null)
       {

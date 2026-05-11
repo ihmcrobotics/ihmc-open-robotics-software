@@ -60,19 +60,19 @@ public class FootstepStreamingToolboxOutputStatus implements ROS2Message<Footste
    /**
       Desired footstep position in world frame.
    */
-   private final geometry_msgs.Point desired_foot_position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage desired_foot_position_;
    /**
       Desired footstep orientation in world frame.
    */
-   private final geometry_msgs.Quaternion desired_foot_orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage desired_foot_orientation_;
 
    public FootstepStreamingToolboxOutputStatus()
    {
       robot_side_ = (byte) 255;
       adjustment_footstep_ = (boolean) false;
       last_adjustment_ = (boolean) false;
-      desired_foot_position_ = new geometry_msgs.Point();
-      desired_foot_orientation_ = new geometry_msgs.Quaternion();
+      desired_foot_position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      desired_foot_orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
 
    }
 
@@ -167,12 +167,12 @@ public class FootstepStreamingToolboxOutputStatus implements ROS2Message<Footste
       this.last_adjustment_ = last_adjustment_;
    }
 
-   public geometry_msgs.Point getDesiredFootPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getDesiredFootPosition()
    {
       return desired_foot_position_;
    }
 
-   public geometry_msgs.Quaternion getDesiredFootOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getDesiredFootOrientation()
    {
       return desired_foot_orientation_;
    }

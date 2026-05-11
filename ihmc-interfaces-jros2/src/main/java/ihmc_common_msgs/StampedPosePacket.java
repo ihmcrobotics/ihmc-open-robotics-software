@@ -31,7 +31,7 @@ public class StampedPosePacket implements ROS2Message<StampedPosePacket>
       Unique ID used to identify this message, should preferably be consecutively increasing.
    */
    private long sequence_id_;
-   private final geometry_msgs.Pose pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage pose_;
    private final geometry_msgs.Twist twist_;
    private long timestamp_;
    private double confidence_factor_;
@@ -39,7 +39,7 @@ public class StampedPosePacket implements ROS2Message<StampedPosePacket>
 
    public StampedPosePacket()
    {
-      pose_ = new geometry_msgs.Pose();
+      pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       twist_ = new geometry_msgs.Twist();
       frame_id_ = new StringBuilder();
 
@@ -107,7 +107,7 @@ public class StampedPosePacket implements ROS2Message<StampedPosePacket>
       this.sequence_id_ = sequence_id_;
    }
 
-   public geometry_msgs.Pose getPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getPose()
    {
       return pose_;
    }

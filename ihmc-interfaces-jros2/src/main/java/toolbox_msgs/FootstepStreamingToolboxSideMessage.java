@@ -69,22 +69,22 @@ public class FootstepStreamingToolboxSideMessage implements ROS2Message<Footstep
       Current position of the robot foot frame's origin.
       The data is assumed to be expressed in world frame.
    */
-   private final geometry_msgs.Point robot_foot_position_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage robot_foot_position_in_world_;
    /**
       Current orientation of the robot foot frame.
       The data is assumed to be expressed in world frame.
    */
-   private final geometry_msgs.Quaternion robot_foot_orientation_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage robot_foot_orientation_in_world_;
    /**
       Current position of the tracker frame's origin.
       The data is assumed to be expressed in world frame.
    */
-   private final geometry_msgs.Point current_position_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage current_position_in_world_;
    /**
       Current orientation of the tracker frame.
       The data is assumed to be expressed in world frame.
    */
-   private final geometry_msgs.Quaternion current_orientation_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage current_orientation_in_world_;
    /**
       Whether the current linear velocity is defined.
    */
@@ -92,23 +92,23 @@ public class FootstepStreamingToolboxSideMessage implements ROS2Message<Footstep
    /**
       The current linear velocity of the tracker frame's origin.
    */
-   private final geometry_msgs.Vector3 current_linear_velocity_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage current_linear_velocity_in_world_;
    /**
       The current angular velocity of the tracker frame.
    */
-   private final geometry_msgs.Vector3 current_angular_velocity_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage current_angular_velocity_in_world_;
 
    public FootstepStreamingToolboxSideMessage()
    {
       side_ = (byte) 255;
       timestamp_ = (long) 0;
-      robot_foot_position_in_world_ = new geometry_msgs.Point();
-      robot_foot_orientation_in_world_ = new geometry_msgs.Quaternion();
-      current_position_in_world_ = new geometry_msgs.Point();
-      current_orientation_in_world_ = new geometry_msgs.Quaternion();
+      robot_foot_position_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      robot_foot_orientation_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
+      current_position_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      current_orientation_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
       has_current_velocity_ = (boolean) false;
-      current_linear_velocity_in_world_ = new geometry_msgs.Vector3();
-      current_angular_velocity_in_world_ = new geometry_msgs.Vector3();
+      current_linear_velocity_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      current_angular_velocity_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -209,22 +209,22 @@ public class FootstepStreamingToolboxSideMessage implements ROS2Message<Footstep
       this.timestamp_ = timestamp_;
    }
 
-   public geometry_msgs.Point getRobotFootPositionInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getRobotFootPositionInWorld()
    {
       return robot_foot_position_in_world_;
    }
 
-   public geometry_msgs.Quaternion getRobotFootOrientationInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getRobotFootOrientationInWorld()
    {
       return robot_foot_orientation_in_world_;
    }
 
-   public geometry_msgs.Point getCurrentPositionInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getCurrentPositionInWorld()
    {
       return current_position_in_world_;
    }
 
-   public geometry_msgs.Quaternion getCurrentOrientationInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getCurrentOrientationInWorld()
    {
       return current_orientation_in_world_;
    }
@@ -239,12 +239,12 @@ public class FootstepStreamingToolboxSideMessage implements ROS2Message<Footstep
       this.has_current_velocity_ = has_current_velocity_;
    }
 
-   public geometry_msgs.Vector3 getCurrentLinearVelocityInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getCurrentLinearVelocityInWorld()
    {
       return current_linear_velocity_in_world_;
    }
 
-   public geometry_msgs.Vector3 getCurrentAngularVelocityInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getCurrentAngularVelocityInWorld()
    {
       return current_angular_velocity_in_world_;
    }

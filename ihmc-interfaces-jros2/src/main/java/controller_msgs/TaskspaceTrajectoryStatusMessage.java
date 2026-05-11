@@ -73,28 +73,28 @@ public class TaskspaceTrajectoryStatusMessage implements ROS2Message<TaskspaceTr
    /**
       The desired position (in world coordinates) of the end-effector sent to the controller.
    */
-   private final geometry_msgs.Point desired_end_effector_position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage desired_end_effector_position_;
    /**
       The desired orientation (in world coordinates) of the end-effector sent to the controller.
    */
-   private final geometry_msgs.Quaternion desired_end_effector_orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage desired_end_effector_orientation_;
    /**
       The position (in world coordinates) of where the end-effector actually arrived when the trajectory finished.
    */
-   private final geometry_msgs.Point actual_end_effector_position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage actual_end_effector_position_;
    /**
       The orientation (in world coordinates) of where the end-effector actually arrived when the trajectory finished.
    */
-   private final geometry_msgs.Quaternion actual_end_effector_orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage actual_end_effector_orientation_;
 
    public TaskspaceTrajectoryStatusMessage()
    {
       end_effector_name_ = new StringBuilder();
       trajectory_execution_status_ = (byte) 255;
-      desired_end_effector_position_ = new geometry_msgs.Point();
-      desired_end_effector_orientation_ = new geometry_msgs.Quaternion();
-      actual_end_effector_position_ = new geometry_msgs.Point();
-      actual_end_effector_orientation_ = new geometry_msgs.Quaternion();
+      desired_end_effector_position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      desired_end_effector_orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
+      actual_end_effector_position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      actual_end_effector_orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
 
    }
 
@@ -203,22 +203,22 @@ public class TaskspaceTrajectoryStatusMessage implements ROS2Message<TaskspaceTr
       this.timestamp_ = timestamp_;
    }
 
-   public geometry_msgs.Point getDesiredEndEffectorPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getDesiredEndEffectorPosition()
    {
       return desired_end_effector_position_;
    }
 
-   public geometry_msgs.Quaternion getDesiredEndEffectorOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getDesiredEndEffectorOrientation()
    {
       return desired_end_effector_orientation_;
    }
 
-   public geometry_msgs.Point getActualEndEffectorPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getActualEndEffectorPosition()
    {
       return actual_end_effector_position_;
    }
 
-   public geometry_msgs.Quaternion getActualEndEffectorOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getActualEndEffectorOrientation()
    {
       return actual_end_effector_orientation_;
    }

@@ -58,11 +58,11 @@ public class DetectedObjectPacket implements ROS2Message<DetectedObjectPacket>
    /**
       Position and Orientation of the sensor at the time when the corresponding ImageMessage was published
    */
-   private final geometry_msgs.Pose sensor_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage sensor_pose_;
    /**
       Position and Orientation of the object
    */
-   private final geometry_msgs.Pose pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage pose_;
    /**
       How confident are we about what object it is. Mostly used to NN based detections
    */
@@ -74,11 +74,11 @@ public class DetectedObjectPacket implements ROS2Message<DetectedObjectPacket>
    /**
       2D Vertices of the 3d object bounding box projected onto image plane
    */
-   private final geometry_msgs.Point[] bounding_box_2d_vertices_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage[] bounding_box_2d_vertices_;
    /**
       3d Vertices of the 3d object Bounding box
    */
-   private final geometry_msgs.Point[] bounding_box_vertices_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage[] bounding_box_vertices_;
    /**
       Optional point cloud for ICP tracked object
    */
@@ -87,20 +87,20 @@ public class DetectedObjectPacket implements ROS2Message<DetectedObjectPacket>
 
    public DetectedObjectPacket()
    {
-      sensor_pose_ = new geometry_msgs.Pose();
-      pose_ = new geometry_msgs.Pose();
+      sensor_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
+      pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       object_type_ = new StringBuilder();
-      bounding_box_2d_vertices_ = new geometry_msgs.Point[8];
+      bounding_box_2d_vertices_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage[8];
       // bounding_box_2d_vertices is defined as a fixed-size array, so it is pre-allocated.
       for (int i = 0; i < bounding_box_2d_vertices_.length; ++i)
       {
-         bounding_box_2d_vertices_[i] = new geometry_msgs.Point();
+         bounding_box_2d_vertices_[i] = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
       }
-      bounding_box_vertices_ = new geometry_msgs.Point[8];
+      bounding_box_vertices_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage[8];
       // bounding_box_vertices is defined as a fixed-size array, so it is pre-allocated.
       for (int i = 0; i < bounding_box_vertices_.length; ++i)
       {
-         bounding_box_vertices_[i] = new geometry_msgs.Point();
+         bounding_box_vertices_[i] = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
       }
       object_point_cloud_ = new IDLObjectSequence<geometry_msgs.Point32>(32768, geometry_msgs.Point32.class);
       segmented_point_cloud_ = new IDLObjectSequence<geometry_msgs.Point32>(32768, geometry_msgs.Point32.class);
@@ -219,12 +219,12 @@ public class DetectedObjectPacket implements ROS2Message<DetectedObjectPacket>
       this.id_ = id_;
    }
 
-   public geometry_msgs.Pose getSensorPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getSensorPose()
    {
       return sensor_pose_;
    }
 
-   public geometry_msgs.Pose getPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getPose()
    {
       return pose_;
    }
@@ -254,12 +254,12 @@ public class DetectedObjectPacket implements ROS2Message<DetectedObjectPacket>
       this.object_type_.delete(0, this.object_type_.length());
       this.object_type_.insert(0, s);
    }
-   public geometry_msgs.Point[] getBoundingBox2dVertices()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage[] getBoundingBox2dVertices()
    {
       return bounding_box_2d_vertices_;
    }
 
-   public geometry_msgs.Point[] getBoundingBoxVertices()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage[] getBoundingBoxVertices()
    {
       return bounding_box_vertices_;
    }

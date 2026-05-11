@@ -26,13 +26,13 @@ public class BoundingBox3DMessage implements ROS2Message<BoundingBox3DMessage>
       Unique ID used to identify this message, should preferably be consecutively increasing.
    */
    private long sequence_id_;
-   private final geometry_msgs.Point min_point_;
-   private final geometry_msgs.Point max_point_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage min_point_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage max_point_;
 
    public BoundingBox3DMessage()
    {
-      min_point_ = new geometry_msgs.Point();
-      max_point_ = new geometry_msgs.Point();
+      min_point_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      max_point_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
 
    }
 
@@ -85,12 +85,12 @@ public class BoundingBox3DMessage implements ROS2Message<BoundingBox3DMessage>
       this.sequence_id_ = sequence_id_;
    }
 
-   public geometry_msgs.Point getMinPoint()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getMinPoint()
    {
       return min_point_;
    }
 
-   public geometry_msgs.Point getMaxPoint()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getMaxPoint()
    {
       return max_point_;
    }

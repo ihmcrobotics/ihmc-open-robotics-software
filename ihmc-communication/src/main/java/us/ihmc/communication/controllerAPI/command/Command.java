@@ -3,7 +3,6 @@ package us.ihmc.communication.controllerAPI.command;
 import org.apache.commons.lang3.NotImplementedException;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
@@ -40,11 +39,6 @@ public interface Command<C extends Command<C, M>, M extends Settable<M>> extends
     */
    public abstract void setFromMessage(M message);
 
-   /**
-    * Informs which {@link Packet} class this Command is associated with.
-    * 
-    * @return {@link Packet} class this Command is associated with.
-    */
    public abstract Class<M> getMessageClass();
 
    /**

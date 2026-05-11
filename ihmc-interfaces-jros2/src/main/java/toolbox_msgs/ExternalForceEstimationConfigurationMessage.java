@@ -66,7 +66,7 @@ public class ExternalForceEstimationConfigurationMessage implements ROS2Message<
    /**
       List of contact positions for each rigid body, expressed in RigidBody.getParentJoint().getFrameAfterJoint()
    */
-   private final IDLObjectSequence<geometry_msgs.Point> contact_point_positions_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> contact_point_positions_;
    /**
       (in beta) Estimates the location of the contact point at a single rigid body (the first provided). The root joint wrench is not estimated.
    */
@@ -78,7 +78,7 @@ public class ExternalForceEstimationConfigurationMessage implements ROS2Message<
       solver_alpha_ = (double) 0.005;
       calculate_root_joint_wrench_ = (boolean) true;
       rigid_body_hash_codes_ = new IDLIntSequence(10);
-      contact_point_positions_ = new IDLObjectSequence<geometry_msgs.Point>(10, geometry_msgs.Point.class);
+      contact_point_positions_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(10, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
       estimate_contact_location_ = (boolean) false;
 
    }
@@ -183,7 +183,7 @@ public class ExternalForceEstimationConfigurationMessage implements ROS2Message<
       return rigid_body_hash_codes_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getContactPointPositions()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getContactPointPositions()
    {
       return contact_point_positions_;
    }

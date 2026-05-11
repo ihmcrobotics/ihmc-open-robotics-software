@@ -74,7 +74,7 @@ public class ConditionNodeStateMessage implements ROS2Message<ConditionNodeState
    /**
       The positional vector from frame B to frame A in world frame
    */
-   private final geometry_msgs.Vector3 b_to_a_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage b_to_a_;
    /**
       Whether frame A is present
    */
@@ -94,7 +94,7 @@ public class ConditionNodeStateMessage implements ROS2Message<ConditionNodeState
       state_ = new behavior_msgs.LeafNodeStateMessage();
       definition_ = new behavior_msgs.ConditionNodeDefinitionMessage();
       request_reset_context_ = (boolean) false;
-      b_to_a_ = new geometry_msgs.Vector3();
+      b_to_a_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
       frame_a_is_present_ = (boolean) false;
       frame_b_is_present_ = (boolean) false;
       frame_is_contained_ = (boolean) false;
@@ -206,7 +206,7 @@ public class ConditionNodeStateMessage implements ROS2Message<ConditionNodeState
       this.request_reset_context_ = request_reset_context_;
    }
 
-   public geometry_msgs.Vector3 getBToA()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getBToA()
    {
       return b_to_a_;
    }

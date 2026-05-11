@@ -1,8 +1,8 @@
 package us.ihmc.communication.crdt;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.idl.IDLSequence.Byte;
-import us.ihmc.idl.IDLSequence.Integer;
+import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLIntSequence;
 
 /**
  * Represents an integer List that can be modified by both the
@@ -55,16 +55,16 @@ public class CRDTBidirectionalIntegerList extends CRDTBidirectionalMutableField<
       getValueInternal().toArray(messageArray, 0, Math.min(getSize(), messageArray.length));
    }
 
-   public void toMessage(Integer message)
+   public void toMessage(IDLIntSequence message)
    {
       message.clear();
       for (int i = 0; i < getSize(); ++i)
          message.add(getValueReadOnly(i));
    }
 
-   public void toMessage(Byte message)
+   public void toMessage(IDLByteSequence message)
    {
-      message.resetQuick();
+      message.clear();
       for (int i = 0; i < getSize(); ++i)
          message.add((byte) getValueReadOnly(i));
    }
@@ -78,7 +78,7 @@ public class CRDTBidirectionalIntegerList extends CRDTBidirectionalMutableField<
       }
    }
 
-   public void fromMessage(Integer message)
+   public void fromMessage(IDLIntSequence message)
    {
       if (isModificationIncoming())
       {
@@ -88,7 +88,7 @@ public class CRDTBidirectionalIntegerList extends CRDTBidirectionalMutableField<
       }
    }
 
-   public void fromMessage(Byte message)
+   public void fromMessage(IDLByteSequence message)
    {
       if (isModificationIncoming())
       {

@@ -42,7 +42,7 @@ public class ExternalForceEstimationOutputStatus implements ROS2Message<External
    /**
       Estimated external force in world frame
    */
-   private final IDLObjectSequence<geometry_msgs.Vector3> estimated_external_forces_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage> estimated_external_forces_;
    /**
       Estimated root joint wrench, if requested. Will be set to NaN if root joint was not included in the solver
    */
@@ -54,13 +54,13 @@ public class ExternalForceEstimationOutputStatus implements ROS2Message<External
    /**
       Estimated contact point in parent joint frame, if configured with estimate_contact_location=true
    */
-   private final geometry_msgs.Point contact_point_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage contact_point_;
 
    public ExternalForceEstimationOutputStatus()
    {
-      estimated_external_forces_ = new IDLObjectSequence<geometry_msgs.Vector3>(10, geometry_msgs.Vector3.class);
+      estimated_external_forces_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage>(10, us.ihmc.euclid.jros2.messages.EuclidVector3DMessage.class);
       estimated_root_joint_wrench_ = new geometry_msgs.Wrench();
-      contact_point_ = new geometry_msgs.Point();
+      contact_point_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
 
    }
 
@@ -121,7 +121,7 @@ public class ExternalForceEstimationOutputStatus implements ROS2Message<External
       this.sequence_id_ = sequence_id_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Vector3> getEstimatedExternalForces()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage> getEstimatedExternalForces()
    {
       return estimated_external_forces_;
    }
@@ -141,7 +141,7 @@ public class ExternalForceEstimationOutputStatus implements ROS2Message<External
       this.rigid_body_hash_code_ = rigid_body_hash_code_;
    }
 
-   public geometry_msgs.Point getContactPoint()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getContactPoint()
    {
       return contact_point_;
    }

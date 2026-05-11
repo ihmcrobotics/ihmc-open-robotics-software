@@ -74,11 +74,11 @@ public class AI2RActionFailureMessage implements ROS2Message<AI2RActionFailureMe
    /**
       Error in position for the action
    */
-   private final geometry_msgs.Point position_error_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage position_error_;
    /**
       Error in orientation for the action
    */
-   private final geometry_msgs.Quaternion orientation_error_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage orientation_error_;
 
    public AI2RActionFailureMessage()
    {
@@ -87,8 +87,8 @@ public class AI2RActionFailureMessage implements ROS2Message<AI2RActionFailureMe
       action_frame_ = new StringBuilder();
       missing_frame_ = (boolean) false;
       collision_name_ = new StringBuilder();
-      position_error_ = new geometry_msgs.Point();
-      orientation_error_ = new geometry_msgs.Quaternion();
+      position_error_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      orientation_error_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
 
    }
 
@@ -249,12 +249,12 @@ public class AI2RActionFailureMessage implements ROS2Message<AI2RActionFailureMe
       this.orientation_tolerance_ = orientation_tolerance_;
    }
 
-   public geometry_msgs.Point getPositionError()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getPositionError()
    {
       return position_error_;
    }
 
-   public geometry_msgs.Quaternion getOrientationError()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getOrientationError()
    {
       return orientation_error_;
    }

@@ -9,6 +9,7 @@ import toolbox_msgs.*;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.jros2.ROS2QoSProfile;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,8 +27,8 @@ public final class ControllerAPI
    public static final Set<Class<?>> inputMessageClasses = new HashSet<>();
    public static final Set<Class<? extends Settable<?>>> outputMessageClasses = new HashSet<>();
 
-   public static final Map<Class<?>, ROS2QosProfile> inputMessageClassSpecificQoS = new HashMap<>();
-   public static final Map<Class<?>, ROS2QosProfile> outputMessageClassSpecificQoS = new HashMap<>();
+   public static final Map<Class<?>, ROS2QoSProfile> inputMessageClassSpecificQoS = new HashMap<>();
+   public static final Map<Class<?>, ROS2QoSProfile> outputMessageClassSpecificQoS = new HashMap<>();
 
    static
    {
@@ -141,44 +142,45 @@ public final class ControllerAPI
       outputMessageClasses.add(RLPolicyState.class);
 
       // Setting the input messages with specific QoS
-      inputMessageClassSpecificQoS.put(WholeBodyStreamingMessage.class, ROS2QosProfile.BEST_EFFORT());
-      inputMessageClassSpecificQoS.put(KinematicsStreamingToolboxInputMessage.class, ROS2QosProfile.BEST_EFFORT());
+      inputMessageClassSpecificQoS.put(WholeBodyStreamingMessage.class, ROS2QoSProfile.BEST_EFFORT);
+      inputMessageClassSpecificQoS.put(KinematicsStreamingToolboxInputMessage.class, ROS2QoSProfile.BEST_EFFORT);
 
       // Setting the output messages with specific QoS
-      outputMessageClassSpecificQoS.put(CapturabilityBasedStatus.class, ROS2QosProfile.BEST_EFFORT());
-      outputMessageClassSpecificQoS.put(JointDesiredOutputMessage.class, ROS2QosProfile.BEST_EFFORT());
-      outputMessageClassSpecificQoS.put(RobotDesiredConfigurationData.class, ROS2QosProfile.BEST_EFFORT());
-      outputMessageClassSpecificQoS.put(FootstepQueueStatusMessage.class, ROS2QosProfile.BEST_EFFORT());
-      outputMessageClassSpecificQoS.put(MultiContactBalanceStatus.class, ROS2QosProfile.BEST_EFFORT());
+      outputMessageClassSpecificQoS.put(CapturabilityBasedStatus.class, ROS2QoSProfile.BEST_EFFORT);
+      outputMessageClassSpecificQoS.put(JointDesiredOutputMessage.class, ROS2QoSProfile.BEST_EFFORT);
+      outputMessageClassSpecificQoS.put(RobotDesiredConfigurationData.class, ROS2QoSProfile.BEST_EFFORT);
+      outputMessageClassSpecificQoS.put(FootstepQueueStatusMessage.class, ROS2QoSProfile.BEST_EFFORT);
+      outputMessageClassSpecificQoS.put(MultiContactBalanceStatus.class, ROS2QoSProfile.BEST_EFFORT);
    }
 
    public static ROS2Topic<?> getBaseTopic(String controlModuleName, String robotName)
    {
-      return ROS2Tools.IHMC_ROOT.appendedWith(controlModuleName).withRobot(robotName);
+      return ROS2Tools.IHMC_ROOT.appendedWith(controlModuleName).appendedWith(robotName);
    }
 
-   public static <T> ROS2Topic<T> getTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
+   @SuppressWarnings("unchecked")
+   public static <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Topic<T> getTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
    {
       if (inputMessageClasses.contains(messageClass))
-         return baseTopic.withInput().withType(messageClass);
+         return (ROS2Topic<T>) baseTopic.appendedWith("input").withType(messageClass);
       else if (outputMessageClasses.contains(messageClass))
-         return baseTopic.appendedWith("output").withType(messageClass);
+         return (ROS2Topic<T>) baseTopic.appendedWith("output").withType(messageClass);
       else
-         return baseTopic.withType(messageClass);
+         return (ROS2Topic<T>) baseTopic.withType(messageClass);
    }
 
-   public static <T> ROS2Topic<T> getLowFrequencyTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
+   public static <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Topic<T> getLowFrequencyTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
    {
       return getTopic(baseTopic, messageClass).appendedWith("lf");
    }
 
-   public static ROS2QosProfile getQoS(Class<?> messageClass)
+   public static ROS2QoSProfile getQoS(Class<?> messageClass)
    {
       if (inputMessageClasses.contains(messageClass))
-         return Objects.requireNonNullElse(inputMessageClassSpecificQoS.get(messageClass), ROS2QosProfile.RELIABLE());
+         return Objects.requireNonNullElse(inputMessageClassSpecificQoS.get(messageClass), ROS2QoSProfile.RELIABLE);
       else if (outputMessageClasses.contains(messageClass))
-         return Objects.requireNonNullElse(outputMessageClassSpecificQoS.get(messageClass), ROS2QosProfile.RELIABLE());
+         return Objects.requireNonNullElse(outputMessageClassSpecificQoS.get(messageClass), ROS2QoSProfile.RELIABLE);
       else
-         return ROS2QosProfile.BEST_EFFORT();
+         return ROS2QoSProfile.BEST_EFFORT;
    }
 }

@@ -51,15 +51,15 @@ public class ScrewPrimitiveActionStateMessage implements ROS2Message<ScrewPrimit
       Definition
    */
    private final behavior_msgs.ScrewPrimitiveActionDefinitionMessage definition_;
-   private final IDLObjectSequence<geometry_msgs.Pose> preview_trajectory_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> preview_trajectory_;
    /**
       Hand force
    */
-   private final geometry_msgs.Vector3 force_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage force_;
    /**
       Hand torque
    */
-   private final geometry_msgs.Vector3 torque_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage torque_;
    private double preview_trajectory_duration_;
    private double preview_trajectory_linear_velocity_;
    private double preview_trajectory_angular_velocity_;
@@ -74,9 +74,9 @@ public class ScrewPrimitiveActionStateMessage implements ROS2Message<ScrewPrimit
    {
       state_ = new behavior_msgs.ActionNodeStateMessage();
       definition_ = new behavior_msgs.ScrewPrimitiveActionDefinitionMessage();
-      preview_trajectory_ = new IDLObjectSequence<geometry_msgs.Pose>(50, geometry_msgs.Pose.class);
-      force_ = new geometry_msgs.Vector3();
-      torque_ = new geometry_msgs.Vector3();
+      preview_trajectory_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage>(50, us.ihmc.euclid.jros2.messages.EuclidPose3DMessage.class);
+      force_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      torque_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
       preview_joint_angles_ = new double[7];
 
    }
@@ -171,17 +171,17 @@ public class ScrewPrimitiveActionStateMessage implements ROS2Message<ScrewPrimit
       return definition_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Pose> getPreviewTrajectory()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> getPreviewTrajectory()
    {
       return preview_trajectory_;
    }
 
-   public geometry_msgs.Vector3 getForce()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getForce()
    {
       return force_;
    }
 
-   public geometry_msgs.Vector3 getTorque()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getTorque()
    {
       return torque_;
    }

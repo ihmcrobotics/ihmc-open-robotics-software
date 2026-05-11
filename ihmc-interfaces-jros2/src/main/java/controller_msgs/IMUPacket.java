@@ -30,16 +30,16 @@ public class IMUPacket implements ROS2Message<IMUPacket>
       Unique ID used to identify this message, should preferably be consecutively increasing.
    */
    private long sequence_id_;
-   private final geometry_msgs.Quaternion orientation_;
-   private final geometry_msgs.Vector3 angular_velocity_;
-   private final geometry_msgs.Vector3 linear_acceleration_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage angular_velocity_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage linear_acceleration_;
    private double time_;
 
    public IMUPacket()
    {
-      orientation_ = new geometry_msgs.Quaternion();
-      angular_velocity_ = new geometry_msgs.Vector3();
-      linear_acceleration_ = new geometry_msgs.Vector3();
+      orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
+      angular_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      linear_acceleration_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -100,17 +100,17 @@ public class IMUPacket implements ROS2Message<IMUPacket>
       this.sequence_id_ = sequence_id_;
    }
 
-   public geometry_msgs.Quaternion getOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getOrientation()
    {
       return orientation_;
    }
 
-   public geometry_msgs.Vector3 getAngularVelocity()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getAngularVelocity()
    {
       return angular_velocity_;
    }
 
-   public geometry_msgs.Vector3 getLinearAcceleration()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getLinearAcceleration()
    {
       return linear_acceleration_;
    }

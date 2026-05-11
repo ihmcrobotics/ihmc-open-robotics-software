@@ -1,6 +1,7 @@
 package us.ihmc.communication.ros2;
 
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Message;
 
 /**
  * A class to group a bidirectional topic. We used the terminology "command" and "status"
@@ -8,7 +9,7 @@ import us.ihmc.jros2.ROS2Topic;
  * the input is a command that effects a change of the underlying process and the output
  * is really a status to make others aware about what has been most recently commanded.
  */
-public class ROS2IOTopicPair<T>
+public class ROS2IOTopicPair<T extends ROS2Message<T>>
 {
    private final ROS2Topic<T> commandTopic;
    private final ROS2Topic<T> statusTopic;

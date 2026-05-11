@@ -3,9 +3,9 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import java.util.List;
 import java.util.Random;
 
-import ihmc_common_msgs.msg.dds.FrameInformation;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.FrameInformation;
+import ihmc_common_msgs.SE3TrajectoryMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -135,7 +135,7 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
       weightMatrix.setAngularWeights(message.getAngularWeightMatrix().getXWeight(), message.getAngularWeightMatrix().getYWeight(), message.getAngularWeightMatrix().getZWeight());
       weightMatrix.setLinearWeights(message.getLinearWeightMatrix().getXWeight(), message.getLinearWeightMatrix().getYWeight(), message.getLinearWeightMatrix().getZWeight());
       useCustomControlFrame = message.getUseCustomControlFrame();
-      message.getControlFramePose().get(controlFramePoseInBodyFrame);
+      message.getControlFramePose().getPose().get(controlFramePoseInBodyFrame);
 
       if (resolver != null)
       {

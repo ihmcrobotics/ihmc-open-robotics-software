@@ -102,13 +102,13 @@ public class KinematicsToolboxRigidBodyMessage implements ROS2Message<Kinematics
       If the control frame has not been defined, it represents the desired position endEffector.getBodyFixedFrame().
       The data is assumed to be expressed in world frame.
    */
-   private final geometry_msgs.Point desired_position_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage desired_position_in_world_;
    /**
       This is the desired orientation of the control frame.
       I the control frame has not been defined, it represents the desired orientation of endEffector.getBodyFixedFrame().
       The data is assumed to be expressed in world frame.
    */
-   private final geometry_msgs.Quaternion desired_orientation_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage desired_orientation_in_world_;
    /**
       Whether the desired linear velocity is defined.
    */
@@ -116,7 +116,7 @@ public class KinematicsToolboxRigidBodyMessage implements ROS2Message<Kinematics
    /**
       The desired linear velocity of the control frame's origin.
    */
-   private final geometry_msgs.Vector3 desired_linear_velocity_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage desired_linear_velocity_in_world_;
    /**
       Whether the desired angular velocity is defined.
    */
@@ -124,18 +124,18 @@ public class KinematicsToolboxRigidBodyMessage implements ROS2Message<Kinematics
    /**
       The desired angular velocity of the control frame.
    */
-   private final geometry_msgs.Vector3 desired_angular_velocity_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage desired_angular_velocity_in_world_;
    /**
       This is the position of the control frame's origin expressed in endEffector.getBodyFixedFrame().
       By default, the control frame is coincident to endEffector.getBodyFixedFrame().
       The control frame is rigidly attached to the end-effector.
    */
-   private final geometry_msgs.Point control_frame_position_in_end_effector_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage control_frame_position_in_end_effector_;
    /**
       This is the orientation of the control frame expressed in endEffector.getBodyFixedFrame().
       By default, the control frame is coincident to endEffector.getBodyFixedFrame().
    */
-   private final geometry_msgs.Quaternion control_frame_orientation_in_end_effector_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage control_frame_orientation_in_end_effector_;
    /**
       The selection matrix is used to determinate which degree of freedom of the end-effector should
       be controlled.
@@ -181,14 +181,14 @@ public class KinematicsToolboxRigidBodyMessage implements ROS2Message<Kinematics
 
    public KinematicsToolboxRigidBodyMessage()
    {
-      desired_position_in_world_ = new geometry_msgs.Point();
-      desired_orientation_in_world_ = new geometry_msgs.Quaternion();
+      desired_position_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      desired_orientation_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
       has_desired_linear_velocity_ = (boolean) false;
-      desired_linear_velocity_in_world_ = new geometry_msgs.Vector3();
+      desired_linear_velocity_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
       has_desired_angular_velocity_ = (boolean) false;
-      desired_angular_velocity_in_world_ = new geometry_msgs.Vector3();
-      control_frame_position_in_end_effector_ = new geometry_msgs.Point();
-      control_frame_orientation_in_end_effector_ = new geometry_msgs.Quaternion();
+      desired_angular_velocity_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      control_frame_position_in_end_effector_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      control_frame_orientation_in_end_effector_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
       angular_selection_matrix_ = new ihmc_common_msgs.SelectionMatrix3DMessage();
       linear_selection_matrix_ = new ihmc_common_msgs.SelectionMatrix3DMessage();
       angular_weight_matrix_ = new ihmc_common_msgs.WeightMatrix3DMessage();
@@ -309,12 +309,12 @@ public class KinematicsToolboxRigidBodyMessage implements ROS2Message<Kinematics
       this.end_effector_hash_code_ = end_effector_hash_code_;
    }
 
-   public geometry_msgs.Point getDesiredPositionInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getDesiredPositionInWorld()
    {
       return desired_position_in_world_;
    }
 
-   public geometry_msgs.Quaternion getDesiredOrientationInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getDesiredOrientationInWorld()
    {
       return desired_orientation_in_world_;
    }
@@ -329,7 +329,7 @@ public class KinematicsToolboxRigidBodyMessage implements ROS2Message<Kinematics
       this.has_desired_linear_velocity_ = has_desired_linear_velocity_;
    }
 
-   public geometry_msgs.Vector3 getDesiredLinearVelocityInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getDesiredLinearVelocityInWorld()
    {
       return desired_linear_velocity_in_world_;
    }
@@ -344,17 +344,17 @@ public class KinematicsToolboxRigidBodyMessage implements ROS2Message<Kinematics
       this.has_desired_angular_velocity_ = has_desired_angular_velocity_;
    }
 
-   public geometry_msgs.Vector3 getDesiredAngularVelocityInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getDesiredAngularVelocityInWorld()
    {
       return desired_angular_velocity_in_world_;
    }
 
-   public geometry_msgs.Point getControlFramePositionInEndEffector()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getControlFramePositionInEndEffector()
    {
       return control_frame_position_in_end_effector_;
    }
 
-   public geometry_msgs.Quaternion getControlFrameOrientationInEndEffector()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getControlFrameOrientationInEndEffector()
    {
       return control_frame_orientation_in_end_effector_;
    }

@@ -115,11 +115,11 @@ public class ImageMessage implements ROS2Message<ImageMessage>
    /**
       Position of the focal point at sensor data acquisition
    */
-   private final geometry_msgs.Point position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage position_;
    /**
       Orientation of the focal point at sensor data acquisition
    */
-   private final geometry_msgs.Quaternion orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage orientation_;
    /**
       Camera model of the sensor. Ordinal of us.ihmc.perception.CameraModel
    */
@@ -153,8 +153,8 @@ public class ImageMessage implements ROS2Message<ImageMessage>
    {
       acquisition_time_ = new ihmc_common_msgs.InstantMessage();
       data_ = new IDLByteSequence(25000000);
-      position_ = new geometry_msgs.Point();
-      orientation_ = new geometry_msgs.Quaternion();
+      position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
       ouster_beam_altitude_angles_ = new IDLFloatSequence(128);
       ouster_beam_azimuth_angles_ = new IDLFloatSequence(128);
 
@@ -325,12 +325,12 @@ public class ImageMessage implements ROS2Message<ImageMessage>
       this.compression_type_ = compression_type_;
    }
 
-   public geometry_msgs.Point getPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getPosition()
    {
       return position_;
    }
 
-   public geometry_msgs.Quaternion getOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getOrientation()
    {
       return orientation_;
    }

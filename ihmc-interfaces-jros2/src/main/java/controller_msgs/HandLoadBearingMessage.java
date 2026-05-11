@@ -60,11 +60,11 @@ public class HandLoadBearingMessage implements ROS2Message<HandLoadBearingMessag
    /**
       Hand contact point expressed in the hand's body-fixed frame (only used if load=true).
    */
-   private final geometry_msgs.Point contact_point_in_body_frame_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage contact_point_in_body_frame_;
    /**
       Contact normal in world frame, pointing away from the environment (only used if load=true).
    */
-   private final geometry_msgs.Vector3 contact_normal_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage contact_normal_in_world_;
    /**
       The time to delay this command on the controller side before being executed.
    */
@@ -75,8 +75,8 @@ public class HandLoadBearingMessage implements ROS2Message<HandLoadBearingMessag
       robot_side_ = (byte) 255;
       load_ = (boolean) false;
       coefficient_of_friction_ = (double) 0;
-      contact_point_in_body_frame_ = new geometry_msgs.Point();
-      contact_normal_in_world_ = new geometry_msgs.Vector3();
+      contact_point_in_body_frame_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      contact_normal_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -175,12 +175,12 @@ public class HandLoadBearingMessage implements ROS2Message<HandLoadBearingMessag
       this.coefficient_of_friction_ = coefficient_of_friction_;
    }
 
-   public geometry_msgs.Point getContactPointInBodyFrame()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getContactPointInBodyFrame()
    {
       return contact_point_in_body_frame_;
    }
 
-   public geometry_msgs.Vector3 getContactNormalInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getContactNormalInWorld()
    {
       return contact_normal_in_world_;
    }

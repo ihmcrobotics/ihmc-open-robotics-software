@@ -1,31 +1,32 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.*;
 import gnu.trove.list.array.TDoubleArrayList;
-import ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
-import ihmc_common_msgs.msg.dds.FrameInformation;
-import ihmc_common_msgs.msg.dds.QueueableMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
-import ihmc_common_msgs.msg.dds.StampedPosePacket;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
-import perception_msgs.msg.dds.DetectedObjectPacket;
-import perception_msgs.msg.dds.IntrinsicParametersMessage;
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.ReachingManifoldMessage;
-import toolbox_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
-import toolbox_msgs.msg.dds.WaypointBasedTrajectoryMessage;
-import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
+import ihmc_common_msgs.EuclideanTrajectoryMessage;
+import ihmc_common_msgs.EuclideanTrajectoryPointMessage;
+import ihmc_common_msgs.FrameInformation;
+import ihmc_common_msgs.QueueableMessage;
+import ihmc_common_msgs.SE3TrajectoryMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.SO3TrajectoryMessage;
+import ihmc_common_msgs.SO3TrajectoryPointMessage;
+import ihmc_common_msgs.StampedPosePacket;
+import ihmc_common_msgs.TrajectoryPoint1DMessage;
+import perception_msgs.DetectedObjectPacket;
+import perception_msgs.IntrinsicParametersMessage;
+import toolbox_msgs.KinematicsPlanningToolboxCenterOfMassMessage;
+import toolbox_msgs.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.KinematicsPlanningToolboxRigidBodyMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import toolbox_msgs.ReachingManifoldMessage;
+import toolbox_msgs.RigidBodyExplorationConfigurationMessage;
+import toolbox_msgs.WaypointBasedTrajectoryMessage;
+import toolbox_msgs.WholeBodyTrajectoryToolboxConfigurationMessage;
+import toolbox_msgs.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.Packet;
+// TODO: Packet doesn't exist in jros2
+// import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -370,8 +371,8 @@ public class HumanoidMessageTools
                + ", explorationRangeLowerLimits.length = ");
 
       message.getConfigurationSpaceNamesToExplore().resetQuick();
-      message.getExplorationRangeUpperLimits().reset();
-      message.getExplorationRangeLowerLimits().reset();
+      message.getExplorationRangeUpperLimits().clear();
+      message.getExplorationRangeLowerLimits().clear();
 
       message.getConfigurationSpaceNamesToExplore().add(degreesOfFreedomToExplore1);
 
@@ -400,8 +401,8 @@ public class HumanoidMessageTools
                + ", explorationRangeLowerLimits.length = ");
 
       message.getConfigurationSpaceNamesToExplore().resetQuick();
-      message.getExplorationRangeUpperLimits().reset();
-      message.getExplorationRangeLowerLimits().reset();
+      message.getExplorationRangeUpperLimits().clear();
+      message.getExplorationRangeLowerLimits().clear();
 
       message.getConfigurationSpaceNamesToExplore().add(degreesOfFreedomToExplore1);
       message.getExplorationRangeUpperLimits().add(explorationRangeUpperLimits);
@@ -1933,7 +1934,8 @@ public class HumanoidMessageTools
     *
     * @param clazz the class you want to clear
     */
-   public static ClearDelayQueueMessage createClearDelayQueueMessage(Class<? extends Packet<?>> clazz)
+   // TODO: Refactor to not use Packet class
+   public static ClearDelayQueueMessage createClearDelayQueueMessage(Class<?> clazz)
    {
       ClearDelayQueueMessage message = new ClearDelayQueueMessage();
       message.setClassSimpleNameBasedHashCode(clazz.getSimpleName().hashCode());

@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
 import java.util.List;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionMessage;
+import toolbox_msgs.KinematicsToolboxSupportRegionMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -55,7 +55,7 @@ public class KinematicsToolboxSupportRegionCommand implements Command<Kinematics
       for (int i = 0; i < message.getSupportRegionVertices().size(); i++)
       {
          ReferenceFrame referenceFrame = hasCustomReferenceFrames ? referenceFrameResolver.getReferenceFrame(message.getSupportRegionVertexFrames().get(i)) : ReferenceFrame.getWorldFrame();
-         Point3D supportRegionVertex = message.getSupportRegionVertices().get(i);
+         Point3D supportRegionVertex = message.getSupportRegionVertices().get(i).getPoint();
          contactPoints.add().set(referenceFrame, supportRegionVertex);
       }
    }

@@ -28,13 +28,13 @@ public class SpatialVectorMessage implements ROS2Message<SpatialVectorMessage>
       Unique ID used to identify this message, should preferably be consecutively increasing.
    */
    private long sequence_id_;
-   private final geometry_msgs.Vector3 angular_part_;
-   private final geometry_msgs.Vector3 linear_part_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage angular_part_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage linear_part_;
 
    public SpatialVectorMessage()
    {
-      angular_part_ = new geometry_msgs.Vector3();
-      linear_part_ = new geometry_msgs.Vector3();
+      angular_part_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      linear_part_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -87,12 +87,12 @@ public class SpatialVectorMessage implements ROS2Message<SpatialVectorMessage>
       this.sequence_id_ = sequence_id_;
    }
 
-   public geometry_msgs.Vector3 getAngularPart()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getAngularPart()
    {
       return angular_part_;
    }
 
-   public geometry_msgs.Vector3 getLinearPart()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getLinearPart()
    {
       return linear_part_;
    }

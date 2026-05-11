@@ -38,7 +38,7 @@ public class ROS2DemandGraphNodeTest
 
       testHeartbeat.destroy();
       testNode.destroy();
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    @Test
@@ -82,7 +82,7 @@ public class ROS2DemandGraphNodeTest
       testHeartbeat.destroy();
       dependantNode.destroy();
       dependantHeartbeat.destroy();
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    @Test
@@ -138,6 +138,6 @@ public class ROS2DemandGraphNodeTest
       dependantHeartbeat.destroy();
       testNode.destroy();
       testHeartbeat.destroy();
-      ros2Node.destroy();
+      ros2Node.close();
    }
 }

@@ -27,16 +27,16 @@ public class Ellipsoid3DMessage implements ROS2Message<Ellipsoid3DMessage>
    /**
       Pose of the ellipsoid, see Ellipsoid3D
    */
-   private final geometry_msgs.Pose pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage pose_;
    /**
       Radii of the ellipsoid, see Ellipsoid3D
    */
-   private final geometry_msgs.Vector3 radii_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage radii_;
 
    public Ellipsoid3DMessage()
    {
-      pose_ = new geometry_msgs.Pose();
-      radii_ = new geometry_msgs.Vector3();
+      pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
+      radii_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -75,12 +75,12 @@ public class Ellipsoid3DMessage implements ROS2Message<Ellipsoid3DMessage>
 
    }
 
-   public geometry_msgs.Pose getPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getPose()
    {
       return pose_;
    }
 
-   public geometry_msgs.Vector3 getRadii()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getRadii()
    {
       return radii_;
    }

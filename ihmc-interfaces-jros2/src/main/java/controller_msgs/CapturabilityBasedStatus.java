@@ -61,51 +61,51 @@ public class CapturabilityBasedStatus implements ROS2Message<CapturabilityBasedS
    /**
       This is the measured position in world of the robot's capture point. Only x and y coordinates are relevant.
    */
-   private final geometry_msgs.Point capture_point_2d_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage capture_point_2d_;
    /**
       This is the desired position in world for the robot's capture point. Only x and y coordinates are relevant.
    */
-   private final geometry_msgs.Point desired_capture_point_2d_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage desired_capture_point_2d_;
    /**
       This is the measured position in world of the robot's center of mass.
    */
-   private final geometry_msgs.Point center_of_mass_3d_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage center_of_mass_3d_;
    /**
       List of the active contact points used for the left foot. The coordinates are in world frame.
    */
-   private final IDLObjectSequence<geometry_msgs.Point> left_foot_support_polygon_3d_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> left_foot_support_polygon_3d_;
    /**
       List of the active contact points used for the right foot. The coordinates are in world frame.
    */
-   private final IDLObjectSequence<geometry_msgs.Point> right_foot_support_polygon_3d_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> right_foot_support_polygon_3d_;
    /**
       List of the active contact points for the left hand, empty if there is no hand contact point. The coordinates are in the hand body-fixed frame.
    */
-   private final IDLObjectSequence<geometry_msgs.Point> left_hand_contact_points_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> left_hand_contact_points_;
    /**
       List of the active contact points for the right hand, empty is there is no hand contact point. The coordinates are in the hand body-fixed frame.
    */
-   private final IDLObjectSequence<geometry_msgs.Point> right_hand_contact_points_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> right_hand_contact_points_;
    /**
       Surface normal of the left hand, if in contact. Contact is assumed to be at the hand control frame. Set to zero (the default value) if not in contact.
    */
-   private final geometry_msgs.Vector3 left_hand_contact_normal_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage left_hand_contact_normal_;
    /**
       Surface normal of the right hand, if in contact. Contact is assumed to be at the hand control frame. Set to zero (the default value) if not in contact.
    */
-   private final geometry_msgs.Vector3 right_hand_contact_normal_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage right_hand_contact_normal_;
 
    public CapturabilityBasedStatus()
    {
-      capture_point_2d_ = new geometry_msgs.Point();
-      desired_capture_point_2d_ = new geometry_msgs.Point();
-      center_of_mass_3d_ = new geometry_msgs.Point();
-      left_foot_support_polygon_3d_ = new IDLObjectSequence<geometry_msgs.Point>(8, geometry_msgs.Point.class);
-      right_foot_support_polygon_3d_ = new IDLObjectSequence<geometry_msgs.Point>(8, geometry_msgs.Point.class);
-      left_hand_contact_points_ = new IDLObjectSequence<geometry_msgs.Point>(1, geometry_msgs.Point.class);
-      right_hand_contact_points_ = new IDLObjectSequence<geometry_msgs.Point>(1, geometry_msgs.Point.class);
-      left_hand_contact_normal_ = new geometry_msgs.Vector3();
-      right_hand_contact_normal_ = new geometry_msgs.Vector3();
+      capture_point_2d_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      desired_capture_point_2d_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      center_of_mass_3d_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      left_foot_support_polygon_3d_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(8, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      right_foot_support_polygon_3d_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(8, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      left_hand_contact_points_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(1, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      right_hand_contact_points_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(1, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      left_hand_contact_normal_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      right_hand_contact_normal_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -200,47 +200,47 @@ public class CapturabilityBasedStatus implements ROS2Message<CapturabilityBasedS
       this.omega_ = omega_;
    }
 
-   public geometry_msgs.Point getCapturePoint2d()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getCapturePoint2d()
    {
       return capture_point_2d_;
    }
 
-   public geometry_msgs.Point getDesiredCapturePoint2d()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getDesiredCapturePoint2d()
    {
       return desired_capture_point_2d_;
    }
 
-   public geometry_msgs.Point getCenterOfMass3d()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getCenterOfMass3d()
    {
       return center_of_mass_3d_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getLeftFootSupportPolygon3d()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getLeftFootSupportPolygon3d()
    {
       return left_foot_support_polygon_3d_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getRightFootSupportPolygon3d()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getRightFootSupportPolygon3d()
    {
       return right_foot_support_polygon_3d_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getLeftHandContactPoints()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getLeftHandContactPoints()
    {
       return left_hand_contact_points_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getRightHandContactPoints()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getRightHandContactPoints()
    {
       return right_hand_contact_points_;
    }
 
-   public geometry_msgs.Vector3 getLeftHandContactNormal()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getLeftHandContactNormal()
    {
       return left_hand_contact_normal_;
    }
 
-   public geometry_msgs.Vector3 getRightHandContactNormal()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getRightHandContactNormal()
    {
       return right_hand_contact_normal_;
    }

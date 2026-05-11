@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.MultiContactBalanceStatus;
+import controller_msgs.MultiContactBalanceStatus;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -37,19 +37,19 @@ public class MultiContactBalanceStatusCommand implements Command<MultiContactBal
    public void setFromMessage(MultiContactBalanceStatus message)
    {
       sequenceId = message.getSequenceId();
-      capturePoint2D.set(message.getCapturePoint2d());
-      centerOfMass3D.set(message.getCenterOfMass3d());
+      capturePoint2D.set(message.getCapturePoint2d().getPoint());
+      centerOfMass3D.set(message.getCenterOfMass3d().getPoint());
 
       contactPointsInWorld.clear();
       for (int i = 0; i < message.getContactPointsInWorld().size(); i++)
       {
-         contactPointsInWorld.add().set(message.getContactPointsInWorld().get(i));
+         contactPointsInWorld.add().set(message.getContactPointsInWorld().get(i).getPoint());
       }
 
       surfaceNormalsInWorld.clear();
       for (int i = 0; i < message.getSurfaceNormalsInWorld().size(); i++)
       {
-         surfaceNormalsInWorld.add().set(message.getSurfaceNormalsInWorld().get(i));
+         surfaceNormalsInWorld.add().set(message.getSurfaceNormalsInWorld().get(i).getVector());
       }
 
       supportRigidBodies.reset();

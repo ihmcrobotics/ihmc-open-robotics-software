@@ -24,11 +24,11 @@ public class ConvexPolytope3DMessage implements ROS2Message<ConvexPolytope3DMess
    /**
       Vertices of the polytope, see ConvexPolytope3D.
    */
-   private final IDLObjectSequence<geometry_msgs.Point> vertices_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> vertices_;
 
    public ConvexPolytope3DMessage()
    {
-      vertices_ = new IDLObjectSequence<geometry_msgs.Point>(50, geometry_msgs.Point.class);
+      vertices_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(50, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
 
    }
 
@@ -63,7 +63,7 @@ public class ConvexPolytope3DMessage implements ROS2Message<ConvexPolytope3DMess
 
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getVertices()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getVertices()
    {
       return vertices_;
    }

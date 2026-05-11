@@ -74,11 +74,11 @@ public class KinematicsToolboxPrivilegedConfigurationMessage implements ROS2Mess
    /**
       When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
    */
-   private final geometry_msgs.Point privileged_root_joint_position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage privileged_root_joint_position_;
    /**
       When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
    */
-   private final geometry_msgs.Quaternion privileged_root_joint_orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage privileged_root_joint_orientation_;
    /**
       This array is used to identify to which joint each angle in privileged_joint_angles belongs to.
       See Joint.hashCode() for the computation of a joint hash code.
@@ -115,8 +115,8 @@ public class KinematicsToolboxPrivilegedConfigurationMessage implements ROS2Mess
    {
       use_privileged_root_joint_position_ = (boolean) false;
       use_privileged_root_joint_orientation_ = (boolean) false;
-      privileged_root_joint_position_ = new geometry_msgs.Point();
-      privileged_root_joint_orientation_ = new geometry_msgs.Quaternion();
+      privileged_root_joint_position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      privileged_root_joint_orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
       privileged_joint_hash_codes_ = new IDLIntSequence();
       privileged_joint_angles_ = new IDLFloatSequence();
       nullspace_alpha_ = (double) -1;
@@ -222,12 +222,12 @@ public class KinematicsToolboxPrivilegedConfigurationMessage implements ROS2Mess
       this.use_privileged_root_joint_orientation_ = use_privileged_root_joint_orientation_;
    }
 
-   public geometry_msgs.Point getPrivilegedRootJointPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getPrivilegedRootJointPosition()
    {
       return privileged_root_joint_position_;
    }
 
-   public geometry_msgs.Quaternion getPrivilegedRootJointOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getPrivilegedRootJointOrientation()
    {
       return privileged_root_joint_orientation_;
    }

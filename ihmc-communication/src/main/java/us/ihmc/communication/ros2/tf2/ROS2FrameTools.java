@@ -1,8 +1,9 @@
 package us.ihmc.communication.ros2.tf2;
 
-import builtin_interfaces.msg.dds.Time;
+import builtin_interfaces.Time;
 import geometry_msgs.TransformStamped;
-import tf2_msgs.msg.dds.TFMessage;
+import tf2_msgs.TFMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -29,7 +30,7 @@ public class ROS2FrameTools
 
       messageToPack.getHeader().getStamp().set(timestamp);
       messageToPack.getHeader().setFrameId(frame.getParent().getName());
-      messageToPack.getTransform().set(frame.getTransformToParent());
+      MessageTools.toMessage(frame.getTransformToParent(), messageToPack.getTransform());
       messageToPack.setChildFrameId(frame.getName());
    }
 

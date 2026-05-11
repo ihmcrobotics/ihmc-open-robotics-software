@@ -4,7 +4,7 @@ import java.util.EnumMap;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
-import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.GoHomeMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.robotics.robotSide.RobotSide;

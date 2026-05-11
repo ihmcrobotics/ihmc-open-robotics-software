@@ -7,8 +7,7 @@ import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.pubsub.common.Guid;
-import us.ihmc.pubsub.common.SampleInfo;
+import us.ihmc.jros2.Guid;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Subscription;
@@ -34,6 +33,7 @@ public class ROS2PeerClockOffsetEstimator
    private final HashMap<Guid, ROS2PeerClockOffsetEstimatorPeer> peerMap = new HashMap<>();
    private final List<ROS2PeerClockOffsetEstimatorPeer> peerList = new ArrayList<>();
    private int nextPeerToPing = 0;
+   private final ROS2Node ros2Node;
    private final ROS2Publisher<PeerClockOffsetEstimatorPingMessage> publisher;
    private final Guid ourGuid;
    private final RepeatingTaskThread requestThread = new RepeatingTaskThread(getClass().getSimpleName(),
@@ -44,18 +44,22 @@ public class ROS2PeerClockOffsetEstimator
          = Executors.newCachedThreadPool(ThreadTools.createNamedThreadFactory(getClass().getSimpleName() + "PublishReply", true));
    private final PeerClockOffsetEstimatorPingMessage requestMessage = new PeerClockOffsetEstimatorPingMessage();
    private final PeerClockOffsetEstimatorPingMessage receivedMessage = new PeerClockOffsetEstimatorPingMessage();
-   private final SampleInfo sampleInfo = new SampleInfo();
+   // TODO: jros2 migration - SampleInfo not exposed yet in jros2
+   // private final SampleInfo sampleInfo = new SampleInfo();
    private final Guid receivedRequestTarget = new Guid();
    private final Guid receivedReplyTarget = new Guid();
 
    public ROS2PeerClockOffsetEstimator(ROS2Node ros2Node)
    {
+      this.ros2Node = ros2Node;
       publisher = ros2Node.createPublisher(TOPIC);
-      ourGuid = publisher.getPublisher().getGuid();
+      ourGuid = new Guid();
+      ourGuid.set(publisher.getGuid());
 
-      subscription = ros2Node.createSubscription(TOPIC, subscriber ->
+      // TODO: jros2 migration - subscription matched callback not yet supported, needs ROS2SubscriptionMatchedCallback
+      subscription = ros2Node.createSubscription(TOPIC, reader ->
       {
-         subscriber.takeNextData(receivedMessage, sampleInfo);
+         receivedMessage.set(reader.read());
 
          MessageTools.fromMessage(receivedMessage.getRequestTarget(), receivedRequestTarget);
          MessageTools.fromMessage(receivedMessage.getReplyTarget(), receivedReplyTarget);
@@ -85,10 +89,15 @@ public class ROS2PeerClockOffsetEstimator
                            MessageTools.toInstant(receivedMessage.getReplySendTime()));
             }
          }
-      }, (subscriber, info) ->
+      });
+
+      // TODO: jros2 migration - subscription matched callback not supported yet
+      // The following code was for tracking when peers connect/disconnect:
+      /*
+      subscription.setMatchedCallback((subscriber, info) ->
       {
          Guid guid = info.getGuid();
-         if (!guid.equals(publisher.getPublisher().getGuid())) // Exclude our publisher
+         if (!guid.equals(ourGuid)) // Exclude our publisher
          {
             switch (info.getStatus())
             {
@@ -112,6 +121,7 @@ public class ROS2PeerClockOffsetEstimator
             }
          }
       });
+      */
 
       requestThread.setFrequencyLimit(5.0);
       requestThread.startRepeating();
@@ -142,8 +152,8 @@ public class ROS2PeerClockOffsetEstimator
    {
       cachedThreadPool.shutdown();
       requestThread.kill();
-      subscription.remove();
-      publisher.remove();
+      ros2Node.destroySubscription(subscription);
+      ros2Node.destroyPublisher(publisher);
    }
 
    public Guid getOurGuid()

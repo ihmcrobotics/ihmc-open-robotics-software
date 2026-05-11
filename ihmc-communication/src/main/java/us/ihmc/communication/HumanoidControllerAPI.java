@@ -24,16 +24,16 @@ public final class HumanoidControllerAPI
 
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return getBaseTopic(robotName).withInput();
+      return getBaseTopic(robotName).appendedWith("input");
    }
 
    /** Applies only for the humanoid controller. */
-   public static <T> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
+   public static <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
    {
       return ControllerAPI.getTopic(getBaseTopic(robotName), messageClass);
    }
 
-   public static <T> ROS2Topic<T> getLowFrequencyTopic(Class<T> messageClass, String robotName)
+   public static <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Topic<T> getLowFrequencyTopic(Class<T> messageClass, String robotName)
    {
       return ControllerAPI.getLowFrequencyTopic(getBaseTopic(robotName), messageClass);
    }

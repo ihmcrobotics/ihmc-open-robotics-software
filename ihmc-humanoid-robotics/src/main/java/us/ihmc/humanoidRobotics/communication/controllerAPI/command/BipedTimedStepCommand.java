@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.BipedTimedStepMessage;
+import controller_msgs.BipedTimedStepMessage;
 import us.ihmc.commons.time.TimeInterval;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;

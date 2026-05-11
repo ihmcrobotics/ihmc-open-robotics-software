@@ -2,8 +2,8 @@ package us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI;
 
 import java.util.Map;
 
-import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
-import toolbox_msgs.msg.dds.WaypointBasedTrajectoryMessage;
+import ihmc_common_msgs.SelectionMatrix3DMessage;
+import toolbox_msgs.WaypointBasedTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;

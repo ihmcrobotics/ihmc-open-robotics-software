@@ -44,18 +44,18 @@ public class BipedTimedStepMessage implements ROS2Message<BipedTimedStepMessage>
    /**
       Specifies the position of the footstep (sole frame) in world frame.
    */
-   private final geometry_msgs.Point location_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage location_;
    /**
       Specifies the orientation of the footstep (sole frame) in world frame.
    */
-   private final geometry_msgs.Quaternion orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage orientation_;
 
    public BipedTimedStepMessage()
    {
       swing_height_ = (double) -1.0;
       robot_side_ = (byte) 255;
-      location_ = new geometry_msgs.Point();
-      orientation_ = new geometry_msgs.Quaternion();
+      location_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
 
    }
 
@@ -164,12 +164,12 @@ public class BipedTimedStepMessage implements ROS2Message<BipedTimedStepMessage>
       this.robot_side_ = robot_side_;
    }
 
-   public geometry_msgs.Point getLocation()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getLocation()
    {
       return location_;
    }
 
-   public geometry_msgs.Quaternion getOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getOrientation()
    {
       return orientation_;
    }

@@ -1,9 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.KinematicsStreamingToolboxInitialConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxCenterOfMassMessage;
+import toolbox_msgs.KinematicsToolboxOneDoFJointMessage;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.referenceFrame.FramePose3D;

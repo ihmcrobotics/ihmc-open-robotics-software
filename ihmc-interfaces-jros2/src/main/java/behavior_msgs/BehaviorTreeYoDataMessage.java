@@ -49,7 +49,7 @@ public class BehaviorTreeYoDataMessage implements ROS2Message<BehaviorTreeYoData
 
    private byte number_of_persistent_detections_;
    private byte number_of_scene_objects_;
-   private final geometry_msgs.Pose[] scene_object_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage[] scene_object_pose_;
    private boolean automatic_execution_;
    private short execution_next_index_;
    private boolean concurrency_enabled_;
@@ -58,33 +58,33 @@ public class BehaviorTreeYoDataMessage implements ROS2Message<BehaviorTreeYoData
    private final byte[] executing_action_type_;
    private final short[] executing_action_id_;
    private final float[] elapsed_execution_time_;
-   private final geometry_msgs.Pose[] current_hand_pose_;
-   private final geometry_msgs.Pose[] goal_hand_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage[] current_hand_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage[] goal_hand_pose_;
 
    public BehaviorTreeYoDataMessage()
    {
-      scene_object_pose_ = new geometry_msgs.Pose[3];
+      scene_object_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage[3];
       // scene_object_pose is defined as a fixed-size array, so it is pre-allocated.
       for (int i = 0; i < scene_object_pose_.length; ++i)
       {
-         scene_object_pose_[i] = new geometry_msgs.Pose();
+         scene_object_pose_[i] = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       }
       automatic_execution_ = (boolean) false;
       concurrency_enabled_ = (boolean) false;
       executing_action_type_ = new byte[5];
       executing_action_id_ = new short[5];
       elapsed_execution_time_ = new float[5];
-      current_hand_pose_ = new geometry_msgs.Pose[2];
+      current_hand_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage[2];
       // current_hand_pose is defined as a fixed-size array, so it is pre-allocated.
       for (int i = 0; i < current_hand_pose_.length; ++i)
       {
-         current_hand_pose_[i] = new geometry_msgs.Pose();
+         current_hand_pose_[i] = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       }
-      goal_hand_pose_ = new geometry_msgs.Pose[2];
+      goal_hand_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage[2];
       // goal_hand_pose is defined as a fixed-size array, so it is pre-allocated.
       for (int i = 0; i < goal_hand_pose_.length; ++i)
       {
-         goal_hand_pose_[i] = new geometry_msgs.Pose();
+         goal_hand_pose_[i] = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       }
 
    }
@@ -251,7 +251,7 @@ public class BehaviorTreeYoDataMessage implements ROS2Message<BehaviorTreeYoData
       this.number_of_scene_objects_ = number_of_scene_objects_;
    }
 
-   public geometry_msgs.Pose[] getSceneObjectPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage[] getSceneObjectPose()
    {
       return scene_object_pose_;
    }
@@ -321,12 +321,12 @@ public class BehaviorTreeYoDataMessage implements ROS2Message<BehaviorTreeYoData
       return elapsed_execution_time_;
    }
 
-   public geometry_msgs.Pose[] getCurrentHandPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage[] getCurrentHandPose()
    {
       return current_hand_pose_;
    }
 
-   public geometry_msgs.Pose[] getGoalHandPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage[] getGoalHandPose()
    {
       return goal_hand_pose_;
    }

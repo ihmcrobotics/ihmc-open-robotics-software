@@ -3,8 +3,8 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import java.util.List;
 import java.util.Random;
 
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage;
+import controller_msgs.OneDoFJointTrajectoryMessage;
+import controller_msgs.WholeBodyJointspaceTrajectoryMessage;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;

@@ -89,7 +89,7 @@ public class ROS2MutableFrame extends ROS2Frame
       if (hasNewTransform.getAndSet(false))
          transformToParent.set(newestTransformToParent);
       else if (remoteTransform != null && MessageTools.compareTime(updateTime, remoteTransform.getHeader().getStamp()) < 0)
-         transformToParent.set(remoteTransform.getTransform());
+         MessageTools.fromMessage(remoteTransform.getTransform(), transformToParent);
 
       markUpdateTime();
       publishTFMessages();

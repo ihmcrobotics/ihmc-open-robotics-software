@@ -13,17 +13,17 @@ public final class FootstepPlannerAPI
    /** By default, topics are made using "typed topic names" from this base topic */
    public static ROS2Topic<?> outputTopic(String robotName)
    {
-      return FOOTSTEP_PLANNER.withRobot(robotName).appendedWith("output");
+      return FOOTSTEP_PLANNER.appendedWith(robotName).appendedWith("output");
    }
 
    /** By default, topics are made using "typed topic names" from this base topic */
    public static ROS2Topic<?> inputTopic(String robotName)
    {
-      return FOOTSTEP_PLANNER.withRobot(robotName).withInput();
+      return FOOTSTEP_PLANNER.appendedWith(robotName).appendedWith("input");
    }
 
    public static ROS2Topic<FootstepDataListMessage> swingReplanOutputTopic(String robotName)
    {
-      return outputTopic(robotName).withInput().withType(FootstepDataListMessage.class).appendedWith("/replan_swing");
+      return outputTopic(robotName).appendedWith("input").withType(FootstepDataListMessage.class).appendedWith("/replan_swing");
    }
 }

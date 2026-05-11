@@ -47,7 +47,7 @@ public class MultiContactTrajectoryMessage implements ROS2Message<MultiContactTr
    /**
       Terminal root joint pose in world frame
    */
-   private final geometry_msgs.Pose root_joint_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage root_joint_pose_;
    /**
       Hash of joint array
    */
@@ -56,7 +56,7 @@ public class MultiContactTrajectoryMessage implements ROS2Message<MultiContactTr
    public MultiContactTrajectoryMessage()
    {
       joint_angles_ = new IDLDoubleSequence(50);
-      root_joint_pose_ = new geometry_msgs.Pose();
+      root_joint_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
 
    }
 
@@ -132,7 +132,7 @@ public class MultiContactTrajectoryMessage implements ROS2Message<MultiContactTr
       return joint_angles_;
    }
 
-   public geometry_msgs.Pose getRootJointPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getRootJointPose()
    {
       return root_joint_pose_;
    }

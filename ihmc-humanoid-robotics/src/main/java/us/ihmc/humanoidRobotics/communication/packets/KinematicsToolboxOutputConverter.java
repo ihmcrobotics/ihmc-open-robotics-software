@@ -1,8 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import controller_msgs.msg.dds.*;
-import ihmc_common_msgs.msg.dds.*;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.*;
+import ihmc_common_msgs.*;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -17,7 +17,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -34,6 +33,7 @@ import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.List;
 import java.util.function.BiConsumer;
 
 public class KinematicsToolboxOutputConverter
@@ -175,7 +175,7 @@ public class KinematicsToolboxOutputConverter
       se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrameId);
       se3TrajectoryMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
-      Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3TrajectoryMessage.getTaskspaceTrajectoryPoints();
+      List<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3TrajectoryMessage.getTaskspaceTrajectoryPoints();
       taskspaceTrajectoryPoints.clear();
       packSE3TrajectoryPointMessage(trajectoryTime, desiredPose, desiredSpatialVelocity, taskspaceTrajectoryPoints.add());
    }
@@ -217,7 +217,7 @@ public class KinematicsToolboxOutputConverter
       SO3TrajectoryMessage so3Trajectory = headTrajectoryMessage.getSo3Trajectory();
       so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
 
-      Object<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = so3Trajectory.getTaskspaceTrajectoryPoints();
+      List<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = so3Trajectory.getTaskspaceTrajectoryPoints();
       taskspaceTrajectoryPoints.clear();
       packSO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity, taskspaceTrajectoryPoints.add());
    }
@@ -246,7 +246,7 @@ public class KinematicsToolboxOutputConverter
       so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrameId);
       so3Trajectory.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
-      Object<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = so3Trajectory.getTaskspaceTrajectoryPoints();
+      List<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = so3Trajectory.getTaskspaceTrajectoryPoints();
       taskspaceTrajectoryPoints.clear();
       packSO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity, taskspaceTrajectoryPoints.add());
    }
@@ -275,7 +275,7 @@ public class KinematicsToolboxOutputConverter
       se3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrameId);
       se3Trajectory.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
-      Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3Trajectory.getTaskspaceTrajectoryPoints();
+      List<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3Trajectory.getTaskspaceTrajectoryPoints();
       taskspaceTrajectoryPoints.clear();
       packSE3TrajectoryPointMessage(trajectoryTime, desiredPose, desiredSpatialVelocity, taskspaceTrajectoryPoints.add());
    }
@@ -294,7 +294,7 @@ public class KinematicsToolboxOutputConverter
       euclideanTrajectory.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
       euclideanTrajectory.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
-      Object<EuclideanTrajectoryPointMessage> taskspaceTrajectoryPoints = euclideanTrajectory.getTaskspaceTrajectoryPoints();
+      List<EuclideanTrajectoryPointMessage> taskspaceTrajectoryPoints = euclideanTrajectory.getTaskspaceTrajectoryPoints();
       taskspaceTrajectoryPoints.clear();
 
       packEuclideanTrajectoryPointMessage(trajectoryTime, desiredPose.getPosition(), desiredSpatialVelocity.getLinearPart(), taskspaceTrajectoryPoints.add());
@@ -319,7 +319,7 @@ public class KinematicsToolboxOutputConverter
       SE3TrajectoryMessage se3Trajectory = footTrajectoryMessage.getSe3Trajectory();
       se3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
 
-      Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3Trajectory.getTaskspaceTrajectoryPoints();
+      List<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3Trajectory.getTaskspaceTrajectoryPoints();
       taskspaceTrajectoryPoints.clear();
       packSE3TrajectoryPointMessage(trajectoryTime, desiredPose, desiredSpatialVelocity, taskspaceTrajectoryPoints.add());
    }

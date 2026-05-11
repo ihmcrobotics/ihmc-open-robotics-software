@@ -1,6 +1,6 @@
 package us.ihmc.communication.crdt;
 
-import us.ihmc.idl.IDLSequence.Boolean;
+import us.ihmc.fastddsjava.cdr.idl.IDLBoolSequence;
 
 /**
  * Represents a boolean array that can be modified by both the
@@ -38,7 +38,7 @@ public class CRDTBidirectionalBooleanArray extends CRDTBidirectionalMutableField
       System.arraycopy(getValueInternal(), 0, messageArray, 0, Math.min(getLength(), messageArray.length));
    }
 
-   public void toMessage(Boolean message)
+   public void toMessage(IDLBoolSequence message)
    {
       message.clear();
       for (int i = 0; i < getLength(); ++i)
@@ -55,13 +55,13 @@ public class CRDTBidirectionalBooleanArray extends CRDTBidirectionalMutableField
       }
    }
 
-   public void fromMessage(Boolean message)
+   public void fromMessage(IDLBoolSequence message)
    {
       if (isModificationIncoming())
       {
          for (int i = 0; i < message.size() && i < getLength(); ++i)
          {
-            setValue(i, message.getBoolean(i));
+            setValue(i, message.get(i));
          }
       }
    }

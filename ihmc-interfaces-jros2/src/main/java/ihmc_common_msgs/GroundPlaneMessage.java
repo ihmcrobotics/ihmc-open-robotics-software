@@ -32,13 +32,13 @@ public class GroundPlaneMessage implements ROS2Message<GroundPlaneMessage>
       Unique ID used to identify this message, should preferably be consecutively increasing.
    */
    private long sequence_id_;
-   private final geometry_msgs.Point region_origin_;
-   private final geometry_msgs.Vector3 region_normal_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage region_origin_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage region_normal_;
 
    public GroundPlaneMessage()
    {
-      region_origin_ = new geometry_msgs.Point();
-      region_normal_ = new geometry_msgs.Vector3();
+      region_origin_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      region_normal_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -91,12 +91,12 @@ public class GroundPlaneMessage implements ROS2Message<GroundPlaneMessage>
       this.sequence_id_ = sequence_id_;
    }
 
-   public geometry_msgs.Point getRegionOrigin()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getRegionOrigin()
    {
       return region_origin_;
    }
 
-   public geometry_msgs.Vector3 getRegionNormal()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getRegionNormal()
    {
       return region_normal_;
    }

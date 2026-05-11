@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.ObjLongConsumer;
 
-class ReplayTopicManager<T>
+class ReplayTopicManager<T extends us.ihmc.jros2.ROS2Message<T>>
 {
    private final String topicName;
    private final Consumer<T> messageConsumer;

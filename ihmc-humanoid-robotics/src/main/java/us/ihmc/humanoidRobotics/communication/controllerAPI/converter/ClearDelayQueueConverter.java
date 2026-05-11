@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.converter;
 
 import java.util.List;
 
-import controller_msgs.msg.dds.ClearDelayQueueMessage;
+import controller_msgs.ClearDelayQueueMessage;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;

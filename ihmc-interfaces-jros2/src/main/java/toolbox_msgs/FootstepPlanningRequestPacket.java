@@ -101,19 +101,19 @@ public class FootstepPlanningRequestPacket implements ROS2Message<FootstepPlanni
    /**
       Starting left foot pose
    */
-   private final geometry_msgs.Pose start_left_foot_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage start_left_foot_pose_;
    /**
       Starting right foot pose
    */
-   private final geometry_msgs.Pose start_right_foot_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage start_right_foot_pose_;
    /**
       Goal left foot pose
    */
-   private final geometry_msgs.Pose goal_left_foot_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage goal_left_foot_pose_;
    /**
       Goal right foot pose
    */
-   private final geometry_msgs.Pose goal_right_foot_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage goal_right_foot_pose_;
    /**
       Requested initial stance side. If not specified the planner will choose
    */
@@ -146,7 +146,7 @@ public class FootstepPlanningRequestPacket implements ROS2Message<FootstepPlanni
       Requested body path waypoints in world-frame. If non-empty, planner will follow this path and will not plan a body path
       The robot will walk with the orientation of waypoint N between points N and N+1
    */
-   private final IDLObjectSequence<geometry_msgs.Pose> body_path_waypoints_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> body_path_waypoints_;
    /**
       (In beta) acceptable xy distance from the given goal for the planner to terminate
    */
@@ -204,10 +204,10 @@ public class FootstepPlanningRequestPacket implements ROS2Message<FootstepPlanni
 
    public FootstepPlanningRequestPacket()
    {
-      start_left_foot_pose_ = new geometry_msgs.Pose();
-      start_right_foot_pose_ = new geometry_msgs.Pose();
-      goal_left_foot_pose_ = new geometry_msgs.Pose();
-      goal_right_foot_pose_ = new geometry_msgs.Pose();
+      start_left_foot_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
+      start_right_foot_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
+      goal_left_foot_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
+      goal_right_foot_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       requested_initial_stance_side_ = (byte) 255;
       snap_goal_steps_ = (boolean) true;
       abort_if_goal_step_snapping_fails_ = (boolean) false;
@@ -215,7 +215,7 @@ public class FootstepPlanningRequestPacket implements ROS2Message<FootstepPlanni
       plan_body_path_ = (boolean) false;
       plan_footsteps_ = (boolean) true;
       perform_a_star_search_ = (boolean) true;
-      body_path_waypoints_ = new IDLObjectSequence<geometry_msgs.Pose>(50, geometry_msgs.Pose.class);
+      body_path_waypoints_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage>(50, us.ihmc.euclid.jros2.messages.EuclidPose3DMessage.class);
       goal_distance_proximity_ = (double) -1.0;
       goal_yaw_proximity_ = (double) -1.0;
       timeout_ = (double) 5.0;
@@ -372,22 +372,22 @@ public class FootstepPlanningRequestPacket implements ROS2Message<FootstepPlanni
       this.sequence_id_ = sequence_id_;
    }
 
-   public geometry_msgs.Pose getStartLeftFootPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getStartLeftFootPose()
    {
       return start_left_foot_pose_;
    }
 
-   public geometry_msgs.Pose getStartRightFootPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getStartRightFootPose()
    {
       return start_right_foot_pose_;
    }
 
-   public geometry_msgs.Pose getGoalLeftFootPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getGoalLeftFootPose()
    {
       return goal_left_foot_pose_;
    }
 
-   public geometry_msgs.Pose getGoalRightFootPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getGoalRightFootPose()
    {
       return goal_right_foot_pose_;
    }
@@ -462,7 +462,7 @@ public class FootstepPlanningRequestPacket implements ROS2Message<FootstepPlanni
       this.perform_a_star_search_ = perform_a_star_search_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Pose> getBodyPathWaypoints()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> getBodyPathWaypoints()
    {
       return body_path_waypoints_;
    }

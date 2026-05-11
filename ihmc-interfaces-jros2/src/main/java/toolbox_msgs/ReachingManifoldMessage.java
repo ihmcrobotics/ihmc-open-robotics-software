@@ -51,16 +51,16 @@ public class ReachingManifoldMessage implements ROS2Message<ReachingManifoldMess
    public static final byte CONFIGURATION_SPACE_NAME_YAW = 5;
    public static final byte CONFIGURATION_SPACE_NAME_SO3 = 6;
    private int end_effector_hash_code_;
-   private final geometry_msgs.Point manifold_origin_position_;
-   private final geometry_msgs.Quaternion manifold_origin_orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage manifold_origin_position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage manifold_origin_orientation_;
    private final IDLByteSequence manifold_configuration_space_names_;
    private final IDLDoubleSequence manifold_lower_limits_;
    private final IDLDoubleSequence manifold_upper_limits_;
 
    public ReachingManifoldMessage()
    {
-      manifold_origin_position_ = new geometry_msgs.Point();
-      manifold_origin_orientation_ = new geometry_msgs.Quaternion();
+      manifold_origin_position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      manifold_origin_orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
       manifold_configuration_space_names_ = new IDLByteSequence();
       manifold_lower_limits_ = new IDLDoubleSequence();
       manifold_upper_limits_ = new IDLDoubleSequence();
@@ -142,12 +142,12 @@ public class ReachingManifoldMessage implements ROS2Message<ReachingManifoldMess
       this.end_effector_hash_code_ = end_effector_hash_code_;
    }
 
-   public geometry_msgs.Point getManifoldOriginPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getManifoldOriginPosition()
    {
       return manifold_origin_position_;
    }
 
-   public geometry_msgs.Quaternion getManifoldOriginOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getManifoldOriginOrientation()
    {
       return manifold_origin_orientation_;
    }

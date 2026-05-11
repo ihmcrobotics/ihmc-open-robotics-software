@@ -35,17 +35,17 @@ public class AI2RObjectMessage implements ROS2Message<AI2RObjectMessage>
    /**
       Pose of the object in world frame
    */
-   private final geometry_msgs.Pose object_pose_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage object_pose_in_world_;
    /**
       Pose of the object in robot frame (mid point between footsoles)
    */
-   private final geometry_msgs.Pose object_pose_in_robot_frame_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage object_pose_in_robot_frame_;
 
    public AI2RObjectMessage()
    {
       object_name_ = new StringBuilder();
-      object_pose_in_world_ = new geometry_msgs.Pose();
-      object_pose_in_robot_frame_ = new geometry_msgs.Pose();
+      object_pose_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
+      object_pose_in_robot_frame_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
 
    }
 
@@ -104,12 +104,12 @@ public class AI2RObjectMessage implements ROS2Message<AI2RObjectMessage>
       this.object_name_.delete(0, this.object_name_.length());
       this.object_name_.insert(0, s);
    }
-   public geometry_msgs.Pose getObjectPoseInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getObjectPoseInWorld()
    {
       return object_pose_in_world_;
    }
 
-   public geometry_msgs.Pose getObjectPoseInRobotFrame()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getObjectPoseInRobotFrame()
    {
       return object_pose_in_robot_frame_;
    }

@@ -3,8 +3,11 @@ package us.ihmc.communication.crdt;
 import behavior_msgs.WalkActionFootstepDefinitionMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.idl.IDLSequence;
+// IDLSequence.Object is replaced with direct usage from jros2
+// import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -14,6 +17,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
  */
 public class CRDTStatusFootstepList extends CRDTStatusMutableField<RecyclingArrayList<WalkActionFootstepDefinitionMessage>>
 {
+   private final Pose3D tempPose = new Pose3D();
+
    public CRDTStatusFootstepList(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
    {
       super(sideThatCanModify, crdtInfo, () -> new RecyclingArrayList<>(WalkActionFootstepDefinitionMessage::new));
@@ -21,7 +26,8 @@ public class CRDTStatusFootstepList extends CRDTStatusMutableField<RecyclingArra
 
    public Pose3DReadOnly getPoseReadOnly(int index)
    {
-      return getValueInternal().get(index).getSolePose();
+      MessageTools.fromMessage(getValueInternal().get(index).getSolePose(), tempPose);
+      return tempPose;
    }
 
    public RobotSide getSide(int index)
@@ -34,7 +40,7 @@ public class CRDTStatusFootstepList extends CRDTStatusMutableField<RecyclingArra
       return getValueInternal().size();
    }
 
-   public void toMessage(IDLSequence.Object<WalkActionFootstepDefinitionMessage> message)
+   public void toMessage(us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<WalkActionFootstepDefinitionMessage> message)
    {
       message.clear();
 
@@ -44,7 +50,7 @@ public class CRDTStatusFootstepList extends CRDTStatusMutableField<RecyclingArra
       }
    }
 
-   public void fromMessage(IDLSequence.Object<WalkActionFootstepDefinitionMessage> message)
+   public void fromMessage(us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<WalkActionFootstepDefinitionMessage> message)
    {
       if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
       {

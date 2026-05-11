@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.RLModelSelectionMessage;
+import controller_msgs.RLModelSelectionMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
 public class RLModelSelectionCommand implements Command<RLModelSelectionCommand, RLModelSelectionMessage>

@@ -5,7 +5,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 import java.util.Random;
 
-import controller_msgs.msg.dds.SpineTrajectoryMessage;
+import controller_msgs.SpineTrajectoryMessage;
 
 public class SpineTrajectoryCommand implements Command<SpineTrajectoryCommand, SpineTrajectoryMessage>, EpsilonComparable<SpineTrajectoryCommand>
 {

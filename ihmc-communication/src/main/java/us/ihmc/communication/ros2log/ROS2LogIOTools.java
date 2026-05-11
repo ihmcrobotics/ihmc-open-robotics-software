@@ -5,11 +5,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.idl.serializers.extra.AbstractSerializer;
+// import us.ihmc.idl.serializers.extra.AbstractSerializer; // Not available in jros2, commenting out
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.TopicDataType;
+// import us.ihmc.pubsub.TopicDataType; // Not available in jros2, commenting out
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
@@ -75,39 +74,41 @@ public class ROS2LogIOTools
             return null;
          }
 
-         for (int topic_idx = 0; topic_idx < topicManagers.size(); topic_idx++)
-         {
-            RecordTopicManager<?> topicManager = topicManagers.get(topic_idx);
-            ROS2Topic<?> topic = topicManager.getTopic();
-            TLongArrayList timestampsToLog = topicManager.getTimestamps();
-            List<?> messagesToLog = topicManager.getMessages();
+         // Serialization not available in jros2 - commenting out entire loop
+         // for (int topic_idx = 0; topic_idx < topicManagers.size(); topic_idx++)
+         // {
+         //    RecordTopicManager<?> topicManager = topicManagers.get(topic_idx);
+         //    ROS2Topic<?> topic = topicManager.getTopic();
+         //    TLongArrayList timestampsToLog = topicManager.getTimestamps();
+         //    List<?> messagesToLog = topicManager.getMessages();
+         //
+         //    if (messagesToLog.isEmpty())
+         //       continue;
+         //
+         //    Packet packet = (Packet) topic.getType().getConstructor().newInstance();
+         //    // TopicDataType<?> topicDataType = (TopicDataType) packet.getPubSubTypePacket().get();
+         //    // AbstractSerializer serializer = serialization.createSerializer(topicDataType);
+         //
+         //    ObjectNode topicObject = rootNode.putObject(packet.getClass().getName());
+         //    ArrayNode timestamps = topicObject.putArray(timestampKey);
+         //    ArrayNode messages = topicObject.putArray(messageKey);
+         //
+         //    // for (int message_idx = 0; message_idx < messagesToLog.size(); message_idx++)
+         //    // {
+         //    //    timestamps.add((timestampsToLog.get(message_idx) - firstTimestamp));
+         //    //    messages.add(serializer.serializeToString(messagesToLog.get(message_idx)));
+         //    // }
+         // }
+         throw new RuntimeException("ROS2LogIOTools.writeLogFile: Serialization not yet ported to jros2");
 
-            if (messagesToLog.isEmpty())
-               continue;
-
-            Packet packet = (Packet) topic.getType().getConstructor().newInstance();
-            TopicDataType<?> topicDataType = (TopicDataType) packet.getPubSubTypePacket().get();
-            AbstractSerializer serializer = serialization.createSerializer(topicDataType);
-
-            ObjectNode topicObject = rootNode.putObject(packet.getClass().getName());
-            ArrayNode timestamps = topicObject.putArray(timestampKey);
-            ArrayNode messages = topicObject.putArray(messageKey);
-
-            for (int message_idx = 0; message_idx < messagesToLog.size(); message_idx++)
-            {
-               timestamps.add((timestampsToLog.get(message_idx) - firstTimestamp));
-               messages.add(serializer.serializeToString(messagesToLog.get(message_idx)));
-            }
-         }
-
-         String fileName = logDirectory + dateFormat.format(new Date()) + "." + serialization.getFilePostfix();
-         FileOutputStream outputStream = new FileOutputStream(fileName);
-         PrintStream printStream = new PrintStream(outputStream);
-         objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, rootNode);
-         printStream.close();
-
-         LogTools.info("ROS 2 log record finished: " + fileName);
-         return fileName;
+//         String fileName = logDirectory + dateFormat.format(new Date()) + "." + serialization.getFilePostfix();
+//         FileOutputStream outputStream = new FileOutputStream(fileName);
+//         PrintStream printStream = new PrintStream(outputStream);
+//         objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, rootNode);
+//         printStream.close();
+//
+//         LogTools.info("ROS 2 log record finished: " + fileName);
+//         return fileName;
       }
       catch (Exception e)
       {
@@ -116,12 +117,14 @@ public class ROS2LogIOTools
       }
    }
 
+   @SuppressWarnings({"unchecked", "rawtypes"})
    public static List<ReplayTopicManager<?>> loadLogFile(ROS2Node ros2Node, List<ROS2Topic<?>> loggedTopics, File logFile)
    {
       return loadLogFile(logFile, loggedTopics, topic ->
       {
          ROS2Publisher publisher = ros2Node.createPublisher(topic);
-         return publisher::publish;
+         Consumer consumer = message -> publisher.publish((us.ihmc.jros2.ROS2Message) message);
+         return consumer;
       });
    }
 
@@ -137,54 +140,56 @@ public class ROS2LogIOTools
          ObjectNode rootNode = (ObjectNode) objectMapper.readTree(inputStream);
          long firstTimestamp = Long.MAX_VALUE;
 
-         for (int topic_idx = 0; topic_idx < loggedTopics.size(); topic_idx++)
-         {
-            ROS2Topic<?> topic = loggedTopics.get(topic_idx);
-            Consumer<?> messageConsumer = messageConsumerGenerator.apply(topic);
-            ReplayTopicManager topicManager = new ReplayTopicManager(topic, messageConsumer);
+         // Serialization not available in jros2 - commenting out entire loop
+         // for (int topic_idx = 0; topic_idx < loggedTopics.size(); topic_idx++)
+         // {
+         //    ROS2Topic<?> topic = loggedTopics.get(topic_idx);
+         //    Consumer<?> messageConsumer = messageConsumerGenerator.apply(topic);
+         //    ReplayTopicManager topicManager = new ReplayTopicManager(topic, messageConsumer);
+         //
+         //    Packet packet = (Packet) topic.getType().getConstructor().newInstance();
+         //    // TopicDataType<?> topicDataType = (TopicDataType) packet.getPubSubTypePacket().get();
+         //    // AbstractSerializer serializer = serialization.createSerializer(topicDataType);
+         //
+         //    ObjectNode topicObject = (ObjectNode) rootNode.get(packet.getClass().getName());
+         //    if (topicObject == null || topicObject.isEmpty())
+         //       continue;
+         //
+         //    ArrayNode timestamps = (ArrayNode) topicObject.get(timestampKey);
+         //    ArrayNode messages = (ArrayNode) topicObject.get(messageKey);
+         //
+         //    if (timestamps.size() != messages.size())
+         //    {
+         //       LogTools.error("Number of timestamps does not match number of messages");
+         //       return null;
+         //    }
+         //
+         //    for (int message_idx = 0; message_idx < timestamps.size(); message_idx++)
+         //    {
+         //       long timestamp = timestamps.get(message_idx).longValue();
+         //       // Object message = serializer.deserialize(messages.get(message_idx).asText());
+         //
+         //       topicManager.getTimestamps().add(timestamp);
+         //       // topicManager.getMessages().add(message);
+         //    }
+         //
+         //    if (!timestamps.isEmpty())
+         //       firstTimestamp = Math.min(timestamps.get(0).longValue(), firstTimestamp);
+         //
+         //    topicManagers.add(topicManager);
+         // }
+         throw new RuntimeException("ROS2LogIOTools.loadLogFile: Serialization not yet ported to jros2");
 
-            Packet packet = (Packet) topic.getType().getConstructor().newInstance();
-            TopicDataType<?> topicDataType = (TopicDataType) packet.getPubSubTypePacket().get();
-            AbstractSerializer serializer = serialization.createSerializer(topicDataType);
-
-            ObjectNode topicObject = (ObjectNode) rootNode.get(packet.getClass().getName());
-            if (topicObject == null || topicObject.isEmpty())
-               continue;
-
-            ArrayNode timestamps = (ArrayNode) topicObject.get(timestampKey);
-            ArrayNode messages = (ArrayNode) topicObject.get(messageKey);
-
-            if (timestamps.size() != messages.size())
-            {
-               LogTools.error("Number of timestamps does not match number of messages");
-               return null;
-            }
-
-            for (int message_idx = 0; message_idx < timestamps.size(); message_idx++)
-            {
-               long timestamp = timestamps.get(message_idx).longValue();
-               Object message = serializer.deserialize(messages.get(message_idx).asText());
-
-               topicManager.getTimestamps().add(timestamp);
-               topicManager.getMessages().add(message);
-            }
-
-            if (!timestamps.isEmpty())
-               firstTimestamp = Math.min(timestamps.get(0).longValue(), firstTimestamp);
-
-            topicManagers.add(topicManager);
-         }
-
-         for (int topic_idx = 0; topic_idx < topicManagers.size(); topic_idx++)
-         {
-            TLongArrayList timestamps = topicManagers.get(topic_idx).getTimestamps();
-            for (int message_idx = 0; message_idx < timestamps.size(); message_idx++)
-            {
-               timestamps.set(message_idx, timestamps.get(message_idx) - firstTimestamp);
-            }
-         }
-
-         return topicManagers;
+//         for (int topic_idx = 0; topic_idx < topicManagers.size(); topic_idx++)
+//         {
+//            TLongArrayList timestamps = topicManagers.get(topic_idx).getTimestamps();
+//            for (int message_idx = 0; message_idx < timestamps.size(); message_idx++)
+//            {
+//               timestamps.set(message_idx, timestamps.get(message_idx) - firstTimestamp);
+//            }
+//         }
+//
+//         return topicManagers;
       }
       catch (Exception e)
       {

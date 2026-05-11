@@ -53,11 +53,11 @@ public class QueuedFootstepStatusMessage implements ROS2Message<QueuedFootstepSt
    /**
       Specifies the position of the footstep (sole frame) in world frame.
    */
-   private final geometry_msgs.Point location_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage location_;
    /**
       Specifies the orientation of the footstep (sole frame) in world frame.
    */
-   private final geometry_msgs.Quaternion orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage orientation_;
    /**
       The swingDuration is the time a foot is not in ground contact during a step.
       If the value of this field is invalid (not positive) it will be replaced by a default swing_duration.
@@ -72,8 +72,8 @@ public class QueuedFootstepStatusMessage implements ROS2Message<QueuedFootstepSt
    public QueuedFootstepStatusMessage()
    {
       robot_side_ = (byte) 255;
-      location_ = new geometry_msgs.Point();
-      orientation_ = new geometry_msgs.Quaternion();
+      location_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
       swing_duration_ = (double) -1.0;
       transfer_duration_ = (double) -1.0;
 
@@ -150,12 +150,12 @@ public class QueuedFootstepStatusMessage implements ROS2Message<QueuedFootstepSt
       this.robot_side_ = robot_side_;
    }
 
-   public geometry_msgs.Point getLocation()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getLocation()
    {
       return location_;
    }
 
-   public geometry_msgs.Quaternion getOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getOrientation()
    {
       return orientation_;
    }

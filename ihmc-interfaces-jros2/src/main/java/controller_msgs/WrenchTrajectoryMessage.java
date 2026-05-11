@@ -57,7 +57,7 @@ public class WrenchTrajectoryMessage implements ROS2Message<WrenchTrajectoryMess
       Pose of custom control frame expressed in the end-effector frame.
       This is the frame attached to the rigid body that the wrench trajectory is defined for.
    */
-   private final geometry_msgs.Pose control_frame_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage control_frame_pose_;
    /**
       Properties for queueing trajectories.
    */
@@ -68,7 +68,7 @@ public class WrenchTrajectoryMessage implements ROS2Message<WrenchTrajectoryMess
       wrench_trajectory_points_ = new IDLObjectSequence<controller_msgs.WrenchTrajectoryPointMessage>(50, controller_msgs.WrenchTrajectoryPointMessage.class);
       frame_information_ = new ihmc_common_msgs.FrameInformation();
       use_custom_control_frame_ = (boolean) false;
-      control_frame_pose_ = new geometry_msgs.Pose();
+      control_frame_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       queueing_properties_ = new ihmc_common_msgs.QueueableMessage();
 
    }
@@ -154,7 +154,7 @@ public class WrenchTrajectoryMessage implements ROS2Message<WrenchTrajectoryMess
       this.use_custom_control_frame_ = use_custom_control_frame_;
    }
 
-   public geometry_msgs.Pose getControlFramePose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getControlFramePose()
    {
       return control_frame_pose_;
    }

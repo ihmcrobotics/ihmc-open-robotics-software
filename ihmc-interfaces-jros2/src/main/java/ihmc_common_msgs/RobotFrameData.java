@@ -45,7 +45,7 @@ public class RobotFrameData implements ROS2Message<RobotFrameData>
    /**
       Pose3D of this frame in the world frame.
    */
-   private final geometry_msgs.Pose frame_pose_in_world_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage frame_pose_in_world_;
    /**
       Name of this frame.
    */
@@ -53,7 +53,7 @@ public class RobotFrameData implements ROS2Message<RobotFrameData>
 
    public RobotFrameData()
    {
-      frame_pose_in_world_ = new geometry_msgs.Pose();
+      frame_pose_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       frame_name_ = new StringBuilder();
 
    }
@@ -122,7 +122,7 @@ public class RobotFrameData implements ROS2Message<RobotFrameData>
       this.frame_name_hash_ = frame_name_hash_;
    }
 
-   public geometry_msgs.Pose getFramePoseInWorld()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getFramePoseInWorld()
    {
       return frame_pose_in_world_;
    }

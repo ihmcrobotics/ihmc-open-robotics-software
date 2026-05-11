@@ -33,11 +33,11 @@ public class WalkingControllerFailureStatusMessage implements ROS2Message<Walkin
    /**
       Specifies the estimated falling direction in 2D
    */
-   private final geometry_msgs.Vector3 falling_direction_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage falling_direction_;
 
    public WalkingControllerFailureStatusMessage()
    {
-      falling_direction_ = new geometry_msgs.Vector3();
+      falling_direction_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -86,7 +86,7 @@ public class WalkingControllerFailureStatusMessage implements ROS2Message<Walkin
       this.sequence_id_ = sequence_id_;
    }
 
-   public geometry_msgs.Vector3 getFallingDirection()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getFallingDirection()
    {
       return falling_direction_;
    }

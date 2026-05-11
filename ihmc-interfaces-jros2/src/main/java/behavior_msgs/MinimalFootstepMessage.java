@@ -39,11 +39,11 @@ public class MinimalFootstepMessage implements ROS2Message<MinimalFootstepMessag
    /**
       Specifies the position of the footstep (sole frame) in world frame.
    */
-   private final geometry_msgs.Point position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage position_;
    /**
       Specifies the orientation of the footstep (sole frame) in world frame.
    */
-   private final geometry_msgs.Quaternion orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage orientation_;
    /**
       Support polygon
    */
@@ -55,8 +55,8 @@ public class MinimalFootstepMessage implements ROS2Message<MinimalFootstepMessag
 
    public MinimalFootstepMessage()
    {
-      position_ = new geometry_msgs.Point();
-      orientation_ = new geometry_msgs.Quaternion();
+      position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
       support_polygon_ = new IDLObjectSequence<ihmc_common_msgs.Point2DMessage>(16, ihmc_common_msgs.Point2DMessage.class);
       description_ = new StringBuilder();
 
@@ -120,12 +120,12 @@ public class MinimalFootstepMessage implements ROS2Message<MinimalFootstepMessag
       this.robot_side_ = robot_side_;
    }
 
-   public geometry_msgs.Point getPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getPosition()
    {
       return position_;
    }
 
-   public geometry_msgs.Quaternion getOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getOrientation()
    {
       return orientation_;
    }

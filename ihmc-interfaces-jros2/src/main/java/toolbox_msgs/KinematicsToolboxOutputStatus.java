@@ -108,11 +108,11 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
    /**
       Desired root joint position in world frame.
    */
-   private final geometry_msgs.Point desired_root_position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage desired_root_position_;
    /**
       Desired root joint orientation in world frame.
    */
-   private final geometry_msgs.Quaternion desired_root_orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage desired_root_orientation_;
    /**
       Desired joint velocities.
    */
@@ -120,15 +120,15 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
    /**
       Desired linear velocity of the root joint expressed in local frame.
    */
-   private final geometry_msgs.Vector3 desired_root_linear_velocity_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage desired_root_linear_velocity_;
    /**
       Desired angular velocity of the root joint expressed in local frame.
    */
-   private final geometry_msgs.Vector3 desired_root_angular_velocity_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage desired_root_angular_velocity_;
    /**
       Support region used by the toolbox
    */
-   private final IDLObjectSequence<geometry_msgs.Point> support_region_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> support_region_;
    /**
       Desired joint velocities derived from finite difference from positions at publishing period.
    */
@@ -136,13 +136,13 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
    /**
       Desired linear velocity of the root joint expressed in local frame, derived from finite difference from positions at publishing period.
    */
-   private final geometry_msgs.Vector3 desired_root_linear_velocity_publishing_period_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage desired_root_linear_velocity_publishing_period_;
    /**
       Desired angular velocity of the root joint expressed in local frame, derived from finite difference from positions at publishing period.
    */
-   private final geometry_msgs.Vector3 desired_root_angular_velocity_publishing_period_;
-   private final geometry_msgs.Point desired_torso_position_;
-   private final geometry_msgs.Quaternion desired_torso_orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage desired_root_angular_velocity_publishing_period_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage desired_torso_position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage desired_torso_orientation_;
    private float com_offset_;
    /**
       Legged robot-specific contact information (false if not a legged robot)
@@ -155,17 +155,17 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
    {
       current_toolbox_state_ = (byte) 0;
       desired_joint_angles_ = new IDLFloatSequence();
-      desired_root_position_ = new geometry_msgs.Point();
-      desired_root_orientation_ = new geometry_msgs.Quaternion();
+      desired_root_position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      desired_root_orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
       desired_joint_velocities_ = new IDLFloatSequence();
-      desired_root_linear_velocity_ = new geometry_msgs.Vector3();
-      desired_root_angular_velocity_ = new geometry_msgs.Vector3();
-      support_region_ = new IDLObjectSequence<geometry_msgs.Point>(32, geometry_msgs.Point.class);
+      desired_root_linear_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      desired_root_angular_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      support_region_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(32, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
       desired_joint_velocities_publishing_period_ = new IDLFloatSequence();
-      desired_root_linear_velocity_publishing_period_ = new geometry_msgs.Vector3();
-      desired_root_angular_velocity_publishing_period_ = new geometry_msgs.Vector3();
-      desired_torso_position_ = new geometry_msgs.Point();
-      desired_torso_orientation_ = new geometry_msgs.Quaternion();
+      desired_root_linear_velocity_publishing_period_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      desired_root_angular_velocity_publishing_period_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      desired_torso_position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      desired_torso_orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
       left_foot_in_contact_ = (boolean) false;
       right_foot_in_contact_ = (boolean) false;
       solution_quality_ = (double) -1;
@@ -310,12 +310,12 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
       return desired_joint_angles_;
    }
 
-   public geometry_msgs.Point getDesiredRootPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getDesiredRootPosition()
    {
       return desired_root_position_;
    }
 
-   public geometry_msgs.Quaternion getDesiredRootOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getDesiredRootOrientation()
    {
       return desired_root_orientation_;
    }
@@ -325,17 +325,17 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
       return desired_joint_velocities_;
    }
 
-   public geometry_msgs.Vector3 getDesiredRootLinearVelocity()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getDesiredRootLinearVelocity()
    {
       return desired_root_linear_velocity_;
    }
 
-   public geometry_msgs.Vector3 getDesiredRootAngularVelocity()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getDesiredRootAngularVelocity()
    {
       return desired_root_angular_velocity_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getSupportRegion()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getSupportRegion()
    {
       return support_region_;
    }
@@ -345,22 +345,22 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
       return desired_joint_velocities_publishing_period_;
    }
 
-   public geometry_msgs.Vector3 getDesiredRootLinearVelocityPublishingPeriod()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getDesiredRootLinearVelocityPublishingPeriod()
    {
       return desired_root_linear_velocity_publishing_period_;
    }
 
-   public geometry_msgs.Vector3 getDesiredRootAngularVelocityPublishingPeriod()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getDesiredRootAngularVelocityPublishingPeriod()
    {
       return desired_root_angular_velocity_publishing_period_;
    }
 
-   public geometry_msgs.Point getDesiredTorsoPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getDesiredTorsoPosition()
    {
       return desired_torso_position_;
    }
 
-   public geometry_msgs.Quaternion getDesiredTorsoOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getDesiredTorsoOrientation()
    {
       return desired_torso_orientation_;
    }

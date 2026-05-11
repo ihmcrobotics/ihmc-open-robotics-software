@@ -71,7 +71,7 @@ public class SO3TrajectoryMessage implements ROS2Message<SO3TrajectoryMessage>
       Pose of custom control frame expressed in the end-effector frame.
       This is the frame attached to the rigid body that the taskspace trajectory is defined for.
    */
-   private final geometry_msgs.Pose control_frame_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage control_frame_pose_;
    /**
       Properties for queueing trajectories.
    */
@@ -84,7 +84,7 @@ public class SO3TrajectoryMessage implements ROS2Message<SO3TrajectoryMessage>
       frame_information_ = new ihmc_common_msgs.FrameInformation();
       weight_matrix_ = new ihmc_common_msgs.WeightMatrix3DMessage();
       use_custom_control_frame_ = (boolean) false;
-      control_frame_pose_ = new geometry_msgs.Pose();
+      control_frame_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       queueing_properties_ = new ihmc_common_msgs.QueueableMessage();
 
    }
@@ -188,7 +188,7 @@ public class SO3TrajectoryMessage implements ROS2Message<SO3TrajectoryMessage>
       this.use_custom_control_frame_ = use_custom_control_frame_;
    }
 
-   public geometry_msgs.Pose getControlFramePose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getControlFramePose()
    {
       return control_frame_pose_;
    }

@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.communication.packets.dataobjects;
 import java.util.List;
 import java.util.zip.CRC32;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.RobotConfigurationData;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -65,9 +65,9 @@ public class RobotConfigurationDataFactory
 
    public static void packJointState(RobotConfigurationData robotConfigurationData, OneDoFJointReadOnly[] newJointData)
    {
-      robotConfigurationData.getJointAngles().reset();
-      robotConfigurationData.getJointVelocities().reset();
-      robotConfigurationData.getJointTorques().reset();
+      robotConfigurationData.getJointAngles().clear();
+      robotConfigurationData.getJointVelocities().clear();
+      robotConfigurationData.getJointTorques().clear();
 
       for (int i = 0; i < newJointData.length; i++)
       {
@@ -79,9 +79,9 @@ public class RobotConfigurationDataFactory
 
    public static void packJointState(RobotConfigurationData robotConfigurationData, List<? extends OneDoFJointReadOnly> newJointData)
    {
-      robotConfigurationData.getJointAngles().reset();
-      robotConfigurationData.getJointVelocities().reset();
-      robotConfigurationData.getJointTorques().reset();
+      robotConfigurationData.getJointAngles().clear();
+      robotConfigurationData.getJointVelocities().clear();
+      robotConfigurationData.getJointTorques().clear();
 
       for (int i = 0; i < newJointData.size(); i++)
       {

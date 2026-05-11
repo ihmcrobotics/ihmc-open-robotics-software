@@ -107,11 +107,11 @@ public class WalkActionStateMessage implements ROS2Message<WalkActionStateMessag
    /**
       Current left pose
    */
-   private final geometry_msgs.Pose current_left_foot_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage current_left_foot_pose_;
    /**
       Current right pose
    */
-   private final geometry_msgs.Pose current_right_foot_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage current_right_foot_pose_;
    /**
       Preview footstep plan, with a maximum of 50
    */
@@ -126,8 +126,8 @@ public class WalkActionStateMessage implements ROS2Message<WalkActionStateMessag
       goal_transform_to_parent_ = new controller_msgs.RigidBodyTransformMessage();
       desired_left_footsteps_ = new IDLObjectSequence<ihmc_common_msgs.SE3TrajectoryPointMessage>(50, ihmc_common_msgs.SE3TrajectoryPointMessage.class);
       desired_right_footsteps_ = new IDLObjectSequence<ihmc_common_msgs.SE3TrajectoryPointMessage>(50, ihmc_common_msgs.SE3TrajectoryPointMessage.class);
-      current_left_foot_pose_ = new geometry_msgs.Pose();
-      current_right_foot_pose_ = new geometry_msgs.Pose();
+      current_left_foot_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
+      current_right_foot_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       preview_footsteps_ = new IDLObjectSequence<behavior_msgs.WalkActionFootstepDefinitionMessage>(50, behavior_msgs.WalkActionFootstepDefinitionMessage.class);
 
    }
@@ -276,12 +276,12 @@ public class WalkActionStateMessage implements ROS2Message<WalkActionStateMessag
       return desired_right_footsteps_;
    }
 
-   public geometry_msgs.Pose getCurrentLeftFootPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getCurrentLeftFootPose()
    {
       return current_left_foot_pose_;
    }
 
-   public geometry_msgs.Pose getCurrentRightFootPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getCurrentRightFootPose()
    {
       return current_right_foot_pose_;
    }

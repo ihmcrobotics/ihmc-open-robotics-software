@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-import controller_msgs.msg.dds.*;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import ihmc_common_msgs.msg.dds.*;
-import perception_msgs.msg.dds.*;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.*;
+import controller_msgs.RobotConfigurationData;
+import ihmc_common_msgs.*;
+import perception_msgs.*;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;

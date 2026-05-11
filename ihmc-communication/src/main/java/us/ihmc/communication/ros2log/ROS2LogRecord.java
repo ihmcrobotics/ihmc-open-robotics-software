@@ -43,9 +43,10 @@ public class ROS2LogRecord
       ros2Node = new ROS2Node("ihmc_ros2_logger");
       this.serialization = serialization;
 
-      ros2Node.createSubscription(getROS2LogTopic(), s ->
+      ros2Node.createSubscription(getROS2LogTopic(), reader ->
       {
-         ROS2LoggerRequestedState requestedState = ROS2LoggerRequestedState.fromByte(s.takeNextData().getRequestedState());
+         ROS2LogMessage message = reader.read();
+         ROS2LoggerRequestedState requestedState = ROS2LoggerRequestedState.fromByte(message.getRequestedState());
          if (requestedState == ROS2LoggerRequestedState.START)
             start();
          else if (requestedState == ROS2LoggerRequestedState.FINISH)
@@ -60,7 +61,7 @@ public class ROS2LogRecord
       }
    }
 
-   public <T> void setData(ROS2Topic<T> topic, T data)
+   public <T extends us.ihmc.jros2.ROS2Message<T>> void setData(ROS2Topic<T> topic, T data)
    {
       RecordTopicManager<T> topicManager = getTopicManager(topic);
       if (topicManager == null)
@@ -130,7 +131,7 @@ public class ROS2LogRecord
       {
          executorService.shutdownNow();
       }
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    public static ROS2Topic<ROS2LogMessage> getROS2LogTopic()
@@ -139,7 +140,7 @@ public class ROS2LogRecord
    }
 
    @SuppressWarnings("unchecked")
-   private <T> RecordTopicManager<T> getTopicManager(ROS2Topic<T> topic)
+   private <T extends us.ihmc.jros2.ROS2Message<T>> RecordTopicManager<T> getTopicManager(ROS2Topic<T> topic)
    {
       for (int i = 0; i < topicManagers.size(); i++)
       {

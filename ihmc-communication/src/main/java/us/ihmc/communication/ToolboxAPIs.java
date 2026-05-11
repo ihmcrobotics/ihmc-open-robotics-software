@@ -36,22 +36,22 @@ public final class ToolboxAPIs
 
    public static ROS2Topic<WalkingControllerPreviewInputMessage> getControllerPreviewInputTopic(String robotName)
    {
-      return WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withInput().withType(WalkingControllerPreviewInputMessage.class);
+      return WALKING_PREVIEW_TOOLBOX.appendedWith(robotName).appendedWith("input").withType(WalkingControllerPreviewInputMessage.class);
    }
 
    public static ROS2Topic<WalkingControllerPreviewOutputMessage> getControllerPreviewOutputTopic(String robotName)
    {
-      return WALKING_PREVIEW_TOOLBOX.withRobot(robotName).appendedWith("output").withType(WalkingControllerPreviewOutputMessage.class);
+      return WALKING_PREVIEW_TOOLBOX.appendedWith(robotName).appendedWith("output").withType(WalkingControllerPreviewOutputMessage.class);
    }
 
-   public static <T> ROS2Topic<T> getIKToolboxTopic(Class<T> messageClass, String robotName)
+   public static <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Topic<T> getIKToolboxTopic(Class<T> messageClass, String robotName)
    {
       return ControllerAPI.getTopic(ControllerAPI.getBaseTopic(KINEMATICS_TOOLBOX_MODULE_NAME, robotName), messageClass);
    }
 
    public static ROS2Topic<?> getIKStreamingInputBaseTopic(String robotName)
    {
-      return ToolboxAPIs.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withInput();
+      return ToolboxAPIs.KINEMATICS_STREAMING_TOOLBOX.appendedWith(robotName).appendedWith("input");
    }
 
    public static ROS2Topic<KinematicsStreamingToolboxInputMessage> getIKStreamingInputTopic(String robotName)

@@ -64,15 +64,15 @@ public class PlanarRegionsListMessage implements ROS2Message<PlanarRegionsListMe
    /**
       The coordinates in world of the origin of each planar region.
    */
-   private final IDLObjectSequence<geometry_msgs.Point> region_origin_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> region_origin_;
    /**
       The orientation with respect to world of each planar region.
    */
-   private final IDLObjectSequence<geometry_msgs.Quaternion> region_orientation_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage> region_orientation_;
    /**
       The normal expressed in world of each planar region.
    */
-   private final IDLObjectSequence<geometry_msgs.Vector3> region_normal_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage> region_normal_;
    /**
       Indicates for each planar region the number of vertices for the concave hull.
    */
@@ -88,19 +88,19 @@ public class PlanarRegionsListMessage implements ROS2Message<PlanarRegionsListMe
    /**
       Single buffer used to store for each planar the vertices of the concave hull and the convex polygons.
    */
-   private final IDLObjectSequence<geometry_msgs.Point> vertex_buffer_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> vertex_buffer_;
 
    public PlanarRegionsListMessage()
    {
       last_updated_ = new ihmc_common_msgs.InstantMessage();
       region_id_ = new IDLIntSequence(3000);
-      region_origin_ = new IDLObjectSequence<geometry_msgs.Point>(3000, geometry_msgs.Point.class);
-      region_orientation_ = new IDLObjectSequence<geometry_msgs.Quaternion>(3000, geometry_msgs.Quaternion.class);
-      region_normal_ = new IDLObjectSequence<geometry_msgs.Vector3>(3000, geometry_msgs.Vector3.class);
+      region_origin_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(3000, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      region_orientation_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage>(3000, us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage.class);
+      region_normal_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage>(3000, us.ihmc.euclid.jros2.messages.EuclidVector3DMessage.class);
       concave_hulls_size_ = new IDLIntSequence(3000);
       number_of_convex_polygons_ = new IDLIntSequence(3000);
       convex_polygons_size_ = new IDLIntSequence(3000);
-      vertex_buffer_ = new IDLObjectSequence<geometry_msgs.Point>(50000, geometry_msgs.Point.class);
+      vertex_buffer_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(50000, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
 
    }
 
@@ -191,17 +191,17 @@ public class PlanarRegionsListMessage implements ROS2Message<PlanarRegionsListMe
       return region_id_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getRegionOrigin()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getRegionOrigin()
    {
       return region_origin_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Quaternion> getRegionOrientation()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage> getRegionOrientation()
    {
       return region_orientation_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Vector3> getRegionNormal()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage> getRegionNormal()
    {
       return region_normal_;
    }
@@ -221,7 +221,7 @@ public class PlanarRegionsListMessage implements ROS2Message<PlanarRegionsListMe
       return convex_polygons_size_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getVertexBuffer()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getVertexBuffer()
    {
       return vertex_buffer_;
    }

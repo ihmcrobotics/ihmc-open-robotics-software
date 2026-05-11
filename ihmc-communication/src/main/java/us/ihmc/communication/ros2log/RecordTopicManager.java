@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
 
-class RecordTopicManager<T>
+class RecordTopicManager<T extends us.ihmc.jros2.ROS2Message<T>>
 {
    private final ROS2Topic<T> ros2Topic;
    private final AtomicReference<Pair<Long, T>> latestData = new AtomicReference<>();
@@ -35,10 +35,11 @@ class RecordTopicManager<T>
 
       if (subscribeToTopic)
       {
-         ros2Node.createSubscription(ros2Topic, s ->
+         ros2Node.createSubscription(ros2Topic, reader ->
          {
+            T message = reader.read();
             long timestamp = timestampSupplier.getAsLong();
-            latestData.set(Pair.of(timestamp, s.takeNextData()));
+            latestData.set(Pair.of(timestamp, message));
          });
       }
    }

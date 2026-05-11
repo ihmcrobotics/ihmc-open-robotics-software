@@ -65,6 +65,7 @@ public class ROS2Heartbeat
    public void destroy()
    {
       publishThread.blockingKill(); // Important to use blockingKill() - we don't want the publisher to get removed before this finishes
-      heartbeatPublisher.remove();
+      // TODO: Need ros2Node reference to call destroyPublisher
+      // ros2Node.destroyPublisher(heartbeatPublisher);
    }
 }

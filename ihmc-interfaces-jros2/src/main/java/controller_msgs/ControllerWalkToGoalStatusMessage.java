@@ -41,12 +41,12 @@ public class ControllerWalkToGoalStatusMessage implements ROS2Message<Controller
    private double current_goal_x_position_;
    private double current_goal_y_position_;
    private double current_goal_yaw_;
-   private final geometry_msgs.Point current_position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage current_position_;
    private boolean is_reached_;
 
    public ControllerWalkToGoalStatusMessage()
    {
-      current_position_ = new geometry_msgs.Point();
+      current_position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
       is_reached_ = (boolean) false;
 
    }
@@ -142,7 +142,7 @@ public class ControllerWalkToGoalStatusMessage implements ROS2Message<Controller
       this.current_goal_yaw_ = current_goal_yaw_;
    }
 
-   public geometry_msgs.Point getCurrentPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getCurrentPosition()
    {
       return current_position_;
    }

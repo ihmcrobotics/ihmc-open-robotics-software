@@ -52,11 +52,11 @@ public class ArmActionStateMessage implements ROS2Message<ArmActionStateMessage>
    /**
       Hand force
    */
-   private final geometry_msgs.Vector3 force_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage force_;
    /**
       Hand torque
    */
-   private final geometry_msgs.Vector3 torque_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage torque_;
    /**
       Joint angles
    */
@@ -71,8 +71,8 @@ public class ArmActionStateMessage implements ROS2Message<ArmActionStateMessage>
       state_ = new behavior_msgs.ActionNodeStateMessage();
       definition_ = new behavior_msgs.ArmActionDefinitionMessage();
       goal_chest_transform_to_world_ = new controller_msgs.RigidBodyTransformMessage();
-      force_ = new geometry_msgs.Vector3();
-      torque_ = new geometry_msgs.Vector3();
+      force_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      torque_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
       joint_angles_ = new double[7];
 
    }
@@ -156,12 +156,12 @@ public class ArmActionStateMessage implements ROS2Message<ArmActionStateMessage>
       return goal_chest_transform_to_world_;
    }
 
-   public geometry_msgs.Vector3 getForce()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getForce()
    {
       return force_;
    }
 
-   public geometry_msgs.Vector3 getTorque()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getTorque()
    {
       return torque_;
    }

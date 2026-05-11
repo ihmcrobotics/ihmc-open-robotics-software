@@ -3,7 +3,6 @@ package us.ihmc.communication.ros2;
 import std_msgs.Bool;
 import std_msgs.Empty;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
@@ -24,7 +23,7 @@ public class ROS2PublisherMap
       this.ros2Node = ros2Node;
    }
 
-   public <T> ROS2Publisher getOrCreatePublisher(ROS2Topic<T> topic)
+   public <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Publisher getOrCreatePublisher(ROS2Topic<T> topic)
    {
       ROS2Publisher publisher = map.get(topic);
       if (publisher == null)
@@ -36,15 +35,17 @@ public class ROS2PublisherMap
       return publisher;
    }
 
-   public <T> void publish(ROS2Topic<T> topic, T message)
+   public <T extends us.ihmc.jros2.ROS2Message<T>> void publish(ROS2Topic<T> topic, T message)
    {
       getOrCreatePublisher(topic).publish(message);
    }
 
-   public void publish(ROS2Topic<Pose3D> topic, Pose3D message)
-   {
-      getOrCreatePublisher(topic).publish(message);
-   }
+   // TODO: jros2 migration - Pose3D publishing needs custom message wrapper
+   // public void publish(ROS2Topic<Pose3DMessageWrapper> topic, Pose3D message)
+   // {
+   //    Pose3DMessageWrapper wrapper = new Pose3DMessageWrapper(message);
+   //    getOrCreatePublisher(topic).publish(wrapper);
+   // }
 
    public void publish(ROS2Topic<Empty> topic)
    {

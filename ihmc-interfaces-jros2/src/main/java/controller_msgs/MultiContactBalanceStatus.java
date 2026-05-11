@@ -45,19 +45,19 @@ public class MultiContactBalanceStatus implements ROS2Message<MultiContactBalanc
    /**
       This is the measured position in world of the robot's capture point. Only x and y coordinates are relevant.
    */
-   private final geometry_msgs.Point capture_point_2d_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage capture_point_2d_;
    /**
       This is the measured position in world of the robot's center of mass.
    */
-   private final geometry_msgs.Point center_of_mass_3d_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage center_of_mass_3d_;
    /**
       List of contact points in world-frame.
    */
-   private final IDLObjectSequence<geometry_msgs.Point> contact_points_in_world_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> contact_points_in_world_;
    /**
       (Optional) List of the contact surface normals in world frame. If provided these are used to solve generalized support region.
    */
-   private final IDLObjectSequence<geometry_msgs.Vector3> surface_normals_in_world_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage> surface_normals_in_world_;
    /**
       List of the rigid-bodies in contact. This list's size and ordering corresponds to contact_point_in_world and surface_normals_in_world.
    */
@@ -65,10 +65,10 @@ public class MultiContactBalanceStatus implements ROS2Message<MultiContactBalanc
 
    public MultiContactBalanceStatus()
    {
-      capture_point_2d_ = new geometry_msgs.Point();
-      center_of_mass_3d_ = new geometry_msgs.Point();
-      contact_points_in_world_ = new IDLObjectSequence<geometry_msgs.Point>(16, geometry_msgs.Point.class);
-      surface_normals_in_world_ = new IDLObjectSequence<geometry_msgs.Vector3>(16, geometry_msgs.Vector3.class);
+      capture_point_2d_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      center_of_mass_3d_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      contact_points_in_world_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(16, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      surface_normals_in_world_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage>(16, us.ihmc.euclid.jros2.messages.EuclidVector3DMessage.class);
       support_rigid_body_ids_ = new IDLIntSequence(16);
 
    }
@@ -134,22 +134,22 @@ public class MultiContactBalanceStatus implements ROS2Message<MultiContactBalanc
       this.sequence_id_ = sequence_id_;
    }
 
-   public geometry_msgs.Point getCapturePoint2d()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getCapturePoint2d()
    {
       return capture_point_2d_;
    }
 
-   public geometry_msgs.Point getCenterOfMass3d()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getCenterOfMass3d()
    {
       return center_of_mass_3d_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getContactPointsInWorld()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getContactPointsInWorld()
    {
       return contact_points_in_world_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Vector3> getSurfaceNormalsInWorld()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage> getSurfaceNormalsInWorld()
    {
       return surface_normals_in_world_;
    }

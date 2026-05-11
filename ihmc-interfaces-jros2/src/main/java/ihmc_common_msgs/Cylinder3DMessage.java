@@ -33,11 +33,11 @@ public class Cylinder3DMessage implements ROS2Message<Cylinder3DMessage>
    /**
       Position of the cylinder, see Cylinder3D.
    */
-   private final geometry_msgs.Point position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage position_;
    /**
       Axis of the cylinder, see Cylinder3D.
    */
-   private final geometry_msgs.Vector3 axis_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage axis_;
    /**
       Radius of the cylinder, see Cylinder3D.
    */
@@ -49,8 +49,8 @@ public class Cylinder3DMessage implements ROS2Message<Cylinder3DMessage>
 
    public Cylinder3DMessage()
    {
-      position_ = new geometry_msgs.Point();
-      axis_ = new geometry_msgs.Vector3();
+      position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      axis_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -97,12 +97,12 @@ public class Cylinder3DMessage implements ROS2Message<Cylinder3DMessage>
 
    }
 
-   public geometry_msgs.Point getPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getPosition()
    {
       return position_;
    }
 
-   public geometry_msgs.Vector3 getAxis()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getAxis()
    {
       return axis_;
    }

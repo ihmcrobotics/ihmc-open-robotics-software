@@ -53,7 +53,7 @@ public class KinematicsToolboxSupportRegionMessage implements ROS2Message<Kinema
       The list of vertices of the support region.
       These are nominally identical to the robot's contact points, but might be different when a hand-hold is present, for example.
    */
-   private final IDLObjectSequence<geometry_msgs.Point> support_region_vertices_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> support_region_vertices_;
    /**
       The frame id of the vertex. If empty, world frame is assumed.
    */
@@ -62,7 +62,7 @@ public class KinematicsToolboxSupportRegionMessage implements ROS2Message<Kinema
    public KinematicsToolboxSupportRegionMessage()
    {
       center_of_mass_margin_ = (double) -1;
-      support_region_vertices_ = new IDLObjectSequence<geometry_msgs.Point>(geometry_msgs.Point.class);
+      support_region_vertices_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
       support_region_vertex_frames_ = new IDLLongSequence();
 
    }
@@ -130,7 +130,7 @@ public class KinematicsToolboxSupportRegionMessage implements ROS2Message<Kinema
       this.center_of_mass_margin_ = center_of_mass_margin_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getSupportRegionVertices()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getSupportRegionVertices()
    {
       return support_region_vertices_;
    }

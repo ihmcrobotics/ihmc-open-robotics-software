@@ -45,16 +45,16 @@ public class EuclideanTrajectoryPointMessage implements ROS2Message<EuclideanTra
    /**
       Define the desired 3D position to be reached at this trajectory point. It is expressed in world frame.
    */
-   private final geometry_msgs.Point position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage position_;
    /**
       Define the desired 3D linear velocity to be reached at this trajectory point. It is expressed in world frame.
    */
-   private final geometry_msgs.Vector3 linear_velocity_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage linear_velocity_;
 
    public EuclideanTrajectoryPointMessage()
    {
-      position_ = new geometry_msgs.Point();
-      linear_velocity_ = new geometry_msgs.Vector3();
+      position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      linear_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -121,12 +121,12 @@ public class EuclideanTrajectoryPointMessage implements ROS2Message<EuclideanTra
       this.time_ = time_;
    }
 
-   public geometry_msgs.Point getPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getPosition()
    {
       return position_;
    }
 
-   public geometry_msgs.Vector3 getLinearVelocity()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getLinearVelocity()
    {
       return linear_velocity_;
    }

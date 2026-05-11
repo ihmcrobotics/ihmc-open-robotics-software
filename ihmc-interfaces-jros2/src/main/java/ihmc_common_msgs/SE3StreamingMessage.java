@@ -49,43 +49,43 @@ public class SE3StreamingMessage implements ROS2Message<SE3StreamingMessage>
       Pose of custom control frame expressed in the end-effector frame.
       This is the frame attached to the rigid body that the taskspace trajectory is defined for.
    */
-   private final geometry_msgs.Pose control_frame_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage control_frame_pose_;
    /**
       Define the desired 3D position to be reached.
    */
-   private final geometry_msgs.Point position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage position_;
    /**
       Define the desired 3D orientation to be reached.
    */
-   private final geometry_msgs.Quaternion orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage orientation_;
    /**
       Define the desired 3D linear velocity, expressed in world frame,  to be reached.
    */
-   private final geometry_msgs.Vector3 linear_velocity_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage linear_velocity_;
    /**
       Define the desired 3D angular velocity, expressed in world frame,  to be reached.
    */
-   private final geometry_msgs.Vector3 angular_velocity_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage angular_velocity_;
    /**
       Define the desired 3D linear acceleration, expressed in world frame,  to be reached.
    */
-   private final geometry_msgs.Vector3 linear_acceleration_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage linear_acceleration_;
    /**
       Define the desired 3D angular acceleration, expressed in world frame,  to be reached.
    */
-   private final geometry_msgs.Vector3 angular_acceleration_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage angular_acceleration_;
 
    public SE3StreamingMessage()
    {
       frame_information_ = new ihmc_common_msgs.FrameInformation();
       use_custom_control_frame_ = (boolean) false;
-      control_frame_pose_ = new geometry_msgs.Pose();
-      position_ = new geometry_msgs.Point();
-      orientation_ = new geometry_msgs.Quaternion();
-      linear_velocity_ = new geometry_msgs.Vector3();
-      angular_velocity_ = new geometry_msgs.Vector3();
-      linear_acceleration_ = new geometry_msgs.Vector3();
-      angular_acceleration_ = new geometry_msgs.Vector3();
+      control_frame_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
+      position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
+      linear_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      angular_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      linear_acceleration_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      angular_acceleration_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -167,37 +167,37 @@ public class SE3StreamingMessage implements ROS2Message<SE3StreamingMessage>
       this.use_custom_control_frame_ = use_custom_control_frame_;
    }
 
-   public geometry_msgs.Pose getControlFramePose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getControlFramePose()
    {
       return control_frame_pose_;
    }
 
-   public geometry_msgs.Point getPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getPosition()
    {
       return position_;
    }
 
-   public geometry_msgs.Quaternion getOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getOrientation()
    {
       return orientation_;
    }
 
-   public geometry_msgs.Vector3 getLinearVelocity()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getLinearVelocity()
    {
       return linear_velocity_;
    }
 
-   public geometry_msgs.Vector3 getAngularVelocity()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getAngularVelocity()
    {
       return angular_velocity_;
    }
 
-   public geometry_msgs.Vector3 getLinearAcceleration()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getLinearAcceleration()
    {
       return linear_acceleration_;
    }
 
-   public geometry_msgs.Vector3 getAngularAcceleration()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getAngularAcceleration()
    {
       return angular_acceleration_;
    }

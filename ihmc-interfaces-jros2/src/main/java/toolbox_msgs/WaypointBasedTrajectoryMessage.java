@@ -40,21 +40,21 @@ public class WaypointBasedTrajectoryMessage implements ROS2Message<WaypointBased
    private long sequence_id_;
    private int end_effector_hash_code_;
    private final IDLDoubleSequence waypoint_times_;
-   private final IDLObjectSequence<geometry_msgs.Pose> waypoints_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> waypoints_;
    private final ihmc_common_msgs.SelectionMatrix3DMessage angular_selection_matrix_;
    private final ihmc_common_msgs.SelectionMatrix3DMessage linear_selection_matrix_;
-   private final geometry_msgs.Point control_frame_position_in_end_effector_;
-   private final geometry_msgs.Quaternion control_frame_orientation_in_end_effector_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage control_frame_position_in_end_effector_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage control_frame_orientation_in_end_effector_;
    private double weight_;
 
    public WaypointBasedTrajectoryMessage()
    {
       waypoint_times_ = new IDLDoubleSequence();
-      waypoints_ = new IDLObjectSequence<geometry_msgs.Pose>(geometry_msgs.Pose.class);
+      waypoints_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage>(us.ihmc.euclid.jros2.messages.EuclidPose3DMessage.class);
       angular_selection_matrix_ = new ihmc_common_msgs.SelectionMatrix3DMessage();
       linear_selection_matrix_ = new ihmc_common_msgs.SelectionMatrix3DMessage();
-      control_frame_position_in_end_effector_ = new geometry_msgs.Point();
-      control_frame_orientation_in_end_effector_ = new geometry_msgs.Quaternion();
+      control_frame_position_in_end_effector_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      control_frame_orientation_in_end_effector_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
       weight_ = (double) -1;
 
    }
@@ -147,7 +147,7 @@ public class WaypointBasedTrajectoryMessage implements ROS2Message<WaypointBased
       return waypoint_times_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Pose> getWaypoints()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> getWaypoints()
    {
       return waypoints_;
    }
@@ -162,12 +162,12 @@ public class WaypointBasedTrajectoryMessage implements ROS2Message<WaypointBased
       return linear_selection_matrix_;
    }
 
-   public geometry_msgs.Point getControlFramePositionInEndEffector()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getControlFramePositionInEndEffector()
    {
       return control_frame_position_in_end_effector_;
    }
 
-   public geometry_msgs.Quaternion getControlFrameOrientationInEndEffector()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getControlFrameOrientationInEndEffector()
    {
       return control_frame_orientation_in_end_effector_;
    }

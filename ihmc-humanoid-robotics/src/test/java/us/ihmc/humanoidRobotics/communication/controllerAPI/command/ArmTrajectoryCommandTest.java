@@ -10,8 +10,8 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.ArmTrajectoryMessage;
+import ihmc_common_msgs.TrajectoryPoint1DMessage;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.ExecutionMode;

@@ -33,11 +33,11 @@ public class PlanOffsetStatus implements ROS2Message<PlanOffsetStatus>
    /**
       The amount by which the remaining footsteps have been translated.
    */
-   private final geometry_msgs.Vector3 offset_vector_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage offset_vector_;
 
    public PlanOffsetStatus()
    {
-      offset_vector_ = new geometry_msgs.Vector3();
+      offset_vector_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -86,7 +86,7 @@ public class PlanOffsetStatus implements ROS2Message<PlanOffsetStatus>
       this.sequence_id_ = sequence_id_;
    }
 
-   public geometry_msgs.Vector3 getOffsetVector()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getOffsetVector()
    {
       return offset_vector_;
    }

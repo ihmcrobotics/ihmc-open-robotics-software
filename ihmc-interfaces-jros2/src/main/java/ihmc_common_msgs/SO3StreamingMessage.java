@@ -43,28 +43,28 @@ public class SO3StreamingMessage implements ROS2Message<SO3StreamingMessage>
       Pose of custom control frame expressed in the end-effector frame.
       This is the frame attached to the rigid body that the taskspace trajectory is defined for.
    */
-   private final geometry_msgs.Pose control_frame_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage control_frame_pose_;
    /**
       Define the desired 3D orientation to be reached.
    */
-   private final geometry_msgs.Quaternion orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage orientation_;
    /**
       Define the desired 3D angular velocity, expressed in world frame, to be reached.
    */
-   private final geometry_msgs.Vector3 angular_velocity_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage angular_velocity_;
    /**
       Define the desired 3D angular acceleration, expressed in world frame,  to be reached.
    */
-   private final geometry_msgs.Vector3 angular_acceleration_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage angular_acceleration_;
 
    public SO3StreamingMessage()
    {
       frame_information_ = new ihmc_common_msgs.FrameInformation();
       use_custom_control_frame_ = (boolean) false;
-      control_frame_pose_ = new geometry_msgs.Pose();
-      orientation_ = new geometry_msgs.Quaternion();
-      angular_velocity_ = new geometry_msgs.Vector3();
-      angular_acceleration_ = new geometry_msgs.Vector3();
+      control_frame_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
+      orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
+      angular_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      angular_acceleration_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -134,22 +134,22 @@ public class SO3StreamingMessage implements ROS2Message<SO3StreamingMessage>
       this.use_custom_control_frame_ = use_custom_control_frame_;
    }
 
-   public geometry_msgs.Pose getControlFramePose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getControlFramePose()
    {
       return control_frame_pose_;
    }
 
-   public geometry_msgs.Quaternion getOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getOrientation()
    {
       return orientation_;
    }
 
-   public geometry_msgs.Vector3 getAngularVelocity()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getAngularVelocity()
    {
       return angular_velocity_;
    }
 
-   public geometry_msgs.Vector3 getAngularAcceleration()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getAngularAcceleration()
    {
       return angular_acceleration_;
    }

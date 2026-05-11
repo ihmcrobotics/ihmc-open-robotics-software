@@ -116,15 +116,15 @@ public class FootstepPlanningToolboxOutputStatus implements ROS2Message<Footstep
    /**
       Planned body path. Empty if planner failed
    */
-   private final IDLObjectSequence<geometry_msgs.Pose> body_path_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> body_path_;
    /**
       Planned body path before smoothing, used for debugging. Empty if planner failed
    */
-   private final IDLObjectSequence<geometry_msgs.Point> body_path_unsmoothed_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> body_path_unsmoothed_;
    /**
       Goal pose used by the planner. This will be different from the requested goal pose if it's beyond the horizon length.
    */
-   private final geometry_msgs.Pose goal_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage goal_pose_;
    /**
       Object to record various planner timings, helpful for debugging
    */
@@ -142,9 +142,9 @@ public class FootstepPlanningToolboxOutputStatus implements ROS2Message<Footstep
       body_path_planning_result_ = (byte) 255;
       footstep_planning_result_ = (byte) 255;
       height_map_message_ = new perception_msgs.HeightMapMessage();
-      body_path_ = new IDLObjectSequence<geometry_msgs.Pose>(geometry_msgs.Pose.class);
-      body_path_unsmoothed_ = new IDLObjectSequence<geometry_msgs.Point>(geometry_msgs.Point.class);
-      goal_pose_ = new geometry_msgs.Pose();
+      body_path_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage>(us.ihmc.euclid.jros2.messages.EuclidPose3DMessage.class);
+      body_path_unsmoothed_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      goal_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       planner_timings_ = new toolbox_msgs.FootstepPlanningTimingsMessage();
       exception_message_ = new StringBuilder();
       stacktrace_ = new IDLStringSequence(20);
@@ -277,17 +277,17 @@ public class FootstepPlanningToolboxOutputStatus implements ROS2Message<Footstep
       return height_map_message_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Pose> getBodyPath()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> getBodyPath()
    {
       return body_path_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Point> getBodyPathUnsmoothed()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> getBodyPathUnsmoothed()
    {
       return body_path_unsmoothed_;
    }
 
-   public geometry_msgs.Pose getGoalPose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getGoalPose()
    {
       return goal_pose_;
    }

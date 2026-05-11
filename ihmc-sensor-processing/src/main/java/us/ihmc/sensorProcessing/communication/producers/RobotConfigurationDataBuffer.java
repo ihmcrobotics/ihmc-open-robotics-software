@@ -5,10 +5,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.SpatialVectorMessage;
-import gnu.trove.list.array.TFloatArrayList;
-import us.ihmc.communication.net.PacketConsumer;
+import controller_msgs.RobotConfigurationData;
+import controller_msgs.SpatialVectorMessage;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
+// TODO: PacketConsumer interface removed in jros2 - class needs refactoring
+// import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -28,7 +29,8 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
  *
  * @author jesper
  */
-public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigurationData>
+// TODO: PacketConsumer interface doesn't exist in jros2 - needs refactoring to use ROS2Callback or similar
+public class RobotConfigurationDataBuffer // implements PacketConsumer<RobotConfigurationData>
 {
    final static int BUFFER_SIZE = 1000;
 
@@ -175,8 +177,8 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
          throw new RuntimeException("Joint names do not match for RobotConfigurationData");
       }
 
-      TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
-      TFloatArrayList newJointVelocities = robotConfigurationData.getJointVelocities();
+      IDLFloatSequence newJointAngles = robotConfigurationData.getJointAngles();
+      IDLFloatSequence newJointVelocities = robotConfigurationData.getJointVelocities();
 
       for (int i = 0; i < newJointAngles.size(); i++)
       {
@@ -184,15 +186,15 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
          fullRobotModelCache.allJoints[i].setQd(newJointVelocities.get(i));
       }
 
-      Point3D translation = robotConfigurationData.getRootPosition();
+      Point3D translation = robotConfigurationData.getRootPosition().getPoint();
       rootJoint.getJointPose().getPosition().set(translation.getX(), translation.getY(), translation.getZ());
-      Quaternion orientation = robotConfigurationData.getRootOrientation();
+      Quaternion orientation = robotConfigurationData.getRootOrientation().getQuaternion();
       rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
 
       Twist rootJointTwist = new Twist();
       rootJointTwist.setIncludingFrame(rootJoint.getJointTwist());
-      Vector3D pelvisAngularVelocity = robotConfigurationData.getPelvisAngularVelocity();
-      Vector3D pelvisLinearVelocity = robotConfigurationData.getPelvisLinearVelocity();
+      Vector3D pelvisAngularVelocity = robotConfigurationData.getPelvisAngularVelocity().getVector();
+      Vector3D pelvisLinearVelocity = robotConfigurationData.getPelvisLinearVelocity().getVector();
       rootJointTwist.getAngularPart().set(pelvisAngularVelocity);
       rootJointTwist.getLinearPart().set(pelvisLinearVelocity);
       rootJoint.setJointTwist(rootJointTwist);
@@ -205,7 +207,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
          {
             SpatialVectorMessage momentAndForceVectorForSensor = robotConfigurationData.getForceSensorData().get(i);
             forceSensorDataHolder.getData(forceSensorDataHolder.getForceSensorDefinitions().get(i))
-                                 .setWrench(momentAndForceVectorForSensor.getAngularPart(), momentAndForceVectorForSensor.getLinearPart());
+                                 .setWrench(momentAndForceVectorForSensor.getAngularPart().getVector(), momentAndForceVectorForSensor.getLinearPart().getVector());
          }
       }
    }
@@ -241,7 +243,8 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       }
    }
 
-   @Override
+   // TODO: This method was part of PacketConsumer interface which doesn't exist in jros2
+   // Kept for backwards compatibility but no longer overrides an interface method
    public void receivedPacket(RobotConfigurationData packet)
    {
       update(packet);

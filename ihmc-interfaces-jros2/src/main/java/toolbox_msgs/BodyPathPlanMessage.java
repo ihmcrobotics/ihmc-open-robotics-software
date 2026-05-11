@@ -53,7 +53,7 @@ public class BodyPathPlanMessage implements ROS2Message<BodyPathPlanMessage>
    private byte footstep_planning_result_;
    private int plan_id_;
    private final perception_msgs.PlanarRegionsListMessage planar_regions_list_;
-   private final IDLObjectSequence<geometry_msgs.Pose> body_path_;
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> body_path_;
    private final geometry_msgs.Pose2D path_planner_start_pose_;
    private final geometry_msgs.Pose2D path_planner_goal_pose_;
 
@@ -62,7 +62,7 @@ public class BodyPathPlanMessage implements ROS2Message<BodyPathPlanMessage>
       footstep_planning_result_ = (byte) 255;
       plan_id_ = (int) -1;
       planar_regions_list_ = new perception_msgs.PlanarRegionsListMessage();
-      body_path_ = new IDLObjectSequence<geometry_msgs.Pose>(geometry_msgs.Pose.class);
+      body_path_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage>(us.ihmc.euclid.jros2.messages.EuclidPose3DMessage.class);
       path_planner_start_pose_ = new geometry_msgs.Pose2D();
       path_planner_goal_pose_ = new geometry_msgs.Pose2D();
 
@@ -158,7 +158,7 @@ public class BodyPathPlanMessage implements ROS2Message<BodyPathPlanMessage>
       return planar_regions_list_;
    }
 
-   public IDLObjectSequence<geometry_msgs.Pose> getBodyPath()
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> getBodyPath()
    {
       return body_path_;
    }

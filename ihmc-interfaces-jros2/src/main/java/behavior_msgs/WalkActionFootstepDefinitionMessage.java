@@ -31,12 +31,12 @@ public class WalkActionFootstepDefinitionMessage implements ROS2Message<WalkActi
    /**
       The footstep's sole pose
    */
-   private final geometry_msgs.Pose sole_pose_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage sole_pose_;
 
    public WalkActionFootstepDefinitionMessage()
    {
       robot_side_ = (byte) 255;
-      sole_pose_ = new geometry_msgs.Pose();
+      sole_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
 
    }
 
@@ -85,7 +85,7 @@ public class WalkActionFootstepDefinitionMessage implements ROS2Message<WalkActi
       this.robot_side_ = robot_side_;
    }
 
-   public geometry_msgs.Pose getSolePose()
+   public us.ihmc.euclid.jros2.messages.EuclidPose3DMessage getSolePose()
    {
       return sole_pose_;
    }

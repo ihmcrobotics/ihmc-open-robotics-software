@@ -189,19 +189,19 @@ public final class PerceptionAPI
     */
    private static final ROS2Topic<RigidBodyTransformMessage> TRANSFORM_TUNING_BASE_TOPIC = IHMC_ROOT.withType(RigidBodyTransformMessage.class)
                                                                                                     .appendedWith("transform_tuning");
-   public static final ROS2IOTopicPair<RigidBodyTransformMessage> STEPPING_CAMERA_TO_PARENT_TUNING = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix(
+   public static final ROS2IOTopicPair<RigidBodyTransformMessage> STEPPING_CAMERA_TO_PARENT_TUNING = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.appendedWith(
          "stepping_camera_to_parent"));
-   public static final ROS2IOTopicPair<RigidBodyTransformMessage> EXPERIMENTAL_CAMERA_TO_PARENT_TUNING = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix(
+   public static final ROS2IOTopicPair<RigidBodyTransformMessage> EXPERIMENTAL_CAMERA_TO_PARENT_TUNING = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.appendedWith(
          "experimental_camera_to_parent"));
    public static final SideDependentList<ROS2IOTopicPair<RigidBodyTransformMessage>> SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING = new SideDependentList<>();
 
    static
    {
       SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING.set(RobotSide.LEFT,
-                                                        new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix(
+                                                        new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.appendedWith(
                                                               "situational_awareness_left_camera_to_parent")));
       SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING.set(RobotSide.RIGHT,
-                                                        new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix(
+                                                        new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.appendedWith(
                                                               "situational_awareness_right_camera_to_parent")));
    }
 
@@ -214,5 +214,6 @@ public final class PerceptionAPI
    /*
     * Mocap
     */
-   public static final ROS2Topic<Pose3D> MOCAP_RIGID_BODY = IHMC_ROOT.withType(Pose3D.class).appendedWith("frame_update").appendedWith("mocap");
+   // TODO: Pose3D requires custom ROS2Message wrapper implementation (see jros2 examples/custom-message-class)
+   // public static final ROS2Topic<Pose3D> MOCAP_RIGID_BODY = IHMC_ROOT.withType(Pose3D.class).appendedWith("frame_update").appendedWith("mocap");
 }

@@ -38,18 +38,18 @@ public class AI2RHandPoseAdaptationMessage implements ROS2Message<AI2RHandPoseAd
    /**
       Hand Pose action - The position of the hand specified in reference_frame_name
    */
-   private final geometry_msgs.Point new_position_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage new_position_;
    /**
       Hand Pose action - The orientation of the hand specified in reference_frame_name
    */
-   private final geometry_msgs.Quaternion new_orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage new_orientation_;
 
    public AI2RHandPoseAdaptationMessage()
    {
       action_name_ = new StringBuilder();
       reference_frame_name_ = new StringBuilder();
-      new_position_ = new geometry_msgs.Point();
-      new_orientation_ = new geometry_msgs.Quaternion();
+      new_position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      new_orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
 
    }
 
@@ -128,12 +128,12 @@ public class AI2RHandPoseAdaptationMessage implements ROS2Message<AI2RHandPoseAd
       this.reference_frame_name_.delete(0, this.reference_frame_name_.length());
       this.reference_frame_name_.insert(0, s);
    }
-   public geometry_msgs.Point getNewPosition()
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getNewPosition()
    {
       return new_position_;
    }
 
-   public geometry_msgs.Quaternion getNewOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getNewOrientation()
    {
       return new_orientation_;
    }

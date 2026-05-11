@@ -1,10 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import controller_msgs.msg.dds.*;
-import ihmc_common_msgs.msg.dds.*;
+import controller_msgs.*;
+import ihmc_common_msgs.*;
 import us.ihmc.communication.packets.ObjectValidityChecker;
 import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
-import us.ihmc.communication.packets.Packet;
+// TODO: Packet doesn't exist in jros2
+// import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -847,7 +848,8 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   public static String validatePacket(Packet<?> packet)
+   // TODO: Refactor to not use Packet class
+   public static String validatePacket(Object packet)
    {
       if (packet == null)
          return "is null.";

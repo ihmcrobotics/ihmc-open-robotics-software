@@ -55,27 +55,27 @@ public class RobotDesiredConfigurationData implements ROS2Message<RobotDesiredCo
    */
    private final IDLObjectSequence<controller_msgs.JointDesiredOutputMessage> joint_desired_output_list_;
    private boolean has_desired_root_joint_position_data_;
-   private final geometry_msgs.Vector3 desired_root_joint_translation_;
-   private final geometry_msgs.Quaternion desired_root_joint_orientation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage desired_root_joint_translation_;
+   private final us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage desired_root_joint_orientation_;
    private boolean has_desired_root_joint_velocity_data_;
-   private final geometry_msgs.Vector3 desired_root_joint_linear_velocity_;
-   private final geometry_msgs.Vector3 desired_root_joint_angular_velocity_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage desired_root_joint_linear_velocity_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage desired_root_joint_angular_velocity_;
    private boolean has_desired_root_joint_acceleration_data_;
-   private final geometry_msgs.Vector3 desired_root_joint_linear_acceleration_;
-   private final geometry_msgs.Vector3 desired_root_joint_angular_acceleration_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage desired_root_joint_linear_acceleration_;
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage desired_root_joint_angular_acceleration_;
 
    public RobotDesiredConfigurationData()
    {
       joint_desired_output_list_ = new IDLObjectSequence<controller_msgs.JointDesiredOutputMessage>(50, controller_msgs.JointDesiredOutputMessage.class);
       has_desired_root_joint_position_data_ = (boolean) false;
-      desired_root_joint_translation_ = new geometry_msgs.Vector3();
-      desired_root_joint_orientation_ = new geometry_msgs.Quaternion();
+      desired_root_joint_translation_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      desired_root_joint_orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
       has_desired_root_joint_velocity_data_ = (boolean) false;
-      desired_root_joint_linear_velocity_ = new geometry_msgs.Vector3();
-      desired_root_joint_angular_velocity_ = new geometry_msgs.Vector3();
+      desired_root_joint_linear_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      desired_root_joint_angular_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
       has_desired_root_joint_acceleration_data_ = (boolean) false;
-      desired_root_joint_linear_acceleration_ = new geometry_msgs.Vector3();
-      desired_root_joint_angular_acceleration_ = new geometry_msgs.Vector3();
+      desired_root_joint_linear_acceleration_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
+      desired_root_joint_angular_acceleration_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 
    }
 
@@ -189,12 +189,12 @@ public class RobotDesiredConfigurationData implements ROS2Message<RobotDesiredCo
       this.has_desired_root_joint_position_data_ = has_desired_root_joint_position_data_;
    }
 
-   public geometry_msgs.Vector3 getDesiredRootJointTranslation()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getDesiredRootJointTranslation()
    {
       return desired_root_joint_translation_;
    }
 
-   public geometry_msgs.Quaternion getDesiredRootJointOrientation()
+   public us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage getDesiredRootJointOrientation()
    {
       return desired_root_joint_orientation_;
    }
@@ -209,12 +209,12 @@ public class RobotDesiredConfigurationData implements ROS2Message<RobotDesiredCo
       this.has_desired_root_joint_velocity_data_ = has_desired_root_joint_velocity_data_;
    }
 
-   public geometry_msgs.Vector3 getDesiredRootJointLinearVelocity()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getDesiredRootJointLinearVelocity()
    {
       return desired_root_joint_linear_velocity_;
    }
 
-   public geometry_msgs.Vector3 getDesiredRootJointAngularVelocity()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getDesiredRootJointAngularVelocity()
    {
       return desired_root_joint_angular_velocity_;
    }
@@ -229,12 +229,12 @@ public class RobotDesiredConfigurationData implements ROS2Message<RobotDesiredCo
       this.has_desired_root_joint_acceleration_data_ = has_desired_root_joint_acceleration_data_;
    }
 
-   public geometry_msgs.Vector3 getDesiredRootJointLinearAcceleration()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getDesiredRootJointLinearAcceleration()
    {
       return desired_root_joint_linear_acceleration_;
    }
 
-   public geometry_msgs.Vector3 getDesiredRootJointAngularAcceleration()
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getDesiredRootJointAngularAcceleration()
    {
       return desired_root_joint_angular_acceleration_;
    }

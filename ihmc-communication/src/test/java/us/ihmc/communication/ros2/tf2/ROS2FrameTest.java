@@ -1,6 +1,7 @@
 package us.ihmc.communication.ros2.tf2;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -57,7 +58,7 @@ public class ROS2FrameTest
 
       staticFrame.remove();
       staticFrame1.remove();
-      node.destroy();
+      node.close();
    }
 
    @Test
@@ -81,7 +82,7 @@ public class ROS2FrameTest
       EuclidCoreTestTools.assertEquals(new RigidBodyTransform(), mutableFrame.getTransformToParent(), EPSILON);
 
       mutableFrame.remove();
-      node.destroy();
+      node.close();
    }
 
    @Test
@@ -97,11 +98,13 @@ public class ROS2FrameTest
 
       // We'll also publish the updated transform, and ensure it's correct.
       AtomicInteger correctMessagesReceived = new AtomicInteger(0);
-      node.createSubscription2(ROS2FrameTools.TF_TOPIC, message ->
+      node.createSubscription(ROS2FrameTools.TF_TOPIC, reader ->
       {
+         tf2_msgs.TFMessage message = reader.read();
          synchronized (correctMessagesReceived)
          {
-            RigidBodyTransform messageTransform = new RigidBodyTransform(message.getTransforms().get(0).getTransform());
+            RigidBodyTransform messageTransform = new RigidBodyTransform();
+            MessageTools.fromMessage(message.getTransforms().get(0).getTransform(), messageTransform);
             if (messageTransform.epsilonEquals(updatedTransformToParent, EPSILON))
                correctMessagesReceived.getAndIncrement();
 
@@ -146,7 +149,7 @@ public class ROS2FrameTest
       }
 
       mutableFrame.remove();
-      node.destroy();
+      node.close();
    }
 
    @Test
@@ -164,8 +167,9 @@ public class ROS2FrameTest
       AtomicInteger transformsInTFStaticMessage = new AtomicInteger(0);
 
       // Subscribe to /tf and /tf_static
-      ros2Node.createSubscription2(ROS2FrameTools.TF_TOPIC, tfMessage ->
+      ros2Node.createSubscription(ROS2FrameTools.TF_TOPIC, reader ->
       {
+         tf2_msgs.TFMessage tfMessage = reader.read();
          synchronized (messagesReceived)
          {
             messagesReceived.getAndIncrement();
@@ -176,8 +180,9 @@ public class ROS2FrameTest
          }
       });
 
-      ros2Node.createSubscription2(ROS2FrameTools.TF_STATIC_TOPIC, tfMessage ->
+      ros2Node.createSubscription(ROS2FrameTools.TF_STATIC_TOPIC, reader ->
       {
+         tf2_msgs.TFMessage tfMessage = reader.read();
          synchronized (messagesReceived)
          {
             messagesReceived.getAndIncrement();
