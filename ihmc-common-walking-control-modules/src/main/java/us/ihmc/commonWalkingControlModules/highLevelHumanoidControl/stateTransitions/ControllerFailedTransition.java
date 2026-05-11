@@ -1,15 +1,21 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions;
 
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class ControllerFailedTransition implements StateTransitionCondition
 {
    private final YoBoolean controllerFailed;
+   private final BooleanProvider isRobotOffSupport;
+   private final HighLevelControllerName nextStateEnum;
 
-   public ControllerFailedTransition(YoBoolean controllerFailed)
+   public ControllerFailedTransition(YoBoolean controllerFailed, BooleanProvider isRobotOffSupport, HighLevelControllerName nextStateEnum)
    {
       this.controllerFailed = controllerFailed;
+      this.isRobotOffSupport = isRobotOffSupport;
+      this.nextStateEnum = nextStateEnum;
    }
 
    private boolean pollControllerFailed()
@@ -22,6 +28,9 @@ public class ControllerFailedTransition implements StateTransitionCondition
    @Override
    public boolean testCondition(double timeInState)
    {
-      return pollControllerFailed();
+      boolean controllerFailed = pollControllerFailed();
+      boolean shouldTransition = (isRobotOffSupport.getValue() && nextStateEnum.equals(HighLevelControllerName.FALLING_STATE)) ||
+                                 (!isRobotOffSupport.getValue() && !nextStateEnum.equals(HighLevelControllerName.FALLING_STATE));
+      return controllerFailed && shouldTransition;
    }
 }
