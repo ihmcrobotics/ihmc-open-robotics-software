@@ -1,6 +1,7 @@
 package us.ihmc.perception;
 
 import perception_msgs.msg.dds.Float32MultiArrayHack;
+import std_msgs.msg.dds.MultiArrayDimension;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -78,11 +79,15 @@ public class RLPerceptionPublicationManager implements AutoCloseable
             rayTransform.appendTranslation(x, y, 0.0);
             float height = (float) heightMapData.getHeight(rayTransform.getTranslationX(), rayTransform.getTranslationY());
             if (i < rayCount)
-               rlHeightScanData[i++] = height;
+               rlHeightScanData[i++] = rayTransform.getTranslation().getZ32() - height - 0.5f;
          }
       }
 
       Float32MultiArrayHack rlHeightScanDataMessage = new Float32MultiArrayHack();
+      rlHeightScanDataMessage.getLayout().setDataOffset(0);
+      MultiArrayDimension dimension = rlHeightScanDataMessage.getLayout().getDim().add();
+      dimension.setSize(rayCount);
+      dimension.setStride(rayCount);
       rlHeightScanDataMessage.getData().addAll(rlHeightScanData);
       heightScanPublisher.publish(rlHeightScanDataMessage);
    }
