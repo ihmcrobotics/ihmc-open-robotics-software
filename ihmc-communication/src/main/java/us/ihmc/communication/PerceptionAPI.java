@@ -3,6 +3,7 @@ package us.ihmc.communication;
 import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
 import perception_msgs.msg.dds.ChunkMessage;
+import perception_msgs.msg.dds.Float32MultiArrayHack;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
@@ -216,4 +217,12 @@ public final class PerceptionAPI
     * Mocap
     */
    public static final ROS2Topic<Pose3D> MOCAP_RIGID_BODY = IHMC_ROOT.withTypeName(Pose3D.class).withModule("frame_update").withSuffix("mocap");
+
+   /*
+    * RL Perception
+    */
+   public static final ROS2Topic<ImageMessage> RL_DEPTH_IMAGE = IHMC_ROOT.withModule("rl_perception").withSuffix("depth_image").withType(ImageMessage.class);
+   public static final ROS2Topic<Float32MultiArrayHack> RL_HEIGHT_SCAN = IHMC_ROOT.withModule("rl_perception")
+                                                                                  .withSuffix("height_scan")
+                                                                                  .withType(Float32MultiArrayHack.class);
 }
