@@ -1096,6 +1096,9 @@ public class RDXVRWholeBodyKinematicStreaming
             miniGhostReal.setActive(false);
          }
          setStreamToController(false, false);
+         hideRealHead = false;
+         String headName = syncedRobot.getFullRobotModel().getHead().getName();
+         robotVisualizer.getMultiBodyGraphic().getMultiBody().getRigidBodiesToHide().remove(headName);
       }
 
       isKSTEnabled.set(enabled);
@@ -1121,7 +1124,7 @@ public class RDXVRWholeBodyKinematicStreaming
             }
             performingDemonstration.set(-1);
          }
-//         sendRLStateTransitionRequest(enabled);
+         sendRLStateTransitionRequest(enabled);
       }
 
       streamToController.set(enabled);
