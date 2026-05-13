@@ -6,6 +6,7 @@ import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.gpuMapping.HeightMapData;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensors.ImageSensor;
@@ -18,22 +19,27 @@ public class RLPerceptionPublicationManager implements AutoCloseable
    private static final float RL_HEIGHT_SCAN_RESOLUTION = 0.05f;
    private static final float RL_HEIGHT_SCAN_OBSERVATION_OFFSET_X = 0.6f;
 
-   // Depth image publishing section
    private final ImageSensor imageSensor;
+
+   // Depth image publishing section
    private final ImageSensorPublishThread depthPublishThread;
 
    // Height scan publishing section
    private final GpuMappingThread heightMapThread;
-   private final RepeatingTaskThread heightScanPublishThread;
+   private final ZUpFrame sensorZUpFrame;
    private final ROS2Publisher<Float32MultiArrayHack> heightScanPublisher;
+   private final RepeatingTaskThread heightScanPublishThread;
 
    public RLPerceptionPublicationManager(ROS2Node ros2Node, ImageSensor imageSensor, int depthImageKey, GpuMappingThread heightMapThread)
    {
       this.imageSensor = imageSensor;
+      this.heightMapThread = heightMapThread;
+
       depthPublishThread = new ImageSensorPublishThread(ros2Node, imageSensor);
       depthPublishThread.addTopic(PerceptionAPI.RL_DEPTH_IMAGE, depthImageKey, RL_DEPTH_OBSERVATION_SCALE);
 
-      this.heightMapThread = heightMapThread;
+      // Assumes height map and depth image come from same sensor
+      sensorZUpFrame = new ZUpFrame(imageSensor.getSensorFrame(), imageSensor.getSensorFrame().getName() + "ZUp");
       heightScanPublisher = ros2Node.createPublisher(PerceptionAPI.RL_HEIGHT_SCAN);
       heightScanPublishThread = new RepeatingTaskThread("RLHeightScanPublishThread", this::publishHeightMap);
    }
@@ -62,8 +68,8 @@ public class RLPerceptionPublicationManager implements AutoCloseable
 
       HeightMapData heightMapData = heightMapThread.getLatestHeightMapData();
 
-      // FIXME: Assumes height map and depth image comes from same sensor
-      RigidBodyTransform heightScanCenter = new RigidBodyTransform(imageSensor.getSensorFrame().getTransformToRoot());
+      sensorZUpFrame.update();
+      RigidBodyTransform heightScanCenter = new RigidBodyTransform(sensorZUpFrame.getTransformToRoot());
       heightScanCenter.appendTranslation(RL_HEIGHT_SCAN_OBSERVATION_OFFSET_X, 0.0, 0.0);
 
       int rayCount = Math.round(
@@ -71,15 +77,14 @@ public class RLPerceptionPublicationManager implements AutoCloseable
       float[] rlHeightScanData = new float[rayCount];
 
       int i = 0;
-      for (float y = -0.5f * RL_HEIGHT_SCAN_OBSERVATION_HEIGHT; y < 0.5f * RL_HEIGHT_SCAN_OBSERVATION_HEIGHT; y += RL_HEIGHT_SCAN_RESOLUTION)
+      for (float y = -0.5f * RL_HEIGHT_SCAN_OBSERVATION_WIDTH; y < 0.5f * RL_HEIGHT_SCAN_OBSERVATION_WIDTH && i < rayCount; y += RL_HEIGHT_SCAN_RESOLUTION)
       {
-         for (float x = -0.5f * RL_HEIGHT_SCAN_OBSERVATION_WIDTH; x < 0.5f * RL_HEIGHT_SCAN_OBSERVATION_WIDTH; x += RL_HEIGHT_SCAN_RESOLUTION)
+         for (float x = -0.5f * RL_HEIGHT_SCAN_OBSERVATION_HEIGHT; x < 0.5f * RL_HEIGHT_SCAN_OBSERVATION_HEIGHT && i < rayCount; x += RL_HEIGHT_SCAN_RESOLUTION)
          {
             RigidBodyTransform rayTransform = new RigidBodyTransform(heightScanCenter);
             rayTransform.appendTranslation(x, y, 0.0);
             float height = (float) heightMapData.getHeight(rayTransform.getTranslationX(), rayTransform.getTranslationY());
-            if (i < rayCount)
-               rlHeightScanData[i++] = rayTransform.getTranslation().getZ32() - height - 0.5f;
+            rlHeightScanData[i++] = rayTransform.getTranslation().getZ32() - height - 0.5f;
          }
       }
 
