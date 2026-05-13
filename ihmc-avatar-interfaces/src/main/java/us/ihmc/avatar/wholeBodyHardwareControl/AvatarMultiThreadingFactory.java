@@ -636,9 +636,12 @@ public class AvatarMultiThreadingFactory
          controllerFactory.addRequestableTransition(WALKING, EXIT_WALKING);
          controllerFactory.addRequestableTransition(FALLING_STATE, STAND_PREP_STATE);
 
-         // Always be able to request to go to freeze, since that's often a good failure state. Also add this as a failure transition for all states
+         // Always be able to request to go to freeze, falling, do nothing, and whatever the fallback state is
          for (HighLevelControllerName highLevelControllerName : HighLevelControllerName.values)
          {
+            if (!highLevelControllerName.equals(DO_NOTHING_BEHAVIOR))
+               controllerFactory.addRequestableTransition(highLevelControllerName, DO_NOTHING_BEHAVIOR);
+
             if (!highLevelControllerName.equals(FREEZE_STATE))
                controllerFactory.addRequestableTransition(highLevelControllerName, FREEZE_STATE);
 
@@ -647,22 +650,8 @@ public class AvatarMultiThreadingFactory
 
             if (!highLevelControllerName.equals(fallbackControllerState))
                controllerFactory.addRequestableTransition(highLevelControllerName, fallbackControllerState);
-         }
 
-         for (HighLevelControllerName highLevelControllerName : HighLevelControllerName.values)
-         {
-            if (highLevelControllerName == FALLING_STATE)
-               continue;
-
-            controllerFactory.addRequestableTransition(highLevelControllerName, FALLING_STATE);
-         }
-
-         for (HighLevelControllerName highLevelControllerName : HighLevelControllerName.values)
-         {
-            if (highLevelControllerName == DO_NOTHING_BEHAVIOR)
-               continue;
-
-            controllerFactory.addRequestableTransition(highLevelControllerName, DO_NOTHING_BEHAVIOR);
+            controllerFactory.addControllerFailureTransition(highLevelControllerName, fallbackControllerState);
          }
 
          controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING, false);
