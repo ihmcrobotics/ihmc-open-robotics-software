@@ -28,9 +28,13 @@ public class ControllerFailedTransition implements StateTransitionCondition
    @Override
    public boolean testCondition(double timeInState)
    {
-      boolean controllerFailed = pollControllerFailed();
+      boolean controllerFailed = this.controllerFailed.getBooleanValue();
       boolean shouldTransition = (isRobotOffSupport.getValue() && nextStateEnum.equals(HighLevelControllerName.FALLING_STATE)) ||
                                  (!isRobotOffSupport.getValue() && !nextStateEnum.equals(HighLevelControllerName.FALLING_STATE));
+
+      if (controllerFailed && shouldTransition)
+         this.controllerFailed.set(false);
+
       return controllerFailed && shouldTransition;
    }
 }
