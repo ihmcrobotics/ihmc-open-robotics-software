@@ -1,11 +1,16 @@
 package us.ihmc.perception;
 
+import org.bytedeco.opencv.global.opencv_imgproc;
 import perception_msgs.msg.dds.Float32MultiArrayHack;
+import perception_msgs.msg.dds.ImageMessage;
 import std_msgs.msg.dds.MultiArrayDimension;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.gpuMapping.HeightMapData;
+import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.perception.tools.RawImageTools;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
@@ -22,21 +27,27 @@ public class RLPerceptionPublicationManager implements AutoCloseable
    private final ImageSensor imageSensor;
 
    // Depth image publishing section
-   private final ImageSensorPublishThread depthPublishThread;
+   private final int depthImageKey;
+   private final ROS2Publisher<ImageMessage> depthImagePublisher;
+   private final ImageMessage depthImageMessage;
+   private final RepeatingTaskThread depthImagePublishThread;
 
    // Height scan publishing section
    private final GpuMappingThread heightMapThread;
    private final ZUpFrame sensorZUpFrame;
    private final ROS2Publisher<Float32MultiArrayHack> heightScanPublisher;
+   private final Float32MultiArrayHack rlHeightScanDataMessage = new Float32MultiArrayHack();
    private final RepeatingTaskThread heightScanPublishThread;
 
    public RLPerceptionPublicationManager(ROS2Node ros2Node, ImageSensor imageSensor, int depthImageKey, GpuMappingThread heightMapThread)
    {
       this.imageSensor = imageSensor;
+      this.depthImageKey = depthImageKey;
       this.heightMapThread = heightMapThread;
 
-      depthPublishThread = new ImageSensorPublishThread(ros2Node, imageSensor);
-      depthPublishThread.addTopic(PerceptionAPI.RL_DEPTH_IMAGE, depthImageKey, RL_DEPTH_OBSERVATION_SCALE);
+      depthImagePublisher = ros2Node.createPublisher(PerceptionAPI.RL_DEPTH_IMAGE);
+      depthImageMessage = new ImageMessage();
+      depthImagePublishThread = new RepeatingTaskThread("RLDepthImagePublishThread", this::publishDepthImage);
 
       // Assumes height map and depth image come from same sensor
       sensorZUpFrame = new ZUpFrame(imageSensor.getSensorFrame(), imageSensor.getSensorFrame().getName() + "ZUp");
@@ -47,18 +58,33 @@ public class RLPerceptionPublicationManager implements AutoCloseable
    public void start()
    {
       if (imageSensor != null)
-         depthPublishThread.start();
+         depthImagePublishThread.startRepeating();
 
       if (heightMapThread != null && imageSensor != null)
-         heightScanPublishThread.start();
+         heightScanPublishThread.startRepeating();
    }
 
    @Override
    public void close()
    {
-      depthPublishThread.kill();
+      depthImagePublishThread.kill();
       heightScanPublishThread.kill();
       heightScanPublisher.remove();
+   }
+
+   private void publishDepthImage() throws InterruptedException
+   {
+      imageSensor.waitForGrab();
+
+      RawImage depthImage = imageSensor.getImage(depthImageKey);
+      if (depthImage == null)
+         return;
+
+      RawImage downScaledImage = RawImageTools.scale(depthImage, RL_DEPTH_OBSERVATION_SCALE, opencv_imgproc.INTER_NEAREST);
+      PerceptionMessageTools.packImageMessage(downScaledImage, downScaledImage.getCpuImageMat().data(), CompressionType.UNCOMPRESSED, depthImageMessage);
+      depthImagePublisher.publish(depthImageMessage);
+
+      depthImage.release();
    }
 
    private void publishHeightMap()
@@ -88,11 +114,12 @@ public class RLPerceptionPublicationManager implements AutoCloseable
          }
       }
 
-      Float32MultiArrayHack rlHeightScanDataMessage = new Float32MultiArrayHack();
       rlHeightScanDataMessage.getLayout().setDataOffset(0);
+      rlHeightScanDataMessage.getLayout().getDim().clear();
       MultiArrayDimension dimension = rlHeightScanDataMessage.getLayout().getDim().add();
       dimension.setSize(rayCount);
       dimension.setStride(rayCount);
+      rlHeightScanDataMessage.getData().clear(rayCount);
       rlHeightScanDataMessage.getData().addAll(rlHeightScanData);
       heightScanPublisher.publish(rlHeightScanDataMessage);
    }
