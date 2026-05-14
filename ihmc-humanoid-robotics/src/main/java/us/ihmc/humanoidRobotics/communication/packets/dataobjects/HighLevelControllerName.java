@@ -37,7 +37,9 @@ public enum HighLevelControllerName
    EXTERNAL,
    RL_CONTROL,
    EXIT_RL,
-   RL_TRANSITION_STATE;
+   RL_TRANSITION_STATE,
+   @RosEnumValueDocumentation(documentation = "Whole body model predictive control state.")
+   MPC_CONTROL;
 
    public static final HighLevelControllerName[] values = values();
 
