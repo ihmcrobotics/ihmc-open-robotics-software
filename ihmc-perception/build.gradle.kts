@@ -61,3 +61,4 @@ slamWrapperDependencies {
 }
 
 app.entrypoint("IsaacROSFoundationPoseDemo", "us.ihmc.perception.demo.IsaacROSFoundationPoseDemo")
+app.entrypoint("ZEDSVOToMP4Demo", "us.ihmc.perception.demo.ZEDSVOToMP4Demo")

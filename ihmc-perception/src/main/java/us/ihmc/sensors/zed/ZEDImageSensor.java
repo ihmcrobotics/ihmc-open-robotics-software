@@ -210,7 +210,7 @@ public class ZEDImageSensor extends ImageSensor
 
       // Set some more runtime and init parameters
       zedRuntimeParameters.enable_depth(slDepthMode != SL_DEPTH_MODE_NONE);
-      zedInitParameters.depth_mode(slDepthMode);
+      zedInitParameters.depth_mode(slDepthMode != SL_DEPTH_MODE_NONE ? slDepthMode : SL_DEPTH_MODE_NEURAL);
       zedInitParameters.svo_real_time_mode(true);
    }
 
@@ -367,7 +367,8 @@ public class ZEDImageSensor extends ImageSensor
          }
 
          throwOnError(returnCode);
-         lastGrabTime = grabTime;
+         long zedTimestampNanos = sl_get_current_timestamp(cameraID); // or equivalent
+         lastGrabTime = Instant.ofEpochSecond(zedTimestampNanos / 1_000_000_000L, zedTimestampNanos % 1_000_000_000L);
          ++grabSequenceNumber;
 
          lastGrabTimestamp = sl_get_current_timestamp(cameraID);
