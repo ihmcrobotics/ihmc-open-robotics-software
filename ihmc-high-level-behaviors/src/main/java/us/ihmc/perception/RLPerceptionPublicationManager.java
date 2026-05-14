@@ -103,7 +103,7 @@ public class RLPerceptionPublicationManager implements AutoCloseable
       float[] rlHeightScanData = new float[rayCount];
 
       int i = 0;
-      for (float y = 0.5f * RL_HEIGHT_SCAN_OBSERVATION_WIDTH; y > -0.5f * RL_HEIGHT_SCAN_OBSERVATION_WIDTH && i < rayCount; y -= RL_HEIGHT_SCAN_RESOLUTION)
+      for (float y = -0.5f * RL_HEIGHT_SCAN_OBSERVATION_WIDTH; y < 0.5f * RL_HEIGHT_SCAN_OBSERVATION_WIDTH && i < rayCount; y += RL_HEIGHT_SCAN_RESOLUTION)
       {
          for (float x = -0.5f * RL_HEIGHT_SCAN_OBSERVATION_HEIGHT; x < 0.5f * RL_HEIGHT_SCAN_OBSERVATION_HEIGHT && i < rayCount; x += RL_HEIGHT_SCAN_RESOLUTION)
          {
