@@ -1,6 +1,8 @@
 package us.ihmc.perception;
 
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import perception_msgs.msg.dds.Float32MultiArrayHack;
 import perception_msgs.msg.dds.ImageMessage;
 import std_msgs.msg.dds.MultiArrayDimension;
@@ -9,6 +11,7 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.gpuMapping.HeightMapData;
 import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.perception.tools.RawImageTools;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -81,9 +84,16 @@ public class RLPerceptionPublicationManager implements AutoCloseable
          return;
 
       RawImage downScaledImage = RawImageTools.scale(depthImage, RL_DEPTH_OBSERVATION_SCALE, opencv_imgproc.INTER_NEAREST);
-      PerceptionMessageTools.packImageMessage(downScaledImage, downScaledImage.getCpuImageMat().data(), CompressionType.UNCOMPRESSED, depthImageMessage);
+
+      GpuMat float32DepthMat = new GpuMat();
+      downScaledImage.getGpuImageMat().convertTo(float32DepthMat, opencv_core.CV_32FC1, downScaledImage.getDepthDiscretization());
+      RawImage float32DepthImage = downScaledImage.replaceImage(float32DepthMat, PixelFormat.GRAY_F32);
+
+      PerceptionMessageTools.packImageMessage(float32DepthImage, float32DepthImage.getCpuImageMat().data(), CompressionType.UNCOMPRESSED, depthImageMessage);
       depthImagePublisher.publish(depthImageMessage);
 
+      float32DepthImage.release();
+      downScaledImage.release();
       depthImage.release();
    }
 
