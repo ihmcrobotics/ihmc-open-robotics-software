@@ -20,6 +20,11 @@ public interface HighLevelControllerParameters
       return null;
    }
 
+   default boolean getIsRobotOffSupport()
+   {
+      return false;
+   }
+
    HighLevelControllerName getDefaultInitialControllerState();
 
    HighLevelControllerName getFallbackControllerState();
