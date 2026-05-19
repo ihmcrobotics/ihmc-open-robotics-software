@@ -108,15 +108,20 @@ public class RLPerceptionPublicationManager implements AutoCloseable
       RigidBodyTransform heightScanCenter = new RigidBodyTransform(sensorZUpFrame.getTransformToRoot());
       heightScanCenter.appendTranslation(RL_HEIGHT_SCAN_OBSERVATION_OFFSET_X, 0.0, 0.0);
 
-      int rayCount = Math.round(
-            (RL_HEIGHT_SCAN_OBSERVATION_WIDTH * RL_HEIGHT_SCAN_OBSERVATION_HEIGHT) / (RL_HEIGHT_SCAN_RESOLUTION * RL_HEIGHT_SCAN_RESOLUTION));
+      // Sample on grid vertices (inclusive endpoints) to match IsaacLab's GridPatternCfg,
+      // which places rays at corners: count = (size/res + 1) per axis.
+      int nx = Math.round(RL_HEIGHT_SCAN_OBSERVATION_HEIGHT / RL_HEIGHT_SCAN_RESOLUTION) + 1;
+      int ny = Math.round(RL_HEIGHT_SCAN_OBSERVATION_WIDTH / RL_HEIGHT_SCAN_RESOLUTION) + 1;
+      int rayCount = nx * ny;
       float[] rlHeightScanData = new float[rayCount];
 
       int i = 0;
-      for (float y = -0.5f * RL_HEIGHT_SCAN_OBSERVATION_WIDTH; y < 0.5f * RL_HEIGHT_SCAN_OBSERVATION_WIDTH && i < rayCount; y += RL_HEIGHT_SCAN_RESOLUTION)
+      for (int iy = 0; iy < ny; iy++)
       {
-         for (float x = -0.5f * RL_HEIGHT_SCAN_OBSERVATION_HEIGHT; x < 0.5f * RL_HEIGHT_SCAN_OBSERVATION_HEIGHT && i < rayCount; x += RL_HEIGHT_SCAN_RESOLUTION)
+         float y = -0.5f * RL_HEIGHT_SCAN_OBSERVATION_WIDTH + iy * RL_HEIGHT_SCAN_RESOLUTION;
+         for (int ix = 0; ix < nx; ix++)
          {
+            float x = -0.5f * RL_HEIGHT_SCAN_OBSERVATION_HEIGHT + ix * RL_HEIGHT_SCAN_RESOLUTION;
             RigidBodyTransform rayTransform = new RigidBodyTransform(heightScanCenter);
             rayTransform.appendTranslation(x, y, 0.0);
             float height = (float) heightMapData.getHeight(rayTransform.getTranslationX(), rayTransform.getTranslationY());
