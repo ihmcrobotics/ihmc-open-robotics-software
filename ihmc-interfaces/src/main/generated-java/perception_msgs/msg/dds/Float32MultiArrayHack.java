@@ -25,7 +25,7 @@ public class Float32MultiArrayHack extends Packet<Float32MultiArrayHack> impleme
    public Float32MultiArrayHack()
    {
       layout_ = new std_msgs.msg.dds.MultiArrayLayout();
-      data_ = new us.ihmc.idl.IDLSequence.Float (512, "type_5");
+      data_ = new us.ihmc.idl.IDLSequence.Float (1024, "type_5");
 
    }
 
