@@ -72,10 +72,10 @@ public class XBoxOneRDXLocomotionPlugin extends AbstractJoystickLocomotionPlugin
                else if (buttonCode == controller.getMapping().buttonB)
                   csgParametersCommand.setTransferDuration(csgStatusMessage.getCurrentTransferDuration() + parameterIncrement);
 
-               else if (buttonCode == controller.getMapping().buttonDpadDown)
-                  csgParametersCommand.setSwingHeight(csgStatusMessage.getCurrentSwingHeight() - parameterIncrement);
+//               else if (buttonCode == controller.getMapping().buttonDpadDown)
+//                  csgParametersCommand.setSwingHeight(csgStatusMessage.getCurrentSwingHeight() - parameterIncrement);
                else if (buttonCode == controller.getMapping().buttonDpadUp)
-                  csgParametersCommand.setSwingHeight(csgStatusMessage.getCurrentSwingHeight() + parameterIncrement);
+                  directionalControlInputMessage.setJump(true);
 
                csgROS2CommunicationHelper.publish(csgParametersCommand);
             }
@@ -102,7 +102,10 @@ public class XBoxOneRDXLocomotionPlugin extends AbstractJoystickLocomotionPlugin
       updateCommandsFromRC();
 
       if (publisherThrottler.run() && !heartBeat.isExpired(PUBLISHER_HEARTBEAT_DURATION))
+      {
          publish();
+         directionalControlInputMessage.setJump(false);
+      }
    }
 
    private void updateCommandsFromRC()

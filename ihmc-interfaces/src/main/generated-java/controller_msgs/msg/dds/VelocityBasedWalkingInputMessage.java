@@ -21,6 +21,10 @@ public class VelocityBasedWalkingInputMessage extends Packet<VelocityBasedWalkin
             */
    public boolean walk_;
    /**
+            * If true, jump
+            */
+   public boolean jump_;
+   /**
             * Desired velocity setpoints
             */
    public double forward_velocity_;
@@ -47,6 +51,8 @@ public class VelocityBasedWalkingInputMessage extends Packet<VelocityBasedWalkin
       sequence_id_ = other.sequence_id_;
 
       walk_ = other.walk_;
+
+      jump_ = other.jump_;
 
       forward_velocity_ = other.forward_velocity_;
 
@@ -86,6 +92,21 @@ public class VelocityBasedWalkingInputMessage extends Packet<VelocityBasedWalkin
    public boolean getWalk()
    {
       return walk_;
+   }
+
+   /**
+            * If true, jump
+            */
+   public void setJump(boolean jump)
+   {
+      jump_ = jump;
+   }
+   /**
+            * If true, jump
+            */
+   public boolean getJump()
+   {
+      return jump_;
    }
 
    /**
@@ -160,6 +181,8 @@ public class VelocityBasedWalkingInputMessage extends Packet<VelocityBasedWalkin
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.walk_, other.walk_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.jump_, other.jump_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.forward_velocity_, other.forward_velocity_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.lateral_velocity_, other.lateral_velocity_, epsilon)) return false;
@@ -185,6 +208,8 @@ public class VelocityBasedWalkingInputMessage extends Packet<VelocityBasedWalkin
 
       if(this.walk_ != otherMyClass.walk_) return false;
 
+      if(this.jump_ != otherMyClass.jump_) return false;
+
       if(this.forward_velocity_ != otherMyClass.forward_velocity_) return false;
 
       if(this.lateral_velocity_ != otherMyClass.lateral_velocity_) return false;
@@ -207,6 +232,8 @@ public class VelocityBasedWalkingInputMessage extends Packet<VelocityBasedWalkin
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("walk=");
       builder.append(this.walk_);      builder.append(", ");
+      builder.append("jump=");
+      builder.append(this.jump_);      builder.append(", ");
       builder.append("forward_velocity=");
       builder.append(this.forward_velocity_);      builder.append(", ");
       builder.append("lateral_velocity=");

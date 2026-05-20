@@ -15,7 +15,7 @@ public class VelocityBasedWalkingInputMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f241babc5724675e917fb5eab95c4ba2b58606b1dabade26c21b95540f2b2376";
+   		return "6ac10964815cc33895e38dbbbceabb0354661278e5295b9bb66713168532c326";
    }
    
    @Override
@@ -56,6 +56,8 @@ public class VelocityBasedWalkingInputMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -83,6 +85,9 @@ public class VelocityBasedWalkingInputMessagePubSubType implements us.ihmc.pubsu
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -105,6 +110,8 @@ public class VelocityBasedWalkingInputMessagePubSubType implements us.ihmc.pubsu
 
       cdr.write_type_7(data.getWalk());
 
+      cdr.write_type_7(data.getJump());
+
       cdr.write_type_6(data.getForwardVelocity());
 
       cdr.write_type_6(data.getLateralVelocity());
@@ -120,6 +127,8 @@ public class VelocityBasedWalkingInputMessagePubSubType implements us.ihmc.pubsu
       data.setSequenceId(cdr.read_type_12());
       	
       data.setWalk(cdr.read_type_7());
+      	
+      data.setJump(cdr.read_type_7());
       	
       data.setForwardVelocity(cdr.read_type_6());
       	
@@ -137,6 +146,7 @@ public class VelocityBasedWalkingInputMessagePubSubType implements us.ihmc.pubsu
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("walk", data.getWalk());
+      ser.write_type_7("jump", data.getJump());
       ser.write_type_6("forward_velocity", data.getForwardVelocity());
       ser.write_type_6("lateral_velocity", data.getLateralVelocity());
       ser.write_type_6("turn_velocity", data.getTurnVelocity());
@@ -148,6 +158,7 @@ public class VelocityBasedWalkingInputMessagePubSubType implements us.ihmc.pubsu
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setWalk(ser.read_type_7("walk"));
+      data.setJump(ser.read_type_7("jump"));
       data.setForwardVelocity(ser.read_type_6("forward_velocity"));
       data.setLateralVelocity(ser.read_type_6("lateral_velocity"));
       data.setTurnVelocity(ser.read_type_6("turn_velocity"));
