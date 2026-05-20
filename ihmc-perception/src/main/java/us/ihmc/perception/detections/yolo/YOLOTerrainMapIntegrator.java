@@ -162,10 +162,10 @@ public class YOLOTerrainMapIntegrator
                if (distance > minDistance && bandWidth > 1e-6)
                {
                   // Compute interpolated score
-                  score = (float) EuclidCoreTools.clamp((distance - minDistance) / bandWidth, 0.0, 1.0); // 0→1
+                  score = (float) EuclidCoreTools.clamp((distance - minDistance) / bandWidth, 0.0, 1.0);
 
                   // Compute interpolated height
-                  height = (float) ((1.0 - score) * OBSTACLE_HEIGHT); // linear 1→0
+                  height = (float) ((1.0 - score) * OBSTACLE_HEIGHT);
                }
 
                // If multiple obstacles overlap, keep the min score

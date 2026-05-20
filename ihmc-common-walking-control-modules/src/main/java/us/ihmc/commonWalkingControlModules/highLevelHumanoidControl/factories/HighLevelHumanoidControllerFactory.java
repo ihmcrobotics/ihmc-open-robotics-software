@@ -358,6 +358,10 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public void addControllerFailureTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName fallbackControlStateEnum)
    {
       stateTransitionFactories.add(new ControllerFailedTransitionFactory(currentControlStateEnum, fallbackControlStateEnum));
+
+      // Falling controller gets added if not already the fallback control state
+      if (!fallbackControlStateEnum.equals(HighLevelControllerName.FALLING_STATE))
+         stateTransitionFactories.add(new ControllerFailedTransitionFactory(currentControlStateEnum, HighLevelControllerName.FALLING_STATE));
    }
 
    public void addCustomStateTransition(ControllerStateTransitionFactory<HighLevelControllerName> stateTransitionFactory)
