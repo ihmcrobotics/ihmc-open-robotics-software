@@ -9,7 +9,7 @@ module controller_msgs
     {
 
       /**
-       * This message is used to select which RL model the controller should run
+       * This message represents the command to switch to a desired policy
        */
       @TypeCode(type="controller_msgs::msg::dds_::RLModelSelectionMessage_")
       struct RLModelSelectionMessage
