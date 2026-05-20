@@ -49,7 +49,7 @@ public class KinematicsPlanningToolboxCenterOfMassCommand
       for (int i = 0; i < message.getWayPointTimes().size(); i++)
       {
          waypointTimes.add(message.getWayPointTimes().get(i));
-         waypoints.add().set(message.getDesiredWayPointPositionsInWorld().get(i));
+         waypoints.add().set(message.getDesiredWayPointPositionsInWorld().get(i).getPoint());
       }
 
       selectionMatrix.clearSelectionFrame();

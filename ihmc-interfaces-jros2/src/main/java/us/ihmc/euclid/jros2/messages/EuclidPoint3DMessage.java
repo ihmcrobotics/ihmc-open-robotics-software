@@ -1,6 +1,16 @@
 package us.ihmc.euclid.jros2.messages;
 
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.fastddsjava.cdr.CDRBuffer;
 import us.ihmc.jros2.ROS2Message;
 
@@ -68,10 +78,75 @@ public class EuclidPoint3DMessage implements ROS2Message<EuclidPoint3DMessage>
       this.point.set(from.point);
    }
 
+   public void set(Tuple3DBasics from)
+   {
+      this.point.set(from);
+   }
+
+   public void set(Tuple3DReadOnly from)
+   {
+      this.point.set(from);
+   }
+
    /**
     * Set from a Point3D directly.
     */
    public void set(Point3D from)
+   {
+      this.point.set(from);
+   }
+
+   /**
+    * Set from a Point3DBasics directly.
+    */
+   public void set(Point3DBasics from)
+   {
+      this.point.set(from);
+   }
+
+   /**
+    * Set from a Point3DReadOnly directly.
+    */
+   public void set(Point3DReadOnly from)
+   {
+      this.point.set(from);
+   }
+
+   public void set(Point2D from)
+   {
+      this.point.set(from);
+   }
+
+   public void set(Point2DBasics from)
+   {
+      this.point.set(from);
+   }
+
+   public void set(Point2DReadOnly from)
+   {
+      this.point.set(from);
+   }
+
+   /**
+    * Set from a Vector3D directly.
+    */
+   public void set(Vector3D from)
+   {
+      this.point.set(from);
+   }
+
+   /**
+    * Set from a Vector3DBasics directly.
+    */
+   public void set(Vector3DBasics from)
+   {
+      this.point.set(from);
+   }
+
+   /**
+    * Set from a Vector3DReadOnly directly.
+    */
+   public void set(Vector3DReadOnly from)
    {
       this.point.set(from);
    }

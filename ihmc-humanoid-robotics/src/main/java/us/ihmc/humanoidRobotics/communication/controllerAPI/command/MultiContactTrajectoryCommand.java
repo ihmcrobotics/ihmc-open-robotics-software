@@ -29,7 +29,7 @@ public class MultiContactTrajectoryCommand
    {
       sequenceId = message.getSequenceId();
       trajectoryDuration = message.getTrajectoryDuration();
-      pelvisPose.set(message.getRootJointPose());
+      pelvisPose.set(message.getRootJointPose().getPose());
 
       for (int i = 0; i < message.getJointAngles().size(); i++)
       {

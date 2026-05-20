@@ -1,20 +1,16 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.ArmTrajectoryMessage;
 import controller_msgs.ChestTrajectoryMessage;
 import controller_msgs.JointspaceTrajectoryMessage;
-import toolbox_msgs.KinematicsPlanningToolboxOutputStatus;
-import toolbox_msgs.KinematicsToolboxOutputStatus;
 import controller_msgs.OneDoFJointTrajectoryMessage;
 import controller_msgs.PelvisTrajectoryMessage;
-import ihmc_common_msgs.SO3TrajectoryMessage;
-import ihmc_common_msgs.SO3TrajectoryPointMessage;
 import controller_msgs.WholeBodyTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
+import ihmc_common_msgs.SO3TrajectoryMessage;
+import ihmc_common_msgs.SO3TrajectoryPointMessage;
+import toolbox_msgs.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -33,6 +29,10 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajector
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
 public class KinematicsPlanningToolboxOutputConverter
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -40,7 +40,7 @@ public class KinematicsPlanningToolboxOutputConverter
    private WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage;
    private final KinematicsToolboxOutputConverter converter;
 
-   private final List<KinematicsToolboxOutputStatus> keyFrames = new ArrayList<KinematicsToolboxOutputStatus>();
+   private final List<KinematicsToolboxOutputStatus> keyFrames = new ArrayList<>();
    private final TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
    private final AtomicReference<KinematicsPlanningToolboxOutputStatus> solution;
    private int numberOfTrajectoryPoints;
@@ -50,13 +50,13 @@ public class KinematicsPlanningToolboxOutputConverter
    public KinematicsPlanningToolboxOutputConverter(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
       converter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
-      solution = new AtomicReference<KinematicsPlanningToolboxOutputStatus>();
+      solution = new AtomicReference<>();
       for (RobotSide robotSide : RobotSide.values)
-         armJointNamesFromShoulder.put(robotSide, new ArrayList<String>());
+         armJointNamesFromShoulder.put(robotSide, new ArrayList<>());
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         List<String> armJointNamesFromHand = new ArrayList<String>();
+         List<String> armJointNamesFromHand = new ArrayList<>();
          JointBasics armJoint = converter.getFullRobotModel().getHand(robotSide).getParentJoint();
          while (armJoint.getPredecessor() != converter.getFullRobotModel().getElevator())
          {
@@ -109,7 +109,6 @@ public class KinematicsPlanningToolboxOutputConverter
 
          double time = keyFrameTimes.get(i);
          orientationCalculator.appendTrajectoryPoint(time, desiredOrientation);
-
       }
 
       orientationCalculator.useSecondOrderInitialGuess();
@@ -184,8 +183,13 @@ public class KinematicsPlanningToolboxOutputConverter
 
          desiredAngularVelocity.set(orientationCalculator.getTrajectoryPoint(i).getAngularVelocity());
 
-         trajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
-                          .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, desiredPositions[i], desiredOrientations[i], desiredLinearVelocity,
+         trajectoryMessage.getSe3Trajectory()
+                          .getTaskspaceTrajectoryPoints()
+                          .add()
+                          .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time,
+                                                                                    desiredPositions[i],
+                                                                                    desiredOrientations[i],
+                                                                                    desiredLinearVelocity,
                                                                                     desiredAngularVelocity));
       }
 
@@ -245,22 +249,5 @@ public class KinematicsPlanningToolboxOutputConverter
    public void setMessageToCreate(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage)
    {
       this.wholeBodyTrajectoryMessage = wholebodyTrajectoryMessage;
-   }
-
-   public KinematicsToolboxOutputStatus getRobotConfiguration(KinematicsPlanningToolboxOutputStatus solution, double time)
-   {
-      double minimumGap = Double.MAX_VALUE;
-      int nodeIndex = 0;
-      for (int i = 0; i < solution.getKeyFrameTimes().size(); i++)
-      {
-         double gap = Math.abs(time - solution.getKeyFrameTimes().get(i));
-         if (gap < minimumGap)
-         {
-            minimumGap = gap;
-            nodeIndex = i;
-         }
-      }
-
-      return solution.getRobotConfigurations().get(nodeIndex);
    }
 }

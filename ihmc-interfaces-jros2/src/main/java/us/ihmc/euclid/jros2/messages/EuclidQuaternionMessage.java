@@ -1,6 +1,11 @@
 package us.ihmc.euclid.jros2.messages;
 
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.fastddsjava.cdr.CDRBuffer;
 import us.ihmc.jros2.ROS2Message;
 
@@ -76,6 +81,46 @@ public class EuclidQuaternionMessage implements ROS2Message<EuclidQuaternionMess
     * Set from a Quaternion directly.
     */
    public void set(Quaternion from)
+   {
+      this.quaternion.set(from);
+   }
+
+   /**
+    * Set from a QuaternionBasics directly.
+    */
+   public void set(QuaternionBasics from)
+   {
+      this.quaternion.set(from);
+   }
+
+   /**
+    * Set from a QuaternionReadOnly directly.
+    */
+   public void set(QuaternionReadOnly from)
+   {
+      this.quaternion.set(from);
+   }
+
+   /**
+    * Set from a RotationMatrix directly.
+    */
+   public void set(RotationMatrix from)
+   {
+      this.quaternion.set(from);
+   }
+
+   /**
+    * Set from a RotationMatrixBasics directly.
+    */
+   public void set(RotationMatrixBasics from)
+   {
+      this.quaternion.set(from);
+   }
+
+   /**
+    * Set from a RotationMatrixReadOnly directly.
+    */
+   public void set(RotationMatrixReadOnly from)
    {
       this.quaternion.set(from);
    }

@@ -75,7 +75,7 @@ public class BipedTimedStepCommand implements Command<BipedTimedStepCommand, Bip
       sequenceId = message.getSequenceId();
       robotSide = RobotSide.fromByte(message.getRobotSide());
       swingHeight = message.getSwingHeight();
-      goalPose.set(message.getLocation(), message.getOrientation());
+      goalPose.set(message.getLocation().getPoint(), message.getOrientation().getQuaternion());
       timeInterval.setInterval(message.getStartTime(), message.getEndTime());
    }
 

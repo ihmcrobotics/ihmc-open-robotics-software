@@ -3,13 +3,11 @@ package us.ihmc.humanoidRobotics.bipedSupportPolygons;
 import controller_msgs.StepConstraintMessage;
 import controller_msgs.StepConstraintsListMessage;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -21,40 +19,6 @@ import java.util.List;
 
 public class StepConstraintMessageConverter
 {
-   public static StepConstraintMessage convertToStepConstraintMessage(StepConstraintRegion constraintRegion)
-   {
-      StepConstraintMessage message = new StepConstraintMessage();
-
-      message.getRegionOrigin().set(constraintRegion.getRegionOriginInWorld());
-      message.getRegionOrientation().set(constraintRegion.getTransformToWorld().getRotation());
-
-      constraintRegion.getNormal(message.getRegionNormal());
-
-      message.setConcaveHullSize(constraintRegion.getConcaveHullSize());
-      message.setNumberOfHolesInRegion(constraintRegion.getNumberOfHolesInRegion());
-
-      List<Point3D> vertexBuffer = message.getVertexBuffer();
-      vertexBuffer.clear();
-
-      for (int vertexIndex = 0; vertexIndex < constraintRegion.getConcaveHullSize(); vertexIndex++)
-      {
-         vertexBuffer.add().set(constraintRegion.getConcaveHullVertexInRegionFrame(vertexIndex), 0.0);
-      }
-
-      for (int polygonIndex = 0; polygonIndex < constraintRegion.getNumberOfHolesInRegion(); polygonIndex++)
-      {
-         ConcavePolygon2DReadOnly convexPolygon = constraintRegion.getHoleInConstraintRegion(polygonIndex);
-         message.getHolePolygonsSize().add(convexPolygon.getNumberOfVertices());
-
-         for (int vertexIndex = 0; vertexIndex < convexPolygon.getNumberOfVertices(); vertexIndex++)
-         {
-            vertexBuffer.add().set(convexPolygon.getVertex(vertexIndex), 0.0);
-         }
-      }
-
-      return message;
-   }
-
    public static StepConstraintsListMessage convertToStepConstraintsListMessage(List<StepConstraintRegion> constraintRegions)
    {
       StepConstraintsListMessage message = new StepConstraintsListMessage();
@@ -72,21 +36,21 @@ public class StepConstraintMessageConverter
       message.getConcaveHullsSize().clear();
       message.getNumberOfHolesInRegion().clear();
       message.getHolePolygonsSize().clear();
-      List<Point3D> vertexBuffer = message.getVertexBuffer();
+      var vertexBuffer = message.getVertexBuffer();
       vertexBuffer.clear();
       for (int i = 0; i < constraintRegions.size(); i++)
       {
          StepConstraintRegion constraintRegion = constraintRegions.get(i);
 
-         constraintRegion.getTransformToWorld().get(message.getRegionOrientation().add(), message.getRegionOrigin().add());
-         constraintRegion.getNormal(message.getRegionNormal().add());
+         constraintRegion.getTransformToWorld().get(message.getRegionOrientation().add().getQuaternion(), message.getRegionOrigin().add().getPoint());
+         constraintRegion.getNormal(message.getRegionNormal().add().getVector());
 
          message.getConcaveHullsSize().add(constraintRegion.getConcaveHullSize());
          message.getNumberOfHolesInRegion().add(constraintRegion.getNumberOfHolesInRegion());
 
          for (int vertexIndex = 0; vertexIndex < constraintRegion.getConcaveHullSize(); vertexIndex++)
          {
-            vertexBuffer.add().set(constraintRegion.getConcaveHullVertexInRegionFrame(vertexIndex), 0.0);
+            vertexBuffer.add().getPoint().set(constraintRegion.getConcaveHullVertexInRegionFrame(vertexIndex), 0.0);
          }
 
          for (int polygonIndex = 0; polygonIndex < constraintRegion.getNumberOfHolesInRegion(); polygonIndex++)
@@ -96,7 +60,7 @@ public class StepConstraintMessageConverter
 
             for (int vertexIndex = 0; vertexIndex < convexPolygon.getNumberOfVertices(); vertexIndex++)
             {
-               vertexBuffer.add().set(convexPolygon.getVertex(vertexIndex), 0.0);
+               vertexBuffer.add().getPoint().set(convexPolygon.getVertex(vertexIndex), 0.0);
             }
          }
       }
@@ -106,19 +70,19 @@ public class StepConstraintMessageConverter
    {
       StepConstraintsListMessage message = new StepConstraintsListMessage();
 
-      List<Point3D> vertexBuffer = message.getVertexBuffer();
+      var vertexBuffer = message.getVertexBuffer();
       vertexBuffer.clear();
       for (PlanarRegion constraintRegion : constraintRegions)
       {
-         constraintRegion.getTransformToWorld().get(message.getRegionOrientation().add(), message.getRegionOrigin().add());
-         constraintRegion.getNormal(message.getRegionNormal().add());
+         constraintRegion.getTransformToWorld().get(message.getRegionOrientation().add().getQuaternion(), message.getRegionOrigin().add().getPoint());
+         constraintRegion.getNormal(message.getRegionNormal().add().getVector());
 
          message.getConcaveHullsSize().add(constraintRegion.getConcaveHullSize());
          message.getNumberOfHolesInRegion().add(0);
 
          for (int vertexIndex = 0; vertexIndex < constraintRegion.getConcaveHullSize(); vertexIndex++)
          {
-            vertexBuffer.add().set(constraintRegion.getConcaveHullVertex(vertexIndex), 0.0);
+            vertexBuffer.add().getPoint().set(constraintRegion.getConcaveHullVertex(vertexIndex), 0.0);
          }
       }
 
@@ -129,20 +93,20 @@ public class StepConstraintMessageConverter
    {
       StepConstraintMessage message = new StepConstraintMessage();
 
-      message.getRegionOrigin().set(constraintRegion.getPoint());
-      message.getRegionOrientation().set(constraintRegion.getTransformToWorld().getRotation());
+      message.getRegionOrigin().getPoint().set(constraintRegion.getPoint());
+      message.getRegionOrientation().getQuaternion().set(constraintRegion.getTransformToWorld().getRotation());
 
-      constraintRegion.getNormal(message.getRegionNormal());
+      constraintRegion.getNormal(message.getRegionNormal().getVector());
 
       message.setConcaveHullSize(constraintRegion.getConcaveHullSize());
       message.setNumberOfHolesInRegion(0);
 
-      List<Point3D> vertexBuffer = message.getVertexBuffer();
+      var vertexBuffer = message.getVertexBuffer();
       vertexBuffer.clear();
 
       for (int vertexIndex = 0; vertexIndex < constraintRegion.getConcaveHullSize(); vertexIndex++)
       {
-         vertexBuffer.add().set(constraintRegion.getConcaveHullVertex(vertexIndex), 0.0);
+         vertexBuffer.add().getPoint().set(constraintRegion.getConcaveHullVertex(vertexIndex), 0.0);
       }
 
       return message;

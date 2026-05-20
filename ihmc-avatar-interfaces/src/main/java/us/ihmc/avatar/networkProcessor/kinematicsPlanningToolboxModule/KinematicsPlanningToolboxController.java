@@ -1,13 +1,20 @@
 package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.CapturabilityBasedStatus;
+import controller_msgs.RobotConfigurationData;
 import gnu.trove.list.array.TDoubleArrayList;
 import org.fest.swing.util.Pair;
-import toolbox_msgs.msg.dds.*;
+import toolbox_msgs.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxCenterOfMassMessage;
+import toolbox_msgs.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.*;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -19,7 +26,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxRigidBodyCommand;
@@ -290,7 +296,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
          for (int j = 0; j < numberOfKeyFrames; j++)
          {
             KinematicsToolboxRigidBodyMessage nextMessage = ikRigidBodyMessages.get(j);
-            Pose3D nextDesiredPose = new Pose3D(nextMessage.getDesiredPositionInWorld(), nextMessage.getDesiredOrientationInWorld());
+            Pose3D nextDesiredPose = new Pose3D(nextMessage.getDesiredPositionInWorld().getPoint(), nextMessage.getDesiredOrientationInWorld().getQuaternion());
             for (int k = 0; k < numberOfInterpolatedPoints; k++)
             {
                double alpha = ((double) k + 1) / (numberOfInterpolatedPoints + 1);
@@ -308,7 +314,8 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
          ikRigidBodyMessages.clear();
          for (int j = 0; j < ikRigidBodyPoses.size(); j++)
          {
-            KinematicsToolboxRigidBodyMessage messageToAdd = new KinematicsToolboxRigidBodyMessage(rigidBodyMessageBuffer);
+            KinematicsToolboxRigidBodyMessage messageToAdd = new KinematicsToolboxRigidBodyMessage();
+            messageToAdd.set(rigidBodyMessageBuffer);
             messageToAdd.getDesiredPositionInWorld().set(ikRigidBodyPoses.get(j).getPosition());
             messageToAdd.getDesiredOrientationInWorld().set(ikRigidBodyPoses.get(j).getOrientation());
             ikRigidBodyMessages.add(messageToAdd);
@@ -316,13 +323,13 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
       }
 
       // create interpolated way points for com.
-      List<Point3D> comPoints = new ArrayList<Point3D>();
+      List<Point3D> comPoints = new ArrayList<>();
       CenterOfMassCalculator calculator = new CenterOfMassCalculator(getDesiredFullRobotModel().getRootBody(), worldFrame);
       calculator.reset();
       Point3D currentPoint = new Point3D(calculator.getCenterOfMass());
       for (int i = 0; i < ikCenterOfMassMessages.size(); i++)
       {
-         Point3D nextDesiredPoint = new Point3D(ikCenterOfMassMessages.get(i).getDesiredPositionInWorld());
+         Point3D nextDesiredPoint = new Point3D(ikCenterOfMassMessages.get(i).getDesiredPositionInWorld().getPoint());
          for (int j = 0; j < numberOfInterpolatedPoints; j++)
          {
             double alpha = ((double) j + 1) / (numberOfInterpolatedPoints + 1);

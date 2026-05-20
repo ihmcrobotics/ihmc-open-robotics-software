@@ -52,10 +52,7 @@ public class CRDTBidirectionalFloatArray extends CRDTBidirectionalMutableField<f
    public void toMessage(IDLFloatSequence message)
    {
       message.clear();
-      for (int i = 0; i < getLength(); ++i)
-      {
-         message.add(getValueReadOnly(i));
-      }
+      message.addAll(getValue());
    }
 
    public void fromMessage(float[] messageArray)

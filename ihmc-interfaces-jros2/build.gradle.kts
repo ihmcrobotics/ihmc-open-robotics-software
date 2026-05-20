@@ -16,6 +16,7 @@ ihmc {
 mainDependencies {
    api("us.ihmc:jros2:source")
    api("us.ihmc:euclid-geometry:0.22.5")
+   api("us.ihmc:euclid-shape:0.22.5")
    api("us.ihmc:ihmc-commons:0.35.1")
 }
 

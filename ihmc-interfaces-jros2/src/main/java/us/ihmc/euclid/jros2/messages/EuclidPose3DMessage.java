@@ -1,6 +1,9 @@
 package us.ihmc.euclid.jros2.messages;
 
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DPoseReadOnly;
 import us.ihmc.fastddsjava.cdr.CDRBuffer;
 import us.ihmc.jros2.ROS2Message;
 
@@ -98,6 +101,27 @@ public class EuclidPose3DMessage implements ROS2Message<EuclidPose3DMessage>
     * Set from a Pose3D directly.
     */
    public void set(Pose3D from)
+   {
+      this.pose.set(from);
+   }
+
+   /**
+    * Set from a Pose3DBasics directly.
+    */
+   public void set(Pose3DBasics from)
+   {
+      this.pose.set(from);
+   }
+
+   /**
+    * Set from a Pose3DReadOnly directly.
+    */
+   public void set(Pose3DReadOnly from)
+   {
+      this.pose.set(from);
+   }
+
+   public void set(Shape3DPoseReadOnly from)
    {
       this.pose.set(from);
    }

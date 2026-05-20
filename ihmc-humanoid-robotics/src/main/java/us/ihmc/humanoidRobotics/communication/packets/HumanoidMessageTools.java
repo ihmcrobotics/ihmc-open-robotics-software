@@ -1,33 +1,22 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import controller_msgs.*;
-import gnu.trove.list.array.TDoubleArrayList;
-import ihmc_common_msgs.EuclideanTrajectoryMessage;
-import ihmc_common_msgs.EuclideanTrajectoryPointMessage;
-import ihmc_common_msgs.FrameInformation;
-import ihmc_common_msgs.QueueableMessage;
+import controller_msgs.ArmTrajectoryMessage;
+import controller_msgs.ChestHybridJointspaceTaskspaceTrajectoryMessage;
+import controller_msgs.DesiredAccelerationsMessage;
+import controller_msgs.FootLoadBearingMessage;
+import controller_msgs.HandHybridJointspaceTaskspaceTrajectoryMessage;
+import controller_msgs.HandTrajectoryMessage;
+import controller_msgs.HeadHybridJointspaceTaskspaceTrajectoryMessage;
+import controller_msgs.HighLevelStateChangeStatusMessage;
+import controller_msgs.JointspaceTrajectoryMessage;
+import controller_msgs.NeckDesiredAccelerationsMessage;
+import controller_msgs.OneDoFJointTrajectoryMessage;
 import ihmc_common_msgs.SE3TrajectoryMessage;
-import ihmc_common_msgs.SE3TrajectoryPointMessage;
 import ihmc_common_msgs.SO3TrajectoryMessage;
-import ihmc_common_msgs.SO3TrajectoryPointMessage;
-import ihmc_common_msgs.StampedPosePacket;
-import ihmc_common_msgs.TrajectoryPoint1DMessage;
-import perception_msgs.DetectedObjectPacket;
-import perception_msgs.IntrinsicParametersMessage;
-import toolbox_msgs.KinematicsPlanningToolboxCenterOfMassMessage;
-import toolbox_msgs.KinematicsPlanningToolboxOutputStatus;
-import toolbox_msgs.KinematicsPlanningToolboxRigidBodyMessage;
-import toolbox_msgs.KinematicsToolboxOutputStatus;
-import toolbox_msgs.ReachingManifoldMessage;
 import toolbox_msgs.RigidBodyExplorationConfigurationMessage;
 import toolbox_msgs.WaypointBasedTrajectoryMessage;
-import toolbox_msgs.WholeBodyTrajectoryToolboxConfigurationMessage;
-import toolbox_msgs.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
-// TODO: Packet doesn't exist in jros2
-// import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
@@ -95,7 +84,7 @@ public class HumanoidMessageTools
    public static DesiredAccelerationsMessage createDesiredAccelerationsMessage(double[] desiredJointAccelerations)
    {
       DesiredAccelerationsMessage message = new DesiredAccelerationsMessage();
-      message.getDesiredJointAccelerations().add(desiredJointAccelerations);
+      message.getDesiredJointAccelerations().addAll(desiredJointAccelerations);
       return message;
    }
 
@@ -138,7 +127,9 @@ public class HumanoidMessageTools
    public static ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide robotSide, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
       ArmTrajectoryMessage message = new ArmTrajectoryMessage();
-      message.getJointspaceTrajectory().set(new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage));
+      JointspaceTrajectoryMessage copy = new JointspaceTrajectoryMessage();
+      copy.set(jointspaceTrajectoryMessage);
+      message.getJointspaceTrajectory().set(copy);
       message.setRobotSide(robotSide.toByte());
       return message;
    }
@@ -339,7 +330,7 @@ public class HumanoidMessageTools
    public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBodyBasics rigidBody)
    {
       ConfigurationSpaceName[] configurations = {ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z, ConfigurationSpaceName.YAW,
-            ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
+                                                 ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
       double[] regionAmplitude = new double[] {0, 0, 0, 0, 0, 0};
 
       return createRigidBodyExplorationConfigurationMessage(rigidBody, configurations, regionAmplitude);
@@ -368,13 +359,13 @@ public class HumanoidMessageTools
       byte[] degreesOfFreedomToExplore1 = ConfigurationSpaceName.toBytes(degreesOfFreedomToExplore);
       if (degreesOfFreedomToExplore1.length != explorationRangeAmplitudes.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore1.length
-               + ", explorationRangeLowerLimits.length = ");
+                                    + ", explorationRangeLowerLimits.length = ");
 
-      message.getConfigurationSpaceNamesToExplore().resetQuick();
+      message.getConfigurationSpaceNamesToExplore().getBuffer().reset();
       message.getExplorationRangeUpperLimits().clear();
       message.getExplorationRangeLowerLimits().clear();
 
-      message.getConfigurationSpaceNamesToExplore().add(degreesOfFreedomToExplore1);
+      message.getConfigurationSpaceNamesToExplore().addAll(degreesOfFreedomToExplore1);
 
       for (int i = 0; i < degreesOfFreedomToExplore1.length; i++)
       {
@@ -398,15 +389,15 @@ public class HumanoidMessageTools
       byte[] degreesOfFreedomToExplore1 = ConfigurationSpaceName.toBytes(degreesOfFreedomToExplore);
       if (degreesOfFreedomToExplore1.length != explorationRangeUpperLimits.length || degreesOfFreedomToExplore1.length != explorationRangeLowerLimits.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore1.length
-               + ", explorationRangeLowerLimits.length = ");
+                                    + ", explorationRangeLowerLimits.length = ");
 
-      message.getConfigurationSpaceNamesToExplore().resetQuick();
+      message.getConfigurationSpaceNamesToExplore().getBuffer().reset();
       message.getExplorationRangeUpperLimits().clear();
       message.getExplorationRangeLowerLimits().clear();
 
-      message.getConfigurationSpaceNamesToExplore().add(degreesOfFreedomToExplore1);
-      message.getExplorationRangeUpperLimits().add(explorationRangeUpperLimits);
-      message.getExplorationRangeLowerLimits().add(explorationRangeLowerLimits);
+      message.getConfigurationSpaceNamesToExplore().addAll(degreesOfFreedomToExplore1);
+      message.getExplorationRangeUpperLimits().addAll(explorationRangeUpperLimits);
+      message.getExplorationRangeLowerLimits().addAll(explorationRangeLowerLimits);
 
       return message;
    }
@@ -597,7 +588,7 @@ public class HumanoidMessageTools
    }
 
    public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime,
-                                                                       Orientation3DReadOnly desiredOrientation)
+                                                                     Orientation3DReadOnly desiredOrientation)
    {
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
       message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, ReferenceFrame.getWorldFrame()));
@@ -1777,7 +1768,7 @@ public class HumanoidMessageTools
          if (footstep.getCustomPositionWaypoints().size() != 2)
          {
             LogTools.warn("Received footstep object without the correct number of waypoint positions. Should be 0 or 2, received: "
-                  + footstep.getCustomPositionWaypoints().size());
+                          + footstep.getCustomPositionWaypoints().size());
          }
          else
          {
@@ -1795,7 +1786,7 @@ public class HumanoidMessageTools
          if (footstep.getCustomWaypointProportions().size() != 2)
          {
             LogTools.warn("Received footstep object without the correct number of waypoint proportions. Should be 0 or 2, received: "
-                  + footstep.getCustomWaypointProportions().size());
+                          + footstep.getCustomWaypointProportions().size());
          }
          else
          {
@@ -1838,7 +1829,7 @@ public class HumanoidMessageTools
 
       if (keyFrameTimes.size() != keyFramePoses.size())
          throw new RuntimeException("Inconsistent list lengths: keyFrameTimes.size() = " + keyFrameTimes.size() + ", keyFramePoses.size() = "
-               + keyFramePoses.size());
+                                    + keyFramePoses.size());
 
       for (int i = 0; i < keyFrameTimes.size(); i++)
       {
@@ -1865,7 +1856,7 @@ public class HumanoidMessageTools
 
       if (keyFrameTimes.size() != keyFramePoses.size())
          throw new RuntimeException("Inconsistent list lengths: keyFrameTimes.size() = " + keyFrameTimes.size() + ", keyFramePoses.size() = "
-               + keyFramePoses.size());
+                                    + keyFramePoses.size());
 
       for (int i = 0; i < keyFrameTimes.size(); i++)
       {
@@ -1883,7 +1874,7 @@ public class HumanoidMessageTools
       KinematicsPlanningToolboxCenterOfMassMessage message = new KinematicsPlanningToolboxCenterOfMassMessage();
       if (keyFrameTimes.size() != keyFramePoints.size())
          throw new RuntimeException("Inconsistent list lengths: keyFrameTimes.size() = " + keyFrameTimes.size() + ", keyFramePoints.size() = "
-               + keyFramePoints.size());
+                                    + keyFramePoints.size());
       for (int i = 0; i < keyFrameTimes.size(); i++)
       {
          message.getWayPointTimes().add(keyFrameTimes.get(i));
@@ -1934,8 +1925,7 @@ public class HumanoidMessageTools
     *
     * @param clazz the class you want to clear
     */
-   // TODO: Refactor to not use Packet class
-   public static ClearDelayQueueMessage createClearDelayQueueMessage(Class<?> clazz)
+   public static ClearDelayQueueMessage createClearDelayQueueMessage(Class<? extends Packet<?>> clazz)
    {
       ClearDelayQueueMessage message = new ClearDelayQueueMessage();
       message.setClassSimpleNameBasedHashCode(clazz.getSimpleName().hashCode());
@@ -2100,35 +2090,35 @@ public class HumanoidMessageTools
    public static IntrinsicParametersMessage toIntrinsicParametersMessage(Object intrinsicParameters)
    {
       IntrinsicParametersMessage intrinsicParametersMessage = new IntrinsicParametersMessage();
-//      intrinsicParametersMessage.setWidth(intrinsicParameters.width);
-//      intrinsicParametersMessage.setHeight(intrinsicParameters.height);
-//      intrinsicParametersMessage.setFx(intrinsicParameters.fx);
-//      intrinsicParametersMessage.setFy(intrinsicParameters.fy);
-//      intrinsicParametersMessage.setSkew(intrinsicParameters.skew);
-//      intrinsicParametersMessage.setCx(intrinsicParameters.cx);
-//      intrinsicParametersMessage.setCy(intrinsicParameters.cy);
-//      if (intrinsicParameters.radial != null)
-//         intrinsicParametersMessage.getRadial().add(intrinsicParameters.radial);
-//      intrinsicParametersMessage.setT1(intrinsicParameters.t1);
-//      intrinsicParametersMessage.setT2(intrinsicParameters.t2);
+      //      intrinsicParametersMessage.setWidth(intrinsicParameters.width);
+      //      intrinsicParametersMessage.setHeight(intrinsicParameters.height);
+      //      intrinsicParametersMessage.setFx(intrinsicParameters.fx);
+      //      intrinsicParametersMessage.setFy(intrinsicParameters.fy);
+      //      intrinsicParametersMessage.setSkew(intrinsicParameters.skew);
+      //      intrinsicParametersMessage.setCx(intrinsicParameters.cx);
+      //      intrinsicParametersMessage.setCy(intrinsicParameters.cy);
+      //      if (intrinsicParameters.radial != null)
+      //         intrinsicParametersMessage.getRadial().add(intrinsicParameters.radial);
+      //      intrinsicParametersMessage.setT1(intrinsicParameters.t1);
+      //      intrinsicParametersMessage.setT2(intrinsicParameters.t2);
       return intrinsicParametersMessage;
    }
 
    @Deprecated
    public static Object toIntrinsicParameters(IntrinsicParametersMessage message)
    {
-//      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
-//      intrinsicParameters.width = message.getWidth();
-//      intrinsicParameters.height = message.getHeight();
-//      intrinsicParameters.fx = message.getFx();
-//      intrinsicParameters.fy = message.getFy();
-//      intrinsicParameters.skew = message.getSkew();
-//      intrinsicParameters.cx = message.getCx();
-//      intrinsicParameters.cy = message.getCy();
-//      if (!message.getRadial().isEmpty())
-//         intrinsicParameters.radial = message.getRadial().toArray();
-//      intrinsicParameters.t1 = message.getT1();
-//      intrinsicParameters.t2 = message.getT2();
+      //      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
+      //      intrinsicParameters.width = message.getWidth();
+      //      intrinsicParameters.height = message.getHeight();
+      //      intrinsicParameters.fx = message.getFx();
+      //      intrinsicParameters.fy = message.getFy();
+      //      intrinsicParameters.skew = message.getSkew();
+      //      intrinsicParameters.cx = message.getCx();
+      //      intrinsicParameters.cy = message.getCy();
+      //      if (!message.getRadial().isEmpty())
+      //         intrinsicParameters.radial = message.getRadial().toArray();
+      //      intrinsicParameters.t1 = message.getT1();
+      //      intrinsicParameters.t2 = message.getT2();
       return new Object();
    }
 

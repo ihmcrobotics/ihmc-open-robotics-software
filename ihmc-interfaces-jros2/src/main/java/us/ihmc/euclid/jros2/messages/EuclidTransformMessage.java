@@ -1,6 +1,8 @@
 package us.ihmc.euclid.jros2.messages;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.fastddsjava.cdr.CDRBuffer;
 import us.ihmc.jros2.ROS2Message;
@@ -108,10 +110,26 @@ public class EuclidTransformMessage implements ROS2Message<EuclidTransformMessag
    }
 
    /**
+    * Set from a RigidBodyTransformBasics directly.
+    */
+   public void set(RigidBodyTransformBasics from)
+   {
+      this.transform.set(from);
+   }
+
+   /**
+    * Set from a RigidBodyTransformReadOnly directly.
+    */
+   public void set(RigidBodyTransformReadOnly from)
+   {
+      this.transform.set(from);
+   }
+
+   /**
     * Get the wrapped Euclid RigidBodyTransform object.
     * This returns the actual object, not a copy.
     */
-   public RigidBodyTransform getTransform()
+   public RigidBodyTransformBasics getTransform()
    {
       return transform;
    }

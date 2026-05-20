@@ -43,7 +43,7 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
       for (int i = 0; i < message.getRigidBodyHashCodes().size(); i++)
       {
          this.rigidBodyHashCodes.add(message.getRigidBodyHashCodes().get(i));
-         this.contactPointPositions.add().set(message.getContactPointPositions().get(i));
+         this.contactPointPositions.add().set(message.getContactPointPositions().get(i).getPoint());
       }
 
       this.estimateContactLocation = message.getEstimateContactLocation();

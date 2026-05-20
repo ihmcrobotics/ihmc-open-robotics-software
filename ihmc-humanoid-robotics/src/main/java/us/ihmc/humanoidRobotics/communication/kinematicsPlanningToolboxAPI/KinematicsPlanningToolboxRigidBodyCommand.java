@@ -74,7 +74,7 @@ public class KinematicsPlanningToolboxRigidBodyCommand implements Command<Kinema
 
       for (int i = 0; i < message.getKeyFramePoses().size(); i++)
       {
-         waypoints.add().set(message.getKeyFramePoses().get(i));
+         waypoints.add().set(message.getKeyFramePoses().get(i).getPose());
          waypointTimes.add(message.getKeyFrameTimes().get(i));
       }
 
@@ -101,7 +101,7 @@ public class KinematicsPlanningToolboxRigidBodyCommand implements Command<Kinema
       }
 
       ReferenceFrame referenceFrame = endEffector == null ? null : endEffector.getBodyFixedFrame();
-      controlFramePose.setIncludingFrame(referenceFrame, message.getControlFramePositionInEndEffector(), message.getControlFrameOrientationInEndEffector());
+      controlFramePose.setIncludingFrame(referenceFrame, message.getControlFramePositionInEndEffector().getPoint(), message.getControlFrameOrientationInEndEffector().getQuaternion());
 
       for (int i = 0; i < message.getAllowablePositionDisplacement().size(); i++)
       {

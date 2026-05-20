@@ -26,7 +26,8 @@ public class CRDTStatusFootstepList extends CRDTStatusMutableField<RecyclingArra
 
    public Pose3DReadOnly getPoseReadOnly(int index)
    {
-      MessageTools.fromMessage(getValueInternal().get(index).getSolePose(), tempPose);
+      // TODO jros2
+//      MessageTools.fromMessage(getValueInternal().get(index).getSolePose(), tempPose);
       return tempPose;
    }
 

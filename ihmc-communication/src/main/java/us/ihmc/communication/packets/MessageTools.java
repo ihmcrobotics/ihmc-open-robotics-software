@@ -27,6 +27,7 @@ import ihmc_common_msgs.UUIDMessage;
 import ihmc_common_msgs.WeightMatrix3DMessage;
 import ihmc_common_msgs.YoRegistryMessage;
 import org.apache.logging.log4j.Level;
+import perception_msgs.ImageMessage;
 import std_msgs.Bool;
 import toolbox_msgs.KinematicsStreamingToolboxInitialConfigurationMessage;
 import toolbox_msgs.KinematicsToolboxCenterOfMassMessage;
@@ -42,6 +43,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.jros2.messages.EuclidPose3DMessage;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.polytope.FrameConvexPolytope3D;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
@@ -65,6 +67,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 import us.ihmc.jros2.Guid;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -78,6 +82,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -87,6 +92,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -126,7 +132,7 @@ public class MessageTools
    public static KinematicsToolboxCenterOfMassMessage createKinematicsToolboxCenterOfMassMessage(Point3DReadOnly desiredPosition)
    {
       KinematicsToolboxCenterOfMassMessage message = new KinematicsToolboxCenterOfMassMessage();
-      toMessage(desiredPosition, message.getDesiredPositionInWorld());
+      message.getDesiredPositionInWorld().set(desiredPosition);
       return message;
    }
 
@@ -165,7 +171,7 @@ public class MessageTools
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
       message.setEndEffectorHashCode(endEffector.hashCode());
-      toMessage(desiredPosition, message.getDesiredPositionInWorld());
+      message.getDesiredPositionInWorld().set(desiredPosition);
       packSelectionMatrix3DMessage(false, message.getAngularSelectionMatrix());
       packSelectionMatrix3DMessage(true, message.getLinearSelectionMatrix());
       return message;
@@ -192,7 +198,7 @@ public class MessageTools
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
       message.setEndEffectorHashCode(endEffector.hashCode());
-      toMessage(desiredOrientation, message.getDesiredOrientationInWorld());
+      message.getDesiredOrientationInWorld().set(desiredOrientation);
       packSelectionMatrix3DMessage(true, message.getAngularSelectionMatrix());
       packSelectionMatrix3DMessage(false, message.getLinearSelectionMatrix());
       return message;
@@ -231,8 +237,8 @@ public class MessageTools
 
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
       message.setEndEffectorHashCode(endEffector.hashCode());
-      toMessage(desiredPosition, message.getDesiredPositionInWorld());
-      toMessage(desiredOrientation, message.getDesiredOrientationInWorld());
+      message.getDesiredPositionInWorld().set(desiredPosition);
+      message.getDesiredOrientationInWorld().set(desiredOrientation);
       return message;
    }
 
@@ -262,12 +268,12 @@ public class MessageTools
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
       message.setEndEffectorHashCode(endEffector.hashCode());
-      toMessage(desiredPosition, message.getDesiredPositionInWorld());
-      toMessage(desiredOrientation, message.getDesiredOrientationInWorld());
+      message.getDesiredPositionInWorld().set(desiredPosition);
+      message.getDesiredOrientationInWorld().set(desiredOrientation);
       RigidBodyTransform transformToBodyFixedFrame = new RigidBodyTransform();
       controlFrame.getTransformToDesiredFrame(transformToBodyFixedFrame, endEffector.getBodyFixedFrame());
-      toMessage(transformToBodyFixedFrame.getTranslation(), message.getControlFramePositionInEndEffector());
-      toMessage(transformToBodyFixedFrame.getRotation(), message.getControlFrameOrientationInEndEffector());
+      message.getControlFramePositionInEndEffector().set(transformToBodyFixedFrame.getTranslation());
+      message.getControlFrameOrientationInEndEffector().set(transformToBodyFixedFrame.getRotation());
       return message;
    }
 
@@ -761,14 +767,10 @@ public class MessageTools
       for (int i = 0; i < kinematicsToolboxOutputStatus.getDesiredJointVelocities().size(); i++)
          jointsToUpdate[i].setQd(kinematicsToolboxOutputStatus.getDesiredJointVelocities().get(i));
 
-      Point3D desiredRootPosition = new Point3D();
-      Quaternion desiredRootOrientation = new Quaternion();
-      Vector3D desiredRootLinearVelocity = new Vector3D();
-      Vector3D desiredRootAngularVelocity = new Vector3D();
-      fromMessage(kinematicsToolboxOutputStatus.getDesiredRootPosition(), desiredRootPosition);
-      fromMessage(kinematicsToolboxOutputStatus.getDesiredRootOrientation(), desiredRootOrientation);
-      fromMessage(kinematicsToolboxOutputStatus.getDesiredRootLinearVelocity(), desiredRootLinearVelocity);
-      fromMessage(kinematicsToolboxOutputStatus.getDesiredRootAngularVelocity(), desiredRootAngularVelocity);
+      Point3D desiredRootPosition = kinematicsToolboxOutputStatus.getDesiredRootPosition().getPoint();
+      Quaternion desiredRootOrientation = kinematicsToolboxOutputStatus.getDesiredRootOrientation().getQuaternion();
+      Vector3D desiredRootLinearVelocity = kinematicsToolboxOutputStatus.getDesiredRootLinearVelocity().getVector();
+      Vector3D desiredRootAngularVelocity = kinematicsToolboxOutputStatus.getDesiredRootAngularVelocity().getVector();
       rootJointToUpdate.getJointPose().set(desiredRootPosition, desiredRootOrientation);
       rootJointToUpdate.getJointTwist().set(desiredRootAngularVelocity, desiredRootLinearVelocity);
    }
@@ -805,23 +807,27 @@ public class MessageTools
          kinematicsToolboxOutputStatusToPack.getDesiredJointVelocities().add((float) joint.getQd());
       }
 
+      Point3D desiredRootTranslation = kinematicsToolboxOutputStatusToPack.getDesiredRootPosition().getPoint();
+      Quaternion desiredRootOrientation = kinematicsToolboxOutputStatusToPack.getDesiredRootOrientation().getQuaternion();
+      Vector3D desiredRootLinearVelocity = kinematicsToolboxOutputStatusToPack.getDesiredRootLinearVelocity().getVector();
+      Vector3D desiredRootAngularVelocity = kinematicsToolboxOutputStatusToPack.getDesiredRootAngularVelocity().getVector();
+
       if (rootJoint != null)
       {
          Pose3DReadOnly jointPose = rootJoint.getJointPose();
          TwistReadOnly jointTwist = rootJoint.getJointTwist();
 
-         toMessage(jointPose.getPosition(), kinematicsToolboxOutputStatusToPack.getDesiredRootPosition());
-         toMessage(jointPose.getOrientation(), kinematicsToolboxOutputStatusToPack.getDesiredRootOrientation());
-         toMessage(jointTwist.getLinearPart(), kinematicsToolboxOutputStatusToPack.getDesiredRootLinearVelocity());
-         toMessage(jointTwist.getAngularPart(), kinematicsToolboxOutputStatusToPack.getDesiredRootAngularVelocity());
+         desiredRootTranslation.set(jointPose.getPosition());
+         desiredRootOrientation.set(jointPose.getOrientation());
+         desiredRootLinearVelocity.set(jointTwist.getLinearPart());
+         desiredRootAngularVelocity.set(jointTwist.getAngularPart());
       }
       else
       {
-         kinematicsToolboxOutputStatusToPack.getDesiredRootPosition().getPoint().setToZero();
-         kinematicsToolboxOutputStatusToPack.getDesiredRootOrientation().getQuaternion().setToZero();
-         kinematicsToolboxOutputStatusToPack.getDesiredRootOrientation().getQuaternion().set(0.0, 0.0, 0.0, 1.0);
-         kinematicsToolboxOutputStatusToPack.getDesiredRootLinearVelocity().getVector().setToZero();
-         kinematicsToolboxOutputStatusToPack.getDesiredRootAngularVelocity().getVector().setToZero();
+         desiredRootTranslation.setToZero();
+         desiredRootOrientation.setToZero();
+         desiredRootLinearVelocity.setToZero();
+         desiredRootAngularVelocity.setToZero();
       }
    }
 
@@ -845,10 +851,10 @@ public class MessageTools
       interpolatedToPack.getDesiredJointAngles().clear();
       interpolatedToPack.getDesiredJointVelocities().clear();
 
-      us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence jointAngles1 = outputStatusOne.getDesiredJointAngles();
-      us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence jointAngles2 = outputStatusTwo.getDesiredJointAngles();
-      us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence jointVelocities1 = outputStatusOne.getDesiredJointVelocities();
-      us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence jointVelocities2 = outputStatusTwo.getDesiredJointVelocities();
+      var jointAngles1 = outputStatusOne.getDesiredJointAngles();
+      var jointAngles2 = outputStatusTwo.getDesiredJointAngles();
+      var jointVelocities1 = outputStatusOne.getDesiredJointVelocities();
+      var jointVelocities2 = outputStatusTwo.getDesiredJointVelocities();
 
       for (int i = 0; i < jointAngles1.size(); i++)
       {
@@ -856,19 +862,19 @@ public class MessageTools
          interpolatedToPack.getDesiredJointVelocities().add((float) EuclidCoreTools.interpolate(jointVelocities1.get(i), jointVelocities2.get(i), alpha));
       }
 
-      // Interpolate directly using wrapped Euclid objects
-      interpolatedToPack.getDesiredRootPosition().getPoint().interpolate(outputStatusOne.getDesiredRootPosition().getPoint(),
-                                                                          outputStatusTwo.getDesiredRootPosition().getPoint(),
-                                                                          alpha);
-      interpolatedToPack.getDesiredRootOrientation().getQuaternion().interpolate(outputStatusOne.getDesiredRootOrientation().getQuaternion(),
-                                                                                  outputStatusTwo.getDesiredRootOrientation().getQuaternion(),
-                                                                                  alpha);
-      interpolatedToPack.getDesiredRootLinearVelocity().getVector().interpolate(outputStatusOne.getDesiredRootLinearVelocity().getVector(),
-                                                                                 outputStatusTwo.getDesiredRootLinearVelocity().getVector(),
-                                                                                 alpha);
-      interpolatedToPack.getDesiredRootAngularVelocity().getVector().interpolate(outputStatusOne.getDesiredRootAngularVelocity().getVector(),
-                                                                                  outputStatusTwo.getDesiredRootAngularVelocity().getVector(),
-                                                                                  alpha);
+      Point3D rootPosition1 = outputStatusOne.getDesiredRootPosition().getPoint();
+      Point3D rootPosition2 = outputStatusTwo.getDesiredRootPosition().getPoint();
+      Quaternion rootOrientation1 = outputStatusOne.getDesiredRootOrientation().getQuaternion();
+      Quaternion rootOrientation2 = outputStatusTwo.getDesiredRootOrientation().getQuaternion();
+      Vector3D rootLinearVelocity1 = outputStatusOne.getDesiredRootLinearVelocity().getVector();
+      Vector3D rootLinearVelocity2 = outputStatusTwo.getDesiredRootLinearVelocity().getVector();
+      Vector3D rootAngularVelocity1 = outputStatusOne.getDesiredRootAngularVelocity().getVector();
+      Vector3D rootAngularVelocity2 = outputStatusTwo.getDesiredRootAngularVelocity().getVector();
+
+      interpolatedToPack.getDesiredRootPosition().getPoint().interpolate(rootPosition1, rootPosition2, alpha);
+      interpolatedToPack.getDesiredRootOrientation().getQuaternion().interpolate(rootOrientation1, rootOrientation2, alpha);
+      interpolatedToPack.getDesiredRootLinearVelocity().getVector().interpolate(rootLinearVelocity1, rootLinearVelocity2, alpha);
+      interpolatedToPack.getDesiredRootAngularVelocity().getVector().interpolate(rootAngularVelocity1, rootAngularVelocity2, alpha);
 
       interpolatedToPack.setJointNameHash(outputStatusOne.getJointNameHash());
    }
@@ -913,12 +919,12 @@ public class MessageTools
       interpolatedToPack.setJointNameHash(start.getJointNameHash());
 
       // 1-DoF joints:
-      us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence jointAnglesStart = start.getDesiredJointAngles();
-      us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence jointAnglesEnd = end.getDesiredJointAngles();
-      us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence jointAnglesInterpolated = interpolatedToPack.getDesiredJointAngles();
-      us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence jointVelocitiesStart = start.getDesiredJointVelocities();
-      us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence jointVelocitiesEnd = end.getDesiredJointVelocities();
-      us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence jointVelocitiesInterpolated = interpolatedToPack.getDesiredJointVelocities();
+      var jointAnglesStart = start.getDesiredJointAngles();
+      var jointAnglesEnd = end.getDesiredJointAngles();
+      var jointAnglesInterpolated = interpolatedToPack.getDesiredJointAngles();
+      var jointVelocitiesStart = start.getDesiredJointVelocities();
+      var jointVelocitiesEnd = end.getDesiredJointVelocities();
+      var jointVelocitiesInterpolated = interpolatedToPack.getDesiredJointVelocities();
 
       if (jointAnglesStart.size() != jointAnglesEnd.size() || jointVelocitiesStart.size() != jointVelocitiesEnd.size())
          throw new IllegalArgumentException("start and end are not compatible");
@@ -940,35 +946,38 @@ public class MessageTools
       }
 
       // Root joint:
-      // Convert geometry_msgs to Euclid for interpolation
-      // Access wrapped Euclid objects directly
-      us.ihmc.euclid.tuple4D.Quaternion orientationInterpolated = interpolatedToPack.getDesiredRootOrientation().getQuaternion();
+      Quaternion orientationStart = start.getDesiredRootOrientation().getQuaternion();
+      Quaternion orientationEnd = end.getDesiredRootOrientation().getQuaternion();
+      Quaternion orientationInterpolated = interpolatedToPack.getDesiredRootOrientation().getQuaternion();
+      Point3D positionStart = start.getDesiredRootPosition().getPoint();
+      Point3D positionEnd = end.getDesiredRootPosition().getPoint();
       Point3D positionInterpolated = interpolatedToPack.getDesiredRootPosition().getPoint();
+
+      Vector3D angularVelocityStart = start.getDesiredRootAngularVelocity().getVector();
+      Vector3D angularVelocityEnd = end.getDesiredRootAngularVelocity().getVector();
       Vector3D angularVelocityInterpolated = interpolatedToPack.getDesiredRootAngularVelocity().getVector();
+      Vector3D linearVelocityEnd = end.getDesiredRootLinearVelocity().getVector();
+      Vector3D linearVelocityStart = start.getDesiredRootLinearVelocity().getVector();
       Vector3D linearVelocityInterpolated = interpolatedToPack.getDesiredRootLinearVelocity().getVector();
 
       // Do configuration
-      orientationInterpolated.interpolate(start.getDesiredRootOrientation().getQuaternion(),
-                                          end.getDesiredRootOrientation().getQuaternion(),
-                                          alpha);
-      positionInterpolated.interpolate(start.getDesiredRootPosition().getPoint(),
-                                       end.getDesiredRootPosition().getPoint(),
-                                       alpha);
+      orientationInterpolated.interpolate(orientationStart, orientationEnd, alpha);
+      positionInterpolated.interpolate(positionStart, positionEnd, alpha);
 
       // Root joint velocity
       Vector4D quaternionDot = new Vector4D();
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-      quaternionDot.sub(end.getDesiredRootOrientation().getQuaternion(), start.getDesiredRootOrientation().getQuaternion());
+      quaternionDot.sub(orientationEnd, orientationStart);
       quaternionDot.scale(alphaDot);
       quaternionCalculus.computeAngularVelocityInRotatedFrame(orientationInterpolated, quaternionDot, angularVelocityInterpolated);
-      angularVelocityInterpolated.scaleAdd(1.0 - alpha, start.getDesiredRootAngularVelocity().getVector(), angularVelocityInterpolated);
-      angularVelocityInterpolated.scaleAdd(alpha, end.getDesiredRootAngularVelocity().getVector(), angularVelocityInterpolated);
+      angularVelocityInterpolated.scaleAdd(1.0 - alpha, angularVelocityStart, angularVelocityInterpolated);
+      angularVelocityInterpolated.scaleAdd(alpha, angularVelocityEnd, angularVelocityInterpolated);
 
-      linearVelocityInterpolated.sub(end.getDesiredRootPosition().getPoint(), start.getDesiredRootPosition().getPoint());
+      linearVelocityInterpolated.sub(positionEnd, positionStart);
       linearVelocityInterpolated.scale(alphaDot);
       orientationInterpolated.inverseTransform(linearVelocityInterpolated);
-      linearVelocityInterpolated.scaleAdd(1.0 - alpha, start.getDesiredRootLinearVelocity().getVector(), linearVelocityInterpolated);
-      linearVelocityInterpolated.scaleAdd(alpha, end.getDesiredRootLinearVelocity().getVector(), linearVelocityInterpolated);
+      linearVelocityInterpolated.scaleAdd(1.0 - alpha, linearVelocityStart, linearVelocityInterpolated);
+      linearVelocityInterpolated.scaleAdd(alpha, linearVelocityEnd, linearVelocityInterpolated);
    }
 
    /**
@@ -998,8 +1007,8 @@ public class MessageTools
                                                        int[] jointHashCodes,
                                                        float[] jointAngles)
    {
-      toMessage(rootJointPosition, message.getPrivilegedRootJointPosition());
-      toMessage(rootJointOrientation, message.getPrivilegedRootJointOrientation());
+      message.getPrivilegedRootJointPosition().set(rootJointPosition);
+      message.getPrivilegedRootJointOrientation().set(rootJointOrientation);
       MessageTools.packPrivilegedJointAngles(message, jointHashCodes, jointAngles);
    }
 
@@ -1028,11 +1037,9 @@ public class MessageTools
          throw new IllegalArgumentException("The two arrays jointAngles and jointHashCodes have to be of same length.");
 
       message.getPrivilegedJointHashCodes().clear();
-      for (int hashCode : jointHashCodes)
-         message.getPrivilegedJointHashCodes().add(hashCode);
+      message.getPrivilegedJointHashCodes().addAll(jointHashCodes);
       message.getPrivilegedJointAngles().clear();
-      for (float angle : jointAngles)
-         message.getPrivilegedJointAngles().add(angle);
+      message.getPrivilegedJointAngles().addAll(jointAngles);
    }
 
    public static void packInitialJointAngles(KinematicsStreamingToolboxInitialConfigurationMessage message, int[] jointHashCodes, float[] jointAngles)
@@ -1041,11 +1048,9 @@ public class MessageTools
          throw new IllegalArgumentException("The two arrays jointAngles and jointHashCodes have to be of same length.");
 
       message.getInitialJointHashCodes().clear();
-      for (int hashCode : jointHashCodes)
-         message.getInitialJointHashCodes().add(hashCode);
+      message.getInitialJointHashCodes().addAll(jointHashCodes);
       message.getInitialJointAngles().clear();
-      for (float angle : jointAngles)
-         message.getInitialJointAngles().add(angle);
+      message.getInitialJointAngles().addAll(jointAngles);
    }
 
    /*
@@ -1135,8 +1140,8 @@ public class MessageTools
 
    public static void packBox3DMessage(Box3DReadOnly box, Box3DMessage boxMessageToSet)
    {
-      toMessage(box.getSize(), boxMessageToSet.getSize());
-      toMessage(box.getPose(), boxMessageToSet.getPose());
+      boxMessageToSet.getSize().set(box.getSize());
+      boxMessageToSet.getPose().set(box.getPose());
    }
 
    public static void packConvexPolytope3DMessage(ConvexPolytope3DReadOnly polytope, ConvexPolytope3DMessage convexPolytopeMessageToSet)
@@ -1145,43 +1150,42 @@ public class MessageTools
 
       for (int i = 0; i < polytope.getNumberOfVertices(); i++)
       {
-         us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage vertex = convexPolytopeMessageToSet.getVertices().add();
-         toMessage(polytope.getVertex(i), vertex);
+         convexPolytopeMessageToSet.getVertices().add().set(polytope.getVertex(i));
       }
    }
 
    public static void packCylinder3DMessage(Cylinder3DReadOnly cylinder, Cylinder3DMessage cylinderMessageToSet)
    {
-      toMessage(cylinder.getPosition(), cylinderMessageToSet.getPosition());
-      toMessage(cylinder.getAxis(), cylinderMessageToSet.getAxis());
+      cylinderMessageToSet.getPosition().set(cylinder.getPosition());
+      cylinderMessageToSet.getAxis().set(cylinder.getAxis());
       cylinderMessageToSet.setRadius(cylinder.getRadius());
       cylinderMessageToSet.setLength(cylinder.getLength());
    }
 
    public static void packCapsule3DMessage(Capsule3DReadOnly capsule, Capsule3DMessage capsuleMessageToSet)
    {
-      toMessage(capsule.getPosition(), capsuleMessageToSet.getPosition());
-      toMessage(capsule.getAxis(), capsuleMessageToSet.getAxis());
+      capsuleMessageToSet.getPosition().set(capsule.getPosition());
+      capsuleMessageToSet.getAxis().set(capsule.getAxis());
       capsuleMessageToSet.setRadius(capsule.getRadius());
       capsuleMessageToSet.setLength(capsule.getLength());
    }
 
    public static void packEllipsoid3DMessage(Ellipsoid3DReadOnly ellipsoid, Ellipsoid3DMessage ellipsoidMessageToSet)
    {
-      toMessage(ellipsoid.getPose(), ellipsoidMessageToSet.getPose());
-      toMessage(ellipsoid.getRadii(), ellipsoidMessageToSet.getRadii());
+      ellipsoidMessageToSet.getPose().set(ellipsoid.getPose());
+      ellipsoidMessageToSet.getRadii().set(ellipsoid.getRadii());
    }
 
    public static void unpackBox3DMessage(Box3DMessage boxMessage, Box3DBasics boxToSet)
    {
-      fromMessage(boxMessage.getSize(), boxToSet.getSize());
-      fromMessage(boxMessage.getPose(), boxToSet.getPose());
+      boxToSet.getSize().set(boxMessage.getSize().getVector());
+      boxToSet.getPose().set(boxMessage.getPose().getPose());
    }
 
    public static void unpackRamp3DMessage(Ramp3DMessage rampMessage, Ramp3DBasics rampToSet)
    {
-      fromMessage(rampMessage.getSize(), rampToSet.getSize());
-      fromMessage(rampMessage.getPose(), rampToSet.getPose());
+      rampToSet.getSize().set(rampMessage.getSize().getVector());
+      rampToSet.getPose().set(rampMessage.getPose().getPose());
    }
 
    public static void unpackConvexPolytope3DMessage(ConvexPolytope3DMessage convexPolytopeMessage, FrameConvexPolytope3D polytopeToSet)
@@ -1190,9 +1194,7 @@ public class MessageTools
 
       for (int i = 0; i < convexPolytopeMessage.getVertices().size(); i++)
       {
-         Point3D vertex = new Point3D();
-         fromMessage(convexPolytopeMessage.getVertices().get(i), vertex);
-         polytopeToSet.addVertex(vertex);
+         polytopeToSet.addVertex(new Point3D(convexPolytopeMessage.getVertices().get(i).getPoint()));
       }
    }
 
@@ -1202,50 +1204,48 @@ public class MessageTools
 
       for (int i = 0; i < convexPolytopeMessage.getVertices().size(); i++)
       {
-         Point3D vertex = new Point3D();
-         fromMessage(convexPolytopeMessage.getVertices().get(i), vertex);
-         polytopeToSet.addVertex(vertex);
+         polytopeToSet.addVertex(new Point3D(convexPolytopeMessage.getVertices().get(i).getPoint()));
       }
    }
 
    public static void unpackCylinder3DMessage(Cylinder3DMessage cylinderMessage, Cylinder3DBasics cylinderToSet)
    {
-      fromMessage(cylinderMessage.getPosition(), cylinderToSet.getPosition());
-      fromMessage(cylinderMessage.getAxis(), cylinderToSet.getAxis());
+      cylinderToSet.getPosition().set(cylinderMessage.getPosition().getPoint());
+      cylinderToSet.getAxis().set(cylinderMessage.getAxis().getVector());
       cylinderToSet.setRadius(cylinderMessage.getRadius());
       cylinderToSet.setLength(cylinderMessage.getLength());
    }
 
    public static void unpackCapsule3DMessage(Capsule3DMessage capsuleMessage, Capsule3DBasics capsuleToSet)
    {
-      fromMessage(capsuleMessage.getPosition(), capsuleToSet.getPosition());
-      fromMessage(capsuleMessage.getAxis(), capsuleToSet.getAxis());
+      capsuleToSet.getPosition().set(capsuleMessage.getPosition().getPoint());
+      capsuleToSet.getAxis().set(capsuleMessage.getAxis().getVector());
       capsuleToSet.setRadius(capsuleMessage.getRadius());
       capsuleToSet.setLength(capsuleMessage.getLength());
    }
 
    public static void unpackEllipsoid3DMessage(Ellipsoid3DMessage ellipsoidMessage, Ellipsoid3DBasics ellipsoidToSet)
    {
-      fromMessage(ellipsoidMessage.getPose(), ellipsoidToSet.getPose());
-      fromMessage(ellipsoidMessage.getRadii(), ellipsoidToSet.getRadii());
+      ellipsoidToSet.getPose().set(ellipsoidMessage.getPose().getPose());
+      ellipsoidToSet.getRadii().set(ellipsoidMessage.getRadii().getVector());
    }
 
    public static void toMessage(SE3TrajectoryPointReadOnly trajectoryPoint, SE3TrajectoryPointMessage trajectoryPointMessage)
    {
       trajectoryPointMessage.setTime(trajectoryPoint.getTime());
-      toMessage(trajectoryPoint.getPosition(), trajectoryPointMessage.getPosition());
-      toMessage(trajectoryPoint.getOrientation(), trajectoryPointMessage.getOrientation());
-      toMessage(trajectoryPoint.getLinearVelocity(), trajectoryPointMessage.getLinearVelocity());
-      toMessage(trajectoryPoint.getAngularVelocity(), trajectoryPointMessage.getAngularVelocity());
+      trajectoryPointMessage.getPosition().set(trajectoryPoint.getPosition());
+      trajectoryPointMessage.getOrientation().set(trajectoryPoint.getOrientation());
+      trajectoryPointMessage.getLinearVelocity().set(trajectoryPoint.getLinearVelocity());
+      trajectoryPointMessage.getAngularVelocity().set(trajectoryPoint.getAngularVelocity());
    }
 
    public static void fromMessage(SE3TrajectoryPointMessage trajectoryPointMessage, SE3TrajectoryPoint trajectoryPoint)
    {
       trajectoryPoint.setTime(trajectoryPointMessage.getTime());
-      fromMessage(trajectoryPointMessage.getPosition(), trajectoryPoint.getPosition());
-      fromMessage(trajectoryPointMessage.getOrientation(), trajectoryPoint.getOrientation());
-      fromMessage(trajectoryPointMessage.getLinearVelocity(), trajectoryPoint.getLinearVelocity());
-      fromMessage(trajectoryPointMessage.getAngularVelocity(), trajectoryPoint.getAngularVelocity());
+      trajectoryPoint.getPosition().set(trajectoryPointMessage.getPosition().getPoint());
+      trajectoryPoint.getOrientation().set(trajectoryPointMessage.getOrientation().getQuaternion());
+      trajectoryPoint.getLinearVelocity().set(trajectoryPointMessage.getLinearVelocity().getVector());
+      trajectoryPoint.getAngularVelocity().set(trajectoryPointMessage.getAngularVelocity().getVector());
    }
 
    public static void toMessage(OneDoFTrajectoryPointReadOnly trajectoryPoint, TrajectoryPoint1DMessage trajectoryPointMessage)
@@ -1314,110 +1314,97 @@ public class MessageTools
       return guid;
    }
 
-   // ==================== geometry_msgs conversions ====================
-   // Note: With jros2 custom message wrappers, geometry_msgs types now wrap Euclid objects directly.
-   // These methods now simply access the wrapped Euclid objects.
-
-   public static void toMessage(us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly tuple3D, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage pointMessage)
+   public static double calculateDelay(ImageMessage imageMessage)
    {
-      pointMessage.getPoint().set(tuple3D);
+      return TimeTools.calculateDelay(imageMessage.getAcquisitionTime().getSecondsSinceEpoch(), imageMessage.getAcquisitionTime().getAdditionalNanos());
    }
 
-   public static void fromMessage(us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage pointMessage, us.ihmc.euclid.tuple3D.interfaces.Point3DBasics point3D)
+   public static void packIDLSequence(ByteBuffer sourceBuffer, IDLByteSequence sequenceToPack)
    {
-      point3D.set(pointMessage.getPoint());
+      sequenceToPack.getBuffer().reset();
+      // A lot of data goes through here. We wish we could do a direct memcopy, but our message data is on the Java heap.
+      for (int i = 0; i < sourceBuffer.limit(); i++)
+      {
+         sequenceToPack.add(sourceBuffer.get(i));
+      }
    }
 
-   public static void toMessage(us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly orientation, us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage quaternionMessage)
+   public static void packIDLSequenceCastingIntsToBytes(ByteBuffer sourceBuffer, IDLByteSequence sequenceToPack)
    {
-      quaternionMessage.getQuaternion().set(orientation);
+      sequenceToPack.getBuffer().reset();
+      int numberOfIntegers = sourceBuffer.limit() / Integer.BYTES;
+      for (int i = 0; i < numberOfIntegers; i++)
+      {
+         sequenceToPack.add((byte) sourceBuffer.getInt(i * Integer.BYTES));
+      }
    }
 
-   public static void fromMessage(us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage quaternionMessage, us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics quaternion)
+   public static void packIDLSequence(ByteBuffer sourceBuffer, IDLFloatSequence sequenceToPack)
    {
-      quaternion.set(quaternionMessage.getQuaternion());
+      // It is important to call resetQuick, which does not set the full sequence to zeros
+      sequenceToPack.getBuffer().reset();
+      // A lot of data goes through here. We wish we could do a direct memcopy, but our message data is on the Java heap.
+      int numberOfFloats = sourceBuffer.limit() / java.lang.Float.BYTES;
+      for (int i = 0; i < numberOfFloats; i++)
+      {
+         float sourceFloat = sourceBuffer.getFloat(i * java.lang.Float.BYTES);
+         sequenceToPack.add(sourceFloat);
+      }
    }
 
-   public static void toMessage(us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly tuple3D, us.ihmc.euclid.jros2.messages.EuclidVector3DMessage vector3Message)
+   public static void extractIDLSequence(IDLByteSequence sourceIDLSequence, ByteBuffer byteBufferToPack)
    {
-      vector3Message.getVector().set(tuple3D);
+      int numberOfBytes = sourceIDLSequence.size();
+      byteBufferToPack.rewind();
+      byteBufferToPack.limit(byteBufferToPack.capacity());
+      for (int i = 0; i < numberOfBytes; i++)
+      {
+         byteBufferToPack.put(sourceIDLSequence.get(i));
+      }
+      byteBufferToPack.flip();
    }
 
-   public static void fromMessage(us.ihmc.euclid.jros2.messages.EuclidVector3DMessage vector3Message, us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics vector3D)
+   public static void extractIDLSequenceCastingBytesToInts(IDLByteSequence sourceIDLSequence, ByteBuffer byteBufferToPack)
    {
-      vector3D.set(vector3Message.getVector());
+      int numberOfBytes = sourceIDLSequence.size();
+      byteBufferToPack.rewind();
+      byteBufferToPack.limit(byteBufferToPack.capacity());
+      for (int i = 0; i < numberOfBytes; i++)
+      {
+         byte x = sourceIDLSequence.get(i);
+         int value = Byte.toUnsignedInt(x);
+         byteBufferToPack.putInt(value);
+      }
+      byteBufferToPack.flip();
    }
 
-   public static void toMessage(us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly pose3D, us.ihmc.euclid.jros2.messages.EuclidPose3DMessage poseMessage)
+   public static void extractIDLSequence(IDLFloatSequence sourceIDLSequence, ByteBuffer byteBufferToPack)
    {
-      poseMessage.getPose().set(pose3D);
+      int numberOfFloats = sourceIDLSequence.size();
+      byteBufferToPack.rewind();
+      byteBufferToPack.limit(byteBufferToPack.capacity());
+      for (int i = 0; i < numberOfFloats; i++)
+      {
+         float value = sourceIDLSequence.get(i);
+         byteBufferToPack.putFloat(value);
+      }
+      byteBufferToPack.flip();
    }
 
-   public static void fromMessage(us.ihmc.euclid.jros2.messages.EuclidPose3DMessage poseMessage, us.ihmc.euclid.geometry.interfaces.Pose3DBasics pose3D)
+   public static PoseListMessage createPoseListMessage(Collection<Pose3DReadOnly> poses)
    {
-      pose3D.set(poseMessage.getPose());
+      PoseListMessage poseListMessage = new PoseListMessage();
+      packPoseListMessage(poses, poseListMessage);
+      return poseListMessage;
    }
-
-   public static void toMessage(us.ihmc.euclid.shape.primitives.interfaces.Shape3DPoseReadOnly shape3DPose, us.ihmc.euclid.jros2.messages.EuclidPose3DMessage poseMessage)
-   {
-      poseMessage.getPose().set(shape3DPose.getShapePosition(), shape3DPose.getShapeOrientation());
-   }
-
-   public static void fromMessage(us.ihmc.euclid.jros2.messages.EuclidPose3DMessage poseMessage, us.ihmc.euclid.shape.primitives.interfaces.Shape3DPoseBasics shape3DPose)
-   {
-      shape3DPose.set(poseMessage.getPose());
-   }
-
-   public static void toMessage(us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly rigidBodyTransform, us.ihmc.euclid.jros2.messages.EuclidTransformMessage transformMessage)
-   {
-      transformMessage.getTransform().set(rigidBodyTransform);
-   }
-
-   public static void fromMessage(us.ihmc.euclid.jros2.messages.EuclidTransformMessage transformMessage, us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics rigidBodyTransform)
-   {
-      rigidBodyTransform.set(transformMessage.getTransform());
-   }
-
-   // Legacy methods for standard ROS2 geometry_msgs (from jros2, not our custom wrappers)
-   // These are needed for TransformStamped and other standard ROS messages that don't use our custom types
-
-   public static void toMessage(us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly rigidBodyTransform, geometry_msgs.Transform transformMessage)
-   {
-      transformMessage.getTranslation().setX(rigidBodyTransform.getTranslationX());
-      transformMessage.getTranslation().setY(rigidBodyTransform.getTranslationY());
-      transformMessage.getTranslation().setZ(rigidBodyTransform.getTranslationZ());
-
-      us.ihmc.euclid.tuple4D.Quaternion quat = new us.ihmc.euclid.tuple4D.Quaternion();
-      quat.set(rigidBodyTransform.getRotation());
-      transformMessage.getRotation().setX(quat.getX());
-      transformMessage.getRotation().setY(quat.getY());
-      transformMessage.getRotation().setZ(quat.getZ());
-      transformMessage.getRotation().setW(quat.getS());
-   }
-
-   public static void fromMessage(geometry_msgs.Transform transformMessage, us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics rigidBodyTransform)
-   {
-      rigidBodyTransform.getTranslation().set(transformMessage.getTranslation().getX(),
-                                              transformMessage.getTranslation().getY(),
-                                              transformMessage.getTranslation().getZ());
-
-      us.ihmc.euclid.tuple4D.Quaternion quat = new us.ihmc.euclid.tuple4D.Quaternion();
-      quat.set(transformMessage.getRotation().getX(),
-               transformMessage.getRotation().getY(),
-               transformMessage.getRotation().getZ(),
-               transformMessage.getRotation().getW());
-      rigidBodyTransform.getRotation().set(quat);
-   }
-
-   // ==================== End geometry_msgs conversions ====================
 
    public static <T extends Pose3DReadOnly> void packPoseListMessage(Iterable<T> poses, PoseListMessage poseListMessage)
    {
       poseListMessage.getPoses().clear();
       for (Pose3DReadOnly pose : poses)
       {
-         us.ihmc.euclid.jros2.messages.EuclidPose3DMessage messagePose = poseListMessage.getPoses().add();
-         toMessage(pose, messagePose);
+         EuclidPose3DMessage messagePose = poseListMessage.getPoses().add();
+         messagePose.set(pose);
       }
    }
 
@@ -1426,8 +1413,7 @@ public class MessageTools
       ArrayList<Pose3D> poses = new ArrayList<>();
       for (int i = 0; i < poseListMessage.getPoses().size(); i++)
       {
-         Pose3D pose = new Pose3D();
-         fromMessage(poseListMessage.getPoses().get(i), pose);
+         Pose3D pose = new Pose3D(poseListMessage.getPoses().get(i).getPose());
          poses.add(pose);
       }
       return poses;
@@ -1446,21 +1432,16 @@ public class MessageTools
     * which creates a Byte sequence 25 MB in size.
     * We use ASCII because UTF8 causes issues when publishing over DDS.
     */
-   public static void packLongStringToByteSequence(String longString, us.ihmc.fastddsjava.cdr.idl.IDLByteSequence byteSequence)
+   public static void packLongStringToByteSequence(String longString, IDLByteSequence byteSequence)
    {
-      byteSequence.clear();
+      byteSequence.getBuffer().reset();
       byte[] longStringBytes = longString.getBytes(StandardCharsets.US_ASCII);
-      byteSequence.ensureMinCapacity(longStringBytes.length);
-      byteSequence.getBuffer().put(longStringBytes);
+      byteSequence.addAll(longStringBytes);
    }
 
-   /**
-    * See {@link #unpackLongStringFromByteSequence(us.ihmc.fastddsjava.cdr.idl.IDLByteSequence)}.
-    */
-   public static String unpackLongStringFromByteSequence(us.ihmc.fastddsjava.cdr.idl.IDLByteSequence byteSequence)
+   public static String unpackLongStringFromByteSequence(IDLByteSequence byteSequence)
    {
-      byte[] longStringData = new byte[byteSequence.size()];
-      byteSequence.getBuffer().get(0, longStringData, 0, byteSequence.size());
+      byte[] longStringData = byteSequence.getBuffer().array();
       return new String(longStringData, StandardCharsets.US_ASCII);
    }
 

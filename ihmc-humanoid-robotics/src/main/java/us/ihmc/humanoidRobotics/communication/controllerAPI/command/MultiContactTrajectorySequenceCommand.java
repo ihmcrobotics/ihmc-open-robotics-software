@@ -38,7 +38,7 @@ public class MultiContactTrajectorySequenceCommand implements Command<MultiConta
       clear();
       sequenceId = message.getSequenceId();
 
-      List<MultiContactTrajectoryMessage> trajectoryMessages = message.getTrajectorySequence();
+      var trajectoryMessages = message.getTrajectorySequence();
       for (int i = 0; i < trajectoryMessages.size(); i++)
       {
          this.trajectorySequence.add().setFromMessage(trajectoryMessages.get(i));

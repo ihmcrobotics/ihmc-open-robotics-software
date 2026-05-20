@@ -44,10 +44,7 @@ public class CRDTBidirectionalStringArray extends CRDTBidirectionalMutableField<
    public void toMessage(IDLStringSequence message)
    {
       message.clear();
-      for (int i = 0; i < getLength(); ++i)
-      {
-         message.add(getValueReadOnly(i));
-      }
+      message.addAll(getValue());
    }
 
    public void fromMessage(StringBuilder[] messageArray)

@@ -128,14 +128,23 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
 
       sequenceId = message.getSequenceId();
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), dataFrame);
-      List<WrenchTrajectoryPointMessage> trajectoryPointMessages = message.getWrenchTrajectoryPoints();
+      var trajectoryPointMessages = message.getWrenchTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
          WrenchTrajectoryPointMessage trajectoryPointMessage = trajectoryPointMessages.get(i);
          trajectoryPointTimes.add(trajectoryPointMessage.getTime());
-         trajectoryPointList.add().setIncludingFrame(dataFrame, trajectoryPointMessage.getWrench().getTorque(), trajectoryPointMessage.getWrench().getForce());
+         // Wrench uses standard geometry_msgs.Vector3, not Euclid wrappers
+         // SpatialVector has angular part (torque) and linear part (force)
+         SpatialVector spatialVector = trajectoryPointList.add();
+         spatialVector.setReferenceFrame(dataFrame);
+         spatialVector.getAngularPart().set(trajectoryPointMessage.getWrench().getTorque().getX(),
+                                            trajectoryPointMessage.getWrench().getTorque().getY(),
+                                            trajectoryPointMessage.getWrench().getTorque().getZ());
+         spatialVector.getLinearPart().set(trajectoryPointMessage.getWrench().getForce().getX(),
+                                           trajectoryPointMessage.getWrench().getForce().getY(),
+                                           trajectoryPointMessage.getWrench().getForce().getZ());
       }
       setQueueableCommandVariables(message.getQueueingProperties());
       useCustomControlFrame = message.getUseCustomControlFrame();

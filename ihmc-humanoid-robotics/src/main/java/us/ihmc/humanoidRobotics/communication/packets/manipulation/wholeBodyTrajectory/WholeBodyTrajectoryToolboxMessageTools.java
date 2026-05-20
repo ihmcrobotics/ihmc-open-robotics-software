@@ -36,8 +36,8 @@ public class WholeBodyTrajectoryToolboxMessageTools
             {
                t0 = message.getWaypointTimes().get(i - 1);
                tf = message.getWaypointTimes().get(i);
-               previous = message.getWaypoints().get(i - 1);
-               next = message.getWaypoints().get(i);
+               previous = message.getWaypoints().get(i - 1).getPose();
+               next = message.getWaypoints().get(i).getPose();
                if (time < message.getWaypointTimes().get(i))
                   break;
             }

@@ -66,7 +66,7 @@ public final class WholeBodyJointspaceTrajectoryCommand extends QueueableCommand
       clear();
       sequenceId = message.getSequenceId();
       setQueueableCommandVariables(message.getQueueingProperties());
-      List<OneDoFJointTrajectoryMessage> trajectoryPointListArray = message.getJointTrajectoryMessages();
+      var trajectoryPointListArray = message.getJointTrajectoryMessages();
 
       for (int i = 0; i < message.getJointHashCodes().size(); i++)
       {

@@ -113,14 +113,14 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
 
       sequenceId = message.getSequenceId();
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
-      List<EuclideanTrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
+      var trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
          EuclideanTrajectoryPointMessage euclideanTrajectoryPointMessage = trajectoryPointMessages.get(i);
-         trajectoryPointList.addTrajectoryPoint(euclideanTrajectoryPointMessage.getTime(), euclideanTrajectoryPointMessage.getPosition(),
-                                                euclideanTrajectoryPointMessage.getLinearVelocity());
+         trajectoryPointList.addTrajectoryPoint(euclideanTrajectoryPointMessage.getTime(), euclideanTrajectoryPointMessage.getPosition().getPoint(),
+                                                euclideanTrajectoryPointMessage.getLinearVelocity().getVector());
       }
       setQueueableCommandVariables(message.getQueueingProperties());
       selectionMatrix.resetSelection();

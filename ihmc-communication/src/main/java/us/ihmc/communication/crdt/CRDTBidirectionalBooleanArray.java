@@ -41,10 +41,7 @@ public class CRDTBidirectionalBooleanArray extends CRDTBidirectionalMutableField
    public void toMessage(IDLBoolSequence message)
    {
       message.clear();
-      for (int i = 0; i < getLength(); ++i)
-      {
-         message.add(getValueReadOnly(i));
-      }
+      message.addAll(getValue());
    }
 
    public void fromMessage(boolean[] messageArray)

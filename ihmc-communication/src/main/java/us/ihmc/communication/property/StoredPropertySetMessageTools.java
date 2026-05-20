@@ -64,9 +64,9 @@ public class StoredPropertySetMessageTools
 
    public static void toMessage(PrimitiveDataVectorMessage message, StoredPropertySetReadOnly storedPropertySet)
    {
-      message.getDoubleValues().resetQuick();
-      message.getIntegerValues().resetQuick();
-      message.getBooleanValues().resetQuick();
+      message.getDoubleValues().clear();
+      message.getIntegerValues().clear();
+      message.getBooleanValues().clear();
 
       for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
       {

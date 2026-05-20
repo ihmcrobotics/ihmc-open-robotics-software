@@ -1,10 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI;
 
-import java.util.Map;
-
+import gnu.trove.list.array.TDoubleArrayList;
 import ihmc_common_msgs.SelectionMatrix3DMessage;
 import toolbox_msgs.WaypointBasedTrajectoryMessage;
-import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -13,6 +11,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+
+import java.util.Map;
 
 public class WaypointBasedTrajectoryCommand
       implements Command<WaypointBasedTrajectoryCommand, WaypointBasedTrajectoryMessage>, WholeBodyTrajectoryToolboxAPI<WaypointBasedTrajectoryMessage>
@@ -28,7 +28,7 @@ public class WaypointBasedTrajectoryCommand
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final FramePose3D controlFramePose = new FramePose3D();
-   
+
    private double weight;
 
    @Override
@@ -63,7 +63,7 @@ public class WaypointBasedTrajectoryCommand
       selectionMatrix.set(other.selectionMatrix);
 
       controlFramePose.setIncludingFrame(other.controlFramePose);
-      
+
       weight = other.weight;
    }
 
@@ -74,7 +74,8 @@ public class WaypointBasedTrajectoryCommand
    }
 
    @Override
-   public void set(WaypointBasedTrajectoryMessage message, Map<Integer, RigidBodyBasics> rigidBodyNamedBasedHashMap,
+   public void set(WaypointBasedTrajectoryMessage message,
+                   Map<Integer, RigidBodyBasics> rigidBodyNamedBasedHashMap,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
       clear();
@@ -89,17 +90,19 @@ public class WaypointBasedTrajectoryCommand
       for (int i = 0; i < message.getWaypoints().size(); i++)
       {
          waypointTimes.add(message.getWaypointTimes().get(i));
-         waypoints.add().set(message.getWaypoints().get(i));
+         waypoints.add().set(message.getWaypoints().get(i).getPose());
       }
 
       ReferenceFrame referenceFrame = endEffector == null ? null : endEffector.getBodyFixedFrame();
-      controlFramePose.setIncludingFrame(referenceFrame, message.getControlFramePositionInEndEffector(), message.getControlFrameOrientationInEndEffector());
+      controlFramePose.setIncludingFrame(referenceFrame,
+                                         message.getControlFramePositionInEndEffector().getPoint(),
+                                         message.getControlFrameOrientationInEndEffector().getQuaternion());
       selectionMatrix.resetSelection();
       SelectionMatrix3DMessage angularSelection = message.getAngularSelectionMatrix();
       SelectionMatrix3DMessage linearSelection = message.getLinearSelectionMatrix();
       selectionMatrix.setAngularAxisSelection(angularSelection.getXSelected(), angularSelection.getYSelected(), angularSelection.getZSelected());
       selectionMatrix.setLinearAxisSelection(linearSelection.getXSelected(), linearSelection.getYSelected(), linearSelection.getZSelected());
-      
+
       weight = message.getWeight();
    }
 
@@ -137,7 +140,7 @@ public class WaypointBasedTrajectoryCommand
    {
       return controlFramePose;
    }
-   
+
    public double getWeight()
    {
       return weight;

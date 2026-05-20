@@ -1,6 +1,8 @@
 package us.ihmc.euclid.jros2.messages;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.fastddsjava.cdr.CDRBuffer;
 import us.ihmc.jros2.ROS2Message;
 
@@ -69,9 +71,25 @@ public class EuclidVector3DMessage implements ROS2Message<EuclidVector3DMessage>
    }
 
    /**
-    * Set from a Vector3D directly.
+    * Set from a Vector3DBasics directly.
     */
    public void set(Vector3D from)
+   {
+      this.vector.set(from);
+   }
+
+   /**
+    * Set from a Vector3DBasics directly.
+    */
+   public void set(Vector3DBasics from)
+   {
+      this.vector.set(from);
+   }
+
+   /**
+    * Set from a Vector3DReadOnly directly.
+    */
+   public void set(Vector3DReadOnly from)
    {
       this.vector.set(from);
    }
