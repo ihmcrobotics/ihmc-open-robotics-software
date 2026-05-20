@@ -14,11 +14,15 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
+import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.PelvisActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.SpineActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitActionState;
+import us.ihmc.avatar.arm.PresetArmConfiguration;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition.ConditionNodeType;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
@@ -42,13 +46,16 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.StringBuilderHolder;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImagePublisher;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -97,6 +104,42 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private String goToCheckpointName = "";
    private WalkActionState goToAction = null;
    private ROS2LogRecord ros2LogRecord = null;
+   private double[] defaultRightHandJointAngles = new double[ArmActionDefinition.MAX_NUMBER_OF_JOINTS];
+   private double[] defaultLeftHandJointAngles = new double[ArmActionDefinition.MAX_NUMBER_OF_JOINTS];
+   private PresetArmConfiguration defaultRightHandPreset = null;
+   private PresetArmConfiguration defaultLeftHandPreset = null;
+   private final double[] defaultSpineJointAngles = new double[3];
+   private final RigidBodyTransform defaultPelvisTransform = new RigidBodyTransform();
+   private double defaultRightHandDuration = 4.0;
+   private double defaultLeftHandDuration = 4.0;
+   private double defaultSpineDuration = 4.0;
+   private double defaultPelvisDuration = 4.0;
+   private boolean wholeBodyDefaultsInitialized = false;
+   private boolean wholeBodyRandomizationSessionActive = false;
+   private boolean wholeBodyRandomizationRunInProgress = false;
+   private int wholeBodyRandomizationsCompleted = 0;
+   private int wholeBodyRandomizationTargetCount = 0;
+   private int wholeBodyStartLeafIndex = -1;
+   private String wholeBodyBehaviorName = "WHOLE BODY";
+   private ArmActionState wholeBodyRightArmAction = null;
+   private ArmActionState wholeBodyLeftArmAction = null;
+   private SpineActionState wholeBodySpineAction = null;
+   private PelvisActionState wholeBodyPelvisAction = null;
+   private static final double PELVIS_PITCH_MIN_RADIANS = 0.0;
+   private static final double PELVIS_PITCH_MAX_RADIANS = Math.toRadians(30.0);
+   private static final double PELVIS_HEIGHT_MIN_METERS = 0.56;
+   private static final double PELVIS_HEIGHT_MAX_METERS = 0.94;
+   private static final double PELVIS_HEIGHT_CENTER_METERS = 0.9;
+   /**
+    * For centered Gaussian sampling, this is the target probability mass within the chosen
+    * reference distance from the center. Example: 0.90 means 90% of samples lie within that distance.
+    */
+   private static final double CENTERED_GAUSSIAN_TARGET_PROBABILITY = 0.80;
+   private static final double ARM_DURATION_MEAN_SECONDS = 1.5;
+   private static final double ARM_DURATION_MIN_SECONDS = 0.8;
+   private static final double ARM_DURATION_MAX_SECONDS = 4.0;
+   private static final double DURATION_MIN_SECONDS = 1.0;
+   private static final double DURATION_MAX_SECONDS = 4.0;
 
    public AI2RNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
@@ -112,6 +155,8 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
 
       resetStatusMessage();
 
+      defaultLeftHandJointAngles = robotModel.getPresetArmConfiguration(RobotSide.LEFT, PresetArmConfiguration.N_POSE);
+      defaultRightHandJointAngles = robotModel.getPresetArmConfiguration(RobotSide.RIGHT, PresetArmConfiguration.N_POSE);
       List<Integer> nonFingerIndices = FullRobotModelUtils.getAllJointsExcludingHandsIndices(syncedRobot.getFullRobotModel());
       float[] nonFingerValues = new float[nonFingerIndices.size()];
       ROS2Publisher<KinematicsToolboxOutputStatus> publisher = ros2ControllerHelper.getROS2Node().createPublisher(kstOutputTopic);
@@ -225,6 +270,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       endSequenceAfterBehaviorExecution();
       executeBehaviorLogic();
       handleRandomizedGoToRecording();
+      handleWholeBodyActionRandomizationRequest();
    }
 
    private void handleRandomizedGoToRecording()
@@ -403,6 +449,459 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       goToCheckpointLeafIndex = -1;
       goToCheckpointName = "";
       goToAction = null;
+   }
+
+   private void handleWholeBodyActionRandomizationRequest()
+   {
+      if (!definition.getRandomizeWholeBodyActionEnabled())
+      {
+         if (wholeBodyRandomizationSessionActive)
+            resetWholeBodyRandomizationSession();
+         return;
+      }
+
+      if (!wholeBodyRandomizationSessionActive)
+      {
+         wholeBodyRightArmAction = null;
+         wholeBodyLeftArmAction = null;
+         wholeBodySpineAction = null;
+         wholeBodyPelvisAction = null;
+         wholeBodyStartLeafIndex = Integer.MAX_VALUE;
+
+         for (LeafNodeState<?> leaf : actionSequence.getOrderedLeaves())
+         {
+            String leafNameLower = leaf.getDefinition().getName().toLowerCase();
+            if (!leafNameLower.contains("whole body"))
+               continue;
+
+            wholeBodyStartLeafIndex = Math.min(wholeBodyStartLeafIndex, leaf.getLeafIndex());
+
+            if (leaf instanceof ArmActionState armActionState)
+            {
+               if (armActionState.getDefinition().getSide() == RobotSide.RIGHT)
+                  wholeBodyRightArmAction = armActionState;
+               else
+                  wholeBodyLeftArmAction = armActionState;
+            }
+            else if (leaf instanceof SpineActionState spineActionState)
+            {
+               wholeBodySpineAction = spineActionState;
+            }
+            else if (leaf instanceof PelvisActionState pelvisActionState)
+            {
+               wholeBodyPelvisAction = pelvisActionState;
+            }
+         }
+
+         if (wholeBodyRightArmAction == null && wholeBodyLeftArmAction == null && wholeBodySpineAction == null && wholeBodyPelvisAction == null)
+         {
+            for (LeafNodeState<?> leaf : actionSequence.getOrderedLeaves())
+            {
+               wholeBodyStartLeafIndex = Math.min(wholeBodyStartLeafIndex, leaf.getLeafIndex());
+
+               if (leaf instanceof ArmActionState armActionState)
+               {
+                  if (armActionState.getDefinition().getSide() == RobotSide.RIGHT && wholeBodyRightArmAction == null)
+                     wholeBodyRightArmAction = armActionState;
+                  else if (armActionState.getDefinition().getSide() == RobotSide.LEFT && wholeBodyLeftArmAction == null)
+                     wholeBodyLeftArmAction = armActionState;
+               }
+               else if (leaf instanceof SpineActionState spineActionState && wholeBodySpineAction == null)
+               {
+                  wholeBodySpineAction = spineActionState;
+               }
+               else if (leaf instanceof PelvisActionState pelvisActionState && wholeBodyPelvisAction == null)
+               {
+                  wholeBodyPelvisAction = pelvisActionState;
+               }
+            }
+         }
+
+         if (wholeBodyRightArmAction == null && wholeBodyLeftArmAction == null && wholeBodySpineAction == null && wholeBodyPelvisAction == null)
+            return;
+
+         if (wholeBodyStartLeafIndex == Integer.MAX_VALUE)
+            wholeBodyStartLeafIndex = actionSequence.getOrderedLeaves().isEmpty() ? -1 : actionSequence.getOrderedLeaves().get(0).getLeafIndex();
+         if (wholeBodyStartLeafIndex < 0)
+            return;
+
+         initializeWholeBodyDefaults(wholeBodyRightArmAction, wholeBodyLeftArmAction, wholeBodySpineAction, wholeBodyPelvisAction);
+         wholeBodyRandomizationTargetCount = Math.max(1, definition.getNumberOfRandomizationsValue());
+         definition.setNumberOfRandomizationsValue(wholeBodyRandomizationTargetCount);
+         definition.modify();
+         wholeBodyRandomizationsCompleted = 0;
+         wholeBodyRandomizationRunInProgress = false;
+         wholeBodyRandomizationSessionActive = true;
+      }
+
+      if (wholeBodyRandomizationsCompleted >= wholeBodyRandomizationTargetCount)
+      {
+         definition.setRandomizeWholeBodyActionEnabled(false);
+         definition.modify();
+         resetWholeBodyRandomizationSession();
+         return;
+      }
+
+      if (!wholeBodyRandomizationRunInProgress && !actionSequence.getAutomaticExecution())
+      {
+         int[] mask = sampleWholeBodyMask();
+         definition.setLeftHandMask(mask[0]);
+         definition.setRightHandMask(mask[1]);
+         definition.setSpineMask(mask[2]);
+         definition.setPelvisMask(mask[3]);
+         definition.modify();
+
+         if (wholeBodyRightArmAction != null)
+         {
+            if (mask[1] == 1)
+               applyRightHandSetting(wholeBodyRightArmAction);
+         }
+
+         if (wholeBodyLeftArmAction != null)
+         {
+            if (mask[0] == 1)
+               applyLeftHandSetting(wholeBodyLeftArmAction);
+         }
+
+         if (wholeBodySpineAction != null)
+         {
+            if (mask[2] == 1)
+               applySpineSetting(wholeBodySpineAction);
+            else
+               restoreSpineDefaults(wholeBodySpineAction);
+         }
+
+         if (wholeBodyPelvisAction != null)
+         {
+            if (mask[3] == 1)
+               applyPelvisSetting(wholeBodyPelvisAction);
+            else
+               restorePelvisDefaults(wholeBodyPelvisAction);
+         }
+
+         actionSequence.setExecutionNextIndex(wholeBodyStartLeafIndex);
+         actionSequence.setAutomaticExecution(true);
+         statusMessage.setBehaviorInProgress(wholeBodyBehaviorName);
+         startGoToRecording();
+         wholeBodyRandomizationRunInProgress = true;
+      }
+      else if (wholeBodyRandomizationRunInProgress && !actionSequence.getAutomaticExecution())
+      {
+         stopGoToRecording();
+         wholeBodyRandomizationsCompleted++;
+         definition.setNumberOfRandomizationsValue(Math.max(0, wholeBodyRandomizationTargetCount - wholeBodyRandomizationsCompleted));
+         definition.modify();
+         wholeBodyRandomizationRunInProgress = false;
+      }
+   }
+
+   private void resetWholeBodyRandomizationSession()
+   {
+      stopGoToRecording();
+
+      if (wholeBodyRightArmAction != null)
+         restoreRightHandDefaults(wholeBodyRightArmAction);
+      if (wholeBodyLeftArmAction != null)
+         restoreLeftHandDefaults(wholeBodyLeftArmAction);
+      if (wholeBodySpineAction != null)
+         restoreSpineDefaults(wholeBodySpineAction);
+      if (wholeBodyPelvisAction != null)
+         restorePelvisDefaults(wholeBodyPelvisAction);
+
+      wholeBodyRandomizationSessionActive = false;
+      wholeBodyRandomizationRunInProgress = false;
+      wholeBodyRandomizationsCompleted = 0;
+      wholeBodyRandomizationTargetCount = 0;
+      wholeBodyStartLeafIndex = -1;
+      wholeBodyRightArmAction = null;
+      wholeBodyLeftArmAction = null;
+      wholeBodySpineAction = null;
+      wholeBodyPelvisAction = null;
+   }
+
+   private void initializeWholeBodyDefaults(ArmActionState rightArmAction, ArmActionState leftArmAction, SpineActionState spineAction, PelvisActionState pelvisAction)
+   {
+      if (wholeBodyDefaultsInitialized)
+         return;
+
+      if (rightArmAction != null)
+      {
+         var rightArmDefinition = rightArmAction.getDefinition();
+         defaultRightHandDuration = rightArmDefinition.getTrajectoryDuration();
+         defaultRightHandPreset = rightArmDefinition.getPreset();
+         for (int i = 0; i < defaultRightHandJointAngles.length; i++)
+            defaultRightHandJointAngles[i] = rightArmDefinition.getJointAngles().getValueReadOnly(i);
+      }
+
+      if (leftArmAction != null)
+      {
+         var leftArmDefinition = leftArmAction.getDefinition();
+         defaultLeftHandDuration = leftArmDefinition.getTrajectoryDuration();
+         defaultLeftHandPreset = leftArmDefinition.getPreset();
+         for (int i = 0; i < defaultLeftHandJointAngles.length; i++)
+            defaultLeftHandJointAngles[i] = leftArmDefinition.getJointAngles().getValueReadOnly(i);
+      }
+
+      if (spineAction != null)
+      {
+         for (int i = 0; i < defaultSpineJointAngles.length; i++)
+            defaultSpineJointAngles[i] = spineAction.getDefinition().getJointAngles().getValueReadOnly(i);
+         defaultSpineDuration = spineAction.getDefinition().getTrajectoryDuration();
+      }
+
+      if (pelvisAction != null)
+      {
+         defaultPelvisTransform.set(pelvisAction.getDefinition().getPelvisToParentTransform().getValueReadOnly());
+         defaultPelvisDuration = pelvisAction.getDefinition().getTrajectoryDuration();
+      }
+
+      wholeBodyDefaultsInitialized = true;
+   }
+
+   private void applyRightHandSetting(ArmActionState rightArmAction)
+   {
+      var actionDefinition = rightArmAction.getDefinition();
+      double[] randomizedJointPositions = generateRandomJointPositions(random, getArmJoints(RobotSide.RIGHT));
+      actionDefinition.setUsePredefinedJointAngles(true);
+      actionDefinition.setPreset(null); // CUSTOM_ANGLES
+      for (int i = 0; i < Math.min(actionDefinition.getJointAngles().getLength(), randomizedJointPositions.length); i++)
+         actionDefinition.getJointAngles().setValue(i, randomizedJointPositions[i]);
+      actionDefinition.setTrajectoryDuration(randomArmDuration());
+      actionDefinition.modify();
+   }
+
+   private void restoreRightHandDefaults(ArmActionState rightArmAction)
+   {
+      var actionDefinition = rightArmAction.getDefinition();
+      actionDefinition.setUsePredefinedJointAngles(true);
+      actionDefinition.setPreset(defaultRightHandPreset);
+      for (int i = 0; i < defaultRightHandJointAngles.length; i++)
+         actionDefinition.getJointAngles().setValue(i, defaultRightHandJointAngles[i]);
+      actionDefinition.setTrajectoryDuration(defaultRightHandDuration);
+      actionDefinition.modify();
+   }
+
+   private void applyLeftHandSetting(ArmActionState leftArmAction)
+   {
+      var actionDefinition = leftArmAction.getDefinition();
+      double[] randomizedJointPositions = generateRandomJointPositions(random, getArmJoints(RobotSide.LEFT));
+      actionDefinition.setUsePredefinedJointAngles(true);
+      actionDefinition.setPreset(null); // CUSTOM_ANGLES
+      for (int i = 0; i < Math.min(actionDefinition.getJointAngles().getLength(), randomizedJointPositions.length); i++)
+         actionDefinition.getJointAngles().setValue(i, randomizedJointPositions[i]);
+      actionDefinition.setTrajectoryDuration(randomArmDuration());
+      actionDefinition.modify();
+   }
+
+   private void restoreLeftHandDefaults(ArmActionState leftArmAction)
+   {
+      var actionDefinition = leftArmAction.getDefinition();
+      actionDefinition.setUsePredefinedJointAngles(true);
+      actionDefinition.setPreset(defaultLeftHandPreset);
+      for (int i = 0; i < defaultLeftHandJointAngles.length; i++)
+         actionDefinition.getJointAngles().setValue(i, defaultLeftHandJointAngles[i]);
+      actionDefinition.setTrajectoryDuration(defaultLeftHandDuration);
+      actionDefinition.modify();
+   }
+
+   private OneDoFJointBasics[] getArmJoints(RobotSide side)
+   {
+      ArmJointName[] armJointNames = syncedRobot.getRobotModel().getJointMap().getArmJointNames(side);
+      OneDoFJointBasics[] armJoints = new OneDoFJointBasics[armJointNames.length];
+      for (int i = 0; i < armJointNames.length; i++)
+         armJoints[i] = syncedRobot.getFullRobotModel().getArmJoint(side, armJointNames[i]);
+      return armJoints;
+   }
+
+   private static double[] generateRandomJointPositions(Random random, OneDoFJointBasics[] armJoints)
+   {
+      double[] desiredJointPositions = new double[armJoints.length];
+      for (int i = 0; i < armJoints.length; i++)
+      {
+         OneDoFJointBasics joint = armJoints[i];
+         desiredJointPositions[i] = RandomNumbers.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
+      }
+      return desiredJointPositions;
+   }
+
+   private void applySpineSetting(SpineActionState spineAction)
+   {
+      var actionDefinition = spineAction.getDefinition();
+      for (int i = 0; i < defaultSpineJointAngles.length; i++)
+         actionDefinition.getJointAngles().setValue(i, defaultSpineJointAngles[i]);
+
+      SpineJointName[] spineJointNames = syncedRobot.getRobotModel().getJointMap().getSpineJointNames();
+      int yawIndex = -1;
+      double yawMin = Double.NEGATIVE_INFINITY;
+      double yawMax = Double.POSITIVE_INFINITY;
+      int spineJointCount = Math.min(spineJointNames.length, defaultSpineJointAngles.length);
+      for (int i = 0; i < spineJointCount; i++)
+      {
+         if (spineJointNames[i] == SpineJointName.SPINE_YAW)
+         {
+            yawIndex = i;
+            var yawJoint = syncedRobot.getFullRobotModel().getSpineJoint(spineJointNames[i]);
+            yawMin = yawJoint.getJointLimitLower();
+            yawMax = yawJoint.getJointLimitUpper();
+            break;
+         }
+      }
+
+      if (yawIndex >= 0)
+      {
+         double yawReferenceDistance = Math.min(Math.abs(yawMin), Math.abs(yawMax));
+         double yawSigma = computeGaussianSigmaForReferenceDistance(yawReferenceDistance, CENTERED_GAUSSIAN_TARGET_PROBABILITY);
+         double randomizedYaw = sampleTruncatedGaussian(0.0, yawMin, yawMax, yawSigma);
+         actionDefinition.getJointAngles().setValue(yawIndex, randomizedYaw);
+      }
+
+      actionDefinition.setTrajectoryDuration(randomDuration());
+      actionDefinition.modify();
+   }
+
+   private void restoreSpineDefaults(SpineActionState spineAction)
+   {
+      var definition = spineAction.getDefinition();
+      for (int i = 0; i < defaultSpineJointAngles.length; i++)
+         definition.getJointAngles().setValue(i, defaultSpineJointAngles[i]);
+      definition.setTrajectoryDuration(defaultSpineDuration);
+      definition.modify();
+   }
+
+   private void applyPelvisSetting(PelvisActionState pelvisAction)
+   {
+      var actionDefinition = pelvisAction.getDefinition();
+      var transform = actionDefinition.getPelvisToParentTransform().getValueAndModify();
+      transform.set(defaultPelvisTransform);
+
+      double pelvisPitchReferenceDistance = PELVIS_PITCH_MAX_RADIANS - PELVIS_PITCH_MIN_RADIANS;
+      double pelvisPitchSigma = computeGaussianSigmaForReferenceDistance(pelvisPitchReferenceDistance, CENTERED_GAUSSIAN_TARGET_PROBABILITY);
+      double pelvisPitch = sampleTruncatedGaussian(PELVIS_PITCH_MIN_RADIANS,
+                                                   PELVIS_PITCH_MIN_RADIANS,
+                                                   PELVIS_PITCH_MAX_RADIANS,
+                                                   pelvisPitchSigma);
+      transform.getRotation().setYawPitchRoll(defaultPelvisTransform.getRotation().getYaw(), pelvisPitch, defaultPelvisTransform.getRotation().getRoll());
+
+      double pelvisHeightReferenceDistance = 0.1;
+      double pelvisHeightSigma = computeGaussianSigmaForReferenceDistance(pelvisHeightReferenceDistance, CENTERED_GAUSSIAN_TARGET_PROBABILITY);
+      double pelvisHeight = sampleTruncatedGaussian(PELVIS_HEIGHT_CENTER_METERS,
+                                                    PELVIS_HEIGHT_MIN_METERS,
+                                                    PELVIS_HEIGHT_MAX_METERS,
+                                                    pelvisHeightSigma);
+      transform.getTranslation().setZ(pelvisHeight);
+
+      actionDefinition.setTrajectoryDuration(randomDuration());
+      actionDefinition.modify();
+   }
+
+   private void restorePelvisDefaults(PelvisActionState pelvisAction)
+   {
+      var actionDefinition = pelvisAction.getDefinition();
+      actionDefinition.getPelvisToParentTransform().getValueAndModify().set(defaultPelvisTransform);
+      actionDefinition.setTrajectoryDuration(defaultPelvisDuration);
+      actionDefinition.modify();
+   }
+
+   private int[] sampleWholeBodyMask()
+   {
+      int[] mask = {0, 0, 0, 0}; // [leftArm, rightArm, torso, pelvis]
+      mask[1] = random.nextDouble() < definition.getProbabilityRightArmEnabled() ? 1 : 0;
+      mask[0] = random.nextDouble() < definition.getProbabilityLeftArmEnabled() ? 1 : 0;
+      mask[3] = random.nextDouble() < definition.getProbabilityPelvisEnabled() ? 1 : 0;
+      mask[2] = random.nextDouble() < definition.getProbabilityTorsoEnabled() ? 1 : 0;
+      return mask;
+   }
+
+   private double randomDuration()
+   {
+      return DURATION_MIN_SECONDS + random.nextDouble() * (DURATION_MAX_SECONDS - DURATION_MIN_SECONDS);
+   }
+
+   private double randomArmDuration()
+   {
+      double armDurationReferenceDistance = 0.5;
+      double armDurationSigma = computeGaussianSigmaForReferenceDistance(armDurationReferenceDistance, CENTERED_GAUSSIAN_TARGET_PROBABILITY);
+      return sampleTruncatedGaussian(ARM_DURATION_MEAN_SECONDS, ARM_DURATION_MIN_SECONDS, ARM_DURATION_MAX_SECONDS, armDurationSigma);
+   }
+
+   private static double clamp(double value, double min, double max)
+   {
+      return Math.max(min, Math.min(max, value));
+   }
+
+   /**
+    * Samples a Gaussian distribution centered at {@code mean}, truncated to [{@code min}, {@code max}].
+    */
+   private double sampleTruncatedGaussian(double mean, double min, double max, double stdDev)
+   {
+      if (min > max)
+      {
+         double tmp = min;
+         min = max;
+         max = tmp;
+      }
+
+      if (max - min < 1.0e-12)
+         return min;
+
+      double clampedMean = clamp(mean, min, max);
+      double safeStdDev = Math.max(stdDev, 1.0e-6);
+
+      for (int i = 0; i < 64; i++)
+      {
+         double sample = clampedMean + random.nextGaussian() * safeStdDev;
+         if (sample >= min && sample <= max)
+            return sample;
+      }
+
+      return clamp(clampedMean, min, max);
+   }
+
+   /**
+    * Computes Gaussian sigma so that:
+    * P(|x - mean| <= referenceDistance) = targetProbability.
+    */
+   private static double computeGaussianSigmaForReferenceDistance(double referenceDistance, double targetProbability)
+   {
+      double safeReferenceDistance = Math.max(Math.abs(referenceDistance), 1.0e-6);
+      double safeTargetProbability = clamp(targetProbability, 1.0e-6, 1.0 - 1.0e-6);
+      double cumulative = 0.5 * (1.0 + safeTargetProbability);
+      double zScore = inverseStandardNormalCdf(cumulative);
+      return safeReferenceDistance / Math.max(Math.abs(zScore), 1.0e-6);
+   }
+
+   /**
+    * Approximation from Peter J. Acklam's inverse-normal algorithm.
+    */
+   private static double inverseStandardNormalCdf(double p)
+   {
+      double clampedP = clamp(p, 1.0e-12, 1.0 - 1.0e-12);
+
+      double[] a = {-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00};
+      double[] b = {-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01};
+      double[] c = {-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00};
+      double[] d = {7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00};
+
+      double pLow = 0.02425;
+      double pHigh = 1.0 - pLow;
+
+      if (clampedP < pLow)
+      {
+         double q = Math.sqrt(-2.0 * Math.log(clampedP));
+         return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5])
+                / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1.0);
+      }
+      if (clampedP <= pHigh)
+      {
+         double q = clampedP - 0.5;
+         double r = q * q;
+         return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q
+                / (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1.0);
+      }
+
+      double q = Math.sqrt(-2.0 * Math.log(1.0 - clampedP));
+      return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5])
+             / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1.0);
    }
 
    private void addNode()
