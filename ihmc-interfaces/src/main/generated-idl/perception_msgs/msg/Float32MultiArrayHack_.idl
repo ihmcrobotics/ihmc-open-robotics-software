@@ -1,5 +1,5 @@
-#ifndef __perception_msgs__msg__UInt16MultiArrayHack__idl__
-#define __perception_msgs__msg__UInt16MultiArrayHack__idl__
+#ifndef __perception_msgs__msg__Float32MultiArrayHack__idl__
+#define __perception_msgs__msg__Float32MultiArrayHack__idl__
 
 #include "std_msgs/msg/./MultiArrayLayout_.idl"
 module perception_msgs
@@ -10,12 +10,12 @@ module perception_msgs
     {
 
       /**
-       * This is a stupid copy of the UInt16MultiArray message to get enough array elements
+       * This is a stupid copy of the Float32MultiArray message to get enough array elements
        * because ihmc-ros2-library defaults unbounded arrays to 100 elements.
        * TODO: jros2 Remove this message when we transition to jros2
        */
-      @TypeCode(type="perception_msgs::msg::dds_::UInt16MultiArrayHack_")
-      struct UInt16MultiArrayHack
+      @TypeCode(type="perception_msgs::msg::dds_::Float32MultiArrayHack_")
+      struct Float32MultiArrayHack
       {
         /**
          * specification of data layout
@@ -24,7 +24,7 @@ module perception_msgs
         /**
          * array of data
          */
-        sequence<unsigned short, 1024> data;
+        sequence<float, 1024> data;
       };
     };
   };

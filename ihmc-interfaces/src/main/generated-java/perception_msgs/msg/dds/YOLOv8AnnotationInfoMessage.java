@@ -26,13 +26,13 @@ public class YOLOv8AnnotationInfoMessage extends Packet<YOLOv8AnnotationInfoMess
    /**
             * Polygons representing the mask of the detection
             */
-   public perception_msgs.msg.dds.UInt16MultiArrayHack mask_polygons_;
+   public perception_msgs.msg.dds.Float32MultiArrayHack mask_polygons_;
 
    public YOLOv8AnnotationInfoMessage()
    {
       object_class_ = new java.lang.StringBuilder(255);
       bounding_box_ = new vision_msgs.msg.dds.BoundingBox2D();
-      mask_polygons_ = new perception_msgs.msg.dds.UInt16MultiArrayHack();
+      mask_polygons_ = new perception_msgs.msg.dds.Float32MultiArrayHack();
    }
 
    public YOLOv8AnnotationInfoMessage(YOLOv8AnnotationInfoMessage other)
@@ -49,7 +49,7 @@ public class YOLOv8AnnotationInfoMessage extends Packet<YOLOv8AnnotationInfoMess
       confidence_ = other.confidence_;
 
       vision_msgs.msg.dds.BoundingBox2DPubSubType.staticCopy(other.bounding_box_, bounding_box_);
-      perception_msgs.msg.dds.UInt16MultiArrayHackPubSubType.staticCopy(other.mask_polygons_, mask_polygons_);
+      perception_msgs.msg.dds.Float32MultiArrayHackPubSubType.staticCopy(other.mask_polygons_, mask_polygons_);
    }
 
    /**
@@ -104,7 +104,7 @@ public class YOLOv8AnnotationInfoMessage extends Packet<YOLOv8AnnotationInfoMess
    /**
             * Polygons representing the mask of the detection
             */
-   public perception_msgs.msg.dds.UInt16MultiArrayHack getMaskPolygons()
+   public perception_msgs.msg.dds.Float32MultiArrayHack getMaskPolygons()
    {
       return mask_polygons_;
    }
