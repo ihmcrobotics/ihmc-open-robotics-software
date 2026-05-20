@@ -622,7 +622,10 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       String ret = getClass().getSimpleName() + ": ";
       ret += "base = " + spatialAccelerationCommand.getBase() + ", ";
       ret += "endEffector = " + spatialAccelerationCommand.getEndEffector() + ", ";
-      ret += "orientation = " + referenceOrientation.toStringAsYawPitchRoll();
+      ret += "orientation = " + referenceOrientation.toStringAsYawPitchRoll() + ", ";
+      ret += "weight = " + spatialAccelerationCommand.getWeightMatrix() + ", ";
+      ret += "selection = " + spatialAccelerationCommand.getSelectionMatrix() + ", ";
+      ret += "gains = " + gains;
       return ret;
    }
 }
