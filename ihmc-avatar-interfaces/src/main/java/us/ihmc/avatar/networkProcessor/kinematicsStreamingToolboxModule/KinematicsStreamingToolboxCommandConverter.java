@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
+import us.ihmc.jros2.ROS2Message;
+
 import toolbox_msgs.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.KinematicsStreamingToolboxContactConfigurationMessage;
 import toolbox_msgs.KinematicsStreamingToolboxInitialConfigurationMessage;
@@ -36,7 +38,7 @@ public class KinematicsStreamingToolboxCommandConverter implements CommandConver
    }
 
    @Override
-   public <C extends Command<?, M>, M extends Settable<M>> boolean isConvertible(C command, M message)
+   public <C extends Command<?, M>, M extends ROS2Message<M>> boolean isConvertible(C command, M message)
    {
       if (message instanceof KinematicsStreamingToolboxInputMessage)
          return true;
@@ -52,7 +54,7 @@ public class KinematicsStreamingToolboxCommandConverter implements CommandConver
    }
 
    @Override
-   public <C extends Command<?, M>, M extends Settable<M>> void process(C command, M message)
+   public <C extends Command<?, M>, M extends ROS2Message<M>> void process(C command, M message)
    {
       if (message instanceof KinematicsStreamingToolboxInputMessage inputMessage)
       {

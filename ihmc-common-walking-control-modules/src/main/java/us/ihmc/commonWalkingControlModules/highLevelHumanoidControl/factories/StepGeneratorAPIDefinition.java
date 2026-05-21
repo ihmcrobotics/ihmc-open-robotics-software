@@ -25,7 +25,7 @@ import java.util.List;
 public class StepGeneratorAPIDefinition
 {
    private static final List<Class<? extends Command<?, ?>>> stepGeneratorSupportedCommands;
-   private static final List<Class<? extends Settable<?>>> stepGeneratorSupportedStatusMessages;
+   private static final List<Class<? extends ROS2Message<?>>> stepGeneratorSupportedStatusMessages;
    private static final HashSet<Class<?>> inputMessageClasses = new HashSet<>();
    private static final HashSet<Class<?>> outputMessageClasses = new HashSet<>();
 
@@ -55,7 +55,7 @@ public class StepGeneratorAPIDefinition
          }
       }
 
-      List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
+      List<Class<? extends ROS2Message<?>>> statusMessages = new ArrayList<>();
       statusMessages.add(ContinuousStepGeneratorStatusMessage.class);
       statusMessages.add(ControllerWalkToGoalStatusMessage.class);
       statusMessages.add(ControllerWaypointStatusMessage.class);
@@ -79,7 +79,7 @@ public class StepGeneratorAPIDefinition
       return outputMessageClasses;
    }
 
-   public static List<Class<? extends Settable<?>>> getStepGeneratorSupportedStatusMessages()
+   public static List<Class<? extends ROS2Message<?>>> getStepGeneratorSupportedStatusMessages()
    {
       return stepGeneratorSupportedStatusMessages;
    }

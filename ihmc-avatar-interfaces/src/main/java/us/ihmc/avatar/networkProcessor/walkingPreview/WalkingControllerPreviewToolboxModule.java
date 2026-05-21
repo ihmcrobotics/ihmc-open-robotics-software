@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.walkingPreview;
 
+import us.ihmc.jros2.ROS2Message;
+
 import controller_msgs.RobotConfigurationData;
 import toolbox_msgs.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -70,12 +72,12 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    }
 
    @Override
-   public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
+   public List<Class<? extends ROS2Message<?>>> createListOfSupportedStatus()
    {
       return supportedStatus();
    }
 
-   public static List<Class<? extends Settable<?>>> supportedStatus()
+   public static List<Class<? extends ROS2Message<?>>> supportedStatus()
    {
       return Collections.singletonList(WalkingControllerPreviewOutputMessage.class);
    }

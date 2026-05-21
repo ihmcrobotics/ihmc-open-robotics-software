@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
+import us.ihmc.communication.ROS2Tools;
+
 import controller_msgs.CapturabilityBasedStatus;
 import controller_msgs.RobotConfigurationData;
 import org.junit.jupiter.api.AfterEach;
@@ -197,7 +199,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
 
       toolboxROS2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, CapturabilityBasedStatus.class),
                                          s -> toolboxController.updateCapturabilityBasedStatus(s.read()));
-      toolboxROS2Node.spin();
+      ROS2Tools.blockUntilInterrupted();
    }
 
    @AfterEach

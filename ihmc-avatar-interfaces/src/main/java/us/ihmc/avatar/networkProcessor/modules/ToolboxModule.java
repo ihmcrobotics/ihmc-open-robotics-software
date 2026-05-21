@@ -1,5 +1,9 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
+import us.ihmc.communication.ROS2Tools;
+
+import us.ihmc.jros2.ROS2Message;
+
 import com.google.common.base.CaseFormat;
 import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
@@ -148,7 +152,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       registerExtraPuSubs(ros2Node);
 
       if (manageROS2Node && ros2Node instanceof AsyncROS2Node rtNode)
-         rtNode.spin();
+         ROS2Tools.blockUntilInterrupted();
    }
 
    public void setRootRegistry(YoRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
@@ -272,7 +276,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    {
       return new MessageFilter()
       {
-         private final Set<Class<? extends Settable<?>>> exceptions = filterExceptions();
+         private final Set<Class<? extends ROS2Message<?>>> exceptions = filterExceptions();
 
          @Override
          public boolean isMessageValid(Object message)
@@ -516,7 +520,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    /**
     * @return used to create the {@link StatusMessageOutputManager} and to defines the output API.
     */
-   abstract public List<Class<? extends Settable<?>>> createListOfSupportedStatus();
+   abstract public List<Class<? extends ROS2Message<?>>> createListOfSupportedStatus();
 
    public YoRegistry getRegistry()
    {
@@ -534,7 +538,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    /**
     * @return the collection of messages that are allowed to go through the message filter.
     */
-   public Set<Class<? extends Settable<?>>> filterExceptions()
+   public Set<Class<? extends ROS2Message<?>>> filterExceptions()
    {
       return Collections.emptySet();
    }

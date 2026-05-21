@@ -34,10 +34,10 @@ public class StepGeneratorNetworkSubscriber
    private final AtomicReference<ControllerNetworkSubscriber.MessageValidator> messageValidator;
 
    /** All the possible messages that can be sent to the communicator. */
-   private final List<Class<? extends Settable<?>>> listOfSupportedControlMessages;
-   private final List<Class<? extends Settable<?>>> listOfSupportedStatusMessages;
+   private final List<Class<? extends ROS2Message<?>>> listOfSupportedControlMessages;
+   private final List<Class<? extends ROS2Message<?>>> listOfSupportedStatusMessages;
 
-   private final Map<Class<? extends Settable<?>>, ROS2Publisher<?>> statusMessagePublisherMap = new HashMap<>();
+   private final Map<Class<? extends ROS2Message<?>>, ROS2Publisher<?>> statusMessagePublisherMap = new HashMap<>();
 
    private final AsyncROS2Node realtimeROS2Node;
 
@@ -87,7 +87,7 @@ public class StepGeneratorNetworkSubscriber
                                                                              int expectedMessageSize,
                                                                              MessageUnpackingTools.MessageUnpacker<T> messageUnpacker)
    {
-      final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
+      final List<ROS2Message<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
       ROS2Topic<T> topic = ControllerAPI.getTopic(inputTopic, multipleMessageType);
       T localInstance = ROS2Message.createInstance(multipleMessageType);
@@ -110,9 +110,9 @@ public class StepGeneratorNetworkSubscriber
       }
    }
 
-   private <T extends Settable<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass,
+   private <T extends ROS2Message<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass,
                                                            MessageUnpackingTools.MessageUnpacker<T> messageUnpacker,
-                                                           List<Settable<?>> unpackedMessages,
+                                                           List<ROS2Message<?>> unpackedMessages,
                                                            T multipleMessageHolder)
    {
       if (DEBUG)
@@ -182,7 +182,7 @@ public class StepGeneratorNetworkSubscriber
    }
 
    @SuppressWarnings({"unchecked", "rawtypes"})
-   private void publishStatusMessage(Settable<?> message)
+   private void publishStatusMessage(ROS2Message<?> message)
    {
       ROS2Publisher publisher = (ROS2Publisher) statusMessagePublisherMap.get(message.getClass());
       publisher.publish((ROS2Message) message);
@@ -195,7 +195,7 @@ public class StepGeneratorNetworkSubscriber
    }
 
    @SuppressWarnings("unchecked")
-   private <T extends Settable<T>> void receivedMessage(Settable<?> message)
+   private <T extends ROS2Message<T>> void receivedMessage(ROS2Message<?> message)
    {
       if (DEBUG)
          LogTools.debug("Received message: {}, {}", message.getClass().getSimpleName(), message);
@@ -207,7 +207,7 @@ public class StepGeneratorNetworkSubscriber
          commandInputManager.submitMessage((T) message);
    }
 
-   private boolean testMessageWithMessageFilter(Settable<?> messageToTest)
+   private boolean testMessageWithMessageFilter(ROS2Message<?> messageToTest)
    {
       if (!messageFilter.get().isMessageValid(messageToTest))
       {

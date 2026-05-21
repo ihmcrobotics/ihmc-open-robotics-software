@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule;
 
+import us.ihmc.jros2.ROS2Message;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,7 +71,7 @@ public class WholeBodyTrajectoryToolboxCommandConverter implements CommandConver
     * Only converting {@link KinematicsToolboxRigidBodyMessage}.
     */
    @Override
-   public <C extends Command<?, M>, M extends Settable<M>> boolean isConvertible(C command, M message)
+   public <C extends Command<?, M>, M extends ROS2Message<M>> boolean isConvertible(C command, M message)
    {
       if (command instanceof WholeBodyTrajectoryToolboxAPI<?>)
          return true;
@@ -81,7 +83,7 @@ public class WholeBodyTrajectoryToolboxCommandConverter implements CommandConver
     */
    //@SuppressWarnings("unchecked")
    @Override
-   public <C extends Command<?, M>, M extends Settable<M>> void process(C command, M message)
+   public <C extends Command<?, M>, M extends ROS2Message<M>> void process(C command, M message)
    {
       WholeBodyTrajectoryToolboxAPI<M> wholeBodyTrajectoryCommand = (WholeBodyTrajectoryToolboxAPI<M>) command;
       wholeBodyTrajectoryCommand.set(message, rigidBodyHashMap, referenceFrameHashCodeResolver);

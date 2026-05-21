@@ -78,4 +78,20 @@ public final class ROS2Tools
       ros2Node.createSubscription(topic, reader -> typedNotification.set(reader.read()));
       return typedNotification;
    }
+
+   /**
+    * Blocks the current thread until interrupted. DDS subscription callbacks still run on listener threads.
+    * Use when a module thread must stay alive without adding a blocking API to {@link ROS2Node}.
+    */
+   public static void blockUntilInterrupted()
+   {
+      try
+      {
+         Thread.sleep(Long.MAX_VALUE);
+      }
+      catch (InterruptedException e)
+      {
+         Thread.currentThread().interrupt();
+      }
+   }
 }

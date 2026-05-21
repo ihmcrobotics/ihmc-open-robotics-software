@@ -48,17 +48,17 @@ public class ControllerNetworkSubscriber
    private final List<MessageCollector> messageCollectors = new ArrayList<>();
 
    /** All the possible status message that can be sent to the communicator. */
-   private final List<Class<? extends Settable<?>>> listOfSupportedStatusMessages;
+   private final List<Class<? extends ROS2Message<?>>> listOfSupportedStatusMessages;
 
    /** All the possible messages that can be sent to the communicator. */
-   private final List<Class<? extends Settable<?>>> listOfSupportedControlMessages;
+   private final List<Class<? extends ROS2Message<?>>> listOfSupportedControlMessages;
 
    /**
     * Local buffers for each message to ensure proper copying from the controller thread to the
     * communication thread.
     */
-   private final Map<Class<? extends Settable<?>>, ROS2Publisher<?>> statusMessagePublisherMap = new HashMap<>();
-   private final Map<Class<? extends Settable<?>>, ThrottledROS2Publisher> lowFrequencyStatusMessagePublisherMap = new HashMap<>();
+   private final Map<Class<? extends ROS2Message<?>>, ROS2Publisher<?>> statusMessagePublisherMap = new HashMap<>();
+   private final Map<Class<? extends ROS2Message<?>>, ThrottledROS2Publisher> lowFrequencyStatusMessagePublisherMap = new HashMap<>();
 
    private final ROS2Node ros2Node;
 
@@ -95,7 +95,7 @@ public class ControllerNetworkSubscriber
                                                                              int expectedMessageSize,
                                                                              MessageUnpacker<T> messageUnpacker)
    {
-      final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
+      final List<ROS2Message<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
       T localInstance = ROS2Message.createInstance(multipleMessageType);
       ros2Node.createSubscription(ControllerAPI.getTopic(inputTopic, multipleMessageType), reader ->
@@ -105,9 +105,9 @@ public class ControllerNetworkSubscriber
       });
    }
 
-   private <T extends Settable<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass,
+   private <T extends ROS2Message<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass,
                                                            MessageUnpacker<T> messageUnpacker,
-                                                           List<Settable<?>> unpackedMessages,
+                                                           List<ROS2Message<?>> unpackedMessages,
                                                            T multipleMessageHolder)
    {
       if (DEBUG)
@@ -194,7 +194,7 @@ public class ControllerNetworkSubscriber
    {
       for (int i = 0; i < listOfSupportedStatusMessages.size(); i++)
       {
-         Class<? extends Settable<?>> messageClass = listOfSupportedStatusMessages.get(i);
+         Class<? extends ROS2Message<?>> messageClass = listOfSupportedStatusMessages.get(i);
          statusMessagePublisherMap.put(messageClass, createPublisher((Class<? extends ROS2Message<?>>) messageClass));
          lowFrequencyStatusMessagePublisherMap.put(messageClass, createLowFrequencyPublisher((Class<? extends ROS2Message<?>>) messageClass));
       }
@@ -223,7 +223,7 @@ public class ControllerNetworkSubscriber
    }
 
    @SuppressWarnings("unchecked")
-   private <T extends Settable<T>> void receivedMessage(Settable<?> message)
+   private <T extends ROS2Message<T>> void receivedMessage(ROS2Message<?> message)
    {
       if (DEBUG)
          LogTools.debug("Received message: {}, {}", message.getClass().getSimpleName(), message);
@@ -239,7 +239,7 @@ public class ControllerNetworkSubscriber
 
             if (!messageCollector.isCollecting())
             {
-               List<Settable<?>> collectedMessages = messageCollector.getCollectedMessages();
+               List<ROS2Message<?>> collectedMessages = messageCollector.getCollectedMessages();
                for (int i = 0; i < collectedMessages.size(); i++)
                {
                   receivedMessage(collectedMessages.get(i));
@@ -255,7 +255,7 @@ public class ControllerNetworkSubscriber
 
       if (errorMessage != null)
       {
-         reportInvalidMessage((Class<? extends Settable<?>>) message.getClass(), errorMessage);
+         reportInvalidMessage((Class<? extends ROS2Message<?>>) message.getClass(), errorMessage);
          return;
       }
 
@@ -263,7 +263,7 @@ public class ControllerNetworkSubscriber
          controllerCommandInputManager.submitMessage((T) message);
    }
 
-   private boolean testMessageWithMessageFilter(Settable<?> messageToTest)
+   private boolean testMessageWithMessageFilter(ROS2Message<?> messageToTest)
    {
       if (!messageFilter.get().isMessageValid(messageToTest))
       {
@@ -289,7 +289,7 @@ public class ControllerNetworkSubscriber
    }
 
    @SuppressWarnings({"unchecked", "rawtypes"})
-   private void publishStatusMessage(Settable<?> message)
+   private void publishStatusMessage(ROS2Message<?> message)
    {
       ROS2Publisher publisher = (ROS2Publisher) statusMessagePublisherMap.get(message.getClass());
       publisher.publish((ROS2Message) message);

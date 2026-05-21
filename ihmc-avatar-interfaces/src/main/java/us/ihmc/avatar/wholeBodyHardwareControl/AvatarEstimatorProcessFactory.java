@@ -1,5 +1,7 @@
 package us.ihmc.avatar.wholeBodyHardwareControl;
 
+import us.ihmc.communication.ROS2Tools;
+
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarEstimatorThreadFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -104,7 +106,7 @@ public class AvatarEstimatorProcessFactory
 
    public void start()
    {
-      estimatorRealtimeROS2Node.spin();
+      ROS2Tools.blockUntilInterrupted();
       hardwareCommunicationInterface.start();
       threadingManager.get().start();
    }

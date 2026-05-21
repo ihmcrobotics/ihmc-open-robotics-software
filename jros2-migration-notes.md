@@ -7,54 +7,82 @@ Treat as a guide, not a journal — patterns to apply, decisions to remember, wo
 
 ## Current Status
 
-Verified against `git diff develop...HEAD` (824 files; ~191 hand-edited `.java` outside `generated-java` / `ihmc-interfaces-jros2`) plus working-tree fixes on top of branch HEAD.
+Last verified: **May 2026** on branch `jros2-conversion-2` (includes `develop` merge).
 
-| Module                                | Status                                                                |
-| ------------------------------------- | --------------------------------------------------------------------- |
-| `ihmc-interfaces-jros2`               | New module, ~306 generated message types (jros2-generator v1.2.1)     |
-| `ihmc-communication`                  | ✅ compiles                                                            |
-| `ihmc-humanoid-robotics`              | ✅ compiles                                                            |
-| `ihmc-sensor-processing`              | ✅ compiles (3 touched files)                                          |
-| `ihmc-graphics`                       | ✅ compiles (2 touched files)                                          |
-| `ihmc-avatar-interfaces`              | ✅ compiles (May 2026) — loggers/snapshots/reachability/KST migrated   |
-| `ihmc-high-level-behaviors`           | ✅ compiles (main + libgdx + tests)                                      |
-| `ihmc-common-walking-control-modules` | ✅ compiles (network subscribers, geometry wrappers, message collections) |
-| `ihmc-perception`                     | ✅ compiles                                                            |
-| `ihmc-state-estimation`               | ✅ compiles (`EuclidPose3DMessage` → `.getPose()` for `Pose3D`)        |
-| `ihmc-manipulation-planning`          | ✅ compiles (`KinematicsToolboxOutputStatus` copy via `.set()`)        |
-| `ihmc-footstep-planning`              | ✅ compiles (geometry wrappers, CDR log I/O)                           |
-| `ihmc-path-planning` (data-sets)      | ✅ compiles (legacy JSON height maps via `HeightMapDataSetIOTools`)    |
-Hand-edited Java files: **191** (`git diff develop...HEAD --name-only -- '*.java' | grep -v generated-java | grep -v ihmc-interfaces-jros2/src | wc -l`).
+| Check | Result |
+| ----- | ------ |
+| `git diff develop...HEAD --stat` | **1391 files**, +73808 / −5851 lines |
+| Hand-edited `.java` (excl. `generated-java`, `ihmc-interfaces-jros2/src/main/java`) | **750** files |
+| `compositeTask -PtaskName=compileJava` | ✅ BUILD SUCCESSFUL |
+| `compositeTask -PtaskName=compileTestJava` | ✅ BUILD SUCCESSFUL |
+
+Hand-edited Java by module (top):
+
+| Module | Files |
+| ------ | ----- |
+| `ihmc-high-level-behaviors` | 212 |
+| `ihmc-avatar-interfaces` | 172 |
+| `ihmc-humanoid-robotics` | 104 |
+| `ihmc-communication` | 76 |
+| `ihmc-common-walking-control-modules` | 56 |
+| `ihmc-perception` | 51 |
+| `ihmc-footstep-planning` | 48 |
+| other (sensor, zulu, manipulation, …) | ≤10 each |
+
+| Module | Status |
+| ------ | ------ |
+| `ihmc-interfaces-jros2` | New module — jros2-generated types + `EuclidXxxMessage` / `EuclidTransformMessage` wrappers |
+| `ihmc-communication` … `zulu` | ✅ all composite `compileJava` targets build |
+| `ihmc-avatar-interfaces-test` | ✅ compiles (~85 test files migrated) |
+| `ihmc-high-level-behaviors-libgdx` | ✅ compiles (~77 libgdx sources migrated) |
 
 ```bash
-GRADLE_OPTS="-Xmx4g" ./gradlew :ihmc-avatar-interfaces:compileJava
-GRADLE_OPTS="-Xmx4g" ./gradlew :ihmc-high-level-behaviors:compileJava
+cd ihmc-open-robotics-software
+GRADLE_OPTS="-Xmx4g" ./gradlew compositeTask -PtaskName=compileJava
+GRADLE_OPTS="-Xmx4g" ./gradlew compositeTask -PtaskName=compileTestJava
 ```
 
-### Branch audit (`develop...HEAD`) — patterns in the diff
+### Branch audit (`develop...HEAD`)
+
+**Clean in production `src/main` (grep scan):**
+
+| Anti-pattern | Count in `src/main` |
+| ------------ | ------------------- |
+| `*.msg.dds.*` imports | 0 (Javadoc-only mentions may remain) |
+| `ROS2NodeBuilder` | 0 |
+| `takeNextData` | 0 |
+| `us.ihmc.ros2` (old package) | 0 |
+
+**Expected / intentional exceptions:**
+
+| Item | Notes |
+| ---- | ----- |
+| `us.ihmc.pubsub` | 4 files — `ROS2LogIOTools`, `ROS2LogSerialization`, `SCSROS2Visualizer`, `PubSubStatsTools` (legacy log/stats paths) |
+| `RDXROS2StatsPanel` + `PubSub*Stats` | Stubbed UI — old pubsub metrics API removed |
+| `BigVideoSwapData` | Stubbed (unused legacy) |
+| `ihmc-interfaces/.../generated-java` | Legacy tree; **runtime** uses `ihmc-interfaces-jros2` |
+| `ihmc-interfaces` atlas mock tests | Still reference `.msg.dds` (not on migration path) |
+
+**develop merge (perception):** `UInt16MultiArrayHack` → `Float32MultiArrayHack` for YOLOv8 mask polygons (`IDLFloatSequence`, `Float.BYTES` stride). Both hack types may exist in `ihmc-interfaces-jros2` until fully removed.
+
+### Migration patterns (confirmed on branch)
 
 | Pattern | On branch |
 | ------- | --------- |
-| Drop `.msg.dds.` in imports | Migrated API modules |
+| Drop `.msg.dds.` in imports | ✅ migrated API modules |
 | `prependedWith` / `appendedWith` / `withType` | Topic constants |
-| `reader.read()` / `reader.read(buffer)` | Subscriptions (replaces `takeNextData`) |
+| `reader.read()` / `reader.read(buffer)` | Subscriptions |
 | `close()` / `destroySubscription` | Node/sub lifecycle |
 | `EuclidXxxMessage` accessors | `.getPoint()` / `.getQuaternion()` / `.getPose()` / `.getVector()` |
-| `new T(); dest.set(src);` | Message copy (no copy constructors) |
+| `new T(); dest.set(src);` | Message deep copy |
 | `Ros2MessageCdrFileTools` | CDR file I/O |
-| `IDLObjectSequence.add().set(item)` | Deep copy (`MessageTools.copyData(T[], …)`) |
-| `IDL*Sequence.addAll(...)` | Shallow bulk append (arrays / collections) |
-| `(short)` / `(int)` casts | `uint16` / `uint32` fields |
-| `IDLStringSequence` + `getAsString(i)` | Replaces `StringBuilderHolder` string sequences |
-| `IDLShortSequence` | `uint16[]` (e.g. via `CRDTBidirectionalIntegerList.toMessage/fromMessage`) |
+| `MessageTools.copyData(T[], IDLObjectSequence<T>)` | Deep copy sequences |
+| `MessageTools.toMessage/toEuclid(RigidBodyTransform, geometry_msgs.Transform)` | TF / plain `geometry_msgs` transforms |
+| `ControllerMessageConstants.INVALID_MESSAGE_ID` / `VALID_MESSAGE_DEFAULT_ID` | Replaces `Packet.*` ID constants |
 | `AsyncROS2Node` | Realtime comms |
 | `ihmc_hands_ros2:source` | Cloned hands repo on jros2 |
 
-**HEAD vs working tree:** On branch HEAD, `ROS2Helper.subscribe()` → `ROS2Input` is still commented (`// TODO: jros2 migration`). `ROS2Input.java` is migrated; uncomment those methods or call `new ROS2Input<>(ros2Node, topic)` directly. `subscribeViaCallback` is active on HEAD.
-
-**Composite `compileJava`:** `GRADLE_OPTS="-Xmx4g" ./gradlew compositeTask -PtaskName=compileJava` succeeds (May 2026).
-
-**Deferred / stubbed:** `RDXROS2StatsPanel` and pub/sub stats helpers (old `us.ihmc.pubsub` metrics UI). Legacy `ihmc-interfaces/.../generated-java` remains in tree but runtime uses `ihmc-interfaces-jros2`.
+**Deferred / stubbed:** `RDXROS2StatsPanel` and pub/sub stats helpers. `ROS2Helper.publish(Pose3D)` and `ROS2PeerClockOffsetEstimator` subscription-matched callbacks remain commented (see Open TODOs).
 
 ### ihmc-avatar-interfaces (completed patterns)
 
@@ -167,28 +195,44 @@ bodyPathWaypoints.add(new Pose3D(waypointMessage.getPose()));
 
 ## Open TODOs in the source
 
-Each one is marked `// TODO jros2` (or similar) in code. Listed here so they don't get lost.
+Marked `// TODO jros2` (or `@Disabled // TODO: jros2 migration`) in code.
 
-| File                                                 | Line   | Issue                                                                  |
-| ---------------------------------------------------- | ------ | ---------------------------------------------------------------------- |
-| ~~`MessageTools.java`~~                              | ~~571~~ | ~~`copyData` stubs~~ — fixed (typed overloads for Pose3D/Point3D/List/ROS2Message) |
-| ~~`HumanoidMessageTools.java`~~                      | ~~1705~~ | ~~wrench / foot polygon~~ — fixed                                      |
-| `ROS2Helper.java` (branch HEAD)                      | ~117   | `subscribe(...) → ROS2Input<T>` commented out — uncomment after `ROS2Input` migration |
-| `ROS2Helper.java`                                    | ~155   | `publish(ROS2Topic<Pose3D>, Pose3D)` commented out                     |
-| `ROS2PublisherMap.java`                              | ~39    | `publish(ROS2Topic<Pose3D>, Pose3D)` commented out                     |
-| `ROS2PeerClockOffsetEstimator.java`                  | ~46    | `SampleInfo` and subscription matched callback commented out           |
+| File | Issue |
+| ---- | ----- |
+| `ROS2Helper.java` | `publish(ROS2Topic<Pose3D>, Pose3D)` commented — needs `Pose3DMessageWrapper` or use `EuclidPose3DMessage` topic |
+| `ROS2PublisherMap.java` | Same Pose3D publish overload |
+| `ROS2PeerClockOffsetEstimator.java` | `SampleInfo` + subscription-matched callback not in jros2 yet |
+| `Float32MultiArrayHack.java` / `UInt16MultiArrayHack.java` | Generated TODO to remove hack types when no longer needed |
+| `YOLOv8AnnotationInfoMessage.java` | Generator comment to swap IDL block when stable |
 
-Disabled tests (annotated `@Disabled` with TODO):
-- `RealtimeROS2PublisherSubscriberTest` — used `QueuedROS2Subscription`; replace with `AsyncROS2Node.createSubscription` if re-enabled
-- `FrameRealtimeROS2PublisherSubscriberTest` — same
-- `ROS2PeerClockOffsetEstimatorTest` — uses `ROS2NodeBuilder.SpecialTransportMode`
-- `ROS2LogTest` — uses `message.epsilonEquals()` (geometry_msgs types don't have it)
+**Fixed in audit (May 2026):**
+
+| File | Fix |
+| ---- | --- |
+| `MessageTools.java` | Typed `copyData` for `ROS2Message[]`, `List`, `Pose3D[]`, `Point3D[]`; `toMessage`/`toEuclid` for `geometry_msgs.Transform` |
+| `HumanoidMessageTools.java` | Wrench + foot polygon conversions |
+| `ROS2Helper.java` | `subscribe()` → `ROS2Input` **active** (not commented) |
+| `ROS2FrameTools.java` | TF transform packing via `MessageTools.toMessage` |
+| `ROS2MutableFrame.java` | Remote TF apply via `MessageTools.toEuclid` |
+| `CRDTStatusFootstepList.java` | `getPoseReadOnly` → `getSolePose().getPose()` |
+| `ROS2HumanoidFrames.java` | Javadoc: `tf2_msgs.TFMessage` (not `.msg.dds`) |
+
+Disabled tests (`@Disabled // TODO: jros2 migration`):
+
+| Test | Blocker |
+| ---- | ------- |
+| `RealtimeROS2PublisherSubscriberTest` | `QueuedROS2Subscription` not porting |
+| `FrameRealtimeROS2PublisherSubscriberTest` | same |
+| `ROS2PeerClockOffsetEstimatorTest` | `ROS2NodeBuilder` transport modes |
+| `ROS2LogTest` | no `epsilonEquals` on `ROS2Message` |
+| `MessageToolsTest` | old `Packet` serialize round-trip |
+| `ROS2ToolsTest` (2 methods) | intraprocess / `ROS2NodeBuilder` |
 
 ---
 
 ## Style: no fully-qualified names
 
-When writing or fixing code, **import the package — never use fully-qualified names inline**. All 191 touched files in this branch have been audited and are clean.
+When writing or fixing code, **import the package — never use fully-qualified names inline**. Spot-check new edits; the 750 hand-edited files were migrated with this rule but not re-verified line-by-line in this audit.
 
 **Gotcha learned the hard way**: do not use `Edit replace_all` to swap `us.ihmc.jros2.ROS2Message` → `ROS2Message`. It will also rewrite the `import us.ihmc.jros2.ROS2Message;` line into the broken `import ROS2Message;`. Add the import first as a stable, fully-qualified line, then replace_all the FQN, then `sed -i 's|^import ROS2Message;|import us.ihmc.jros2.ROS2Message;|'` over the affected files to restore the imports. Or just edit each file individually.
 
@@ -247,7 +291,7 @@ Files deleted in the migration:
 
 Imports that are gone entirely (no replacement; the call site must be rewritten):
 - `us.ihmc.ros2.ROS2NodeBuilder` — use `ROS2Node` / `AsyncROS2Node` constructors
-- `us.ihmc.ros2.ROS2Input` — `us.ihmc.communication.ROS2Input` (uses `createSubscription` + `reader.read()`); restore `ROS2Helper.subscribe(topic)` on HEAD (currently commented TODO) or construct `ROS2Input` directly
+- `us.ihmc.ros2.ROS2Input` — `us.ihmc.communication.ROS2Input` (uses `createSubscription` + `reader.read()`); use `ROS2Helper.subscribe(topic)` or `new ROS2Input<>(ros2Node, topic)`
 - `us.ihmc.ros2.ROS2TopicNameTools` — use `ROS2Message.createInstance(topic.getType())`
 - `us.ihmc.ros2.QueuedROS2Subscription` — **not porting**; use `AsyncROS2Node.createSubscription` for realtime paths
 - `us.ihmc.pubsub.subscriber.Subscriber` — use `ROS2MessageReader<T>` in callback signature
@@ -270,7 +314,7 @@ new ROS2NodeBuilder().buildRealtime(name) → new AsyncROS2Node(name)
 ros2Node.destroy()                        → ros2Node.close()
 subscription.remove()                     → ros2Node.destroySubscription(subscription)
 publisher.remove()                        → ros2Node.destroyPublisher(publisher)
-ros2Node.spin()                           → blocks until interrupted (restored on jros2 `ROS2Node`)
+ros2Node.spin()                           → removed; use app-level wait (e.g. `ROS2Tools.blockUntilInterrupted()`)
 ```
 
 ### Euclid wrapper package (avatar)
@@ -493,28 +537,30 @@ footstep.getOrientation().set(nextFootstepPose3D.getOrientation());
 
 ### Geometry: standard geometry_msgs types
 
-The `geometry_msgs.Point`, `Vector3`, `Quaternion`, etc. (used by TF and plain ROS messages, not by IHMC custom messages) do not have Euclid `set(...)` overloads. Use field setters or the converters in `MessageTools`:
+Plain `geometry_msgs` types (TF, `TransformStamped`, upstream ROS messages) have no Euclid `set(RigidBodyTransform)` overload. Use field setters or `MessageTools`:
 
 ```java
-// Field by field
-msg.setX(p.getX()); msg.setY(p.getY()); msg.setZ(p.getZ());
+// RigidBodyTransform ↔ geometry_msgs.Transform (TF publishing / subscription)
+MessageTools.toMessage(rigidBodyTransform, transformStamped.getTransform());
+MessageTools.toEuclid(transformStamped.getTransform(), rigidBodyTransformToPack);
 
-// Or via MessageTools (these overloads target the *plain* geometry_msgs types)
-MessageTools.toMessage(point3D, geometryPointMsg);
-MessageTools.fromMessage(geometryPointMsg, point3D);
+// Field by field for Point / Vector3
+msg.setX(p.getX()); msg.setY(p.getY()); msg.setZ(p.getZ());
 ```
 
-Gotcha: Euclid Quaternion's scalar is `getS()`, geometry_msgs.Quaternion's is `getW()`. The MessageTools converter bridges this; if you're handling fields manually, watch for it.
+Gotcha: Euclid quaternion scalar is `getS()`; `geometry_msgs.Quaternion` uses `getW()`. `MessageTools.toMessage/toEuclid(Transform, …)` handles this.
+
+For IHMC custom messages, prefer `EuclidTransformMessage` (same wire type as `geometry_msgs/Transform`) where the IDL field uses the wrapper.
 
 ### MessageTools.copyData
 
 ```java
-// Implemented (deep copy):
-MessageTools.copyData(T[] source, IDLObjectSequence<T> destination)  // clear + add().set(item)
-
-// Still stubs (TODO jros2) — implement via add().set loop or addAll only if shallow copy is OK:
-MessageTools.copyData(Object[] source, IDLObjectSequence destination)
-MessageTools.copyData(List source, IDLObjectSequence destination)
+// Deep copy (implemented):
+MessageTools.copyData(T[] source, IDLObjectSequence<T> destination)
+MessageTools.copyData(List<T> source, IDLObjectSequence<T> destination)
+MessageTools.copyData(Pose3DReadOnly[] source, IDLObjectSequence<EuclidPose3DMessage> destination)
+MessageTools.copyData(Point3DReadOnly[] source, IDLObjectSequence<EuclidPoint3DMessage> destination)
+MessageTools.copyData(Iterable<? extends Point3DReadOnly> source, IDLObjectSequence<EuclidPoint3DMessage> destination)
 
 // Shallow bulk (references only):
 target.clear();
@@ -542,7 +588,9 @@ In `ihmc-interfaces-jros2`:
 
 ## Architectural decisions worth remembering
 
-- **Why `ROS2Message extends Settable<T>` and why euclid is a jros2 dep:** the IHMC codebase routes generated messages through `Settable<?>` for the same `set(from)` mechanic Euclid types use (see `MessageUnpackingTools`). Making `ROS2Message` extend `Settable<T>` lets these existing patterns keep working without per-message adapters. Cost: jros2 now has a hard `euclid` dep. If we ever upstream jros2 to a non-IHMC audience, this needs revisiting — the alternative is an `IhmcROS2Message<T>` interface in `ihmc-interfaces-jros2` that adds `Settable`.
+- **`ROS2Message` and euclid:** jros2 does **not** depend on euclid. `ROS2Message<T>` declares `void set(T from)` directly (same as generated messages). IHMC controller glue (`Command<M extends ROS2Message<M>>`, `CommandInputManager`, status APIs) uses `ROS2Message` bounds instead of `Settable` for wire types. **Commands** still extend Euclid `Settable<C>` for garbage-free command copies.
+- **No `ROS2Node.spin()`:** blocking the caller is an application concern. IHMC uses `ROS2Tools.blockUntilInterrupted()` where a thread must stay alive while DDS callbacks run on listener threads.
+- **`getGuid()`:** returns `us.ihmc.jros2.Guid` from publishers and subscriptions (not `byte[]`).
 - **Why the Euclid wrapper messages instead of `geometry_msgs.Point` everywhere:** generated messages have plain double fields and no Euclid API. Wiring the wire format to the Euclid types we actually use (Point3D, Quaternion, ...) is what eliminates per-call-site boilerplate. The wrappers serialise byte-identically to the standard messages, so they're interoperable on the wire.
 - **Why `MessageTools.toMessage/fromMessage` still exists for plain geometry_msgs:** TF messages (`TFMessage`, `TransformStamped`) and other upstream ROS messages use the standard geometry_msgs types. Those code paths still need explicit conversion.
 - **`uniqueId` deletion is intentional, not lossy:** the old library carried `uniqueId` alongside `sequenceId` and code typically set both to the same value. jros2 only keeps `sequenceId`. Where you see `setUniqueId(x)` removed without a replacement, that's because `setSequenceId(x)` is already being called elsewhere in the same block.
@@ -583,7 +631,8 @@ In `ihmc-interfaces-jros2`:
 | `ROS2Message cannot be converted to T` in `reader.read(buffer)`    | Use `reader.read()` return value, or raw-cast buffer + reader      |
 | `Settable cannot be converted to ROS2Message` on publish           | `publisher.publish((ROS2Message) message)` with raw `ROS2Publisher` |
 | `cannot find symbol: getW()` on Euclid Quaternion                    | `.getS()` (Euclid uses `S` for scalar)                           |
-| `no suitable method: copyData(array/list, IDLObjectSequence)`        | Use `copyData(T[], IDLObjectSequence<T>)` or `clear(); add().set` loop; `Object[]`/raw `List` overloads still stubs |
+| `no suitable method: copyData(array/list, IDLObjectSequence)`        | Use typed `copyData(T[]/List<T>, …)` or `clear(); add().set` loop |
+| `getTransform().set(RigidBodyTransform)` on TF messages              | `MessageTools.toMessage(transform, msg.getTransform())` |
 | `toTDoubleArrayList(IDLFloatSequence)` missing                       | Loop `input.size()` / `input.get(i)` into `TDoubleArrayList`     |
 | `geometry_msgs.Vector3.applyTransform` missing                       | Copy to `Vector3D`, transform, write back with `setX/Y/Z`        |
 | `Ros2MessageCdrFileTools.messageToJsonNode` in try/catch IOException | `messageToJsonNode` does not throw — drop empty catch blocks     |
@@ -638,7 +687,7 @@ In `ihmc-interfaces-jros2`:
 3. **`MessageTestTools.epsilonEquals`** for plain `geometry_msgs` types — blocks `ROS2LogTest`.
 4. **`SampleInfo` + matched subscription callback** — blocks `ROS2PeerClockOffsetEstimator` clock sync TODO.
 5. **`Pose3D` wrapper in jros2** — or keep using `EuclidPose3DMessage`; commented `publish(ROS2Topic<Pose3D>, …)` stubs in `ROS2Helper` / `ROS2PublisherMap`.
-6. **Finish `MessageTools.copyData(Object[]/List, IDLObjectSequence)` stubs** — `copyData(T[], …)` already uses `add().set`.
+6. **`ROS2NodeBuilder` transport modes** — intraprocess / shared-memory; blocks disabled `ROS2ToolsTest` methods.
 
 ### Explicitly not porting
 

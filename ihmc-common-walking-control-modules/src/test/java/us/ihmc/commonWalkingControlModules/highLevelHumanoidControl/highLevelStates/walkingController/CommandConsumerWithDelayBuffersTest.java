@@ -20,6 +20,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.commons.lists.SupplierBuilder;
@@ -46,7 +47,7 @@ public class CommandConsumerWithDelayBuffersTest
    }
 
    @Test
-   public <C extends Command<C, ?>, M extends Settable<M>> void testIsNewCommandAvailableWithNoDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+   public <C extends Command<C, ?>, M extends ROS2Message<M>> void testIsNewCommandAvailableWithNoDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       Random random = new Random(100);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
@@ -97,7 +98,7 @@ public class CommandConsumerWithDelayBuffersTest
 
    @SuppressWarnings("unchecked")
    @Test
-   public <C extends Command<C, ?>, M extends Settable<M>> void testIsNewCommandAvailableWithDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+   public <C extends Command<C, ?>, M extends ROS2Message<M>> void testIsNewCommandAvailableWithDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       Random random = new Random(100);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
@@ -167,7 +168,7 @@ public class CommandConsumerWithDelayBuffersTest
 
    @SuppressWarnings({"unchecked", "rawtypes"})
    @Test
-   public <C extends Command<C, ?>, M extends Settable<M>> void testSendMultipleCommandWithDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+   public <C extends Command<C, ?>, M extends ROS2Message<M>> void testSendMultipleCommandWithDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       Random random = new Random(10);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
@@ -242,7 +243,7 @@ public class CommandConsumerWithDelayBuffersTest
    }
 
    @Test
-   public <C extends Command<C, ?>, M extends Settable<M>> void testQueueingManually()
+   public <C extends Command<C, ?>, M extends ROS2Message<M>> void testQueueingManually()
    {
       Random random = new Random(100);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = new ArrayList<>();
@@ -297,7 +298,7 @@ public class CommandConsumerWithDelayBuffersTest
    }
 
    @Test
-   public <C extends Command<C, ?>, M extends Settable<M>> void testClearAllQueues()
+   public <C extends Command<C, ?>, M extends ROS2Message<M>> void testClearAllQueues()
    {
       Random random = new Random(100);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = new ArrayList<>();
@@ -342,7 +343,7 @@ public class CommandConsumerWithDelayBuffersTest
    }
 
    @Test
-   public <C extends Command<C, ?>, M extends Settable<M>> void testClearSingleQueue()
+   public <C extends Command<C, ?>, M extends ROS2Message<M>> void testClearSingleQueue()
    {
       Random random = new Random(100);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = new ArrayList<>();
@@ -405,7 +406,7 @@ public class CommandConsumerWithDelayBuffersTest
    }
 
    @Test
-   public <C extends Command<C, ?>, M extends Settable<M>> void testFlushCommands()
+   public <C extends Command<C, ?>, M extends ROS2Message<M>> void testFlushCommands()
    {
       Random random = new Random(100);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = new ArrayList<>();
@@ -445,7 +446,7 @@ public class CommandConsumerWithDelayBuffersTest
    }
 
    @Test
-   public <C extends Command<C, ?>, M extends Settable<M>> void testAddingTooManyCommands()
+   public <C extends Command<C, ?>, M extends ROS2Message<M>> void testAddingTooManyCommands()
    {
       Random random = new Random(100);
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = new ArrayList<>();
@@ -477,7 +478,7 @@ public class CommandConsumerWithDelayBuffersTest
       
    }
    
-   private <M extends Settable<M>> Command<?, M> getCommand(Random random, Class clazz)
+   private <M extends ROS2Message<M>> Command<?, M> getCommand(Random random, Class clazz)
          throws InstantiationException, IllegalAccessException, InvocationTargetException
    {
       Command<?, M> command;

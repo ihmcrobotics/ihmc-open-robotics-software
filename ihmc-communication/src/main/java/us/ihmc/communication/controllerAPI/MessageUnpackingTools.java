@@ -5,7 +5,7 @@ import ihmc_common_msgs.*;
 import toolbox_msgs.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -33,7 +33,7 @@ public final class MessageUnpackingTools
          private final HandHybridJointspaceTaskspaceTrajectoryMessage rightHandHybridJointspaceTaskspaceTrajectoryMessage = new HandHybridJointspaceTaskspaceTrajectoryMessage();
 
          @Override
-         public void unpackMessage(WholeBodyTrajectoryMessage multipleMessageHolder, List<Settable<?>> messagesToPack)
+         public void unpackMessage(WholeBodyTrajectoryMessage multipleMessageHolder, List<ROS2Message<?>> messagesToPack)
          {
             HandTrajectoryMessage leftHandTrajectoryMessage = multipleMessageHolder.getLeftHandTrajectoryMessage();
             HandTrajectoryMessage rightHandTrajectoryMessage = multipleMessageHolder.getRightHandTrajectoryMessage();
@@ -131,7 +131,7 @@ public final class MessageUnpackingTools
          private final CenterOfMassTrajectoryMessage centerOfMassTrajectoryMessage = new CenterOfMassTrajectoryMessage();
 
          @Override
-         public void unpackMessage(WholeBodyStreamingMessage message, List<Settable<?>> messagesToPack)
+         public void unpackMessage(WholeBodyStreamingMessage message, List<ROS2Message<?>> messagesToPack)
          {
             long sequenceId = message.getSequenceId();
             long uniqueId = message.getSequenceId();
@@ -514,7 +514,7 @@ public final class MessageUnpackingTools
       return new MessageUnpacker<WholeBodyTrajectoryToolboxMessage>()
       {
          @Override
-         public void unpackMessage(WholeBodyTrajectoryToolboxMessage multipleMessageHolder, List<Settable<?>> messagesToPack)
+         public void unpackMessage(WholeBodyTrajectoryToolboxMessage multipleMessageHolder, List<ROS2Message<?>> messagesToPack)
          {
             if (multipleMessageHolder.getConfiguration() != null)
                messagesToPack.add(multipleMessageHolder.getConfiguration());
@@ -544,6 +544,6 @@ public final class MessageUnpackingTools
        *
        * @param messagesToPack the list the messages should be stored once unpacked.
        */
-      public void unpackMessage(T multipleMessageHolder, List<Settable<?>> messagesToPack);
+      public void unpackMessage(T multipleMessageHolder, List<ROS2Message<?>> messagesToPack);
    }
 }

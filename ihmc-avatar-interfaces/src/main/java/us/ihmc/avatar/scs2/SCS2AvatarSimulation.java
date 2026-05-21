@@ -1,5 +1,7 @@
 package us.ihmc.avatar.scs2;
 
+import us.ihmc.jros2.ROS2Message;
+
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarStepGeneratorThread;
@@ -15,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -104,7 +107,7 @@ public class SCS2AvatarSimulation
    public void afterSessionThreadStart()
    {
       if (realtimeROS2Node != null)
-         realtimeROS2Node.spin();
+         ROS2Tools.blockUntilInterrupted();
       if (simulationConstructionSet.isVisualizerEnabled())
          simulationConstructionSet.waitUntilVisualizerFullyUp();
    }
@@ -604,7 +607,7 @@ public class SCS2AvatarSimulation
       stepGeneratorThread.getCsgCommandInputManager().getCommandInputManager().submitCommand(command);
    }
 
-   public <S extends Settable<S>> void attachStepGeneratorStatusMessageListener(Class<S> statusMessageClass, StatusMessageListener<S> statusMessageListener)
+   public <S extends ROS2Message<S>> void attachStepGeneratorStatusMessageListener(Class<S> statusMessageClass, StatusMessageListener<S> statusMessageListener)
    {
       stepGeneratorThread.getStatusOutputManager().attachStatusMessageListener(statusMessageClass, statusMessageListener);
    }

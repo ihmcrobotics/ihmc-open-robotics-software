@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import controller_msgs.ClearDelayQueueMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
 
 /**
@@ -13,7 +13,7 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
 {
    private long sequenceId;
    private Class<? extends Command<?, ?>> commandClassToClear;
-   private Class<? extends Settable<?>> messageClassToClear;
+   private Class<? extends ROS2Message<?>> messageClassToClear;
 
    private boolean clearAllDelayBuffers;
 
@@ -49,7 +49,7 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
     * 
     * @param clazz the class you want to clear
     */
-   public void setMessageClassToClear(Class<? extends Settable<?>> messageClassToClear)
+   public void setMessageClassToClear(Class<? extends ROS2Message<?>> messageClassToClear)
    {
       this.messageClassToClear = messageClassToClear;
    }
@@ -79,7 +79,7 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
     * 
     * @param commandClassToClear the class to clear
     */
-   public Class<? extends Settable<?>> getMessageClassToClear()
+   public Class<? extends ROS2Message<?>> getMessageClassToClear()
    {
       return messageClassToClear;
    }

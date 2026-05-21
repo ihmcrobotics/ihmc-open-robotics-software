@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
+import us.ihmc.jros2.ROS2Message;
+
 import controller_msgs.CapturabilityBasedStatus;
 import toolbox_msgs.KinematicsPlanningToolboxOutputStatus;
 import toolbox_msgs.KinematicsToolboxOutputStatus;
@@ -61,9 +63,9 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
       return kinematicsPlanningToolboxController;
    }
 
-   public static List<Class<? extends Settable<?>>> supportedStatus()
+   public static List<Class<? extends ROS2Message<?>>> supportedStatus()
    {
-      List<Class<? extends Settable<?>>> status = new ArrayList<>();
+      List<Class<? extends ROS2Message<?>>> status = new ArrayList<>();
       status.add(KinematicsPlanningToolboxOutputStatus.class);
       status.add(KinematicsToolboxOutputStatus.class);
       return status;
@@ -86,7 +88,7 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    }
 
    @Override
-   public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
+   public List<Class<? extends ROS2Message<?>>> createListOfSupportedStatus()
    {
       return supportedStatus();
    }

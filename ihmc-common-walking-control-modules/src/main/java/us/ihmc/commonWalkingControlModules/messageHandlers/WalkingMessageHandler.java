@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
+import us.ihmc.jros2.ROS2Message;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -462,7 +464,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       footstepConsumptionListenerList.remove(listener);
    }
 
-   public interface Listener<S extends Settable<S>>
+   public interface Listener<S extends ROS2Message<S>>
    {
       void doListenerAction();
    }

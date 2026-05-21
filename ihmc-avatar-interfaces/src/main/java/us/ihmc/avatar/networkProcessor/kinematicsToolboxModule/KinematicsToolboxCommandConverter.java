@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import us.ihmc.jros2.ROS2Message;
+
 import toolbox_msgs.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.KinematicsToolboxInputCollectionMessage;
 import toolbox_msgs.KinematicsToolboxOneDoFJointMessage;
@@ -55,7 +57,7 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
     * Only converting {@link KinematicsToolboxRigidBodyMessage}.
     */
    @Override
-   public <C extends Command<?, M>, M extends Settable<M>> boolean isConvertible(C command, M message)
+   public <C extends Command<?, M>, M extends ROS2Message<M>> boolean isConvertible(C command, M message)
    {
       if (message instanceof KinematicsToolboxRigidBodyMessage)
          return true;
@@ -76,7 +78,7 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
     * Retrieves the end-effector and convert the message into its command counterpart.
     */
    @Override
-   public <C extends Command<?, M>, M extends Settable<M>> void process(C command, M message)
+   public <C extends Command<?, M>, M extends ROS2Message<M>> void process(C command, M message)
    {
       if (message instanceof KinematicsToolboxRigidBodyMessage rigidBodyMessage)
       {

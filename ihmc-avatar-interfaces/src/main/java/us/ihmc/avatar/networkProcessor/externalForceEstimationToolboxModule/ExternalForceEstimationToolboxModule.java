@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
+import us.ihmc.jros2.ROS2Message;
+
 import controller_msgs.RobotConfigurationData;
 import controller_msgs.RobotDesiredConfigurationData;
 import toolbox_msgs.ExternalForceEstimationOutputStatus;
@@ -79,14 +81,14 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
    }
 
    @Override
-   public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
+   public List<Class<? extends ROS2Message<?>>> createListOfSupportedStatus()
    {
       return getSupportedStatuses();
    }
 
-   public static List<Class<? extends Settable<?>>> getSupportedStatuses()
+   public static List<Class<? extends ROS2Message<?>>> getSupportedStatuses()
    {
-      List<Class<? extends Settable<?>>> status = new ArrayList<>();
+      List<Class<? extends ROS2Message<?>>> status = new ArrayList<>();
       status.add(ExternalForceEstimationOutputStatus.class);
       return status;
    }

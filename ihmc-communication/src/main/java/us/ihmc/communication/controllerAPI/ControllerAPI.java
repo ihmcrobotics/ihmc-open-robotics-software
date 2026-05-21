@@ -7,7 +7,6 @@ import ihmc_common_msgs.Point2DMessage;
 import ihmc_common_msgs.TextToSpeechPacket;
 import toolbox_msgs.*;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2QoSProfile;
 import us.ihmc.jros2.ROS2Topic;
@@ -26,7 +25,7 @@ import java.util.Set;
 public final class ControllerAPI
 {
    public static final Set<Class<?>> inputMessageClasses = new HashSet<>();
-   public static final Set<Class<? extends Settable<?>>> outputMessageClasses = new HashSet<>();
+   public static final Set<Class<? extends ROS2Message<?>>> outputMessageClasses = new HashSet<>();
 
    public static final Map<Class<?>, ROS2QoSProfile> inputMessageClassSpecificQoS = new HashMap<>();
    public static final Map<Class<?>, ROS2QoSProfile> outputMessageClassSpecificQoS = new HashMap<>();

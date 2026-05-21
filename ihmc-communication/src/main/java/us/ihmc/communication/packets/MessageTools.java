@@ -63,7 +63,9 @@ import us.ihmc.euclid.shape.primitives.interfaces.Ellipsoid3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Ramp3DBasics;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
+import geometry_msgs.Transform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -677,7 +679,7 @@ public class MessageTools
     * @param source      the array containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
-   public static <T extends Settable<T>> void copyData(T[] source, RecyclingArrayList<T> destination)
+   public static <T extends ROS2Message<T>> void copyData(T[] source, RecyclingArrayList<T> destination)
    {
       destination.clear();
 
@@ -1166,6 +1168,33 @@ public class MessageTools
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
       toEuclid(rigidBodyTransformMessage, rigidBodyTransform);
       return rigidBodyTransform;
+   }
+
+   public static void toMessage(RigidBodyTransformReadOnly rigidBodyTransform, Transform transformMessage)
+   {
+      transformMessage.getTranslation().setX(rigidBodyTransform.getTranslationX());
+      transformMessage.getTranslation().setY(rigidBodyTransform.getTranslationY());
+      transformMessage.getTranslation().setZ(rigidBodyTransform.getTranslationZ());
+      Quaternion quaternion = new Quaternion();
+      quaternion.set(rigidBodyTransform.getRotation());
+      transformMessage.getRotation().setX(quaternion.getX());
+      transformMessage.getRotation().setY(quaternion.getY());
+      transformMessage.getRotation().setZ(quaternion.getZ());
+      transformMessage.getRotation().setW(quaternion.getS());
+   }
+
+   public static void toEuclid(Transform transformMessage, RigidBodyTransform rigidBodyTransformToPack)
+   {
+      rigidBodyTransformToPack.getTranslation()
+                            .set(transformMessage.getTranslation().getX(),
+                                 transformMessage.getTranslation().getY(),
+                                 transformMessage.getTranslation().getZ());
+      Quaternion quaternion = new Quaternion();
+      quaternion.set(transformMessage.getRotation().getX(),
+                     transformMessage.getRotation().getY(),
+                     transformMessage.getRotation().getZ(),
+                     transformMessage.getRotation().getW());
+      rigidBodyTransformToPack.getRotation().set(quaternion);
    }
 
    public static Box3DMessage createBox3DMessage(Box3DReadOnly box)

@@ -299,7 +299,7 @@ public class HumanoidKinematicsSimulation
 
       robotConfigurationDataPublisher = createRobotConfigurationDataPublisher(robotModel.getSimpleRobotName());
 
-      realtimeROS2Node.spin();
+      ROS2Tools.blockUntilInterrupted();
 
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(kinematicsSimulationParameters::getDt,
                                                                                        GRAVITY_Z,

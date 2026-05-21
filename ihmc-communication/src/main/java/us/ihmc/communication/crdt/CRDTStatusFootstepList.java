@@ -3,8 +3,6 @@ package us.ihmc.communication.crdt;
 import behavior_msgs.WalkActionFootstepDefinitionMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -16,8 +14,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
  */
 public class CRDTStatusFootstepList extends CRDTStatusMutableField<RecyclingArrayList<WalkActionFootstepDefinitionMessage>>
 {
-   private final Pose3D tempPose = new Pose3D();
-
    public CRDTStatusFootstepList(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
    {
       super(sideThatCanModify, crdtInfo, () -> new RecyclingArrayList<>(WalkActionFootstepDefinitionMessage::new));
@@ -25,9 +21,7 @@ public class CRDTStatusFootstepList extends CRDTStatusMutableField<RecyclingArra
 
    public Pose3DReadOnly getPoseReadOnly(int index)
    {
-      // TODO jros2
-//      MessageTools.fromMessage(getValueInternal().get(index).getSolePose(), tempPose);
-      return tempPose;
+      return getValueInternal().get(index).getSolePose().getPose();
    }
 
    public RobotSide getSide(int index)

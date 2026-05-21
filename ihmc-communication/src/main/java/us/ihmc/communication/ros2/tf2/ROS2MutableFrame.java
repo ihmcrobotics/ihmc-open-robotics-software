@@ -83,14 +83,13 @@ public class ROS2MutableFrame extends ROS2Frame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      // TODO jros2
       if (remoteTransform == null)
          remoteTransform = ROS2TFTree.getInstance().getTransforms().get(getFrameId());
 
       if (hasNewTransform.getAndSet(false))
          transformToParent.set(newestTransformToParent);
       else if (remoteTransform != null && MessageTools.compareTime(updateTime, remoteTransform.getHeader().getStamp()) < 0)
-//         transformToParent.set(remoteTransform.getTransform());
+         MessageTools.toEuclid(remoteTransform.getTransform(), transformToParent);
 
       markUpdateTime();
       publishTFMessages();

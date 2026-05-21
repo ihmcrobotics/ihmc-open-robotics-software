@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
+import us.ihmc.jros2.ROS2Message;
+
 import controller_msgs.CapturabilityBasedStatus;
 import controller_msgs.ControllerCrashNotificationPacket;
 import controller_msgs.RobotConfigurationData;
@@ -188,14 +190,14 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    }
 
    @Override
-   public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
+   public List<Class<? extends ROS2Message<?>>> createListOfSupportedStatus()
    {
       return supportedStatus();
    }
 
-   public static List<Class<? extends Settable<?>>> supportedStatus()
+   public static List<Class<? extends ROS2Message<?>>> supportedStatus()
    {
-      List<Class<? extends Settable<?>>> status = new ArrayList<>();
+      List<Class<? extends ROS2Message<?>>> status = new ArrayList<>();
       status.add(KinematicsToolboxOutputStatus.class);
       status.add(ControllerCrashNotificationPacket.class);
       return status;

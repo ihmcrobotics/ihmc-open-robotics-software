@@ -1,5 +1,7 @@
 package us.ihmc.avatar.wholeBodyHardwareControl;
 
+import us.ihmc.communication.ROS2Tools;
+
 import org.apache.commons.math3.util.Precision;
 import us.ihmc.affinity.Processor;
 import us.ihmc.avatar.*;
@@ -417,7 +419,7 @@ public class AvatarMultiThreadingFactory
       // Add estimatorr startup callback to start spinning node
       estimatorTask.addRunnableOnStartup(() ->
                                          {
-                                            estimatorRealtimeROS2Node.spin();
+                                            ROS2Tools.blockUntilInterrupted();
                                             LogTools.info("Estimator node has started spinning");
                                          });
 
@@ -473,7 +475,7 @@ public class AvatarMultiThreadingFactory
       // Add controller startup callback to start spinning node
       controllerTask.addRunnableOnStartup(() ->
                                           {
-                                             controllerRealtimeROS2Node.spin();
+                                             ROS2Tools.blockUntilInterrupted();
                                              LogTools.info("Controller node has started spinning");
                                           });
 

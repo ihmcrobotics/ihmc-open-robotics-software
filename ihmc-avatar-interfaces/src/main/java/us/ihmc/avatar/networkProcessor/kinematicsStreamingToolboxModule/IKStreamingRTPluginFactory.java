@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
+import us.ihmc.jros2.ROS2Message;
+
 import controller_msgs.CapturabilityBasedStatus;
 import controller_msgs.WholeBodyStreamingMessage;
 import controller_msgs.WholeBodyTrajectoryMessage;
@@ -246,7 +248,7 @@ public class IKStreamingRTPluginFactory
          kinematicsStreamingToolboxController.setCollisionModel(collisionModel);
 
          MessageUnpacker<WholeBodyStreamingMessage> wholeBodyStreamingMessageUnpacker = MessageUnpackingTools.createWholeBodyStreamingMessageUnpacker();
-         List<Settable<?>> unpackedMessages = new ArrayList<>();
+         List<ROS2Message<?>> unpackedMessages = new ArrayList<>();
 
          kinematicsStreamingToolboxController.setStreamingMessagePublisher(streamingMessage ->
                                                                            {

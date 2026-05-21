@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule;
 
+import us.ihmc.jros2.ROS2Message;
+
 import controller_msgs.RobotConfigurationData;
 import toolbox_msgs.WholeBodyTrajectoryToolboxMessage;
 import toolbox_msgs.WholeBodyTrajectoryToolboxOutputStatus;
@@ -69,14 +71,14 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    }
 
    @Override
-   public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
+   public List<Class<? extends ROS2Message<?>>> createListOfSupportedStatus()
    {
       return supportedStatus();
    }
 
-   static List<Class<? extends Settable<?>>> supportedStatus()
+   static List<Class<? extends ROS2Message<?>>> supportedStatus()
    {
-      List<Class<? extends Settable<?>>> status = new ArrayList<>();
+      List<Class<? extends ROS2Message<?>>> status = new ArrayList<>();
       status.add(WholeBodyTrajectoryToolboxOutputStatus.class);
       return status;
    }
