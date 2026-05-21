@@ -24,10 +24,10 @@ float32 confidence
 vision_msgs/BoundingBox2D bounding_box
 
 # Polygons representing the mask of the detection
-UInt16MultiArrayHack mask_polygons
+Float32MultiArrayHack mask_polygons
 
 # TODO: jros2 replace above with below
-# std_msgs/UInt16MultiArray mask_polygons
+# std_msgs/Float32MultiArray mask_polygons
 }</pre>
 */
 public class YOLOv8AnnotationInfoMessage implements ROS2Message<YOLOv8AnnotationInfoMessage>
@@ -49,13 +49,13 @@ public class YOLOv8AnnotationInfoMessage implements ROS2Message<YOLOv8Annotation
    /**
       Polygons representing the mask of the detection
    */
-   private final perception_msgs.UInt16MultiArrayHack mask_polygons_;
+   private final perception_msgs.Float32MultiArrayHack mask_polygons_;
 
    public YOLOv8AnnotationInfoMessage()
    {
       object_class_ = new StringBuilder();
       bounding_box_ = new vision_msgs.BoundingBox2D();
-      mask_polygons_ = new perception_msgs.UInt16MultiArrayHack();
+      mask_polygons_ = new perception_msgs.Float32MultiArrayHack();
 
    }
 
@@ -133,7 +133,7 @@ public class YOLOv8AnnotationInfoMessage implements ROS2Message<YOLOv8Annotation
       return bounding_box_;
    }
 
-   public perception_msgs.UInt16MultiArrayHack getMaskPolygons()
+   public perception_msgs.Float32MultiArrayHack getMaskPolygons()
    {
       return mask_polygons_;
    }

@@ -426,10 +426,10 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
    @Override
    public String toString()
    {
-      String ret = getClass().getSimpleName() + ": ";
+      String ret = getClass().getSimpleName() + ": constraintType = " + constraintType + ", ";
       for (int i = 0; i < joints.size(); i++)
       {
-         ret += joints.get(i).getName();
+         ret += joints.get(i).getName() + " (weight = " + getWeight(i) + ")";
          if (i < joints.size() - 1)
             ret += ", ";
          else

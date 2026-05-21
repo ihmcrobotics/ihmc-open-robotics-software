@@ -1,7 +1,7 @@
 #ifndef __perception_msgs__msg__YOLOv8AnnotationInfoMessage__idl__
 #define __perception_msgs__msg__YOLOv8AnnotationInfoMessage__idl__
 
-#include "perception_msgs/msg/./UInt16MultiArrayHack_.idl"
+#include "perception_msgs/msg/./Float32MultiArrayHack_.idl"
 #include "vision_msgs/msg/./BoundingBox2D_.idl"
 module perception_msgs
 {
@@ -31,7 +31,7 @@ module perception_msgs
         /**
          * Polygons representing the mask of the detection
          */
-        perception_msgs::msg::dds::UInt16MultiArrayHack mask_polygons;
+        perception_msgs::msg::dds::Float32MultiArrayHack mask_polygons;
       };
     };
   };
