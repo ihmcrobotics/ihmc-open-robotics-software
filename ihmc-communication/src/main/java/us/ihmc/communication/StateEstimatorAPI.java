@@ -5,6 +5,7 @@ import controller_msgs.LocalizationPacket;
 import controller_msgs.PelvisPoseErrorPacket;
 import controller_msgs.RobotConfigurationData;
 import ihmc_common_msgs.StampedPosePacket;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Topic;
 
 /**
@@ -27,7 +28,7 @@ public final class StateEstimatorAPI
       return outputTopic.withType(RobotConfigurationData.class);
    }
 
-   public static <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
+   public static <T extends ROS2Message<T>> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
    {
       // Input types
       if (messageClass.equals(StampedPosePacket.class)

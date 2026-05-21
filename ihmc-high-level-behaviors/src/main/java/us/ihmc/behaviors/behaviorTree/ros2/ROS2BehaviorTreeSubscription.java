@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import behavior_msgs.msg.dds.*;
+import behavior_msgs.*;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
@@ -13,7 +13,7 @@ import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -252,7 +252,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
 
       ROS2BehaviorTreeMessageTools.packSubscriptionNode(nodeType, indexInTypesList, behaviorTreeStateMessage, subscriptionNode);
 
-      idToSubscriptionNodesMap.put(subscriptionNode.getBehaviorTreeNodeStateMessage().getId(), subscriptionNode);
+      idToSubscriptionNodesMap.put((long) subscriptionNode.getBehaviorTreeNodeStateMessage().getId(), subscriptionNode);
 
       for (int i = 0; i < subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getNumberOfChildren(); i++)
       {

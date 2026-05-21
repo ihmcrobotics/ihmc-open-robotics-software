@@ -11,11 +11,11 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.HighLevelStateMessage;
-import controller_msgs.msg.dds.ReinitializeStateEstimatorMessage;
-import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
-import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
+import controller_msgs.GoHomeMessage;
+import controller_msgs.HighLevelStateMessage;
+import controller_msgs.ReinitializeStateEstimatorMessage;
+import ihmc_common_msgs.SelectionMatrix3DMessage;
+import ihmc_common_msgs.WeightMatrix3DMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
@@ -23,20 +23,21 @@ import imgui.type.ImInt;
 import imgui.type.ImString;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.openvr.InputDigitalActionData;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxContactConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.ROS2LogMessage;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.KinematicsStreamingToolboxContactConfigurationMessage;
+import toolbox_msgs.KinematicsStreamingToolboxInitialConfigurationMessage;
+import toolbox_msgs.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.KinematicsToolboxCenterOfMassMessage;
+import toolbox_msgs.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.ROS2LogMessage;
+import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.drcRobot.RobotVersion;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.communication.ROS2Input;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.packets.MessageTools;
@@ -83,8 +84,7 @@ import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -832,8 +832,8 @@ public class RDXVRWholeBodyKinematicStreaming
             else
             {
                // Update IK ghost robot
-               ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootPosition());
-               ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
+               ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootPosition().getPoint());
+               ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation().getQuaternion());
                for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
                {
                   ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
@@ -1245,7 +1245,7 @@ public class RDXVRWholeBodyKinematicStreaming
          {
             if (armIndices.get(i) != -1)
             {
-               initialConfigMessage.getInitialJointAngles().set(armIndices.get(i), retargetingParameters.getArmHomePoint(robotSide, armJointNames.get(i)));
+               initialConfigMessage.getInitialJointAngles().getBuffer().put(armIndices.get(i), retargetingParameters.getArmHomePoint(robotSide, armJointNames.get(i)));
             }
          }
       }

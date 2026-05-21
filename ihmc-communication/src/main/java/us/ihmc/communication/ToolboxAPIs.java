@@ -6,6 +6,7 @@ import toolbox_msgs.ToolboxStateMessage;
 import toolbox_msgs.WalkingControllerPreviewInputMessage;
 import toolbox_msgs.WalkingControllerPreviewOutputMessage;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Topic;
 
 public final class ToolboxAPIs
@@ -44,7 +45,7 @@ public final class ToolboxAPIs
       return WALKING_PREVIEW_TOOLBOX.appendedWith(robotName).appendedWith("output").withType(WalkingControllerPreviewOutputMessage.class);
    }
 
-   public static <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Topic<T> getIKToolboxTopic(Class<T> messageClass, String robotName)
+   public static <T extends ROS2Message<T>> ROS2Topic<T> getIKToolboxTopic(Class<T> messageClass, String robotName)
    {
       return ControllerAPI.getTopic(ControllerAPI.getBaseTopic(KINEMATICS_TOOLBOX_MODULE_NAME, robotName), messageClass);
    }

@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage;
+import behavior_msgs.BehaviorTreeNodeStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
@@ -82,7 +82,7 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
 
    public void toMessage(BehaviorTreeNodeStateMessage message)
    {
-      message.setId(id);
+      message.setId((int) id);
       message.setIsActive(isActive);
 
       logger.toMessage(message.getRecentLogMessages());

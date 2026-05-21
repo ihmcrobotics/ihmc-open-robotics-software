@@ -9,6 +9,7 @@ import us.ihmc.euclid.interfaces.Settable;
 // import us.ihmc.idl.serializers.extra.AbstractSerializer; // Not available in jros2, commenting out
 import us.ihmc.log.LogTools;
 // import us.ihmc.pubsub.TopicDataType; // Not available in jros2, commenting out
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
@@ -123,7 +124,7 @@ public class ROS2LogIOTools
       return loadLogFile(logFile, loggedTopics, topic ->
       {
          ROS2Publisher publisher = ros2Node.createPublisher(topic);
-         Consumer consumer = message -> publisher.publish((us.ihmc.jros2.ROS2Message) message);
+         Consumer consumer = message -> publisher.publish((ROS2Message) message);
          return consumer;
       });
    }

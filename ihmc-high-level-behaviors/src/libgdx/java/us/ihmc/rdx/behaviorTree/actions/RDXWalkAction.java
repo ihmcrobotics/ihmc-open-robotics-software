@@ -49,7 +49,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
-import static behavior_msgs.msg.dds.WalkActionDefinitionMessage.*;
+import static behavior_msgs.WalkActionDefinitionMessage.*;
 
 public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefinition>
 {

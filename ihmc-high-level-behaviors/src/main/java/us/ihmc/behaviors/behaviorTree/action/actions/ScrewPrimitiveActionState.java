@@ -13,7 +13,7 @@ import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveActionDefinition>
 {
    /** This limit is defined in the .msg file and limited to the size in the SE3TrajectoryMessage. */
-   public static final int TRAJECTORY_SIZE_LIMIT = new ScrewPrimitiveActionStateMessage().getPreviewTrajectory().getCurrentCapacity();
+   public static final int TRAJECTORY_SIZE_LIMIT = new ScrewPrimitiveActionStateMessage().getPreviewTrajectory().capacity();
 
    private final DetachableReferenceFrame screwFrame;
    private final CRDTStatusPoseList previewTrajectory;
@@ -71,8 +71,8 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
       super.toMessage(message.getState());
 
       previewTrajectory.toMessage(message.getPreviewTrajectory());
-      force.toMessage(message.getForce());
-      torque.toMessage(message.getTorque());
+      message.getForce().set(force.getValueReadOnly());
+      message.getTorque().set(torque.getValueReadOnly());
       message.setPreviewTrajectoryDuration(previewTrajectoryDuration.toMessage());
       message.setPreviewTrajectoryLinearVelocity(previewTrajectoryLinearVelocity.toMessage());
       message.setPreviewTrajectoryAngularVelocity(previewTrajectoryAngularVelocity.toMessage());
@@ -91,8 +91,8 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
       super.fromMessage(message.getState());
 
       previewTrajectory.fromMessage(message.getPreviewTrajectory());
-      force.fromMessage(message.getForce());
-      torque.fromMessage(message.getTorque());
+      force.fromMessage(message.getForce().getVector());
+      torque.fromMessage(message.getTorque().getVector());
       previewTrajectoryDuration.fromMessage(message.getPreviewTrajectoryDuration());
       previewTrajectoryLinearVelocity.fromMessage(message.getPreviewTrajectoryLinearVelocity());
       previewTrajectoryAngularVelocity.fromMessage(message.getPreviewTrajectoryAngularVelocity());

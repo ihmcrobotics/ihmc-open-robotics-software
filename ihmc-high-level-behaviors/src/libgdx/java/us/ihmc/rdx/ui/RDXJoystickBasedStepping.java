@@ -6,12 +6,13 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.*;
+import controller_msgs.*;
 import imgui.internal.ImGui;
 import imgui.type.ImDouble;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.communication.ROS2Input;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -19,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Con
 import us.ihmc.commons.DeadbandTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -135,8 +135,8 @@ public class RDXJoystickBasedStepping
             {
                lastSupportFootPoses.put(RobotSide.fromByte(footstepStatus.getRobotSide()),
                                         new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                        footstepStatus.getActualFootPositionInWorld(),
-                                                        footstepStatus.getActualFootOrientationInWorld()));
+                                                        footstepStatus.getActualFootPositionInWorld().getPoint(),
+                                                        footstepStatus.getActualFootOrientationInWorld().getQuaternion()));
             }
          });
       });
@@ -355,12 +355,14 @@ public class RDXJoystickBasedStepping
       {
          FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().get(i);
          footstepDataMessage.setSwingHeight(swingHeight.get());
-         Pose3D pose = new Pose3D(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
+         Pose3D pose = new Pose3D(footstepDataMessage.getLocation().getPoint(), footstepDataMessage.getOrientation().getQuaternion());
          minimalFootsteps.add(new MinimalFootstep(RobotSide.fromByte(footstepDataMessage.getRobotSide()), pose));
       }
 
       footstepPlanGraphic.generateMeshesAsync(minimalFootsteps);
-      footstepsToSendReference.set(new FootstepDataListMessage(footstepDataListMessage));
+      FootstepDataListMessage footstepsToSend = new FootstepDataListMessage();
+      footstepsToSend.set(footstepDataListMessage);
+      footstepsToSendReference.set(footstepsToSend);
    }
 
    private boolean isStepSnappable(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)

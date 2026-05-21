@@ -3,6 +3,7 @@ package us.ihmc.communication.ros2log;
 import toolbox_msgs.ROS2LogMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
 
@@ -61,7 +62,7 @@ public class ROS2LogRecord
       }
    }
 
-   public <T extends us.ihmc.jros2.ROS2Message<T>> void setData(ROS2Topic<T> topic, T data)
+   public <T extends ROS2Message<T>> void setData(ROS2Topic<T> topic, T data)
    {
       RecordTopicManager<T> topicManager = getTopicManager(topic);
       if (topicManager == null)
@@ -140,7 +141,7 @@ public class ROS2LogRecord
    }
 
    @SuppressWarnings("unchecked")
-   private <T extends us.ihmc.jros2.ROS2Message<T>> RecordTopicManager<T> getTopicManager(ROS2Topic<T> topic)
+   private <T extends ROS2Message<T>> RecordTopicManager<T> getTopicManager(ROS2Topic<T> topic)
    {
       for (int i = 0; i < topicManagers.size(); i++)
       {

@@ -76,8 +76,8 @@ public class HumanoidMessageToolsTest
       assertEquals(messageA.getTouchdownDuration(), messageB.getTouchdownDuration(), epsilon);
       assertEquals(messageA.getSwingHeight(), messageB.getSwingHeight(), epsilon);
       assertEquals(messageA.getRobotSide(), messageB.getRobotSide());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(messageA.getLocation(), messageB.getLocation(), epsilon);
-      EuclidCoreTestTools.assertEquals(messageA.getOrientation(), messageB.getOrientation(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(messageA.getLocation().getPoint(), messageB.getLocation().getPoint(), epsilon);
+      EuclidCoreTestTools.assertEquals(messageA.getOrientation().getQuaternion(), messageB.getOrientation().getQuaternion(), epsilon);
    }
 
 }

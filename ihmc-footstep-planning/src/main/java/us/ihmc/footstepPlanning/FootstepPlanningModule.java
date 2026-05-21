@@ -34,7 +34,7 @@ import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlan;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -521,7 +521,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    {
       if (manageROS2Node && ros2Node != null)
       {
-         ros2Node.destroy();
+         ros2Node.close();
          ros2Node = null;
       }
    }

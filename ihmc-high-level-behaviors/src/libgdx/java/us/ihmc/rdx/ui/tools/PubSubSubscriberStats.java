@@ -1,38 +1,7 @@
 package us.ihmc.rdx.ui.tools;
 
-import us.ihmc.pubsub.participant.Participant;
-import us.ihmc.pubsub.subscriber.Subscriber;
-
-public class PubSubSubscriberStats extends PubSubCommonStats
+/** @deprecated Replaced by jros2; kept as compile stub for {@link RDXROS2StatsPanel} migration. */
+@Deprecated
+public class PubSubSubscriberStats
 {
-   private final Subscriber<?> subscriber;
-
-   public PubSubSubscriberStats(Participant participant, Subscriber<?> subscriber)
-   {
-      super(participant);
-
-      this.subscriber = subscriber;
-   }
-
-   public Subscriber<?> getSubscriber()
-   {
-      return subscriber;
-   }
-
-   @Override
-   public long getNumberOfEvents()
-   {
-      return subscriber.getNumberOfReceivedMessages();
-   }
-
-   @Override
-   public long getCumulativePayloadBytes()
-   {
-      return subscriber.getCumulativePayloadBytes();
-   }
-
-   public double getReceiveFrequency()
-   {
-      return getEventFrequency();
-   }
 }

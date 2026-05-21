@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
-import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.PauseWalkingMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.behaviors.activeMapping.TerrainPlanningDebugger;
@@ -11,7 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Publisher;
 
 public class DoNothingState implements State
 {

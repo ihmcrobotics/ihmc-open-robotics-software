@@ -4,6 +4,7 @@ import geometry_msgs.TransformStamped;
 import tf2_msgs.TFMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
+import us.ihmc.jros2.ROS2MessageReader;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Subscription;
 import us.ihmc.jros2.ROS2Topic;
@@ -65,7 +66,7 @@ public class ROS2TFTree
       return ros2Node;
    }
 
-   private void receiveTFMessage(us.ihmc.jros2.ROS2MessageReader<TFMessage> reader, TFMessage tfMessage)
+   private void receiveTFMessage(ROS2MessageReader<TFMessage> reader, TFMessage tfMessage)
    {
       // Read the new message
       reader.read(tfMessage);

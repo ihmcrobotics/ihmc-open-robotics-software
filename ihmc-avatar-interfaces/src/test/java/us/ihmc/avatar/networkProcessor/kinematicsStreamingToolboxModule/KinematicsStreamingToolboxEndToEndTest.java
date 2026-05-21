@@ -1,7 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.CapturabilityBasedStatus;
+import controller_msgs.RobotConfigurationData;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -26,9 +26,8 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.controller.interfaces.ControllerOutputBasics;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -65,7 +64,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
    protected FullHumanoidRobotModel desiredFullRobotModel;
    protected KinematicsStreamingToolboxController toolboxController;
    private Robot toolboxGhost;
-   private RealtimeROS2Node toolboxROS2Node;
+   private AsyncROS2Node toolboxROS2Node;
    protected static final MaterialDefinition toolboxGhostMaterial = new MaterialDefinition(ColorDefinitions.Yellow().derive(0, 1, 1, 0.25));
 
    public abstract DRCRobotModel newRobotModel();
@@ -97,7 +96,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       simulationTestHelperFactory.addSecondaryRobot(toolboxGhost);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
 
-      toolboxROS2Node = new ROS2NodeBuilder().buildRealtime("toolbox_node");
+      toolboxROS2Node = new AsyncROS2Node("toolbox_node");
       createToolboxController(robotModel);
       toolboxGhost.addThrottledController(new Controller()
       {
@@ -124,7 +123,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
 
       simulationTestHelper.start();
 
-      Point3D cameraFix = new Point3D(initialRobotConfigurationData.getRootPosition());
+      Point3D cameraFix = new Point3D(initialRobotConfigurationData.getRootPosition().getPoint());
       Point3D cameraPosition = new Point3D(cameraFix);
       cameraPosition.add(-7.0, -9.0, 4.0);
       simulationTestHelper.setCamera(cameraFix, cameraPosition);
@@ -194,10 +193,10 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
       toolboxController.setRobotStateUpdater(robotStateUpdater);
       toolboxROS2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
-                                         s -> robotStateUpdater.setRobotConfigurationData(s.takeNextData()));
+                                         s -> robotStateUpdater.setRobotConfigurationData(s.read()));
 
       toolboxROS2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, CapturabilityBasedStatus.class),
-                                         s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
+                                         s -> toolboxController.updateCapturabilityBasedStatus(s.read()));
       toolboxROS2Node.spin();
    }
 
@@ -225,7 +224,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       toolboxGhost = null;
       if (toolboxROS2Node != null)
       {
-         toolboxROS2Node.destroy();
+         toolboxROS2Node.close();
          toolboxROS2Node = null;
       }
    }

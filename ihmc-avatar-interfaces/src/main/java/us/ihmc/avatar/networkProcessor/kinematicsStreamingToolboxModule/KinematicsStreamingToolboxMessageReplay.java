@@ -2,25 +2,21 @@ package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.CapturabilityBasedStatusPubSubType;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import controller_msgs.CapturabilityBasedStatus;
+import controller_msgs.RobotConfigurationData;
 import org.apache.commons.lang3.mutable.MutableInt;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessagePubSubType;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessagePubSubType;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.jros2.AsyncROS2Node;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -41,11 +37,6 @@ public class KinematicsStreamingToolboxMessageReplay
 {
    private final List<KinematicsStreamingToolboxMessageSet> messages;
 
-   private final JSONSerializer<RobotConfigurationData> robotConfigurationDataSerializer = new JSONSerializer<>(new RobotConfigurationDataPubSubType());
-   private final JSONSerializer<CapturabilityBasedStatus> capturabilityBasedStatusSerializer = new JSONSerializer<>(new CapturabilityBasedStatusPubSubType());
-   private final JSONSerializer<KinematicsToolboxConfigurationMessage> kinematicsToolboxConfigurationMessageSerializer = new JSONSerializer<>(new KinematicsToolboxConfigurationMessagePubSubType());
-   private final JSONSerializer<KinematicsStreamingToolboxInputMessage> kinematicsStreamingToolboxInputMessageSerializer = new JSONSerializer<>(new KinematicsStreamingToolboxInputMessagePubSubType());
-
    private final ROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
    private final ROS2Publisher<CapturabilityBasedStatus> capturabilityBasedStatusPublisher;
    private final ROS2Publisher<KinematicsToolboxConfigurationMessage> kinematicsToolboxConfigurationPublisher;
@@ -55,23 +46,23 @@ public class KinematicsStreamingToolboxMessageReplay
    private final MutableInt counter = new MutableInt();
    private double timeOffsetSeconds;
 
-   private final RealtimeROS2Node ros2Node;
+   private final AsyncROS2Node ros2Node;
 
    public KinematicsStreamingToolboxMessageReplay(String robotName, InputStream inputStream) throws IOException
    {
       messages = loadMessages(inputStream);
       String name = getClass().getSimpleName();
 
-      ros2Node = new ROS2NodeBuilder().buildRealtime("ihmc_" + name);
+      ros2Node = new AsyncROS2Node("ihmc_" + name);
 
       ROS2Topic controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
-      robotConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(RobotConfigurationData.class));
-      capturabilityBasedStatusPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(CapturabilityBasedStatus.class));
+      robotConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withType(RobotConfigurationData.class));
+      capturabilityBasedStatusPublisher = ros2Node.createPublisher(controllerOutputTopic.withType(CapturabilityBasedStatus.class));
 
       ROS2Topic toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
-      kinematicsToolboxConfigurationPublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(KinematicsToolboxConfigurationMessage.class));
-      kinematicsStreamingToolboxInputPublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(KinematicsStreamingToolboxInputMessage.class));
-      toolboxStatePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ToolboxStateMessage.class));
+      kinematicsToolboxConfigurationPublisher = ros2Node.createPublisher(toolboxInputTopic.withType(KinematicsToolboxConfigurationMessage.class));
+      kinematicsStreamingToolboxInputPublisher = ros2Node.createPublisher(toolboxInputTopic.withType(KinematicsStreamingToolboxInputMessage.class));
+      toolboxStatePublisher = ros2Node.createPublisher(toolboxInputTopic.withType(ToolboxStateMessage.class));
 
       ros2Node.spin();
    }
@@ -126,7 +117,7 @@ public class KinematicsStreamingToolboxMessageReplay
 
    public void close()
    {
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    private void sendMessagesAtIndex(int i)
@@ -165,21 +156,25 @@ public class KinematicsStreamingToolboxMessageReplay
 
          if (childNode.has(robotConfigurationDataName))
          {
-            messageSet.robotConfigurationData = robotConfigurationDataSerializer.deserialize(childNode.get(robotConfigurationDataName).toString());
+            messageSet.robotConfigurationData = ROS2Message.createInstance(RobotConfigurationData.class);
+            Ros2MessageCdrFileTools.deserializeFromJsonNode(childNode.get(robotConfigurationDataName), messageSet.robotConfigurationData);
          }
          if (childNode.has(capturabilityBasedStatusName))
          {
-            messageSet.capturabilityBasedStatus = capturabilityBasedStatusSerializer.deserialize(childNode.get(capturabilityBasedStatusName).toString());
+            messageSet.capturabilityBasedStatus = ROS2Message.createInstance(CapturabilityBasedStatus.class);
+            Ros2MessageCdrFileTools.deserializeFromJsonNode(childNode.get(capturabilityBasedStatusName), messageSet.capturabilityBasedStatus);
          }
          if (childNode.has(kinematicsToolboxConfigurationMessageName))
          {
-            messageSet.kinematicsToolboxConfigurationMessage = kinematicsToolboxConfigurationMessageSerializer
-                  .deserialize(childNode.get(kinematicsToolboxConfigurationMessageName).toString());
+            messageSet.kinematicsToolboxConfigurationMessage = ROS2Message.createInstance(KinematicsToolboxConfigurationMessage.class);
+            Ros2MessageCdrFileTools.deserializeFromJsonNode(childNode.get(kinematicsToolboxConfigurationMessageName),
+                                                            messageSet.kinematicsToolboxConfigurationMessage);
          }
          if (childNode.has(kinematicsStreamingToolboxInputMessageName))
          {
-            messageSet.kinematicsStreamingToolboxInputMessage = kinematicsStreamingToolboxInputMessageSerializer
-                  .deserialize(childNode.get(kinematicsStreamingToolboxInputMessageName).toString());
+            messageSet.kinematicsStreamingToolboxInputMessage = ROS2Message.createInstance(KinematicsStreamingToolboxInputMessage.class);
+            Ros2MessageCdrFileTools.deserializeFromJsonNode(childNode.get(kinematicsStreamingToolboxInputMessageName),
+                                                            messageSet.kinematicsStreamingToolboxInputMessage);
          }
 
          allMessages.add(messageSet);

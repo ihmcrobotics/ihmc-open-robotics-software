@@ -1,11 +1,11 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionMessage;
+import toolbox_msgs.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxInputCollectionMessage;
+import toolbox_msgs.KinematicsToolboxOneDoFJointMessage;
+import toolbox_msgs.KinematicsToolboxPrivilegedConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.KinematicsToolboxSupportRegionMessage;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;

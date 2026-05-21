@@ -115,7 +115,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
       fullRobotModelTrajectoryCalculator = new WholeBodyTrajectoryPointCalculator(drcRobotModel);
 
       solution = HumanoidMessageTools.createKinematicsPlanningToolboxOutputStatus();
-      solution.setDestination(-1);
       outputConverter = new KinematicsPlanningToolboxOutputConverter(drcRobotModel);
 
       this.commandInputManager = commandInputManager;
@@ -347,8 +346,9 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
       ikCenterOfMassMessages.clear();
       for (int j = 0; j < comPoints.size(); j++)
       {
-         KinematicsToolboxCenterOfMassMessage messageToAdd = new KinematicsToolboxCenterOfMassMessage(comMessageBuffer);
-         messageToAdd.getDesiredPositionInWorld().set(comPoints.get(j));
+         KinematicsToolboxCenterOfMassMessage messageToAdd = new KinematicsToolboxCenterOfMassMessage();
+         messageToAdd.set(comMessageBuffer);
+         messageToAdd.getDesiredPositionInWorld().getPoint().set(comPoints.get(j));
          ikCenterOfMassMessages.add(messageToAdd);
       }
 
@@ -523,7 +523,13 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
    private void generateTrajectoriesToPreview(boolean useKeyFrameOptimizer)
    {
       fullRobotModelTrajectoryCalculator.clear();
-      fullRobotModelTrajectoryCalculator.addKeyFrames(solution.getRobotConfigurations(), solution.getKeyFrameTimes());
+      ArrayList<KinematicsToolboxOutputStatus> keyFrames = new ArrayList<>();
+      for (int i = 0; i < solution.getRobotConfigurations().size(); i++)
+         keyFrames.add(solution.getRobotConfigurations().get(i));
+      gnu.trove.list.array.TDoubleArrayList keyFrameTimes = new gnu.trove.list.array.TDoubleArrayList();
+      for (int i = 0; i < solution.getKeyFrameTimes().size(); i++)
+         keyFrameTimes.add(solution.getKeyFrameTimes().get(i));
+      fullRobotModelTrajectoryCalculator.addKeyFrames(keyFrames, keyFrameTimes);
       fullRobotModelTrajectoryCalculator.initializeCalculator();
       if (useKeyFrameOptimizer)
          fullRobotModelTrajectoryCalculator.computeOptimizingKeyFrameTimes();
@@ -552,8 +558,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
 
    private void convertWholeBodyTrajectoryMessage()
    {
-      WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-      wholeBodyTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+      controller_msgs.WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new controller_msgs.WholeBodyTrajectoryMessage();
       outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
       outputConverter.computeWholeBodyTrajectoryMessage(solution);
       solution.getSuggestedControllerMessage().set(wholeBodyTrajectoryMessage);
@@ -561,7 +566,8 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
 
    private void appendRobotConfigurationOnToolboxSolution()
    {
-      KinematicsToolboxOutputStatus keyFrame = new KinematicsToolboxOutputStatus(ikController.getSolution());
+      KinematicsToolboxOutputStatus keyFrame = new KinematicsToolboxOutputStatus();
+      keyFrame.set(ikController.getSolution());
       solution.getRobotConfigurations().add().set(keyFrame);
 
       solution.setSolutionQuality(solution.getSolutionQuality() + ikController.getSolution().getSolutionQuality());

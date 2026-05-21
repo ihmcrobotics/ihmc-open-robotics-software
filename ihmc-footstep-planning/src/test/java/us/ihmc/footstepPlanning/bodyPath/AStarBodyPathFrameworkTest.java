@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
 import org.junit.jupiter.api.*;
-import perception_msgs.msg.dds.TerrainMapMessage;
+import perception_msgs.TerrainMapMessage;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;

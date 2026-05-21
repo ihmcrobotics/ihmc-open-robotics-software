@@ -1,6 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
@@ -172,7 +172,7 @@ public class KinematicsToolboxHelper
                                                               OneDoFJointBasics[] oneDoFJoints,
                                                               List<Integer> oneDoFJointsIndices)
    {
-      TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
+      us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence newJointAngles = robotConfigurationData.getJointAngles();
       if (oneDoFJointsIndices != null)
       {
          List<Float> filteredJoints = new ArrayList<>();
@@ -202,10 +202,8 @@ public class KinematicsToolboxHelper
 
       if (rootJoint != null)
       {
-         Point3D translation = robotConfigurationData.getRootPosition();
-         rootJoint.getJointPose().getPosition().set(translation.getX(), translation.getY(), translation.getZ());
-         Quaternion orientation = robotConfigurationData.getRootOrientation();
-         rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
+         rootJoint.getJointPose().getPosition().set(robotConfigurationData.getRootPosition().getPoint());
+         rootJoint.getJointPose().getOrientation().set(robotConfigurationData.getRootOrientation().getQuaternion());
          rootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
 
          rootJoint.updateFrame();

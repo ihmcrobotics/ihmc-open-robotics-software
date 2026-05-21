@@ -6,8 +6,7 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-// IDLSequence.Object is replaced with direct usage from jros2
-// import us.ihmc.idl.IDLSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -41,7 +40,7 @@ public class CRDTStatusFootstepList extends CRDTStatusMutableField<RecyclingArra
       return getValueInternal().size();
    }
 
-   public void toMessage(us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<WalkActionFootstepDefinitionMessage> message)
+   public void toMessage(IDLObjectSequence<WalkActionFootstepDefinitionMessage> message)
    {
       message.clear();
 
@@ -51,7 +50,7 @@ public class CRDTStatusFootstepList extends CRDTStatusMutableField<RecyclingArra
       }
    }
 
-   public void fromMessage(us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<WalkActionFootstepDefinitionMessage> message)
+   public void fromMessage(IDLObjectSequence<WalkActionFootstepDefinitionMessage> message)
    {
       if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
       {

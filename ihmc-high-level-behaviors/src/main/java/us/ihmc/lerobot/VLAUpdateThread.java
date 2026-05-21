@@ -1,17 +1,17 @@
 package us.ihmc.lerobot;
 
-import behavior_msgs.msg.dds.VLAOperationMessage;
-import ihmc_common_msgs.msg.dds.YoRegistryMessage;
+import behavior_msgs.VLAOperationMessage;
+import ihmc_common_msgs.YoRegistryMessage;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Size;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDataset;
@@ -40,9 +40,9 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.yoVariables.euclid.YoPose3D;
 
@@ -58,9 +58,9 @@ import java.util.concurrent.CompletableFuture;
  */
 public class VLAUpdateThread extends VLAYoRegistry
 {
-   public static final ROS2IOTopicPair<VLAOperationMessage> UI = new ROS2IOTopicPair<>(new ROS2Topic<>().withPrefix("vla_ui")
-                                                                                                        .withTypeName(VLAOperationMessage.class));
-   public static final ROS2Topic<YoRegistryMessage> YO = new ROS2Topic<>().withPrefix("vla_yo").withTypeName(YoRegistryMessage.class);
+   public static final ROS2IOTopicPair<VLAOperationMessage> UI = new ROS2IOTopicPair<>(new ROS2Topic<>("/").prependedWith("vla_ui")
+                                                                                                        .withType(VLAOperationMessage.class));
+   public static final ROS2Topic<YoRegistryMessage> YO = new ROS2Topic<>("/").prependedWith("vla_yo").withType(YoRegistryMessage.class);
    private final RepeatingTaskThread thread = new RepeatingTaskThread(getClass().getSimpleName(), this::runTask).setFrequencyLimit(50.0);
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImageSensor zedSensor;
@@ -114,7 +114,7 @@ public class VLAUpdateThread extends VLAYoRegistry
       kstFullRobotModel = robotModel.createFullRobotModel();
       kstReferenceFrames = new HumanoidReferenceFrames(kstFullRobotModel, robotModel.getSensorInformation());
       kstOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(kstFullRobotModel);
-      ros2Node.createSubscription2(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()), kstStatusSubscription::set);
+      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()), reader -> kstStatusSubscription.set(reader.read()));
 
       kstInputPublisher = ros2Node.createPublisher(ToolboxAPIs.getIKStreamingInputTopic(robotModel.getSimpleRobotName()));
       kstStatePublisher = ros2Node.createPublisher(ToolboxAPIs.getIKStreamingStateTopic(robotModel.getSimpleRobotName()));
@@ -210,8 +210,8 @@ public class VLAUpdateThread extends VLAYoRegistry
          {
             kstStatusSubscription.poll();
             KinematicsToolboxOutputStatus kstStatus = kstStatusSubscription.read();
-            kstFullRobotModel.getRootJoint().setJointPosition(kstStatus.getDesiredRootPosition());
-            kstFullRobotModel.getRootJoint().setJointOrientation(kstStatus.getDesiredRootOrientation());
+            kstFullRobotModel.getRootJoint().setJointPosition(kstStatus.getDesiredRootPosition().getPoint());
+            kstFullRobotModel.getRootJoint().setJointOrientation(kstStatus.getDesiredRootOrientation().getQuaternion());
             for (int i = 0; i < kstOneDoFJointsExcludingHands.length; i++)
                kstOneDoFJointsExcludingHands[i].setQ(kstStatus.getDesiredJointAngles().get(i));
             kstFullRobotModel.getElevator().updateFramesRecursively();
@@ -405,7 +405,7 @@ public class VLAUpdateThread extends VLAYoRegistry
    {
       VLAOperationMessage uiStatus = new VLAOperationMessage();
       latestTimestampModifiable.toMessage(uiStatus.getLatestTimestampModifiable());
-      uiStatus.setSequenceId(sequenceID++);
+      uiStatus.setSequenceId((int) sequenceID++);
       uiStatus.setRunning(running.toMessage());
       uiStatus.setControlRobot(controlRobot.toMessage());
       for (RobotSide side : RobotSide.values)

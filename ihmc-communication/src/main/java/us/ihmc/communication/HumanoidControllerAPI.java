@@ -2,6 +2,7 @@ package us.ihmc.communication;
 
 import ihmc_common_msgs.TextToSpeechPacket;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Topic;
 
 public final class HumanoidControllerAPI
@@ -28,12 +29,12 @@ public final class HumanoidControllerAPI
    }
 
    /** Applies only for the humanoid controller. */
-   public static <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
+   public static <T extends ROS2Message<T>> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
    {
       return ControllerAPI.getTopic(getBaseTopic(robotName), messageClass);
    }
 
-   public static <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Topic<T> getLowFrequencyTopic(Class<T> messageClass, String robotName)
+   public static <T extends ROS2Message<T>> ROS2Topic<T> getLowFrequencyTopic(Class<T> messageClass, String robotName)
    {
       return ControllerAPI.getLowFrequencyTopic(getBaseTopic(robotName), messageClass);
    }

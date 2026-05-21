@@ -1,7 +1,7 @@
 package us.ihmc.perception.imageMessage;
 
 import org.bytedeco.javacpp.BytePointer;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.ImageMessage;
 
 /**
  * This class is used to simplify the allocation free packing of our
@@ -31,7 +31,7 @@ public class ImageMessageDataPacker
    {
       int numberOfDataBytes = (int) imageDataBytePointer.limit();
       imageDataBytePointer.get(heapByteArrayData, 0, numberOfDataBytes);
-      imageMessageToPack.getData().resetQuick();
-      imageMessageToPack.getData().add(heapByteArrayData, 0, numberOfDataBytes);
+      imageMessageToPack.getData().getBuffer().reset();
+      imageMessageToPack.getData().getBuffer().put(heapByteArrayData, 0, numberOfDataBytes);
    }
 }

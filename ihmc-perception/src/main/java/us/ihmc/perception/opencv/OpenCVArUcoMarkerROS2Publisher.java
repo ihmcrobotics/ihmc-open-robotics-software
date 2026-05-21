@@ -5,7 +5,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ArUcoMarkerPoses;
+import perception_msgs.ArUcoMarkerPoses;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -87,8 +87,8 @@ public class OpenCVArUcoMarkerROS2Publisher
                                                 markerSize,
                                                 sensorFrame,
                                                 ReferenceFrame.getWorldFrame(),
-                                                arUcoMarkerPoses.getPosition().add(),
-                                                arUcoMarkerPoses.getOrientation().add());
+                                                arUcoMarkerPoses.getPosition().add().getPoint(),
+                                                arUcoMarkerPoses.getOrientation().add().getQuaternion());
          }
       }
       ros2.publish(PerceptionAPI.ARUCO_MARKER_POSES, arUcoMarkerPoses);

@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
@@ -189,11 +189,11 @@ public class WholeBodyTrajectoryPointCalculator
 
    public void packOptimizedVelocities(KinematicsPlanningToolboxOutputStatus solution)
    {
-      List<KinematicsToolboxOutputStatus> robotConfigurations = solution.getRobotConfigurations();
+      var robotConfigurations = solution.getRobotConfigurations();
       for (int i = 0; i < robotConfigurations.size(); i++)
       {
          KinematicsToolboxOutputStatus keyFrameSolution = robotConfigurations.get(i);
-         keyFrameSolution.getDesiredJointVelocities().resetQuick();
+         keyFrameSolution.getDesiredJointVelocities().getBuffer().reset();
 
          for (String jointName : jointNames)
          {

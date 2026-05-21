@@ -1,6 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -213,25 +213,25 @@ public interface KSTOutputDataBasics extends KSTOutputDataReadOnly
          @Override
          public Point3DBasics getRootJointPosition()
          {
-            return outputStatus.getDesiredRootPosition();
+            return outputStatus.getDesiredRootPosition().getPoint();
          }
 
          @Override
          public QuaternionBasics getRootJointOrientation()
          {
-            return outputStatus.getDesiredRootOrientation();
+            return outputStatus.getDesiredRootOrientation().getQuaternion();
          }
 
          @Override
          public Vector3DBasics getRootJointLinearVelocity()
          {
-            return outputStatus.getDesiredRootLinearVelocity();
+            return outputStatus.getDesiredRootLinearVelocity().getVector();
          }
 
          @Override
          public Vector3DBasics getRootJointAngularVelocity()
          {
-            return outputStatus.getDesiredRootAngularVelocity();
+            return outputStatus.getDesiredRootAngularVelocity().getVector();
          }
 
          @Override
@@ -255,13 +255,13 @@ public interface KSTOutputDataBasics extends KSTOutputDataReadOnly
          @Override
          public void setJointPosition(int jointIndex, double position)
          {
-            outputStatus.getDesiredJointAngles().set(jointIndex, (float) position);
+            outputStatus.getDesiredJointAngles().getBuffer().put(jointIndex, (float) position);
          }
 
          @Override
          public void setJointVelocity(int jointIndex, double velocity)
          {
-            outputStatus.getDesiredJointVelocities().set(jointIndex, (float) velocity);
+            outputStatus.getDesiredJointVelocities().getBuffer().put(jointIndex, (float) velocity);
          }
       };
    }

@@ -2,6 +2,7 @@ package us.ihmc.communication.ros2log;
 
 import gnu.trove.list.array.TLongArrayList;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
 
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
 
-class RecordTopicManager<T extends us.ihmc.jros2.ROS2Message<T>>
+class RecordTopicManager<T extends ROS2Message<T>>
 {
    private final ROS2Topic<T> ros2Topic;
    private final AtomicReference<Pair<Long, T>> latestData = new AtomicReference<>();

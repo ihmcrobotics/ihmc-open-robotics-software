@@ -10,9 +10,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import imgui.ImGui;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
 import imgui.extension.imguifiledialog.flag.ImGuiFileDialogFlags;
-import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.HeightMapMessagePubSubType;
-import us.ihmc.idl.serializers.extra.JSONSerializer;
+import perception_msgs.HeightMapMessage;
+import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuMapping.HeightMapLogReader;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -79,8 +78,7 @@ public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
                   File file = new File(selectedFile);
                   InputStream requestPacketInputStream = new FileInputStream(file);
                   JsonNode jsonNode = mapper.readTree(requestPacketInputStream);
-                  JSONSerializer<HeightMapMessage> heightMapSerializer = new JSONSerializer<>(new HeightMapMessagePubSubType());
-                  heightMapMessage.set(heightMapSerializer.deserialize(jsonNode.toString()));
+                  Ros2MessageCdrFileTools.deserializeFromJsonNode(jsonNode, heightMapMessage);
                }
                catch (IOException e)
                {

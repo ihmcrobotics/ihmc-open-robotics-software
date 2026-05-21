@@ -3,6 +3,7 @@ package us.ihmc.communication.ros2;
 import std_msgs.Bool;
 import std_msgs.Empty;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
@@ -23,7 +24,7 @@ public class ROS2PublisherMap
       this.ros2Node = ros2Node;
    }
 
-   public <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Publisher getOrCreatePublisher(ROS2Topic<T> topic)
+   public <T extends ROS2Message<T>> ROS2Publisher getOrCreatePublisher(ROS2Topic<T> topic)
    {
       ROS2Publisher publisher = map.get(topic);
       if (publisher == null)
@@ -35,7 +36,7 @@ public class ROS2PublisherMap
       return publisher;
    }
 
-   public <T extends us.ihmc.jros2.ROS2Message<T>> void publish(ROS2Topic<T> topic, T message)
+   public <T extends ROS2Message<T>> void publish(ROS2Topic<T> topic, T message)
    {
       getOrCreatePublisher(topic).publish(message);
    }

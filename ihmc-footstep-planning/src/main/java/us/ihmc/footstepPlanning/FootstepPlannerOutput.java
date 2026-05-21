@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning;
 
-import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;

@@ -6,8 +6,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import ihmc_common_msgs.msg.dds.PoseListMessage;
+import controller_msgs.FootstepDataListMessage;
+import ihmc_common_msgs.PoseListMessage;
 import imgui.type.ImBoolean;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
@@ -31,7 +31,7 @@ import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.jros2.ROS2Node;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -72,8 +72,8 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
 
       this.monteCarloFootstepPlannerParameters = monteCarloFootstepPlannerParameters;
 
-      ros2Node.createSubscription2(ContinuousHikingAPI.MONTE_CARLO_TREE_NODES, this::onMonteCarloTreeNodesReceived);
-      ros2Node.createSubscription2(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
+      ros2Node.createSubscription(ContinuousHikingAPI.MONTE_CARLO_TREE_NODES, reader -> this.onMonteCarloTreeNodesReceived(reader.read()));
+      ros2Node.createSubscription(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, reader -> this.onMonteCarloPlanReceived(reader.read()));
 
       goalFootstepGraphics = new SideDependentList<>(new RDXFootstepGraphic(contactPoints, RobotSide.LEFT),
                                                      new RDXFootstepGraphic(contactPoints, RobotSide.RIGHT));

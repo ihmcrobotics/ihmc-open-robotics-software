@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
-import controller_msgs.msg.dds.ControllerWalkToGoalStatusMessage;
-import controller_msgs.msg.dds.ControllerWaypointStatusMessage;
+import controller_msgs.ContinuousStepGeneratorStatusMessage;
+import controller_msgs.ControllerWalkToGoalStatusMessage;
+import controller_msgs.ControllerWaypointStatusMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorInputCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorParametersCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerReleaseGoalCommand;
@@ -13,9 +13,10 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeightMapCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2TopicNameTools;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Topic;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -41,7 +42,18 @@ public class StepGeneratorAPIDefinition
       commands.add(HeightMapCommand.class);
 
       stepGeneratorSupportedCommands = Collections.unmodifiableList(commands);
-      stepGeneratorSupportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));
+      for (Class<? extends Command<?, ?>> commandClass : stepGeneratorSupportedCommands)
+      {
+         try
+         {
+            Command<?, ?> command = commandClass.getDeclaredConstructor().newInstance();
+            inputMessageClasses.add(command.getMessageClass());
+         }
+         catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e)
+         {
+            throw new RuntimeException(e);
+         }
+      }
 
       List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
       statusMessages.add(ContinuousStepGeneratorStatusMessage.class);
@@ -82,15 +94,15 @@ public class StepGeneratorAPIDefinition
       return HumanoidControllerAPI.getOutputTopic(robotName);
    }
 
-   public static <T> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
+   public static <T extends ROS2Message<T>> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
    {
       if (inputMessageClasses.contains(messageClass))
       {
-         return getInputTopic(robotName).withTypeName(messageClass);
+         return getInputTopic(robotName).withType(messageClass);
       }
       if (outputMessageClasses.contains(messageClass))
       {
-         return getOutputTopic(robotName).withTypeName(messageClass);
+         return getOutputTopic(robotName).withType(messageClass);
       }
 
       throw new RuntimeException("Topic does not exist: " + messageClass);

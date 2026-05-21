@@ -20,8 +20,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       implements BehaviorTreeRootNode<BehaviorTreeNodeExecutor<?, ?>>
 {
    private final BehaviorTreeExecutor tree;
-   private final TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;
+   private final TriFunction<DRCRobotModel, ROS2Node, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;
    private final List<LeafNodeExecutor<?, ?>> orderedLeaves = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> orderedActions = new ArrayList<>();
    private final List<FallbackNodeExecutor> fallbackNodes = new ArrayList<>();
@@ -57,7 +56,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          BehaviorTreeExecutor tree,
          WorkspaceResourceDirectory saveFileDirectory,
          ROS2ControllerHelper ros2ControllerHelper,
-         TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
+         TriFunction<DRCRobotModel, ROS2Node, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
          ROS2SyncedRobotModel syncedRobot,
          ControllerStatusTracker controllerStatusTracker,
          SideDependentList<AbilityHandActionComms> abilityHandComms,
@@ -121,8 +120,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          if (previewSimulation == null)
          {
             // Put preview simulation on a different domain ID
-            ROS2NodeBuilder ros2NodeBuilder = new ROS2NodeBuilder().domainId(165); // TODO: Decide what domain is better
-            previewROS2Node = ros2NodeBuilder.build("behavior_preview");
+            previewROS2Node = new ROS2Node("behavior_preview", 165); // TODO: Decide what domain is better
             previewROS2ControllerHelper = new ROS2ControllerHelper(previewROS2Node, robotModel.getSimpleRobotName());
             previewSyncedRobot = new ROS2SyncedRobotModel(rootNode.robotModel, previewROS2Node);
             previewControllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), previewROS2ControllerHelper.getROS2Node(), previewSyncedRobot);
@@ -131,7 +129,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             for (OneDoFJointBasics oneDoFJoint : previewSyncedRobot.getFullRobotModel().getOneDoFJoints())
                resetJointAngles.put(oneDoFJoint.getName(), oneDoFJoint.getQ());
             RigidBodyTransformReadOnly walkingFrame = syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getTransformToWorldFrame();
-            previewSimulation = kinematicsSimulationBuilder.apply(robotModel, ros2NodeBuilder, walkingFrame);
+            previewSimulation = kinematicsSimulationBuilder.apply(robotModel, previewROS2Node, walkingFrame);
          }
 
          previewSyncedRobot.update();
@@ -307,7 +305,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       super.destroy();
 
       if (previewROS2Node != null)
-         previewROS2Node.destroy();
+         previewROS2Node.close();
       if (previewSyncedRobot != null)
          previewSyncedRobot.destroy();
       if (previewSimulation != null)

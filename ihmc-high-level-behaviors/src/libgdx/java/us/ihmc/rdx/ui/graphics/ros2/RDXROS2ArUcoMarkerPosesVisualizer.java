@@ -3,7 +3,8 @@ package us.ihmc.rdx.ui.graphics.ros2;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import perception_msgs.msg.dds.ArUcoMarkerPoses;
+import perception_msgs.ArUcoMarkerPoses;
+import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
@@ -11,8 +12,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
-import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -54,7 +54,7 @@ public class RDXROS2ArUcoMarkerPosesVisualizer extends RDXROS2SingleTopicVisuali
          {
             if (i < numberOfArUcoMarkers)
             {
-               markerPose.set(arUcoMarkerPosesMessage.getOrientation().get(i), arUcoMarkerPosesMessage.getPosition().get(i));
+               markerPose.set(arUcoMarkerPosesMessage.getOrientation().get(i).getQuaternion(), arUcoMarkerPosesMessage.getPosition().get(i).getPoint());
             }
             else
             {

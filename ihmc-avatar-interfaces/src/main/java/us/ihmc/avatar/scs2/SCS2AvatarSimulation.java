@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -26,7 +25,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.state.interfaces.SixDoFJointStateBasics;
@@ -63,7 +62,7 @@ public class SCS2AvatarSimulation
    private DRCRobotModel robotModel;
    private boolean showGUI;
    private boolean automaticallyStartSimulation;
-   private RealtimeROS2Node realtimeROS2Node;
+   private AsyncROS2Node realtimeROS2Node;
    private ROS2Heartbeat heartbeat;
 
    private boolean systemExitOnDestroy = true;
@@ -132,7 +131,7 @@ public class SCS2AvatarSimulation
 
       if (realtimeROS2Node != null)
       {
-         realtimeROS2Node.destroy();
+         realtimeROS2Node.close();
          realtimeROS2Node = null;
       }
 
@@ -615,7 +614,7 @@ public class SCS2AvatarSimulation
       this.automaticallyStartSimulation = automaticallyStartSimulation;
    }
 
-   public void setRealTimeROS2Node(RealtimeROS2Node realtimeROS2Node)
+   public void setRealTimeROS2Node(AsyncROS2Node realtimeROS2Node)
    {
       this.realtimeROS2Node = realtimeROS2Node;
    }

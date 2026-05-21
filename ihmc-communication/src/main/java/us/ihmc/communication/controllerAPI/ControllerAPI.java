@@ -8,8 +8,9 @@ import ihmc_common_msgs.TextToSpeechPacket;
 import toolbox_msgs.*;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2QoSProfile;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -159,7 +160,7 @@ public final class ControllerAPI
    }
 
    @SuppressWarnings("unchecked")
-   public static <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Topic<T> getTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
+   public static <T extends ROS2Message<T>> ROS2Topic<T> getTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
    {
       if (inputMessageClasses.contains(messageClass))
          return (ROS2Topic<T>) baseTopic.appendedWith("input").withType(messageClass);
@@ -169,7 +170,7 @@ public final class ControllerAPI
          return (ROS2Topic<T>) baseTopic.withType(messageClass);
    }
 
-   public static <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Topic<T> getLowFrequencyTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
+   public static <T extends ROS2Message<T>> ROS2Topic<T> getLowFrequencyTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
    {
       return getTopic(baseTopic, messageClass).appendedWith("lf");
    }

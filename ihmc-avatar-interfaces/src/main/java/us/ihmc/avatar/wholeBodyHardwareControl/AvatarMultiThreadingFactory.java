@@ -45,8 +45,7 @@ import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.time.ThreadTimer;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
@@ -106,8 +105,8 @@ public class AvatarMultiThreadingFactory
    public final String IHMC_ROS_STATE_ESTIMATOR_NODE_NAME;
    public final String IHMC_ROS_CONTROLLER_NODE_NAME;
    public final String IHMC_ROS_IKSTREAMING_NODE_NAME;
-   private final RealtimeROS2Node estimatorRealtimeROS2Node;
-   private final RealtimeROS2Node controllerRealtimeROS2Node;
+   private final AsyncROS2Node estimatorRealtimeROS2Node;
+   private final AsyncROS2Node controllerRealtimeROS2Node;
    private final PeriodicThreadSchedulerFactory ros2ThreadFactory;
 
    // Estimator
@@ -194,8 +193,8 @@ public class AvatarMultiThreadingFactory
       else
          ros2ThreadFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
 
-      estimatorRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME, ros2ThreadFactory);
-      controllerRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_CONTROLLER_NODE_NAME, ros2ThreadFactory);
+      estimatorRealtimeROS2Node = new AsyncROS2Node(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME);
+      controllerRealtimeROS2Node = new AsyncROS2Node(IHMC_ROS_CONTROLLER_NODE_NAME);
 
       // Create estimator and estimator thread
       avatarEstimator = createAndAddEstimatorThread(robotModel, sensorReaderFactory);
@@ -423,16 +422,12 @@ public class AvatarMultiThreadingFactory
                                          });
 
       // Add estimator cleanup callback to stop spinning node
-      estimatorTask.addRunnableOnCleanup(() ->
-                                         {
-                                            estimatorRealtimeROS2Node.stopSpinning();
-                                            LogTools.info("Estimator node has stopped Spinning");
-                                         });
+      estimatorTask.addRunnableOnCleanup(() -> LogTools.info("Estimator node has stopped spinning"));
 
       // Add estimator cleanup callback to destroy node
       estimatorTask.addRunnableOnCleanup(() ->
                                          {
-                                            estimatorRealtimeROS2Node.destroy();
+                                            estimatorRealtimeROS2Node.close();
                                             LogTools.info("Estimator node has been destroyed");
                                          });
 
@@ -483,16 +478,12 @@ public class AvatarMultiThreadingFactory
                                           });
 
       // Add controller cleanup callback to stop spinning node
-      controllerTask.addRunnableOnCleanup(() ->
-                                          {
-                                             controllerRealtimeROS2Node.stopSpinning();
-                                             LogTools.info("Controller node has stopped Spinning");
-                                          });
+      controllerTask.addRunnableOnCleanup(() -> LogTools.info("Controller node has stopped spinning"));
 
       // Add controller cleanup callback to destroy node
       controllerTask.addRunnableOnCleanup(() ->
                                           {
-                                             controllerRealtimeROS2Node.destroy();
+                                             controllerRealtimeROS2Node.close();
                                              LogTools.info("Controller node has been destroyed");
                                           });
 
@@ -572,7 +563,7 @@ public class AvatarMultiThreadingFactory
     * Creates and sets up factory for high-level controller
     */
    private HighLevelHumanoidControllerFactory createHighLevelControllerFactory(DRCRobotModel robotModel,
-                                                                               RealtimeROS2Node ros2Node,
+                                                                               AsyncROS2Node ros2Node,
                                                                                AvatarLowLevelOutputProcessor lowLevelOutputProcessor,
                                                                                HighLevelControllerStateFactory standPrepStateFactory,
                                                                                HighLevelControllerStateFactory freezeStateFactory)
@@ -1106,7 +1097,7 @@ public class AvatarMultiThreadingFactory
       return avatarEstimator.getSCS2YoGraphics();
    }
 
-   public RealtimeROS2Node getEstimatorROS2Node()
+   public AsyncROS2Node getEstimatorROS2Node()
    {
       return estimatorRealtimeROS2Node;
    }

@@ -1,6 +1,6 @@
 package us.ihmc.rdx.perception;
 
-import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
+import behavior_msgs.ContinuousHikingCommandMessage;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -8,15 +8,15 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.studiohartman.jamepad.ControllerButton;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.PlanOffsetStatus;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import ihmc_common_msgs.msg.dds.PoseListMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepStatusMessage;
+import controller_msgs.PlanOffsetStatus;
+import controller_msgs.WalkingControllerFailureStatusMessage;
+import ihmc_common_msgs.PoseListMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import std_msgs.msg.dds.Empty;
-import std_msgs.msg.dds.Float32;
+import std_msgs.Empty;
+import std_msgs.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
@@ -57,8 +57,8 @@ import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.perception.gpuMapping.HeightMapParameters;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
@@ -98,6 +98,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
 
+   private final ROS2Node ros2Node;
    private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitorUI;
    private final ContinuousHikingCommandMessage commandMessage = new ContinuousHikingCommandMessage();
    private final ROS2Publisher<ContinuousHikingCommandMessage> commandPublisher;
@@ -128,6 +129,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    {
       super("Continuous Hiking");
       setRenderMethod(this::renderImGuiWidgets);
+      this.ros2Node = ros2Node;
 
       footstepStatusMessagePublisher = ros2Node.createPublisher(getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()));
       walkingControllerFailureStatusPublisher = ros2Node.createPublisher(getTopic(WalkingControllerFailureStatusMessage.class,
@@ -144,9 +146,9 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ros2Node.createSubscription(getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
                                   (s) -> terrainPlanningDebugger.reset());
 
-      ros2Node.createSubscription2(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
-      ros2Node.createSubscription2(ContinuousHikingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
-      ros2Node.createSubscription2(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
+      ros2Node.createSubscription(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS, reader -> this.onStartAndGoalPosesReceived(reader.read()));
+      ros2Node.createSubscription(ContinuousHikingAPI.PLANNED_FOOTSTEPS, reader -> this.onPlannedFootstepsReceived(reader.read()));
+      ros2Node.createSubscription(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, reader -> this.onMonteCarloPlanReceived(reader.read()));
 
       commandPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND);
       squareUpPublisher = ros2Node.createPublisher(ContinuousHikingAPI.SQUARE_UP_STEP);
@@ -586,7 +588,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    public void destroy()
    {
-      commandPublisher.remove();
+      ros2Node.destroyPublisher(commandPublisher);
       stancePoseSelectionPanel.destroy();
       terrainPlanningDebugger.destroy();
    }

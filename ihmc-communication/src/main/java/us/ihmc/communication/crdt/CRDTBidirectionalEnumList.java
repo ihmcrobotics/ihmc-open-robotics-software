@@ -54,7 +54,7 @@ public class CRDTBidirectionalEnumList<T extends Enum<T>> extends CRDTBidirectio
    public void toMessage(IDLByteSequence messageArray)
    {
       List<T> values = getValueInternal();
-      messageArray.clear();
+      messageArray.getBuffer().reset();
       for (int i = 0; i < getSize(); i++)
       {
          messageArray.add(values.get(i) == null ? -1 : (byte) values.get(i).ordinal());

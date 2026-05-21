@@ -7,8 +7,7 @@ import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.jros2.ROS2Node;
 
 public class RDXZED2DisplayDemo
 {
@@ -17,7 +16,7 @@ public class RDXZED2DisplayDemo
 
    public RDXZED2DisplayDemo()
    {
-      ROS2Node ros2Node = new ROS2NodeBuilder().build("zed_2_demo_node");
+      ROS2Node ros2Node = new ROS2Node("zed_2_demo_node");
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -68,7 +67,7 @@ public class RDXZED2DisplayDemo
          {
             perceptionVisualizerPanel.destroy();
             baseUI.dispose();
-            ros2Node.destroy();
+            ros2Node.close();
          }
       });
    }

@@ -1,10 +1,10 @@
 package us.ihmc.perception;
 
 import org.apache.logging.log4j.core.util.ExecutorServices;
-import sensor_msgs.msg.dds.CameraInfo;
+import sensor_msgs.CameraInfo;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.tf2.ROS2FollowingFrame;
 import us.ihmc.communication.ros2.tf2.ROS2StaticFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -13,8 +13,8 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.sensors.ImageSensor;
 
 import java.util.HashMap;
@@ -51,12 +51,12 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
       imageSensor = sensorToPublish;
    }
 
-   public void addTopic(ROS2Topic<? extends Packet<?>> topicToPublishOn, int imageKey)
+   public void addTopic(ROS2Topic<? extends ROS2Message<?>> topicToPublishOn, int imageKey)
    {
       addTopic(topicToPublishOn, imageKey, 1.0);
    }
 
-   public void addTopic(ROS2Topic<? extends Packet<?>> topicToPublishOn, int imageKey, double scale)
+   public void addTopic(ROS2Topic<? extends ROS2Message<?>> topicToPublishOn, int imageKey, double scale)
    {
       publisherMap.put(new AsyncImagePublisher(ros2Node, topicToPublishOn, scale), imageKey);
    }
@@ -107,7 +107,7 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
          for (Entry<AsyncImagePublisher, Integer> imageEntry : publisherMap.entrySet())
          {
             AsyncImagePublisher publisher = imageEntry.getKey();
-            ROS2Topic<? extends Packet<?>> imageTopic = publisher.topic;
+            ROS2Topic<? extends ROS2Message<?>> imageTopic = publisher.topic;
 
             // If the topic is a camera info topic, check whether we should skip this publish
             if (imageTopic.getType().equals(CameraInfo.class) && getCompleted() % cameraInfoPublishModulus != 0)
@@ -195,13 +195,13 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
    private static class AsyncImagePublisher
    {
       private final RawImagePublisher publisher;
-      private final ROS2Topic<? extends Packet<?>> topic;
+      private final ROS2Topic<? extends ROS2Message<?>> topic;
       private long lastSequenceNumber = -1L;
 
       private final ExecutorService publishExecutor;
       private Future<?> publishFuture;
 
-      private AsyncImagePublisher(ROS2Node ros2Node, ROS2Topic<? extends Packet<?>> topic, double scale)
+      private AsyncImagePublisher(ROS2Node ros2Node, ROS2Topic<? extends ROS2Message<?>> topic, double scale)
       {
          this.topic = topic;
          publisher = new RawImagePublisher(ros2Node, scale);

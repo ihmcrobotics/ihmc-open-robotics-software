@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui.hands.psyonicAbilityHand;
 
-import ihmc_hands_ros2.msg.dds.AbilityHandCommand;
-import ihmc_hands_ros2.msg.dds.AbilityHandState;
+import ihmc_hands_ros2.AbilityHandCommand;
+import ihmc_hands_ros2.AbilityHandState;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImFloat;
@@ -16,8 +16,8 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.hands.RDXHandInterface;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.tools.Timer;
 
 public class RDXAbilityHand implements RDXHandInterface
@@ -57,7 +57,7 @@ public class RDXAbilityHand implements RDXHandInterface
          desiredVelocities[i] = new ImFloat(DEFAULT_VELOCITY);
       }
 
-      ros2Node.createSubscription2(AbilityHandROS2API.STATE_TOPICS.get(handSide), stateNotification::set);
+      ros2Node.createSubscription(AbilityHandROS2API.STATE_TOPICS.get(handSide), reader -> stateNotification.set(reader.read()));
       commandPublisher = ros2Node.createPublisher(AbilityHandROS2API.COMMAND_TOPICS.get(handSide));
    }
 

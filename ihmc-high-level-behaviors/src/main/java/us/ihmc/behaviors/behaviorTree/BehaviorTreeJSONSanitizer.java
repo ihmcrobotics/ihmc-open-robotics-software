@@ -7,9 +7,7 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2NodeBuilder.SpecialTransportMode;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -33,7 +31,7 @@ public class BehaviorTreeJSONSanitizer
    {
       this.robotModel = robotModel;
 
-      ROS2Node ros2Node = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY).build("json_sanitizer");
+      ROS2Node ros2Node = new ROS2Node("json_sanitizer");
       ROS2PeerClockOffsetEstimator peerClockEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
       crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, peerClockEstimator);
 
@@ -42,7 +40,7 @@ public class BehaviorTreeJSONSanitizer
       processDirectory(treeFilesDirectory);
 
       peerClockEstimator.destroy();
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    private void processDirectory(WorkspaceResourceDirectory directory)

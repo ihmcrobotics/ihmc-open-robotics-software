@@ -12,8 +12,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.jros2.ROS2Node;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -25,7 +26,7 @@ import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 public class ControllerFootstepQueueMonitor
 {
    private int controllerQueueSize = 0;
-   private us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<QueuedFootstepStatusMessage> controllerQueue;
+   private IDLObjectSequence<QueuedFootstepStatusMessage> controllerQueue;
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
    private final AtomicReference<PlanOffsetStatus> planOffsetMessage = new AtomicReference<>(new PlanOffsetStatus());
 
@@ -102,7 +103,7 @@ public class ControllerFootstepQueueMonitor
       this.planOffsetMessage.set(planOffsetMessage);
    }
 
-   public us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<QueuedFootstepStatusMessage> getControllerFootstepQueue()
+   public IDLObjectSequence<QueuedFootstepStatusMessage> getControllerFootstepQueue()
    {
       return controllerQueue;
    }

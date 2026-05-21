@@ -1,12 +1,12 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
+import behavior_msgs.BehaviorTreeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Topic;
 
 /**
  * Manages syncing a behavior tree over ROS 2 as a CRDT.

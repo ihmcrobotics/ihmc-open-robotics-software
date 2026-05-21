@@ -15,6 +15,8 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.fastddsjava.cdr.idl.IDLDoubleSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -238,10 +240,14 @@ public class KinematicsPlanningToolboxOutputConverter
       solution.set(toolboxSolution);
 
       keyFrames.clear();
-      keyFrames.addAll(solution.get().getRobotConfigurations());
+      IDLObjectSequence<KinematicsToolboxOutputStatus> robotConfigurations = solution.get().getRobotConfigurations();
+      for (int i = 0; i < robotConfigurations.size(); i++)
+         keyFrames.add(robotConfigurations.get(i));
 
       keyFrameTimes.clear();
-      keyFrameTimes.addAll(solution.get().getKeyFrameTimes());
+      IDLDoubleSequence solutionKeyFrameTimes = solution.get().getKeyFrameTimes();
+      for (int i = 0; i < solutionKeyFrameTimes.size(); i++)
+         keyFrameTimes.add(solutionKeyFrameTimes.get(i));
 
       numberOfTrajectoryPoints = keyFrames.size();
    }

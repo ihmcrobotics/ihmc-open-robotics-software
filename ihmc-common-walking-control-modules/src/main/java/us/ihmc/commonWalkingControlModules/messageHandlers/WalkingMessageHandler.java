@@ -3,10 +3,10 @@ package us.ihmc.commonWalkingControlModules.messageHandlers;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.*;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
-import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
+import ihmc_common_msgs.TextToSpeechPacket;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.lists.RecyclingArrayDeque;

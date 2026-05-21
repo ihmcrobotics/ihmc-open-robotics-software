@@ -1,6 +1,7 @@
 package us.ihmc.communication.crdt;
 
 import us.ihmc.fastddsjava.cdr.idl.IDLIntSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLShortSequence;
 
 /**
  * Represents an integer array that can be modified by both the
@@ -53,6 +54,25 @@ public class CRDTBidirectionalIntegerArray extends CRDTBidirectionalMutableField
    }
 
    public void fromMessage(IDLIntSequence message)
+   {
+      if (isModificationIncoming())
+      {
+         for (int i = 0; i < Math.min(message.size(), getLength()); i++)
+         {
+            getValueInternal()[i] = message.get(i);
+         }
+      }
+   }
+
+   public void toMessage(IDLShortSequence message)
+   {
+      message.clear();
+      int[] values = getValue();
+      for (int i = 0; i < values.length; i++)
+         message.add((short) values[i]);
+   }
+
+   public void fromMessage(IDLShortSequence message)
    {
       if (isModificationIncoming())
       {

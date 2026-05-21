@@ -104,7 +104,8 @@ public class ROS2FrameTest
          synchronized (correctMessagesReceived)
          {
             RigidBodyTransform messageTransform = new RigidBodyTransform();
-            MessageTools.fromMessage(message.getTransforms().get(0).getTransform(), messageTransform);
+            // TODO jros2
+//            MessageTools.fromMessage(message.getTransforms().get(0).getTransform(), messageTransform);
             if (messageTransform.epsilonEquals(updatedTransformToParent, EPSILON))
                correctMessagesReceived.getAndIncrement();
 

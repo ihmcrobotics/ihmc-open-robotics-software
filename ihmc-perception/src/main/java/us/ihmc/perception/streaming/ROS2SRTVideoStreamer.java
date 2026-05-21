@@ -1,17 +1,19 @@
 package us.ihmc.perception.streaming;
 
 import org.bytedeco.javacpp.BytePointer;
-import perception_msgs.msg.dds.SRTStreamStatus;
-import perception_msgs.msg.dds.VideoFrameExtraData;
+import perception_msgs.SRTStreamStatus;
+import perception_msgs.VideoFrameExtraData;
 import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.fastddsjava.cdr.CDRBuffer;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.util.Map;
 
 import static org.bytedeco.ffmpeg.global.avutil.*;
@@ -24,6 +26,7 @@ public class ROS2SRTVideoStreamer
    private static final String DEPTH_OUTPUT_FORMAT = "matroska";
    private static final int COLOR_OUTPUT_PIXEL_FORMAT = AV_PIX_FMT_YUV444P;
 
+   private final ROS2Node ros2Node;
    private final SRTStreamStatus statusMessage;
    private final ROS2Publisher<SRTStreamStatus> statusMessagePublisher;
    private final VideoFrameExtraData frameExtraData;
@@ -45,9 +48,10 @@ public class ROS2SRTVideoStreamer
 
       LogTools.info("Streaming {} on {}", streamTopic.getName(), streamOutputAddress);
 
+      this.ros2Node = ros2Node;
       statusMessage = new SRTStreamStatus();
       statusMessage.setStreamerAddress(streamOutputAddress.getHostString());
-      statusMessage.setStreamerPort(streamOutputAddress.getPort());
+      statusMessage.setStreamerPort((short) streamOutputAddress.getPort());
 
       statusMessagePublisher = ros2Node.createPublisher(streamTopic);
 
@@ -138,7 +142,7 @@ public class ROS2SRTVideoStreamer
       if (frame.get() == null)
          return;
 
-      frameExtraData.setSequenceNumber(frame.getSequenceNumber());
+      frameExtraData.setSequenceNumber((int) frame.getSequenceNumber());
       MessageTools.toMessage(frame.getAcquisitionTime(), frameExtraData.getAcquisitionTime());
       frameExtraData.getSensorPose().set(frame.getTransformToWorld());
 
@@ -150,7 +154,13 @@ public class ROS2SRTVideoStreamer
       }
       else
       {
-         BytePointer serializedMessage = new BytePointer(MessageTools.serialize(frameExtraData));
+         CDRBuffer cdrBuffer = new CDRBuffer();
+         cdrBuffer.ensureRemainingCapacity(frameExtraData.calculateSizeBytes(0) + CDRBuffer.PAYLOAD_HEADER.length);
+         cdrBuffer.writePayloadHeader();
+         frameExtraData.serialize(cdrBuffer);
+         ByteBuffer underlyingBuffer = cdrBuffer.getBufferUnsafe();
+         underlyingBuffer.flip();
+         BytePointer serializedMessage = new BytePointer(underlyingBuffer);
          videoStreamer.sendFrame(frame, serializedMessage);
          serializedMessage.close();
          statusMessage.setContainsExtraData(false);
@@ -160,8 +170,8 @@ public class ROS2SRTVideoStreamer
       float frequency = (float) sendFrequencyCalculator.getFrequency();
       statusMessage.setExpectedPublishFrequency(Math.max(1.0f, frequency));
       statusMessage.setIsStreaming(true);
-      statusMessage.setImageWidth(frame.getWidth());
-      statusMessage.setImageHeight(frame.getHeight());
+      statusMessage.setImageWidth((short) frame.getWidth());
+      statusMessage.setImageHeight((short) frame.getHeight());
       statusMessage.setFx(frame.getFocalLengthX());
       statusMessage.setFy(frame.getFocalLengthY());
       statusMessage.setCx(frame.getPrincipalPointX());
@@ -179,7 +189,7 @@ public class ROS2SRTVideoStreamer
       statusMessagePublisher.publish(statusMessage);
 
       videoStreamer.destroy();
-      statusMessagePublisher.remove();
+      ros2Node.destroyPublisher(statusMessagePublisher);
    }
 
    public int connectedCallerCount()

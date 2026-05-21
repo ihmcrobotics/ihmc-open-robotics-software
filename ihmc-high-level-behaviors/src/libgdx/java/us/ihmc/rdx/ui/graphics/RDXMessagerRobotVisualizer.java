@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui.graphics;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.MessagerSyncedRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;

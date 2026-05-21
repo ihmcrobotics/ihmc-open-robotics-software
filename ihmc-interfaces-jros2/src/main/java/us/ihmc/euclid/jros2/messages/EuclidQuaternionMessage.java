@@ -3,6 +3,8 @@ package us.ihmc.euclid.jros2.messages;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -121,6 +123,16 @@ public class EuclidQuaternionMessage implements ROS2Message<EuclidQuaternionMess
     * Set from a RotationMatrixReadOnly directly.
     */
    public void set(RotationMatrixReadOnly from)
+   {
+      this.quaternion.set(from);
+   }
+
+   public void set(Orientation3DBasics from)
+   {
+      this.quaternion.set(from);
+   }
+
+   public void set(Orientation3DReadOnly from)
    {
       this.quaternion.set(from);
    }

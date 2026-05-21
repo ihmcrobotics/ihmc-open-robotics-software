@@ -30,7 +30,7 @@ public class FrameRealtimeROS2PublisherSubscriberTest
          LogTools.info("Got from callback");
       }, ROS2QoSProfile.BEST_EFFORT);
 
-      // QueuedROS2Subscription not available in jros2 yet - test disabled
+      // QueuedROS2Subscription not ported — use AsyncROS2Node.createSubscription if rewriting this test
 
       ThreadTools.sleepForever();
    }

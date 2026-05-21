@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
@@ -202,8 +202,8 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       message.setYoloModelName(yoloModelName.toMessage());
       message.setYoloClassName(yoloClassName.toMessage());
       message.setFoundationPoseObjectType(foundationPoseObjectType.toMessageOrdinal());
-      message.setMinPostPoints(minPostPoints.toMessage());
-      message.setMinRecessPoints(minRecessPoints.toMessage());
+      message.setMinPostPoints((short) minPostPoints.toMessage());
+      message.setMinRecessPoints((short) minRecessPoints.toMessage());
       message.setCompositeFrameName(compositeFrameName.toMessage());
       message.setCompositeFrameA(compositeFrameA.toMessage());
       message.setCompositeFrameB(compositeFrameB.toMessage());

@@ -5,8 +5,7 @@ import ihmc_common_msgs.TrajectoryPoint1DMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-// IDLSequence.Object is replaced with direct usage from jros2
-// import us.ihmc.idl.IDLSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointReadOnly;
 
@@ -47,7 +46,7 @@ public class CRDTStatusOneDoFJointTrajectoryList extends CRDTStatusMutableField<
       return getValueInternal().get(jointIndex).size();
    }
 
-   public void toMessage(us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<OneDoFJointTrajectoryMessage> trajectoryMessage)
+   public void toMessage(IDLObjectSequence<OneDoFJointTrajectoryMessage> trajectoryMessage)
    {
       trajectoryMessage.clear();
 
@@ -63,7 +62,7 @@ public class CRDTStatusOneDoFJointTrajectoryList extends CRDTStatusMutableField<
       }
    }
 
-   public void fromMessage(us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<OneDoFJointTrajectoryMessage> trajectoryMessage)
+   public void fromMessage(IDLObjectSequence<OneDoFJointTrajectoryMessage> trajectoryMessage)
    {
       if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
       {

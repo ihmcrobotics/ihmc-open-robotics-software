@@ -9,8 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -755,7 +755,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
          FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
          FramePose3D pose = new FramePose3D(soleFrames.get(side));
          pose.changeFrame(ReferenceFrame.getWorldFrame());
-         footstep.getLocation().set(pose.getPosition());
+         footstep.getLocation().getPoint().set(pose.getPosition());
          footstep.getOrientation().set(pose.getOrientation());
          footstep.setRobotSide(side.toByte());
       }

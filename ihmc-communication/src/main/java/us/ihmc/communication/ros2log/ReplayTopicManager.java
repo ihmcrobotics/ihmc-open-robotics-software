@@ -1,6 +1,7 @@
 package us.ihmc.communication.ros2log;
 
 import gnu.trove.list.array.TLongArrayList;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Topic;
 
 import java.util.ArrayList;
@@ -8,7 +9,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.ObjLongConsumer;
 
-class ReplayTopicManager<T extends us.ihmc.jros2.ROS2Message<T>>
+class ReplayTopicManager<T extends ROS2Message<T>>
 {
    private final String topicName;
    private final Consumer<T> messageConsumer;

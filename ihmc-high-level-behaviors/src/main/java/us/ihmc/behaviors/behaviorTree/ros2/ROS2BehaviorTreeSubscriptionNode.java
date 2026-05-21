@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import behavior_msgs.msg.dds.*;
+import behavior_msgs.*;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 
 import java.util.ArrayList;

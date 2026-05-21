@@ -133,7 +133,7 @@ public class RDXFootstepPlannerLogViewer
          rejectionReasonReport.update();
 
          // Move the camera to where the data is, so we don't have to find it.
-         panel3D.getCamera3D().setCameraFocusPoint(footstepPlannerLog.getRequestPacket().getStartLeftFootPose().getPosition());
+         panel3D.getCamera3D().setCameraFocusPoint(footstepPlannerLog.getRequestPacket().getStartLeftFootPose().getPose().getPosition());
       }
       planarRegionsGraphic.update();
       footstepPlanGraphic.update();
@@ -163,12 +163,12 @@ public class RDXFootstepPlannerLogViewer
          ImGui.text("Loaded log:");
          ImGui.text(footstepPlannerLog.getLogName());
 
-         goalPose.set(footstepPlannerLog.getStatusPacket().getGoalPose().getPosition(), footstepPlannerLog.getStatusPacket().getGoalPose().getOrientation());
+         goalPose.set(footstepPlannerLog.getStatusPacket().getGoalPose().getPose());
          goalGraphic.setToPose(goalPose);
-         goalFootPoses.get(RobotSide.LEFT).setPose(footstepPlannerLog.getRequestPacket().getGoalLeftFootPose());
-         goalFootPoses.get(RobotSide.RIGHT).setPose(footstepPlannerLog.getRequestPacket().getGoalRightFootPose());
-         startFootPoses.get(RobotSide.LEFT).setPose(footstepPlannerLog.getRequestPacket().getStartLeftFootPose());
-         startFootPoses.get(RobotSide.RIGHT).setPose(footstepPlannerLog.getRequestPacket().getStartRightFootPose());
+         goalFootPoses.get(RobotSide.LEFT).setPose(footstepPlannerLog.getRequestPacket().getGoalLeftFootPose().getPose());
+         goalFootPoses.get(RobotSide.RIGHT).setPose(footstepPlannerLog.getRequestPacket().getGoalRightFootPose().getPose());
+         startFootPoses.get(RobotSide.LEFT).setPose(footstepPlannerLog.getRequestPacket().getStartLeftFootPose().getPose());
+         startFootPoses.get(RobotSide.RIGHT).setPose(footstepPlannerLog.getRequestPacket().getStartRightFootPose().getPose());
 
          ImGui.text("Number of planned footsteps: " + footstepPlan.getNumberOfSteps());
          ImGui.text("Requested initial stance side: " + RobotSide.fromByte(footstepPlannerLog.getRequestPacket().getRequestedInitialStanceSide()).name());
@@ -220,11 +220,11 @@ public class RDXFootstepPlannerLogViewer
       {
          if (footstepPlannerLog != null)
          {
-            probedFootFrames.get(RobotSide.LEFT).update(transformToWorld -> transformToWorld.set(footstepPlannerLog.getRequestPacket().getStartLeftFootPose()));
+            probedFootFrames.get(RobotSide.LEFT).update(transformToWorld -> transformToWorld.set(footstepPlannerLog.getRequestPacket().getStartLeftFootPose().getPose()));
             probePose.changeFrame(probedFootFrames.get(RobotSide.LEFT).getReferenceFrame());
             String tooltipString = "Left start to here: " + EuclidCoreIOTools.getTuple3DString(probePose.getPosition());
 
-            probedFootFrames.get(RobotSide.RIGHT).update(transformToWorld -> transformToWorld.set(footstepPlannerLog.getRequestPacket().getStartRightFootPose()));
+            probedFootFrames.get(RobotSide.RIGHT).update(transformToWorld -> transformToWorld.set(footstepPlannerLog.getRequestPacket().getStartRightFootPose().getPose()));
             probePose.changeFrame(probedFootFrames.get(RobotSide.RIGHT).getReferenceFrame());
             tooltipString += "\nRight start to here: " + EuclidCoreIOTools.getTuple3DString(probePose.getPosition());
 

@@ -10,11 +10,15 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage;
+import us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage;
+import us.ihmc.euclid.jros2.messages.EuclidVector3DMessage;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-// IDLSequence is now in fastddsjava
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
@@ -29,27 +33,28 @@ public class PlanarRegionMessageConverter
 
       Point3D pointInRegion = new Point3D();
       planarRegion.getPointInRegion(pointInRegion);
-      MessageTools.toMessage(pointInRegion, message.getRegionOrigin());
+      message.getRegionOrigin().set(pointInRegion);
 
       Vector3D normal = new Vector3D();
       planarRegion.getNormal(normal);
-      MessageTools.toMessage(normal, message.getRegionNormal());
+      message.getRegionNormal().set(normal);
 
       RigidBodyTransform transform = new RigidBodyTransform();
       planarRegion.getTransformToWorld(transform);
-      MessageTools.toMessage(transform.getRotation(), message.getRegionOrientation());
+      message.getRegionOrientation().set(transform.getRotation());
 
       message.setConcaveHullSize(planarRegion.getConcaveHullSize());
       message.setNumberOfConvexPolygons(planarRegion.getNumberOfConvexPolygons());
 
-      us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> vertexBuffer = message.getVertexBuffer();
+      IDLObjectSequence<EuclidPoint3DMessage> vertexBuffer = message.getVertexBuffer();
       vertexBuffer.clear();
 
       for (int vertexIndex = 0; vertexIndex < planarRegion.getConcaveHullSize(); vertexIndex++)
       {
          Point3D vertex = new Point3D();
          vertex.set(planarRegion.getConcaveHullVertex(vertexIndex), 0.0);
-         MessageTools.toMessage(vertex, vertexBuffer.add());
+
+         vertexBuffer.add().set(vertex);
       }
 
       for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
@@ -61,7 +66,8 @@ public class PlanarRegionMessageConverter
          {
             Point3D vertex = new Point3D();
             vertex.set(convexPolygon.getVertex(vertexIndex), 0.0);
-            MessageTools.toMessage(vertex, vertexBuffer.add());
+
+            vertexBuffer.add().set(vertex);
          }
       }
 
@@ -72,27 +78,27 @@ public class PlanarRegionMessageConverter
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
-      us.ihmc.euclid.tuple4D.Quaternion quaternionTemp = new us.ihmc.euclid.tuple4D.Quaternion();
-      MessageTools.fromMessage(message.getRegionOrientation(), quaternionTemp);
+      Quaternion quaternionTemp = new Quaternion();
+      quaternionTemp.set(message.getRegionOrientation().getQuaternion());
       if (Math.abs(AngleTools.trimAngleMinusPiToPi(quaternionTemp.getAngle())) < 1.0e-3)
       {
          Vector3D regionNormal = new Vector3D();
-         MessageTools.fromMessage(message.getRegionNormal(), regionNormal);
+         regionNormal.set(message.getRegionNormal().getVector());
          AxisAngle regionOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(regionNormal);
          Point3D regionOrigin = new Point3D();
-         MessageTools.fromMessage(message.getRegionOrigin(), regionOrigin);
+         regionOrigin.set(message.getRegionOrigin().getPoint());
          transformToWorld.set(regionOrientation, regionOrigin);
       }
       else
       {
-         us.ihmc.euclid.tuple4D.Quaternion quat = new us.ihmc.euclid.tuple4D.Quaternion();
-         MessageTools.fromMessage(message.getRegionOrientation(), quat);
+         Quaternion quat = new Quaternion();
+         quat.set(message.getRegionOrientation().getQuaternion());
          Point3D regionOrigin = new Point3D();
-         MessageTools.fromMessage(message.getRegionOrigin(), regionOrigin);
+         regionOrigin.set(message.getRegionOrigin().getPoint());
          transformToWorld.set(quat, regionOrigin);
       }
 
-      us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> vertexBuffer = message.getVertexBuffer();
+      IDLObjectSequence<EuclidPoint3DMessage> vertexBuffer = message.getVertexBuffer();
 
       List<Point2D> concaveHullVertices = new ArrayList<>();
       int vertexIndex = 0;
@@ -101,7 +107,7 @@ public class PlanarRegionMessageConverter
       for (; vertexIndex < upperBound; vertexIndex++)
       {
          Point3D vertex = new Point3D();
-         MessageTools.fromMessage(vertexBuffer.get(vertexIndex), vertex);
+         vertex.set(vertexBuffer.get(vertexIndex).getPoint());
          concaveHullVertices.add(new Point2D(vertex));
       }
 
@@ -115,7 +121,7 @@ public class PlanarRegionMessageConverter
          for (; vertexIndex < upperBound; vertexIndex++)
          {
             Point3D vertex = new Point3D();
-            MessageTools.fromMessage(vertexBuffer.get(vertexIndex), vertex);
+            vertex.set(vertexBuffer.get(vertexIndex).getPoint());
             convexPolygon.addVertex(vertex);
          }
          convexPolygon.update();
@@ -138,10 +144,10 @@ public class PlanarRegionMessageConverter
    {
       PlanarRegionsListMessage message = new PlanarRegionsListMessage();
 
-      us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> vertexBuffer = message.getVertexBuffer();
-      us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage> orientationBuffer = message.getRegionOrientation();
-      us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> originBuffer = message.getRegionOrigin();
-      us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage> normalBuffer = message.getRegionNormal();
+      IDLObjectSequence<EuclidPoint3DMessage> vertexBuffer = message.getVertexBuffer();
+      IDLObjectSequence<EuclidQuaternionMessage> orientationBuffer = message.getRegionOrientation();
+      IDLObjectSequence<EuclidPoint3DMessage> originBuffer = message.getRegionOrigin();
+      IDLObjectSequence<EuclidVector3DMessage> normalBuffer = message.getRegionNormal();
 
       vertexBuffer.clear();
 
@@ -150,12 +156,12 @@ public class PlanarRegionMessageConverter
          RigidBodyTransform transform = new RigidBodyTransform();
          planarRegion.getTransformToWorld(transform);
 
-         MessageTools.toMessage(transform.getRotation(), orientationBuffer.add());
-         MessageTools.toMessage(transform.getTranslation(), originBuffer.add());
+         orientationBuffer.add().getQuaternion().set(transform.getRotation());
+         originBuffer.add().getPoint().set(transform.getTranslation());
 
          Vector3D normal = new Vector3D();
          planarRegion.getNormal(normal);
-         MessageTools.toMessage(normal, normalBuffer.add());
+         normalBuffer.add().getVector().set(normal);
 
          message.getRegionId().add(planarRegion.getRegionId());
 
@@ -166,7 +172,7 @@ public class PlanarRegionMessageConverter
          {
             Point3D vertex = new Point3D();
             vertex.set(planarRegion.getConcaveHullVertex(vertexIndex), 0.0);
-            MessageTools.toMessage(vertex, vertexBuffer.add());
+            vertexBuffer.add().getPoint().set(vertex);
          }
 
          for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
@@ -178,7 +184,7 @@ public class PlanarRegionMessageConverter
             {
                Point3D vertex = new Point3D();
                vertex.set(convexPolygon.getVertex(vertexIndex), 0.0);
-               MessageTools.toMessage(vertex, vertexBuffer.add());
+               vertexBuffer.add().getPoint().set(vertex);
             }
          }
       }
@@ -192,10 +198,10 @@ public class PlanarRegionMessageConverter
          return null;
 
       int vertexIndex = 0;
-      us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage> normals = message.getRegionNormal();
-      us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> origins = message.getRegionOrigin();
+      IDLObjectSequence<EuclidVector3DMessage> normals = message.getRegionNormal();
+      IDLObjectSequence<EuclidPoint3DMessage> origins = message.getRegionOrigin();
 
-      us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> vertexBuffer = message.getVertexBuffer();
+      IDLObjectSequence<EuclidPoint3DMessage> vertexBuffer = message.getVertexBuffer();
 
       List<PlanarRegion> planarRegions = new ArrayList<>();
 
@@ -208,25 +214,25 @@ public class PlanarRegionMessageConverter
          boolean useNormalBasedOrientation = message.getRegionOrientation().isEmpty();
          if (!useNormalBasedOrientation)
          {
-            us.ihmc.euclid.tuple4D.Quaternion quatTemp = new us.ihmc.euclid.tuple4D.Quaternion();
-            MessageTools.fromMessage(message.getRegionOrientation().get(regionIndex), quatTemp);
+            Quaternion quatTemp = new Quaternion();
+            quatTemp.set(message.getRegionOrientation().get(regionIndex).getQuaternion());
             useNormalBasedOrientation = Math.abs(AngleTools.trimAngleMinusPiToPi(quatTemp.getAngle())) < 1.0e-3;
          }
          if (useNormalBasedOrientation)
          {
             Vector3D normal = new Vector3D();
-            MessageTools.fromMessage(normals.get(regionIndex), normal);
+            normal.set(normals.get(regionIndex).getVector());
             AxisAngle regionOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normal);
             Point3D origin = new Point3D();
-            MessageTools.fromMessage(origins.get(regionIndex), origin);
+            origin.set(origins.get(regionIndex).getPoint());
             transformToWorld.set(regionOrientation, origin);
          }
          else
          {
-            us.ihmc.euclid.tuple4D.Quaternion quat = new us.ihmc.euclid.tuple4D.Quaternion();
-            MessageTools.fromMessage(message.getRegionOrientation().get(regionIndex), quat);
+            Quaternion quat = new Quaternion();
+            quat.set(message.getRegionOrientation().get(regionIndex).getQuaternion());
             Point3D origin = new Point3D();
-            MessageTools.fromMessage(message.getRegionOrigin().get(regionIndex), origin);
+            origin.set(message.getRegionOrigin().get(regionIndex).getPoint());
             transformToWorld.set(quat, origin);
          }
 
@@ -236,7 +242,7 @@ public class PlanarRegionMessageConverter
          for (; vertexIndex < upperBound; vertexIndex++)
          {
             Point3D vertex = new Point3D();
-            MessageTools.fromMessage(vertexBuffer.get(vertexIndex), vertex);
+            vertex.set(vertexBuffer.get(vertexIndex).getPoint());
             concaveHullVertices.add(new Point2D(vertex));
          }
 
@@ -250,7 +256,7 @@ public class PlanarRegionMessageConverter
             for (; vertexIndex < upperBound; vertexIndex++)
             {
                Point3D vertex = new Point3D();
-               MessageTools.fromMessage(vertexBuffer.get(vertexIndex), vertex);
+               vertex.set(vertexBuffer.get(vertexIndex).getPoint());
                convexPolygon.addVertex(vertex);
             }
             convexPolygon.update();
@@ -291,10 +297,10 @@ public class PlanarRegionMessageConverter
 
       PlanarRegionsList planarRegionsList = convertToPlanarRegionsList(message.getPlanarRegions());
       framePlanarRegionsListToReturn.setPlanarRegionsList(planarRegionsList);
-      us.ihmc.euclid.tuple4D.Quaternion sensorQuat = new us.ihmc.euclid.tuple4D.Quaternion();
+      Quaternion sensorQuat = new Quaternion();
       Point3D sensorPos = new Point3D();
-      MessageTools.fromMessage(message.getSensorOrientation(), sensorQuat);
-      MessageTools.fromMessage(message.getSensorPosition(), sensorPos);
+      sensorQuat.set(message.getSensorOrientation().getQuaternion());
+      sensorPos.set(message.getSensorPosition().getPoint());
       framePlanarRegionsListToReturn.getSensorToWorldFrameTransform().set(sensorQuat, sensorPos);
 
       return framePlanarRegionsListToReturn;
@@ -303,10 +309,10 @@ public class PlanarRegionMessageConverter
    public static PlanarRegionsList convertToPlanarRegionsListInWorld(FramePlanarRegionsListMessage message)
    {
       PlanarRegionsList planarRegionsList = convertToPlanarRegionsList(message.getPlanarRegions());
-      us.ihmc.euclid.tuple4D.Quaternion sensorQuat = new us.ihmc.euclid.tuple4D.Quaternion();
+      Quaternion sensorQuat = new Quaternion();
       Point3D sensorPos = new Point3D();
-      MessageTools.fromMessage(message.getSensorOrientation(), sensorQuat);
-      MessageTools.fromMessage(message.getSensorPosition(), sensorPos);
+      sensorQuat.set(message.getSensorOrientation().getQuaternion());
+      sensorPos.set(message.getSensorPosition().getPoint());
       planarRegionsList.applyTransform(new RigidBodyTransform(sensorQuat, sensorPos));
       return planarRegionsList;
    }
@@ -317,8 +323,8 @@ public class PlanarRegionMessageConverter
 
       PlanarRegionsListMessage planarRegionsListMessage = convertToPlanarRegionsListMessage(frameRegions.getPlanarRegionsList());
       messageToReturn.getPlanarRegions().set(planarRegionsListMessage);
-      MessageTools.toMessage(frameRegions.getSensorToWorldFrameTransform().getTranslation(), messageToReturn.getSensorPosition());
-      MessageTools.toMessage(frameRegions.getSensorToWorldFrameTransform().getRotation(), messageToReturn.getSensorOrientation());
+      messageToReturn.getSensorPosition().set(frameRegions.getSensorToWorldFrameTransform().getTranslation());
+      messageToReturn.getSensorOrientation().set(frameRegions.getSensorToWorldFrameTransform().getRotation());
 
       return messageToReturn;
    }

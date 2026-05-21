@@ -86,8 +86,8 @@ public class ReachingManifoldCommand
       else
          rigidBody = rigidBodyHashMap.get(rigidBodyHashCode);
 
-      this.manifoldOriginPosition.set(message.getManifoldOriginPosition());
-      this.manifoldOriginOrientation.set(message.getManifoldOriginOrientation());
+      this.manifoldOriginPosition.set(message.getManifoldOriginPosition().getPoint());
+      this.manifoldOriginOrientation.set(message.getManifoldOriginOrientation().getQuaternion());
 
       for (int i = 0; i < message.getManifoldConfigurationSpaceNames().size(); i++)
       {

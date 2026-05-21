@@ -12,8 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
@@ -411,7 +411,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
          FootstepDataMessage footstepMessage = new FootstepDataMessage();
          footstepMessage.setSwingDuration(swingDuration);
          footstepMessage.setTransferDuration(transferDuration);
-         footstepMessage.getLocation().set(new Point3D(xLocation, robotSide.negateIfRightSide(stanceWidth / 2.0), 0.0));
+         footstepMessage.getLocation().getPoint().set(new Point3D(xLocation, robotSide.negateIfRightSide(stanceWidth / 2.0), 0.0));
          footstepMessage.getOrientation().set(new Quaternion());
          footstepMessage.setRobotSide(robotSide.toByte());
 
@@ -422,7 +422,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       FootstepDataMessage footstepMessage = new FootstepDataMessage();
       footstepMessage.setSwingDuration(swingDuration);
       footstepMessage.setTransferDuration(transferDuration);
-      footstepMessage.getLocation().set(new Point3D(xLocation, robotSide.negateIfRightSide(stanceWidth / 2.0), 0.0));
+      footstepMessage.getLocation().getPoint().set(new Point3D(xLocation, robotSide.negateIfRightSide(stanceWidth / 2.0), 0.0));
       footstepMessage.getOrientation().set(new Quaternion());
       footstepMessage.setRobotSide(robotSide.toByte());
 
@@ -545,7 +545,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       FramePoint3D placeToStepInWorld = new FramePoint3D(placeToStep);
       placeToStepInWorld.changeFrame(worldFrame);
 
-      footstepData.getLocation().set(placeToStepInWorld);
+      footstepData.getLocation().getPoint().set(placeToStepInWorld);
       footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(robotSide.toByte());
 

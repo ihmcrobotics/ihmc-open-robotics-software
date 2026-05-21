@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.type.ImDouble;
-import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
+import perception_msgs.FramePlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -12,8 +12,8 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -41,7 +41,7 @@ public class RDXROS2FramePlanarRegionsVisualizer extends RDXROS2SingleTopicVisua
       int queueSize = 1;
       executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), daemon, queueSize);
 
-      ros2Node.createSubscription2(topic, this::acceptMessage);
+      ros2Node.createSubscription(topic, reader -> this.acceptMessage(reader.read()));
    }
 
    private void acceptMessage(FramePlanarRegionsListMessage framePlanarRegionsListMessage)

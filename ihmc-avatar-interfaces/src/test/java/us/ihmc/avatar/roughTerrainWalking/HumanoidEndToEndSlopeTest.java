@@ -6,9 +6,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.ChestTrajectoryMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -198,16 +199,16 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       {
          FootstepDataMessage previousFootstep = footsteps.getFootstepDataList().get(i - 2);
          FootstepDataMessage footstep = footsteps.getFootstepDataList().get(i);
-         Point3D start = new Point3D(previousFootstep.getLocation());
-         Point3D end = new Point3D(footstep.getLocation());
+         Point3D start = new Point3D(previousFootstep.getLocation().getPoint());
+         Point3D end = new Point3D(footstep.getLocation().getPoint());
          Point3D firstWaypoint = new Point3D();
          Point3D secondWaypoint = new Point3D();
          firstWaypoint.interpolate(start, end, 0.25);
          secondWaypoint.interpolate(start, end, 0.90);
          Vector3D startNormal = new Vector3D(Axis3D.Z);
-         previousFootstep.getOrientation().transform(startNormal);
+         new Quaternion(previousFootstep.getOrientation().getQuaternion()).transform(startNormal);
          Vector3D endNormal = new Vector3D(Axis3D.Z);
-         footstep.getOrientation().transform(endNormal);
+         new Quaternion(footstep.getOrientation().getQuaternion()).transform(endNormal);
 
          firstWaypoint.scaleAdd(swingHeight, startNormal, firstWaypoint);
          secondWaypoint.scaleAdd(swingHeight, endNormal, secondWaypoint);
@@ -379,7 +380,7 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       // Yaw all the footsteps
       for (int i = 0; i < footsteps.getFootstepDataList().size(); i++)
       {
-         footsteps.getFootstepDataList().get(i).getOrientation().appendYawRotation(-0.5 * Math.PI);
+         footsteps.getFootstepDataList().get(i).getOrientation().getQuaternion().appendYawRotation(-0.5 * Math.PI);
       }
 
       return footsteps;
@@ -389,7 +390,7 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
    {
       FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
       footstep.setRobotSide(stepSide.toByte());
-      footstep.getLocation().set(pose.getPosition());
+      footstep.getLocation().getPoint().set(pose.getPosition());
       footstep.getOrientation().set(pose.getOrientation());
    }
 
@@ -397,7 +398,7 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
    {
       FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
       footstep.setRobotSide(stepSide.toByte());
-      footstep.getLocation().set(x, y, z);
+      footstep.getLocation().getPoint().set(x, y, z);
    }
 
    private static class SlopeEnvironment implements CommonAvatarEnvironmentInterface

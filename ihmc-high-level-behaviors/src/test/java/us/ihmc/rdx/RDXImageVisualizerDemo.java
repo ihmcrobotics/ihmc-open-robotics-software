@@ -7,8 +7,7 @@ import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.tools.RawImageTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
@@ -38,7 +37,7 @@ public class RDXImageVisualizerDemo
       grayVisualizer = new RDXImageVisualizer("ZED Color", "GRAY Panel", false);
       depthVisualizer = new RDXImageVisualizer("ZED Depth", "Depth Panel", false);
 
-      ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
+      ros2Node = new ROS2Node(getClass().getSimpleName().toLowerCase());
 
       zedSensor = new ROS2ZEDSVOPlaybackSensor(new ROS2Helper(ros2Node), 0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
       zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
@@ -130,7 +129,7 @@ public class RDXImageVisualizerDemo
    {
       zedGrabThread.blockingKill();
       zedSensor.close();
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    public static void main(String[] args)

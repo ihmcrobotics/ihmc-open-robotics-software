@@ -4,9 +4,9 @@ import imgui.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.FoundationPoseRequest;
-import perception_msgs.msg.dds.FoundationPoseResult;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.FoundationPoseRequest;
+import perception_msgs.FoundationPoseResult;
+import perception_msgs.ImageMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
@@ -25,11 +25,9 @@ import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
@@ -84,12 +82,12 @@ public class RDXFoundationPoseDemo
    private static final BytePointer JPG = new BytePointer(".jpg");
    private static final BytePointer PNG = new BytePointer(".png");
 
-   private static final ROS2Topic<?> RELIABLE_TOPIC = new ROS2Topic<>().withQoS(ROS2QosProfile.RELIABLE());
-   private static final ROS2Topic<ImageMessage> COLOR_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/color_rgb8").withType(ImageMessage.class);
-   private static final ROS2Topic<ImageMessage> DEPTH_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/depth_mono16").withType(ImageMessage.class);
-   private static final ROS2Topic<FoundationPoseRequest> REQUEST_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/request").withType(FoundationPoseRequest.class);
-   private static final ROS2Topic<std_msgs.msg.dds.String> REMOVE_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/remove").withType(std_msgs.msg.dds.String.class);
-   private static final ROS2Topic<FoundationPoseResult> RESULT_TOPIC = new ROS2Topic<>().withModule("foundation_pose/result").withType(FoundationPoseResult.class);
+   private static final ROS2Topic<?> RELIABLE_TOPIC = new ROS2Topic<>();
+   private static final ROS2Topic<ImageMessage> COLOR_TOPIC = RELIABLE_TOPIC.appendedWith("foundation_pose/color_rgb8").withType(ImageMessage.class);
+   private static final ROS2Topic<ImageMessage> DEPTH_TOPIC = RELIABLE_TOPIC.appendedWith("foundation_pose/depth_mono16").withType(ImageMessage.class);
+   private static final ROS2Topic<FoundationPoseRequest> REQUEST_TOPIC = RELIABLE_TOPIC.appendedWith("foundation_pose/request").withType(FoundationPoseRequest.class);
+   private static final ROS2Topic<std_msgs.String_> REMOVE_TOPIC = RELIABLE_TOPIC.appendedWith("foundation_pose/remove").withType(std_msgs.String_.class);
+   private static final ROS2Topic<FoundationPoseResult> RESULT_TOPIC = new ROS2Topic<>().appendedWith("foundation_pose/result").withType(FoundationPoseResult.class);
 
    private final ROS2Node ros2Node;
    private final ROS2PeerClockOffsetEstimator robotClockOffsetEstimator;
@@ -99,8 +97,8 @@ public class RDXFoundationPoseDemo
    private final FoundationPoseRequest requestMessage;
    private boolean sendRequest;
 
-   private final ROS2Publisher<std_msgs.msg.dds.String> removePublisher;
-   private final std_msgs.msg.dds.String removeMessage;
+   private final ROS2Publisher<std_msgs.String_> removePublisher;
+   private final std_msgs.String_ removeMessage;
 
    private final ROS2Publisher<ImageMessage> colorPublisher;
    private final ROS2Publisher<ImageMessage> depthPublisher;
@@ -125,16 +123,16 @@ public class RDXFoundationPoseDemo
    {
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));
 
-      ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName());
+      ros2Node = new ROS2Node(getClass().getSimpleName());
       robotClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
       uiClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
       requestPublisher = ros2Node.createPublisher(REQUEST_TOPIC);
       requestMessage = new FoundationPoseRequest();
       sendRequest = false;
       removePublisher = ros2Node.createPublisher(REMOVE_TOPIC);
-      removeMessage = new std_msgs.msg.dds.String();
+      removeMessage = new std_msgs.String_();
 
-      ros2Node.createSubscription2(RESULT_TOPIC, this::receivePose);
+      ros2Node.createSubscription(RESULT_TOPIC, reader -> this.receivePose(reader.read()));
 
       boolean enableNeuralMode = CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getDeviceName(0), "RTX 3080");
       zed = new ZEDImageSensor(0, ZEDModelData.ZED_2, SL_INPUT_TYPE_USB);
@@ -222,7 +220,7 @@ public class RDXFoundationPoseDemo
 
    private void receivePose(FoundationPoseResult result)
    {
-      objectPoseGraphic.setPoseInWorldFrame(result.getObjectPose());
+      objectPoseGraphic.setPoseInWorldFrame(result.getObjectPose().getPose());
    }
 
    private void consumeZEDImage()
@@ -326,7 +324,7 @@ public class RDXFoundationPoseDemo
 
       robotClockOffsetEstimator.destroy();
       uiClockOffsetEstimator.destroy();
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    public static void main(String[] args)

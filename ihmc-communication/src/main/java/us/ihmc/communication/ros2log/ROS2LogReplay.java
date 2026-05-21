@@ -3,6 +3,7 @@ package us.ihmc.communication.ros2log;
 import com.google.common.base.CaseFormat;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
 
@@ -253,7 +254,7 @@ public class ROS2LogReplay
       return replaySpeed;
    }
 
-   public <T extends us.ihmc.jros2.ROS2Message<T>> void addReplayMutator(ROS2Topic<T> topic, ObjLongConsumer<T> mutator)
+   public <T extends ROS2Message<T>> void addReplayMutator(ROS2Topic<T> topic, ObjLongConsumer<T> mutator)
    {
       ReplayTopicManager<?> topicManager = topicManagersMap.get(topic.getName());
       if (topicManager == null)

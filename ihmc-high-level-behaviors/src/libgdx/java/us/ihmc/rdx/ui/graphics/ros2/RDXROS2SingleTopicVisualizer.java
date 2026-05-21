@@ -2,9 +2,10 @@ package us.ihmc.rdx.ui.graphics.ros2;
 
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Topic;
 
-public abstract class RDXROS2SingleTopicVisualizer<T> extends RDXVisualizer
+public abstract class RDXROS2SingleTopicVisualizer<T extends ROS2Message<T>> extends RDXVisualizer
 {
    private final ImGuiAveragedFrequencyText frequencyText = new ImGuiAveragedFrequencyText();
 

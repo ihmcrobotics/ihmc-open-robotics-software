@@ -4,10 +4,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import controller_msgs.PelvisHeightTrajectoryMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -112,7 +112,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
 
       FootstepDataMessage footstep = message.getFootstepDataList().add();
       footstep.setRobotSide(robotSide.toByte());
-      footstep.getLocation().set(touchdownPosition);
+      footstep.getLocation().getPoint().set(touchdownPosition);
       footstep.getOrientation().set(footOrientation);
 
       double touchdownVelocity = -0.2;
@@ -122,33 +122,33 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       SE3TrajectoryPointMessage waypointA = footstep.getSwingTrajectory().add();
       waypointA.setTime(0.2 * swingTime);
       waypointA.getPosition().set(footPosition);
-      waypointA.getPosition().addZ(stepHeight + 0.05);
+      waypointA.getPosition().getPoint().addZ(stepHeight + 0.05);
       waypointA.getOrientation().set(footOrientation);
-      waypointA.getLinearVelocity().setToZero();
-      waypointA.getAngularVelocity().setToZero();
+      waypointA.getLinearVelocity().getVector().setToZero();
+      waypointA.getAngularVelocity().getVector().setToZero();
 
       SE3TrajectoryPointMessage waypointB = footstep.getSwingTrajectory().add();
       waypointB.setTime(2.0 * swingTime / 3.0);
       waypointB.getPosition().set(touchdownPosition);
-      waypointB.getPosition().addZ(-lastPortion * swingTime * touchdownVelocity + 0.03);
+      waypointB.getPosition().getPoint().addZ(-lastPortion * swingTime * touchdownVelocity + 0.03);
       waypointB.getOrientation().set(footOrientation);
-      waypointB.getLinearVelocity().setToZero();
-      waypointB.getAngularVelocity().setToZero();
+      waypointB.getLinearVelocity().getVector().setToZero();
+      waypointB.getAngularVelocity().getVector().setToZero();
 
       SE3TrajectoryPointMessage waypointC = footstep.getSwingTrajectory().add();
       waypointC.setTime((1.0 - lastPortion) * swingTime);
       waypointC.getPosition().set(touchdownPosition);
-      waypointC.getPosition().addZ(-lastPortion * swingTime * touchdownVelocity);
+      waypointC.getPosition().getPoint().addZ(-lastPortion * swingTime * touchdownVelocity);
       waypointC.getOrientation().set(footOrientation);
-      waypointC.getLinearVelocity().set(0.0, 0.0, touchdownVelocity);
-      waypointC.getAngularVelocity().setToZero();
+      waypointC.getLinearVelocity().getVector().set(0.0, 0.0, touchdownVelocity);
+      waypointC.getAngularVelocity().getVector().setToZero();
 
       SE3TrajectoryPointMessage touchdown = footstep.getSwingTrajectory().add();
       touchdown.setTime(swingTime);
       touchdown.getPosition().set(touchdownPosition);
       touchdown.getOrientation().set(footOrientation);
-      touchdown.getLinearVelocity().set(0.0, 0.0, touchdownVelocity);
-      touchdown.getAngularVelocity().setToZero();
+      touchdown.getLinearVelocity().getVector().set(0.0, 0.0, touchdownVelocity);
+      touchdown.getAngularVelocity().getVector().setToZero();
 
       YoVariable desiredVelocity = simulationTestHelper.findVariable("leftFootControlModule", "leftFootSwingDesiredSoleLinearVelocityInWorldZ");
 
@@ -252,7 +252,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
 
       footPosition.changeFrame(worldFrame);
       footOrientation.changeFrame(worldFrame);
-      footstep.getLocation().set(footPosition);
+      footstep.getLocation().getPoint().set(footPosition);
       footstep.getOrientation().set(footOrientation);
       MessageTools.copyData(waypoints, footstep.getSwingTrajectory());
 
@@ -277,16 +277,16 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
          String linearVelocityPrefix = YoGeometryNameTools.assembleName(prefix, "linearVelocity", "");
          Vector3D desiredLinearVelocity = EndToEndTestTools.findVector3D(linearNamespace, linearVelocityPrefix, suffix, simulationTestHelper);
 
-         EuclidCoreTestTools.assertEquals("Position", waypoint.getPosition(), desiredPosition, 1.0E-10, format);
-         EuclidCoreTestTools.assertEquals("Linear Velocity", waypoint.getLinearVelocity(), desiredLinearVelocity, 1.0E-10, format);
+         EuclidCoreTestTools.assertEquals("Position", waypoint.getPosition().getPoint(), desiredPosition, 1.0E-10, format);
+         EuclidCoreTestTools.assertEquals("Linear Velocity", waypoint.getLinearVelocity().getVector(), desiredLinearVelocity, 1.0E-10, format);
 
          String orientationPrefix = YoGeometryNameTools.assembleName(prefix, "orientation", "");
          Quaternion desiredOrientation = EndToEndTestTools.findQuaternion(angularNamespace, orientationPrefix, suffix, simulationTestHelper);
          String angularVelocityPrefix = YoGeometryNameTools.assembleName(prefix, "angularVelocity", "");
          Vector3D desiredAngularVelocity = EndToEndTestTools.findVector3D(angularNamespace, angularVelocityPrefix, suffix, simulationTestHelper);
 
-         EuclidCoreTestTools.assertEquals("Orientation", waypoint.getOrientation(), desiredOrientation, 1.0E-10, format);
-         EuclidCoreTestTools.assertEquals("Angular Velocity", waypoint.getAngularVelocity(), desiredAngularVelocity, 1.0E-10, format);
+         EuclidCoreTestTools.assertEquals("Orientation", waypoint.getOrientation().getQuaternion(), desiredOrientation, 1.0E-10, format);
+         EuclidCoreTestTools.assertEquals("Angular Velocity", waypoint.getAngularVelocity().getVector(), desiredAngularVelocity, 1.0E-10, format);
       }
 
       String currentIndexName = prefix + "CurrentWaypointIndex";

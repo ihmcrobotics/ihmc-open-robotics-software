@@ -4,6 +4,9 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DPoseReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.fastddsjava.cdr.CDRBuffer;
 import us.ihmc.jros2.ROS2Message;
 
@@ -122,6 +125,21 @@ public class EuclidPose3DMessage implements ROS2Message<EuclidPose3DMessage>
    }
 
    public void set(Shape3DPoseReadOnly from)
+   {
+      this.pose.set(from);
+   }
+
+   public void set(RigidBodyTransform from)
+   {
+      this.pose.set(from);
+   }
+
+   public void set(RigidBodyTransformBasics from)
+   {
+      this.pose.set(from);
+   }
+
+   public void set(RigidBodyTransformReadOnly from)
    {
       this.pose.set(from);
    }

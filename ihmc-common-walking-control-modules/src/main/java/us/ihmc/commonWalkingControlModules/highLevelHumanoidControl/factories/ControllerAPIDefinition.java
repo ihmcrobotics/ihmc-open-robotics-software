@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import controller_msgs.msg.dds.*;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.*;
+import perception_msgs.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.BipedTimedStepListCommand;

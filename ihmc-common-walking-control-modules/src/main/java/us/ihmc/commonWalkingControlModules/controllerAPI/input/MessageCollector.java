@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import ihmc_common_msgs.msg.dds.MessageCollection;
-import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
+import ihmc_common_msgs.MessageCollection;
+import ihmc_common_msgs.MessageCollectionNotification;
 import gnu.trove.set.hash.TLongHashSet;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.fastddsjava.cdr.idl.IDLIntSequence;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 
 /**
  * A {@code MessageCollector} can be added to a {@link ControllerNetworkSubscriber}.
@@ -126,9 +127,9 @@ public class MessageCollector
       }
       reset();
       isCollecting = true;
-      notification.setMessageCollectionSequenceId(collection.getSequenceId());
+      notification.setMessageCollectionSequenceId((int) collection.getSequenceId());
 
-      IDLSequence.Long sequences = collection.getSequences();
+      IDLIntSequence sequences = collection.getSequences();
       for (int i = 0; i < sequences.size(); i++)
       {
          expectedMessageIDs.add(sequences.get(i));

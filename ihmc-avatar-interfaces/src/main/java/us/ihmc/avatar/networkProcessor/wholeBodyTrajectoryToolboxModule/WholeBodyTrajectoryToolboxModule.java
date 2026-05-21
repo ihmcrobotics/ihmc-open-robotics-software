@@ -1,8 +1,8 @@
 package us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
-import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
-import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
+import controller_msgs.RobotConfigurationData;
+import toolbox_msgs.WholeBodyTrajectoryToolboxMessage;
+import toolbox_msgs.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -15,8 +15,8 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Reac
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -100,7 +100,7 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 
    public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ToolboxAPIs.WHOLE_BODY_TRAJECTORY_TOOLBOX.withRobot(robotName).withOutput();
+      return ToolboxAPIs.WHOLE_BODY_TRAJECTORY_TOOLBOX.appendedWith(robotName).appendedWith("output");
    }
 
    @Override
@@ -111,7 +111,7 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 
    public static ROS2Topic getInputTopic(String robotName)
    {
-      return ToolboxAPIs.WHOLE_BODY_TRAJECTORY_TOOLBOX.withRobot(robotName).withInput();
+      return ToolboxAPIs.WHOLE_BODY_TRAJECTORY_TOOLBOX.appendedWith(robotName).appendedWith("input");
    }
 
    @Override
@@ -119,9 +119,9 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    {
       ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 
-      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class), s -> {
+      ros2Node.createSubscription(controllerOutputTopic.withType(RobotConfigurationData.class), s -> {
          if (wholeBodyTrajectoryToolboxController != null)
-            wholeBodyTrajectoryToolboxController.updateRobotConfigurationData(s.takeNextData());
+            wholeBodyTrajectoryToolboxController.updateRobotConfigurationData(s.read());
       });
    }
 }

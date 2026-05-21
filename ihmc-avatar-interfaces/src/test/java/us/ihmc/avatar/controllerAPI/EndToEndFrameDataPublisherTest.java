@@ -12,9 +12,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import ihmc_common_msgs.msg.dds.RobotFrameData;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import ihmc_common_msgs.RobotFrameData;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -27,6 +27,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.controllerAPI.ControllerMessageConstants;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -36,7 +37,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -131,12 +132,12 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
             stepsPackedInMessage++;
          }
          message.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
-         message.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
+         message.getQueueingProperties().setPreviousMessageId(ControllerMessageConstants.VALID_MESSAGE_DEFAULT_ID);
          messages.add(message);
       }
       FootstepDataListMessage r = messages.get(0);
       r.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      r.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
+      r.getQueueingProperties().setPreviousMessageId(ControllerMessageConstants.VALID_MESSAGE_DEFAULT_ID);
 
       YoVariable numberOfStepsInController = simulationTestHelper.findVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
       int expectedNumberOfSteps = 0;
@@ -220,7 +221,7 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
       
       //      fullRobotModel.updateFrames();
       ROS2Topic<RobotFrameData> ros2Topic = HumanoidControllerAPI.getOutputTopic(robotModel.getSimpleRobotName())
-                                                                 .withSuffix("afterL_arm_ely")
+                                                                 .appendedWith("afterL_arm_ely")
                                                                  .withType(RobotFrameData.class);
       List<RobotFrameData> frameMessages = new ArrayList<>();
       
@@ -279,9 +280,9 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
       for (int i = 0; i < steps; i++)
       {
          FootstepDataMessage footstep = message.getFootstepDataList().get(i);
-         stepPose.setIncludingFrame(messageFrame, footstep.getLocation(), footstep.getOrientation());
+         stepPose.setIncludingFrame(messageFrame, footstep.getLocation().getPoint(), footstep.getOrientation().getQuaternion());
          stepPose.changeFrame(ReferenceFrame.getWorldFrame());
-         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getLocation().getPoint().set(stepPose.getPosition());
          footstep.getOrientation().set(stepPose.getOrientation());
       }
    }

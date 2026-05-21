@@ -1,5 +1,8 @@
 package us.ihmc.euclid.jros2.messages;
 
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -68,6 +71,21 @@ public class EuclidVector3DMessage implements ROS2Message<EuclidVector3DMessage>
    public void set(EuclidVector3DMessage from)
    {
       this.vector.set(from.vector);
+   }
+
+   public void set(Vector2D from)
+   {
+      this.vector.set(from);
+   }
+
+   public void set(Vector2DBasics from)
+   {
+      this.vector.set(from);
+   }
+
+   public void set(Vector2DReadOnly from)
+   {
+      this.vector.set(from);
    }
 
    /**

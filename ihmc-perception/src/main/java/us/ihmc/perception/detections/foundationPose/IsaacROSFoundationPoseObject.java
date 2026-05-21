@@ -1,12 +1,12 @@
 package us.ihmc.perception.detections.foundationPose;
 
-import ihmc_common_msgs.msg.dds.Box3DMessage;
-import perception_msgs.msg.dds.FoundationPoseParameters;
-import sensor_msgs.msg.dds.CameraInfo;
-import sensor_msgs.msg.dds.Image;
-import std_msgs.msg.dds.Empty;
-import us.ihmc.ros2.ROS2Topic;
-import vision_msgs.msg.dds.Detection3DArray;
+import ihmc_common_msgs.Box3DMessage;
+import perception_msgs.FoundationPoseParameters;
+import sensor_msgs.CameraInfo;
+import sensor_msgs.Image;
+import std_msgs.Empty;
+import us.ihmc.jros2.ROS2Topic;
+import vision_msgs.Detection3DArray;
 
 import static us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseAPI.*;
 
@@ -41,28 +41,28 @@ public enum IsaacROSFoundationPoseObject
                                       ROS2Topic<Detection3DArray> poseEstimationOutput, ROS2Topic<Image> trackingDepthImage, ROS2Topic<Image> trackingRGBImage,
                                       ROS2Topic<CameraInfo> trackingCameraInfo, ROS2Topic<Detection3DArray> trackingOutput, ROS2Topic<Image> depthImage,
                                       ROS2Topic<Image> rgbImage, ROS2Topic<Image> segmentation, ROS2Topic<CameraInfo> cameraInfo, ROS2Topic<Empty> reset,
-                                      ROS2Topic<Box3DMessage> ihmcResult, ROS2Topic<std_msgs.msg.dds.Byte> ihmcState,
+                                      ROS2Topic<Box3DMessage> ihmcResult, ROS2Topic<std_msgs.Byte> ihmcState,
                                       ROS2Topic<FoundationPoseParameters> ihmcParameters)
    {
       public FoundationPoseTopics(String object)
       {
-         this(POSE_ESTIMATION_DEPTH_IMAGE.withModule(object),
-              POSE_ESTIMATION_RGB_IMAGE.withModule(object),
-              POSE_ESTIMATION_SEGMENTATION.withModule(object),
-              POSE_ESTIMATION_CAMERA_INFO.withModule(object),
-              POSE_ESTIMATION_OUTPUT.withModule(object),
-              TRACKING_DEPTH_IMAGE.withModule(object),
-              TRACKING_RGB_IMAGE.withModule(object),
-              TRACKING_CAMERA_INFO.withModule(object),
-              TRACKING_OUTPUT.withModule(object),
-              DEPTH_IMAGE.withModule(object),
-              RGB_IMAGE.withModule(object),
-              SEGMENTATION.withModule(object),
-              CAMERA_INFO.withModule(object),
-              RESET.withModule(object),
-              IHMC_RESULT.withModule(object),
-              IHMC_STATE.withModule(object),
-              IHMC_PARAMETERS.withModule(object));
+         this(POSE_ESTIMATION_DEPTH_IMAGE.appendedWith(object),
+              POSE_ESTIMATION_RGB_IMAGE.appendedWith(object),
+              POSE_ESTIMATION_SEGMENTATION.appendedWith(object),
+              POSE_ESTIMATION_CAMERA_INFO.appendedWith(object),
+              POSE_ESTIMATION_OUTPUT.appendedWith(object),
+              TRACKING_DEPTH_IMAGE.appendedWith(object),
+              TRACKING_RGB_IMAGE.appendedWith(object),
+              TRACKING_CAMERA_INFO.appendedWith(object),
+              TRACKING_OUTPUT.appendedWith(object),
+              DEPTH_IMAGE.appendedWith(object),
+              RGB_IMAGE.appendedWith(object),
+              SEGMENTATION.appendedWith(object),
+              CAMERA_INFO.appendedWith(object),
+              RESET.appendedWith(object),
+              IHMC_RESULT.appendedWith(object),
+              IHMC_STATE.appendedWith(object),
+              IHMC_PARAMETERS.appendedWith(object));
       }
    }
 }

@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
-import controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage;
-import controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage;
-import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
-import std_msgs.msg.dds.Empty;
+import controller_msgs.ContinuousStepGeneratorInputMessage;
+import controller_msgs.ContinuousStepGeneratorParametersMessage;
+import controller_msgs.ContinuousStepGeneratorStatusMessage;
+import std_msgs.Empty;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
@@ -13,10 +13,9 @@ import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
-import us.ihmc.ros2.QueuedROS2Subscription;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import java.util.function.Consumer;
 
 /**
@@ -35,9 +34,9 @@ public class CSGROS2CommunicationHelper
    // we only have a limited amount of networking bandwidth when using WIFI.
    private static final double THROTTLER_THREAD_HERTZ = 11.0;
 
-   public static final ROS2Topic<Empty> CSG_HEARTBEAT_TOPIC = new ROS2Topic<>().withPrefix("ihmc")
-                                                                               .withModule("continuous_step_generator")
-                                                                               .withSuffix("heartbeat")
+   public static final ROS2Topic<Empty> CSG_HEARTBEAT_TOPIC = new ROS2Topic<>().prependedWith("ihmc")
+                                                                               .appendedWith("continuous_step_generator")
+                                                                               .appendedWith("heartbeat")
                                                                                .withType(Empty.class);
 
    private final ROS2Node ros2Node;
@@ -48,7 +47,6 @@ public class CSGROS2CommunicationHelper
    private final ContinuousStepGeneratorParametersMessage csgParametersCommand = new ContinuousStepGeneratorParametersMessage();
 
    // CSG ROS Statuses
-   private final QueuedROS2Subscription<ContinuousStepGeneratorStatusMessage> csgStatusSubscription;
    private final ContinuousStepGeneratorStatusMessage csgStatusMessage = new ContinuousStepGeneratorStatusMessage();
 
    private final ROS2Publisher<ContinuousStepGeneratorInputMessage> csgInputCommandPublisher;
@@ -71,8 +69,6 @@ public class CSGROS2CommunicationHelper
    {
       this.ros2Node = ros2Node;
       this.robotName = robotName;
-
-      csgStatusSubscription = ros2Node.createQueuedSubscription(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotName), 10);
 
       ROS2Tools.createVolatileCallbackSubscription(ros2Node,
                                                    HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotName),

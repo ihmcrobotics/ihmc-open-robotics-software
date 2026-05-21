@@ -1,13 +1,13 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
-import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.QueueableMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.ArmTrajectoryMessage;
+import controller_msgs.HandHybridJointspaceTaskspaceTrajectoryMessage;
+import controller_msgs.JointspaceTrajectoryMessage;
+import controller_msgs.OneDoFJointTrajectoryMessage;
+import ihmc_common_msgs.QueueableMessage;
+import ihmc_common_msgs.SE3TrajectoryMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.LeafNodeExecutor;
@@ -187,8 +187,8 @@ public class ArmActionExecutor extends ActionNodeExecutor<ArmActionState, ArmAct
             se3TrajectoryPointMessage.setTime(definition.getTrajectoryDuration());
             se3TrajectoryPointMessage.getPosition().set(desiredControlFramePose.getPosition());
             se3TrajectoryPointMessage.getOrientation().set(desiredControlFramePose.getOrientation());
-            se3TrajectoryPointMessage.getLinearVelocity().setToZero();
-            se3TrajectoryPointMessage.getAngularVelocity().setToZero();
+            se3TrajectoryPointMessage.getLinearVelocity().getVector().setToZero();
+            se3TrajectoryPointMessage.getAngularVelocity().getVector().setToZero();
 
             HandHybridJointspaceTaskspaceTrajectoryMessage handHybridJointspaceTaskspaceTrajectoryMessage
                   = new HandHybridJointspaceTaskspaceTrajectoryMessage();

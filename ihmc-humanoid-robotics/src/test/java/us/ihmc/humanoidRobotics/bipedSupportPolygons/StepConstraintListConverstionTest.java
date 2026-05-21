@@ -118,12 +118,12 @@ public class StepConstraintListConverstionTest
 
    private static void assertMessageEquals(String failureMessage, PlanarRegion expected, StepConstraintMessage actual, double epsilon)
    {
-      EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getNormal(), actual.getRegionNormal(), epsilon);
-      EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getPoint(), actual.getRegionOrigin(), epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getNormal(), actual.getRegionNormal().getVector(), epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getPoint(), actual.getRegionOrigin().getPoint(), epsilon);
       assertEquals(expected.getConcaveHullSize(), actual.getConcaveHullSize(), failureMessage);
       for (int i = 0; i < expected.getConcaveHullSize(); i++)
       {
-         EuclidCoreTestTools.assertEquals(failureMessage, expected.getConcaveHullVertex(i), new Point2D(actual.getVertexBuffer().get(i)), epsilon);
+         EuclidCoreTestTools.assertEquals(failureMessage, expected.getConcaveHullVertex(i), new Point2D(actual.getVertexBuffer().get(i).getPoint()), epsilon);
       }
    }
 

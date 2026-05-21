@@ -7,8 +7,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -233,10 +233,10 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       setupCameraForWalkingOntoSlopes();
       assertTrue(simulationTestHelper.simulateNow(0.5));
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingToTheSlopesSideways();
-      List<FootstepDataMessage> dataList = createFootstepsForSteppingOverTheSlopesEdgeSideways().getFootstepDataList();
-      for (int i = 0; i < dataList.size(); i++)
+      FootstepDataListMessage edgeFootsteps = createFootstepsForSteppingOverTheSlopesEdgeSideways();
+      for (int i = 0; i < edgeFootsteps.getFootstepDataList().size(); i++)
       {
-         FootstepDataMessage step = dataList.get(i);
+         FootstepDataMessage step = edgeFootsteps.getFootstepDataList().get(i);
          footstepDataList.getFootstepDataList().add().set(step);
       }
       simulationTestHelper.publishToController(footstepDataList);

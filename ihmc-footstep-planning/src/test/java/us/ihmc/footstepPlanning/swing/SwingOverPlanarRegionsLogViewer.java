@@ -3,8 +3,8 @@ package us.ihmc.footstepPlanning.swing;
 import java.awt.Color;
 import java.io.File;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -54,7 +54,7 @@ public class SwingOverPlanarRegionsLogViewer
       {
          FootstepDataMessage message = footsteps.getFootstepDataList().get(i);
          footstepPlan.addFootstep(RobotSide.fromByte(message.getRobotSide()),
-                                  new FramePose3D(ReferenceFrame.getWorldFrame(), message.getLocation(), message.getOrientation()));
+                                  new FramePose3D(ReferenceFrame.getWorldFrame(), message.getLocation().getPoint(), message.getOrientation().getQuaternion()));
       }
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setFromPacket(log.getRequestPacket());

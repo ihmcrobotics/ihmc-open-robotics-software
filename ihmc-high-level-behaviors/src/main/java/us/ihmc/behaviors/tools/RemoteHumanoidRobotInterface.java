@@ -1,27 +1,28 @@
 package us.ihmc.behaviors.tools;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.FootLoadBearingMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
-import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
-import ihmc_common_msgs.msg.dds.StampedPosePacket;
+import controller_msgs.ArmTrajectoryMessage;
+import controller_msgs.CapturabilityBasedStatus;
+import controller_msgs.ChestTrajectoryMessage;
+import controller_msgs.FootLoadBearingMessage;
+import controller_msgs.FootTrajectoryMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepStatusMessage;
+import controller_msgs.GoHomeMessage;
+import controller_msgs.HeadTrajectoryMessage;
+import controller_msgs.HighLevelStateChangeStatusMessage;
+import controller_msgs.PauseWalkingMessage;
+import controller_msgs.PelvisOrientationTrajectoryMessage;
+import controller_msgs.PelvisTrajectoryMessage;
+import controller_msgs.WalkingStatusMessage;
+import ihmc_common_msgs.SO3TrajectoryMessage;
+import ihmc_common_msgs.SO3TrajectoryPointMessage;
+import ihmc_common_msgs.StampedPosePacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerPublisherMap;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
@@ -47,9 +48,8 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,8 +87,8 @@ public class RemoteHumanoidRobotInterface
       controllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotName);
       publisherMap = new ROS2PublisherMap(ros2Node);
       
-      ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatus);
-      ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, robotName), footstepStatusMessage::set);
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, robotName), reader -> acceptWalkingStatus(reader.read()));
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, robotName), reader -> footstepStatusMessage.set(reader.read()));
 
       HighLevelStateChangeStatusMessage initialState = new HighLevelStateChangeStatusMessage();
       initialState.setInitialHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
@@ -133,7 +133,7 @@ public class RemoteHumanoidRobotInterface
 
    public void createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
    {
-      ros2Node.createSubscription2(topicName.withOutput().withType(FootstepStatusMessage.class), consumer);
+      ros2Node.createSubscription(topicName.appendedWith("output").withType(FootstepStatusMessage.class), reader -> consumer.accept(reader.read()));
    }
 
    public FootstepStatusMessage getLatestFootstepStatusMessage()
@@ -163,21 +163,18 @@ public class RemoteHumanoidRobotInterface
    public void requestFootTrajectory(RobotSide robotSide, double trajectoryTime, Point3D position, Quaternion orientation)
    {
       FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryTime, position, orientation);
-      footTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       requestFootTrajectory(footTrajectoryMessage);
    }
 
    public void requestFootLoadBearing(RobotSide robotSide, LoadBearingRequest loadBearingRequest)
    {
       FootLoadBearingMessage message = HumanoidMessageTools.createFootLoadBearingMessage(robotSide, loadBearingRequest);
-      message.setDestination(PacketDestination.CONTROLLER.ordinal());
       requestFootLoadBearing(message);
    }
 
    public void requestArmTrajectory(RobotSide robotSide, double trajectoryTime, double[] jointAngles)
    {
       ArmTrajectoryMessage armTrajectoryMessage = createArmTrajectoryMessage(robotSide, trajectoryTime, jointAngles);
-      armTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       requestArmTrajectory(armTrajectoryMessage);
    }
 
@@ -191,14 +188,12 @@ public class RemoteHumanoidRobotInterface
    public void requestChestGoHome(double trajectoryTime)
    {
       GoHomeMessage chestGoHomeMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.CHEST, trajectoryTime);
-      chestGoHomeMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       requestGoHome(chestGoHomeMessage);
    }
 
    public void requestPelvisGoHome(double trajectoryTime)
    {
       GoHomeMessage pelvisGoHomeMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.PELVIS, trajectoryTime);
-      pelvisGoHomeMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       requestGoHome(pelvisGoHomeMessage);
    }
 
@@ -209,7 +204,6 @@ public class RemoteHumanoidRobotInterface
                                                                                                          chestOrientation,
                                                                                                          dataFrame,
                                                                                                          trajectoryFrame);
-      chestOrientationMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       requestChestOrientationTrajectory(chestOrientationMessage);
    }
 
@@ -263,7 +257,6 @@ public class RemoteHumanoidRobotInterface
       so3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrameId);
       headOrientationMessage.getSo3Trajectory().set(so3TrajectoryMessage);
       headOrientationMessage.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(dataFrameId);
-      headOrientationMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       requestHeadOrientationTrajectory(headOrientationMessage);
    }
 
@@ -272,14 +265,12 @@ public class RemoteHumanoidRobotInterface
 
       PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(trajectoryTime,
                                                                                                                                             pelvisOrientation);
-      pelvisOrientationTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       requestPelvisOrientationTrajectory(pelvisOrientationTrajectoryMessage);
    }
 
    public void requestPelvisTrajectory(double trajectoryTime, FramePoint3DReadOnly pelvisPosition, FrameQuaternionReadOnly pelvisOrientation)
    {
       PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, pelvisPosition, pelvisOrientation);
-      pelvisTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       requestPelvisTrajectory(pelvisTrajectoryMessage);
    }
 
@@ -326,7 +317,7 @@ public class RemoteHumanoidRobotInterface
    public void publishPose(Pose3D pose, double confidenceFactor, long timestamp)
    {
       StampedPosePacket stampedPosePacket = new StampedPosePacket();
-      stampedPosePacket.pose_.set(pose);
+      stampedPosePacket.getPose().set(pose);
       stampedPosePacket.setTimestamp(timestamp);
       stampedPosePacket.setConfidenceFactor(confidenceFactor);
 

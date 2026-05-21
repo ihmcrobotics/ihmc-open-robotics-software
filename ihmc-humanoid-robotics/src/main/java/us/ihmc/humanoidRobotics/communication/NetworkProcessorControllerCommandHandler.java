@@ -7,6 +7,6 @@ package us.ihmc.humanoidRobotics.communication;
 public interface NetworkProcessorControllerCommandHandler // extends PacketConsumer<Packet>
 {
    // TODO: Refactor to use ROS2 messages instead of Packet
-   // public void sendObjectToFieldComputer(Packet<?> object);
-   // public <T extends Packet<?>> void attachListener(Class<T> clazz, PacketConsumer<T> object);
+   // public void sendObjectToFieldComputer(ROS2Message<?> object);
+   // public <T extends ROS2Message<?>> void attachListener(Class<T> clazz, PacketConsumer<T> object);
 }

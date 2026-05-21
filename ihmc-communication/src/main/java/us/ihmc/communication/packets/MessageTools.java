@@ -38,11 +38,15 @@ import toolbox_msgs.ToolboxStateMessage;
 import toolbox_msgs.WalkingControllerPreviewOutputMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.euclid.QuaternionCalculus;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage;
 import us.ihmc.euclid.jros2.messages.EuclidPose3DMessage;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.polytope.FrameConvexPolytope3D;
@@ -68,7 +72,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
-import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 import us.ihmc.jros2.Guid;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -562,6 +565,61 @@ public class MessageTools
       {
          destination.add(source.getQuick(i));
       }
+   }
+
+   public static <T extends ROS2Message<T>> void copyData(T[] source, IDLObjectSequence<T> destination)
+   {
+      destination.clear();
+
+      if (source == null)
+         return;
+
+      for (T item : source)
+         destination.add().set(item);
+   }
+
+   public static <T extends ROS2Message<T>> void copyData(List<T> source, IDLObjectSequence<T> destination)
+   {
+      destination.clear();
+
+      if (source == null || source.isEmpty())
+         return;
+
+      for (T item : source)
+         destination.add().set(item);
+   }
+
+   public static void copyData(Pose3DReadOnly[] source, IDLObjectSequence<EuclidPose3DMessage> destination)
+   {
+      destination.clear();
+
+      if (source == null)
+         return;
+
+      for (Pose3DReadOnly pose : source)
+         destination.add().set(pose);
+   }
+
+   public static void copyData(Point3DReadOnly[] source, IDLObjectSequence<EuclidPoint3DMessage> destination)
+   {
+      destination.clear();
+
+      if (source == null)
+         return;
+
+      for (Point3DReadOnly point : source)
+         destination.add().set(point);
+   }
+
+   public static void copyData(Iterable<? extends Point3DReadOnly> source, IDLObjectSequence<EuclidPoint3DMessage> destination)
+   {
+      destination.clear();
+
+      if (source == null)
+         return;
+
+      for (Point3DReadOnly point : source)
+         destination.add().set(point);
    }
 
    /**
@@ -1501,5 +1559,16 @@ public class MessageTools
          variable.setValueFromLongBits(buffer.getLong());
       for (YoRegistry child : registry.getChildren())
          fromMessageInternal(buffer, child);
+   }
+
+   public static void copyData(IDLFloatSequence source, IDLFloatSequence destination)
+   {
+      destination.clear();
+
+      if (source == null)
+         return;
+
+      for (int i = 0; i < source.size(); i++)
+         destination.add(source.get(i));
    }
 }

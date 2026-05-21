@@ -1,12 +1,12 @@
 package us.ihmc.perception.detections.foundationPose;
 
-import ihmc_common_msgs.msg.dds.Box3DMessage;
+import ihmc_common_msgs.Box3DMessage;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import sensor_msgs.msg.dds.CameraInfo;
-import sensor_msgs.msg.dds.Image;
-import std_msgs.msg.dds.Byte;
-import std_msgs.msg.dds.Empty;
+import sensor_msgs.CameraInfo;
+import sensor_msgs.Image;
+import std_msgs.Byte;
+import std_msgs.Empty;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.tf2.ROS2MutableFrame;
@@ -23,13 +23,12 @@ import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.tools.RawImageTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Subscription;
-import us.ihmc.ros2.ROS2Topic;
-import vision_msgs.msg.dds.Detection3D;
-import vision_msgs.msg.dds.Detection3DArray;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
+import vision_msgs.Detection3D;
+import vision_msgs.Detection3DArray;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -73,14 +72,14 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       targetPoint = new Point3D();
       newTargetPoint = new TypedNotification<>();
 
-      ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName() + "Node");
+      ros2Node = new ROS2Node(getClass().getSimpleName() + "Node");
       imagePublisher = new RawImagePublisher(ros2Node, 0.5);
       resetRequestPublisher = ros2Node.createPublisher(objectToTrack.topics.reset());
       resultRelayPublisher = ros2Node.createPublisher(objectToTrack.topics.ihmcResult());
       statePublisher = ros2Node.createPublisher(objectToTrack.topics.ihmcState());
-      poseEstimationResultSubscription = ros2Node.createSubscription2(objectToTrack.topics.poseEstimationOutput(), this::updateLatestResult);
-      trackingResultSubscription = ros2Node.createSubscription2(objectToTrack.topics.trackingOutput(), this::updateLatestResult);
-      resetRequestSubscription = ros2Node.createSubscription2(objectToTrack.topics.reset(), message -> changeState(State.ESTIMATING_POSE));
+      poseEstimationResultSubscription = ros2Node.createSubscription(objectToTrack.topics.poseEstimationOutput(), reader -> this.updateLatestResult(reader.read()));
+      trackingResultSubscription = ros2Node.createSubscription(objectToTrack.topics.trackingOutput(), reader -> this.updateLatestResult(reader.read()));
+      resetRequestSubscription = ros2Node.createSubscription(objectToTrack.topics.reset(), reader -> changeState(State.ESTIMATING_POSE));
 
       parameters = new SyncedIsaacROSFoundationPoseParameters(ros2Node, crdtInfo, objectToTrack);
       parameters.getEnabled().setValue(false);
@@ -110,12 +109,14 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
    private void updateLatestResult(Detection3DArray results)
    {
       // Ensure the result message has a result
-      Detection3D result = results.getDetections().getFirst();
+      if (results.getDetections().size() == 0)
+         return;
+      Detection3D result = results.getDetections().get(0);
       if (result == null)
          return;
 
       // Get the pose in world
-      FramePose3D poseInWorld = new FramePose3D(sensorFrame, result.getBbox().getCenter());
+      FramePose3D poseInWorld = new FramePose3D(sensorFrame, result.getBbox().getCenter().getPose());
       poseInWorld.prependRotation(FOUNDATION_POSE_TO_IHMC_ROTATION);
       synchronized (sensorFrame) // synchronize over the sensor frame when changing frame to avoid data race
       {
@@ -123,7 +124,7 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       }
 
       // Update the latest result
-      latestResult = new IsaacROSFoundationPoseInstantDetection(objectToTrack, new Box3D(poseInWorld, result.getBbox().getSize()), Instant.now());
+      latestResult = new IsaacROSFoundationPoseInstantDetection(objectToTrack, new Box3D(poseInWorld, result.getBbox().getSize().getVector()), Instant.now());
 
       if (state != State.TRACKING)
          changeState(State.TRACKING);
@@ -316,14 +317,14 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
    public void close()
    {
       parameters.close();
-      poseEstimationResultSubscription.remove();
-      trackingResultSubscription.remove();
-      resetRequestSubscription.remove();
-      resetRequestPublisher.remove();
-      resultRelayPublisher.remove();
-      statePublisher.remove();
+      ros2Node.destroySubscription(poseEstimationResultSubscription);
+      ros2Node.destroySubscription(trackingResultSubscription);
+      ros2Node.destroySubscription(resetRequestSubscription);
+      ros2Node.destroyPublisher(resetRequestPublisher);
+      ros2Node.destroyPublisher(resultRelayPublisher);
+      ros2Node.destroyPublisher(statePublisher);
       imagePublisher.close();
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    public enum State

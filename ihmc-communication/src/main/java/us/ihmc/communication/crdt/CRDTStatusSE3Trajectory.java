@@ -5,8 +5,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-// IDLSequence.Object is replaced with direct usage from jros2
-// import us.ihmc.idl.IDLSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 
@@ -42,7 +41,7 @@ public class CRDTStatusSE3Trajectory extends CRDTStatusMutableField<RecyclingArr
       return getValueInternal().size();
    }
 
-   public void toMessage(us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<SE3TrajectoryPointMessage> trajectoryMessage)
+   public void toMessage(IDLObjectSequence<SE3TrajectoryPointMessage> trajectoryMessage)
    {
       trajectoryMessage.clear();
 
@@ -52,7 +51,7 @@ public class CRDTStatusSE3Trajectory extends CRDTStatusMutableField<RecyclingArr
       }
    }
 
-   public void fromMessage(us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence<SE3TrajectoryPointMessage> trajectoryMessage)
+   public void fromMessage(IDLObjectSequence<SE3TrajectoryPointMessage> trajectoryMessage)
    {
       if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
       {

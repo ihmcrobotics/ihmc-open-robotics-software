@@ -1,8 +1,8 @@
 package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.CapturabilityBasedStatus;
+import toolbox_msgs.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -15,8 +15,8 @@ import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.Kinem
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,12 +46,12 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
       ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), s ->
       {
          if (kinematicsPlanningToolboxController != null)
-            kinematicsPlanningToolboxController.updateRobotConfigurationData(s.takeNextData());
+            kinematicsPlanningToolboxController.updateRobotConfigurationData(s.read());
       });
       ros2Node.createSubscription(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName), s ->
       {
          if (kinematicsPlanningToolboxController != null)
-            kinematicsPlanningToolboxController.updateCapturabilityBasedStatus(s.takeNextData());
+            kinematicsPlanningToolboxController.updateCapturabilityBasedStatus(s.read());
       });
    }
 
@@ -99,7 +99,7 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
 
    public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
+      return ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.appendedWith(robotName).appendedWith("output");
    }
 
    @Override
@@ -110,6 +110,6 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
 
    public static ROS2Topic getInputTopic(String robotName)
    {
-      return ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
+      return ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.appendedWith(robotName).appendedWith("input");
    }
 }

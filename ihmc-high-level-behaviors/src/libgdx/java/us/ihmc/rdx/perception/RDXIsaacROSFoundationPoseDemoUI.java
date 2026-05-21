@@ -10,12 +10,11 @@ import us.ihmc.rdx.ui.graphics.ros2.foundationPose.RDXIsaacROSFoundationPoseVisu
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.jros2.ROS2Node;
 
 public class RDXIsaacROSFoundationPoseDemoUI
 {
-   private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
+   private final ROS2Node ros2Node = new ROS2Node(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
 
    public RDXIsaacROSFoundationPoseDemoUI()
@@ -61,7 +60,7 @@ public class RDXIsaacROSFoundationPoseDemoUI
             baseUI.dispose();
 
             peerClockOffsetEstimator.destroy();
-            ros2Node.destroy();
+            ros2Node.close();
          }
       });
    }

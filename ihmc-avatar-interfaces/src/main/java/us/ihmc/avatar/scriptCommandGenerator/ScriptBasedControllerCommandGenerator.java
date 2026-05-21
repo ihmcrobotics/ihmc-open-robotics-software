@@ -6,11 +6,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import controller_msgs.FootTrajectoryMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.HandTrajectoryMessage;
+import controller_msgs.PauseWalkingMessage;
+import controller_msgs.PelvisHeightTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

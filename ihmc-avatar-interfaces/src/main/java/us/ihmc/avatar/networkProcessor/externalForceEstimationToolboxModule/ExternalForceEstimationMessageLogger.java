@@ -1,27 +1,24 @@
 package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
 import com.google.common.base.CaseFormat;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
-import controller_msgs.msg.dds.RobotDesiredConfigurationData;
-import controller_msgs.msg.dds.RobotDesiredConfigurationDataPubSubType;
-import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
-import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessagePubSubType;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.RobotConfigurationData;
+import controller_msgs.RobotDesiredConfigurationData;
+import toolbox_msgs.ExternalForceEstimationConfigurationMessage;
+import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.jros2.AsyncROS2Node;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -43,17 +40,13 @@ public class ExternalForceEstimationMessageLogger
    static final String robotDesiredConfigurationDataName = RobotDesiredConfigurationData.class.getSimpleName();
    static final String externalForceEstimationConfigName = ExternalForceEstimationConfigurationMessage.class.getSimpleName();
 
-   private final RealtimeROS2Node ros2Node;
+   private final AsyncROS2Node ros2Node;
    private final AtomicBoolean firstMessage = new AtomicBoolean();
    private final AtomicBoolean stopRequested = new AtomicBoolean();
 
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
    private final AtomicReference<RobotDesiredConfigurationData> robotDesiredConfigurationData = new AtomicReference<>();
    private final AtomicReference<ExternalForceEstimationConfigurationMessage> externalForceEstimationConfigurationMessage = new AtomicReference<>();
-
-   private final JSONSerializer<RobotConfigurationData> robotConfigurationDataSerializer = new JSONSerializer<>(new RobotConfigurationDataPubSubType());
-   private final JSONSerializer<RobotDesiredConfigurationData> robotDesiredConfigurationDataSerializer = new JSONSerializer<>(new RobotDesiredConfigurationDataPubSubType());
-   private final JSONSerializer<ExternalForceEstimationConfigurationMessage> externalForceEstimationConfigurationSerializer = new JSONSerializer<>(new ExternalForceEstimationConfigurationMessagePubSubType());
 
    private final ScheduledThreadPoolExecutor executorService = new ScheduledThreadPoolExecutor(1);
 
@@ -66,25 +59,28 @@ public class ExternalForceEstimationMessageLogger
    public ExternalForceEstimationMessageLogger(String robotName)
    {
       this.robotName = robotName;
-      ros2Node = new ROS2NodeBuilder().buildRealtime("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ExternalForceEstimationMessageLogger"));
+      ros2Node = new AsyncROS2Node("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ExternalForceEstimationMessageLogger"));
 
       ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
-      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class),
-                                  s -> robotConfigurationData.set(s.takeNextData()));
-      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotDesiredConfigurationData.class),
-                                  s -> robotDesiredConfigurationData.set(s.takeNextData()));
+      ros2Node.createSubscription(controllerOutputTopic.withType(RobotConfigurationData.class),
+                                  reader -> robotConfigurationData.set(reader.read()));
+      ros2Node.createSubscription(controllerOutputTopic.withType(RobotDesiredConfigurationData.class),
+                                  reader -> robotDesiredConfigurationData.set(reader.read()));
 
       ROS2Topic<?> toolboxInputTopic = ExternalForceEstimationToolboxModule.getInputTopic(robotName);
-      ros2Node.createSubscription(toolboxInputTopic.withTypeName(ToolboxStateMessage.class),
-                                  s1 -> processToolboxStateMessage(s1.takeNextData()));
-      ros2Node.createSubscription(toolboxInputTopic.withTypeName(ExternalForceEstimationConfigurationMessage.class),
-                                  s -> externalForceEstimationConfigurationMessage.set(s.takeNextData()));
+      ros2Node.createSubscription(toolboxInputTopic.withType(ToolboxStateMessage.class),
+                                  reader -> processToolboxStateMessage(reader.read()));
+      ros2Node.createSubscription(toolboxInputTopic.withType(ExternalForceEstimationConfigurationMessage.class),
+                                  reader -> externalForceEstimationConfigurationMessage.set(reader.read()));
 
       ros2Node.spin();
    }
 
    private void processToolboxStateMessage(ToolboxStateMessage message)
    {
+      if (message == null)
+         return;
+
       boolean loggingRequested = message.getRequestLogging();
       boolean sleepRequested = message.getRequestedToolboxState() == ToolboxStateMessage.SLEEP;
 
@@ -154,9 +150,9 @@ public class ExternalForceEstimationMessageLogger
 
       try
       {
-         writeIfPresent(robotConfigurationData, robotConfigurationDataName, robotConfigurationDataSerializer, printStream);
-         writeIfPresent(robotDesiredConfigurationData, robotDesiredConfigurationDataName, robotDesiredConfigurationDataSerializer, printStream);
-         writeIfPresent(externalForceEstimationConfigurationMessage, externalForceEstimationConfigName, externalForceEstimationConfigurationSerializer, printStream);
+         writeIfPresent(robotConfigurationData, robotConfigurationDataName, printStream);
+         writeIfPresent(robotDesiredConfigurationData, robotDesiredConfigurationDataName, printStream);
+         writeIfPresent(externalForceEstimationConfigurationMessage, externalForceEstimationConfigName, printStream);
       }
       catch (IOException e)
       {
@@ -197,8 +193,7 @@ public class ExternalForceEstimationMessageLogger
       outputStream = null;
    }
 
-   private static <T extends Packet> void writeIfPresent(AtomicReference<T> messageReference, String messageName, JSONSerializer<T> serializer,
-                                                         PrintStream printStream)
+   private static <T extends ROS2Message<T>> void writeIfPresent(AtomicReference<T> messageReference, String messageName, PrintStream printStream)
          throws IOException
    {
       T message = messageReference.getAndSet(null);
@@ -206,8 +201,7 @@ public class ExternalForceEstimationMessageLogger
          return;
 
       printStream.println(",");
-      printStream.println("\"" + messageName + "\" : ");
-      printStream.write(serializer.serializeToBytes(message));
+      printStream.println("\"" + messageName + "\" : \"" + Base64.getEncoder().encodeToString(Ros2MessageCdrFileTools.serializeToBytes(message)) + "\"");
    }
 
    public static void main(String[] args)

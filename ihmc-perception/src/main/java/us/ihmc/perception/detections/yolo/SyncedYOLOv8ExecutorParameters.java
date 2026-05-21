@@ -1,8 +1,8 @@
 package us.ihmc.perception.detections.yolo;
 
-import perception_msgs.msg.dds.YOLOv8ExecutorParameters;
-import perception_msgs.msg.dds.YOLOv8ModelInfo;
-import perception_msgs.msg.dds.YOLOv8ModelParameters;
+import perception_msgs.YOLOv8ExecutorParameters;
+import perception_msgs.YOLOv8ModelInfo;
+import perception_msgs.YOLOv8ModelParameters;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
@@ -12,9 +12,9 @@ import us.ihmc.communication.crdt.CRDTStatusSet;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Subscription;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -31,6 +31,7 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
 
    private final YOLOv8ExecutorParameters message;
 
+   private final ROS2Node ros2Node;
    private final ROS2Publisher<YOLOv8ExecutorParameters> publisher;
    private final ROS2Subscription<YOLOv8ExecutorParameters> subscription;
    private final TypedNotification<YOLOv8ExecutorParameters> newMessageNotification;
@@ -42,13 +43,14 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
       super(crdtInfo);
       setModifierName(getClass().getSimpleName());
 
+      this.ros2Node = ros2Node;
       availableModels = new CRDTStatusSet<>(ROS2ActorDesignation.ROBOT, crdtInfo, LinkedHashSet::new);
       modelsToRun = new CRDTBidirectionalSet<>(this);
       modelParameters = new LinkedHashMap<>();
 
       message = new YOLOv8ExecutorParameters();
       newMessageNotification = new TypedNotification<>();
-      subscription = ros2Node.createSubscription2(PerceptionAPI.YOLO_PARAMETERS, newMessageNotification::set);
+      subscription = ros2Node.createSubscription(PerceptionAPI.YOLO_PARAMETERS, reader -> newMessageNotification.set(reader.read()));
       publisher = ros2Node.createPublisher(PerceptionAPI.YOLO_PARAMETERS);
 
       publishThrottler = new Throttler().setFrequency(5.0);
@@ -111,8 +113,8 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
 
    public void close()
    {
-      publisher.remove();
-      subscription.remove();
+      ros2Node.destroyPublisher(publisher);
+      ros2Node.destroySubscription(subscription);
    }
 
    private void toMessage(YOLOv8ExecutorParameters messageToPack)
@@ -152,7 +154,8 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
          availableModels.fromMessage(models ->
          {
             models.clear();
-            models.addAll(message.getAvailableYoloModels());
+            for (YOLOv8ModelInfo m : message.getAvailableYoloModels())
+               models.add(m);
          });
       }
 
@@ -161,7 +164,8 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
          modelsToRun.fromMessage(models ->
          {
             models.clear();
-            models.addAll(message.getModelsToRun().stream().map(StringBuilder::toString).toList());
+            for (int i = 0; i < message.getModelsToRun().size(); i++)
+               models.add(message.getModelsToRun().getAsString(i));
          });
       }
 

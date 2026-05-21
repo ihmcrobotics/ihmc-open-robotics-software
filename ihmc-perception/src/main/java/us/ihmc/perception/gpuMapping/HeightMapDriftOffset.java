@@ -1,6 +1,6 @@
 package us.ihmc.perception.gpuMapping;
 
-import controller_msgs.msg.dds.PlanOffsetStatus;
+import controller_msgs.PlanOffsetStatus;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 
@@ -45,7 +45,7 @@ public class HeightMapDriftOffset
       if (latestPlanOffsetMessage == null)
          return 0.0f;
 
-      Vector3D latestPlanOffset = latestPlanOffsetMessage.getOffsetVector();
+      Vector3D latestPlanOffset = latestPlanOffsetMessage.getOffsetVector().getVector();
 
       if (controllerFootstepQueueMonitor.isFootstepStarted() && latestPlanOffset != null)
       {

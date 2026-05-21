@@ -5,7 +5,6 @@ import toolbox_msgs.KinematicsToolboxCenterOfMassMessage;
 import toolbox_msgs.KinematicsToolboxOneDoFJointMessage;
 import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -53,7 +52,6 @@ public class KinematicsToolboxMessageFactory
       message.getLinearSelectionMatrix().setZSelected(true);
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
-      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
 
       return message;
    }
@@ -87,7 +85,6 @@ public class KinematicsToolboxMessageFactory
       message.getLinearSelectionMatrix().setZSelected(true);
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
-      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
 
       return message;
    }
@@ -121,7 +118,6 @@ public class KinematicsToolboxMessageFactory
       message.getLinearSelectionMatrix().setZSelected(true);
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
-      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
 
       return message;
    }
@@ -152,7 +148,6 @@ public class KinematicsToolboxMessageFactory
       message.getLinearSelectionMatrix().setZSelected(false);
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
-      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
 
       return message;
    }
@@ -184,7 +179,6 @@ public class KinematicsToolboxMessageFactory
       selectionMatrix3D.setAxisSelection(holdX, holdY, holdZ);
 
       message.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix3D));
-      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
 
       return message;
    }
@@ -231,7 +225,6 @@ public class KinematicsToolboxMessageFactory
       }
 
       MessageTools.packInitialJointAngles(message, jointHashCodes, initialJointAngles);
-      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
 
       return message;
    }

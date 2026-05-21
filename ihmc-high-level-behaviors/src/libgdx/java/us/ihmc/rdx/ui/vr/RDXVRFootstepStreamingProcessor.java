@@ -1,12 +1,13 @@
 package us.ihmc.rdx.ui.vr;
 
-import toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.FootstepStreamingToolboxOutputStatus;
-import toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage;
+import toolbox_msgs.FootstepStreamingToolboxInputMessage;
+import toolbox_msgs.FootstepStreamingToolboxOutputStatus;
+import toolbox_msgs.FootstepStreamingToolboxSideMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepStreamingModule.FootstepStreamingToolboxModule;
 import us.ihmc.behaviors.tools.walkingController.SwingFootTracker;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,7 +16,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Input;
 
 /**
  * Class responsible for streaming footstep placements based on VR tracker data.
@@ -119,8 +119,8 @@ public class RDXVRFootstepStreamingProcessor
                // Place and send footstep
                footstepPlacer.createNewFootstep(side);
                footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                              latestStatus.getDesiredFootPosition(),
-                                                              latestStatus.getDesiredFootOrientation()));
+                                                              latestStatus.getDesiredFootPosition().getPoint(),
+                                                              latestStatus.getDesiredFootOrientation().getQuaternion()));
                // We can't trigger stepping here. We have to notify the KST and stop streaming
                readyToStep.clear();
                readyToStep.set();
@@ -128,11 +128,11 @@ public class RDXVRFootstepStreamingProcessor
             else if (latestStatus.getAdjustmentFootstep() && !latestStatus.getLastAdjustment()) // Later values of updated estimate
             {
                if (footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                  latestStatus.getDesiredFootPosition(),
-                                                                  latestStatus.getDesiredFootOrientation())))
+                                                                  latestStatus.getDesiredFootPosition().getPoint(),
+                                                                  latestStatus.getDesiredFootOrientation().getQuaternion())))
                {
                   step(true);
-                  previousAdjustment.put(side, new RigidBodyTransform(latestStatus.getDesiredFootOrientation(), latestStatus.getDesiredFootPosition()));
+                  previousAdjustment.put(side, new RigidBodyTransform(latestStatus.getDesiredFootOrientation().getQuaternion(), latestStatus.getDesiredFootPosition().getPoint()));
                }
                else
                {

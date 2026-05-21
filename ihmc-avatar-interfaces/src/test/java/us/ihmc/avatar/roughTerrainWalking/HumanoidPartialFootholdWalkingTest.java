@@ -4,8 +4,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -80,7 +80,7 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       FootstepDataListMessage message = new FootstepDataListMessage();
       FootstepDataMessage step = message.getFootstepDataList().add();
       step.setRobotSide(FootstepDataMessage.ROBOT_SIDE_LEFT);
-      step.getLocation().set(blockDistanceFromOrigin + 0.15, stepWidth / 2, topHeight);
+      step.getLocation().getPoint().set(blockDistanceFromOrigin + 0.15, stepWidth / 2, topHeight);
 
       simulationTestHelper.publishToController(message);
       boolean success = simulationTestHelper.simulateNow(4.0);
@@ -105,7 +105,7 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       FootstepDataListMessage message = new FootstepDataListMessage();
       FootstepDataMessage step = message.getFootstepDataList().add();
       step.setRobotSide(FootstepDataMessage.ROBOT_SIDE_LEFT);
-      step.getLocation().set(blockDistanceFromOrigin + 0.15, stepWidth / 2, topHeight);
+      step.getLocation().getPoint().set(blockDistanceFromOrigin + 0.15, stepWidth / 2, topHeight);
 
       simulationTestHelper.publishToController(message);
       boolean success = simulationTestHelper.simulateNow(4.0);
@@ -127,7 +127,7 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       FootstepDataListMessage message = new FootstepDataListMessage();
       FootstepDataMessage step = message.getFootstepDataList().add();
       step.setRobotSide(FootstepDataMessage.ROBOT_SIDE_LEFT);
-      step.getLocation().set(blockDistanceFromOrigin + 0.05, width / 2, topHeight);
+      step.getLocation().getPoint().set(blockDistanceFromOrigin + 0.05, width / 2, topHeight);
 
       simulationTestHelper.publishToController(message);
       boolean success = simulationTestHelper.simulateNow(4.0);
@@ -150,11 +150,11 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       FootstepDataListMessage message = new FootstepDataListMessage();
       FootstepDataMessage step = message.getFootstepDataList().add();
       step.setRobotSide(FootstepDataMessage.ROBOT_SIDE_LEFT);
-      step.getLocation().set(stepDistance, width / 2, topHeight);
+      step.getLocation().getPoint().set(stepDistance, width / 2, topHeight);
 
       FootstepDataMessage step2 = message.getFootstepDataList().add();
       step2.setRobotSide(FootstepDataMessage.ROBOT_SIDE_RIGHT);
-      step2.getLocation().set(2 * stepDistance, -width / 2, 0.0);
+      step2.getLocation().getPoint().set(2 * stepDistance, -width / 2, 0.0);
 
       simulationTestHelper.publishToController(message);
       boolean success = simulationTestHelper.simulateNow(4.0);
@@ -176,19 +176,19 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       FootstepDataListMessage message = new FootstepDataListMessage();
       FootstepDataMessage step = message.getFootstepDataList().add();
       step.setRobotSide(FootstepDataMessage.ROBOT_SIDE_LEFT);
-      step.getLocation().set(blockDistanceFromOrigin + 0.045, width / 2, topHeight);
+      step.getLocation().getPoint().set(blockDistanceFromOrigin + 0.045, width / 2, topHeight);
 
       FootstepDataMessage step2 = message.getFootstepDataList().add();
       step2.setRobotSide(FootstepDataMessage.ROBOT_SIDE_RIGHT);
-      step2.getLocation().set(blockDistanceFromOrigin + 0.3, -width / 2, topHeight);
+      step2.getLocation().getPoint().set(blockDistanceFromOrigin + 0.3, -width / 2, topHeight);
 
       FootstepDataMessage step3 = message.getFootstepDataList().add();
       step3.setRobotSide(FootstepDataMessage.ROBOT_SIDE_LEFT);
-      step3.getLocation().set(blockDistanceFromOrigin + 0.55, width / 2, 0.0);
+      step3.getLocation().getPoint().set(blockDistanceFromOrigin + 0.55, width / 2, 0.0);
 
       FootstepDataMessage step4 = message.getFootstepDataList().add();
       step4.setRobotSide(FootstepDataMessage.ROBOT_SIDE_RIGHT);
-      step4.getLocation().set(blockDistanceFromOrigin + 0.55, -width / 2, 0.0);
+      step4.getLocation().getPoint().set(blockDistanceFromOrigin + 0.55, -width / 2, 0.0);
 
       simulationTestHelper.publishToController(message);
       boolean success = simulationTestHelper.simulateNow(4.0);
@@ -278,7 +278,7 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
 
          // first step with toes on
          FootstepDataMessage step = steps.getFootstepDataList().add();
-         step.getLocation().set(stepLength, 0.5 * stanceWidth, blockHeight);
+         step.getLocation().getPoint().set(stepLength, 0.5 * stanceWidth, blockHeight);
          step.setRobotSide(RobotSide.LEFT.toByte());
 
          double blockDepth = stepLength + 2.0 * (fractionOfFoothold - 0.5) * footLength;
@@ -287,7 +287,7 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
 
          // second step with heel on
          step = steps.getFootstepDataList().add();
-         step.getLocation().set(2.0 * stepLength, -0.5 * stanceWidth, blockHeight);
+         step.getLocation().getPoint().set(2.0 * stepLength, -0.5 * stanceWidth, blockHeight);
          step.setRobotSide(RobotSide.RIGHT.toByte());
 
          // third step with outside of foot on
@@ -296,7 +296,7 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
          generator.addCubeReferencedAtBottomMiddle(1.5 * footLength, blockWidth, blockHeight);
 
          step = steps.getFootstepDataList().add();
-         step.getLocation().set(3.0 * stepLength, 0.5 * stanceWidth, blockHeight);
+         step.getLocation().getPoint().set(3.0 * stepLength, 0.5 * stanceWidth, blockHeight);
          step.setRobotSide(RobotSide.LEFT.toByte());
 
          // fourth set with inside of foot on
@@ -304,7 +304,7 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
          generator.addCubeReferencedAtBottomMiddle(1.5 * footLength, blockWidth, blockHeight);
 
          step = steps.getFootstepDataList().add();
-         step.getLocation().set(4.0 * stepLength, -0.5 * stanceWidth, blockHeight);
+         step.getLocation().getPoint().set(4.0 * stepLength, -0.5 * stanceWidth, blockHeight);
          step.setRobotSide(RobotSide.RIGHT.toByte());
 
          generator.translate(0.0, -0.25 * stanceWidth, 0.0);
@@ -313,11 +313,11 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
          generator.addCubeReferencedAtBottomMiddle(stepLength / Math.sin(Math.PI / 4.0), stepLength / Math.sin(Math.PI / 4.0), blockHeight);
 
          step = steps.getFootstepDataList().add();
-         step.getLocation().set(5.0 * stepLength, 0.5 * stanceWidth, blockHeight);
+         step.getLocation().getPoint().set(5.0 * stepLength, 0.5 * stanceWidth, blockHeight);
          step.setRobotSide(RobotSide.LEFT.toByte());
 
          step = steps.getFootstepDataList().add();
-         step.getLocation().set(6.0 * stepLength, -0.5 * stanceWidth, blockHeight);
+         step.getLocation().getPoint().set(6.0 * stepLength, -0.5 * stanceWidth, blockHeight);
          step.setRobotSide(RobotSide.RIGHT.toByte());
 
          generator.identity();
@@ -325,7 +325,7 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
          generator.addCubeReferencedAtBottomMiddle(0.5 * footLength, 0.3, blockHeight);
 
          step = steps.getFootstepDataList().add();
-         step.getLocation().set(7.0 * stepLength, 0.5 * stanceWidth, blockHeight);
+         step.getLocation().getPoint().set(7.0 * stepLength, 0.5 * stanceWidth, blockHeight);
          step.setRobotSide(RobotSide.LEFT.toByte());
 
          generator.translate(1.05 * stepLength, -1.5 * stanceWidth, 0.0);
@@ -334,15 +334,15 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
          generator.addCubeReferencedAtBottomMiddle(sideWidth, sideWidth, blockHeight);
 
          step = steps.getFootstepDataList().add();
-         step.getLocation().set(8.0 * stepLength, -0.5 * stanceWidth, blockHeight);
+         step.getLocation().getPoint().set(8.0 * stepLength, -0.5 * stanceWidth, blockHeight);
          step.setRobotSide(RobotSide.RIGHT.toByte());
 
          step = steps.getFootstepDataList().add();
-         step.getLocation().set(9.0 * stepLength, 0.5 * stanceWidth, blockHeight);
+         step.getLocation().getPoint().set(9.0 * stepLength, 0.5 * stanceWidth, blockHeight);
          step.setRobotSide(RobotSide.LEFT.toByte());
 
          step = steps.getFootstepDataList().add();
-         step.getLocation().set(8.0 * stepLength, -0.5 * stanceWidth, blockHeight);
+         step.getLocation().getPoint().set(8.0 * stepLength, -0.5 * stanceWidth, blockHeight);
          step.setRobotSide(RobotSide.RIGHT.toByte());
 
          addPlanarRegionsToTerrain(YoAppearance.Grey());

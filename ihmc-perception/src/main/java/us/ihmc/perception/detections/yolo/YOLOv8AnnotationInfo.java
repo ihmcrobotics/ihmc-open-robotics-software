@@ -9,13 +9,13 @@ import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
-import perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage;
-import std_msgs.msg.dds.MultiArrayDimension;
+import perception_msgs.YOLOv8AnnotationInfoMessage;
+import std_msgs.MultiArrayDimension;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.perception.RawImage;
 
 /**
@@ -178,9 +178,10 @@ public record YOLOv8AnnotationInfo(String objectClass, float confidence, Boundin
             MultiArrayDimension dimension = message.getMaskPolygons().getLayout().getDim().add();
             dimension.setLabel("polygon " + i);
             dimension.setSize(polygon.length);
-            dimension.setStride((long) Integer.BYTES * polygon.length);
+            dimension.setStride(Integer.BYTES * polygon.length);
 
-            message.getMaskPolygons().getData().add(polygon);
+            for (int v : polygon)
+               message.getMaskPolygons().getData().add((short) v);
          }
       }
       message.getMaskPolygons().getLayout().setDataOffset(0);
@@ -197,12 +198,13 @@ public record YOLOv8AnnotationInfo(String objectClass, float confidence, Boundin
       double maxY = message.getBoundingBox().getCenter().getPosition().getY() + halfSizeY;
       BoundingBox2D boundingBox = new BoundingBox2D(minX, minY, maxX, maxY);
 
-      IDLSequence.Object<MultiArrayDimension> dimensions = message.getMaskPolygons().getLayout().getDim();
+      IDLObjectSequence<MultiArrayDimension> dimensions = message.getMaskPolygons().getLayout().getDim();
       int[][] maskPolygons = new int[dimensions.size()][];
       for (int i = 0, offset = (int) message.getMaskPolygons().getLayout().getDataOffset() / Integer.BYTES; i < dimensions.size(); ++i)
       {
          maskPolygons[i] = new int[(int) dimensions.get(i).getSize()];
-         message.getMaskPolygons().getData().toArray(maskPolygons[i], offset, maskPolygons[i].length);
+         for (int j = 0; j < maskPolygons[i].length; j++)
+            maskPolygons[i][j] = message.getMaskPolygons().getData().get(offset + j);
          offset += maskPolygons[i].length;
       }
 

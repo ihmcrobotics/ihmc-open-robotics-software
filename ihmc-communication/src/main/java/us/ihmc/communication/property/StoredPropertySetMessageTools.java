@@ -3,6 +3,7 @@ package us.ihmc.communication.property;
 import ihmc_common_msgs.PrimitiveDataVectorMessage;
 // Removed old IDL import - jros2 IDLBoolSequence returns boolean directly
 import us.ihmc.tools.property.BooleanStoredPropertyKey;
+import us.ihmc.fastddsjava.cdr.idl.IDLBoolSequence;
 import us.ihmc.tools.property.DoubleStoredPropertyKey;
 import us.ihmc.tools.property.IntegerStoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertyKey;
@@ -64,8 +65,8 @@ public class StoredPropertySetMessageTools
 
    public static void toMessage(PrimitiveDataVectorMessage message, StoredPropertySetReadOnly storedPropertySet)
    {
-      message.getDoubleValues().clear();
-      message.getIntegerValues().clear();
+      message.getDoubleValues().getBuffer().reset();
+      message.getIntegerValues().getBuffer().reset();
       message.getBooleanValues().clear();
 
       for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())

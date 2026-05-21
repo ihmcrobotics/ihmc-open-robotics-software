@@ -1,6 +1,6 @@
 package us.ihmc.sensors.zed;
 
-import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
+import perception_msgs.ZEDSVOCurrentFileMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 

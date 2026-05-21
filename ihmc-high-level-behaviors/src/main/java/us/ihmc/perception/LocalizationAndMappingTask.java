@@ -1,10 +1,10 @@
 package us.ihmc.perception;
 
-import controller_msgs.msg.dds.HighLevelStateMessage;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
-import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.HighLevelStateMessage;
+import controller_msgs.WalkingControllerFailureStatusMessage;
+import perception_msgs.FramePlanarRegionsListMessage;
+import perception_msgs.ImageMessage;
+import perception_msgs.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
@@ -24,9 +24,9 @@ import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.perception.rapidRegions.PolygonizerParameters;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.util.concurrent.ScheduledExecutorService;

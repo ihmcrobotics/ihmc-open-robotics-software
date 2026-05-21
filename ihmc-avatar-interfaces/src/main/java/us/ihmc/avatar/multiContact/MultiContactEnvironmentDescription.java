@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import ihmc_common_msgs.msg.dds.*;
+import ihmc_common_msgs.*;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
@@ -14,7 +15,7 @@ import us.ihmc.euclid.referenceFrame.polytope.FrameConvexPolytope3D;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Capsule3DReadOnly;
-import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.jros2.ROS2Message;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,12 +26,6 @@ public class MultiContactEnvironmentDescription
    public static final String ENVIRONMENT_JSON = "environment";
 
    private static final ObjectMapper objectMapper = new ObjectMapper(new JsonFactory());
-   private static final JSONSerializer<Box3DMessage> boxSerializer = new JSONSerializer<>(new Box3DMessagePubSubType());
-   private static final JSONSerializer<Capsule3DMessage> capsuleSerializer = new JSONSerializer<>(new Capsule3DMessagePubSubType());
-   private static final JSONSerializer<ConvexPolytope3DMessage> polytopeSerializer = new JSONSerializer<>(new ConvexPolytope3DMessagePubSubType());
-   private static final JSONSerializer<Cylinder3DMessage> cylinderSerializer = new JSONSerializer<>(new Cylinder3DMessagePubSubType());
-   private static final JSONSerializer<Ellipsoid3DMessage> ellipsoidSerializer = new JSONSerializer<>(new Ellipsoid3DMessagePubSubType());
-   private static final JSONSerializer<Ramp3DMessage> rampSerializer = new JSONSerializer<>(new Ramp3DMessagePubSubType());
 
    public static JsonNode toJSON(FrameShape3DReadOnly environmentShape)
    {
@@ -38,15 +33,16 @@ public class MultiContactEnvironmentDescription
       {
          if (environmentShape instanceof Box3DReadOnly)
          {
-            return messageToJSON(boxSerializer, MessageTools.createBox3DMessage((Box3DReadOnly) environmentShape));
+            return messageToJSON(Box3DMessage.class.getSimpleName(), MessageTools.createBox3DMessage((Box3DReadOnly) environmentShape));
          }
-         else if (environmentShape instanceof Capsule3DMessage)
+         else if (environmentShape instanceof Capsule3DReadOnly)
          {
-            return messageToJSON(capsuleSerializer, MessageTools.createCapsule3DMessage((Capsule3DReadOnly) environmentShape));
+            return messageToJSON(Capsule3DMessage.class.getSimpleName(), MessageTools.createCapsule3DMessage((Capsule3DReadOnly) environmentShape));
          }
          else if (environmentShape instanceof ConvexPolytope3DReadOnly)
          {
-            return messageToJSON(polytopeSerializer, MessageTools.createConvexPolytope3DMessage((ConvexPolytope3DReadOnly) environmentShape));
+            return messageToJSON(ConvexPolytope3DMessage.class.getSimpleName(),
+                                 MessageTools.createConvexPolytope3DMessage((ConvexPolytope3DReadOnly) environmentShape));
          }
          else
          {
@@ -69,37 +65,49 @@ public class MultiContactEnvironmentDescription
          if (messageClassName.equals(Box3DMessage.class.getSimpleName()))
          {
             FrameBox3D box = new FrameBox3D(ReferenceFrame.getWorldFrame());
-            MessageTools.unpackBox3DMessage(boxSerializer.deserialize(environmentShape.toString()), box);
+            Box3DMessage message = new Box3DMessage();
+            Ros2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
+            MessageTools.unpackBox3DMessage(message, box);
             return box;
          }
          else if (messageClassName.equals(Capsule3DMessage.class.getSimpleName()))
          {
             FrameCapsule3D capsule = new FrameCapsule3D(ReferenceFrame.getWorldFrame());
-            MessageTools.unpackCapsule3DMessage(capsuleSerializer.deserialize(environmentShape.toString()), capsule);
+            Capsule3DMessage message = new Capsule3DMessage();
+            Ros2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
+            MessageTools.unpackCapsule3DMessage(message, capsule);
             return capsule;
          }
          else if (messageClassName.equals(ConvexPolytope3DMessage.class.getSimpleName()))
          {
             FrameConvexPolytope3D polytope = new FrameConvexPolytope3D(ReferenceFrame.getWorldFrame());
-            MessageTools.unpackConvexPolytope3DMessage(polytopeSerializer.deserialize(environmentShape.toString()), polytope);
+            ConvexPolytope3DMessage message = new ConvexPolytope3DMessage();
+            Ros2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
+            MessageTools.unpackConvexPolytope3DMessage(message, polytope);
             return polytope;
          }
          else if (messageClassName.equals(Cylinder3DMessage.class.getSimpleName()))
          {
             FrameCylinder3D cylinder = new FrameCylinder3D(ReferenceFrame.getWorldFrame());
-            MessageTools.unpackCylinder3DMessage(cylinderSerializer.deserialize(environmentShape.toString()), cylinder);
+            Cylinder3DMessage message = new Cylinder3DMessage();
+            Ros2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
+            MessageTools.unpackCylinder3DMessage(message, cylinder);
             return cylinder;
          }
          else if (messageClassName.equals(Ellipsoid3DMessage.class.getSimpleName()))
          {
             FrameEllipsoid3D ellipsoid = new FrameEllipsoid3D(ReferenceFrame.getWorldFrame());
-            MessageTools.unpackEllipsoid3DMessage(ellipsoidSerializer.deserialize(environmentShape.toString()), ellipsoid);
+            Ellipsoid3DMessage message = new Ellipsoid3DMessage();
+            Ros2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
+            MessageTools.unpackEllipsoid3DMessage(message, ellipsoid);
             return ellipsoid;
          }
          else if (messageClassName.equals(Ramp3DMessage.class.getSimpleName()))
          {
             FrameRamp3D ramp = new FrameRamp3D(ReferenceFrame.getWorldFrame());
-            MessageTools.unpackRamp3DMessage(rampSerializer.deserialize(environmentShape.toString()), ramp);
+            Ramp3DMessage message = new Ramp3DMessage();
+            Ros2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
+            MessageTools.unpackRamp3DMessage(message, ramp);
             return ramp;
          }
          else
@@ -113,20 +121,19 @@ public class MultiContactEnvironmentDescription
       }
    }
 
-   private static <T> JsonNode messageToJSON(JSONSerializer<T> serializer, T message) throws IOException
+   private static <T extends ROS2Message<T>> JsonNode messageToJSON(String messageTypeName, T message) throws IOException
    {
-      return objectMapper.readTree(serializer.serializeToString(message));
-   }
-
-   private static FrameShape3DReadOnly stringToShape(String serializedMessage) throws IOException
-   {
-      JsonNode jsonNode = objectMapper.readTree(serializedMessage);
-      return fromJSON(jsonNode);
+      ObjectNode node = objectMapper.createObjectNode();
+      node.set(messageTypeName, Ros2MessageCdrFileTools.messageToJsonNode(objectMapper, message));
+      return node;
    }
 
    private static String getMessageClassName(ObjectNode jsonNode)
    {
       String field = jsonNode.fieldNames().next();
+      if (!field.contains("::"))
+         return field;
+
       String[] messagePath = field.split("::");
       String messageNameWithUnderbar = messagePath[messagePath.length - 1];
       return messageNameWithUnderbar.substring(0, messageNameWithUnderbar.length() - 1);

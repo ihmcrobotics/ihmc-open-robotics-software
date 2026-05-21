@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
@@ -119,8 +119,8 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
          feasibleSolutions.remove(indexToStep);
          SixDoFMotionControlAnchorDescription leftStep = snapshotToStep.getSixDoFAnchors().get(0);
          assert (leftStep.getRigidBodyName().equals(fullRobotModel.getFoot(RobotSide.LEFT).getName()));
-         Point3D desiredPose = leftStep.getInputMessage().getDesiredPositionInWorld();
-         Quaternion orientation = leftStep.getInputMessage().getDesiredOrientationInWorld();
+         Point3D desiredPose = new Point3D(leftStep.getInputMessage().getDesiredPositionInWorld().getPoint());
+         Quaternion orientation = new Quaternion(leftStep.getInputMessage().getDesiredOrientationInWorld().getQuaternion());
 
          RigidBodyTransform rightSole = fullRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame();
 

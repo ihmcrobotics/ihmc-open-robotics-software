@@ -1,8 +1,8 @@
 package us.ihmc.avatar.drcRobot;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.HandJointAnglePacket;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.CapturabilityBasedStatus;
+import controller_msgs.HandJointAnglePacket;
+import controller_msgs.RobotConfigurationData;
 import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.StateEstimatorAPI;
@@ -10,8 +10,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.communication.ROS2Input;
+import us.ihmc.jros2.ROS2Node;
 
 import java.util.function.Consumer;
 

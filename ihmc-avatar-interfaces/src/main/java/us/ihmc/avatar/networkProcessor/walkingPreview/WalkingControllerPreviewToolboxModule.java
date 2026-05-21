@@ -1,7 +1,7 @@
 package us.ihmc.avatar.networkProcessor.walkingPreview;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
-import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
+import controller_msgs.RobotConfigurationData;
+import toolbox_msgs.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
@@ -10,9 +10,9 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.walkingPreviewToolboxAPI.WalkingControllerPreviewInputCommand;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
       this(robotModel, startYoVariableServer, null);
    }
 
-   public WalkingControllerPreviewToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node realtimeROS2Node)
+   public WalkingControllerPreviewToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, AsyncROS2Node realtimeROS2Node)
          throws IOException
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
@@ -45,10 +45,10 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    {
       ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 
-      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class), s ->
+      ros2Node.createSubscription(controllerOutputTopic.withType(RobotConfigurationData.class), s ->
       {
          if (controller != null)
-            controller.updateRobotConfigurationData(s.takeNextData());
+            controller.updateRobotConfigurationData(s.read());
       });
    }
 
@@ -88,7 +88,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withOutput();
+      return ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.appendedWith(robotName).appendedWith("output");
    }
 
    @Override
@@ -99,7 +99,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withInput();
+      return ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.appendedWith(robotName).appendedWith("input");
    }
 
    public YoRegistry getRegistry()

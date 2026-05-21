@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage;
+import behavior_msgs.BehaviorTreeNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -189,7 +189,7 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
 
       message.setName(name.toMessage());
       // message.setNotes(notes.toMessage());
-      message.setNumberOfChildren(children.size());
+      message.setNumberOfChildren((short) children.size());
    }
 
    public void fromMessage(BehaviorTreeNodeDefinitionMessage message)

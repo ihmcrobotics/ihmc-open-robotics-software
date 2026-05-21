@@ -3,13 +3,13 @@ package us.ihmc.rdx.ui.vr;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.HandLoadBearingMessage;
+import controller_msgs.HandLoadBearingMessage;
 import imgui.type.ImBoolean;
-import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.HumanoidKinematicsToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsStreamingToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.KinematicsToolboxCenterOfMassMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -137,7 +137,7 @@ public class RDXVRMultiContact
 
       KinematicsToolboxCenterOfMassMessage comMessage = new KinematicsToolboxCenterOfMassMessage();
       comMessage.getDesiredPositionInWorld().set(desiredCoMPositionFiltered);
-      comMessage.getDesiredLinearVelocityInWorld().setToZero();
+      comMessage.getDesiredLinearVelocityInWorld().getVector().setToZero();
 
       comMessage.getSelectionMatrix().setSelectionFrameId(toFrameId(ReferenceFrame.getWorldFrame()));
       comMessage.getSelectionMatrix().setXSelected(true);

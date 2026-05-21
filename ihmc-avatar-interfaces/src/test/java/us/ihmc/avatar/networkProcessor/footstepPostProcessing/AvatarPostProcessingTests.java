@@ -1,15 +1,15 @@
 package us.ihmc.avatar.networkProcessor.footstepPostProcessing;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.ArmTrajectoryMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import controller_msgs.OneDoFJointTrajectoryMessage;
+import ihmc_common_msgs.TrajectoryPoint1DMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.TerrainMapMessage;
-import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
+import perception_msgs.TerrainMapMessage;
+import toolbox_msgs.FootstepPlanningRequestPacket;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -46,6 +46,8 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
+import us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -321,7 +323,9 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
                                                                                                                     swingDuration,
                                                                                                                     transferDuration);
-      List<FootstepDataMessage> footsteps = new ArrayList<>(footstepDataListMessage.getFootstepDataList());
+      List<FootstepDataMessage> footsteps = new ArrayList<>();
+      for (int i = 0; i < footstepDataListMessage.getFootstepDataList().size(); i++)
+         footsteps.add(footstepDataListMessage.getFootstepDataList().get(i));
 
       int stepCounter = 0;
       for (RobotSide robotSide1 : RobotSide.values)
@@ -335,7 +339,10 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
                   return;
                }
 
-               List<Point3D> contactPoints3D = footsteps.remove(stepCounter).getPredictedContactPoints2d();
+               IDLObjectSequence<EuclidPoint3DMessage> contactPointsSeq = footsteps.remove(stepCounter).getPredictedContactPoints2d();
+               List<Point3D> contactPoints3D = new ArrayList<>();
+               for (int j = 0; j < contactPointsSeq.size(); j++)
+                  contactPoints3D.add(new Point3D(contactPointsSeq.get(j).getPoint()));
                if (contactPoints3D.size() < 1)
                {
                   contactPointController.setNewContacts(defaultSolePolygon.getVertexBufferView(), robotSide1, true);
@@ -420,7 +427,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       YoFramePoint3D goalPosition = new YoFramePoint3D("goalPosition", ReferenceFrame.getWorldFrame(), registry);
 
       Pose3D goalMidFootPose = new Pose3D();
-      goalMidFootPose.interpolate(requestPacket.getGoalLeftFootPose(), requestPacket.getGoalRightFootPose(), 0.5);
+      goalMidFootPose.interpolate(requestPacket.getGoalLeftFootPose().getPose(), requestPacket.getGoalRightFootPose().getPose(), 0.5);
       goalPosition.set(goalMidFootPose.getPosition());
       simulationTestHelper.getRootRegistry().addChild(registry);
       simulationTestHelper.addYoGraphicDefinition(YoGraphicDefinitionFactory.newYoGraphicPoint3D("goalGraphic", goalPosition, 0.025, ColorDefinitions.Green()));
@@ -439,7 +446,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       }
 
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 0.4, 0.8);
-      for (FootstepDataMessage footstepDataMessage : footstepDataListMessage.footstep_data_list_)
+      for (FootstepDataMessage footstepDataMessage : footstepDataListMessage.getFootstepDataList())
       {
          footstepDataMessage.setSwingDuration(0.8);
          footstepDataMessage.setTransferDuration(0.4);

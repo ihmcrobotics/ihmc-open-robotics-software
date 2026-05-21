@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.FootstepStatusMessage;
+import controller_msgs.HighLevelStateChangeStatusMessage;
+import controller_msgs.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredTurningVelocityProvider;
@@ -17,8 +17,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -79,7 +78,7 @@ public class StepGeneratorCommandInputManager implements Updatable
       // by default, command input manager is not enabled, set enabled only if #update is called
       commandInputManager.setEnabled(false);
 
-      ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase() + "Node");
+      ros2Node = new ROS2Node(getClass().getSimpleName().toLowerCase() + "Node");
       heartbeatMonitor = new ROS2HeartbeatMonitor(ros2Node, CSGROS2CommunicationHelper.CSG_HEARTBEAT_TOPIC);
    }
 
@@ -313,7 +312,7 @@ public class StepGeneratorCommandInputManager implements Updatable
 
    public void destroy()
    {
-      ros2Node.destroy();
+      ros2Node.close();
       heartbeatMonitor.destroy();
    }
 }

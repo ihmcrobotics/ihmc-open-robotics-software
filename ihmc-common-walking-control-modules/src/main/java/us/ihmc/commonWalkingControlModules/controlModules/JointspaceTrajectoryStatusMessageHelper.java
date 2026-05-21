@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
+import controller_msgs.JointspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -29,8 +29,8 @@ public class JointspaceTrajectoryStatusMessageHelper extends TrajectoryStatusMes
 
       for (int jointIndex = 0; jointIndex < statusMessage.getDesiredJointPositions().size(); jointIndex++)
       {
-         statusMessage.getActualJointPositions().set(jointIndex, Double.NaN);
-         statusMessage.getDesiredJointPositions().set(jointIndex, Double.NaN);
+         statusMessage.getActualJointPositions().getBuffer().put(jointIndex, Double.NaN);
+         statusMessage.getDesiredJointPositions().getBuffer().put(jointIndex, Double.NaN);
       }
    }
 
@@ -69,8 +69,8 @@ public class JointspaceTrajectoryStatusMessageHelper extends TrajectoryStatusMes
          OneDoFJointFeedbackControlCommand jointCommand = feedbackControlCommand.getJointCommand(jointIndex);
          double qCurrent = jointCommand.getJoint().getQ();
          double qDesired = jointCommand.getReferencePosition();
-         statusMessage.getActualJointPositions().set(jointIndex, qCurrent);
-         statusMessage.getDesiredJointPositions().set(jointIndex, qDesired);
+         statusMessage.getActualJointPositions().getBuffer().put(jointIndex, qCurrent);
+         statusMessage.getDesiredJointPositions().getBuffer().put(jointIndex, qDesired);
       }
    }
 }

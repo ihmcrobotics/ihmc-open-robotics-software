@@ -4,11 +4,10 @@ import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sharedControl.ProMPAssistant;
 import us.ihmc.behaviors.sharedControl.TeleoperationAssistant;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -93,8 +92,8 @@ public class RDXVRSharedControl implements TeleoperationAssistant
 
    public void updatePreviewModel(KinematicsToolboxOutputStatus status)
    {
-      ghostRobotModel.getRootJoint().setJointPosition(status.getDesiredRootPosition());
-      ghostRobotModel.getRootJoint().setJointOrientation(status.getDesiredRootOrientation());
+      ghostRobotModel.getRootJoint().setJointPosition(status.getDesiredRootPosition().getPoint());
+      ghostRobotModel.getRootJoint().setJointOrientation(status.getDesiredRootOrientation().getQuaternion());
       for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
       {
          ghostOneDoFJointsExcludingHands[i].setQ(status.getDesiredJointAngles().get(i));
@@ -105,8 +104,8 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    public void replayPreviewModel()
    {
       KinematicsToolboxOutputStatus status = getPreviewStatus();
-      ghostRobotModel.getRootJoint().setJointPosition(status.getDesiredRootPosition());
-      ghostRobotModel.getRootJoint().setJointOrientation(status.getDesiredRootOrientation());
+      ghostRobotModel.getRootJoint().setJointPosition(status.getDesiredRootPosition().getPoint());
+      ghostRobotModel.getRootJoint().setJointOrientation(status.getDesiredRootOrientation().getQuaternion());
       for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
       {
          ghostOneDoFJointsExcludingHands[i].setQ(status.getDesiredJointAngles().get(i));
@@ -362,7 +361,9 @@ public class RDXVRSharedControl implements TeleoperationAssistant
 
    public void saveStatusForPreview(KinematicsToolboxOutputStatus status)
    {
-      assistanceStatusList.add(new KinematicsToolboxOutputStatus(status));
+      KinematicsToolboxOutputStatus statusCopy = new KinematicsToolboxOutputStatus();
+      statusCopy.set(status);
+      assistanceStatusList.add(statusCopy);
    }
 
    public KinematicsToolboxOutputStatus getPreviewStatus()
