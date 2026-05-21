@@ -9,7 +9,7 @@ import toolbox_msgs.ExternalForceEstimationConfigurationMessage;
 import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Topic;
@@ -203,7 +203,7 @@ public class ExternalForceEstimationMessageLogger
          return;
 
       printStream.println(",");
-      printStream.println("\"" + messageName + "\" : \"" + Base64.getEncoder().encodeToString(Ros2MessageCdrFileTools.serializeToBytes(message)) + "\"");
+      printStream.println("\"" + messageName + "\" : \"" + Base64.getEncoder().encodeToString(ROS2MessageCdrFileTools.serializeToBytes(message)) + "\"");
    }
 
    public static void main(String[] args)

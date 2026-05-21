@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
-import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -61,7 +61,7 @@ public class SixDoFMotionControlAnchorDescription
          description.setContactState(anchorNode.get(IS_CONTACT_STATE_JSON).asBoolean());
          description.setTrackingController(anchorNode.get(IS_TRACKING_CONTROLLER_JSON).asBoolean());
          KinematicsToolboxRigidBodyMessage inputMessage = ROS2Message.createInstance(KinematicsToolboxRigidBodyMessage.class);
-         Ros2MessageCdrFileTools.deserializeFromJsonNode(anchorNode.get(IK_SOLVER_MESSAGE_JSON), inputMessage);
+         ROS2MessageCdrFileTools.deserializeFromJsonNode(anchorNode.get(IK_SOLVER_MESSAGE_JSON), inputMessage);
          description.setInputMessage(inputMessage);
 
          if (anchorNode.has(ANCHOR_ID_JSON))
@@ -90,7 +90,7 @@ public class SixDoFMotionControlAnchorDescription
       if (contactNormal != null)
          anchorJSON.put(CONTACT_NORMAL_JSON, tuple3DToString(contactNormal));
 
-      anchorJSON.set(IK_SOLVER_MESSAGE_JSON, Ros2MessageCdrFileTools.messageToJsonNode(objectMapper, inputMessage));
+      anchorJSON.set(IK_SOLVER_MESSAGE_JSON, ROS2MessageCdrFileTools.messageToJsonNode(objectMapper, inputMessage));
       return root;
    }
 

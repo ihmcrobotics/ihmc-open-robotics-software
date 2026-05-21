@@ -60,8 +60,7 @@ GRADLE_OPTS="-Xmx4g" ./gradlew compositeTask -PtaskName=compileTestJava
 | `us.ihmc.pubsub` | 4 files — `ROS2LogIOTools`, `ROS2LogSerialization`, `SCSROS2Visualizer`, `PubSubStatsTools` (legacy log/stats paths) |
 | `RDXROS2StatsPanel` + `PubSub*Stats` | Stubbed UI — old pubsub metrics API removed |
 | `BigVideoSwapData` | Stubbed (unused legacy) |
-| `ihmc-interfaces/.../generated-java` | Legacy tree; **runtime** uses `ihmc-interfaces-jros2` |
-| `ihmc-interfaces` atlas mock tests | Still reference `.msg.dds` (not on migration path) |
+| `ihmc-interfaces` (removed) | Legacy DDS pub-sub generator project deleted; **runtime** uses `ihmc-interfaces-jros2` only |
 
 **develop merge (perception):** `UInt16MultiArrayHack` → `Float32MultiArrayHack` for YOLOv8 mask polygons (`IDLFloatSequence`, `Float.BYTES` stride). Both hack types may exist in `ihmc-interfaces-jros2` until fully removed.
 
@@ -75,7 +74,7 @@ GRADLE_OPTS="-Xmx4g" ./gradlew compositeTask -PtaskName=compileTestJava
 | `close()` / `destroySubscription` | Node/sub lifecycle |
 | `EuclidXxxMessage` accessors | `.getPoint()` / `.getQuaternion()` / `.getPose()` / `.getVector()` |
 | `new T(); dest.set(src);` | Message deep copy |
-| `Ros2MessageCdrFileTools` | CDR file I/O |
+| `ROS2MessageCdrFileTools` | CDR file I/O |
 | `MessageTools.copyData(T[], IDLObjectSequence<T>)` | Deep copy sequences |
 | `MessageTools.toMessage/toEuclid(RigidBodyTransform, geometry_msgs.Transform)` | TF / plain `geometry_msgs` transforms |
 | `ControllerMessageConstants.INVALID_MESSAGE_ID` / `VALID_MESSAGE_DEFAULT_ID` | Replaces `Packet.*` ID constants |
@@ -91,7 +90,7 @@ GRADLE_OPTS="-Xmx4g" ./gradlew compositeTask -PtaskName=compileTestJava
 - **IDL sequences in planning**: iterate `solution.getRobotConfigurations().size()` / `.get(i)` — not `List`.
 - **Message copy**: `new T(); dest.set(src);` everywhere (reachability snapshots, rigid-body anchors).
 - **Support polygons**: `IDLObjectSequence<EuclidPoint3DMessage>` — `add().getPoint().set(x, y, z)`.
-- **Script JSON I/O**: `MultiContactEnvironmentDescription` + snapshot anchors use `Ros2MessageCdrFileTools` (base64 CDR); legacy DDS-JSON field names still accepted on read via `getMessageClassName()`.
+- **Script JSON I/O**: `MultiContactEnvironmentDescription` + snapshot anchors use `ROS2MessageCdrFileTools` (base64 CDR); legacy DDS-JSON field names still accepted on read via `getMessageClassName()`.
 - **Script statistics**: selection/weight matrices have no `epsilonEquals` — compare axis flags and weights manually; positions/orientations via `.getPoint()` / `.getQuaternion().getRotationVector(...)`.
 - **Kinematics simulation**: `AsyncROS2Node` replaces `ROS2NodeBuilder.buildRealtime`; final `ros2Node` needs single assignment (`configured != null ? configured : new ROS2Node(...)`).
 - **ihmc_hands_ros2** (cloned at `repository-group/ihmc_hands_ros2`, depend on `us.ihmc:ihmc_hands_ros2:source`): jros2 `generateMessages` on repo root (`package.xml` + `msg/`). Generated package is `ihmc_hands_ros2` (not `ihmc_hands_ros2.msg.dds`). Topics: `prependedWith("ability_hand")` / `appendedWith("left"|"right")`. Hand comms use `AsyncROS2Node` + `close()` / `spin()`.
@@ -161,10 +160,10 @@ Files deleted: `PacketConsumer.java`, `ROS2TopicList.java` (see Build section).
 `ihmc-pub-sub-serializers-extra` and `*PubSubType` are gone. For saving/loading messages to disk:
 
 ```java
-import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 
-byte[] bytes = Ros2MessageCdrFileTools.serializeToBytes(message);
-Ros2MessageCdrFileTools.deserializeInto(bytes, message);
+byte[] bytes = ROS2MessageCdrFileTools.serializeToBytes(message);
+ROS2MessageCdrFileTools.deserializeInto(bytes, message);
 ```
 
 **Footstep planner logs** (`FootstepPlannerLogger` / `FootstepPlannerLogLoader`) now write/read CDR bytes (filenames still end in `.json` for compatibility). **Legacy JSON logs** (files starting with `{`) throw a clear `IOException` on load — re-record with the current planner.
@@ -330,7 +329,7 @@ import us.ihmc.euclid.jros2.messages.EuclidVector3DMessage;
 
 ### Snapshot / toolbox JSON logs
 
-`JSONSerializer` + `*PubSubType` → `Ros2MessageCdrFileTools` with **base64 CDR** in Jackson text nodes (`messageToJsonNode` / `deserializeFromJsonNode`). Legacy DDS JSON objects throw on load with a clear `IOException`.
+`JSONSerializer` + `*PubSubType` → `ROS2MessageCdrFileTools` with **base64 CDR** in Jackson text nodes (`messageToJsonNode` / `deserializeFromJsonNode`). Legacy DDS JSON objects throw on load with a clear `IOException`.
 
 Message copy: `new T(); copy.set(source)` — no copy constructors. Removed `setDestination(...)` on toolbox output messages.
 
@@ -620,7 +619,7 @@ In `ihmc-interfaces-jros2`:
 | `no suitable method: toMessage(Euclid, EuclidXxxMessage)`            | Use the wrapper's own `set(...)` overload — no MessageTools call needed |
 | `type argument T is not within bounds`                               | Add `<T extends ROS2Message<T>>` to the generic; at call sites with `Class<? extends ROS2Message<?>>`, cast `(Class)` and suppress |
 | `cannot find symbol: Packet` / `PacketConsumer`                      | See "Removing the old Packet base class"; use `ROS2Message` + `reader.read()` |
-| `cannot find symbol: *PubSubType` / `JSONSerializer`                 | Use `Ros2MessageCdrFileTools` for file I/O; see section above                 |
+| `cannot find symbol: *PubSubType` / `JSONSerializer`                 | Use `ROS2MessageCdrFileTools` for file I/O; see section above                 |
 | `constructor X cannot be applied; required: no arguments` on message | Use `new X(); copy.set(source);`                                              |
 | `EuclidPose3DMessage cannot be converted to Pose3DReadOnly`          | `.getPose().getPose()` or `.getPose()` on wrapper depending on target type      |
 | `cannot find symbol: INVALID_MESSAGE_ID`                             | `ControllerMessageConstants.INVALID_MESSAGE_ID`                  |
@@ -635,7 +634,7 @@ In `ihmc-interfaces-jros2`:
 | `getTransform().set(RigidBodyTransform)` on TF messages              | `MessageTools.toMessage(transform, msg.getTransform())` |
 | `toTDoubleArrayList(IDLFloatSequence)` missing                       | Loop `input.size()` / `input.get(i)` into `TDoubleArrayList`     |
 | `geometry_msgs.Vector3.applyTransform` missing                       | Copy to `Vector3D`, transform, write back with `setX/Y/Z`        |
-| `Ros2MessageCdrFileTools.messageToJsonNode` in try/catch IOException | `messageToJsonNode` does not throw — drop empty catch blocks     |
+| `ROS2MessageCdrFileTools.messageToJsonNode` in try/catch IOException | `messageToJsonNode` does not throw — drop empty catch blocks     |
 
 ---
 

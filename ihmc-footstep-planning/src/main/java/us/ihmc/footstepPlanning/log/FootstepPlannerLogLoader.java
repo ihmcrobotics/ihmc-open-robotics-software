@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning.log;
 import perception_msgs.HeightMapMessage;
 import toolbox_msgs.*;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -444,12 +444,12 @@ public class FootstepPlannerLogLoader
       try (InputStream inputStream = new FileInputStream(file))
       {
          byte[] bytes = inputStream.readAllBytes();
-         if (Ros2MessageCdrFileTools.isLegacyDdsJson(bytes))
+         if (ROS2MessageCdrFileTools.isLegacyDdsJson(bytes))
          {
             throw new IOException("Legacy JSON footstep planner log at " + file.getAbsolutePath()
                                   + " is not supported after jros2 migration. Re-record the log with the current planner.");
          }
-         Ros2MessageCdrFileTools.deserializeInto(bytes, message);
+         ROS2MessageCdrFileTools.deserializeInto(bytes, message);
       }
    }
 
@@ -461,7 +461,7 @@ public class FootstepPlannerLogLoader
       FootstepPlannerLog log = logLoader.getLog();
       HeightMapMessage heightMapMessage = log.getRequestPacket().getHeightMapMessage();
 
-      byte[] serializedHeightMap = Ros2MessageCdrFileTools.serializeToBytes(heightMapMessage);
+      byte[] serializedHeightMap = ROS2MessageCdrFileTools.serializeToBytes(heightMapMessage);
 
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       String fileName = "HeightMap" + dateFormat.format(new Date()) + ".json";

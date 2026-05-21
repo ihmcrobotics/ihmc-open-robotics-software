@@ -15,7 +15,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadResult;
-import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
@@ -134,32 +134,32 @@ public class FootstepPlannerLoggerTest
       // Expected request packet, this variable gets packed with the data from the request
       FootstepPlanningRequestPacket expectedRequestPacket = new FootstepPlanningRequestPacket();
       request.setPacket(expectedRequestPacket);
-      assertArrayEquals(Ros2MessageCdrFileTools.serializeToBytes(expectedRequestPacket),
-                        Ros2MessageCdrFileTools.serializeToBytes(log.getRequestPacket()));
+      assertArrayEquals(ROS2MessageCdrFileTools.serializeToBytes(expectedRequestPacket),
+                        ROS2MessageCdrFileTools.serializeToBytes(log.getRequestPacket()));
 
       // Expected footstep planner parameters
       FootstepPlannerParametersPacket expectedFootstepPlannerParameters = new FootstepPlannerParametersPacket();
       FootstepPlannerMessageTools.copyParametersToPacket(expectedFootstepPlannerParameters, planningModule.getFootstepPlannerParameters());
-      assertArrayEquals(Ros2MessageCdrFileTools.serializeToBytes(expectedFootstepPlannerParameters),
-                        Ros2MessageCdrFileTools.serializeToBytes(log.getFootstepParametersPacket()));
+      assertArrayEquals(ROS2MessageCdrFileTools.serializeToBytes(expectedFootstepPlannerParameters),
+                        ROS2MessageCdrFileTools.serializeToBytes(log.getFootstepParametersPacket()));
 
       // Expected output status packet, this variable gets packed with the data from the planner output
       FootstepPlanningToolboxOutputStatus expectedOutputStatusPacket = new FootstepPlanningToolboxOutputStatus();
       plannerOutput.setPacket(expectedOutputStatusPacket);
-      assertArrayEquals(Ros2MessageCdrFileTools.serializeToBytes(expectedOutputStatusPacket),
-                        Ros2MessageCdrFileTools.serializeToBytes(log.getStatusPacket()));
+      assertArrayEquals(ROS2MessageCdrFileTools.serializeToBytes(expectedOutputStatusPacket),
+                        ROS2MessageCdrFileTools.serializeToBytes(log.getStatusPacket()));
 
       // Expected body path planner packet
       AStarBodyPathPlannerParametersPacket expectedBodyPathParameters = new AStarBodyPathPlannerParametersPacket();
       expectedBodyPathParameters.set(planningModule.getAStarBodyPathPlannerParameters().getAsPacket());
-      assertArrayEquals(Ros2MessageCdrFileTools.serializeToBytes(expectedBodyPathParameters),
-                        Ros2MessageCdrFileTools.serializeToBytes(log.getAStarBodyPathPlannerParametersPacket()));
+      assertArrayEquals(ROS2MessageCdrFileTools.serializeToBytes(expectedBodyPathParameters),
+                        ROS2MessageCdrFileTools.serializeToBytes(log.getAStarBodyPathPlannerParametersPacket()));
 
       // Expected swing planner parameters
       SwingPlannerParametersPacket expectedSwingPlannerParameters = new SwingPlannerParametersPacket();
       expectedSwingPlannerParameters.set(planningModule.getSwingPlannerParameters().getAsPacket());
-      assertArrayEquals(Ros2MessageCdrFileTools.serializeToBytes(expectedSwingPlannerParameters),
-                        Ros2MessageCdrFileTools.serializeToBytes(log.getSwingPlannerParametersPacket()));
+      assertArrayEquals(ROS2MessageCdrFileTools.serializeToBytes(expectedSwingPlannerParameters),
+                        ROS2MessageCdrFileTools.serializeToBytes(log.getSwingPlannerParametersPacket()));
 
       // Delete the log to avoid creating a bunch of logs when running these tests
       FootstepPlannerLogger.deleteOldLogs(0, logDirectory);

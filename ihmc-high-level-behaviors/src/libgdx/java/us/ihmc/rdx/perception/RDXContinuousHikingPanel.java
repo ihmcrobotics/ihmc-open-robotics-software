@@ -250,7 +250,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       if (ros2Throttler.run())
       {
-         updateRos2StoredPropertySets();
+         updateROS2StoredPropertySets();
       }
    }
 
@@ -259,7 +259,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
     * These are all the parameters that are getting synced back and forth between the remote process and the local process.
     * There are three situations that can occur when trying to use Continuous Hiking.
     */
-   private void updateRos2StoredPropertySets()
+   private void updateROS2StoredPropertySets()
    {
       hostStoredPropertySets.setPropertyChanged();
    }

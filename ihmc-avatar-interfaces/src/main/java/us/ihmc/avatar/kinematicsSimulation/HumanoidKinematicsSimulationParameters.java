@@ -147,12 +147,12 @@ public class HumanoidKinematicsSimulationParameters
       this.createPeriodicThread = createPeriodicThread;
    }
 
-   public void setRos2Node(ROS2Node ros2Node)
+   public void setROS2Node(ROS2Node ros2Node)
    {
       this.ros2Node = ros2Node;
    }
 
-   public ROS2Node getRos2Node()
+   public ROS2Node getROS2Node()
    {
       return ros2Node;
    }

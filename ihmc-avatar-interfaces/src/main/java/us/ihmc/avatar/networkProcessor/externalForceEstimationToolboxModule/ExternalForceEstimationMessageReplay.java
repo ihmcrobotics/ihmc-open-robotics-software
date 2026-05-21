@@ -11,7 +11,7 @@ import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.jros2.AsyncROS2Node;
@@ -102,12 +102,12 @@ public class ExternalForceEstimationMessageReplay
          if (childNode.has(robotConfigurationDataName))
          {
             messageSet.robotConfigurationData = new RobotConfigurationData();
-            Ros2MessageCdrFileTools.deserializeFromJsonNode(childNode.get(robotConfigurationDataName), messageSet.robotConfigurationData);
+            ROS2MessageCdrFileTools.deserializeFromJsonNode(childNode.get(robotConfigurationDataName), messageSet.robotConfigurationData);
          }
          if (childNode.has(robotDesiredConfigurationDataName))
          {
             messageSet.robotDesiredConfigurationData = new RobotDesiredConfigurationData();
-            Ros2MessageCdrFileTools.deserializeFromJsonNode(childNode.get(robotDesiredConfigurationDataName), messageSet.robotDesiredConfigurationData);
+            ROS2MessageCdrFileTools.deserializeFromJsonNode(childNode.get(robotDesiredConfigurationDataName), messageSet.robotDesiredConfigurationData);
          }
 
          allMessages.add(messageSet);

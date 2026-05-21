@@ -157,7 +157,7 @@ public class ROS2LogReplay
       System.exit(0);
    }
 
-   public ROS2Node getRos2Node()
+   public ROS2Node getROS2Node()
    {
       return ros2Node;
    }

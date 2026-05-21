@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import toolbox_msgs.KinematicsToolboxOutputStatus;
 import toolbox_msgs.KinematicsToolboxPrivilegedConfigurationMessage;
 import controller_msgs.RobotConfigurationData;
-import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.jros2.ROS2Message;
 
@@ -116,7 +116,7 @@ public class KinematicsToolboxSnapshotDescription
       if (node == null || node.isNull())
          return null;
       T message = ROS2Message.createInstance(type);
-      Ros2MessageCdrFileTools.deserializeFromJsonNode(node, message);
+      ROS2MessageCdrFileTools.deserializeFromJsonNode(node, message);
       return message;
    }
 
@@ -131,9 +131,9 @@ public class KinematicsToolboxSnapshotDescription
       ObjectNode root = objectMapper.createObjectNode();
       ObjectNode configurationJSON = root.putObject(CONFIGURATION_JSON);
 
-      configurationJSON.set(CONTROLLER_CONFIGURATION_JSON, Ros2MessageCdrFileTools.messageToJsonNode(objectMapper, controllerConfiguration));
-      configurationJSON.set(IK_SOLUTION_JSON, Ros2MessageCdrFileTools.messageToJsonNode(objectMapper, ikSolution));
-      configurationJSON.set(IK_PRIVILEGED_CONFIGURATION_JSON, Ros2MessageCdrFileTools.messageToJsonNode(objectMapper, ikPrivilegedConfiguration));
+      configurationJSON.set(CONTROLLER_CONFIGURATION_JSON, ROS2MessageCdrFileTools.messageToJsonNode(objectMapper, controllerConfiguration));
+      configurationJSON.set(IK_SOLUTION_JSON, ROS2MessageCdrFileTools.messageToJsonNode(objectMapper, ikSolution));
+      configurationJSON.set(IK_PRIVILEGED_CONFIGURATION_JSON, ROS2MessageCdrFileTools.messageToJsonNode(objectMapper, ikPrivilegedConfiguration));
       if (centerOfMassAnchor != null)
          configurationJSON.set(COM_ANCHOR_JSON, centerOfMassAnchor.toJSON(objectMapper));
       ArrayNode arraySixDoFAnchorNode = configurationJSON.arrayNode(sixDoFAnchors.size());
@@ -157,9 +157,9 @@ public class KinematicsToolboxSnapshotDescription
 
       ObjectNode root = objectMapper.createObjectNode();
 
-      root.set(CONTROLLER_CONFIGURATION_JSON, Ros2MessageCdrFileTools.messageToJsonNode(objectMapper, controllerConfiguration));
-      root.set(IK_SOLUTION_JSON, Ros2MessageCdrFileTools.messageToJsonNode(objectMapper, ikSolution));
-      root.set(IK_PRIVILEGED_CONFIGURATION_JSON, Ros2MessageCdrFileTools.messageToJsonNode(objectMapper, ikPrivilegedConfiguration));
+      root.set(CONTROLLER_CONFIGURATION_JSON, ROS2MessageCdrFileTools.messageToJsonNode(objectMapper, controllerConfiguration));
+      root.set(IK_SOLUTION_JSON, ROS2MessageCdrFileTools.messageToJsonNode(objectMapper, ikSolution));
+      root.set(IK_PRIVILEGED_CONFIGURATION_JSON, ROS2MessageCdrFileTools.messageToJsonNode(objectMapper, ikPrivilegedConfiguration));
       if (centerOfMassAnchor != null)
          root.set(COM_ANCHOR_JSON, centerOfMassAnchor.toJSON(objectMapper));
       ArrayNode arraySixDoFAnchorNode = root.arrayNode(sixDoFAnchors.size());

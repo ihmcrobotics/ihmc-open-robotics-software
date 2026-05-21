@@ -1,1 +1,0 @@
-string[<=200] object_names

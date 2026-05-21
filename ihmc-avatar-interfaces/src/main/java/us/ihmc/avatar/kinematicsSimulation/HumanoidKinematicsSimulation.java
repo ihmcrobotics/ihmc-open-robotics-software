@@ -164,8 +164,8 @@ public class HumanoidKinematicsSimulation
       this.kinematicsSimulationParameters = kinematicsSimulationParameters;
 
       // instantiate some existing controller ROS2 API?
-      ROS2Node configuredRos2Node = kinematicsSimulationParameters.getRos2Node();
-      ros2Node = configuredRos2Node != null ? configuredRos2Node
+      ROS2Node configuredROS2Node = kinematicsSimulationParameters.getROS2Node();
+      ros2Node = configuredROS2Node != null ? configuredROS2Node
                                             : new ROS2Node(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME);
       heartbeat = new ROS2Heartbeat(ros2Node, KINEMATICS_SIMULATION_HEARTBEAT);
 

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import ihmc_common_msgs.*;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
@@ -66,7 +66,7 @@ public class MultiContactEnvironmentDescription
          {
             FrameBox3D box = new FrameBox3D(ReferenceFrame.getWorldFrame());
             Box3DMessage message = new Box3DMessage();
-            Ros2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
+            ROS2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
             MessageTools.unpackBox3DMessage(message, box);
             return box;
          }
@@ -74,7 +74,7 @@ public class MultiContactEnvironmentDescription
          {
             FrameCapsule3D capsule = new FrameCapsule3D(ReferenceFrame.getWorldFrame());
             Capsule3DMessage message = new Capsule3DMessage();
-            Ros2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
+            ROS2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
             MessageTools.unpackCapsule3DMessage(message, capsule);
             return capsule;
          }
@@ -82,7 +82,7 @@ public class MultiContactEnvironmentDescription
          {
             FrameConvexPolytope3D polytope = new FrameConvexPolytope3D(ReferenceFrame.getWorldFrame());
             ConvexPolytope3DMessage message = new ConvexPolytope3DMessage();
-            Ros2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
+            ROS2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
             MessageTools.unpackConvexPolytope3DMessage(message, polytope);
             return polytope;
          }
@@ -90,7 +90,7 @@ public class MultiContactEnvironmentDescription
          {
             FrameCylinder3D cylinder = new FrameCylinder3D(ReferenceFrame.getWorldFrame());
             Cylinder3DMessage message = new Cylinder3DMessage();
-            Ros2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
+            ROS2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
             MessageTools.unpackCylinder3DMessage(message, cylinder);
             return cylinder;
          }
@@ -98,7 +98,7 @@ public class MultiContactEnvironmentDescription
          {
             FrameEllipsoid3D ellipsoid = new FrameEllipsoid3D(ReferenceFrame.getWorldFrame());
             Ellipsoid3DMessage message = new Ellipsoid3DMessage();
-            Ros2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
+            ROS2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
             MessageTools.unpackEllipsoid3DMessage(message, ellipsoid);
             return ellipsoid;
          }
@@ -106,7 +106,7 @@ public class MultiContactEnvironmentDescription
          {
             FrameRamp3D ramp = new FrameRamp3D(ReferenceFrame.getWorldFrame());
             Ramp3DMessage message = new Ramp3DMessage();
-            Ros2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
+            ROS2MessageCdrFileTools.deserializeFromJsonNode(environmentShape.get(messageClassName), message);
             MessageTools.unpackRamp3DMessage(message, ramp);
             return ramp;
          }
@@ -124,7 +124,7 @@ public class MultiContactEnvironmentDescription
    private static <T extends ROS2Message<T>> JsonNode messageToJSON(String messageTypeName, T message) throws IOException
    {
       ObjectNode node = objectMapper.createObjectNode();
-      node.set(messageTypeName, Ros2MessageCdrFileTools.messageToJsonNode(objectMapper, message));
+      node.set(messageTypeName, ROS2MessageCdrFileTools.messageToJsonNode(objectMapper, message));
       return node;
    }
 

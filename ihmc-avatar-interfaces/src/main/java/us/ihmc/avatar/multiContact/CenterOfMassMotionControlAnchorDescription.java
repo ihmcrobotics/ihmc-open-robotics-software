@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import toolbox_msgs.KinematicsToolboxCenterOfMassMessage;
-import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.jros2.ROS2Message;
 
@@ -57,7 +57,7 @@ public class CenterOfMassMotionControlAnchorDescription
          CenterOfMassMotionControlAnchorDescription description = new CenterOfMassMotionControlAnchorDescription();
          description.setTrackingController(anchorNode.get(IS_TRACKING_CONTROLLER_JSON).asBoolean());
          KinematicsToolboxCenterOfMassMessage inputMessage = ROS2Message.createInstance(KinematicsToolboxCenterOfMassMessage.class);
-         Ros2MessageCdrFileTools.deserializeFromJsonNode(anchorNode.get(IK_SOLVER_MESSAGE_JSON), inputMessage);
+         ROS2MessageCdrFileTools.deserializeFromJsonNode(anchorNode.get(IK_SOLVER_MESSAGE_JSON), inputMessage);
          description.setInputMessage(inputMessage);
          return description;
       }
@@ -74,7 +74,7 @@ public class CenterOfMassMotionControlAnchorDescription
 
       anchorJSON.put(IS_TRACKING_CONTROLLER_JSON, isTrackingController);
 
-      anchorJSON.set(IK_SOLVER_MESSAGE_JSON, Ros2MessageCdrFileTools.messageToJsonNode(objectMapper, inputMessage));
+      anchorJSON.set(IK_SOLVER_MESSAGE_JSON, ROS2MessageCdrFileTools.messageToJsonNode(objectMapper, inputMessage));
       return root;
    }
 

@@ -11,7 +11,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import perception_msgs.TerrainMapMessage;
-import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -284,7 +284,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
          String heightMapDirectoryString = heightMapDirectory.toString();
          File heightMapFile = new File(heightMapDirectoryString + "/" + timestamp + "_HeightMapData.json");
-         Files.writeString(heightMapFile.toPath(), Ros2MessageCdrFileTools.serializeToBase64(terrainMapMessage));
+         Files.writeString(heightMapFile.toPath(), ROS2MessageCdrFileTools.serializeToBase64(terrainMapMessage));
       }
       catch (IOException e)
       {

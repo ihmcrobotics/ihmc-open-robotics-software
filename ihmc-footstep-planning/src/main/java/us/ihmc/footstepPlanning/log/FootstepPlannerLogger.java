@@ -23,7 +23,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
@@ -229,31 +229,31 @@ public class FootstepPlannerLogger
          // log request packet
          String requestPacketFile = sessionDirectory + requestPacketFileName;
          planner.getRequest().setPacket(requestPacket);
-         byte[] serializedRequest = Ros2MessageCdrFileTools.serializeToBytes(requestPacket);
+         byte[] serializedRequest = ROS2MessageCdrFileTools.serializeToBytes(requestPacket);
          writeToFile(requestPacketFile, serializedRequest);
 
          // log footstep planner parameters packet
          String footstepParametersPacketFile = sessionDirectory + footstepParametersFileName;
          footstepParametersPacket.set(planner.getFootstepPlannerParameters().getAsPacket());
-         byte[] serializedFootstepParameters = Ros2MessageCdrFileTools.serializeToBytes(footstepParametersPacket);
+         byte[] serializedFootstepParameters = ROS2MessageCdrFileTools.serializeToBytes(footstepParametersPacket);
          writeToFile(footstepParametersPacketFile, serializedFootstepParameters);
 
          // log body path planner parameters packet
          String bodyPathParametersPacketFile = sessionDirectory + bodyPathParametersFileName;
          bodyPathParametersPacket.set(planner.getAStarBodyPathPlannerParameters().getAsPacket());
-         byte[] serializedBodyPathParameters = Ros2MessageCdrFileTools.serializeToBytes(bodyPathParametersPacket);
+         byte[] serializedBodyPathParameters = ROS2MessageCdrFileTools.serializeToBytes(bodyPathParametersPacket);
          writeToFile(bodyPathParametersPacketFile, serializedBodyPathParameters);
 
          // log swing parameters packet
          String swingParametersPacketFile = sessionDirectory + swingParametersFileName;
          swingPlannerParametersPacket.set(planner.getSwingPlannerParameters().getAsPacket());
-         byte[] serializedSwingParameters = Ros2MessageCdrFileTools.serializeToBytes(swingPlannerParametersPacket);
+         byte[] serializedSwingParameters = ROS2MessageCdrFileTools.serializeToBytes(swingPlannerParametersPacket);
          writeToFile(swingParametersPacketFile, serializedSwingParameters);
 
          // log status packet
          String statusPacketFile = sessionDirectory + outputStatusPacketFileName;
          planner.getOutput().setPacket(outputStatus);
-         byte[] serializedStatus = Ros2MessageCdrFileTools.serializeToBytes(outputStatus);
+         byte[] serializedStatus = ROS2MessageCdrFileTools.serializeToBytes(outputStatus);
          writeToFile(statusPacketFile, serializedStatus);
       }
       catch (Exception e)

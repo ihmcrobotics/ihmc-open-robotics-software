@@ -349,7 +349,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       return tree;
    }
 
-   public ROS2ControllerHelper getRos2ControllerHelper()
+   public ROS2ControllerHelper getROS2ControllerHelper()
    {
       return ros2ControllerHelper;
    }

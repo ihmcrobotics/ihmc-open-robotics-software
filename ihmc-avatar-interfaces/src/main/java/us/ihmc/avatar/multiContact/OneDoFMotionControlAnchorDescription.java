@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import toolbox_msgs.KinematicsToolboxOneDoFJointMessage;
-import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.jros2.ROS2Message;
 
 public class OneDoFMotionControlAnchorDescription
@@ -46,7 +46,7 @@ public class OneDoFMotionControlAnchorDescription
          description.setJointName(anchorNode.get(JOINT_NAME_JSON).asText());
          description.setTrackingController(anchorNode.get(IS_TRACKING_CONTROLLER_JSON).asBoolean());
          KinematicsToolboxOneDoFJointMessage inputMessage = ROS2Message.createInstance(KinematicsToolboxOneDoFJointMessage.class);
-         Ros2MessageCdrFileTools.deserializeFromJsonNode(anchorNode.get(IK_SOLVER_MESSAGE_JSON), inputMessage);
+         ROS2MessageCdrFileTools.deserializeFromJsonNode(anchorNode.get(IK_SOLVER_MESSAGE_JSON), inputMessage);
          description.setInputMessage(inputMessage);
          return description;
       }
@@ -64,7 +64,7 @@ public class OneDoFMotionControlAnchorDescription
       anchorJSON.put(JOINT_NAME_JSON, jointName);
       anchorJSON.put(IS_TRACKING_CONTROLLER_JSON, isTrackingController);
 
-      anchorJSON.set(IK_SOLVER_MESSAGE_JSON, Ros2MessageCdrFileTools.messageToJsonNode(objectMapper, inputMessage));
+      anchorJSON.set(IK_SOLVER_MESSAGE_JSON, ROS2MessageCdrFileTools.messageToJsonNode(objectMapper, inputMessage));
       return root;
    }
 

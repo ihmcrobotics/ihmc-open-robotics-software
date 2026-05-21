@@ -11,7 +11,7 @@ import imgui.ImGui;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
 import imgui.extension.imguifiledialog.flag.ImGuiFileDialogFlags;
 import perception_msgs.HeightMapMessage;
-import us.ihmc.communication.serialization.Ros2MessageCdrFileTools;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuMapping.HeightMapLogReader;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -78,7 +78,7 @@ public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
                   File file = new File(selectedFile);
                   InputStream requestPacketInputStream = new FileInputStream(file);
                   JsonNode jsonNode = mapper.readTree(requestPacketInputStream);
-                  Ros2MessageCdrFileTools.deserializeFromJsonNode(jsonNode, heightMapMessage);
+                  ROS2MessageCdrFileTools.deserializeFromJsonNode(jsonNode, heightMapMessage);
                }
                catch (IOException e)
                {
