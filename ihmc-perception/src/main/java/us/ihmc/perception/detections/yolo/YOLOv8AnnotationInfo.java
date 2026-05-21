@@ -1,5 +1,6 @@
 package us.ihmc.perception.detections.yolo;
 
+import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -25,15 +26,15 @@ import us.ihmc.perception.RawImage;
  *
  * @param objectClass  The object class of the detection.
  * @param confidence   The confidence of the detection.
- * @param boundingBox  2D bounding box of the detection.
+ * @param boundingBox  2D bounding box of the detection in normalized image coordinates.
  * @param maskPolygons Array of polygons representing the mask of the detection.
- *                     Each polygon is an integer array containing [x1, y1, x2, y2, ...].
+ *                     Each polygon is a float array containing normalized image coordinates [x1, y1, x2, y2, ...].
  */
-public record YOLOv8AnnotationInfo(String objectClass, float confidence, BoundingBox2DReadOnly boundingBox, int[][] maskPolygons)
+public record YOLOv8AnnotationInfo(String objectClass, float confidence, BoundingBox2DReadOnly boundingBox, float[][] maskPolygons)
 {
    private static final int FONT = opencv_imgproc.FONT_HERSHEY_DUPLEX;
    private static final int FONT_THICKNESS = 2;
-   private static final double FONT_SCALE = 1.5;
+   private static final double FONT_SCALE_MULTIPLIER = 0.0025;
    private static final int LINE_TYPE = opencv_imgproc.LINE_4;
    private static final int TEXT_LINE_TYPE = opencv_imgproc.LINE_AA;
 
@@ -52,14 +53,35 @@ public record YOLOv8AnnotationInfo(String objectClass, float confidence, Boundin
    {
       inputImage.copyTo(outputImage);
 
+      double outputWidth = outputImage.cols();
+      double outputHeight = outputImage.rows();
+
       // Translate the polygons from int[][] to MatVector
-      int[][] polygons = maskPolygons();
+      float[][] polygons = maskPolygons();
       MatVector polygonsVector = new MatVector(polygons.length);
       for (int i = 0; i < polygons.length; ++i)
       {
-         int[] polygon = polygons[i];
-         Mat polygonMat = new Mat(polygon.length / 2, 1, opencv_core.CV_32SC2, new IntPointer(polygon));
+         float[] polygon = polygons[i];
+         Mat normalizedPolygonMat = new Mat(polygon.length / 2, 1, opencv_core.CV_32FC2, new FloatPointer(polygon));
+
+         MatVector polygonChannels = new MatVector();
+         opencv_core.split(normalizedPolygonMat, polygonChannels);
+
+         Mat xValues = polygonChannels.get(0);
+         Mat yValues = polygonChannels.get(1);
+
+         xValues.convertTo(xValues, opencv_core.CV_32S, outputWidth, 0.0);
+         yValues.convertTo(yValues, opencv_core.CV_32S, outputHeight, 0.0);
+
+         Mat polygonMat = new Mat();
+         opencv_core.merge(polygonChannels, polygonMat);
+
          polygonsVector.put(i, polygonMat);
+
+         xValues.close();
+         yValues.close();
+         polygonChannels.close();
+         normalizedPolygonMat.close();
       }
 
       // Create an overlay image and draw the mask onto the overlay
@@ -94,10 +116,13 @@ public record YOLOv8AnnotationInfo(String objectClass, float confidence, Boundin
    {
       inputImage.copyTo(outputImage);
 
-      Rect boundingBoxRect = new Rect((int) Math.round(boundingBox.getMinX()),
-                                      (int) Math.round(boundingBox.getMinY()),
-                                      (int) Math.round(boundingBox.getMaxX() - boundingBox.getMinX()),
-                                      (int) Math.round(boundingBox.getMaxY() - boundingBox.getMinY()));
+      double outputWidth = outputImage.cols();
+      double outputHeight = outputImage.rows();
+
+      Rect boundingBoxRect = new Rect((int) Math.round(outputWidth * boundingBox.getMinX()),
+                                      (int) Math.round(outputHeight * boundingBox.getMinY()),
+                                      (int) Math.round(outputWidth * (boundingBox.getMaxX() - boundingBox.getMinX())),
+                                      (int) Math.round(outputHeight * (boundingBox.getMaxY() - boundingBox.getMinY())));
       opencv_imgproc.rectangle(outputImage, boundingBoxRect, GREEN, 5, LINE_TYPE, 0);
    }
 
@@ -113,9 +138,18 @@ public record YOLOv8AnnotationInfo(String objectClass, float confidence, Boundin
    {
       inputImage.copyTo(outputImage);
 
+      double outputWidth = outputImage.cols();
+      double outputHeight = outputImage.rows();
+
+      double fontScale = FONT_SCALE_MULTIPLIER * outputHeight;
+
+      BoundingBox2D denormalizedBoundingBox = new BoundingBox2D(boundingBox);
+      denormalizedBoundingBox.getMinPoint().scale(outputWidth, outputHeight);
+      denormalizedBoundingBox.getMaxPoint().scale(outputWidth, outputHeight);
+
       // Get the text and its size
       String text = String.format("%s: %.2f", objectClass, confidence);
-      Size textSize = opencv_imgproc.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
+      Size textSize = opencv_imgproc.getTextSize(text, FONT, fontScale, FONT_THICKNESS, new IntPointer());
 
       // Determine the text position
       int textX;
@@ -125,23 +159,23 @@ public record YOLOv8AnnotationInfo(String objectClass, float confidence, Boundin
       {
          // If inlaying, put the text in the center of the detection unless the text is wider than the detected object
          Point2D centerPoint = new Point2D();
-         boundingBox.getCenterPoint(centerPoint);
+         denormalizedBoundingBox.getCenterPoint(centerPoint);
          textX = (int) Math.round(centerPoint.getX()) - textSize.width() / 2;
-         if (textSize.width() >= boundingBox.getMaxX() - boundingBox.getMinX())
-            textY = (int) Math.round(boundingBox.getMinY()) - textSize.height();
+         if (textSize.width() >= denormalizedBoundingBox.getMaxX() - denormalizedBoundingBox.getMinX())
+            textY = (int) Math.round(denormalizedBoundingBox.getMinY()) - textSize.height();
          else
             textY = (int) Math.round(centerPoint.getY()) - textSize.height() / 2;
       }
       else
       {
          // Otherwise, put the text at the top left corner of the detection
-         textX = (int) Math.round(boundingBox.getMinX());
-         textY = (int) Math.round(boundingBox.getMinY()) - textSize.height();
+         textX = (int) Math.round(denormalizedBoundingBox.getMinX());
+         textY = (int) Math.round(denormalizedBoundingBox.getMinY()) - textSize.height();
       }
 
       // Clamp to ensure the text is within the image bounds
-      int textBoxClampedX = MathTools.clamp(textX, 0, outputImage.cols() - textSize.width());
-      int textBoxClampedY = MathTools.clamp(textY, 0, outputImage.rows() - textSize.height());
+      int textBoxClampedX = MathTools.clamp(textX, 0, Math.max(0, outputImage.cols() - textSize.width()));
+      int textBoxClampedY = MathTools.clamp(textY, 0, Math.max(0, outputImage.rows() - textSize.height()));
 
       // Optionally draw the text background
       if (drawTextBox)
@@ -153,7 +187,7 @@ public record YOLOv8AnnotationInfo(String objectClass, float confidence, Boundin
       // Draw the text
       Scalar textColor = drawTextBox ? WHITE : GREEN;
       Point textLocation = new Point(textBoxClampedX, textBoxClampedY + textSize.height());
-      opencv_imgproc.putText(outputImage, text, textLocation, FONT, FONT_SCALE, textColor, FONT_THICKNESS, TEXT_LINE_TYPE, false);
+      opencv_imgproc.putText(outputImage, text, textLocation, FONT, fontScale, textColor, FONT_THICKNESS, TEXT_LINE_TYPE, false);
    }
 
    public void toMessage(YOLOv8AnnotationInfoMessage message)
@@ -172,13 +206,13 @@ public record YOLOv8AnnotationInfo(String objectClass, float confidence, Boundin
       message.getMaskPolygons().getLayout().getDim().clear();
       for (int i = 0; i < maskPolygons.length; ++i)
       {
-         int[] polygon = maskPolygons[i];
+         float[] polygon = maskPolygons[i];
          if (message.getMaskPolygons().getData().size() + polygon.length < message.getMaskPolygons().getData().capacity())
          {
             MultiArrayDimension dimension = message.getMaskPolygons().getLayout().getDim().add();
             dimension.setLabel("polygon " + i);
             dimension.setSize(polygon.length);
-            dimension.setStride((long) Integer.BYTES * polygon.length);
+            dimension.setStride((long) Float.BYTES * polygon.length);
 
             message.getMaskPolygons().getData().add(polygon);
          }
@@ -198,10 +232,10 @@ public record YOLOv8AnnotationInfo(String objectClass, float confidence, Boundin
       BoundingBox2D boundingBox = new BoundingBox2D(minX, minY, maxX, maxY);
 
       IDLSequence.Object<MultiArrayDimension> dimensions = message.getMaskPolygons().getLayout().getDim();
-      int[][] maskPolygons = new int[dimensions.size()][];
-      for (int i = 0, offset = (int) message.getMaskPolygons().getLayout().getDataOffset() / Integer.BYTES; i < dimensions.size(); ++i)
+      float[][] maskPolygons = new float[dimensions.size()][];
+      for (int i = 0, offset = (int) message.getMaskPolygons().getLayout().getDataOffset() / Float.BYTES; i < dimensions.size(); ++i)
       {
-         maskPolygons[i] = new int[(int) dimensions.get(i).getSize()];
+         maskPolygons[i] = new float[(int) dimensions.get(i).getSize()];
          message.getMaskPolygons().getData().toArray(maskPolygons[i], offset, maskPolygons[i].length);
          offset += maskPolygons[i].length;
       }
@@ -217,10 +251,16 @@ public record YOLOv8AnnotationInfo(String objectClass, float confidence, Boundin
       Mat resizedMask = new Mat();
       YOLOv8Tools.resizeWithCrop(mask, resizedMask, detectionImageSize);
 
+      float xScale = 1.0f / resizedMask.cols();
+      float yScale = 1.0f / resizedMask.rows();
+      BoundingBox2D normalizedBoundingBox = detection.boundingBox();
+      normalizedBoundingBox.getMinPoint().scale(xScale, yScale);
+      normalizedBoundingBox.getMaxPoint().scale(xScale, yScale);
+
       YOLOv8AnnotationInfo info = new YOLOv8AnnotationInfo(detection.objectClass(),
-                                                             detection.confidence(),
-                                                             detection.boundingBox(),
-                                                             YOLOv8Tools.getMaskAsPolygons(resizedMask, precision));
+                                                           detection.confidence(),
+                                                           normalizedBoundingBox,
+                                                           YOLOv8Tools.getMaskAsPolygons(resizedMask, precision));
 
       resizedMask.close();
       maskImage.release();
@@ -237,10 +277,16 @@ public record YOLOv8AnnotationInfo(String objectClass, float confidence, Boundin
       Mat resizedMask = new Mat();
       YOLOv8Tools.resizeWithCrop(mask, resizedMask, colorImage.getCpuImageMat().size());
 
+      float xScale = 1.0f / resizedMask.cols();
+      float yScale = 1.0f / resizedMask.rows();
+      BoundingBox2D normalizedBoundingBox = new BoundingBox2D(detection.getBoundingBox());
+      normalizedBoundingBox.getMinPoint().scale(xScale, yScale);
+      normalizedBoundingBox.getMaxPoint().scale(xScale, yScale);
+
       YOLOv8AnnotationInfo info = new YOLOv8AnnotationInfo(detection.getDetectedObjectClass(),
-                                                             (float) detection.getConfidence(),
-                                                             detection.getBoundingBox(),
-                                                             YOLOv8Tools.getMaskAsPolygons(resizedMask, precision));
+                                                           (float) detection.getConfidence(),
+                                                           normalizedBoundingBox,
+                                                           YOLOv8Tools.getMaskAsPolygons(resizedMask, precision));
 
       resizedMask.close();
       colorImage.release();
