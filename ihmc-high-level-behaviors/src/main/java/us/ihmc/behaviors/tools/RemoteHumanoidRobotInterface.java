@@ -22,6 +22,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerPublisherMap;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.packets.MessageTools;
@@ -133,7 +134,7 @@ public class RemoteHumanoidRobotInterface
 
    public void createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
    {
-      ros2Node.createSubscription(topicName.appendedWith("output").withType(FootstepStatusMessage.class), reader -> consumer.accept(reader.read()));
+      ros2Node.createSubscription(((HumanoidROS2Topic<?>) topicName).withOutput().withType(FootstepStatusMessage.class), reader -> consumer.accept(reader.read()));
    }
 
    public FootstepStatusMessage getLatestFootstepStatusMessage()

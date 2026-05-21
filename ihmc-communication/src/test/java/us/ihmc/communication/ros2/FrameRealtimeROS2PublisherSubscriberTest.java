@@ -20,7 +20,7 @@ public class FrameRealtimeROS2PublisherSubscriberTest
    public FrameRealtimeROS2PublisherSubscriberTest()
    {
       realtimeROS2Node = new AsyncROS2Node("frameTest");
-      ROS2Topic<RobotConfigurationData> topic = ROS2Tools.IHMC_ROOT.appendedWith("FrameData").withType(RobotConfigurationData.class);
+      ROS2Topic<RobotConfigurationData> topic = ROS2Tools.IHMC_ROOT.withSuffix("FrameData").withType(RobotConfigurationData.class);
       LogTools.info("Publishing to {}", topic);
       publisher = realtimeROS2Node.createPublisher(topic, ROS2QoSProfile.BEST_EFFORT);
 

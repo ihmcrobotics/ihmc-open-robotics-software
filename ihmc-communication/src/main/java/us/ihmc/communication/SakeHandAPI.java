@@ -9,11 +9,11 @@ public final class SakeHandAPI
 {
    public static ROS2Topic<SakeHandDesiredCommandMessage> getHandSakeCommandTopic(String robotName, RobotSide side)
    {
-      return HumanoidControllerAPI.getInputTopic(robotName).withType(SakeHandDesiredCommandMessage.class).appendedWith(side.getLowerCaseName());
+      return HumanoidControllerAPI.getInputTopic(robotName).withTypeName(SakeHandDesiredCommandMessage.class).withSuffix(side.getLowerCaseName());
    }
 
    public static ROS2Topic<SakeHandStatusMessage> getHandSakeStatusTopic(String robotName, RobotSide side)
    {
-      return HumanoidControllerAPI.getOutputTopic(robotName).withType(SakeHandStatusMessage.class).appendedWith(side.getLowerCaseName());
+      return HumanoidControllerAPI.getOutputTopic(robotName).withTypeName(SakeHandStatusMessage.class).withSuffix(side.getLowerCaseName());
    }
 }

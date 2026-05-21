@@ -105,7 +105,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class HumanoidKinematicsSimulation
 {
    public static final ROS2Topic<Empty> KINEMATICS_SIMULATION_HEARTBEAT
-         = ROS2Tools.IHMC_ROOT.appendedWith("kinematics_simulation").appendedWith("output").appendedWith("heartbeat").withType(Empty.class);
+         = ROS2Tools.IHMC_ROOT.withModule("kinematics_simulation").withOutput().withSuffix("heartbeat").withType(Empty.class);
    private static final double GRAVITY_Z = 9.81;
    private static final double LIDAR_SPINDLE_SPEED = 2.5;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

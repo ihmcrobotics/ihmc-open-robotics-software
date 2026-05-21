@@ -2,6 +2,7 @@ package us.ihmc.communication.ros2.tf2;
 
 import geometry_msgs.TransformStamped;
 import tf2_msgs.TFMessage;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.jros2.ROS2MessageReader;
@@ -15,10 +16,8 @@ import java.util.concurrent.ConcurrentSkipListMap;
 @SuppressWarnings("ForLoopReplaceableByForEach")
 public class ROS2TFTree
 {
-   public static final ROS2Topic<TFMessage> TF_TOPIC = new ROS2Topic<>().appendedWith("tf").withType(TFMessage.class);
-   public static final ROS2Topic<TFMessage> TF_STATIC_TOPIC = new ROS2Topic<>().appendedWith("tf_static")
-                                                                               
-                                                                               .withType(TFMessage.class);
+   public static final ROS2Topic<TFMessage> TF_TOPIC = new HumanoidROS2Topic<>().withModule("tf").withType(TFMessage.class);
+   public static final ROS2Topic<TFMessage> TF_STATIC_TOPIC = new HumanoidROS2Topic<>().withModule("tf_static").withType(TFMessage.class);
 
    private static ROS2TFTree instance = null;
 

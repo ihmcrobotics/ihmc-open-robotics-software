@@ -178,7 +178,7 @@ public class KinematicsToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ToolboxAPIs.KINEMATICS_TOOLBOX.appendedWith(robotName).appendedWith("output");
+      return ToolboxAPIs.KINEMATICS_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -189,6 +189,6 @@ public class KinematicsToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ToolboxAPIs.KINEMATICS_TOOLBOX.appendedWith(robotName).appendedWith("input");
+      return ToolboxAPIs.KINEMATICS_TOOLBOX.withRobot(robotName).withInput();
    }
 }

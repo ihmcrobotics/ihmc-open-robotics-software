@@ -221,7 +221,7 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
       
       //      fullRobotModel.updateFrames();
       ROS2Topic<RobotFrameData> ros2Topic = HumanoidControllerAPI.getOutputTopic(robotModel.getSimpleRobotName())
-                                                                 .appendedWith("afterL_arm_ely")
+                                                                 .withSuffix("afterL_arm_ely")
                                                                  .withType(RobotFrameData.class);
       List<RobotFrameData> frameMessages = new ArrayList<>();
       

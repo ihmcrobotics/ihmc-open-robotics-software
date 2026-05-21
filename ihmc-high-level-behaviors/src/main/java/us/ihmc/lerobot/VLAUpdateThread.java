@@ -19,6 +19,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.Kinemati
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
@@ -58,9 +59,9 @@ import java.util.concurrent.CompletableFuture;
  */
 public class VLAUpdateThread extends VLAYoRegistry
 {
-   public static final ROS2IOTopicPair<VLAOperationMessage> UI = new ROS2IOTopicPair<>(new ROS2Topic<>("/").prependedWith("vla_ui")
-                                                                                                        .withType(VLAOperationMessage.class));
-   public static final ROS2Topic<YoRegistryMessage> YO = new ROS2Topic<>("/").prependedWith("vla_yo").withType(YoRegistryMessage.class);
+   public static final ROS2IOTopicPair<VLAOperationMessage> UI = new ROS2IOTopicPair<>(new HumanoidROS2Topic<>().withPrefix("vla_ui")
+                                                                                                                .withTypeName(VLAOperationMessage.class));
+   public static final ROS2Topic<YoRegistryMessage> YO = new HumanoidROS2Topic<>().withPrefix("vla_yo").withTypeName(YoRegistryMessage.class);
    private final RepeatingTaskThread thread = new RepeatingTaskThread(getClass().getSimpleName(), this::runTask).setFrequencyLimit(50.0);
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImageSensor zedSensor;

@@ -7,6 +7,7 @@ import ihmc_common_msgs.Point2DMessage;
 import ihmc_common_msgs.TextToSpeechPacket;
 import toolbox_msgs.*;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2QoSProfile;
 import us.ihmc.jros2.ROS2Topic;
@@ -153,25 +154,35 @@ public final class ControllerAPI
       outputMessageClassSpecificQoS.put(MultiContactBalanceStatus.class, ROS2QoSProfile.BEST_EFFORT);
    }
 
-   public static ROS2Topic<?> getBaseTopic(String controlModuleName, String robotName)
+   public static HumanoidROS2Topic<?> getBaseTopic(String controlModuleName, String robotName)
    {
-      return ROS2Tools.IHMC_ROOT.appendedWith(controlModuleName).appendedWith(robotName);
+      return ROS2Tools.IHMC_ROOT.withModule(controlModuleName).withRobot(robotName);
    }
 
    @SuppressWarnings("unchecked")
    public static <T extends ROS2Message<T>> ROS2Topic<T> getTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
    {
+      HumanoidROS2Topic<?> humanoidBase = toHumanoidTopic(baseTopic);
+
       if (inputMessageClasses.contains(messageClass))
-         return (ROS2Topic<T>) baseTopic.appendedWith("input").withType(messageClass);
+         return (ROS2Topic<T>) humanoidBase.withInput().withTypeName(messageClass);
       else if (outputMessageClasses.contains(messageClass))
-         return (ROS2Topic<T>) baseTopic.appendedWith("output").withType(messageClass);
+         return (ROS2Topic<T>) humanoidBase.withOutput().withTypeName(messageClass);
       else
-         return (ROS2Topic<T>) baseTopic.withType(messageClass);
+         return (ROS2Topic<T>) humanoidBase.withTypeName(messageClass);
    }
 
    public static <T extends ROS2Message<T>> ROS2Topic<T> getLowFrequencyTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
    {
-      return getTopic(baseTopic, messageClass).appendedWith("lf");
+      return (ROS2Topic<T>) toHumanoidTopic(getTopic(baseTopic, messageClass)).withSuffix("lf");
+   }
+
+   private static HumanoidROS2Topic<?> toHumanoidTopic(ROS2Topic<?> topic)
+   {
+      if (topic instanceof HumanoidROS2Topic<?> humanoidTopic)
+         return humanoidTopic;
+
+      throw new IllegalArgumentException("Expected HumanoidROS2Topic, got " + topic.getClass().getName() + " for " + topic.getName());
    }
 
    public static ROS2QoSProfile getQoS(Class<?> messageClass)

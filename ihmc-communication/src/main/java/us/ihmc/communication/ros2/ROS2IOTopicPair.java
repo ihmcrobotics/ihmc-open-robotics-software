@@ -1,5 +1,6 @@
 package us.ihmc.communication.ros2;
 
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.jros2.ROS2Message;
 
@@ -16,8 +17,13 @@ public class ROS2IOTopicPair<T extends ROS2Message<T>>
 
    public ROS2IOTopicPair(ROS2Topic<T> baseTopic)
    {
-      commandTopic = baseTopic.appendedWith("command");
-      statusTopic = baseTopic.appendedWith("status");
+      if (!(baseTopic instanceof HumanoidROS2Topic<?> humanoidBase))
+         throw new IllegalArgumentException("ROS2IOTopicPair requires a HumanoidROS2Topic base: " + baseTopic);
+
+      @SuppressWarnings("unchecked")
+      HumanoidROS2Topic<T> typedBase = (HumanoidROS2Topic<T>) humanoidBase;
+      commandTopic = typedBase.withIOQualifier("command");
+      statusTopic = typedBase.withIOQualifier("status");
    }
 
    public ROS2Topic<T> getCommandTopic()

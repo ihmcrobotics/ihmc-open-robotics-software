@@ -114,7 +114,7 @@ public class FootstepStreamingToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ToolboxAPIs.FOOTSTEP_STREAMING_TOOLBOX.appendedWith(robotName).appendedWith("output");
+      return ToolboxAPIs.FOOTSTEP_STREAMING_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -125,7 +125,7 @@ public class FootstepStreamingToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ToolboxAPIs.FOOTSTEP_STREAMING_TOOLBOX.appendedWith(robotName).appendedWith("input");
+      return ToolboxAPIs.FOOTSTEP_STREAMING_TOOLBOX.withRobot(robotName).withInput();
    }
 
    public static ROS2Topic<ToolboxStateMessage> getInputStateTopic(String robotName)

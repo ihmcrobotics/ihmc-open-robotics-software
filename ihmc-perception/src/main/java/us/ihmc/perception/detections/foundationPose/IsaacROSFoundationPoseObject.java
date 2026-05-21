@@ -5,6 +5,7 @@ import perception_msgs.FoundationPoseParameters;
 import sensor_msgs.CameraInfo;
 import sensor_msgs.Image;
 import std_msgs.Empty;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.jros2.ROS2Topic;
 import vision_msgs.Detection3DArray;
 
@@ -46,23 +47,29 @@ public enum IsaacROSFoundationPoseObject
    {
       public FoundationPoseTopics(String object)
       {
-         this(POSE_ESTIMATION_DEPTH_IMAGE.appendedWith(object),
-              POSE_ESTIMATION_RGB_IMAGE.appendedWith(object),
-              POSE_ESTIMATION_SEGMENTATION.appendedWith(object),
-              POSE_ESTIMATION_CAMERA_INFO.appendedWith(object),
-              POSE_ESTIMATION_OUTPUT.appendedWith(object),
-              TRACKING_DEPTH_IMAGE.appendedWith(object),
-              TRACKING_RGB_IMAGE.appendedWith(object),
-              TRACKING_CAMERA_INFO.appendedWith(object),
-              TRACKING_OUTPUT.appendedWith(object),
-              DEPTH_IMAGE.appendedWith(object),
-              RGB_IMAGE.appendedWith(object),
-              SEGMENTATION.appendedWith(object),
-              CAMERA_INFO.appendedWith(object),
-              RESET.appendedWith(object),
-              IHMC_RESULT.appendedWith(object),
-              IHMC_STATE.appendedWith(object),
-              IHMC_PARAMETERS.appendedWith(object));
+         this(withObjectSuffix(POSE_ESTIMATION_DEPTH_IMAGE, object),
+              withObjectSuffix(POSE_ESTIMATION_RGB_IMAGE, object),
+              withObjectSuffix(POSE_ESTIMATION_SEGMENTATION, object),
+              withObjectSuffix(POSE_ESTIMATION_CAMERA_INFO, object),
+              withObjectSuffix(POSE_ESTIMATION_OUTPUT, object),
+              withObjectSuffix(TRACKING_DEPTH_IMAGE, object),
+              withObjectSuffix(TRACKING_RGB_IMAGE, object),
+              withObjectSuffix(TRACKING_CAMERA_INFO, object),
+              withObjectSuffix(TRACKING_OUTPUT, object),
+              withObjectSuffix(DEPTH_IMAGE, object),
+              withObjectSuffix(RGB_IMAGE, object),
+              withObjectSuffix(SEGMENTATION, object),
+              withObjectSuffix(CAMERA_INFO, object),
+              withObjectSuffix(RESET, object),
+              withObjectSuffix(IHMC_RESULT, object),
+              withObjectSuffix(IHMC_STATE, object),
+              withObjectSuffix(IHMC_PARAMETERS, object));
       }
+   }
+
+   @SuppressWarnings("unchecked")
+   private static <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Topic<T> withObjectSuffix(ROS2Topic<T> baseTopic, String object)
+   {
+      return ((HumanoidROS2Topic<T>) baseTopic).withSuffix(object);
    }
 }

@@ -5,6 +5,7 @@ import std_msgs.Int64;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestProfile;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.jros2.ROS2Node;
@@ -21,9 +22,9 @@ import static us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine.*;
 
 public class IntegersAt1HzNetworkTestProfile extends ROS2NetworkTestProfile
 {
-   private static final ROS2Topic<Int64> BASE_TOPIC = ROS2Tools.IHMC_ROOT.appendedWith("ints1hz").withType(Int64.class);
-   private static final ROS2Topic<Int64> TO_OCU = BASE_TOPIC.appendedWith("toocu");
-   private static final ROS2Topic<Int64> TO_CPU1 = BASE_TOPIC.appendedWith("tocpu1");
+   private static final HumanoidROS2Topic<Int64> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule("ints1hz").withType(Int64.class);
+   private static final ROS2Topic<Int64> TO_OCU = BASE_TOPIC.withSuffix("toocu");
+   private static final ROS2Topic<Int64> TO_CPU1 = BASE_TOPIC.withSuffix("tocpu1");
    private final MutableInt number = new MutableInt();
    private final ROS2Publisher<Int64> publisher;
 

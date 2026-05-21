@@ -3,6 +3,7 @@ package us.ihmc.communication.ros2.tf2;
 import builtin_interfaces.Time;
 import geometry_msgs.TransformStamped;
 import tf2_msgs.TFMessage;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,10 +15,8 @@ import us.ihmc.jros2.ROS2Topic;
 
 public class ROS2FrameTools
 {
-   public static final ROS2Topic<TFMessage> TF_TOPIC = new ROS2Topic<>().appendedWith("tf").withType(TFMessage.class);
-   public static final ROS2Topic<TFMessage> TF_STATIC_TOPIC = new ROS2Topic<>().appendedWith("tf_static")
-
-                                                                               .withType(TFMessage.class);
+   public static final ROS2Topic<TFMessage> TF_TOPIC = new HumanoidROS2Topic<>().withModule("tf").withType(TFMessage.class);
+   public static final ROS2Topic<TFMessage> TF_STATIC_TOPIC = new HumanoidROS2Topic<>().withModule("tf_static").withType(TFMessage.class);
 
    // Read about optical frames here: https://ros.org/reps/rep-0103.html#suffix-frames
    public static final Orientation3DReadOnly CAMERA_TO_OPTICAL_ROTATION = new YawPitchRoll(-0.5 * Math.PI, 0.0, -0.5 * Math.PI);

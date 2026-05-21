@@ -96,13 +96,9 @@ public class StepGeneratorAPIDefinition
 
    public static <T extends ROS2Message<T>> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
    {
-      if (inputMessageClasses.contains(messageClass))
+      if (inputMessageClasses.contains(messageClass) || outputMessageClasses.contains(messageClass))
       {
-         return getInputTopic(robotName).withType(messageClass);
-      }
-      if (outputMessageClasses.contains(messageClass))
-      {
-         return getOutputTopic(robotName).withType(messageClass);
+         return HumanoidControllerAPI.getTopic(messageClass, robotName);
       }
 
       throw new RuntimeException("Topic does not exist: " + messageClass);

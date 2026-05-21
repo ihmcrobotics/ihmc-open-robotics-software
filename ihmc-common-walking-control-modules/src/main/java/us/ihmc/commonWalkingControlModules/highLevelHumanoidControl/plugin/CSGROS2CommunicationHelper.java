@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Con
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.jros2.ROS2Node;
@@ -34,10 +35,10 @@ public class CSGROS2CommunicationHelper
    // we only have a limited amount of networking bandwidth when using WIFI.
    private static final double THROTTLER_THREAD_HERTZ = 11.0;
 
-   public static final ROS2Topic<Empty> CSG_HEARTBEAT_TOPIC = new ROS2Topic<>().prependedWith("ihmc")
-                                                                               .appendedWith("continuous_step_generator")
-                                                                               .appendedWith("heartbeat")
-                                                                               .withType(Empty.class);
+   public static final ROS2Topic<Empty> CSG_HEARTBEAT_TOPIC = new HumanoidROS2Topic<>().withPrefix("ihmc")
+                                                                                       .withModule("continuous_step_generator")
+                                                                                       .withSuffix("heartbeat")
+                                                                                       .withType(Empty.class);
 
    private final ROS2Node ros2Node;
    private final String robotName;

@@ -27,7 +27,7 @@ import java.util.concurrent.Executors;
  */
 public class ROS2PeerClockOffsetEstimator
 {
-   private static final ROS2Topic<PeerClockOffsetEstimatorPingMessage> TOPIC = ROS2Tools.IHMC_ROOT.appendedWith("peer_clock_offset_estimator")
+   private static final ROS2Topic<PeerClockOffsetEstimatorPingMessage> TOPIC = ROS2Tools.IHMC_ROOT.withModule("peer_clock_offset_estimator")
                                                                                                   .withType(PeerClockOffsetEstimatorPingMessage.class);
 
    private final HashMap<Guid, ROS2PeerClockOffsetEstimatorPeer> peerMap = new HashMap<>();

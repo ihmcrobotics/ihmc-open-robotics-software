@@ -102,7 +102,7 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 
    public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ToolboxAPIs.WHOLE_BODY_TRAJECTORY_TOOLBOX.appendedWith(robotName).appendedWith("output");
+      return ToolboxAPIs.WHOLE_BODY_TRAJECTORY_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -113,7 +113,7 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 
    public static ROS2Topic getInputTopic(String robotName)
    {
-      return ToolboxAPIs.WHOLE_BODY_TRAJECTORY_TOOLBOX.appendedWith(robotName).appendedWith("input");
+      return ToolboxAPIs.WHOLE_BODY_TRAJECTORY_TOOLBOX.withRobot(robotName).withInput();
    }
 
    @Override

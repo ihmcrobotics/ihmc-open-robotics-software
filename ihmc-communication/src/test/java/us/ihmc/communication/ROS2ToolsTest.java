@@ -8,6 +8,7 @@ import std_msgs.Float64;
 import std_msgs.Int64;
 import test_msgs.LongString;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
@@ -15,6 +16,7 @@ import us.ihmc.jros2.ROS2Node;
 // import us.ihmc.ros2.ROS2NodeBuilder.SpecialTransportMode; // TODO: jros2 migration - ROS2NodeBuilder not ported
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
@@ -32,21 +34,22 @@ class ROS2ToolsTest
    @Test
    public void testTopicNameStuff()
    {
-      assertEquals("/ihmc/camera_info", ROS2Tools.IHMC_ROOT.withType(CameraInfo.class).toString());
-      assertEquals("/ihmc/atlas/camera_info", ROS2Tools.IHMC_ROOT.withType(CameraInfo.class).appendedWith("atlas").toString());
+      assertEquals("/ihmc/camera_info", ROS2Tools.IHMC_ROOT.withTypeName(CameraInfo.class).toString());
+      assertEquals("/ihmc/atlas/camera_info", ROS2Tools.IHMC_ROOT.withTypeName(CameraInfo.class).withRobot("atlas").toString());
       assertEquals("/ihmc/atlas/rea/input/camera_info",
-                   ROS2Tools.IHMC_ROOT.withType(CameraInfo.class).appendedWith("atlas").appendedWith("rea").appendedWith("input").toString());
+                   ROS2Tools.IHMC_ROOT.withTypeName(CameraInfo.class).withRobot("atlas").withModule("rea").withInput().toString());
 
-      ROS2Topic<?> defaultTopicName = ROS2Tools.IHMC_ROOT;
-      assertEquals("/ihmc/camera_info", defaultTopicName.withType(CameraInfo.class).toString());
+      HumanoidROS2Topic<?> defaultTopicName = ROS2Tools.IHMC_ROOT;
+      assertEquals("/ihmc/camera_info", defaultTopicName.withTypeName(CameraInfo.class).toString());
 
-      ROS2Topic<?> defaultTopicNameWithRobot = ROS2Tools.IHMC_ROOT.appendedWith("atlas");
-      assertEquals("/ihmc/atlas/camera_info", defaultTopicNameWithRobot.withType(CameraInfo.class).toString());
+      HumanoidROS2Topic<?> defaultTopicNameWithRobot = ROS2Tools.IHMC_ROOT.withRobot("atlas");
+      assertEquals("/ihmc/atlas/camera_info", defaultTopicNameWithRobot.withTypeName(CameraInfo.class).toString());
 
-      ROS2Topic<?> defaultTopicName3 = ROS2Tools.IHMC_ROOT.appendedWith("atlas").appendedWith("rea").appendedWith("output");
-      assertEquals("/ihmc/atlas/rea/output/camera_info", defaultTopicName3.withType(CameraInfo.class).toString());
+      HumanoidROS2Topic<?> defaultTopicName3 = ROS2Tools.IHMC_ROOT.withRobot("atlas").withModule("rea").withOutput();
+      assertEquals("/ihmc/atlas/rea/output/camera_info", defaultTopicName3.withTypeName(CameraInfo.class).toString());
 
-      assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", ToolboxAPIs.STEP_TELEOP_TOOLBOX.appendedWith("atlas").appendedWith("output").toString());
+      assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", ToolboxAPIs.STEP_TELEOP_TOOLBOX.withRobot("atlas").withOutput().toString());
+      assertEquals("/ihmc/atlas/controller", ControllerAPI.getBaseTopic("controller", "atlas").toString());
    }
 
    @Disabled

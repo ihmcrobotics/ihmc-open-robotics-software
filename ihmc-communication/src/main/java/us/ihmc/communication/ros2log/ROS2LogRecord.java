@@ -137,7 +137,7 @@ public class ROS2LogRecord
 
    public static ROS2Topic<ROS2LogMessage> getROS2LogTopic()
    {
-      return ROS2Tools.IHMC_ROOT.appendedWith(MODULE_NAME).withType(ROS2LogMessage.class);
+      return ROS2Tools.IHMC_ROOT.withModule(MODULE_NAME).withTypeName(ROS2LogMessage.class);
    }
 
    @SuppressWarnings("unchecked")

@@ -101,7 +101,7 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ToolboxAPIs.EXTERNAL_FORCE_ESTIMATION_TOOLBOX.appendedWith(robotName).appendedWith("output");
+      return ToolboxAPIs.EXTERNAL_FORCE_ESTIMATION_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -112,6 +112,6 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ToolboxAPIs.EXTERNAL_FORCE_ESTIMATION_TOOLBOX.appendedWith(robotName).appendedWith("input");
+      return ToolboxAPIs.EXTERNAL_FORCE_ESTIMATION_TOOLBOX.withRobot(robotName).withInput();
    }
 }

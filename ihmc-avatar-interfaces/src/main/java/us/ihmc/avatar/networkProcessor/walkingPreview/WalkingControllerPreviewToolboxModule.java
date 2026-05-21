@@ -90,7 +90,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.appendedWith(robotName).appendedWith("output");
+      return ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -101,7 +101,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.appendedWith(robotName).appendedWith("input");
+      return ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withInput();
    }
 
    public YoRegistry getRegistry()

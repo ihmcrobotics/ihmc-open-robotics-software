@@ -8,6 +8,7 @@ import perception_msgs.FoundationPoseRequest;
 import perception_msgs.FoundationPoseResult;
 import perception_msgs.ImageMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.RawImage;
@@ -82,12 +83,12 @@ public class RDXFoundationPoseDemo
    private static final BytePointer JPG = new BytePointer(".jpg");
    private static final BytePointer PNG = new BytePointer(".png");
 
-   private static final ROS2Topic<?> RELIABLE_TOPIC = new ROS2Topic<>();
-   private static final ROS2Topic<ImageMessage> COLOR_TOPIC = RELIABLE_TOPIC.appendedWith("foundation_pose/color_rgb8").withType(ImageMessage.class);
-   private static final ROS2Topic<ImageMessage> DEPTH_TOPIC = RELIABLE_TOPIC.appendedWith("foundation_pose/depth_mono16").withType(ImageMessage.class);
-   private static final ROS2Topic<FoundationPoseRequest> REQUEST_TOPIC = RELIABLE_TOPIC.appendedWith("foundation_pose/request").withType(FoundationPoseRequest.class);
-   private static final ROS2Topic<std_msgs.String_> REMOVE_TOPIC = RELIABLE_TOPIC.appendedWith("foundation_pose/remove").withType(std_msgs.String_.class);
-   private static final ROS2Topic<FoundationPoseResult> RESULT_TOPIC = new ROS2Topic<>().appendedWith("foundation_pose/result").withType(FoundationPoseResult.class);
+   private static final HumanoidROS2Topic<?> RELIABLE_TOPIC = new HumanoidROS2Topic<>();
+   private static final ROS2Topic<ImageMessage> COLOR_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/color_rgb8").withType(ImageMessage.class);
+   private static final ROS2Topic<ImageMessage> DEPTH_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/depth_mono16").withType(ImageMessage.class);
+   private static final ROS2Topic<FoundationPoseRequest> REQUEST_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/request").withType(FoundationPoseRequest.class);
+   private static final ROS2Topic<std_msgs.String_> REMOVE_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/remove").withType(std_msgs.String_.class);
+   private static final ROS2Topic<FoundationPoseResult> RESULT_TOPIC = new HumanoidROS2Topic<>().withModule("foundation_pose/result").withType(FoundationPoseResult.class);
 
    private final ROS2Node ros2Node;
    private final ROS2PeerClockOffsetEstimator robotClockOffsetEstimator;

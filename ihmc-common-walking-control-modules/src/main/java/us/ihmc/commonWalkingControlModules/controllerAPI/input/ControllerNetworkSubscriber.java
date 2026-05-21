@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 
-import controller_msgs.InvalidPacketNotificationPacket;
 import ihmc_common_msgs.MessageCollection;
 import ihmc_common_msgs.MessageCollectionNotification;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
@@ -85,8 +84,6 @@ public class ControllerNetworkSubscriber
       if (ros2Node == null)
          LogTools.error("No ROS2 node, {} cannot be created.", getClass().getSimpleName());
 
-      listOfSupportedStatusMessages.add(InvalidPacketNotificationPacket.class);
-
       createPublishersSubscribersForSupportedMessages();
       createGlobalStatusMessageListener();
    }
@@ -140,8 +137,9 @@ public class ControllerNetworkSubscriber
 
    public void addMessageCollectors(MessageIDExtractor messageIDExtractor, int numberOfSimultaneousCollectionsToSupport)
    {
-      ROS2Publisher<MessageCollectionNotification> publisher = ros2Node.createPublisher(ControllerAPI.getTopic(outputTopic, MessageCollectionNotification.class));
-      listOfSupportedStatusMessages.add(MessageCollectionNotification.class);
+      @SuppressWarnings("unchecked")
+      ROS2Publisher<MessageCollectionNotification> publisher = (ROS2Publisher<MessageCollectionNotification>) statusMessagePublisherMap.computeIfAbsent(MessageCollectionNotification.class,
+                                                                                                                                                        messageClass -> createPublisher(messageClass));
 
       for (int i = 0; i < numberOfSimultaneousCollectionsToSupport; i++)
       {

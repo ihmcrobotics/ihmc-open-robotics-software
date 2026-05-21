@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import std_msgs.Empty;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
@@ -21,7 +22,7 @@ public class ROS2DemandGraphNodeTest
    {
       ROS2Node ros2Node = new ROS2Node("demand_graph_test_is_demanded");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-      ROS2Topic<Empty> testTopic = ROS2Tools.IHMC_ROOT.appendedWith("demand_graph_test_is_demanded").withType(Empty.class);
+      HumanoidROS2Topic<Empty> testTopic = ROS2Tools.IHMC_ROOT.withSuffix("demand_graph_test_is_demanded").withType(Empty.class);
 
       ROS2DemandGraphNode testNode = new ROS2DemandGraphNode(ros2Node, testTopic);
       ROS2Heartbeat testHeartbeat = new ROS2Heartbeat(ros2Node, testTopic);
@@ -46,8 +47,8 @@ public class ROS2DemandGraphNodeTest
    {
       ROS2Node ros2Node = new ROS2Node("demand_graph_test_dependant");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-      ROS2Topic<Empty> testTopic = ROS2Tools.IHMC_ROOT.appendedWith("demand_graph_test_dependant").withType(Empty.class);
-      ROS2Topic<Empty> dependantTopic = testTopic.prependedWith("dependant");
+      HumanoidROS2Topic<Empty> testTopic = ROS2Tools.IHMC_ROOT.withSuffix("demand_graph_test_dependant").withType(Empty.class);
+      HumanoidROS2Topic<Empty> dependantTopic = testTopic.withPrefix("dependant");
 
       ROS2Heartbeat testHeartbeat = new ROS2Heartbeat(ros2Node, testTopic);
       ROS2DemandGraphNode testNode = new ROS2DemandGraphNode(ros2Node, testTopic);
@@ -90,8 +91,8 @@ public class ROS2DemandGraphNodeTest
    {
       ROS2Node ros2Node = new ROS2Node("demand_graph_test_dependant");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-      ROS2Topic<Empty> testTopic = ROS2Tools.IHMC_ROOT.appendedWith("demand_graph_test_dependant").withType(Empty.class);
-      ROS2Topic<Empty> dependantTopic = testTopic.prependedWith("dependant");
+      HumanoidROS2Topic<Empty> testTopic = ROS2Tools.IHMC_ROOT.withSuffix("demand_graph_test_dependant").withType(Empty.class);
+      HumanoidROS2Topic<Empty> dependantTopic = testTopic.withPrefix("dependant");
 
       ROS2Heartbeat testHeartbeat = new ROS2Heartbeat(ros2Node, testTopic);
       ROS2DemandGraphNode testNode = new ROS2DemandGraphNode(ros2Node, testTopic);

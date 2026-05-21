@@ -35,7 +35,7 @@ public final class ROS2Tools
 {
    public static final String IHMC_TOPIC_PREFIX = "ihmc";
 
-   public static final ROS2Topic<?> IHMC_ROOT = new ROS2Topic<>("/").prependedWith(IHMC_TOPIC_PREFIX);
+   public static final HumanoidROS2Topic<?> IHMC_ROOT = new HumanoidROS2Topic<>().withPrefix(IHMC_TOPIC_PREFIX);
 
    /**
     * Volatile callback where the user only has access to the message in the callback.

@@ -123,8 +123,8 @@ public class FootstepPlanningModuleLauncher
       FootstepPlanningModule footstepPlanningModule = createModule(robotModel);
       footstepPlanningModule.registerRosNode(ros2Node, manageROS2Node);
       String name = footstepPlanningModule.getName();
-      ROS2Topic<?> inputTopic = FootstepPlannerAPI.FOOTSTEP_PLANNER.appendedWith(name).appendedWith("input");
-      ROS2Topic<?> outputTopic = FootstepPlannerAPI.FOOTSTEP_PLANNER.appendedWith(name).appendedWith("output");
+      ROS2Topic<?> inputTopic = FootstepPlannerAPI.inputTopic(name);
+      ROS2Topic<?> outputTopic = FootstepPlannerAPI.outputTopic(name);
 
       AtomicBoolean generateLog = new AtomicBoolean();
 

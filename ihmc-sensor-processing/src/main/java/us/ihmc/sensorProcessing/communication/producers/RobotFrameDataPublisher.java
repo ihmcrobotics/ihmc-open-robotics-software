@@ -2,6 +2,7 @@ package us.ihmc.sensorProcessing.communication.producers;
 
 import ihmc_common_msgs.RobotFrameData;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.jros2.ROS2Publisher;
@@ -31,7 +32,7 @@ public class RobotFrameDataPublisher
 
       if (ENABLE_ROBOT_FRAME_DATA_PUBLISHERS)
       {
-         ROS2Topic<RobotFrameData> ros2Topic = outputTopic.appendedWith(referenceFrame.getName()).withType(RobotFrameData.class);
+         ROS2Topic<RobotFrameData> ros2Topic = ((HumanoidROS2Topic<?>) outputTopic).withSuffix(referenceFrame.getName()).withType(RobotFrameData.class);
          ros2Publisher = ros2Node.createPublisher(ros2Topic);
       }
       else
@@ -62,6 +63,6 @@ public class RobotFrameDataPublisher
 
    public static ROS2Topic<RobotFrameData> getTopic(String robotName, String referenceFrameName)
    {
-      return HumanoidControllerAPI.getOutputTopic(robotName).withType(RobotFrameData.class).appendedWith(referenceFrameName);
+      return HumanoidControllerAPI.getOutputTopic(robotName).withType(RobotFrameData.class).withSuffix(referenceFrameName);
    }
 }

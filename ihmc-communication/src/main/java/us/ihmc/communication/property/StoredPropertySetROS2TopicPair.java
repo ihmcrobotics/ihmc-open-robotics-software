@@ -1,6 +1,7 @@
 package us.ihmc.communication.property;
 
 import ihmc_common_msgs.PrimitiveDataVectorMessage;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.jros2.ROS2Topic;
@@ -23,8 +24,8 @@ public class StoredPropertySetROS2TopicPair
 
    public StoredPropertySetROS2TopicPair(String moduleTopicName, String topicNameSuffix)
    {
-      ROS2Topic<?> baseTopic = ROS2Tools.IHMC_ROOT.appendedWith(moduleTopicName);
-      ROS2Topic<PrimitiveDataVectorMessage> propertySetTopic = baseTopic.withType(PrimitiveDataVectorMessage.class).appendedWith(topicNameSuffix);
+      HumanoidROS2Topic<?> baseTopic = ROS2Tools.IHMC_ROOT.withModule(moduleTopicName);
+      ROS2Topic<PrimitiveDataVectorMessage> propertySetTopic = baseTopic.withType(PrimitiveDataVectorMessage.class).withSuffix(topicNameSuffix);
       topicPair = new ROS2IOTopicPair<>(propertySetTopic);
    }
 
