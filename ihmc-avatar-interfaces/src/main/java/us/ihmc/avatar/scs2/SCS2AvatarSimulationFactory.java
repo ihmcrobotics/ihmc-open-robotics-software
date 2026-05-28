@@ -76,6 +76,8 @@ import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
+import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoPhysicsEngine;
+import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParameters;
 import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
@@ -171,6 +173,9 @@ public class SCS2AvatarSimulationFactory
          false);
    protected final OptionalFactoryField<Consumer<RobotDefinition>> bulletCollisionMutator = new OptionalFactoryField<>(
          "bulletCollisionMutator");
+   protected final OptionalFactoryField<Boolean> useMujocoPhysicsEngine = new OptionalFactoryField<>(
+         "useMujocoPhysicsEngine",
+         false);
    protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>(
          "impulseBasedPhysicsEngineParameters");
    protected final OptionalFactoryField<GroundContactModelParameters> groundContactModelParameters = new OptionalFactoryField<>(
@@ -341,6 +346,15 @@ public class SCS2AvatarSimulationFactory
       else if (useBulletPhysicsEngine.hasValue() && useBulletPhysicsEngine.get())
       {
          physicsEngineFactory = (inertialFrame, rootRegistry) -> new BulletPhysicsEngine(inertialFrame, rootRegistry);
+      }
+      else if (useMujocoPhysicsEngine.hasValue() && useMujocoPhysicsEngine.get())
+      {
+         // MuJoCo requires its internal timestep to match the SCS2 session DT, otherwise sim time
+         // diverges from wall time. Capture simulationDT here rather than at construction so
+         // factory-level overrides ordering doesn't matter.
+         MujocoSimulationParameters mujocoParameters = new MujocoSimulationParameters();
+         mujocoParameters.setTimestep(simulationDT.get());
+         physicsEngineFactory = (inertialFrame, rootRegistry) -> new MujocoPhysicsEngine(inertialFrame, rootRegistry, mujocoParameters);
       }
       else
       {
@@ -1136,6 +1150,11 @@ public class SCS2AvatarSimulationFactory
    public void setBulletCollisionMutator(Consumer<RobotDefinition> bulletCollisionMutator)
    {
       this.bulletCollisionMutator.set(bulletCollisionMutator);
+   }
+
+   public void setUseMujocoPhysicsEngine(boolean useMujocoPhysicsEngine)
+   {
+      this.useMujocoPhysicsEngine.set(useMujocoPhysicsEngine);
    }
 
    public void setEnableSimulatedRobotDamping(boolean enableSimulatedRobotDamping)
