@@ -2,7 +2,6 @@ package us.ihmc.behaviors.behaviorTree.control.ai2r;
 
 import behavior_msgs.msg.dds.AI2RActionFailureMessage;
 import behavior_msgs.msg.dds.AI2RObjectMessage;
-import behavior_msgs.msg.dds.AI2RScanMessage;
 import behavior_msgs.msg.dds.AI2RStatusMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.AbortWalkingMessage;
@@ -20,7 +19,6 @@ import us.ihmc.behaviors.behaviorTree.action.actions.SpineActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionState;
-import us.ihmc.behaviors.behaviorTree.action.actions.WaitActionState;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition.ConditionNodeType;
@@ -43,9 +41,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.idl.IDLSequence.StringBuilderHolder;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImagePublisher;
@@ -315,12 +311,12 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          actionSequence.setExecutionNextIndex(goToCheckpointLeafIndex);
          actionSequence.setAutomaticExecution(true);
          statusMessage.setBehaviorInProgress(goToCheckpointName);
-         startGoToRecording();
+         startRecording();
          randomizationRunInProgress = true;
       }
       else if (randomizationRunInProgress && !actionSequence.getAutomaticExecution())
       {
-         stopGoToRecording();
+         stopRecording();
          randomizationsCompleted++;
          definition.setNumberOfRandomizationsValue(Math.max(0, randomizationTargetCount - randomizationsCompleted));
          definition.modify();
@@ -406,7 +402,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    }
 
 
-   private void startGoToRecording()
+   private void startRecording()
    {
       if (ros2LogRecord != null)
          return;
@@ -416,7 +412,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       ros2LogRecord.start();
    }
 
-   private void stopGoToRecording()
+   private void stopRecording()
    {
       if (ros2LogRecord == null)
          return;
@@ -433,7 +429,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
 
    private void resetRandomizationSession()
    {
-      stopGoToRecording();
+      stopRecording();
 
       // Restore the original points captured at the beginning of the session.
       if (goToAction != null)
@@ -532,6 +528,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          wholeBodyRandomizationsCompleted = 0;
          wholeBodyRandomizationRunInProgress = false;
          wholeBodyRandomizationSessionActive = true;
+         startRecording();
       }
 
       if (wholeBodyRandomizationsCompleted >= wholeBodyRandomizationTargetCount)
@@ -582,12 +579,10 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          actionSequence.setExecutionNextIndex(wholeBodyStartLeafIndex);
          actionSequence.setAutomaticExecution(true);
          statusMessage.setBehaviorInProgress(wholeBodyBehaviorName);
-         startGoToRecording();
          wholeBodyRandomizationRunInProgress = true;
       }
       else if (wholeBodyRandomizationRunInProgress && !actionSequence.getAutomaticExecution())
       {
-         stopGoToRecording();
          wholeBodyRandomizationsCompleted++;
          definition.setNumberOfRandomizationsValue(Math.max(0, wholeBodyRandomizationTargetCount - wholeBodyRandomizationsCompleted));
          definition.modify();
@@ -597,7 +592,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
 
    private void resetWholeBodyRandomizationSession()
    {
-      stopGoToRecording();
+      stopRecording();
 
       if (wholeBodyRightArmAction != null)
          restoreRightHandDefaults(wholeBodyRightArmAction);
