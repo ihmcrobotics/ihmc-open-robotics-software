@@ -179,6 +179,14 @@ public final class PerceptionAPI
    public static final ROS2Topic<TerrainMapMessage> YOLO_TERRAIN_MAP = TERRAIN_MAP_MODULE.withSuffix("yolo").withOutput().withTypeName(TerrainMapMessage.class);
 
    /*
+    * Voxel map height scan — 187 float heights (17×11 grid in robot base frame)
+    * published by the autonomy process from the dual-camera GPU voxel grid.
+    * Used as the terrain observation by the fall-recovery RL controller.
+    */
+   public static final ROS2Topic<HeightMapMessage> VOXEL_HEIGHT_SCAN =
+         PERCEPTION_MODULE.withSuffix("voxel_height_scan").withOutput().withTypeName(HeightMapMessage.class);
+
+   /*
     * SLAM (old, not used)
     */
    public static final ROS2Topic<PlanarRegionsListMessage> SLAM_OUTPUT_RAPID_REGIONS = PERCEPTION_MODULE.withOutput()

@@ -19,46 +19,26 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Fuses depth+colour data from the belly-mounted stepping camera (4 mm lens) and the
- * head-mounted experimental camera (2.2 mm lens) into a single camera-coloured local
- * 3-D voxel map, rendered as a per-vertex RGB point cloud in RDX.
- *
- * <p>Algorithm:
- * <ol>
- *   <li>CUDA kernel back-projects both depth images to world-frame points <em>and</em>
- *       samples the colour at the same (x, y) pixel (depth and left-colour are aligned
- *       by the ZED SDK).</li>
- *   <li>Each point gets a Gaussian range-confidence score based on the camera's
- *       sweet-spot depth.</li>
- *   <li>Points are voxelised: the voxel keeps the point with the highest confidence,
- *       carrying its sampled colour along.</li>
- *   <li>Voxel centres with their colours are uploaded to
- *       {@link RDXColoredWorldPointCloudRenderer}.</li>
- * </ol>
+ * Fuses depth and colour data from both ZED X Mini cameras into a confidence-weighted coloured voxel map.
  */
 public class RDXFusedVoxelMapVisualizer extends RDXVisualizer
 {
-   // ── Depth + colour image history (newest-first) ────────────────────────────
    private final LinkedList<RawImage> steppingDepthHistory      = new LinkedList<>();
    private final LinkedList<RawImage> steppingColorHistory      = new LinkedList<>();
    private final LinkedList<RawImage> experimentalDepthHistory  = new LinkedList<>();
    private final LinkedList<RawImage> experimentalColorHistory  = new LinkedList<>();
    private final Notification newImageNotification = new Notification();
 
-   // ── CUDA extractor (lazy) ─────────────────────────────────────────────────
    private CUDAFusedVoxelMapExtractor extractor;
 
-   // ── Coloured point cloud renderer ─────────────────────────────────────────
    private RDXColoredWorldPointCloudRenderer renderer;
    private int currentMaxPoints = 0;
 
-   // ── Per-camera range limits (metres) ──────────────────────────────────────
    private final ImFloat steppingMinRange     = new ImFloat(0.30f);
    private final ImFloat steppingMaxRange     = new ImFloat(10.0f);
    private final ImFloat experimentalMinRange  = new ImFloat(0.10f);
    private final ImFloat experimentalMaxRange  = new ImFloat(8.0f);
 
-   // ── Confidence model ──────────────────────────────────────────────────────
    // stepping (belly, 4 mm): sweet-spot ~3 m, σ = 2 m
    private static final float STEPPING_OPTIMAL_M    = 3.0f;
    private static final float STEPPING_SIGMA_M      = 2.0f;
@@ -66,7 +46,6 @@ public class RDXFusedVoxelMapVisualizer extends RDXVisualizer
    private static final float EXPERIMENTAL_OPTIMAL_M = 1.8f;
    private static final float EXPERIMENTAL_SIGMA_M   = 1.2f;
 
-   // ── Voxel parameters ──────────────────────────────────────────────────────
    private final ImFloat voxelSize = new ImFloat(0.05f);
    private static final int VOXEL_KEY_OFFSET = 1 << 19;
 
@@ -77,8 +56,6 @@ public class RDXFusedVoxelMapVisualizer extends RDXVisualizer
       super(title);
       setSceneLevels(RDXSceneLevel.MODEL);
    }
-
-   // ── Public image setters (called from ROS2 receive threads) ───────────────
 
    public void setSteppingDepthImage(RawImage depthImage)
    {
@@ -110,8 +87,6 @@ public class RDXFusedVoxelMapVisualizer extends RDXVisualizer
          synchronized (experimentalColorHistory) { experimentalColorHistory.addFirst(colorImage); }
    }
 
-   // ── RDXVisualizer lifecycle ───────────────────────────────────────────────
-
    @Override
    public void update()
    {
@@ -119,7 +94,6 @@ public class RDXFusedVoxelMapVisualizer extends RDXVisualizer
       if (!newImageNotification.poll())
          return;
 
-      // Grab the newest stepping depth and find the closest colour + experimental pair
       RawImage steppingDepth, steppingColor, experimentalDepth, experimentalColor;
 
       synchronized (steppingDepthHistory)
@@ -143,23 +117,19 @@ public class RDXFusedVoxelMapVisualizer extends RDXVisualizer
          experimentalColor = findClosestByTime(experimentalDepth, experimentalColorHistory);
       }
 
-      // ── Lazy CUDA init ────────────────────────────────────────────────────
       if (extractor == null)
          extractor = new CUDAFusedVoxelMapExtractor();
 
-      // ── CUDA extraction ───────────────────────────────────────────────────
       CUDAFusedVoxelMapExtractor.DualCameraPoints raw =
             extractor.extractPointClouds(steppingDepth, steppingColor,
                                          experimentalDepth, experimentalColor,
                                          steppingMinRange.get(), steppingMaxRange.get(),
                                          experimentalMinRange.get(), experimentalMaxRange.get());
 
-      // ── CPU confidence-weighted voxelisation ──────────────────────────────
       List<float[]> voxelPoints = new ArrayList<>();
       List<float[]> voxelColors = new ArrayList<>();
       buildVoxelMap(raw, voxelPoints, voxelColors);
 
-      // ── Grow renderer if needed ───────────────────────────────────────────
       if (voxelPoints.size() > currentMaxPoints)
       {
          if (renderer != null) renderer.dispose();
@@ -171,7 +141,6 @@ public class RDXFusedVoxelMapVisualizer extends RDXVisualizer
       if (renderer != null)
          renderer.updateMesh(voxelPoints, voxelColors);
 
-      // ── Trim history ──────────────────────────────────────────────────────
       float hist = historyLengthS.get();
       synchronized (steppingDepthHistory)     { clearExpiredHistory(steppingDepthHistory, hist); }
       synchronized (steppingColorHistory)     { clearExpiredHistory(steppingColorHistory, hist); }
@@ -220,12 +189,8 @@ public class RDXFusedVoxelMapVisualizer extends RDXVisualizer
       releaseAll(experimentalColorHistory);
    }
 
-   // ── Private helpers ───────────────────────────────────────────────────────
-
    /**
-    * Confidence-weighted voxelisation. For each voxel the point with the highest
-    * Gaussian confidence wins, carrying its sampled camera colour.
-    * Populates {@code outPoints} and {@code outColors} in-place.
+    * Confidence-weighted voxelisation: the point with the highest Gaussian range-confidence wins per voxel.
     */
    private void buildVoxelMap(CUDAFusedVoxelMapExtractor.DualCameraPoints raw,
                                List<float[]> outPoints, List<float[]> outColors)

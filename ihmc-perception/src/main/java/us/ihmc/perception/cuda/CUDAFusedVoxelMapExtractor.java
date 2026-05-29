@@ -2,7 +2,6 @@ package us.ihmc.perception.cuda;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
@@ -18,12 +17,8 @@ import java.util.List;
 import static org.bytedeco.cuda.global.cudart.*;
 
 /**
- * Extracts world-frame 3D point clouds and sampled RGB colours from both ZED X Mini depth cameras
- * in a single CUDA kernel launch. Depth and left-colour images are assumed to be aligned
- * (same resolution and pixel correspondence), which is the ZED SDK default.
- *
- * <p>Camera 0 = stepping camera (belly-mounted, 4 mm lens).
- * Camera 1 = experimental camera (head-mounted, 2.2 mm lens).
+ * Extracts world-frame point clouds and RGB colours from both ZED X Mini cameras in a single CUDA kernel launch.
+ * Camera 0 = stepping (belly, 4 mm lens); Camera 1 = experimental (head, 2.2 mm lens).
  */
 public class CUDAFusedVoxelMapExtractor implements AutoCloseable
 {
@@ -42,27 +37,24 @@ public class CUDAFusedVoxelMapExtractor implements AutoCloseable
 
    private static final int BLOCK_SIZE = 16;
 
-   // ── CUDA infrastructure ────────────────────────────────────────────────────
    private final CUDAProgram program;
    private final CUDAKernel  kernel;
    private final CUstream_st stream;
 
-   // ── Host-pinned memory for transforms and atomic counters ─────────────────
    private final FloatPointer transform0Ptr = new FloatPointer();
    private final FloatPointer transform1Ptr = new FloatPointer();
    private final IntPointer   size0Ptr      = new IntPointer();
    private final IntPointer   size1Ptr      = new IntPointer();
 
-   // ── Transform scratch ─────────────────────────────────────────────────────
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final float[] transformArray0 = new float[16];
    private final float[] transformArray1 = new float[16];
 
-   // ── GPU output: world points (float3) ─────────────────────────────────────
    private final FloatPointer gpuPointCloud0 = new FloatPointer();
    private final FloatPointer gpuPointCloud1 = new FloatPointer();
+   private int lastPointCount0 = 0;
+   private int lastPointCount1 = 0;
 
-   // ── GPU output: colours (float3, normalised RGB) ──────────────────────────
    private final FloatPointer gpuColorCloud0 = new FloatPointer();
    private final FloatPointer gpuColorCloud1 = new FloatPointer();
 
@@ -117,7 +109,6 @@ public class CUDAFusedVoxelMapExtractor implements AutoCloseable
             || experimentalDepth.get() == null || experimentalColor.get() == null)
          return DualCameraPoints.EMPTY;
 
-      // ── Ensure GPU point + colour buffers are large enough ────────────────
       long max0 = 3L * steppingDepth.getWidth()     * steppingDepth.getHeight();
       long max1 = 3L * experimentalDepth.getWidth() * experimentalDepth.getHeight();
 
@@ -126,7 +117,6 @@ public class CUDAFusedVoxelMapExtractor implements AutoCloseable
       ensureCapacity(gpuPointCloud1, max1);
       ensureCapacity(gpuColorCloud1, max1);
 
-      // ── Pack transforms, extract camera origins ───────────────────────────
       tempTransform.set(steppingDepth.getTransformToWorld());
       tempTransform.get(transformArray0);
       transform0Ptr.put(transformArray0);
@@ -137,23 +127,19 @@ public class CUDAFusedVoxelMapExtractor implements AutoCloseable
       transform1Ptr.put(transformArray1);
       float ox1 = transformArray1[3], oy1 = transformArray1[7], oz1 = transformArray1[11];
 
-      // ── Reset atomic counters ─────────────────────────────────────────────
       size0Ptr.put(0);
       size1Ptr.put(0);
 
-      // ── Colour GpuMats (upload from CPU if not already on GPU) ────────────
       GpuMat colorGpu0 = steppingColor.getGpuImageMat();
       GpuMat colorGpu1 = experimentalColor.getGpuImageMat();
 
-      // ── Grid: z=2 for the two cameras ────────────────────────────────────
       int maxW = Math.max(steppingDepth.getWidth(), experimentalDepth.getWidth());
       int maxH = Math.max(steppingDepth.getHeight(), experimentalDepth.getHeight());
       dim3 blockSize = new dim3(BLOCK_SIZE, BLOCK_SIZE, 1);
       int gx = Math.max(1, (maxW + BLOCK_SIZE - 1) / (BLOCK_SIZE * 2));
       int gy = Math.max(1, (maxH + BLOCK_SIZE - 1) / (BLOCK_SIZE * 2));
-      dim3 gridSize = new dim3(gx, gy, 2);
+      dim3 gridSize = new dim3(gx, gy, 2);  // z=2 dispatches one slice per camera
 
-      // ── Launch kernel ─────────────────────────────────────────────────────
       kernel
             // Camera 0 depth
             .withPointer(steppingDepth.getCUDADataPointer())
@@ -201,13 +187,13 @@ public class CUDAFusedVoxelMapExtractor implements AutoCloseable
 
       CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
 
-      int n0 = size0Ptr.get();
-      int n1 = size1Ptr.get();
+      lastPointCount0 = size0Ptr.get();
+      lastPointCount1 = size1Ptr.get();
 
-      float[] raw0 = downloadFloats(gpuPointCloud0, n0);
-      float[] col0 = downloadFloats(gpuColorCloud0, n0);
-      float[] raw1 = downloadFloats(gpuPointCloud1, n1);
-      float[] col1 = downloadFloats(gpuColorCloud1, n1);
+      float[] raw0 = downloadFloats(gpuPointCloud0, lastPointCount0);
+      float[] col0 = downloadFloats(gpuColorCloud0, lastPointCount0);
+      float[] raw1 = downloadFloats(gpuPointCloud1, lastPointCount1);
+      float[] col1 = downloadFloats(gpuColorCloud1, lastPointCount1);
 
       blockSize.close();
       gridSize.close();
@@ -217,12 +203,10 @@ public class CUDAFusedVoxelMapExtractor implements AutoCloseable
       experimentalColor.release();
 
       return new DualCameraPoints(
-            toPoints(raw0, n0), toColors(col0, n0),
-            toPoints(raw1, n1), toColors(col1, n1),
+            toPoints(raw0, lastPointCount0), toColors(col0, lastPointCount0),
+            toPoints(raw1, lastPointCount1), toColors(col1, lastPointCount1),
             ox0, oy0, oz0, ox1, oy1, oz1);
    }
-
-   // ── Private helpers ───────────────────────────────────────────────────────
 
    private void ensureCapacity(FloatPointer ptr, long nFloats)
    {
@@ -264,6 +248,38 @@ public class CUDAFusedVoxelMapExtractor implements AutoCloseable
          list.add(new float[]{arr[3 * i], arr[3 * i + 1], arr[3 * i + 2]});
       return list;
    }
+
+   /**
+    * GPU float3 buffer of world-frame points from the stepping camera.
+    * Valid after the most recent {@link #extractPointClouds} call.
+    * Pass directly to {@link CUDAGPUVoxelGrid#updateHits}.
+    */
+   public FloatPointer getGpuPointCloud0() { return gpuPointCloud0; }
+
+   /** Number of valid points in {@link #getGpuPointCloud0()}. */
+   public int getLastPointCount0() { return lastPointCount0; }
+
+   /**
+    * GPU float3 buffer of world-frame points from the experimental camera.
+    * Valid after the most recent {@link #extractPointClouds} call.
+    */
+   public FloatPointer getGpuPointCloud1() { return gpuPointCloud1; }
+
+   /** Number of valid points in {@link #getGpuPointCloud1()}. */
+   public int getLastPointCount1() { return lastPointCount1; }
+
+   /** Camera 0 (stepping) world-frame origin X from the last extraction. */
+   public float getLastOrigin0X() { return transformArray0[3]; }
+   /** Camera 0 (stepping) world-frame origin Y from the last extraction. */
+   public float getLastOrigin0Y() { return transformArray0[7]; }
+   /** Camera 0 (stepping) world-frame origin Z from the last extraction. */
+   public float getLastOrigin0Z() { return transformArray0[11]; }
+   /** Camera 1 (experimental) world-frame origin X from the last extraction. */
+   public float getLastOrigin1X() { return transformArray1[3]; }
+   /** Camera 1 (experimental) world-frame origin Y from the last extraction. */
+   public float getLastOrigin1Y() { return transformArray1[7]; }
+   /** Camera 1 (experimental) world-frame origin Z from the last extraction. */
+   public float getLastOrigin1Z() { return transformArray1[11]; }
 
    @Override
    public void close()
