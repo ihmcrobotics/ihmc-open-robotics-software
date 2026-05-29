@@ -183,8 +183,8 @@ public final class PerceptionAPI
     * published by the autonomy process from the dual-camera GPU voxel grid.
     * Used as the terrain observation by the fall-recovery RL controller.
     */
-   public static final ROS2Topic<HeightMapMessage> VOXEL_HEIGHT_SCAN =
-         PERCEPTION_MODULE.withSuffix("voxel_height_scan").withOutput().withTypeName(HeightMapMessage.class);
+   public static final ROS2Topic<perception_msgs.msg.dds.Float32MultiArrayHack> VOXEL_HEIGHT_SCAN =
+         PERCEPTION_MODULE.withSuffix("voxel_height_scan").withOutput().withType(perception_msgs.msg.dds.Float32MultiArrayHack.class);
 
    /*
     * SLAM (old, not used)

@@ -12,8 +12,8 @@ import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import org.lwjgl.opengl.GL41;
+import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import us.ihmc.rdx.shader.RDXShader;
-import us.ihmc.rdx.shader.RDXUniform;
 import us.ihmc.rdx.shader.RDXUniform;
 
 import java.nio.FloatBuffer;
@@ -111,11 +111,11 @@ public class RDXColoredWorldPointCloudRenderer implements RenderableProvider
    private void registerUniforms(RDXShader rdxShader)
    {
       rdxShader.getBaseShader().register(
-            com.badlogic.gdx.graphics.g3d.shaders.DefaultShader.Inputs.viewTrans,
-            com.badlogic.gdx.graphics.g3d.shaders.DefaultShader.Setters.viewTrans);
+            DefaultShader.Inputs.viewTrans,
+            DefaultShader.Setters.viewTrans);
       rdxShader.getBaseShader().register(
-            com.badlogic.gdx.graphics.g3d.shaders.DefaultShader.Inputs.projTrans,
-            com.badlogic.gdx.graphics.g3d.shaders.DefaultShader.Setters.projTrans);
+            DefaultShader.Inputs.projTrans,
+            DefaultShader.Setters.projTrans);
 
       rdxShader.registerUniform(RDXUniform.createGlobalUniform("u_screenWidth",
             (shader, id, r, attrs) -> shader.set(id, shader.camera.viewportWidth)));

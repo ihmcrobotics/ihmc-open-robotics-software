@@ -1,6 +1,6 @@
 package us.ihmc.perception;
 
-import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.Float32MultiArrayHack;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.commons.thread.RepeatingTaskThread;
@@ -48,10 +48,9 @@ public class DualCameraVoxelGridThread extends RepeatingTaskThread
    private final ROS2SyncedRobotModel syncedRobot;
    private final RigidBodyTransform baseToWorld = new RigidBodyTransform();
 
-   private final ROS2Publisher<HeightMapMessage> heightScanPublisher;
-   private final HeightMapMessage heightScanMessage = new HeightMapMessage();
+   private final ROS2Publisher<Float32MultiArrayHack> heightScanPublisher;
+   private final Float32MultiArrayHack heightScanMessage = new Float32MultiArrayHack();
    private final float[] heightScanBuffer = new float[CUDAGPUVoxelGrid.NUM_SCAN_POINTS];
-   private long sequenceNumber = 0;
 
    public DualCameraVoxelGridThread(ROS2Node ros2Node, ROS2SyncedRobotModel syncedRobot)
    {
@@ -99,10 +98,9 @@ public class DualCameraVoxelGridThread extends RepeatingTaskThread
 
          voxelGrid.extractHeightScan(baseToWorld, heightScanBuffer, 0);
 
-         heightScanMessage.getHeights().clear();
+         heightScanMessage.getData().clear();
          for (float h : heightScanBuffer)
-            heightScanMessage.getHeights().add(h);
-         heightScanMessage.setSequenceId(sequenceNumber++);
+            heightScanMessage.getData().add(h);
          heightScanPublisher.publish(heightScanMessage);
       }
       catch (InterruptedException ignored)
