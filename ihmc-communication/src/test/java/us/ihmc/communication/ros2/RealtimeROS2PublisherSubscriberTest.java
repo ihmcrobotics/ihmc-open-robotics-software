@@ -12,7 +12,7 @@ import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
-@Disabled // TODO: jros2 migration - QueuedROS2Subscription not ported yet
+@Disabled("QueuedROS2Subscription not yet ported to jros2")
 public class RealtimeROS2PublisherSubscriberTest
 {
    private AsyncROS2Node realtimeROS2Node;

@@ -1,7 +1,6 @@
 package us.ihmc.communication.ros2.sync;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import us.ihmc.commons.thread.ThreadTools;
@@ -12,7 +11,6 @@ import us.ihmc.robotics.time.TimeTools;
 import java.time.Duration;
 import java.time.Instant;
 
-@Disabled // TODO: jros2 migration - ROS2NodeBuilder not ported yet
 public class ROS2PeerClockOffsetEstimatorTest
 {
    @Test

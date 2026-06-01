@@ -44,8 +44,6 @@ public class ROS2PeerClockOffsetEstimator
          = Executors.newCachedThreadPool(ThreadTools.createNamedThreadFactory(getClass().getSimpleName() + "PublishReply", true));
    private final PeerClockOffsetEstimatorPingMessage requestMessage = new PeerClockOffsetEstimatorPingMessage();
    private final PeerClockOffsetEstimatorPingMessage receivedMessage = new PeerClockOffsetEstimatorPingMessage();
-   // TODO: jros2 migration - SampleInfo not exposed yet in jros2
-   // private final SampleInfo sampleInfo = new SampleInfo();
    private final Guid receivedRequestTarget = new Guid();
    private final Guid receivedReplyTarget = new Guid();
 
@@ -56,16 +54,21 @@ public class ROS2PeerClockOffsetEstimator
       ourGuid = new Guid();
       ourGuid.set(publisher.getGuid());
 
-      // TODO: jros2 migration - subscription matched callback not yet supported, needs ROS2SubscriptionMatchedCallback
       subscription = ros2Node.createSubscription(TOPIC, reader ->
       {
-         receivedMessage.set(reader.read());
+         PeerClockOffsetEstimatorPingMessage message = reader.read();
+         if (message == null)
+            return;
+
+         receivedMessage.set(message);
 
          MessageTools.fromMessage(receivedMessage.getRequestTarget(), receivedRequestTarget);
          MessageTools.fromMessage(receivedMessage.getReplyTarget(), receivedReplyTarget);
 
          if (receivedMessage.getIsRequest() && receivedRequestTarget.equals(ourGuid)) // Reply
          {
+            addPeerIfAbsent(receivedReplyTarget);
+
             PeerClockOffsetEstimatorPingMessage replyMessage = new PeerClockOffsetEstimatorPingMessage();
             replyMessage.set(receivedMessage);
             replyMessage.setIsRequest(false);
@@ -89,30 +92,14 @@ public class ROS2PeerClockOffsetEstimator
                            MessageTools.toInstant(receivedMessage.getReplySendTime()));
             }
          }
-      });
-
-      // TODO: jros2 migration - subscription matched callback not supported yet
-      // The following code was for tracking when peers connect/disconnect:
-      /*
-      subscription.setMatchedCallback((subscriber, info) ->
+      }, (subscriber, info) ->
       {
          Guid guid = info.getGuid();
-         if (!guid.equals(ourGuid)) // Exclude our publisher
+         if (!guid.equals(ourGuid))
          {
             switch (info.getStatus())
             {
-               case MATCHED_MATCHING ->
-               {
-                  if (!peerMap.containsKey(guid))
-                  {
-                     Guid guidCopy = new Guid();
-                     guidCopy.set(guid);
-
-                     ROS2PeerClockOffsetEstimatorPeer peer = new ROS2PeerClockOffsetEstimatorPeer(guidCopy);
-                     peerMap.put(guidCopy, peer);
-                     peerList.add(peer);
-                  }
-               }
+               case MATCHED_MATCHING -> addPeerIfAbsent(guid);
                case REMOVED_MATCHING ->
                {
                   peerMap.remove(guid);
@@ -121,10 +108,22 @@ public class ROS2PeerClockOffsetEstimator
             }
          }
       });
-      */
 
       requestThread.setFrequencyLimit(5.0);
       requestThread.startRepeating();
+   }
+
+   private void addPeerIfAbsent(Guid peerGuid)
+   {
+      if (peerGuid.equals(ourGuid) || peerMap.containsKey(peerGuid))
+         return;
+
+      Guid guidCopy = new Guid();
+      guidCopy.set(peerGuid);
+
+      ROS2PeerClockOffsetEstimatorPeer peer = new ROS2PeerClockOffsetEstimatorPeer(guidCopy);
+      peerMap.put(guidCopy, peer);
+      peerList.add(peer);
    }
 
    private void runRequestTask()

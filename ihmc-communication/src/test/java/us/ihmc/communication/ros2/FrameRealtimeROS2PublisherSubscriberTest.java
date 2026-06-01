@@ -11,7 +11,7 @@ import us.ihmc.jros2.ROS2Subscription;
 import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
 
-@Disabled // TODO: jros2 migration - QueuedROS2Subscription not ported yet
+@Disabled("QueuedROS2Subscription not yet ported to jros2")
 public class FrameRealtimeROS2PublisherSubscriberTest
 {
    private AsyncROS2Node realtimeROS2Node;

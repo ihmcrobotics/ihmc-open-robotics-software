@@ -38,7 +38,7 @@ public class MessageToolsTest
       EuclidCoreTestTools.assertEquals(pose1, posesAfter.get(1), 1e-5);
    }
 
-   @Disabled // TODO: jros2 migration - serialize/deserialize only works with Packet types, not ROS2Message
+   @Disabled("Legacy Packet serialize round-trip not applicable to ROS2Message")
    @Test
    public void testSerializeDeserialize()
    {

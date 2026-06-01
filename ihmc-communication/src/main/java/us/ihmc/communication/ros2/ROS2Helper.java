@@ -23,7 +23,6 @@ import java.util.function.Consumer;
  * Supports:
  * - Publishing on the fly without having to first create publishers
  * - Disabling and enabling all the publishers and subscribers created here
- * TODO: A lot of simplification will happen when we switch to jros2
  */
 public class ROS2Helper
 {
@@ -161,11 +160,7 @@ public class ROS2Helper
       ros2PublisherMap.publish(topic, stringMessage);
    }
 
-   // TODO: jros2 migration - Pose3D publishing needs custom message wrapper
-   // public void publish(ROS2Topic<Pose3DMessageWrapper> topic, Pose3D message)
-   // {
-   //    ros2PublisherMap.publish(topic, message);
-   // }
+   // Pose3D publishing requires a custom ROS2Message wrapper (see jros2 examples/custom-message-class).
 
    public void publish(ROS2Topic<Empty> topic)
    {

@@ -210,6 +210,5 @@ public final class PerceptionAPI
    /*
     * Mocap
     */
-   // TODO: Pose3D requires custom ROS2Message wrapper implementation (see jros2 examples/custom-message-class)
-   // public static final ROS2Topic<Pose3D> MOCAP_RIGID_BODY = IHMC_ROOT.withTypeName(Pose3D.class).withModule("frame_update").withSuffix("mocap");
+   // Mocap Pose3D topic disabled until a custom ROS2Message wrapper is added (see jros2 examples/custom-message-class).
 }

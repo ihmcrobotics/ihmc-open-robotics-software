@@ -13,7 +13,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.jros2.ROS2Node;
-// import us.ihmc.ros2.ROS2NodeBuilder.SpecialTransportMode; // TODO: jros2 migration - ROS2NodeBuilder not ported
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Subscription;
 import us.ihmc.communication.HumanoidROS2Topic;
@@ -174,7 +173,7 @@ class ROS2ToolsTest
       ThreadTools.sleepForever();
    }
 
-   @Disabled // TODO: jros2 migration - ROS2NodeBuilder not ported yet
+   @Disabled("Requires ROS2NodeBuilder shared-memory transport mode (not yet in jros2)")
    @Test
    public void testSharedMemoryROS2Node() throws InterruptedException
    {
@@ -209,10 +208,11 @@ class ROS2ToolsTest
       assertTrue(messageReceived.get());
       assertFalse(failed.get());
 
-      // sharedMemorySubscriber.close(); // TODO: jros2 - no close() method on ROS2Subscription anymore
+      sharedMemoryNode.destroySubscription(sharedMemorySubscriber);
+      sharedMemoryNode.close();
    }
 
-   @Disabled // TODO: jros2 migration - ROS2NodeBuilder not ported yet
+   @Disabled("Requires ROS2NodeBuilder loopback/address-restriction transport modes (not yet in jros2)")
    @Test
    public void testLoopbackROS2Node() throws InterruptedException, IOException
    {
@@ -260,8 +260,10 @@ class ROS2ToolsTest
       assertTrue(messageReceived.get());
       assertFalse(failed.get());
 
-      // loopbackSubscriber.close(); // TODO: jros2 - no close() method on ROS2Subscription anymore
-      // outsideSubscriber.close(); // TODO: jros2 - no close() method on ROS2Subscription anymore
+      loopbackNode.destroySubscription(loopbackSubscriber);
+      outsiderNode.destroySubscription(outsideSubscriber);
+      loopbackNode.close();
+      outsiderNode.close();
    }
 
    private InetAddress getPhysicalAddress() throws IOException

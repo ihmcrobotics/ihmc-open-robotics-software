@@ -41,12 +41,7 @@ public class ROS2PublisherMap
       getOrCreatePublisher(topic).publish(message);
    }
 
-   // TODO: jros2 migration - Pose3D publishing needs custom message wrapper
-   // public void publish(ROS2Topic<Pose3DMessageWrapper> topic, Pose3D message)
-   // {
-   //    Pose3DMessageWrapper wrapper = new Pose3DMessageWrapper(message);
-   //    getOrCreatePublisher(topic).publish(wrapper);
-   // }
+   // Pose3D publishing requires a custom ROS2Message wrapper (see jros2 examples/custom-message-class).
 
    public void publish(ROS2Topic<Empty> topic)
    {
