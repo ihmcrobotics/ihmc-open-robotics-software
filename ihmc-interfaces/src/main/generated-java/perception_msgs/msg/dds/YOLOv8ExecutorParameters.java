@@ -19,18 +19,18 @@ public class YOLOv8ExecutorParameters extends Packet<YOLOv8ExecutorParameters> i
    /**
             * List of models to run
             */
-   public java.lang.StringBuilder model_to_run_;
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  models_to_run_;
    /**
             * Settings for each model
             */
-   public perception_msgs.msg.dds.YOLOv8ModelParameters model_settings_;
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelParameters>  model_settings_;
 
    public YOLOv8ExecutorParameters()
    {
       latest_timestamp_modifiable_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
       available_yolo_models_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelInfo> (16, new perception_msgs.msg.dds.YOLOv8ModelInfoPubSubType());
-      model_to_run_ = new java.lang.StringBuilder(255);
-      model_settings_ = new perception_msgs.msg.dds.YOLOv8ModelParameters();
+      models_to_run_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (16, "type_d");
+      model_settings_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelParameters> (16, new perception_msgs.msg.dds.YOLOv8ModelParametersPubSubType());
 
    }
 
@@ -44,10 +44,8 @@ public class YOLOv8ExecutorParameters extends Packet<YOLOv8ExecutorParameters> i
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_timestamp_modifiable_, latest_timestamp_modifiable_);
       available_yolo_models_.set(other.available_yolo_models_);
-      model_to_run_.setLength(0);
-      model_to_run_.append(other.model_to_run_);
-
-      perception_msgs.msg.dds.YOLOv8ModelParametersPubSubType.staticCopy(other.model_settings_, model_settings_);
+      models_to_run_.set(other.models_to_run_);
+      model_settings_.set(other.model_settings_);
    }
 
 
@@ -65,35 +63,20 @@ public class YOLOv8ExecutorParameters extends Packet<YOLOv8ExecutorParameters> i
       return available_yolo_models_;
    }
 
-   /**
-            * List of models to run
-            */
-   public void setModelToRun(java.lang.String model_to_run)
-   {
-      model_to_run_.setLength(0);
-      model_to_run_.append(model_to_run);
-   }
 
    /**
             * List of models to run
             */
-   public java.lang.String getModelToRunAsString()
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getModelsToRun()
    {
-      return getModelToRun().toString();
-   }
-   /**
-            * List of models to run
-            */
-   public java.lang.StringBuilder getModelToRun()
-   {
-      return model_to_run_;
+      return models_to_run_;
    }
 
 
    /**
             * Settings for each model
             */
-   public perception_msgs.msg.dds.YOLOv8ModelParameters getModelSettings()
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8ModelParameters>  getModelSettings()
    {
       return model_settings_;
    }
@@ -124,9 +107,15 @@ public class YOLOv8ExecutorParameters extends Packet<YOLOv8ExecutorParameters> i
          {  if (!this.available_yolo_models_.get(i).epsilonEquals(other.available_yolo_models_.get(i), epsilon)) return false; }
       }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.model_to_run_, other.model_to_run_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.models_to_run_, other.models_to_run_, epsilon)) return false;
 
-      if (!this.model_settings_.epsilonEquals(other.model_settings_, epsilon)) return false;
+      if (this.model_settings_.size() != other.model_settings_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.model_settings_.size(); i++)
+         {  if (!this.model_settings_.get(i).epsilonEquals(other.model_settings_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -142,8 +131,7 @@ public class YOLOv8ExecutorParameters extends Packet<YOLOv8ExecutorParameters> i
 
       if (!this.latest_timestamp_modifiable_.equals(otherMyClass.latest_timestamp_modifiable_)) return false;
       if (!this.available_yolo_models_.equals(otherMyClass.available_yolo_models_)) return false;
-      if (!us.ihmc.idl.IDLTools.equals(this.model_to_run_, otherMyClass.model_to_run_)) return false;
-
+      if (!this.models_to_run_.equals(otherMyClass.models_to_run_)) return false;
       if (!this.model_settings_.equals(otherMyClass.model_settings_)) return false;
 
       return true;
@@ -159,8 +147,8 @@ public class YOLOv8ExecutorParameters extends Packet<YOLOv8ExecutorParameters> i
       builder.append(this.latest_timestamp_modifiable_);      builder.append(", ");
       builder.append("available_yolo_models=");
       builder.append(this.available_yolo_models_);      builder.append(", ");
-      builder.append("model_to_run=");
-      builder.append(this.model_to_run_);      builder.append(", ");
+      builder.append("models_to_run=");
+      builder.append(this.models_to_run_);      builder.append(", ");
       builder.append("model_settings=");
       builder.append(this.model_settings_);
       builder.append("}");

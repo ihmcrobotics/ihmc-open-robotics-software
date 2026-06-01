@@ -4,22 +4,29 @@ import behavior_msgs.msg.dds.ConditionNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.communication.crdt.CRDTStatusBoolean;
+import us.ihmc.communication.crdt.CRDTStatusFloat;
 import us.ihmc.communication.crdt.CRDTStatusInteger;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 public class ShapeContainsConditionState
 {
-   private final CRDTStatusInteger numberOfPointsContained;
    private final CRDTStatusBoolean frameIsContained;
+   private final CRDTStatusInteger numberOfPointsContained;
+   private final CRDTStatusFloat averageHue;
+   private final CRDTStatusFloat averageSaturation;
+   private final CRDTStatusFloat averageValue;
    private final CRDTDetachableReferenceFrame shapeFrame;
 
    public ShapeContainsConditionState(ConditionNodeDefinition definition, BehaviorTreeSceneState scene)
    {
-      numberOfPointsContained = new CRDTStatusInteger(ROS2ActorDesignation.ROBOT, definition.getCRDTInfo(), 0);
-      frameIsContained = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, definition.getCRDTInfo(), false);
       shapeFrame = new CRDTDetachableReferenceFrame(scene::findFrameByName,
                                                     definition.getShapeContains().getShapeParentFrameNameCRDT(),
                                                     definition.getShapeContains().getShapeTransformToParent());
+      frameIsContained = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, definition.getCRDTInfo(), false);
+      numberOfPointsContained = new CRDTStatusInteger(ROS2ActorDesignation.ROBOT, definition.getCRDTInfo(), 0);
+      averageHue = new CRDTStatusFloat(ROS2ActorDesignation.ROBOT, definition.getCRDTInfo(), 0.0f);
+      averageSaturation = new CRDTStatusFloat(ROS2ActorDesignation.ROBOT, definition.getCRDTInfo(), 0.0f);
+      averageValue = new CRDTStatusFloat(ROS2ActorDesignation.ROBOT, definition.getCRDTInfo(), 0.0f);
    }
 
    public void update()
@@ -29,19 +36,35 @@ public class ShapeContainsConditionState
 
    public void toMessage(ConditionNodeStateMessage message)
    {
-      message.setNumberOfPointsContained(numberOfPointsContained.toMessage());
       message.setFrameIsContained(frameIsContained.toMessage());
+      message.setNumberOfPointsContained(numberOfPointsContained.toMessage());
+      message.setAverageHue(averageHue.toMessage());
+      message.setAverageSaturation(averageSaturation.toMessage());
+      message.setAverageValue(averageValue.toMessage());
    }
 
    public void fromMessage(ConditionNodeStateMessage message)
    {
-      numberOfPointsContained.fromMessage((int) message.getNumberOfPointsContained());
       frameIsContained.fromMessage(message.getFrameIsContained());
+      numberOfPointsContained.fromMessage((int) message.getNumberOfPointsContained());
+      averageHue.fromMessage(message.getAverageHue());
+      averageSaturation.fromMessage(message.getAverageSaturation());
+      averageValue.fromMessage(message.getAverageValue());
    }
 
    public CRDTDetachableReferenceFrame getShapeFrame()
    {
       return shapeFrame;
+   }
+
+   public boolean getFrameIsContained()
+   {
+      return frameIsContained.getValue();
+   }
+
+   public void setFrameIsContained(boolean value)
+   {
+      frameIsContained.setValue(value);
    }
 
    public int getNumberOfPointsContained()
@@ -54,13 +77,33 @@ public class ShapeContainsConditionState
       numberOfPointsContained.setValue(value);
    }
 
-   public boolean getFrameIsContained()
+   public float getAverageHue()
    {
-      return frameIsContained.getValue();
+      return averageHue.getValue();
    }
 
-   public void setFrameIsContained(boolean value)
+   public void setAverageHue(float averageHue)
    {
-      frameIsContained.setValue(value);
+      this.averageHue.setValue(averageHue);
+   }
+
+   public float getAverageSaturation()
+   {
+      return averageSaturation.getValue();
+   }
+
+   public void setAverageSaturation(float averageSaturation)
+   {
+      this.averageSaturation.setValue(averageSaturation);
+   }
+
+   public float getAverageValue()
+   {
+      return averageValue.getValue();
+   }
+
+   public void setAverageValue(float averageValue)
+   {
+      this.averageValue.setValue(averageValue);
    }
 }

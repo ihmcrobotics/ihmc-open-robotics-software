@@ -23,7 +23,6 @@ import us.ihmc.commonWalkingControlModules.falling.FallingControllerStateFactory
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommandBlenderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -175,38 +174,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public void createInertialParameterManager(InertialEstimationParameters parameters)
    {
       managerFactory.setInertialEstimationParameters(parameters);
-   }
-
-   private ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory;
-
-   public void createComponentBasedFootstepDataMessageGenerator()
-   {
-      createComponentBasedFootstepDataMessageGenerator(false, null, null);
-   }
-
-   public void createComponentBasedFootstepDataMessageGenerator(boolean useHeadingAndVelocityScript,
-                                                                HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
-   {
-      createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, null, headingAndVelocityEvaluationScriptParameters);
-   }
-
-   public void createComponentBasedFootstepDataMessageGenerator(boolean useHeadingAndVelocityScript,
-                                                                FootstepAdjustment footstepAdjustment,
-                                                                HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
-   {
-      if (componentBasedFootstepDataMessageGeneratorFactory != null)
-         return;
-
-      componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
-      componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
-      componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript);
-      componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(headingAndVelocityEvaluationScriptParameters);
-      componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(footstepAdjustment);
-
-      if (humanoidHighLevelControllerManager != null)
-         humanoidHighLevelControllerManager.addControllerPluginFactory(componentBasedFootstepDataMessageGeneratorFactory);
-      else
-         pluginFactories.add(componentBasedFootstepDataMessageGeneratorFactory);
    }
 
    public void addControllerPlugin(HighLevelHumanoidControllerPluginFactory pluginFactory)
@@ -391,6 +358,10 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public void addControllerFailureTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName fallbackControlStateEnum)
    {
       stateTransitionFactories.add(new ControllerFailedTransitionFactory(currentControlStateEnum, fallbackControlStateEnum));
+
+      // Falling controller gets added if not already the fallback control state
+      if (!fallbackControlStateEnum.equals(HighLevelControllerName.FALLING_STATE))
+         stateTransitionFactories.add(new ControllerFailedTransitionFactory(currentControlStateEnum, HighLevelControllerName.FALLING_STATE));
    }
 
    public void addCustomStateTransition(ControllerStateTransitionFactory<HighLevelControllerName> stateTransitionFactory)

@@ -2,26 +2,32 @@ package us.ihmc.perception.detections.yolo;
 
 import perception_msgs.msg.dds.YOLOv8ExecutorParameters;
 import perception_msgs.msg.dds.YOLOv8ModelInfo;
+import perception_msgs.msg.dds.YOLOv8ModelParameters;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.crdt.CRDTBidirectionalString;
+import us.ihmc.communication.crdt.CRDTBidirectionalSet;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusSet;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Subscription;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
 
 public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
 {
    private final CRDTStatusSet<YOLOv8ModelInfo> availableModels;
-   private final CRDTBidirectionalString modelToRun;
-   private final SyncedYOLOv8ModelParameters modelParameters;
+   private final CRDTBidirectionalSet<String> modelsToRun;
+   private final Map<String, SyncedYOLOv8ModelParameters> modelParameters;
 
    private final YOLOv8ExecutorParameters message;
 
@@ -36,9 +42,9 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
       super(crdtInfo);
       setModifierName(getClass().getSimpleName());
 
-      availableModels = new CRDTStatusSet<>(ROS2ActorDesignation.ROBOT, crdtInfo);
-      modelToRun = new CRDTBidirectionalString(this, null);
-      modelParameters = new SyncedYOLOv8ModelParameters(crdtInfo);
+      availableModels = new CRDTStatusSet<>(ROS2ActorDesignation.ROBOT, crdtInfo, LinkedHashSet::new);
+      modelsToRun = new CRDTBidirectionalSet<>(this);
+      modelParameters = new LinkedHashMap<>();
 
       message = new YOLOv8ExecutorParameters();
       newMessageNotification = new TypedNotification<>();
@@ -55,18 +61,26 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
       if (newMessageNotification.poll())
          fromMessage(newMessageNotification.read());
 
-      if (publishThrottler.run() || pollNeedSendFullData() || getModelParameters().pollNeedSendFullData())
+      if (publishThrottler.run() || pollNeedSendFullData())
       {
          toMessage(message);
          publisher.publish(message);
       }
    }
 
-   public synchronized void setAvailableModels(Collection<YOLOv8Model> models)
+   public void setAvailableModels(Collection<YOLOv8Model> models)
    {
-      availableModels.clear();
-      if (availableModels.addAll(models.stream().map(YOLOv8Tools::toMessage).collect(Collectors.toSet())))
-         modify();
+      synchronized (availableModels)
+      {
+         availableModels.clear();
+         boolean modify = false;
+         for (YOLOv8Model model : models)
+            if (availableModels.add(YOLOv8Tools.toMessage(model)))
+               modify = true;
+         if (modify)
+            modify();
+      }
+      updateModelSettings();
    }
 
    public CRDTStatusSet<YOLOv8ModelInfo> getAvailableModels()
@@ -74,14 +88,25 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
       return availableModels;
    }
 
-   public CRDTBidirectionalString getModelToRun()
+   public CRDTBidirectionalSet<String> getModelsToRun()
    {
-      return modelToRun;
+      return modelsToRun;
    }
 
-   public SyncedYOLOv8ModelParameters getModelParameters()
+   public Map<String, SyncedYOLOv8ModelParameters> getModelParameters()
    {
-      return modelParameters;
+      synchronized (modelParameters)
+      {
+         return new LinkedHashMap<>(modelParameters);
+      }
+   }
+
+   public SyncedYOLOv8ModelParameters getModelParameters(String modelName)
+   {
+      synchronized (modelParameters)
+      {
+         return modelParameters.get(modelName);
+      }
    }
 
    public void close()
@@ -95,11 +120,23 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
       toMessage(messageToPack.getLatestTimestampModifiable());
 
       messageToPack.getAvailableYoloModels().clear();
-      availableModels.getReadOnly().forEach(model -> messageToPack.getAvailableYoloModels().add().set(model));
+      synchronized (availableModels)
+      {
+         availableModels.getReadOnly().forEach(model -> messageToPack.getAvailableYoloModels().add().set(model));
+      }
 
-      messageToPack.setModelToRun(modelToRun.getValue());
+      messageToPack.getModelsToRun().clear();
+      synchronized (modelsToRun)
+      {
+         modelsToRun.getValue().forEach(model -> messageToPack.getModelsToRun().add(model));
+      }
 
-      modelParameters.toMessage(messageToPack.getModelSettings());
+      messageToPack.getModelSettings().clear();
+      synchronized (modelParameters)
+      {
+         for (SyncedYOLOv8ModelParameters modelSetting : modelParameters.values())
+            modelSetting.toMessage(messageToPack.getModelSettings().add());
+      }
    }
 
    private void fromMessage(YOLOv8ExecutorParameters message)
@@ -110,16 +147,61 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
       if (message.getLatestTimestampModifiable().getFullDataNeeded())
          return;
 
-      availableModels.fromMessage(models ->
+      synchronized (availableModels)
       {
-         models.clear();
-         models.addAll(message.getAvailableYoloModels());
-      });
+         availableModels.fromMessage(models ->
+         {
+            models.clear();
+            models.addAll(message.getAvailableYoloModels());
+         });
+      }
 
-      modelToRun.fromMessage(message.getModelToRunAsString());
+      synchronized (modelsToRun)
+      {
+         modelsToRun.fromMessage(models ->
+         {
+            models.clear();
+            models.addAll(message.getModelsToRun().stream().map(StringBuilder::toString).toList());
+         });
+      }
 
-      modelParameters.fromMessage(message.getModelSettings());
+      updateModelSettings();
 
+      synchronized (modelParameters)
+      {
+         for (YOLOv8ModelParameters modelSettingsMessage : message.getModelSettings())
+         {
+            SyncedYOLOv8ModelParameters settings = modelParameters.get(modelSettingsMessage.getModelNameAsString());
+            if (settings != null)
+               settings.fromMessage(modelSettingsMessage);
+            else
+               LogTools.warn("Ignoring YOLO settings for unknown model: {}", modelSettingsMessage.getModelNameAsString());
+         }
+      }
       confirmReceivedFullData();
+   }
+
+   private void updateModelSettings()
+   {
+      List<YOLOv8ModelInfo> availableModelsInOrder = new ArrayList<>();
+      synchronized (availableModels)
+      {
+         availableModelsInOrder.addAll(availableModels.getReadOnly());
+      }
+
+      LinkedHashMap<String, SyncedYOLOv8ModelParameters> orderedModelParameters = new LinkedHashMap<>();
+      synchronized (modelParameters)
+      {
+         for (YOLOv8ModelInfo model : availableModelsInOrder)
+         {
+            String modelName = model.getModelNameAsString();
+            SyncedYOLOv8ModelParameters existingParameters = modelParameters.get(modelName);
+            orderedModelParameters.put(modelName, existingParameters != null ? existingParameters : new SyncedYOLOv8ModelParameters(this, model));
+         }
+         modelParameters.clear();
+         modelParameters.putAll(orderedModelParameters);
+      }
+
+      modelsToRun.retainAll(orderedModelParameters.keySet());
    }
 }

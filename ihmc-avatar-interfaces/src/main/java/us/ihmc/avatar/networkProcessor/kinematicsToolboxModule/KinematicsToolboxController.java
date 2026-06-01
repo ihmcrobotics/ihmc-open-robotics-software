@@ -204,13 +204,13 @@ public class KinematicsToolboxController extends ToolboxController implements SC
     */
    private final KinematicsToolboxOutputStatus inverseKinematicsSolution;
    /**
-    * Variable to keep track of when the last solution was published.
+    * Number of solver ticks between two published solutions.
     */
-   private final YoDouble timeLastSolutionPublished = new YoDouble("timeLastSolutionPublished", registry);
+   private final YoInteger publishSolutionEveryNTicks = new YoInteger("publishSolutionEveryNTicks", registry);
    /**
-    * Specifies time interval for publishing the solution.
+    * Tick counter used to decide when to publish the next solution.
     */
-   private final YoDouble publishSolutionPeriod = new YoDouble("publishSolutionPeriod", registry);
+   private final YoInteger publishSolutionTickCounter = new YoInteger("publishSolutionTickCounter", registry);
    /**
     * This is the current estimate of the solution quality that is calculated based on the tracking
     * error for the end-effectors (center of mass included) being actively controlled.
@@ -512,7 +512,7 @@ public class KinematicsToolboxController extends ToolboxController implements SC
       graphicsList.add(newYoGraphicPoint3D("desiredCoMGraphic", yoDesiredCenterOfMass, 0.04, ColorDefinitions.Red()));
       graphicsList.add(newYoGraphicPoint3D("currentCoMGraphic", yoCurrentCenterOfMass, 0.04, ColorDefinitions.Black()));
 
-      publishSolutionPeriod.set(0.01);
+      publishSolutionEveryNTicks.set(1);
       preserveUserCommandHistory.set(true);
 
       threadTimer = new ThreadTimer("timer", updateDT, registry);
@@ -847,6 +847,7 @@ public class KinematicsToolboxController extends ToolboxController implements SC
       threadTimer.clear();
       userFBCommands.clear();
       previousUserFBCommands.clear();
+      publishSolutionTickCounter.set(publishSolutionEveryNTicks.getValue());
       isUserProvidingSupportPolygon.set(false);
       // By default, always constrain the center of mass according to the current support polygon (if defined).
       enableSupportPolygonConstraint.set(true);
@@ -949,15 +950,28 @@ public class KinematicsToolboxController extends ToolboxController implements SC
       computeCollisions();
 
       double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+      publishSolutionTickCounter.increment();
+      boolean isPublishing = publishSolutionTickCounter.getValue() >= publishSolutionEveryNTicks.getValue();
+      updateStatusMessageBeforePublish(currentTime, isPublishing);
 
-      if (timeLastSolutionPublished.getValue() == 0.0 || currentTime - timeLastSolutionPublished.getValue() >= publishSolutionPeriod.getValue())
+      if (isPublishing)
       {
          reportMessage(inverseKinematicsSolution);
-         timeLastSolutionPublished.set(currentTime);
+         publishSolutionTickCounter.set(0);
       }
 
       firstTick = false;
       threadTimer.stop();
+   }
+
+   /**
+    * Hook for subclasses to update extra fields of {@link #inverseKinematicsSolution} right before publishing.
+    *
+    * @param currentTime  current wall-clock time in seconds.
+    * @param isPublishing whether the current tick will publish the status message.
+    */
+   protected void updateStatusMessageBeforePublish(double currentTime, boolean isPublishing)
+   {
    }
 
    /**
@@ -1703,9 +1717,9 @@ public class KinematicsToolboxController extends ToolboxController implements SC
       return feedbackControllerDataHolder;
    }
 
-   public void setPublishingSolutionPeriod(double periodInSeconds)
+   public void setPublishSolutionEveryNTicks(int publishSolutionEveryNTicks)
    {
-      publishSolutionPeriod.set(periodInSeconds);
+      this.publishSolutionEveryNTicks.set(Math.max(1, publishSolutionEveryNTicks));
    }
 
    public void setPreserveUserCommandHistory(boolean value)

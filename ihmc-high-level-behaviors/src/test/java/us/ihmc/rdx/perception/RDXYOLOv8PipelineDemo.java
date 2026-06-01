@@ -21,6 +21,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDADepthImageSegmenter;
 import us.ihmc.perception.cuda.CUDAPointCloudExtractor;
+import us.ihmc.perception.detections.yolo.YOLOv8AnnotationInfo;
 import us.ihmc.perception.detections.yolo.YOLOv8Detection;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionList;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
@@ -34,9 +35,9 @@ import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
-import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.zed.global.zed;
 
 import java.io.File;
@@ -78,6 +79,8 @@ public class RDXYOLOv8PipelineDemo
    private final RDXImageVisualizer erodedMaskVisualizer = new RDXImageVisualizer("Eroded Mask", "Eroded Mask", false);
    private RawImage annotatedImage;
    private final RDXImageVisualizer annotatedImageVisualizer = new RDXImageVisualizer("Annotated Image", "Annotated Image", false);
+   private RawImage objectOutlineImage;
+   private final RDXImageVisualizer objectOutlineVisualizer = new RDXImageVisualizer("Object Outline", "Object Outline", false);
 
    private final ImFloat confidenceThreshold = new ImFloat(0.8f);
    private final ImFloat nmsThreshold = new ImFloat(0.1f);
@@ -161,6 +164,7 @@ public class RDXYOLOv8PipelineDemo
             detectionMaskVisualizer.setActive(true);
             erodedMaskVisualizer.setActive(true);
             annotatedImageVisualizer.setActive(true);
+            objectOutlineVisualizer.setActive(true);
             segmentedDepthVisualizer.setActive(true);
 
             baseUI.getImGuiPanelManager().addPanel("Options", this::frameSettings);
@@ -169,6 +173,7 @@ public class RDXYOLOv8PipelineDemo
             baseUI.getImGuiPanelManager().addPanel(detectionMaskVisualizer.getPanel());
             baseUI.getImGuiPanelManager().addPanel(erodedMaskVisualizer.getPanel());
             baseUI.getImGuiPanelManager().addPanel(annotatedImageVisualizer.getPanel());
+            baseUI.getImGuiPanelManager().addPanel(objectOutlineVisualizer.getPanel());
             baseUI.getImGuiPanelManager().addPanel(segmentedDepthVisualizer.getPanel());
 
             baseUI.create();
@@ -293,6 +298,11 @@ public class RDXYOLOv8PipelineDemo
          annotatedImage.release();
          annotatedImage = null;
       }
+      if (objectOutlineImage != null)
+      {
+         objectOutlineImage.release();
+         objectOutlineImage = null;
+      }
 
       // Get a detection
       YOLOv8Detection detection = results.get(0);
@@ -322,6 +332,11 @@ public class RDXYOLOv8PipelineDemo
                                                                            null);
       annotatedImage = bgrImage.replaceImage(new Mat(bgrImage.getCpuImageMat().size(), bgrImage.getOpenCVType()));
       YOLOv8Tools.annotateImage(bgrImage.getCpuImageMat(), annotatedImage.getCpuImageMat(), List.of(instantDetection));
+
+      // Get the Object Outline image
+      objectOutlineImage = bgrImage.replaceImage(new Mat(bgrImage.getCpuImageMat().size(), bgrImage.getOpenCVType()));
+      YOLOv8AnnotationInfo annotationInfo = YOLOv8AnnotationInfo.fromYOLOv8Detection(detection, bgrImage.getCpuImageMat().size(), 0.005f);
+      annotationInfo.drawMask(bgrImage.getCpuImageMat(), objectOutlineImage.getCpuImageMat(), false, 1.0);
 
       // Find the centroid of the segmented depth
       centroid.set(findCentroid(segmentedDepth));
@@ -405,6 +420,13 @@ public class RDXYOLOv8PipelineDemo
          annotatedImageVisualizer.setImage(annotatedImage);
          annotatedImageVisualizer.update();
       }
+
+      // Render Object Outline image
+      if (objectOutlineImage != null)
+      {
+         objectOutlineVisualizer.setImage(objectOutlineImage);
+         objectOutlineVisualizer.update();
+      }
    }
 
    private void saveImages()
@@ -436,6 +458,7 @@ public class RDXYOLOv8PipelineDemo
 
       opencv_imgcodecs.imwrite(resultDirectoryPath + "SegmentedDepth.png", segmentedDepth.getCpuImageMat());
       opencv_imgcodecs.imwrite(resultDirectoryPath + "Annotated.png", annotatedImage.getCpuImageMat());
+      opencv_imgcodecs.imwrite(resultDirectoryPath + "ObjectOutline.png", objectOutlineImage.getCpuImageMat());
    }
 
    private void destroy()
@@ -455,6 +478,8 @@ public class RDXYOLOv8PipelineDemo
          segmentedDepth.release();
       if (annotatedImage != null)
          annotatedImage.release();
+      if (objectOutlineImage != null)
+         objectOutlineImage.release();
 
       for (YOLOv8Model model : yoloModels)
          model.destroy();
@@ -467,6 +492,7 @@ public class RDXYOLOv8PipelineDemo
       erodedMaskVisualizer.destroy();
       segmentedDepthVisualizer.destroy();
       annotatedImageVisualizer.destroy();
+      objectOutlineVisualizer.destroy();
 
       depthImageSegmenter.close();
       pointCloudExtractor.close();

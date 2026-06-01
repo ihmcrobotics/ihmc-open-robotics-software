@@ -9,6 +9,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 import java.util.Arrays;
 
+/**
+ * Read-only representation of toolbox output state used between output-processing stages.
+ */
 public interface KSTOutputDataReadOnly
 {
    int getJointNameHash();

@@ -144,6 +144,34 @@ module behavior_msgs
          * Maximum number of points in the shape
          */
         unsigned long max_points;
+        /**
+         * Whether to check the color
+         */
+        boolean check_color;
+        /**
+         * Min hue
+         */
+        unsigned short hue_min;
+        /**
+         * Max hue
+         */
+        unsigned short hue_max;
+        /**
+         * Min saturation
+         */
+        unsigned short saturation_min;
+        /**
+         * Max saturation
+         */
+        unsigned short saturation_max;
+        /**
+         * Min value
+         */
+        unsigned short value_min;
+        /**
+         * Max value
+         */
+        unsigned short value_max;
       };
     };
   };

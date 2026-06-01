@@ -4,13 +4,14 @@ import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionDefinition.SceneActionType;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneCompositeFrameExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorPanelExecutor;
-import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.commons.thread.Throttler;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -18,6 +19,8 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseInstantDetection;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
+import us.ihmc.perception.detections.yolo.SyncedYOLOv8ModelParameters;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.tools.Timer;
 
@@ -55,126 +58,202 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
    {
       state.setElapsedExecutionTime(timer.getElapsedTime());
 
-      boolean isClearScene = definition.getSceneActionType().getValue() == SceneActionType.CLEAR_SCENE;
       boolean isFreeze = definition.getSceneActionType().getValue() == SceneActionType.FREEZE_OBJECT;
       boolean isDelete = definition.getSceneActionType().getValue() == SceneActionType.DELETE_OBJECT;
-      if (isClearScene)
+      if (definition.getSceneActionType().getValue() == SceneActionType.CLEAR_SCENE)
       {
          scene.removeAllObjects();
          state.setIsExecuting(false);
       }
-      else if (isFreeze || isDelete)
+      else if (definition.getSceneActionType().getValue() == SceneActionType.FREEZE_SCENE)
       {
-         BehaviorTreeSceneObjectState matchedObject = null;
          for (BehaviorTreeSceneObjectState object : scene.getObjects())
+            object.freeze();
+         state.setIsExecuting(false);
+      }
+      else if (definition.getSceneActionType().getValue() == SceneActionType.CONFIGURE_PERSISTENT_DETECTIONS)
+      {
+         scene.setPoseFilterAlpha(definition.getPoseFilterAlpha());
+         scene.setAcceptanceConfidence(definition.getAcceptanceConfidence());
+         scene.setStabilityFrequency(definition.getStabilityFrequency());
+         scene.setHistoryDuration(definition.getHistoryDuration());
+         state.setIsExecuting(false);
+      }
+      else if (definition.getSceneActionType().getValue() == SceneActionType.CONFIGURE_YOLO)
+      {
+         YOLOv8DetectionExecutor yolo = scene.getYOLO();
+         yolo.disableAllModels();
+         for (int i = 0; i < definition.getEnabledYoloModels().getSize(); i++)
          {
-            BehaviorTreeSceneObjectDefinition sceneObjectDefinition = definition.getSceneObjectDefinition();
+            SyncedYOLOv8ModelParameters definitionParameters
+                  = definition.getSyncableYOLOModelParameters()[definition.getEnabledYoloModels().getValueReadOnly(i)];
+            yolo.enableModel(definitionParameters.getModelName());
+            yolo.getParameters().getModelParameters().get(definitionParameters.getModelName()).set(definitionParameters);
+         }
+         state.setIsExecuting(false);
+      }
+      else if (isFreeze || isDelete)
+         freezeOrDelete(isFreeze);
+      else // Setup object
+         setupObject();
+   }
 
-            if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL
+   private void freezeOrDelete(boolean isFreeze)
+   {
+      BehaviorTreeSceneObjectState matchedObject = null;
+      for (BehaviorTreeSceneObjectState object : scene.getObjects())
+      {
+         if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL
              && object instanceof BehaviorTreeSceneDoorPanelExecutor)
-            {
-               matchedObject = object;
-            }
-            else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
+            matchedObject = object;
+         else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_FRAME
+                  && object instanceof BehaviorTreeSceneDoorFrameExecutor)
+            matchedObject = object;
+         else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
                   && object.getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
                   && object.getFoundationPoseObjectType() == definition.getSceneObjectDefinition().getFoundationPoseObjectType())
-            {
-               matchedObject = object;
-            }
-            else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY
+            matchedObject = object;
+         else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY
                   && object.getYoloClassName().equals(definition.getSceneObjectDefinition().getYoloClassName()))
-            {
-               matchedObject = object;
-            }
-         }
+            matchedObject = object;
+      }
 
-         if (matchedObject == null)
+      if (matchedObject == null)
+      {
+         if (isFreeze)
+            state.getLogger().error("Failed to find a suitable object to freeze: %s".formatted(definition.getSceneObjectDefinition().getName()));
+         else
+            state.getLogger().error("Failed to find a suitable object to delete: %s".formatted(definition.getSceneObjectDefinition().getName()));
+      }
+      else
+      {
+         if (isFreeze)
          {
-            if (isFreeze)
-               state.getLogger().error("Failed to find a suitable object to freeze: %s".formatted(definition.getSceneObjectDefinition().getName()));
-            else
-               state.getLogger().error("Failed to find a suitable object to delete: %s".formatted(definition.getSceneObjectDefinition().getName()));
+            state.getLogger().info("Freezing object: %s".formatted(matchedObject.getName()));
+            matchedObject.freeze();
          }
          else
          {
-            if (isFreeze)
-            {
-               state.getLogger().info("Freezing object: %s".formatted(matchedObject.getName()));
-               matchedObject.freeze();
-            }
-            else
-            {
-               state.getLogger().info("Deleting object: %s".formatted(matchedObject.getName()));
-               scene.removeObject(matchedObject);
-            }
+            state.getLogger().info("Deleting object: %s".formatted(matchedObject.getName()));
+            scene.removeObject(matchedObject);
          }
-
-         state.setFailed(isFreeze && matchedObject == null); // Don't fail if deleting and object was not found
-         state.setIsExecuting(false);
       }
-      else // Setup object
+
+      state.setFailed(isFreeze && matchedObject == null); // Don't fail if deleting and object was not found
+      state.setIsExecuting(false);
+   }
+
+   private void setupObject()
+   {
+      if (rootNode.getState().getPreviewModeEnabled())
       {
-         if (rootNode.getState().getPreviewModeEnabled())
-         {
-            state.getLogger().info("Preview mode enabled. Adding nominal object pose for: {}", definition.getSceneObjectDefinition().getName());
+         state.getLogger().info("Preview mode enabled. Adding nominal object pose for: {}", definition.getSceneObjectDefinition().getName());
 
-            BehaviorTreeSceneObjectState existingObject = null;
-            for (BehaviorTreeSceneObjectState object : scene.getObjects())
-               if (object.getObjectType() == definition.getSceneObjectDefinition().getObjectType())
-               {
-                  boolean match = definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY
-                                  && object.getYoloClassName().equals(definition.getSceneObjectDefinition().getYoloClassName());
-                  match |= definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
-                           && object.getFoundationPoseObjectType() == definition.getSceneObjectDefinition().getFoundationPoseObjectType();
-                  match |= definition.getSceneObjectDefinition().getObjectType() != BehaviorTreeSceneObjectType.YOLO_ONLY
-                           && definition.getSceneObjectDefinition().getObjectType() != BehaviorTreeSceneObjectType.FOUNDATION_POSE;
-                  if (match)
-                  {
-                     existingObject = object;
-                     break;
-                  }
-               }
-
-            RigidBodyTransform nominalWorldPose = new RigidBodyTransform();
-            nominalWorldPose.set(scene.findFrameByName("Walking").getTransformToRoot());
-            nominalWorldPose.multiply(definition.getNominalObjectPose().getValueReadOnly());
-
-            if (existingObject != null)
-               existingObject.setTransformToWorld(nominalWorldPose);
-            else
+         BehaviorTreeSceneObjectState existingObject = null;
+         for (BehaviorTreeSceneObjectState object : scene.getObjects())
+            if (object.getObjectType() == definition.getSceneObjectDefinition().getObjectType())
             {
-               BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
-               definition.getSceneObjectDefinition().toMessage(message);
-               BehaviorTreeSceneObjectState nominalObject = scene.createObject(message);
-               nominalObject.setTransformToWorld(nominalWorldPose);
-               scene.addObject(nominalObject);
+               boolean match = definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY
+                               && object.getYoloClassName().equals(definition.getSceneObjectDefinition().getYoloClassName());
+               match |= definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
+                        && object.getFoundationPoseObjectType() == definition.getSceneObjectDefinition().getFoundationPoseObjectType();
+               match |= definition.getSceneObjectDefinition().getObjectType() != BehaviorTreeSceneObjectType.YOLO_ONLY
+                        && definition.getSceneObjectDefinition().getObjectType() != BehaviorTreeSceneObjectType.FOUNDATION_POSE;
+               if (match)
+               {
+                  existingObject = object;
+                  break;
+               }
             }
-            state.setIsExecuting(false);
-            return;
-         }
 
-         double timeout = definition.getTimeout();
-         if (!timer.isRunning(timeout))
+         RigidBodyTransform nominalWorldPose = new RigidBodyTransform();
+         nominalWorldPose.set(scene.findFrameByName("Walking").getTransformToRoot());
+         nominalWorldPose.multiply(definition.getNominalObjectPose().getValueReadOnly());
+
+         if (existingObject != null)
+            existingObject.setTransformToWorld(nominalWorldPose);
+         else
          {
-            state.getLogger().error("Timed out after %.1f s without finding a suitable detection.".formatted(timeout));
-            state.setFailed(true);
-            state.setIsExecuting(false);
-            return;
+            BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
+            definition.getSceneObjectDefinition().toMessage(message);
+            BehaviorTreeSceneObjectState nominalObject = scene.createObject(message);
+            nominalObject.setTransformToWorld(nominalWorldPose);
+            scene.addObject(nominalObject);
          }
-
-         printDebug = throttler.run();
-         cameraPosition.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getExperimentalCameraFrame).getTranslation());
-
-         boolean success = switch (definition.getSceneObjectDefinition().getObjectType())
-         {
-            case DOOR_PANEL -> setupDoorPanelDetection();
-            case DOOR_FRAME -> setupDoorFrameDetection();
-            default -> setupSinglePersistentDetection();
-         };
-
-         if (success)
-            state.setIsExecuting(false);
+         state.setIsExecuting(false);
+         return;
       }
+
+      double timeout = definition.getTimeout();
+      if (!timer.isRunning(timeout))
+      {
+         state.getLogger().error("Timed out after %.1f s without finding a suitable detection.".formatted(timeout));
+         state.setFailed(true);
+         state.setIsExecuting(false);
+         return;
+      }
+
+      printDebug = throttler.run();
+      cameraPosition.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getExperimentalCameraFrame).getTranslation());
+
+      boolean success = switch (definition.getSceneObjectDefinition().getObjectType())
+      {
+         case COMPOSITE_FRAME -> setupCompositeFrameDetection();
+         case DOOR_PANEL -> setupDoorPanelDetection();
+         case DOOR_FRAME -> setupDoorFrameDetection();
+         default -> setupSinglePersistentDetection();
+      };
+
+      if (success)
+         state.setIsExecuting(false);
+   }
+
+   private boolean setupCompositeFrameDetection()
+   {
+      ReferenceFrame frameA = scene.findFrameByName(definition.getSceneObjectDefinition().getCompositeFrameA());
+      ReferenceFrame frameB = scene.findFrameByName(definition.getSceneObjectDefinition().getCompositeFrameB());
+      if (frameA == null || frameB == null)
+      {
+         if (printDebug)
+            state.getLogger()
+                 .warn("Failed to find frames: %s = %s and %s = %s".formatted(
+                       definition.getSceneObjectDefinition().getCompositeFrameA(), frameA,
+                       definition.getSceneObjectDefinition().getCompositeFrameB(), frameB));
+         return false;
+      }
+
+      BehaviorTreeSceneCompositeFrameExecutor target = null;
+      for (BehaviorTreeSceneObjectState object : scene.getObjects())
+      {
+         if (object instanceof BehaviorTreeSceneCompositeFrameExecutor compositeFrame
+          && compositeFrame.getCompositeFrameName().equals(definition.getSceneObjectDefinition().getCompositeFrameName()))
+         {
+            target = compositeFrame;
+            break;
+         }
+      }
+
+      if (target != null)
+      {
+         state.getLogger().info("Updating existing composite frame: {}", definition.getSceneObjectDefinition().getCompositeFrameName());
+         target.setCompositeFrameA(definition.getSceneObjectDefinition().getCompositeFrameA());
+         target.setCompositeFrameB(definition.getSceneObjectDefinition().getCompositeFrameB());
+         target.setCompositeFrameType(definition.getSceneObjectDefinition().getCompositeFrameType());
+         target.setCompositeDistance(definition.getSceneObjectDefinition().getCompositeDistance());
+         target.unfreeze();
+      }
+      else
+      {
+         state.getLogger().info("Creating new composite frame: {}", definition.getSceneObjectDefinition().getCompositeFrameName());
+
+         BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
+         definition.getSceneObjectDefinition().toMessage(message);
+         target = (BehaviorTreeSceneCompositeFrameExecutor) scene.createObject(message);
+         target.update();
+         scene.addObject(target);
+      }
+
+      return true;
    }
 
    private boolean setupDoorPanelDetection()
@@ -300,9 +379,9 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       if (targetSceneObject != null)
       {
          state.getLogger().info("Updating existing door panel scene object");
-         targetSceneObject.unfreeze();
          targetSceneObject.setPersistentDetection(openingMechanismDetection);
          targetSceneObject.setDoorPanelPersistentDetection(doorPanelDetection);
+         targetSceneObject.unfreeze();
       }
       else
       {
@@ -357,8 +436,10 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       if (frameSceneObject != null)
       {
          state.getLogger().info("Updating existing door frame scene object");
-         frameSceneObject.unfreeze();
          frameSceneObject.setPersistentDetection(doorPanelSceneObject.getDoorPanelPersistentDetection());
+         frameSceneObject.setMinPostPoints(definition.getSceneObjectDefinition().getMinPostPoints());
+         frameSceneObject.setMinRecessPoints(definition.getSceneObjectDefinition().getMinRecessPoints());
+         frameSceneObject.unfreeze();
       }
       else
       {

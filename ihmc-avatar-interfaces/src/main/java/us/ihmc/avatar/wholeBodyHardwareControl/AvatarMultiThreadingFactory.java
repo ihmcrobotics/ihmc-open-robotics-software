@@ -21,8 +21,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommandBlenderFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.FeetLoadedToWalkingStandTransition;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.thread.RepeatingTaskThread;
@@ -43,6 +41,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.time.ThreadTimer;
@@ -70,6 +69,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static us.ihmc.avatar.wholeBodyHardwareControl.AvatarMultiThreadingManager.runAll;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
@@ -124,8 +124,6 @@ public class AvatarMultiThreadingFactory
 
    // Step Generator
    private final OptionalFactoryField<AvatarStepGeneratorThread> avatarStepGenerator = new OptionalFactoryField<>("AvatarStepGeneratorThread");
-   private final HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints;
-   private final HumanoidSteppingPluginFactory humanoidSteppingPluginFactory;
 
    // IK Streaming
    private final OptionalFactoryField<IKStreamingRTPluginFactory.IKStreamingRTThread> avatarIKStreaming = new OptionalFactoryField<>("AvatarIKStreamingThread");
@@ -209,11 +207,6 @@ public class AvatarMultiThreadingFactory
                                                                  standPrepStateFactory,
                                                                  freezeStateFactory);
       avatarControllerFactory.setListenToHighLevelStatePackets(true);
-
-      // Some extra stuff for the step generator
-      humanoidSteppingPluginFactory = new JoystickBasedSteppingPluginFactory();
-      environmentalConstraints = new HumanoidSteppingPluginEnvironmentalConstraints(masterRobotModel.getContactPointParameters(),
-                                                                                    masterRobotModel.getWalkingControllerParameters().getSteppingParametersForStepGeneration());
 
       // Set the root registry as the YoVariableServer's main registry
       yoVariableServer.setMainRegistry(rootRegistry,
@@ -307,28 +300,6 @@ public class AvatarMultiThreadingFactory
          avatarEstimator.setupHighLevelControllerCallback(avatarControllerFactory, stateModeMap);
       }
 
-      // Set up this stuff
-      if (!avatarStepGenerator.hasValue())
-      {
-         // Sets up the environmental constraint manager as a height map consumer in the input manager
-         humanoidSteppingPluginFactory.addHeightMapCommandConsumer(environmentalConstraints);
-
-         // Adds functions that adjust the footholds based on the environment.
-         humanoidSteppingPluginFactory.setFootStepAdjustment(environmentalConstraints.getFootstepAdjustment());
-
-         // Adds checkers for footholds based on the environment
-         for (FootstepValidityIndicator footstepValidityIndicator : environmentalConstraints.getFootstepValidityIndicators())
-            humanoidSteppingPluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);
-
-         // Clear the environment at the beginning of every update
-         humanoidSteppingPluginFactory.addUpdatable(environmentalConstraints);
-
-         // Create the callback listeners for the planar regions in the stepping plugin
-         humanoidSteppingPluginFactory.createStepGeneratorNetworkSubscriber(masterRobotModel.getSimpleRobotName().toLowerCase(), controllerRealtimeROS2Node);
-
-         avatarControllerFactory.addControllerPlugin(humanoidSteppingPluginFactory);
-      }
-
       // Create the high-level controller
       AvatarControllerThread avatarController = new AvatarControllerThread(masterRobotModel.getSimpleRobotName().toLowerCase(),
                                                                                  masterRobotModel,
@@ -344,9 +315,6 @@ public class AvatarMultiThreadingFactory
       // Add controller registry directly to the YoVariableServer (since it is in a separate thread)
       yoVariableServer.addRegistry(avatarController.getYoVariableRegistry(), avatarController.getSCS2YoGraphics());
 
-      if (!avatarStepGenerator.hasValue())
-         avatarController.getYoVariableRegistry().addChild(environmentalConstraints.getRegistry());
-
       // Set up the task and thread for the controller
       setupControllerTaskAndThread(avatarController, masterFullRobotModel, yoVariableServer);
 
@@ -358,13 +326,12 @@ public class AvatarMultiThreadingFactory
     */
    public AvatarStepGeneratorThread createAndAddStepGeneratorThread()
    {
-      AvatarStepGeneratorThread stepGenerator = new AvatarStepGeneratorThread(humanoidSteppingPluginFactory,
-                                                                                    controllerContextFactory,
-                                                                                    avatarControllerFactory.getStatusOutputManager(),
-                                                                                    avatarControllerFactory.getCommandInputManager(),
-                                                                                    masterRobotModel,
-                                                                                    environmentalConstraints,
-                                                                                    controllerRealtimeROS2Node);
+      AvatarStepGeneratorThread stepGenerator = new AvatarStepGeneratorThread(controllerContextFactory,
+                                                                              avatarControllerFactory.getStatusOutputManager(),
+                                                                              avatarControllerFactory.getCommandInputManager(),
+                                                                              masterRobotModel,
+                                                                              null,
+                                                                              controllerRealtimeROS2Node);
 
       avatarStepGenerator.set(stepGenerator);
 
@@ -390,7 +357,8 @@ public class AvatarMultiThreadingFactory
                                                                             masterRobotModel.getHumanoidRobotKinematicsCollisionModel(),
                                                                             ikStreamingParameters));
 
-      yoVariableServer.addRegistry(avatarIKStreaming.get().getYoVariableRegistry(), avatarIKStreaming.get().getSCS2YoGraphics());
+      if (yoVariableServer != null && avatarIKStreaming.get().isYoVariableServerEnabled())
+         yoVariableServer.addRegistry(avatarIKStreaming.get().getYoVariableRegistry(), avatarIKStreaming.get().getSCS2YoGraphics());
 
       setupIKStreamingTaskAndThread(avatarIKStreaming.get(), yoVariableServer);
 
@@ -581,7 +549,7 @@ public class AvatarMultiThreadingFactory
       IKStreamingRTPluginFactory.IKStreamingRTTask ikStreamingTask = IKStreamingRTPluginFactory.createIKStreamingRTTask(ikStreamingThread, masterThreadDt);
 
       // Add post-IK streaming callback to update YoVariable server with IK streaming registry
-      if (yoVariableServer != null)
+      if (yoVariableServer != null && ikStreamingThread.isYoVariableServerEnabled())
          ikStreamingTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingThread.getHumanoidRobotContextData().getTimestamp(),
                                                                            ikStreamingThread.getYoVariableRegistry()));
 
@@ -656,6 +624,7 @@ public class AvatarMultiThreadingFactory
          controllerFactory.useDefaultStandTransitionControlState(STAND_PREP_STATE, WALKING);
          controllerFactory.useDefaultWalkingControlState();
          controllerFactory.useDefaultDoNothingControlState();
+         controllerFactory.useDefaultFallingControlState();
          controllerFactory.useDefaultExitWalkingTransitionControlState(STAND_PREP_STATE);
 
          // setup transitions
@@ -665,23 +634,24 @@ public class AvatarMultiThreadingFactory
          controllerFactory.addRequestableTransition(STAND_TRANSITION_STATE, STAND_PREP_STATE);
          controllerFactory.addRequestableTransition(FREEZE_STATE, STAND_PREP_STATE);
          controllerFactory.addRequestableTransition(WALKING, EXIT_WALKING);
+         controllerFactory.addRequestableTransition(FALLING_STATE, STAND_PREP_STATE);
 
-         // Always be able to request to go to freeze, since that's often a good failure state. Also add this as a failure transition for all states
+         // Always be able to request to go to freeze, falling, do nothing, and whatever the fallback state is
          for (HighLevelControllerName highLevelControllerName : HighLevelControllerName.values)
          {
-            if (highLevelControllerName == FREEZE_STATE)
-               continue;
+            if (!highLevelControllerName.equals(DO_NOTHING_BEHAVIOR))
+               controllerFactory.addRequestableTransition(highLevelControllerName, DO_NOTHING_BEHAVIOR);
 
-            controllerFactory.addRequestableTransition(highLevelControllerName, FREEZE_STATE);
+            if (!highLevelControllerName.equals(FREEZE_STATE))
+               controllerFactory.addRequestableTransition(highLevelControllerName, FREEZE_STATE);
+
+            if (!highLevelControllerName.equals(FALLING_STATE))
+               controllerFactory.addRequestableTransition(highLevelControllerName, FALLING_STATE);
+
+            if (!highLevelControllerName.equals(fallbackControllerState))
+               controllerFactory.addRequestableTransition(highLevelControllerName, fallbackControllerState);
+
             controllerFactory.addControllerFailureTransition(highLevelControllerName, fallbackControllerState);
-         }
-
-         for (HighLevelControllerName highLevelControllerName : HighLevelControllerName.values)
-         {
-            if (highLevelControllerName == DO_NOTHING_BEHAVIOR)
-               continue;
-
-            controllerFactory.addRequestableTransition(highLevelControllerName, DO_NOTHING_BEHAVIOR);
          }
 
          controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING, false);
@@ -691,18 +661,18 @@ public class AvatarMultiThreadingFactory
                                                                                controllerFactory,
                                                                                !highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady()));
 
-         // Transition to DO_NOTHING in the event of a fault
-         hardwareCommunicationInterface.addFaultListener(change ->
-                                                         {
-                                                            if (hardwareCommunicationInterface.hasRobotFaulted())
-                                                               controllerFactory.getRequestedControlStateEnum().set(DO_NOTHING_BEHAVIOR);
-                                                         });
          // Transition to DO_NOTHING when the robot is unservoed
          lowLevelOutputProcessor.addMasterGainListener(change ->
                                                        {
                                                           if (lowLevelOutputProcessor.getMasterGain().getValue() == 0.0)
                                                              controllerFactory.getRequestedControlStateEnum().set(DO_NOTHING_BEHAVIOR);
                                                        });
+
+         // Add a way to control desired high-level controller state from hardware communication interface module
+         hardwareCommunicationInterface.addRequestedHighLevelControlStateConsumer(highLevelControllerName -> controllerFactory.getRequestedControlStateEnum().set(highLevelControllerName));
+
+         // Listener so that hardware communication interface knows the current high-level controller state
+         controllerFactory.attachHighLevelStateChangedListener((from, to) -> hardwareCommunicationInterface.setCurrentHighLevelControllerState(to));
       }
 
       controllerFactory.setListenToHighLevelStatePackets(true);
@@ -783,8 +753,12 @@ public class AvatarMultiThreadingFactory
       {
          // Setup logger
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
+
          builders.add(new RegistrySendBufferBuilder(rootRegistry,
-                                                    masterFullRobotModel.getRootJoint().subtreeList(),
+                                                    (YoGraphicGroupDefinition) null));
+
+         builders.add(new RegistrySendBufferBuilder(avatarEstimator.getYoRegistry(),
+                                                    avatarEstimator.getFullRobotModel().getRootJoint().subtreeList(),
                                                     avatarEstimator.getSCS2YoGraphics()));
 
          if (avatarController != null)
@@ -825,7 +799,6 @@ public class AvatarMultiThreadingFactory
             LogTools.error("[Logging] Unable to log locally to disk");
          }
 
-         LogTools.info("[Logging] Logging locally to disk");
       }
       else
       {

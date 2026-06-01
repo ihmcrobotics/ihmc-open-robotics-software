@@ -4,7 +4,10 @@ import behavior_msgs.msg.dds.AI2RActionFailureMessage;
 import behavior_msgs.msg.dds.AI2RObjectMessage;
 import behavior_msgs.msg.dds.AI2RScanMessage;
 import behavior_msgs.msg.dds.AI2RStatusMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.AbortWalkingMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
@@ -19,11 +22,16 @@ import us.ihmc.behaviors.behaviorTree.action.actions.WaitActionState;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition.ConditionNodeType;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.CheckpointNodeState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ros2log.ROS2LogRecord;
+import us.ihmc.communication.ros2log.ROS2LogSerialization;
+import us.ihmc.communication.ros2log.ROS2LogTimeSource;
 import us.ihmc.communication.ros2.tf2.ROS2MutableFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -39,12 +47,16 @@ import us.ihmc.perception.RawImagePublisher;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import static us.ihmc.communication.ros2.tf2.ROS2FrameTools.CAMERA_TO_OPTICAL_ROTATION;
 
@@ -53,6 +65,7 @@ import static us.ihmc.communication.ros2.tf2.ROS2FrameTools.CAMERA_TO_OPTICAL_RO
  */
 public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI2RNodeDefinition>
 {
+   private static final double GO_TO_RANDOM_XY_RANGE_METERS = 2.0;
    private final Throttler statusThrottler = new Throttler().setFrequency(10.0);
    private final AI2RStatusMessage statusMessage = new AI2RStatusMessage();
    private final List<LeafNodeState<?>> failedLeaves = new ArrayList<>();
@@ -68,12 +81,29 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private final Notification publishAnnotatedImage = new Notification();
    private final RawImagePublisher imagePublisher;
    private final ROS2MutableFrame annotatedImageFrame;
+   private final ROS2Topic<KinematicsToolboxOutputStatus> kstOutputTopic;
+   private final KinematicsToolboxOutputStatus kinematicsStatus = new KinematicsToolboxOutputStatus();
+   private final RigidBodyTransform initialWalkingPose = new RigidBodyTransform();
+   private final RigidBodyTransform relativePelvisPose = new RigidBodyTransform();
+
+   private final Random random = new Random();
+   private final Point3D baseGoToStancePoint = new Point3D();
+   private final Point3D baseGoToFocalPoint = new Point3D();
+   private boolean randomizationSessionActive = false;
+   private boolean randomizationRunInProgress = false;
+   private int randomizationsCompleted = 0;
+   private int randomizationTargetCount = 0;
+   private int goToCheckpointLeafIndex = -1;
+   private String goToCheckpointName = "";
+   private WalkActionState goToAction = null;
+   private ROS2LogRecord ros2LogRecord = null;
 
    public AI2RNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
       super(new AI2RNodeState(id, rootNode.getState()), rootNode);
 
       actionSequence = rootNode.getState();
+      kstOutputTopic = KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName());
 
       imagePublisher = new RawImagePublisher(ros2ControllerHelper.getROS2Node());
       annotatedImageFrame = new ROS2MutableFrame("vlm_annotated_image_frame", ReferenceFrame.getWorldFrame());
@@ -81,6 +111,37 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       skillEditor = new AI2RSkillEditor(this, rootNode);
 
       resetStatusMessage();
+
+      List<Integer> nonFingerIndices = FullRobotModelUtils.getAllJointsExcludingHandsIndices(syncedRobot.getFullRobotModel());
+      float[] nonFingerValues = new float[nonFingerIndices.size()];
+      ROS2Publisher<KinematicsToolboxOutputStatus> publisher = ros2ControllerHelper.getROS2Node().createPublisher(kstOutputTopic);
+      syncedRobot.addRobotConfigurationDataReceivedCallback(() ->
+      {
+         if (ros2LogRecord != null)
+         {
+            RobotConfigurationData robotConfigurationData = syncedRobot.getLatestRobotConfigurationData();
+            kinematicsStatus.setSequenceId(robotConfigurationData.getSequenceId());
+
+            relativePelvisPose.set(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootPosition());
+            initialWalkingPose.inverseTransform(relativePelvisPose);
+
+            kinematicsStatus.getDesiredRootPosition().set(relativePelvisPose.getTranslation());
+            kinematicsStatus.getDesiredRootOrientation().set(relativePelvisPose.getRotation());
+            kinematicsStatus.getDesiredRootLinearVelocity().set(robotConfigurationData.getPelvisLinearVelocity());
+            kinematicsStatus.getDesiredRootAngularVelocity().set(robotConfigurationData.getPelvisAngularVelocity());
+
+            for (int i = 0; i < nonFingerValues.length; i++)
+               nonFingerValues[i] = robotConfigurationData.getJointAngles().get(nonFingerIndices.get(i));
+            kinematicsStatus.getDesiredJointAngles().clear();
+            kinematicsStatus.getDesiredJointAngles().add(nonFingerValues);
+            for (int i = 0; i < nonFingerValues.length; i++)
+               nonFingerValues[i] = robotConfigurationData.getJointVelocities().get(nonFingerIndices.get(i));
+            kinematicsStatus.getDesiredJointVelocities().clear();
+            kinematicsStatus.getDesiredJointVelocities().add(nonFingerValues);
+
+            publisher.publish(kinematicsStatus);
+         }
+      });
 
       ros2ControllerHelper.subscribeViaCallback(AutonomyAPI.AI2R_COMMAND, message ->
       {
@@ -163,6 +224,185 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
 
       endSequenceAfterBehaviorExecution();
       executeBehaviorLogic();
+      handleRandomizedGoToRecording();
+   }
+
+   private void handleRandomizedGoToRecording()
+   {
+      if (!definition.getRandomizeGoToActionEnabled())
+      {
+         if (randomizationSessionActive)
+            resetRandomizationSession();
+         return;
+      }
+
+      if (!randomizationSessionActive)
+      {
+         goToAction = findGoToAction();
+         CheckpointNodeState goToCheckpoint = findGoToCheckpoint();
+         if (goToAction == null || goToCheckpoint == null)
+            return;
+
+         goToCheckpointLeafIndex = goToCheckpoint.getLeafIndex();
+         goToCheckpointName = goToCheckpoint.getDefinition().getName();
+         baseGoToStancePoint.set(goToAction.getDefinition().getGoalStancePoint().getValueReadOnly());
+         baseGoToFocalPoint.set(goToAction.getDefinition().getGoalFocalPoint().getValueReadOnly());
+         randomizationTargetCount = Math.max(1, definition.getNumberOfRandomizationsValue());
+         definition.setNumberOfRandomizationsValue(randomizationTargetCount);
+         definition.modify();
+         randomizationsCompleted = 0;
+         randomizationRunInProgress = false;
+         randomizationSessionActive = true;
+      }
+
+      if (randomizationsCompleted >= randomizationTargetCount)
+      {
+         definition.setRandomizeGoToActionEnabled(false);
+         definition.modify();
+         resetRandomizationSession();
+         return;
+      }
+
+      if (!randomizationRunInProgress && !actionSequence.getAutomaticExecution())
+      {
+         randomizeGoToGoalXY(goToAction);
+         actionSequence.setExecutionNextIndex(goToCheckpointLeafIndex);
+         actionSequence.setAutomaticExecution(true);
+         statusMessage.setBehaviorInProgress(goToCheckpointName);
+         startGoToRecording();
+         randomizationRunInProgress = true;
+      }
+      else if (randomizationRunInProgress && !actionSequence.getAutomaticExecution())
+      {
+         stopGoToRecording();
+         randomizationsCompleted++;
+         definition.setNumberOfRandomizationsValue(Math.max(0, randomizationTargetCount - randomizationsCompleted));
+         definition.modify();
+         randomizationRunInProgress = false;
+      }
+   }
+
+   private WalkActionState findGoToAction()
+   {
+      for (var leaf : actionSequence.getOrderedLeaves())
+      {
+         String leafNameLower = leaf.getDefinition().getName().toLowerCase();
+         if (leaf instanceof WalkActionState walkActionState && (leafNameLower.contains("go to action") || leafNameLower.contains("goto")))
+            return walkActionState;
+      }
+      return null;
+   }
+
+   private CheckpointNodeState findGoToCheckpoint()
+   {
+      for (CheckpointNodeState checkpoint : state.getCheckpoints())
+      {
+         String checkpointNameLower = checkpoint.getDefinition().getName().toLowerCase();
+         if (checkpointNameLower.contains("goto") || checkpointNameLower.contains("go to"))
+            return checkpoint;
+      }
+      return null;
+   }
+
+   private void randomizeGoToGoalXY(WalkActionState walkActionState)
+   {
+      // Always randomize from the session's initial values, never from the previous randomized result.
+      Point3D randomizedStancePoint = new Point3D(baseGoToStancePoint);
+      Point3D randomizedFocalPoint = new Point3D(baseGoToFocalPoint);
+
+      // Translate stance/focal together so position randomization does not accidentally change yaw.
+      double translationX = randomOffset();
+      double translationY = randomOffset();
+      randomizedStancePoint.add(translationX, translationY, 0.0);
+      randomizedFocalPoint.add(translationX, translationY, 0.0);
+
+      // Apply an explicit yaw randomization by rotating focal around stance.
+      double yawOffset = randomYawOffsetGaussian();
+      double vectorX = randomizedFocalPoint.getX() - randomizedStancePoint.getX();
+      double vectorY = randomizedFocalPoint.getY() - randomizedStancePoint.getY();
+      double cosYaw = Math.cos(yawOffset);
+      double sinYaw = Math.sin(yawOffset);
+      double rotatedX = vectorX * cosYaw - vectorY * sinYaw;
+      double rotatedY = vectorX * sinYaw + vectorY * cosYaw;
+      randomizedFocalPoint.set(randomizedStancePoint.getX() + rotatedX, randomizedStancePoint.getY() + rotatedY, randomizedFocalPoint.getZ());
+
+      walkActionState.getDefinition().getGoalStancePoint().getValueAndModify().set(randomizedStancePoint);
+      walkActionState.getDefinition().getGoalFocalPoint().getValueAndModify().set(randomizedFocalPoint);
+   }
+
+   private double randomOffset()
+   {
+      return (random.nextDouble() * 2.0 - 1.0) * GO_TO_RANDOM_XY_RANGE_METERS;
+   }
+
+   private static final double MAX_YAW_DEG = 90.0;
+   private static final double MAX_YAW_RAD = Math.toRadians(MAX_YAW_DEG);
+
+   // Choose sigma so most samples lie within [-MAX_YAW_RAD, MAX_YAW_RAD]
+   // For example: 3σ ≈ MAX  ⇒  σ = MAX/3
+   private static final double YAW_STD_RAD = MAX_YAW_RAD / 3.0;
+
+   private double randomYawOffsetGaussian()
+   {
+      // Standard normal (mean 0, std 1).
+      double g = random.nextGaussian();
+
+      // Scale to desired std dev in radians
+      double yaw = g * YAW_STD_RAD;
+
+      // Clamp hard to [-MAX_YAW_RAD, MAX_YAW_RAD]
+      if (yaw > MAX_YAW_RAD)
+         yaw = MAX_YAW_RAD;
+      else if (yaw < -MAX_YAW_RAD)
+         yaw = -MAX_YAW_RAD;
+
+      return yaw;
+   }
+
+
+   private void startGoToRecording()
+   {
+      if (ros2LogRecord != null)
+         return;
+
+      initialWalkingPose.set(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getTransformToRoot());
+      ros2LogRecord = new ROS2LogRecord(robotModel.getSimpleRobotName(), List.of(kstOutputTopic), ROS2LogTimeSource.SYSTEM, ROS2LogSerialization.JSON);
+      ros2LogRecord.start();
+   }
+
+   private void stopGoToRecording()
+   {
+      if (ros2LogRecord == null)
+         return;
+
+      ROS2LogRecord ros2LogRecordLocal = ros2LogRecord;
+      ThreadTools.startAThread(() ->
+      {
+         ros2LogRecordLocal.stop();
+         ThreadTools.parkAtLeast(1.0);
+         ros2LogRecordLocal.destroy();
+      }, "StopAI2RGoToLog");
+      ros2LogRecord = null;
+   }
+
+   private void resetRandomizationSession()
+   {
+      stopGoToRecording();
+
+      // Restore the original points captured at the beginning of the session.
+      if (goToAction != null)
+      {
+         goToAction.getDefinition().getGoalStancePoint().getValueAndModify().set(baseGoToStancePoint);
+         goToAction.getDefinition().getGoalFocalPoint().getValueAndModify().set(baseGoToFocalPoint);
+      }
+
+      randomizationSessionActive = false;
+      randomizationRunInProgress = false;
+      randomizationsCompleted = 0;
+      randomizationTargetCount = 0;
+      goToCheckpointLeafIndex = -1;
+      goToCheckpointName = "";
+      goToAction = null;
    }
 
    private void addNode()
@@ -440,6 +680,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    {
       super.destroy();
 
+      resetRandomizationSession();
       imagePublisher.close();
       annotatedImageFrame.remove();
    }

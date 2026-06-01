@@ -423,7 +423,8 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    @Override
    public String toString()
    {
-      return getClass().getSimpleName() + ": control mode: " + controlMode + ", reference position: " + referencePositionInRootFrame + ", reference velocity: "
-            + referenceLinearVelocityInRootFrame + ", reference acceleration: " + referenceLinearAccelerationInRootFrame;
+      return getClass().getSimpleName() + ": control mode = " + controlMode + ", reference position = " + referencePositionInRootFrame
+            + ", reference velocity = " + referenceLinearVelocityInRootFrame + ", reference acceleration = " + referenceLinearAccelerationInRootFrame
+            + ", weight = " + momentumRateCommand.getWeightMatrix() + ", selection = " + momentumRateCommand.getSelectionMatrix() + ", gains = " + gains;
    }
 }

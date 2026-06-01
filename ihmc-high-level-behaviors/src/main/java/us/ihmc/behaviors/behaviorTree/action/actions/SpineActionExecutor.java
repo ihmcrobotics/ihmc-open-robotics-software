@@ -37,7 +37,7 @@ public class SpineActionExecutor extends ActionNodeExecutor<SpineActionState, Sp
 
       trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
-      state.setCanExecute(state.getChestFrame().isChildOfWorld());
+      state.setCanExecute(definition.getJointspaceOnly() || state.getChestFrame().isChildOfWorld());
    }
 
    @Override
@@ -45,46 +45,45 @@ public class SpineActionExecutor extends ActionNodeExecutor<SpineActionState, Sp
    {
       super.triggerExecution();
 
-      if (state.getChestFrame().isChildOfWorld())
+      if (definition.getJointspaceOnly())
       {
-         if (definition.getJointspaceOnly())
+         SpineTrajectoryMessage message = new SpineTrajectoryMessage();
+         double[] jointAngles = new double[spineJointNames.length];
+         for (int i = 0; i < spineJointNames.length; i++)
+            jointAngles[i] = definition.getJointAngles().getValueReadOnly(i);
+         message.getJointspaceTrajectory().set(HumanoidMessageTools.createJointspaceTrajectoryMessage(definition.getTrajectoryDuration(), jointAngles));
+         ros2ControllerHelper.publishToController(message);
+      }
+      else
+      {
+         if (!state.getChestFrame().isChildOfWorld())
          {
-            SpineTrajectoryMessage message = new SpineTrajectoryMessage();
-            double[] jointAngles = new double[spineJointNames.length];
-            for (int i = 0; i < spineJointNames.length; i++)
-               jointAngles[i] = definition.getJointAngles().getValueReadOnly(i);
-            message.getJointspaceTrajectory().set(HumanoidMessageTools.createJointspaceTrajectoryMessage(definition.getTrajectoryDuration(), jointAngles));
-            ros2ControllerHelper.publishToController(message);
-         }
-         else
-         {
-            FrameQuaternion frameChestQuaternion = new FrameQuaternion(state.getChestFrame().getReferenceFrame());
-            frameChestQuaternion.changeFrame(ReferenceFrame.getWorldFrame());
-
-            ChestTrajectoryMessage message = new ChestTrajectoryMessage();
-            message.getSo3Trajectory()
-                   .set(HumanoidMessageTools.createSO3TrajectoryMessage(definition.getTrajectoryDuration(),
-                                                                        frameChestQuaternion,
-                                                                        EuclidCoreTools.zeroVector3D,
-                                                                        ReferenceFrame.getWorldFrame()));
-            long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
-            message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
-
-            ros2ControllerHelper.publishToController(message);
+            state.setFailed(true);
+            state.getLogger().error("Cannot execute. Frame is not a child of World frame.");
+            return;
          }
 
-         trackingCalculator.reset();
+         FrameQuaternion frameChestQuaternion = new FrameQuaternion(state.getChestFrame().getReferenceFrame());
+         frameChestQuaternion.changeFrame(ReferenceFrame.getWorldFrame());
 
-         state.setNominalExecutionDuration(definition.getTrajectoryDuration());
+         ChestTrajectoryMessage message = new ChestTrajectoryMessage();
+         message.getSo3Trajectory()
+                .set(HumanoidMessageTools.createSO3TrajectoryMessage(definition.getTrajectoryDuration(),
+                                                                     frameChestQuaternion,
+                                                                     EuclidCoreTools.zeroVector3D,
+                                                                     ReferenceFrame.getWorldFrame()));
+         long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
+         message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+
+         ros2ControllerHelper.publishToController(message);
 
          desiredChestPose.setFromReferenceFrame(state.getChestFrame().getReferenceFrame());
          syncedChestPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame());
          state.getCommandedTrajectory().setSingleSegmentTrajectory(syncedChestPose, desiredChestPose, definition.getTrajectoryDuration());
       }
-      else
-      {
-         state.getLogger().error("Cannot execute. Frame is not a child of World frame.");
-      }
+
+      trackingCalculator.reset();
+      state.setNominalExecutionDuration(definition.getTrajectoryDuration());
    }
 
    @Override

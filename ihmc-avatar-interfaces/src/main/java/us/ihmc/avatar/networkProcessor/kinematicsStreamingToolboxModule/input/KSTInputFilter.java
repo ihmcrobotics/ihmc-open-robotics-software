@@ -16,6 +16,10 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * Validates and bounds incoming task-space commands before they reach the IK solver.
+ * It applies workspace and per-tick delta/velocity safety limits.
+ */
 public class KSTInputFilter
 {
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

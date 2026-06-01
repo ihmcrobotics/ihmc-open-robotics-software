@@ -308,6 +308,8 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    @Override
    public String toString()
    {
-      return getClass().getSimpleName() + ": contacting rigid body = " + rigidBody + ", number of contact points = " + getNumberOfContactPoints();
+      return getClass().getSimpleName() + ": contacting rigid body = " + rigidBody + ", number of contact points = " + getNumberOfContactPoints()
+            + ", mu = " + coefficientOfFriction + ", contact normal = " + contactNormal + ", useHighCoPDamping = " + useHighCoPDamping
+            + ", hasContactStateChanged = " + hasContactStateChanged;
    }
 }

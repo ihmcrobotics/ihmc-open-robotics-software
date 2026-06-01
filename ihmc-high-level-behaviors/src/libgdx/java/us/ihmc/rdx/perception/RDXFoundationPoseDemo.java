@@ -24,6 +24,7 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Publisher;
@@ -106,7 +107,7 @@ public class RDXFoundationPoseDemo
    private final ImageMessage colorMessage;
    private final ImageMessage depthMessage;
 
-   private final ImageSensor zed;
+   private final ZEDImageSensor zed;
    private final YOLOv8DetectionThread yoloThread;
    private final RepeatingTaskThread zedImageConsumerThread;
 
@@ -136,7 +137,8 @@ public class RDXFoundationPoseDemo
       ros2Node.createSubscription2(RESULT_TOPIC, this::receivePose);
 
       boolean enableNeuralMode = CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getDeviceName(0), "RTX 3080");
-      zed = new ZEDImageSensor(0, ZEDModelData.ZED_2, SL_INPUT_TYPE_USB, enableNeuralMode ? SL_DEPTH_MODE_NEURAL : SL_DEPTH_MODE_PERFORMANCE);
+      zed = new ZEDImageSensor(0, ZEDModelData.ZED_2, SL_INPUT_TYPE_USB);
+      zed.getInitParameters().depth_mode(enableNeuralMode ? SL_DEPTH_MODE_NEURAL : SL_DEPTH_MODE_PERFORMANCE);
 
       colorPublisher = ros2Node.createPublisher(COLOR_TOPIC);
       depthPublisher = ros2Node.createPublisher(DEPTH_TOPIC);
@@ -151,7 +153,7 @@ public class RDXFoundationPoseDemo
 
       baseUI = new RDXBaseUI();
       pointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud");
-      yoloSettings = new RDXROS2YOLOv8Visualizer("YOLO Results", ros2Node, uiClockOffsetEstimator, PerceptionAPI.YOLO_ANNOTATED_IMAGE);
+      yoloSettings = new RDXROS2YOLOv8Visualizer("YOLO Results", ros2Node, uiClockOffsetEstimator, PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT));
 
       destroyed = new AtomicBoolean(false);
 

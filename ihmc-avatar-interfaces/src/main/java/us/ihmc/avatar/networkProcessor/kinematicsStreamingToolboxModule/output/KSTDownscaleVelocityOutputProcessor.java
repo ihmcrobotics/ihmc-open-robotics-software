@@ -5,6 +5,9 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+/**
+ * Scales all joint/root velocities by a configurable factor before publishing to the controller.
+ */
 public class KSTDownscaleVelocityOutputProcessor implements KSTOutputProcessor
 {
    private final KSTTools tools;

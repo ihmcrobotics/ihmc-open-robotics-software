@@ -55,6 +55,7 @@ public final class ControllerAPI
       inputMessageClasses.add(AbortWalkingMessage.class);
       inputMessageClasses.add(PrepareForLocomotionMessage.class);
       inputMessageClasses.add(PauseWalkingMessage.class);
+      inputMessageClasses.add(ReinitializeStateEstimatorMessage.class);
       inputMessageClasses.add(SpineDesiredAccelerationsMessage.class);
       inputMessageClasses.add(HandLoadBearingMessage.class);
       inputMessageClasses.add(HandHybridJointspaceTaskspaceTrajectoryMessage.class);
@@ -78,8 +79,9 @@ public final class ControllerAPI
       // Command supported by the joint-space controller JointspacePositionControllerState
       inputMessageClasses.add(WholeBodyJointspaceTrajectoryMessage.class);
 
-      // Command supported by the RL controller, not in this repo
+      // Commands supported by the RL controller, not in this repo
       inputMessageClasses.add(Point2DMessage.class);
+      inputMessageClasses.add(RLModelSelectionMessage.class);
 
       // Toolbox management
       inputMessageClasses.add(ToolboxStateMessage.class);
@@ -135,6 +137,9 @@ public final class ControllerAPI
 
       // Robot hardware status messages
       outputMessageClasses.add(EStopMasterGainStatusMessage.class);
+
+      // RL policy state (available models and current selection)
+      outputMessageClasses.add(RLPolicyState.class);
 
       // Setting the input messages with specific QoS
       inputMessageClassSpecificQoS.put(WholeBodyStreamingMessage.class, ROS2QosProfile.BEST_EFFORT());

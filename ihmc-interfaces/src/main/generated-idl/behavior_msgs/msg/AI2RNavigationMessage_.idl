@@ -45,6 +45,10 @@ module behavior_msgs
          * The distance to the reference frame (located at the object's centroid)
          */
         double distance_to_object;
+        /**
+         * The minimum distance to the obstacles considered in body path planning
+         */
+        double obstacle_clearance;
       };
     };
   };
