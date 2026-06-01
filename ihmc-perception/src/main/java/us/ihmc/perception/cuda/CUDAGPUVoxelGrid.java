@@ -44,8 +44,9 @@ public class CUDAGPUVoxelGrid implements AutoCloseable
    private final FloatPointer gpuScanY;       // NUM_SCAN_POINTS floats
    private final FloatPointer gpuHeightsOut;  // NUM_SCAN_POINTS floats
 
-   private final FloatPointer baseTransformPtr;   // 16 floats, base-to-world transform
-   private final FloatPointer heightsReadbackPtr; // NUM_SCAN_POINTS floats
+   private final FloatPointer gpuBaseTransform;       // 16 floats on device
+   private final FloatPointer baseTransformStaging;   // 16 floats pinned host, staging for upload
+   private final FloatPointer heightsReadbackPtr;     // NUM_SCAN_POINTS floats pinned host
 
    /**
     * Creates a GPU voxel grid with configurable dimensions.
@@ -107,11 +108,15 @@ public class CUDAGPUVoxelGrid implements AutoCloseable
       tmpX.close();
       tmpY.close();
 
-      baseTransformPtr = new FloatPointer();
-      CUDATools.checkCUDAError(cudaMallocHost(baseTransformPtr, 16L * Float.BYTES));
+      gpuBaseTransform = new FloatPointer();
+      CUDATools.mallocAsync(gpuBaseTransform, 16L, stream);
+      gpuBaseTransform.limit(16L);
+
+      baseTransformStaging = new FloatPointer();
+      CUDATools.mallocHost(baseTransformStaging, 16L);
 
       heightsReadbackPtr = new FloatPointer();
-      CUDATools.checkCUDAError(cudaMallocHost(heightsReadbackPtr, (long) NUM_SCAN_POINTS * Float.BYTES));
+      CUDATools.mallocHost(heightsReadbackPtr, (long) NUM_SCAN_POINTS);
 
       CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
 
@@ -237,7 +242,8 @@ public class CUDAGPUVoxelGrid implements AutoCloseable
    {
       float[] arr = new float[16];
       baseToWorld.get(arr); // row-major 4x4
-      baseTransformPtr.put(arr);
+      baseTransformStaging.put(arr);
+      CUDATools.memcpyAsync(gpuBaseTransform, baseTransformStaging, 16L, stream);
 
       int gridSize = (NUM_SCAN_POINTS + BLOCK_SIZE_1D - 1) / BLOCK_SIZE_1D;
       dim3 block = new dim3(BLOCK_SIZE_1D, 1, 1);
@@ -251,7 +257,7 @@ public class CUDAGPUVoxelGrid implements AutoCloseable
             .withPointer(gpuScanX)
             .withPointer(gpuScanY)
             .withInt(NUM_SCAN_POINTS)
-            .withPointer(baseTransformPtr)
+            .withPointer(gpuBaseTransform)
             .withInt(2)              // searchRadiusVoxels: 2 voxels = 10 cm at 5 cm res
             .withFloat(-1.0f)        // defaultRelativeHeight: unknown → -1 m
             .withPointer(gpuHeightsOut)
@@ -342,8 +348,9 @@ public class CUDAGPUVoxelGrid implements AutoCloseable
       CUDATools.checkCUDAError(cudaFreeAsync(gpuScanX, stream));
       CUDATools.checkCUDAError(cudaFreeAsync(gpuScanY, stream));
       CUDATools.checkCUDAError(cudaFreeAsync(gpuHeightsOut, stream));
-      CUDATools.checkCUDAError(cudaFreeHost(baseTransformPtr));
-      CUDATools.checkCUDAError(cudaFreeHost(heightsReadbackPtr));
+      CUDATools.checkCUDAError(cudaFreeAsync(gpuBaseTransform, stream));
+      CUDATools.freeHost(baseTransformStaging);
+      CUDATools.freeHost(heightsReadbackPtr);
       CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
       kernelUpdateHits.close();
       kernelUpdateMisses.close();

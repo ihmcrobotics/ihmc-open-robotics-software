@@ -5,14 +5,9 @@ import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.RawImage;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.IntStream;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
@@ -61,55 +56,48 @@ public class CUDAPointCloudExtractor implements AutoCloseable
       // Get a stream
       stream = CUDAStreamManager.getStream();
 
-      // Allocate fixed size page-locked memory (on host)
-      error = cudaMallocHost(transformPointer, 16L * transformPointer.sizeof()); // 16 floats for transform matrix
-      CUDATools.checkCUDAError(error);
-      error = cudaMallocHost(pointCloudSize, pointCloudSize.sizeof());           // 1 int for point cloud size
-      CUDATools.checkCUDAError(error);
+      CUDATools.mallocHost(transformPointer, 16L);
+      CUDATools.mallocHost(pointCloudSize, 1L);
    }
 
    /**
-    * Extract a point cloud from a depth image.
+    * Extract a point cloud from a depth image directly into GPU memory — no CPU round-trip.
     *
-    * @param depthImage A 16 bit depth image.
-    * @return The point cloud extracted from the depth image, as a list of {@link Point3D32}s.
-    * @apiNote Points at 0 depth are ignored, as it usually means no depth value was assigned to the pixel.
-    *       Thus, the number of points in the output will not necessarily equal the number of pixels within the depth image.
+    * <p>The result stays in the GPU buffer returned by {@link #getGpuPointCloud()}.
+    * Call {@link #getStream()} and synchronize before passing the buffer to another GPU consumer.
+    *
+    * @param depthImage    16-bit depth image. Released on return.
+    * @param minDepthMeters Points closer than this are discarded (dead band / self-collision filter).
+    * @param maxDepthMeters Points farther than this are discarded.
+    * @return Number of valid points extracted (0 when the image is empty).
     */
-   public List<Point3D32> extractPointCloud(RawImage depthImage)
+   public int extractToGpu(RawImage depthImage, float minDepthMeters, float maxDepthMeters)
    {
       if (depthImage.get() == null)
-         return new ArrayList<>();
+      {
+         depthImage.release();
+         return 0;
+      }
 
-      // Ensure enough GPU memory is allocated
       long maxPointCloudFloats = 3L * depthImage.getWidth() * depthImage.getHeight();
       if (gpuPointCloudPointer.isNull() || gpuPointCloudPointer.limit() < maxPointCloudFloats)
       {
          if (!gpuPointCloudPointer.isNull())
-         {  // de-allocate existing allocation
-            error = cudaFreeAsync(gpuPointCloudPointer, stream);
-            CUDATools.checkCUDAError(error);
-         }
-         CUDATools.mallocAsync(gpuPointCloudPointer, maxPointCloudFloats, stream); // allocate enough memory
+            CUDATools.checkCUDAError(cudaFreeAsync(gpuPointCloudPointer, stream));
+         CUDATools.mallocAsync(gpuPointCloudPointer, maxPointCloudFloats, stream);
          gpuPointCloudPointer.limit(maxPointCloudFloats);
       }
 
-      // Get a float[] of the transformation matrix, and copy it into CUDA page-locked memory
       depthToWorldTransform.set(depthImage.getTransformToWorld());
       depthToWorldTransform.get(transformArray);
       transformPointer.put(transformArray);
-
-      // Set the point cloud size counter to 0
       pointCloudSize.put(0);
 
-      // Calculate block size and grid size of the kernel launch
       dim3 blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
-
       int gridSizeX = (depthImage.getWidth() + BLOCK_SIZE_XY - 1) / (BLOCK_SIZE_XY * 2);
       int gridSizeY = (depthImage.getHeight() + BLOCK_SIZE_XY - 1) / (BLOCK_SIZE_XY * 2);
       dim3 gridSize = new dim3(gridSizeX, gridSizeY, 1);
 
-      // Run the kernel
       kernel.withPointer(depthImage.getCUDADataPointer())
             .withLong(depthImage.getGpuImageMat().step())
             .withInt(depthImage.getWidth())
@@ -119,49 +107,40 @@ public class CUDAPointCloudExtractor implements AutoCloseable
             .withFloat(depthImage.getPrincipalPointX())
             .withFloat(depthImage.getPrincipalPointY())
             .withFloat(depthImage.getDepthDiscretization())
+            .withFloat(minDepthMeters)
+            .withFloat(maxDepthMeters)
             .withPointer(transformPointer)
             .withPointer(gpuPointCloudPointer)
             .withPointer(pointCloudSize)
             .run(stream, gridSize, blockSize, 0);
 
-      // Synchronize the stream to ensure we can read the point cloud size
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
-      int numberOfPoints = pointCloudSize.get();
-      long numberOfFloats = 3L * numberOfPoints;
+      CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
+      int count = pointCloudSize.get();
 
-      // Copy the point cloud data from GPU to CPU, then to a Java float[]
-      FloatPointer cpuPointCloudPointer = new FloatPointer(numberOfFloats);
-      float[] pointsArray = new float[(int) numberOfFloats];
-      CUDATools.memcpyAsync(cpuPointCloudPointer, gpuPointCloudPointer, numberOfFloats, stream);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
-      cpuPointCloudPointer.get(pointsArray);
-
-      // Create a list of points from the float[]
-      Point3D32[] result = new Point3D32[numberOfPoints];
-      IntStream.range(0, numberOfPoints).parallel().forEach(i ->
-      {
-         float x = pointsArray[3 * i];
-         float y = pointsArray[3 * i + 1];
-         float z = pointsArray[3 * i + 2];
-         result[i] = new Point3D32(x, y, z);
-      });
-
-      // Release stuff
       blockSize.close();
       gridSize.close();
-      cpuPointCloudPointer.close();
       depthImage.release();
 
-      return Arrays.asList(result);
+      return count;
+   }
+
+   /** GPU float3 buffer holding the result of the last {@link #extractToGpu} call. */
+   public FloatPointer getGpuPointCloud()
+   {
+      return gpuPointCloudPointer;
+   }
+
+   /** CUDA stream used by this extractor. Synchronize before consuming {@link #getGpuPointCloud()} on another stream. */
+   public CUstream_st getStream()
+   {
+      return stream;
    }
 
    @Override
    public void close()
    {
-      CUDATools.checkCUDAError(cudaFreeHost(transformPointer));
-      CUDATools.checkCUDAError(cudaFreeHost(pointCloudSize));
+      CUDATools.freeHost(transformPointer);
+      CUDATools.freeHost(pointCloudSize);
       if (!gpuPointCloudPointer.isNull())
          CUDATools.checkCUDAError(cudaFreeAsync(gpuPointCloudPointer, stream));
 

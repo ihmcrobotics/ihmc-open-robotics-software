@@ -14,6 +14,8 @@ __global__ void extractPointCloud(unsigned short* depthImage,
                                   float cx,
                                   float cy,
                                   float depthDiscretization,
+                                  float minDepthMeters,
+                                  float maxDepthMeters,
                                   float* depthToWorldTransform,
                                   float3* pointCloud,
                                   int* pointCloudSize)
@@ -33,6 +35,9 @@ __global__ void extractPointCloud(unsigned short* depthImage,
                 continue;
 
             float depthInMeters = depthDiscretization * depthValue;
+            if (depthInMeters < minDepthMeters || depthInMeters > maxDepthMeters)
+                continue;
+
             float3 depthFramePoint = pixelDepthToPoint3D(x, y, depthInMeters, fx, fy, cx, cy);
             float3 worldFramePoint = transformPoint3D(depthFramePoint, depthToWorldTransform);
 
