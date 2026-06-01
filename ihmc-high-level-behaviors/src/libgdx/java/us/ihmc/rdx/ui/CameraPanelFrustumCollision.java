@@ -1,9 +1,8 @@
-package us.ihmc.rdx.ui.vr;
+package us.ihmc.rdx.ui;
 
 import com.badlogic.gdx.math.Vector3;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.log.LogTools;
 
 /**
  * Frustum collision check between near and far planes.
