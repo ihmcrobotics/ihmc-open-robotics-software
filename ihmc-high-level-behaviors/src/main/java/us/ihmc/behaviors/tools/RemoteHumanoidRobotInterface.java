@@ -26,7 +26,6 @@ import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
