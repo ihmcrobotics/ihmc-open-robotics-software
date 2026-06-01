@@ -51,7 +51,7 @@ public class ROS2SRTVideoStreamer
       this.ros2Node = ros2Node;
       statusMessage = new SRTStreamStatus();
       statusMessage.setStreamerAddress(streamOutputAddress.getHostString());
-      statusMessage.setStreamerPort((short) streamOutputAddress.getPort());
+      statusMessage.setStreamerPort(streamOutputAddress.getPort());
 
       statusMessagePublisher = ros2Node.createPublisher(streamTopic);
 

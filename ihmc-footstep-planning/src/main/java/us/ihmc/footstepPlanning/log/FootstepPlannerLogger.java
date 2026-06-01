@@ -109,7 +109,6 @@ public class FootstepPlannerLogger
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
    private final AStarBodyPathPlannerParametersPacket bodyPathParametersPacket = new AStarBodyPathPlannerParametersPacket();
    private final SwingPlannerParametersPacket swingPlannerParametersPacket = new SwingPlannerParametersPacket();
-   private final FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
 
    public FootstepPlannerLogger(FootstepPlanningModule planner)
    {
@@ -252,8 +251,9 @@ public class FootstepPlannerLogger
 
          // log status packet
          String statusPacketFile = sessionDirectory + outputStatusPacketFileName;
-         planner.getOutput().setPacket(outputStatus);
-         byte[] serializedStatus = ROS2MessageCdrFileTools.serializeToBytes(outputStatus);
+         FootstepPlanningToolboxOutputStatus outputStatusToLog = new FootstepPlanningToolboxOutputStatus();
+         planner.getOutput().setPacket(outputStatusToLog);
+         byte[] serializedStatus = ROS2MessageCdrFileTools.serializeToBytes(outputStatusToLog);
          writeToFile(statusPacketFile, serializedStatus);
       }
       catch (Exception e)

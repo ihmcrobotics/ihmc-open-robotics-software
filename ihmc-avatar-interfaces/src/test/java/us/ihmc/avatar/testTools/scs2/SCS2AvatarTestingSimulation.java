@@ -19,6 +19,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.avatar.scriptCommandGenerator.ExerciseAndJUnitScript;
 import us.ihmc.avatar.scriptCommandGenerator.ScriptBasedControllerCommandGenerator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -47,7 +48,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -552,11 +552,11 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    public void destroy()
    {
-      if (ros2Node != null)
+      if (ros2Node != null && !ros2Node.isClosed())
       {
          ros2Node.close();
-         ros2Node = null;
       }
+      ros2Node = null;
 
       avatarSimulation.destroy();
    }
@@ -609,9 +609,9 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       return scriptBasedControllerCommandGenerator;
    }
 
-   public void loadScriptFile(InputStream scriptInputStream, ReferenceFrame referenceFrame)
+   public void runExerciseScript(ExerciseAndJUnitScript script, ReferenceFrame referenceFrame)
    {
-      getScriptBasedControllerCommandGenerator().loadScriptFile(scriptInputStream, referenceFrame);
+      getScriptBasedControllerCommandGenerator().runExerciseScript(script, referenceFrame);
    }
 
    public ROS2Node getROS2Node()

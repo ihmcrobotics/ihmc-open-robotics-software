@@ -2306,7 +2306,7 @@ public class HumanoidMessageTools
       if (configurationSpaces.length != lowerLimits.length || configurationSpaces.length != upperLimits.length || lowerLimits.length != upperLimits.length)
          throw new RuntimeException("Inconsistent array lengths: configurationSpaces = " + configurationSpaces.length);
 
-      reachingManifoldMessage.getManifoldConfigurationSpaceNames().getBuffer().reset();
+      reachingManifoldMessage.getManifoldConfigurationSpaceNames().clear();
       reachingManifoldMessage.getManifoldLowerLimits().clear();
       reachingManifoldMessage.getManifoldUpperLimits().clear();
       reachingManifoldMessage.getManifoldConfigurationSpaceNames().addAll(configurationSpaces);

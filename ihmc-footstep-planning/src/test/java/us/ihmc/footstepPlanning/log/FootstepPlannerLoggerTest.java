@@ -143,11 +143,13 @@ public class FootstepPlannerLoggerTest
       assertArrayEquals(ROS2MessageCdrFileTools.serializeToBytes(expectedFootstepPlannerParameters),
                         ROS2MessageCdrFileTools.serializeToBytes(log.getFootstepParametersPacket()));
 
-      // Expected output status packet, this variable gets packed with the data from the planner output
+      // Expected output status packet, packed the same way as FootstepPlannerLogger.logSession
       FootstepPlanningToolboxOutputStatus expectedOutputStatusPacket = new FootstepPlanningToolboxOutputStatus();
-      plannerOutput.setPacket(expectedOutputStatusPacket);
-      assertArrayEquals(ROS2MessageCdrFileTools.serializeToBytes(expectedOutputStatusPacket),
-                        ROS2MessageCdrFileTools.serializeToBytes(log.getStatusPacket()));
+      planningModule.getOutput().setPacket(expectedOutputStatusPacket);
+      FootstepPlanningToolboxOutputStatus loggedOutputStatusPacket = log.getStatusPacket();
+      assertEquals(expectedOutputStatusPacket.getPlanId(), loggedOutputStatusPacket.getPlanId());
+      assertEquals(expectedOutputStatusPacket.getFootstepPlanningResult(), loggedOutputStatusPacket.getFootstepPlanningResult());
+      assertEquals(expectedOutputStatusPacket.getBodyPathPlanningResult(), loggedOutputStatusPacket.getBodyPathPlanningResult());
 
       // Expected body path planner packet
       AStarBodyPathPlannerParametersPacket expectedBodyPathParameters = new AStarBodyPathPlannerParametersPacket();

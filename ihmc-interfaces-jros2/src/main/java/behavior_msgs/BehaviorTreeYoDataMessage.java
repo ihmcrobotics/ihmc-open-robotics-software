@@ -51,7 +51,7 @@ public class BehaviorTreeYoDataMessage implements ROS2Message<BehaviorTreeYoData
    private byte number_of_scene_objects_;
    private final us.ihmc.euclid.jros2.messages.EuclidPose3DMessage[] scene_object_pose_;
    private boolean automatic_execution_;
-   private short execution_next_index_;
+   private int execution_next_index_;
    private boolean concurrency_enabled_;
    private byte number_of_executing_actions_;
    private byte number_of_failed_actions_;
@@ -130,7 +130,7 @@ public class BehaviorTreeYoDataMessage implements ROS2Message<BehaviorTreeYoData
          scene_object_pose_[i].serialize(buffer);
       }
       buffer.writeBoolean(automatic_execution_);
-      buffer.writeShort(execution_next_index_);
+      buffer.writeUInt16(execution_next_index_);
       buffer.writeBoolean(concurrency_enabled_);
       buffer.writeByte(number_of_executing_actions_);
       buffer.writeByte(number_of_failed_actions_);
@@ -167,7 +167,7 @@ public class BehaviorTreeYoDataMessage implements ROS2Message<BehaviorTreeYoData
          scene_object_pose_[i].deserialize(buffer);
       }
       automatic_execution_ = buffer.readBoolean();
-      execution_next_index_ = buffer.readShort();
+      execution_next_index_ = buffer.readUInt16();
       concurrency_enabled_ = buffer.readBoolean();
       number_of_executing_actions_ = buffer.readByte();
       number_of_failed_actions_ = buffer.readByte();
@@ -266,12 +266,12 @@ public class BehaviorTreeYoDataMessage implements ROS2Message<BehaviorTreeYoData
       this.automatic_execution_ = automatic_execution_;
    }
 
-   public short getExecutionNextIndex()
+   public int getExecutionNextIndex()
    {
       return execution_next_index_;
    }
 
-   public void setExecutionNextIndex(short execution_next_index_)
+   public void setExecutionNextIndex(int execution_next_index_)
    {
       this.execution_next_index_ = execution_next_index_;
    }

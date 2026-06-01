@@ -1,7 +1,7 @@
 pluginManagement {
    plugins {
       id("us.ihmc.ihmc-build") version "1.3.0"
-      id("us.ihmc.jros2.generator") version "1.2.1"
+      id("us.ihmc.jros2.generator") version "1.2.2"
    }
    repositories {
       maven { url = uri("https://plugins.gradle.org/m2/") }

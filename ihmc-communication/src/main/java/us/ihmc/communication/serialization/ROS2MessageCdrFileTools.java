@@ -20,7 +20,7 @@ public final class ROS2MessageCdrFileTools
    public static <T extends ROS2Message<T>> byte[] serializeToBytes(T message)
    {
       CDRBuffer buffer = new CDRBuffer();
-      int payloadSize = message.calculateSizeBytes(4);
+      int payloadSize = message.calculateSizeBytes(0);
       buffer.ensureRemainingCapacity(payloadSize + CDRBuffer.PAYLOAD_HEADER.length + 64);
       buffer.writePayloadHeader();
       message.serialize(buffer);

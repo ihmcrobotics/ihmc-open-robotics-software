@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
-import us.ihmc.communication.ROS2Tools;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.RobotConfigurationData;
@@ -54,8 +52,6 @@ public class ExternalForceEstimationMessageReplay
       ROS2Topic toolboxInputTopic = ExternalForceEstimationToolboxModule.getInputTopic(robotName);
       configMessagePublisher = ros2Node.createPublisher(toolboxInputTopic.withType(ExternalForceEstimationConfigurationMessage.class));
       toolboxStatePublisher = ros2Node.createPublisher(toolboxInputTopic.withType(ToolboxStateMessage.class));
-
-      ROS2Tools.blockUntilInterrupted();
    }
 
    public void replayAllMessages()

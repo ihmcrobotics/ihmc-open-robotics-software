@@ -61,7 +61,7 @@ public class BehaviorTreeRootNodeStateMessage implements ROS2Message<BehaviorTre
    /**
       The index of the action that is set to execute next
    */
-   private short execution_next_index_;
+   private int execution_next_index_;
    /**
       Request manual execution of the next action
    */
@@ -117,7 +117,7 @@ public class BehaviorTreeRootNodeStateMessage implements ROS2Message<BehaviorTre
       definition_.serialize(buffer);
       scene_.serialize(buffer);
       buffer.writeBoolean(automatic_execution_);
-      buffer.writeShort(execution_next_index_);
+      buffer.writeUInt16(execution_next_index_);
       buffer.writeBoolean(manual_execution_requested_);
       buffer.writeBoolean(concurrency_enabled_);
       buffer.writeBoolean(preview_mode_enabled_);
@@ -132,7 +132,7 @@ public class BehaviorTreeRootNodeStateMessage implements ROS2Message<BehaviorTre
       definition_.deserialize(buffer);
       scene_.deserialize(buffer);
       automatic_execution_ = buffer.readBoolean();
-      execution_next_index_ = buffer.readShort();
+      execution_next_index_ = buffer.readUInt16();
       manual_execution_requested_ = buffer.readBoolean();
       concurrency_enabled_ = buffer.readBoolean();
       preview_mode_enabled_ = buffer.readBoolean();
@@ -180,12 +180,12 @@ public class BehaviorTreeRootNodeStateMessage implements ROS2Message<BehaviorTre
       this.automatic_execution_ = automatic_execution_;
    }
 
-   public short getExecutionNextIndex()
+   public int getExecutionNextIndex()
    {
       return execution_next_index_;
    }
 
-   public void setExecutionNextIndex(short execution_next_index_)
+   public void setExecutionNextIndex(int execution_next_index_)
    {
       this.execution_next_index_ = execution_next_index_;
    }

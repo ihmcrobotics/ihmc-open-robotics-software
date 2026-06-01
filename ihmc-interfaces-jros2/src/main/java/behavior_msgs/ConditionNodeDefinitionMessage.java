@@ -244,27 +244,27 @@ public class ConditionNodeDefinitionMessage implements ROS2Message<ConditionNode
    /**
       Min hue
    */
-   private short hue_min_;
+   private int hue_min_;
    /**
       Max hue
    */
-   private short hue_max_;
+   private int hue_max_;
    /**
       Min saturation
    */
-   private short saturation_min_;
+   private int saturation_min_;
    /**
       Max saturation
    */
-   private short saturation_max_;
+   private int saturation_max_;
    /**
       Min value
    */
-   private short value_min_;
+   private int value_min_;
    /**
       Max value
    */
-   private short value_max_;
+   private int value_max_;
 
    public ConditionNodeDefinitionMessage()
    {
@@ -351,12 +351,12 @@ public class ConditionNodeDefinitionMessage implements ROS2Message<ConditionNode
       buffer.writeInt(min_points_);
       buffer.writeInt(max_points_);
       buffer.writeBoolean(check_color_);
-      buffer.writeShort(hue_min_);
-      buffer.writeShort(hue_max_);
-      buffer.writeShort(saturation_min_);
-      buffer.writeShort(saturation_max_);
-      buffer.writeShort(value_min_);
-      buffer.writeShort(value_max_);
+      buffer.writeUInt16(hue_min_);
+      buffer.writeUInt16(hue_max_);
+      buffer.writeUInt16(saturation_min_);
+      buffer.writeUInt16(saturation_max_);
+      buffer.writeUInt16(value_min_);
+      buffer.writeUInt16(value_max_);
 
    }
 
@@ -387,12 +387,12 @@ public class ConditionNodeDefinitionMessage implements ROS2Message<ConditionNode
       min_points_ = buffer.readInt();
       max_points_ = buffer.readInt();
       check_color_ = buffer.readBoolean();
-      hue_min_ = buffer.readShort();
-      hue_max_ = buffer.readShort();
-      saturation_min_ = buffer.readShort();
-      saturation_max_ = buffer.readShort();
-      value_min_ = buffer.readShort();
-      value_max_ = buffer.readShort();
+      hue_min_ = buffer.readUInt16();
+      hue_max_ = buffer.readUInt16();
+      saturation_min_ = buffer.readUInt16();
+      saturation_max_ = buffer.readUInt16();
+      value_min_ = buffer.readUInt16();
+      value_max_ = buffer.readUInt16();
 
    }
 
@@ -704,62 +704,62 @@ public class ConditionNodeDefinitionMessage implements ROS2Message<ConditionNode
       this.check_color_ = check_color_;
    }
 
-   public short getHueMin()
+   public int getHueMin()
    {
       return hue_min_;
    }
 
-   public void setHueMin(short hue_min_)
+   public void setHueMin(int hue_min_)
    {
       this.hue_min_ = hue_min_;
    }
 
-   public short getHueMax()
+   public int getHueMax()
    {
       return hue_max_;
    }
 
-   public void setHueMax(short hue_max_)
+   public void setHueMax(int hue_max_)
    {
       this.hue_max_ = hue_max_;
    }
 
-   public short getSaturationMin()
+   public int getSaturationMin()
    {
       return saturation_min_;
    }
 
-   public void setSaturationMin(short saturation_min_)
+   public void setSaturationMin(int saturation_min_)
    {
       this.saturation_min_ = saturation_min_;
    }
 
-   public short getSaturationMax()
+   public int getSaturationMax()
    {
       return saturation_max_;
    }
 
-   public void setSaturationMax(short saturation_max_)
+   public void setSaturationMax(int saturation_max_)
    {
       this.saturation_max_ = saturation_max_;
    }
 
-   public short getValueMin()
+   public int getValueMin()
    {
       return value_min_;
    }
 
-   public void setValueMin(short value_min_)
+   public void setValueMin(int value_min_)
    {
       this.value_min_ = value_min_;
    }
 
-   public short getValueMax()
+   public int getValueMax()
    {
       return value_max_;
    }
 
-   public void setValueMax(short value_max_)
+   public void setValueMax(int value_max_)
    {
       this.value_max_ = value_max_;
    }

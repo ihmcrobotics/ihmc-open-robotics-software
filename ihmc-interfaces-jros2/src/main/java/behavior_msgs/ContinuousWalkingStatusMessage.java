@@ -46,11 +46,11 @@ public class ContinuousWalkingStatusMessage implements ROS2Message<ContinuousWal
    /**
       a-star number of footsteps
    */
-   private short a_star_num_steps_;
+   private int a_star_num_steps_;
    /**
       monte-carlo number of footsteps
    */
-   private short monte_carlo_num_steps_;
+   private int monte_carlo_num_steps_;
 
    public ContinuousWalkingStatusMessage()
    {
@@ -78,8 +78,8 @@ public class ContinuousWalkingStatusMessage implements ROS2Message<ContinuousWal
       buffer.writeBoolean(left_stance_to_plan_from_);
       buffer.writeDouble(monte_carlo_planning_time_);
       buffer.writeDouble(a_star_planning_time_);
-      buffer.writeShort(a_star_num_steps_);
-      buffer.writeShort(monte_carlo_num_steps_);
+      buffer.writeUInt16(a_star_num_steps_);
+      buffer.writeUInt16(monte_carlo_num_steps_);
 
    }
 
@@ -89,8 +89,8 @@ public class ContinuousWalkingStatusMessage implements ROS2Message<ContinuousWal
       left_stance_to_plan_from_ = buffer.readBoolean();
       monte_carlo_planning_time_ = buffer.readDouble();
       a_star_planning_time_ = buffer.readDouble();
-      a_star_num_steps_ = buffer.readShort();
-      monte_carlo_num_steps_ = buffer.readShort();
+      a_star_num_steps_ = buffer.readUInt16();
+      monte_carlo_num_steps_ = buffer.readUInt16();
 
    }
 
@@ -135,22 +135,22 @@ public class ContinuousWalkingStatusMessage implements ROS2Message<ContinuousWal
       this.a_star_planning_time_ = a_star_planning_time_;
    }
 
-   public short getAStarNumSteps()
+   public int getAStarNumSteps()
    {
       return a_star_num_steps_;
    }
 
-   public void setAStarNumSteps(short a_star_num_steps_)
+   public void setAStarNumSteps(int a_star_num_steps_)
    {
       this.a_star_num_steps_ = a_star_num_steps_;
    }
 
-   public short getMonteCarloNumSteps()
+   public int getMonteCarloNumSteps()
    {
       return monte_carlo_num_steps_;
    }
 
-   public void setMonteCarloNumSteps(short monte_carlo_num_steps_)
+   public void setMonteCarloNumSteps(int monte_carlo_num_steps_)
    {
       this.monte_carlo_num_steps_ = monte_carlo_num_steps_;
    }

@@ -9,9 +9,8 @@ import perception_msgs.ImageMessage;
  *
  * This class is useful when you have a BytePointer to data in direct (native)
  * memory and need to pack that data into an ImageMessage. Since our ROS 2
- * messages use a TByteArrayList which is backed by a heap array, we need
- * to preallocate a heap array, copy the native data to it, then copy
- * it again into the ROS 2 message's internal TByteArrayList (getData).
+ * messages use a heap-backed {@link us.ihmc.fastddsjava.cdr.idl.IDLByteSequence}, we
+ * preallocate a heap array, copy the native data to it, then copy into the message.
  */
 public class ImageMessageDataPacker
 {
@@ -31,7 +30,8 @@ public class ImageMessageDataPacker
    {
       int numberOfDataBytes = (int) imageDataBytePointer.limit();
       imageDataBytePointer.get(heapByteArrayData, 0, numberOfDataBytes);
-      imageMessageToPack.getData().getBuffer().reset();
+      imageMessageToPack.getData().clear();
+      imageMessageToPack.getData().ensureMinCapacity(numberOfDataBytes);
       imageMessageToPack.getData().getBuffer().put(heapByteArrayData, 0, numberOfDataBytes);
    }
 }

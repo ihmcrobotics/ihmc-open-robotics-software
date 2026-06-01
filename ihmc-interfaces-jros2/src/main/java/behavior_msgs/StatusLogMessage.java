@@ -24,7 +24,7 @@ public class StatusLogMessage implements ROS2Message<StatusLogMessage>
    /**
       Log level
    */
-   private short log_level_;
+   private int log_level_;
    /**
       Log message
    */
@@ -50,7 +50,7 @@ public class StatusLogMessage implements ROS2Message<StatusLogMessage>
    @Override
    public void serialize(CDRBuffer buffer)
    {
-      buffer.writeShort(log_level_);
+      buffer.writeUInt16(log_level_);
       log_message_.serialize(buffer);
 
    }
@@ -58,7 +58,7 @@ public class StatusLogMessage implements ROS2Message<StatusLogMessage>
    @Override
    public void deserialize(CDRBuffer buffer)
    {
-      log_level_ = buffer.readShort();
+      log_level_ = buffer.readUInt16();
       log_message_.deserialize(buffer);
 
    }
@@ -71,12 +71,12 @@ public class StatusLogMessage implements ROS2Message<StatusLogMessage>
 
    }
 
-   public short getLogLevel()
+   public int getLogLevel()
    {
       return log_level_;
    }
 
-   public void setLogLevel(short log_level_)
+   public void setLogLevel(int log_level_)
    {
       this.log_level_ = log_level_;
    }

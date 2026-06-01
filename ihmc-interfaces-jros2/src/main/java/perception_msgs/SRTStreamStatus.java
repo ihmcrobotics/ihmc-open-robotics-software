@@ -42,14 +42,14 @@ public class SRTStreamStatus implements ROS2Message<SRTStreamStatus>
       Connection information
    */
    private final StringBuilder streamer_address_;
-   private short streamer_port_;
+   private int streamer_port_;
    private boolean is_streaming_;
    private float expected_publish_frequency_;
    /**
       Camera intrinsics
    */
-   private short image_width_;
-   private short image_height_;
+   private int image_width_;
+   private int image_height_;
    private float fx_;
    private float fy_;
    private float cx_;
@@ -101,11 +101,11 @@ public class SRTStreamStatus implements ROS2Message<SRTStreamStatus>
    public void serialize(CDRBuffer buffer)
    {
       buffer.writeString(streamer_address_);
-      buffer.writeShort(streamer_port_);
+      buffer.writeUInt16(streamer_port_);
       buffer.writeBoolean(is_streaming_);
       buffer.writeFloat(expected_publish_frequency_);
-      buffer.writeShort(image_width_);
-      buffer.writeShort(image_height_);
+      buffer.writeUInt16(image_width_);
+      buffer.writeUInt16(image_height_);
       buffer.writeFloat(fx_);
       buffer.writeFloat(fy_);
       buffer.writeFloat(cx_);
@@ -121,11 +121,11 @@ public class SRTStreamStatus implements ROS2Message<SRTStreamStatus>
    public void deserialize(CDRBuffer buffer)
    {
       buffer.readString(streamer_address_);
-      streamer_port_ = buffer.readShort();
+      streamer_port_ = buffer.readUInt16();
       is_streaming_ = buffer.readBoolean();
       expected_publish_frequency_ = buffer.readFloat();
-      image_width_ = buffer.readShort();
-      image_height_ = buffer.readShort();
+      image_width_ = buffer.readUInt16();
+      image_height_ = buffer.readUInt16();
       fx_ = buffer.readFloat();
       fy_ = buffer.readFloat();
       cx_ = buffer.readFloat();
@@ -173,12 +173,12 @@ public class SRTStreamStatus implements ROS2Message<SRTStreamStatus>
       this.streamer_address_.delete(0, this.streamer_address_.length());
       this.streamer_address_.insert(0, s);
    }
-   public short getStreamerPort()
+   public int getStreamerPort()
    {
       return streamer_port_;
    }
 
-   public void setStreamerPort(short streamer_port_)
+   public void setStreamerPort(int streamer_port_)
    {
       this.streamer_port_ = streamer_port_;
    }
@@ -203,22 +203,22 @@ public class SRTStreamStatus implements ROS2Message<SRTStreamStatus>
       this.expected_publish_frequency_ = expected_publish_frequency_;
    }
 
-   public short getImageWidth()
+   public int getImageWidth()
    {
       return image_width_;
    }
 
-   public void setImageWidth(short image_width_)
+   public void setImageWidth(int image_width_)
    {
       this.image_width_ = image_width_;
    }
 
-   public short getImageHeight()
+   public int getImageHeight()
    {
       return image_height_;
    }
 
-   public void setImageHeight(short image_height_)
+   public void setImageHeight(int image_height_)
    {
       this.image_height_ = image_height_;
    }

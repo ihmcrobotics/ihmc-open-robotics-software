@@ -40,7 +40,7 @@ public class MovingWalkingReferenceFrameTest
       Random random = new Random(23423L);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      YoDouble timeProvider = new YoDouble("time", new YoRegistry(""));
+      YoDouble timeProvider = new YoDouble("time", new YoRegistry("testRegistry"));
       double updateDT = 1.0e-8;
 
       MovingReferenceFrame frameOne = createMovingReferenceFrame("frameOne", worldFrame, random, timeProvider);

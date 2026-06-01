@@ -38,7 +38,7 @@ public class VisionClass implements ROS2Message<VisionClass>
       than 255 classes the "UNLABELED" is the maximum value in the uint8
       range.
    */
-   private short class_id_;
+   private int class_id_;
    /**
       The name of the class represented by the class_id
    */
@@ -64,7 +64,7 @@ public class VisionClass implements ROS2Message<VisionClass>
    @Override
    public void serialize(CDRBuffer buffer)
    {
-      buffer.writeShort(class_id_);
+      buffer.writeUInt16(class_id_);
       buffer.writeString(class_name_);
 
    }
@@ -72,7 +72,7 @@ public class VisionClass implements ROS2Message<VisionClass>
    @Override
    public void deserialize(CDRBuffer buffer)
    {
-      class_id_ = buffer.readShort();
+      class_id_ = buffer.readUInt16();
       buffer.readString(class_name_);
 
    }
@@ -86,12 +86,12 @@ public class VisionClass implements ROS2Message<VisionClass>
 
    }
 
-   public short getClassId()
+   public int getClassId()
    {
       return class_id_;
    }
 
-   public void setClassId(short class_id_)
+   public void setClassId(int class_id_)
    {
       this.class_id_ = class_id_;
    }

@@ -46,6 +46,8 @@ import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 import us.ihmc.fastddsjava.cdr.idl.IDLIntSequence;
 import us.ihmc.fastddsjava.cdr.idl.IDLLongSequence;
 import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLShortSequence;
 import us.ihmc.fastddsjava.cdr.idl.IDLStringSequence;
 import us.ihmc.jros2.ROS2Message;
 
@@ -200,16 +202,18 @@ public class PacketCodeQualityTest
                if (methodName.equals("getPubSubType") && method.getParameterCount() == 0 && Supplier.class.isAssignableFrom(method.getReturnType()))
                   continue;
 
-               if (methodName.equals("set"))
+               if (methodName.equals("set") && method.getParameterCount() == 1 && method.getReturnType() == void.class)
                {
-                  if (method.getParameterCount() == 1 && method.getReturnType() == void.class)
-                  {
-                     Class<?> firstParameterType = method.getParameterTypes()[0];
-                     // This is due to implementing Settable<T>, the generic parameter gets "lost" at compilation and is replaced with Object :/
-                     if (firstParameterType == packetType || firstParameterType == Object.class)
-                        continue; // The method is an acceptable setter.
-                  }
+                  Class<?> firstParameterType = method.getParameterTypes()[0];
+                  if (packetType.isAssignableFrom(firstParameterType) || firstParameterType.isAssignableFrom(packetType) || firstParameterType == Object.class)
+                     continue;
                }
+               if (methodName.equals("serialize") && method.getParameterCount() == 1 && method.getReturnType() == void.class)
+                  continue;
+               if (methodName.equals("deserialize") && method.getParameterCount() == 1 && method.getReturnType() == void.class)
+                  continue;
+               if (methodName.equals("calculateSizeBytes") && method.getParameterCount() == 1 && method.getReturnType() == int.class)
+                  continue;
 
                if (setterNames.containsKey(methodName))
                { // Allowing setters with argument being a super-type of the field.
@@ -277,8 +281,8 @@ public class PacketCodeQualityTest
 
                Class<?> typeToCheck = field.getType();
 
-               if (Iterable.class.isAssignableFrom(typeToCheck) && !IDLObjectSequence.class.isAssignableFrom(typeToCheck)
-                     && !IDLStringSequence.class.isAssignableFrom(typeToCheck))
+               if (Iterable.class.isAssignableFrom(typeToCheck) && !IDLSequence.class.isAssignableFrom(typeToCheck)
+                     && !IDLObjectSequence.class.isAssignableFrom(typeToCheck) && !IDLStringSequence.class.isAssignableFrom(typeToCheck))
                {
                   if (!packetTypesWithIterableOrArrayField.containsKey(packetType))
                      packetTypesWithIterableOrArrayField.put(packetType, new ArrayList<>());

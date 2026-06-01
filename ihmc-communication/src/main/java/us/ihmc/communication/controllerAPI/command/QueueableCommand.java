@@ -1,6 +1,7 @@
 package us.ihmc.communication.controllerAPI.command;
 
 import ihmc_common_msgs.QueueableMessage;
+import us.ihmc.communication.controllerAPI.ControllerMessageConstants;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.jros2.ROS2Message;
 
@@ -15,11 +16,11 @@ import us.ihmc.jros2.ROS2Message;
 public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M extends ROS2Message<M>> implements Command<C, M>
 {
    /** The ID of this command. Used to make sure only consecutive commands are queued. */
-   private long commandId;
+   private long commandId = ControllerMessageConstants.VALID_MESSAGE_DEFAULT_ID;
    /** The {@link ExecutionMode} of this command. */
    private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
    /** The ID of the previous command. Used to make sure only consecutive commands are queued. */
-   private long previousCommandId;
+   private long previousCommandId = ControllerMessageConstants.INVALID_MESSAGE_ID;
    /** the time to delay this command on the controller side before being executed **/
    private double executionDelayTime;
    /** the execution time. This number is set if the execution delay is non zero **/
@@ -73,7 +74,8 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    {
       if (messageQueueingProperties == null)
          return;
-      commandId = messageQueueingProperties.getMessageId();
+      long messageId = messageQueueingProperties.getMessageId();
+      commandId = messageId == ControllerMessageConstants.INVALID_MESSAGE_ID ? ControllerMessageConstants.VALID_MESSAGE_DEFAULT_ID : messageId;
       executionMode = ExecutionMode.fromByte(messageQueueingProperties.getExecutionMode());
       previousCommandId = messageQueueingProperties.getPreviousMessageId();
       executionDelayTime = messageQueueingProperties.getExecutionDelayTime();

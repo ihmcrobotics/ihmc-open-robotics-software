@@ -314,7 +314,7 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static HandLoadBearingMessage nextLoadBearingMessage(Random random)
+   public static HandLoadBearingMessage nextHandLoadBearingMessage(Random random)
    {
       HandLoadBearingMessage next = new HandLoadBearingMessage();
       next.setLoad(random.nextBoolean());

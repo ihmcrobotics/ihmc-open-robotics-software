@@ -156,7 +156,7 @@ public class CenterOfMassTrajectoryHandlerTest
       command2.getEuclideanTrajectory().addTrajectoryPoint(1.0, new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
       command2.getEuclideanTrajectory().addTrajectoryPoint(2.0, new Point3D(1.0, 1.0, 0.0), new Vector3D(1.5, 1.5, 0.0));
       command2.getEuclideanTrajectory().addTrajectoryPoint(3.0, new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
-      command1.getEuclideanTrajectory().setPreviousCommandId(0L);
+      command2.getEuclideanTrajectory().setPreviousCommandId(0L);
       command2.getEuclideanTrajectory().setExecutionMode(ExecutionMode.QUEUE);
 
       yoTime.set(-20.9);

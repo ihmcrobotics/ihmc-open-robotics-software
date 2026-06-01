@@ -13,7 +13,6 @@ import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.ObjectConsumer;
-import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
@@ -76,8 +75,6 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       setRobotModel(robotModel);
       setCommonAvatarEnvrionmentInterface(environment);
       setRobotInitialSetup(robotModel.getDefaultRobotInitialSetup());
-
-      setRealtimeROS2Node(new AsyncROS2Node("ihmc_simulation"));
 
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
 

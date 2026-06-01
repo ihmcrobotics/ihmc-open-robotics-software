@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Disabled // TODO: jros2 migration - messages don't have epsilonEquals(), need custom comparison helper
+@Disabled // jros2: ROS2LogIOTools.writeLogFile returns null — log export path needs migration
 public class ROS2LogTest
 {
    @Test
@@ -63,8 +63,10 @@ public class ROS2LogTest
          Assertions.assertTrue(importedTimestamps.get(1) == 100L);
 
          Assertions.assertTrue(importedMessages.size() == 2);
-         // Assertions.assertTrue(messageExport0.epsilonEquals((RobotConfigurationData) importedMessages.get(0), 1.0e-12)); // TODO: jros2 - epsilonEquals not available
-         // Assertions.assertTrue(messageExport1.epsilonEquals((RobotConfigurationData) importedMessages.get(1), 1.0e-12)); // TODO: jros2 - epsilonEquals not available
+         Assertions.assertEquals(1L, ((RobotConfigurationData) importedMessages.get(0)).getSequenceId());
+         Assertions.assertEquals(2L, ((RobotConfigurationData) importedMessages.get(1)).getSequenceId());
+
+         ros2Node.close();
       }
    }
 }

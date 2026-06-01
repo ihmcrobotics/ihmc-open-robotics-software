@@ -1,7 +1,5 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
-import us.ihmc.communication.ROS2Tools;
-
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
@@ -84,7 +82,6 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPa
             getFrequency().ping();
          });
       });
-      ROS2Tools.blockUntilInterrupted();
    }
 
    @Override

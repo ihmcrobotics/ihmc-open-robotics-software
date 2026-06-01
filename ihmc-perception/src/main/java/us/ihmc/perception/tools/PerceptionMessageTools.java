@@ -87,8 +87,14 @@ public class PerceptionMessageTools
 
    public static void packDataArray(IDLByteSequence dataToPack, ByteBuffer dataBuffer)
    {
-      dataToPack.getBuffer().reset();
-      dataToPack.getBuffer().put(dataBuffer);
+      ByteBuffer source = dataBuffer.duplicate();
+      if (!source.hasRemaining())
+         source.rewind();
+
+      int byteCount = source.remaining();
+      dataToPack.clear();
+      dataToPack.ensureMinCapacity(byteCount);
+      dataToPack.getBuffer().put(source);
    }
 
    public static void packDataArray(IDLByteSequence dataToPack, BytePointer dataPointer)

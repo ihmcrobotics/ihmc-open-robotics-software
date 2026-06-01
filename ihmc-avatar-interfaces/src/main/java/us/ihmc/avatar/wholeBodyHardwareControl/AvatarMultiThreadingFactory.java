@@ -1,7 +1,5 @@
 package us.ihmc.avatar.wholeBodyHardwareControl;
 
-import us.ihmc.communication.ROS2Tools;
-
 import org.apache.commons.math3.util.Precision;
 import us.ihmc.affinity.Processor;
 import us.ihmc.avatar.*;
@@ -417,11 +415,7 @@ public class AvatarMultiThreadingFactory
       estimatorTask.addCallbackPostTask(() -> runAll(postEstimatorRunnables));
 
       // Add estimatorr startup callback to start spinning node
-      estimatorTask.addRunnableOnStartup(() ->
-                                         {
-                                            ROS2Tools.blockUntilInterrupted();
-                                            LogTools.info("Estimator node has started spinning");
-                                         });
+      estimatorTask.addRunnableOnStartup(() -> LogTools.info("Estimator node has started"));
 
       // Add estimator cleanup callback to stop spinning node
       estimatorTask.addRunnableOnCleanup(() -> LogTools.info("Estimator node has stopped spinning"));
@@ -429,7 +423,8 @@ public class AvatarMultiThreadingFactory
       // Add estimator cleanup callback to destroy node
       estimatorTask.addRunnableOnCleanup(() ->
                                          {
-                                            estimatorRealtimeROS2Node.close();
+                                            if (!estimatorRealtimeROS2Node.isClosed())
+                                               estimatorRealtimeROS2Node.close();
                                             LogTools.info("Estimator node has been destroyed");
                                          });
 
@@ -473,11 +468,7 @@ public class AvatarMultiThreadingFactory
       controllerTask.addCallbackPostTask(() -> runAll(postControllerRunnables));
 
       // Add controller startup callback to start spinning node
-      controllerTask.addRunnableOnStartup(() ->
-                                          {
-                                             ROS2Tools.blockUntilInterrupted();
-                                             LogTools.info("Controller node has started spinning");
-                                          });
+      controllerTask.addRunnableOnStartup(() -> LogTools.info("Controller node has started"));
 
       // Add controller cleanup callback to stop spinning node
       controllerTask.addRunnableOnCleanup(() -> LogTools.info("Controller node has stopped spinning"));
@@ -485,7 +476,8 @@ public class AvatarMultiThreadingFactory
       // Add controller cleanup callback to destroy node
       controllerTask.addRunnableOnCleanup(() ->
                                           {
-                                             controllerRealtimeROS2Node.close();
+                                             if (!controllerRealtimeROS2Node.isClosed())
+                                                controllerRealtimeROS2Node.close();
                                              LogTools.info("Controller node has been destroyed");
                                           });
 

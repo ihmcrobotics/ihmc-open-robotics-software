@@ -1,7 +1,5 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import java.io.InputStream;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +9,7 @@ import controller_msgs.PelvisHeightTrajectoryMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.scriptCommandGenerator.ExerciseAndJUnitScript;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.thread.ThreadTools;
@@ -61,8 +60,6 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOn_LeftFootTest.xml";
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -78,8 +75,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisHeight.getZ() + 0.05);
       simulationTestHelper.publishToController(message);
 
-      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-      simulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
+      simulationTestHelper.runExerciseScript(ExerciseAndJUnitScript.TWO_CINDER_BLOCKS_STEP_ON_LEFT_FOOT_TEST, fullRobotModel.getSoleFrame(RobotSide.LEFT));
 
       setupCameraForWalkingOverCinderBlocks();
 
@@ -186,8 +182,6 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOn_LeftFootTest_slow.xml";
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -203,8 +197,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       pelvisHeight.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisHeight.getZ() + 0.1);
       simulationTestHelper.publishToController(message);
-      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-      simulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
+      simulationTestHelper.runExerciseScript(ExerciseAndJUnitScript.TWO_CINDER_BLOCKS_STEP_ON_LEFT_FOOT_TEST_SLOW, fullRobotModel.getSoleFrame(RobotSide.LEFT));
 
       assertTrue(simulationTestHelper.simulateNow(6.0));
 

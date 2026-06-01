@@ -72,7 +72,7 @@ public final class HumanoidROS2TopicNameTools
       if (messageType == null)
          return "";
 
-      String messageTypePart = removeMessageOrPacketSuffixFromTypeName(messageType);
+      String messageTypePart = StringUtils.removeEnd(messageType.getSimpleName(), "Packet");
       return processTopicNamePart(toROSTopicFormat(messageTypePart));
    }
 

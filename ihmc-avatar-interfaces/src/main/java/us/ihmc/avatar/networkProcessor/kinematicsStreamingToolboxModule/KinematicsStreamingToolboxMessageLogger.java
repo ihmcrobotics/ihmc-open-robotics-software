@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
-import us.ihmc.communication.ROS2Tools;
-
 import com.google.common.base.CaseFormat;
 import controller_msgs.CapturabilityBasedStatus;
 import controller_msgs.CapturabilityBasedStatus;
@@ -88,8 +86,6 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
 
       ros2Node.createSubscription(KinematicsStreamingToolboxModule.getOutputTopic(robotName).withType(KinematicsToolboxOutputStatus.class),
                                   reader -> kinematicsToolboxOutputStatus.set(reader.read()));
-
-      ROS2Tools.blockUntilInterrupted();
    }
 
    private void processToolboxStateMessage(ToolboxStateMessage message)

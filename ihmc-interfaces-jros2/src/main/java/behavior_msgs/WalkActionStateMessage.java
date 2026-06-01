@@ -91,11 +91,11 @@ public class WalkActionStateMessage implements ROS2Message<WalkActionStateMessag
    /**
       Total number of footsteps; used for walking actions
    */
-   private short total_number_of_footsteps_;
+   private int total_number_of_footsteps_;
    /**
       Incomplete footsteps; used for walking actions
    */
-   private short number_of_incomplete_footsteps_;
+   private int number_of_incomplete_footsteps_;
    /**
       Desired left footsteps
    */
@@ -163,8 +163,8 @@ public class WalkActionStateMessage implements ROS2Message<WalkActionStateMessag
       footsteps_.serialize(buffer);
       goal_transform_to_parent_.serialize(buffer);
       buffer.writeByte(execution_state_);
-      buffer.writeShort(total_number_of_footsteps_);
-      buffer.writeShort(number_of_incomplete_footsteps_);
+      buffer.writeUInt16(total_number_of_footsteps_);
+      buffer.writeUInt16(number_of_incomplete_footsteps_);
       desired_left_footsteps_.serialize(buffer);
       desired_right_footsteps_.serialize(buffer);
       current_left_foot_pose_.serialize(buffer);
@@ -182,8 +182,8 @@ public class WalkActionStateMessage implements ROS2Message<WalkActionStateMessag
       footsteps_.deserialize(buffer);
       goal_transform_to_parent_.deserialize(buffer);
       execution_state_ = buffer.readByte();
-      total_number_of_footsteps_ = buffer.readShort();
-      number_of_incomplete_footsteps_ = buffer.readShort();
+      total_number_of_footsteps_ = buffer.readUInt16();
+      number_of_incomplete_footsteps_ = buffer.readUInt16();
       desired_left_footsteps_.deserialize(buffer);
       desired_right_footsteps_.deserialize(buffer);
       current_left_foot_pose_.deserialize(buffer);
@@ -246,22 +246,22 @@ public class WalkActionStateMessage implements ROS2Message<WalkActionStateMessag
       this.execution_state_ = execution_state_;
    }
 
-   public short getTotalNumberOfFootsteps()
+   public int getTotalNumberOfFootsteps()
    {
       return total_number_of_footsteps_;
    }
 
-   public void setTotalNumberOfFootsteps(short total_number_of_footsteps_)
+   public void setTotalNumberOfFootsteps(int total_number_of_footsteps_)
    {
       this.total_number_of_footsteps_ = total_number_of_footsteps_;
    }
 
-   public short getNumberOfIncompleteFootsteps()
+   public int getNumberOfIncompleteFootsteps()
    {
       return number_of_incomplete_footsteps_;
    }
 
-   public void setNumberOfIncompleteFootsteps(short number_of_incomplete_footsteps_)
+   public void setNumberOfIncompleteFootsteps(int number_of_incomplete_footsteps_)
    {
       this.number_of_incomplete_footsteps_ = number_of_incomplete_footsteps_;
    }

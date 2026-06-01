@@ -49,7 +49,7 @@ public class ROS2StreamStatusMonitorTest
 
       SRTStreamStatus streamStatusMessage = new SRTStreamStatus();
       streamStatusMessage.setStreamerAddress(streamerAddress.getHostString());
-      streamStatusMessage.setStreamerPort((short) streamerAddress.getPort());
+      streamStatusMessage.setStreamerPort(streamerAddress.getPort());
       streamStatusMessage.setImageWidth((short) imageWidth);
       streamStatusMessage.setImageHeight((short) imageHeight);
       streamStatusMessage.setIsStreaming(true);

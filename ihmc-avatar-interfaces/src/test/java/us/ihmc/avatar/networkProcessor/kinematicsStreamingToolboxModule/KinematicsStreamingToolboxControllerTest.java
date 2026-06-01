@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
-import us.ihmc.communication.ROS2Tools;
-
 import controller_msgs.CapturabilityBasedStatus;
 import controller_msgs.RobotConfigurationData;
 import controller_msgs.WholeBodyStreamingMessage;
@@ -231,8 +229,6 @@ public abstract class KinematicsStreamingToolboxControllerTest
          }
       };
       ghost.addThrottledController(toolboxUpdater, toolboxParameters.getToolboxUpdatePeriod());
-
-      ROS2Tools.blockUntilInterrupted();
    }
 
    public void setupNoWalkingController(RobotCollisionModel collisionModel)

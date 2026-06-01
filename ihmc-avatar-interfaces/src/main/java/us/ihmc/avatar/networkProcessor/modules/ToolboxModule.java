@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
-import us.ihmc.communication.ROS2Tools;
-
 import us.ihmc.jros2.ROS2Message;
 
 import com.google.common.base.CaseFormat;
@@ -30,7 +28,6 @@ import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
-import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -150,9 +147,6 @@ public abstract class ToolboxModule implements CloseableAndDisposable
             receivedPacket(message);
       });
       registerExtraPuSubs(ros2Node);
-
-      if (manageROS2Node && ros2Node instanceof AsyncROS2Node rtNode)
-         ROS2Tools.blockUntilInterrupted();
    }
 
    public void setRootRegistry(YoRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)

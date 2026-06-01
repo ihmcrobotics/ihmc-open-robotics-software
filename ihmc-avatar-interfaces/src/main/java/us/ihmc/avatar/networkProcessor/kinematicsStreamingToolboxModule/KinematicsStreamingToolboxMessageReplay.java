@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
-import us.ihmc.communication.ROS2Tools;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.CapturabilityBasedStatus;
@@ -65,8 +63,6 @@ public class KinematicsStreamingToolboxMessageReplay
       kinematicsToolboxConfigurationPublisher = ros2Node.createPublisher(toolboxInputTopic.withType(KinematicsToolboxConfigurationMessage.class));
       kinematicsStreamingToolboxInputPublisher = ros2Node.createPublisher(toolboxInputTopic.withType(KinematicsStreamingToolboxInputMessage.class));
       toolboxStatePublisher = ros2Node.createPublisher(toolboxInputTopic.withType(ToolboxStateMessage.class));
-
-      ROS2Tools.blockUntilInterrupted();
    }
 
    public void replayAllMessages()

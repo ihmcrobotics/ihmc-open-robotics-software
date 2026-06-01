@@ -9,7 +9,7 @@ import java.util.Objects;
  * IHMC structured ROS 2 topic builder matching the legacy ihmc-ros2-library {@code ROS2Topic} API.
  * <p>
  * Topic names are assembled from fixed slots (not plain append):
- * {@code prefix + robotName + moduleName + ioQualifier + typeName + suffix}
+ * {@code prefix + robotName + moduleName + suffix + ioQualifier + typeName}
  * <p>
  * Example: {@code /ihmc/atlas/toolbox/ik/input/arm_trajectory}
  */
@@ -54,7 +54,7 @@ public class HumanoidROS2Topic<T extends ROS2Message<T>> extends ROS2Topic<T>
                                       String typeName,
                                       String suffix)
    {
-      return prefix + robotName + moduleName + ioQualifier + typeName + suffix;
+      return prefix + robotName + moduleName + suffix + ioQualifier + typeName;
    }
 
    private HumanoidROS2Topic<T> copyIfNotEqual(String prefix,

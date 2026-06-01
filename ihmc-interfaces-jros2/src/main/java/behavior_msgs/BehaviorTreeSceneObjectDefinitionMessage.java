@@ -80,11 +80,11 @@ public class BehaviorTreeSceneObjectDefinitionMessage implements ROS2Message<Beh
    /**
       Minimum number of points to detect the post
    */
-   private short min_post_points_;
+   private int min_post_points_;
    /**
       Minimum number of point to detect the door recess
    */
-   private short min_recess_points_;
+   private int min_recess_points_;
    /**
       Composite frame name
    */
@@ -148,8 +148,8 @@ public class BehaviorTreeSceneObjectDefinitionMessage implements ROS2Message<Beh
       buffer.writeString(yolo_model_name_);
       buffer.writeString(yolo_class_name_);
       buffer.writeByte(foundation_pose_object_type_);
-      buffer.writeShort(min_post_points_);
-      buffer.writeShort(min_recess_points_);
+      buffer.writeUInt16(min_post_points_);
+      buffer.writeUInt16(min_recess_points_);
       buffer.writeString(composite_frame_name_);
       buffer.writeString(composite_frame_a_);
       buffer.writeString(composite_frame_b_);
@@ -165,8 +165,8 @@ public class BehaviorTreeSceneObjectDefinitionMessage implements ROS2Message<Beh
       buffer.readString(yolo_model_name_);
       buffer.readString(yolo_class_name_);
       foundation_pose_object_type_ = buffer.readByte();
-      min_post_points_ = buffer.readShort();
-      min_recess_points_ = buffer.readShort();
+      min_post_points_ = buffer.readUInt16();
+      min_recess_points_ = buffer.readUInt16();
       buffer.readString(composite_frame_name_);
       buffer.readString(composite_frame_a_);
       buffer.readString(composite_frame_b_);
@@ -247,22 +247,22 @@ public class BehaviorTreeSceneObjectDefinitionMessage implements ROS2Message<Beh
       this.foundation_pose_object_type_ = foundation_pose_object_type_;
    }
 
-   public short getMinPostPoints()
+   public int getMinPostPoints()
    {
       return min_post_points_;
    }
 
-   public void setMinPostPoints(short min_post_points_)
+   public void setMinPostPoints(int min_post_points_)
    {
       this.min_post_points_ = min_post_points_;
    }
 
-   public short getMinRecessPoints()
+   public int getMinRecessPoints()
    {
       return min_recess_points_;
    }
 
-   public void setMinRecessPoints(short min_recess_points_)
+   public void setMinRecessPoints(int min_recess_points_)
    {
       this.min_recess_points_ = min_recess_points_;
    }

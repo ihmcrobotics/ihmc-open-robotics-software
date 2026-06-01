@@ -14,21 +14,21 @@ public class TerrainMapMessageTools
       message.setGridCenterX(terrainMapData.getGridCenterX());
       message.setGridCenterY(terrainMapData.getGridCenterY());
 
-      message.getHeightMap().getBuffer().reset();
+      message.getHeightMap().clear();
       message.getHeightMap().addAll(terrainMapData.getHeightMap());
 
-      message.getObstacleClearanceScore().getBuffer().reset();
+      message.getObstacleClearanceScore().clear();
       message.getObstacleClearanceScore().addAll(terrainMapData.getObstacleClearanceScoreMap());
-      message.getTraversabilityScore().getBuffer().reset();
+      message.getTraversabilityScore().clear();
       message.getTraversabilityScore().addAll(terrainMapData.getTraversabilityScoreMap());
-      message.getTraversabilityClass().getBuffer().reset();
+      message.getTraversabilityClass().clear();
       message.getTraversabilityClass().addAll(terrainMapData.getTraversabilityClassMap());
 
-      message.getSnappedNormalXData().getBuffer().reset();
+      message.getSnappedNormalXData().clear();
       message.getSnappedNormalXData().addAll(terrainMapData.getSnapNormalXMap());
-      message.getSnappedNormalYData().getBuffer().reset();
+      message.getSnappedNormalYData().clear();
       message.getSnappedNormalYData().addAll(terrainMapData.getSnapNormalYMap());
-      message.getSnappedNormalZData().getBuffer().reset();
+      message.getSnappedNormalZData().clear();
       message.getSnappedNormalZData().addAll(terrainMapData.getSnapNormalZMap());
    }
 

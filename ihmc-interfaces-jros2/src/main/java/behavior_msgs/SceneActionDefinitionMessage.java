@@ -92,7 +92,7 @@ public class SceneActionDefinitionMessage implements ROS2Message<SceneActionDefi
    /**
       Filter for persistent detection history size
    */
-   private short minimum_history_size_;
+   private int minimum_history_size_;
    /**
       The nominal object pose for behavior previewing
    */
@@ -154,7 +154,7 @@ public class SceneActionDefinitionMessage implements ROS2Message<SceneActionDefi
       buffer.writeByte(scene_action_type_);
       scene_object_definition_.serialize(buffer);
       buffer.writeFloat(timeout_);
-      buffer.writeShort(minimum_history_size_);
+      buffer.writeUInt16(minimum_history_size_);
       nominal_object_pose_.serialize(buffer);
       buffer.writeFloat(pose_filter_alpha_);
       buffer.writeFloat(acceptance_confidence_);
@@ -173,7 +173,7 @@ public class SceneActionDefinitionMessage implements ROS2Message<SceneActionDefi
       scene_action_type_ = buffer.readByte();
       scene_object_definition_.deserialize(buffer);
       timeout_ = buffer.readFloat();
-      minimum_history_size_ = buffer.readShort();
+      minimum_history_size_ = buffer.readUInt16();
       nominal_object_pose_.deserialize(buffer);
       pose_filter_alpha_ = buffer.readFloat();
       acceptance_confidence_ = buffer.readFloat();
@@ -234,12 +234,12 @@ public class SceneActionDefinitionMessage implements ROS2Message<SceneActionDefi
       this.timeout_ = timeout_;
    }
 
-   public short getMinimumHistorySize()
+   public int getMinimumHistorySize()
    {
       return minimum_history_size_;
    }
 
-   public void setMinimumHistorySize(short minimum_history_size_)
+   public void setMinimumHistorySize(int minimum_history_size_)
    {
       this.minimum_history_size_ = minimum_history_size_;
    }

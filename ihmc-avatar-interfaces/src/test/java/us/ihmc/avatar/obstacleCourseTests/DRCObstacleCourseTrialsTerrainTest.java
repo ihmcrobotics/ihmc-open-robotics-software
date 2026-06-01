@@ -1,6 +1,5 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import java.io.InputStream;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -13,6 +12,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.environments.DRCTrialsWalkingEnvironment;
+import us.ihmc.avatar.scriptCommandGenerator.ExerciseAndJUnitScript;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
@@ -74,7 +74,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    public void testTrialsTerrainSlopeScript(double offsetHeight)
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsSlopeLeftFootPose.xml";
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DRC_TRIALS_TRAINING_WALKING;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
                                                                                                                                              environment,
@@ -82,10 +81,9 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
-      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       simulationTestHelper.simulateNow(0.25);
-      simulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
+      simulationTestHelper.runExerciseScript(ExerciseAndJUnitScript.DRC_TRIALS_SLOPE_LEFT_FOOT_POSE, fullRobotModel.getSoleFrame(RobotSide.LEFT));
       if (offsetHeight != 0.0)
       {
          FramePoint3D pelvisPosition = new FramePoint3D(fullRobotModel.getRootJoint().getFrameAfterJoint());
@@ -112,7 +110,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    public void testTrialsTerrainSlopeScriptRandomFootSlip()
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsSlopeLeftFootPose.xml";
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DRC_TRIALS_TRAINING_WALKING;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
                                                                                                                                              environment,
@@ -120,10 +117,9 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
-      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       simulationTestHelper.simulateNow(0.25);
-      simulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
+      simulationTestHelper.runExerciseScript(ExerciseAndJUnitScript.DRC_TRIALS_SLOPE_LEFT_FOOT_POSE, fullRobotModel.getSoleFrame(RobotSide.LEFT));
       setupCameraForWalkingOntoSlopes();
       Robot robot = simulationTestHelper.getRobot();
       SideDependentList<String> footNames = new SideDependentList<>(side -> fullRobotModel.getFoot(side).getName());
@@ -158,7 +154,6 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    public void testTrialsTerrainZigzagHurdlesScript()
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsZigzagHurdlesLeftFootPose.xml";
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
                                                                                                                                              environment,
@@ -166,10 +161,9 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
-      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       simulationTestHelper.simulateNow(0.01);
-      simulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
+      simulationTestHelper.runExerciseScript(ExerciseAndJUnitScript.DRC_TRIALS_ZIGZAG_HURDLES_LEFT_FOOT_POSE, fullRobotModel.getSoleFrame(RobotSide.LEFT));
       setupCameraForWalkingOverHurdles();
       boolean success = simulationTestHelper.simulateNow(8.0);
       // TODO GITHUB WORKFLOWS
@@ -187,16 +181,14 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip()
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsZigzagHurdlesLeftFootPose.xml";
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(), environment, simulationTestingParameters);
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
-      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       simulationTestHelper.simulateNow(0.01);
-      simulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
+      simulationTestHelper.runExerciseScript(ExerciseAndJUnitScript.DRC_TRIALS_ZIGZAG_HURDLES_LEFT_FOOT_POSE, fullRobotModel.getSoleFrame(RobotSide.LEFT));
       setupCameraForWalkingOverHurdles();
       Robot robot = simulationTestHelper.getRobot();
       SideDependentList<String> footNames = new SideDependentList<>(side -> fullRobotModel.getFoot(side).getName());

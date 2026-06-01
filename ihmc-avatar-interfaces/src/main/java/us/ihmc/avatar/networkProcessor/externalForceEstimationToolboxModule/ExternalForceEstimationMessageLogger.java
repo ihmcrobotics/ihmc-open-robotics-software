@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
-import us.ihmc.communication.ROS2Tools;
-
 import com.google.common.base.CaseFormat;
 import controller_msgs.RobotConfigurationData;
 import controller_msgs.RobotDesiredConfigurationData;
@@ -74,8 +72,6 @@ public class ExternalForceEstimationMessageLogger
                                   reader -> processToolboxStateMessage(reader.read()));
       ros2Node.createSubscription(toolboxInputTopic.withType(ExternalForceEstimationConfigurationMessage.class),
                                   reader -> externalForceEstimationConfigurationMessage.set(reader.read()));
-
-      ROS2Tools.blockUntilInterrupted();
    }
 
    private void processToolboxStateMessage(ToolboxStateMessage message)

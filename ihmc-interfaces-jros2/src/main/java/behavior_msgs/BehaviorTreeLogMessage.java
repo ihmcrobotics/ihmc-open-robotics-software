@@ -32,7 +32,7 @@ public class BehaviorTreeLogMessage implements ROS2Message<BehaviorTreeLogMessag
    /**
       Log level - Debug(500), Info(400), Warn(300), or Error(200)
    */
-   private short log_level_;
+   private int log_level_;
    /**
       The log message, as multiple ASCII bytes because of our 255 string length constraint
    */
@@ -61,7 +61,7 @@ public class BehaviorTreeLogMessage implements ROS2Message<BehaviorTreeLogMessag
    public void serialize(CDRBuffer buffer)
    {
       instant_.serialize(buffer);
-      buffer.writeShort(log_level_);
+      buffer.writeUInt16(log_level_);
       log_message_.serialize(buffer);
 
    }
@@ -70,7 +70,7 @@ public class BehaviorTreeLogMessage implements ROS2Message<BehaviorTreeLogMessag
    public void deserialize(CDRBuffer buffer)
    {
       instant_.deserialize(buffer);
-      log_level_ = buffer.readShort();
+      log_level_ = buffer.readUInt16();
       log_message_.deserialize(buffer);
 
    }
@@ -89,12 +89,12 @@ public class BehaviorTreeLogMessage implements ROS2Message<BehaviorTreeLogMessag
       return instant_;
    }
 
-   public short getLogLevel()
+   public int getLogLevel()
    {
       return log_level_;
    }
 
-   public void setLogLevel(short log_level_)
+   public void setLogLevel(int log_level_)
    {
       this.log_level_ = log_level_;
    }

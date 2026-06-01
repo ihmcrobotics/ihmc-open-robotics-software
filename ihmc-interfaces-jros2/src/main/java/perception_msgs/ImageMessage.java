@@ -87,11 +87,11 @@ public class ImageMessage implements ROS2Message<ImageMessage>
    /**
       Image width in pixels
    */
-   private short image_width_;
+   private int image_width_;
    /**
       Image height in pixels
    */
-   private short image_height_;
+   private int image_height_;
    /**
       Depth discretization unit length.
       This is used when this image is a depth image. The image will be represented
@@ -191,8 +191,8 @@ public class ImageMessage implements ROS2Message<ImageMessage>
    {
       buffer.writeInt(sequence_number_);
       acquisition_time_.serialize(buffer);
-      buffer.writeShort(image_width_);
-      buffer.writeShort(image_height_);
+      buffer.writeUInt16(image_width_);
+      buffer.writeUInt16(image_height_);
       buffer.writeFloat(depth_discretization_);
       data_.serialize(buffer);
       buffer.writeByte(pixel_format_);
@@ -214,8 +214,8 @@ public class ImageMessage implements ROS2Message<ImageMessage>
    {
       sequence_number_ = buffer.readInt();
       acquisition_time_.deserialize(buffer);
-      image_width_ = buffer.readShort();
-      image_height_ = buffer.readShort();
+      image_width_ = buffer.readUInt16();
+      image_height_ = buffer.readUInt16();
       depth_discretization_ = buffer.readFloat();
       data_.deserialize(buffer);
       pixel_format_ = buffer.readByte();
@@ -270,22 +270,22 @@ public class ImageMessage implements ROS2Message<ImageMessage>
       return acquisition_time_;
    }
 
-   public short getImageWidth()
+   public int getImageWidth()
    {
       return image_width_;
    }
 
-   public void setImageWidth(short image_width_)
+   public void setImageWidth(int image_width_)
    {
       this.image_width_ = image_width_;
    }
 
-   public short getImageHeight()
+   public int getImageHeight()
    {
       return image_height_;
    }
 
-   public void setImageHeight(short image_height_)
+   public void setImageHeight(int image_height_)
    {
       this.image_height_ = image_height_;
    }

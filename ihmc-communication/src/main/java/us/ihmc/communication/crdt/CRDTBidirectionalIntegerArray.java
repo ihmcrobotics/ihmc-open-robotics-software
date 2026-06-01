@@ -77,9 +77,7 @@ public class CRDTBidirectionalIntegerArray extends CRDTBidirectionalMutableField
       if (isModificationIncoming())
       {
          for (int i = 0; i < Math.min(message.size(), getLength()); i++)
-         {
-            getValueInternal()[i] = message.get(i);
-         }
+            getValueInternal()[i] = Short.toUnsignedInt(message.get(i));
       }
    }
 }

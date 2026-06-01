@@ -64,7 +64,7 @@ public class BehaviorTreeNodeDefinitionMessage implements ROS2Message<BehaviorTr
    /**
       Number of children
    */
-   private short number_of_children_;
+   private int number_of_children_;
 
    public BehaviorTreeNodeDefinitionMessage()
    {
@@ -95,7 +95,7 @@ public class BehaviorTreeNodeDefinitionMessage implements ROS2Message<BehaviorTr
       latest_modification_to_data_.serialize(buffer);
       latest_modification_to_children_.serialize(buffer);
       buffer.writeString(name_);
-      buffer.writeShort(number_of_children_);
+      buffer.writeUInt16(number_of_children_);
 
    }
 
@@ -106,7 +106,7 @@ public class BehaviorTreeNodeDefinitionMessage implements ROS2Message<BehaviorTr
       latest_modification_to_data_.deserialize(buffer);
       latest_modification_to_children_.deserialize(buffer);
       buffer.readString(name_);
-      number_of_children_ = buffer.readShort();
+      number_of_children_ = buffer.readUInt16();
 
    }
 
@@ -157,12 +157,12 @@ public class BehaviorTreeNodeDefinitionMessage implements ROS2Message<BehaviorTr
       this.name_.delete(0, this.name_.length());
       this.name_.insert(0, s);
    }
-   public short getNumberOfChildren()
+   public int getNumberOfChildren()
    {
       return number_of_children_;
    }
 
-   public void setNumberOfChildren(short number_of_children_)
+   public void setNumberOfChildren(int number_of_children_)
    {
       this.number_of_children_ = number_of_children_;
    }

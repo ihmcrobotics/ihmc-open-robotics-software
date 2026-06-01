@@ -27,8 +27,8 @@ public class BigVideoPacket implements ROS2Message<BigVideoPacket>
 
    private long acquisition_time_seconds_since_epoch_;
    private long acquisition_time_additional_nanos_;
-   private short image_width_;
-   private short image_height_;
+   private int image_width_;
+   private int image_height_;
    private final IDLByteSequence data_;
 
    public BigVideoPacket()
@@ -56,8 +56,8 @@ public class BigVideoPacket implements ROS2Message<BigVideoPacket>
    {
       buffer.writeLong(acquisition_time_seconds_since_epoch_);
       buffer.writeLong(acquisition_time_additional_nanos_);
-      buffer.writeShort(image_width_);
-      buffer.writeShort(image_height_);
+      buffer.writeUInt16(image_width_);
+      buffer.writeUInt16(image_height_);
       data_.serialize(buffer);
 
    }
@@ -67,8 +67,8 @@ public class BigVideoPacket implements ROS2Message<BigVideoPacket>
    {
       acquisition_time_seconds_since_epoch_ = buffer.readLong();
       acquisition_time_additional_nanos_ = buffer.readLong();
-      image_width_ = buffer.readShort();
-      image_height_ = buffer.readShort();
+      image_width_ = buffer.readUInt16();
+      image_height_ = buffer.readUInt16();
       data_.deserialize(buffer);
 
    }
@@ -104,22 +104,22 @@ public class BigVideoPacket implements ROS2Message<BigVideoPacket>
       this.acquisition_time_additional_nanos_ = acquisition_time_additional_nanos_;
    }
 
-   public short getImageWidth()
+   public int getImageWidth()
    {
       return image_width_;
    }
 
-   public void setImageWidth(short image_width_)
+   public void setImageWidth(int image_width_)
    {
       this.image_width_ = image_width_;
    }
 
-   public short getImageHeight()
+   public int getImageHeight()
    {
       return image_height_;
    }
 
-   public void setImageHeight(short image_height_)
+   public void setImageHeight(int image_height_)
    {
       this.image_height_ = image_height_;
    }
