@@ -199,6 +199,13 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
       ImGuiTools.previousWidgetTooltip("Moves the camera focus point to the robot's current location.\n (Ctrl + P)");
       ImGui.sameLine();
 
+      if (ImGui.button(labels.get("Snap behind")))
+      {
+         teleportCameraBehindRobot();
+      }
+      ImGuiTools.previousWidgetTooltip("Moves the camera to a third-person view 3 m behind and 2 m above the robot, looking at the pelvis.");
+      ImGui.sameLine();
+
       if (ImGui.checkbox(labels.get("Track robot"), trackRobot))
       {
          if (!trackRobot.get())
@@ -280,6 +287,29 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
    public void teleportCameraToRobotPelvis()
    {
       cameraForTracking.setCameraFocusPoint(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getPosition());
+   }
+
+   /**
+    * Snap the camera to a third-person view behind the robot: focus on the pelvis, eye placed
+    * 3 m behind and 2 m above the pelvis in the robot's yaw frame (so we're always looking at the robot's back).
+    * After snapping, the existing delta-based "Track robot" mode keeps following the robot while preserving
+    * the user's manual yaw/zoom adjustments.
+    */
+   public void teleportCameraBehindRobot()
+   {
+      if (cameraForTracking == null)
+         return;
+      Pose3D pelvisPose = new Pose3D(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame));
+      cameraForTracking.setCameraFocusPoint(pelvisPose.getPosition());
+
+      double yaw = pelvisPose.getYaw();
+      double behind = -3.0;   // [m] behind the robot in its body frame
+      double above  =  2.0;   // [m] above the pelvis
+      double dx = behind * Math.cos(yaw);
+      double dy = behind * Math.sin(yaw);
+      cameraForTracking.changeCameraPosition(pelvisPose.getX() + dx,
+                                              pelvisPose.getY() + dy,
+                                              pelvisPose.getZ() + above);
    }
 
    public void setOpacity(float opacity)
