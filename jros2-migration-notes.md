@@ -151,7 +151,7 @@ publisher.publish((ROS2Message) message);
 
 `ROS2Message.createInstance(Class)` has the same F-bound; prefer `reader.read()` for subscribers, or `commandClass.getDeclaredConstructor().newInstance().getMessageClass()` when building topic lists from `Command` types (catch `InvocationTargetException` on `newInstance()`).
 
-`QueuedROS2Subscription` is not ported — use `AsyncROS2Node.createSubscription` (same reader/callback patterns as `ROS2Node`).
+For “latest message since last poll” in a realtime loop, use `AsyncROS2Node.createSubscription` with a pre-allocated buffer and a `volatile boolean` (or `AtomicBoolean` for one-shot waits): callback does `reader.read()` → `buffer.set(incoming)` → flag; control thread copies when flag is set.
 
 Files deleted: `PacketConsumer.java`, `ROS2TopicList.java` (see Build section).
 
@@ -220,8 +220,8 @@ Disabled tests (`@Disabled // TODO: jros2 migration`):
 
 | Test | Blocker |
 | ---- | ------- |
-| `RealtimeROS2PublisherSubscriberTest` | `QueuedROS2Subscription` not porting |
-| `FrameRealtimeROS2PublisherSubscriberTest` | same |
+| `RealtimeROS2PublisherSubscriberTest` | Manual interactive test (sleepForever) |
+| `FrameRealtimeROS2PublisherSubscriberTest` | Manual interactive test (sleepForever) |
 | `ROS2PeerClockOffsetEstimatorTest` | `ROS2NodeBuilder` transport modes |
 | `ROS2LogTest` | no `epsilonEquals` on `ROS2Message` |
 | `MessageToolsTest` | old `Packet` serialize round-trip |
@@ -292,7 +292,7 @@ Imports that are gone entirely (no replacement; the call site must be rewritten)
 - `us.ihmc.ros2.ROS2NodeBuilder` — use `ROS2Node` / `AsyncROS2Node` constructors
 - `us.ihmc.ros2.ROS2Input` — `us.ihmc.communication.ROS2Input` (uses `createSubscription` + `reader.read()`); use `ROS2Helper.subscribe(topic)` or `new ROS2Input<>(ros2Node, topic)`
 - `us.ihmc.ros2.ROS2TopicNameTools` — use `ROS2Message.createInstance(topic.getType())`
-- `us.ihmc.ros2.QueuedROS2Subscription` — **not porting**; use `AsyncROS2Node.createSubscription` for realtime paths
+- `us.ihmc.ros2.QueuedROS2Subscription` — **removed**; use `createSubscription` + buffer + flag, or `ROS2Input` / `subscribeViaCallback`
 - `us.ihmc.pubsub.subscriber.Subscriber` — use `ROS2MessageReader<T>` in callback signature
 - `us.ihmc.pubsub.TopicDataType` — no equivalent; subscribe via `ROS2Topic<T>` directly
 - `us.ihmc.pubsub.common.SampleInfo` — not yet ported; comment out
@@ -688,16 +688,16 @@ In `ihmc-interfaces-jros2`:
 5. **`Pose3D` wrapper in jros2** — or keep using `EuclidPose3DMessage`; commented `publish(ROS2Topic<Pose3D>, …)` stubs in `ROS2Helper` / `ROS2PublisherMap`.
 6. **`ROS2NodeBuilder` transport modes** — intraprocess / shared-memory; blocks disabled `ROS2ToolsTest` methods.
 
-### Explicitly not porting
+### Removed (replaced by standard subscriptions)
 
-- **`QueuedROS2Subscription`** — not useful for jros2; keep tests `@Disabled`. Use `AsyncROS2Node.createSubscription` instead (standard `reader.read()` / `reader.read(buffer)` callbacks).
+- **`QueuedROS2Subscription`** — removed from alex-hardware. Use `createSubscription` with `reader.read()` / `reader.read(buffer)` and a latest-value flag, or `ROS2Input` / `subscribeViaCallback` for “always latest” semantics.
 
 ---
 
 ## Disabled / not-yet-migrated tests
 
 Search for `@Disabled // TODO: jros2 migration` to find these:
-- `RealtimeROS2PublisherSubscriberTest` — `QueuedROS2Subscription` **not porting**; rewrite against `AsyncROS2Node.createSubscription` if re-enabled
+- `RealtimeROS2PublisherSubscriberTest` — manual interactive test (`sleepForever`); already uses `AsyncROS2Node.createSubscription`
 - `FrameRealtimeROS2PublisherSubscriberTest` — same
 - `ROS2PeerClockOffsetEstimatorTest` — needs `ROS2NodeBuilder` transport modes / `SampleInfo`
 - `ROS2LogTest` — needs geometry `epsilonEquals` helper

@@ -11,7 +11,7 @@ import us.ihmc.jros2.ROS2Subscription;
 import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
 
-@Disabled("QueuedROS2Subscription not yet ported to jros2")
+@Disabled("Manual interactive test — blocks with sleepForever()")
 public class FrameRealtimeROS2PublisherSubscriberTest
 {
    private AsyncROS2Node realtimeROS2Node;
@@ -29,9 +29,6 @@ public class FrameRealtimeROS2PublisherSubscriberTest
          RobotConfigurationData message = reader.read();
          LogTools.info("Got from callback");
       }, ROS2QoSProfile.BEST_EFFORT);
-
-      // QueuedROS2Subscription not ported — use AsyncROS2Node.createSubscription if rewriting this test
-
       ThreadTools.sleepForever();
    }
 

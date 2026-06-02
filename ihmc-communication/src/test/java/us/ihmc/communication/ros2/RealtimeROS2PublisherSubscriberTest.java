@@ -12,7 +12,7 @@ import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
-@Disabled("QueuedROS2Subscription not yet ported to jros2")
+@Disabled("Manual interactive test — blocks with sleepForever()")
 public class RealtimeROS2PublisherSubscriberTest
 {
    private AsyncROS2Node realtimeROS2Node;
@@ -30,9 +30,6 @@ public class RealtimeROS2PublisherSubscriberTest
          ImageMessage message = reader.read();
          LogTools.info("Got from callback");
       }, ROS2QoSProfile.BEST_EFFORT);
-
-      // QueuedROS2Subscription not ported — use AsyncROS2Node.createSubscription if rewriting this test
-
       ThreadTools.startAThread(() ->
       {
          while (true)
