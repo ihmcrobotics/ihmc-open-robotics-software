@@ -7,8 +7,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.RobotConfigurationData;
 import controller_msgs.SpatialVectorMessage;
 import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
-// TODO: PacketConsumer interface removed in jros2 - class needs refactoring
-// import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
@@ -18,8 +16,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
-// TODO: PacketConsumer interface doesn't exist in jros2 - needs refactoring to use ROS2Callback or similar
-public class RobotDataReceiver // implements PacketConsumer<RobotConfigurationData>
+public class RobotDataReceiver
 {
 
    private final AtomicReference<RobotConfigurationData> packet = new AtomicReference<RobotConfigurationData>(null);

@@ -1,7 +1,32 @@
 package us.ihmc.rdx.ui.tools;
 
-/** @deprecated Replaced by jros2; kept as compile stub for {@link RDXROS2StatsPanel} migration. */
-@Deprecated
-public class PubSubPublisherStats
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.Statistics;
+
+public class PubSubPublisherStats extends PubSubCommonStats
 {
+   private final ROS2Publisher<?> publisher;
+
+   public PubSubPublisherStats(ROS2Node node, ROS2Publisher<?> publisher)
+   {
+      super(node);
+      this.publisher = publisher;
+   }
+
+   @Override
+   protected void readSizeStatistics(Statistics statisticsToPack)
+   {
+      publisher.readMessageSizeStatistics(statisticsToPack);
+   }
+
+   public ROS2Publisher<?> getPublisher()
+   {
+      return publisher;
+   }
+
+   public double getPublishFrequency()
+   {
+      return getEventFrequency();
+   }
 }

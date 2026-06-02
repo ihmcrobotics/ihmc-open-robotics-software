@@ -92,19 +92,18 @@ public class ROS2PeerClockOffsetEstimator
                            MessageTools.toInstant(receivedMessage.getReplySendTime()));
             }
          }
-      }, (subscriber, info) ->
+      }, (subscriber, publicationGuid, matched) ->
       {
-         Guid guid = info.getGuid();
-         if (!guid.equals(ourGuid))
+         if (!publicationGuid.equals(ourGuid))
          {
-            switch (info.getStatus())
+            if (matched)
             {
-               case MATCHED_MATCHING -> addPeerIfAbsent(guid);
-               case REMOVED_MATCHING ->
-               {
-                  peerMap.remove(guid);
-                  peerList.removeIf(peer -> peer.getGuid().equals(guid));
-               }
+               addPeerIfAbsent(publicationGuid);
+            }
+            else
+            {
+               peerMap.remove(publicationGuid);
+               peerList.removeIf(peer -> peer.getGuid().equals(publicationGuid));
             }
          }
       });

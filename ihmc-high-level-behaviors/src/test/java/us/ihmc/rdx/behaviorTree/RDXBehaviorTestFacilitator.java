@@ -121,12 +121,17 @@ public class RDXBehaviorTestFacilitator
       ThreadTools.startAThread(this::startBehaviorTree, "StartBehaviorTree");
 
       ros2ControllerHelper = new ROS2ControllerHelper(new ROS2Node("facilitator"), robotName);
+
+      RDXROS2StatsPanel.registerNode(relayNode);
+      RDXROS2StatsPanel.registerNode(ros2ControllerHelper.getROS2Node());
    }
 
    private void startSimulation()
    {
       Pose3D initialWalkingPose = new Pose3D();
-      kinematicsSimulation = kinematicsSimulationBuilder.apply(robotModelBuilder.get(), new ROS2Node("kinematics_sim"), initialWalkingPose);
+      ROS2Node kinematicsSimNode = new ROS2Node("kinematics_sim");
+      RDXROS2StatsPanel.registerNode(kinematicsSimNode);
+      kinematicsSimulation = kinematicsSimulationBuilder.apply(robotModelBuilder.get(), kinematicsSimNode, initialWalkingPose);
 
       ThreadTools.startAsDaemon(() ->
       {
@@ -147,6 +152,7 @@ public class RDXBehaviorTestFacilitator
    private void startBehaviorTree()
    {
       ROS2Node ros2Node = new ROS2Node("behavior_tree");
+      RDXROS2StatsPanel.registerNode(ros2Node);
       DRCRobotModel robotModel = robotModelBuilder.get();
       ROS2ControllerHelper ros2 = new ROS2ControllerHelper(ros2Node, robotModel.getSimpleRobotName());
       ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
@@ -263,6 +269,7 @@ public class RDXBehaviorTestFacilitator
    private void launchRDXUI()
    {
       ROS2Node ros2Node = new ROS2Node("behavior_ui");
+      RDXROS2StatsPanel.registerNode(ros2Node);
       DRCRobotModel robotModel = robotModelBuilder.get();
       ROS2ControllerHelper ros2 = new ROS2ControllerHelper(ros2Node, robotModel.getSimpleRobotName());
       ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);

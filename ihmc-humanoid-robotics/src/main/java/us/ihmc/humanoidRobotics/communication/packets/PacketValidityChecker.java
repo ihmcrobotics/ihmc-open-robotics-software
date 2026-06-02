@@ -4,8 +4,6 @@ import controller_msgs.*;
 import ihmc_common_msgs.*;
 import us.ihmc.communication.packets.ObjectValidityChecker;
 import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
-// TODO: Packet doesn't exist in jros2
-// import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.tuple3D.Point3D;

@@ -26,7 +26,7 @@ vision_msgs/BoundingBox2D bounding_box
 # Polygons representing the mask of the detection
 Float32MultiArrayHack mask_polygons
 
-# TODO: jros2 replace above with below
+# Future: replace mask_polygons with std_msgs/Float32MultiArray when array limits allow.
 # std_msgs/Float32MultiArray mask_polygons
 }</pre>
 */
