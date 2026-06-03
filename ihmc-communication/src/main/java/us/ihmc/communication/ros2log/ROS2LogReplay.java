@@ -235,7 +235,8 @@ public class ROS2LogReplay
 
    public void destroy()
    {
-      ros2Node.close();
+      if (ros2Node != null)
+         ros2Node.close();
    }
 
    public void setReplaySpeed(double replaySpeed)

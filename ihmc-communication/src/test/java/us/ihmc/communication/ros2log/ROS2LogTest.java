@@ -5,7 +5,6 @@ import controller_msgs.RobotConfigurationData;
 import gnu.trove.list.array.TLongArrayList;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.jros2.ROS2Node;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Disabled // jros2: ROS2LogIOTools.writeLogFile returns null — log export path needs migration
 public class ROS2LogTest
 {
    @Test
