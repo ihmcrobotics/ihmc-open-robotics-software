@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
-import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxPrivilegedConfigurationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -96,18 +96,18 @@ public class KinematicsToolboxPrivilegedConfigurationCommand
 
       hasPrivilegedRootJointPosition = message.getUsePrivilegedRootJointPosition();
       if (hasPrivilegedRootJointPosition)
-         privilegedRootJointPosition.set(message.getPrivilegedRootJointPosition());
+         privilegedRootJointPosition.set(message.getPrivilegedRootJointPosition().getPoint());
       else
          privilegedRootJointPosition.setToNaN();
 
       hasPrivilegedRootJointOrientation = message.getUsePrivilegedRootJointOrientation();
       if (hasPrivilegedRootJointOrientation)
-         privilegedRootJointOrientation.set(message.getPrivilegedRootJointOrientation());
+         privilegedRootJointOrientation.set(message.getPrivilegedRootJointOrientation().getQuaternion());
       else
          privilegedRootJointOrientation.setToNaN();
 
-      TIntArrayList messageHashCodes = message.getPrivilegedJointHashCodes();
-      TFloatArrayList messageJointAngles = message.getPrivilegedJointAngles();
+      var messageHashCodes = message.getPrivilegedJointHashCodes();
+      var messageJointAngles = message.getPrivilegedJointAngles();
 
       hasPrivilegedJointAngles = messageHashCodes != null && !messageHashCodes.isEmpty() && messageJointAngles != null && !messageJointAngles.isEmpty();
 

@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import controller_msgs.CapturabilityBasedStatus;
+import controller_msgs.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
@@ -50,6 +50,8 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -871,10 +873,29 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private void packHandLoadBearingStatuses(CapturabilityBasedStatus capturabilityBasedStatus)
    {
+      RecyclingArrayList<Point3D> tempContactPoints = new RecyclingArrayList<>(4, Point3D.class);
+      Vector3D tempContactNormal = new Vector3D();
+
       if (fullRobotModel.getHand(RobotSide.LEFT) != null)
-         packBodyLoadStatus(fullRobotModel.getHand(RobotSide.LEFT), capturabilityBasedStatus.getLeftHandContactPoints(), capturabilityBasedStatus.getLeftHandContactNormal());
+      {
+         packBodyLoadStatus(fullRobotModel.getHand(RobotSide.LEFT), tempContactPoints, tempContactNormal);
+         fillContactPoints(capturabilityBasedStatus.getLeftHandContactPoints(), tempContactPoints);
+         capturabilityBasedStatus.getLeftHandContactNormal().getVector().set(tempContactNormal);
+      }
       if (fullRobotModel.getHand(RobotSide.RIGHT) != null)
-         packBodyLoadStatus(fullRobotModel.getHand(RobotSide.RIGHT), capturabilityBasedStatus.getRightHandContactPoints(), capturabilityBasedStatus.getRightHandContactNormal());
+      {
+         packBodyLoadStatus(fullRobotModel.getHand(RobotSide.RIGHT), tempContactPoints, tempContactNormal);
+         fillContactPoints(capturabilityBasedStatus.getRightHandContactPoints(), tempContactPoints);
+         capturabilityBasedStatus.getRightHandContactNormal().getVector().set(tempContactNormal);
+      }
+   }
+
+   private void fillContactPoints(IDLObjectSequence<EuclidPoint3DMessage> target,
+                                  RecyclingArrayList<Point3D> source)
+   {
+      target.clear();
+      for (int i = 0; i < source.size(); i++)
+         target.add().set(source.get(i));
    }
 
    private void packBodyLoadStatus(RigidBodyBasics rigidBody, RecyclingArrayList<Point3D> contactPointList, Vector3D contactNormalToPack)
@@ -965,10 +986,10 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          return null;
       }
 
-      Quaternion desiredEndEffectorOrientation = pelvisStatusMessage.getDesiredEndEffectorOrientation();
-      Point3D desiredEndEffectorPosition = pelvisStatusMessage.getDesiredEndEffectorPosition();
-      Quaternion actualEndEffectorOrientation = pelvisStatusMessage.getActualEndEffectorOrientation();
-      Point3D actualEndEffectorPosition = pelvisStatusMessage.getActualEndEffectorPosition();
+      Quaternion desiredEndEffectorOrientation = pelvisStatusMessage.getDesiredEndEffectorOrientation().getQuaternion();
+      Point3D desiredEndEffectorPosition = pelvisStatusMessage.getDesiredEndEffectorPosition().getPoint();
+      Quaternion actualEndEffectorOrientation = pelvisStatusMessage.getActualEndEffectorOrientation().getQuaternion();
+      Point3D actualEndEffectorPosition = pelvisStatusMessage.getActualEndEffectorPosition().getPoint();
 
       desiredEndEffectorOrientation.setToNaN();
       desiredEndEffectorPosition.setToNaN();
@@ -980,8 +1001,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          pelvisStatusMessage.setSequenceId(pelvisOrientationStatus.getSequenceId());
          pelvisStatusMessage.setTimestamp(pelvisOrientationStatus.getTimestamp());
          pelvisStatusMessage.setTrajectoryExecutionStatus(pelvisOrientationStatus.getTrajectoryExecutionStatus());
-         desiredEndEffectorOrientation.set(pelvisOrientationStatus.getDesiredEndEffectorOrientation());
-         actualEndEffectorOrientation.set(pelvisOrientationStatus.getActualEndEffectorOrientation());
+         desiredEndEffectorOrientation.set(pelvisOrientationStatus.getDesiredEndEffectorOrientation().getQuaternion());
+         actualEndEffectorOrientation.set(pelvisOrientationStatus.getActualEndEffectorOrientation().getQuaternion());
       }
 
       if (pelvisXYStatus != null)
@@ -989,8 +1010,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          pelvisStatusMessage.setSequenceId(pelvisXYStatus.getSequenceId());
          pelvisStatusMessage.setTimestamp(pelvisXYStatus.getTimestamp());
          pelvisStatusMessage.setTrajectoryExecutionStatus(pelvisXYStatus.getTrajectoryExecutionStatus());
-         desiredEndEffectorPosition.set(pelvisXYStatus.getDesiredEndEffectorPosition());
-         actualEndEffectorPosition.set(pelvisXYStatus.getActualEndEffectorPosition());
+         desiredEndEffectorPosition.set(pelvisXYStatus.getDesiredEndEffectorPosition().getPoint());
+         actualEndEffectorPosition.set(pelvisXYStatus.getActualEndEffectorPosition().getPoint());
       }
 
       if (pelvisHeightStatus != null)
@@ -998,8 +1019,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          pelvisStatusMessage.setSequenceId(pelvisHeightStatus.getSequenceId());
          pelvisStatusMessage.setTimestamp(pelvisHeightStatus.getTimestamp());
          pelvisStatusMessage.setTrajectoryExecutionStatus(pelvisHeightStatus.getTrajectoryExecutionStatus());
-         desiredEndEffectorPosition.setZ(pelvisHeightStatus.getDesiredEndEffectorPosition().getZ());
-         actualEndEffectorPosition.setZ(pelvisHeightStatus.getActualEndEffectorPosition().getZ());
+         desiredEndEffectorPosition.setZ(pelvisHeightStatus.getDesiredEndEffectorPosition().getPoint().getZ());
+         actualEndEffectorPosition.setZ(pelvisHeightStatus.getActualEndEffectorPosition().getPoint().getZ());
       }
 
       return pelvisStatusMessage;

@@ -2,7 +2,7 @@ package us.ihmc.manipulation.planning.rrt.configurationAndTimeSpace;
 
 import java.util.ArrayList;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.commons.PrintTools;
 
 public class CTTaskNode
@@ -210,7 +210,8 @@ public class CTTaskNode
 
    public final void setConfigurationJoints(KinematicsToolboxOutputStatus outputStatus)
    {
-      this.configuration = new KinematicsToolboxOutputStatus(outputStatus);
+      this.configuration = new KinematicsToolboxOutputStatus();
+      this.configuration.set(outputStatus);
    }
 
    public KinematicsToolboxOutputStatus getConfiguration()

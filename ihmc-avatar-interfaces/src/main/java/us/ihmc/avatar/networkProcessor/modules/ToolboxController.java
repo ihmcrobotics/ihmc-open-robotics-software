@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
+import us.ihmc.jros2.ROS2Message;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -129,7 +131,7 @@ public abstract class ToolboxController
     * 
     * @param statusMessage the message to publish.
     */
-   public <S extends Settable<S>> void reportMessage(S statusMessage)
+   public <S extends ROS2Message<S>> void reportMessage(S statusMessage)
    {
       statusOutputManager.reportStatusMessage(statusMessage);
    }

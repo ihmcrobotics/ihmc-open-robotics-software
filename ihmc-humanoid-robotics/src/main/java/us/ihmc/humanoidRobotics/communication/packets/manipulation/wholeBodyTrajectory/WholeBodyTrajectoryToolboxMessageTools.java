@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 
 import java.util.Random;
 
-import toolbox_msgs.msg.dds.WaypointBasedTrajectoryMessage;
+import toolbox_msgs.WaypointBasedTrajectoryMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -36,8 +36,8 @@ public class WholeBodyTrajectoryToolboxMessageTools
             {
                t0 = message.getWaypointTimes().get(i - 1);
                tf = message.getWaypointTimes().get(i);
-               previous = message.getWaypoints().get(i - 1);
-               next = message.getWaypoints().get(i);
+               previous = message.getWaypoints().get(i - 1).getPose();
+               next = message.getWaypoints().get(i).getPose();
                if (time < message.getWaypointTimes().get(i))
                   break;
             }

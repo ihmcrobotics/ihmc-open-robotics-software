@@ -1,8 +1,8 @@
 package us.ihmc.avatar.reachabilityMap.footstep;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import toolbox_msgs.msg.dds.*;
+import controller_msgs.CapturabilityBasedStatus;
+import controller_msgs.RobotConfigurationData;
+import toolbox_msgs.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.multiContact.CenterOfMassMotionControlAnchorDescription;
@@ -47,7 +47,7 @@ import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -463,7 +463,8 @@ public abstract class HumanoidStepReachabilityCalculator
       }
 
       // populate empty fields for these values
-      KinematicsToolboxOutputStatus kinematicsSolution = new KinematicsToolboxOutputStatus(toolboxController.getSolution());
+      KinematicsToolboxOutputStatus kinematicsSolution = new KinematicsToolboxOutputStatus();
+      kinematicsSolution.set(toolboxController.getSolution());
       snapshotDescription.setIkSolution(kinematicsSolution);
       snapshotDescription.setControllerConfiguration(new RobotConfigurationData());
       snapshotDescription.setIkPrivilegedConfiguration(new KinematicsToolboxPrivilegedConfigurationMessage());
@@ -701,7 +702,9 @@ public abstract class HumanoidStepReachabilityCalculator
    {
       SixDoFMotionControlAnchorDescription anchorDescription = new SixDoFMotionControlAnchorDescription();
       anchorDescription.setRigidBodyName(rigidBody.getName());
-      anchorDescription.setInputMessage(new KinematicsToolboxRigidBodyMessage(rigidBodyMessage));
+      KinematicsToolboxRigidBodyMessage copiedMessage = new KinematicsToolboxRigidBodyMessage();
+      copiedMessage.set(rigidBodyMessage);
+      anchorDescription.setInputMessage(copiedMessage);
       return anchorDescription;
    }
 
@@ -709,7 +712,9 @@ public abstract class HumanoidStepReachabilityCalculator
    {
       OneDoFMotionControlAnchorDescription jointDescription = new OneDoFMotionControlAnchorDescription();
       jointDescription.setJointName(jointName);
-      jointDescription.setInputMessage(new KinematicsToolboxOneDoFJointMessage(jointMessage));
+      KinematicsToolboxOneDoFJointMessage copiedJointMessage = new KinematicsToolboxOneDoFJointMessage();
+      copiedJointMessage.set(jointMessage);
+      jointDescription.setInputMessage(copiedJointMessage);
       return jointDescription;
    }
 
@@ -833,20 +838,20 @@ public abstract class HumanoidStepReachabilityCalculator
 
       SideDependentList<ContactablePlaneBody> contactableFeet = extractContactableFeet(currentRobotModel, contactPointParameters);
 
-      IDLSequence.Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
-      IDLSequence.Object<Point3D> rightFootSupportPolygon2d = capturabilityBasedStatus.getRightFootSupportPolygon3d();
+      var leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
+      var rightFootSupportPolygon2d = capturabilityBasedStatus.getRightFootSupportPolygon3d();
       if (isLeftFootInSupport)
          contactableFeet.get(RobotSide.LEFT)
                         .getContactPointsCopy()
                         .stream()
                         .peek(cp -> cp.changeFrame(worldFrame))
-                        .forEach(cp -> leftFootSupportPolygon2d.add().set(cp.getX(), cp.getY(), 0.0));
+                        .forEach(cp -> leftFootSupportPolygon2d.add().getPoint().set(cp.getX(), cp.getY(), 0.0));
       if (isRightFootInSupport)
          contactableFeet.get(RobotSide.RIGHT)
                         .getContactPointsCopy()
                         .stream()
                         .peek(cp -> cp.changeFrame(worldFrame))
-                        .forEach(cp -> rightFootSupportPolygon2d.add().set(cp.getX(), cp.getY(), 0.0));
+                        .forEach(cp -> rightFootSupportPolygon2d.add().getPoint().set(cp.getX(), cp.getY(), 0.0));
       return capturabilityBasedStatus;
    }
 

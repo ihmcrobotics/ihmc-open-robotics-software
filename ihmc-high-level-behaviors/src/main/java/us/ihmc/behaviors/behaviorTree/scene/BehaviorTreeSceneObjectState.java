@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
+import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.BehaviorTreeSceneObjectStateMessage;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -33,7 +33,7 @@ public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinit
    public void toMessage(BehaviorTreeSceneObjectStateMessage message)
    {
       super.toMessage(message.getLatestModificationToData());
-      message.setId(id);
+      message.setId((int) id);
       super.toMessage(message.getDefinition());
       transform.toMessage(message.getTransformToWorld());
       message.setFrozen(frozen.toMessage());

@@ -1,10 +1,10 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
-import controller_msgs.msg.dds.JointspaceStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import ihmc_common_msgs.msg.dds.EuclideanStreamingMessage;
-import ihmc_common_msgs.msg.dds.SE3StreamingMessage;
-import ihmc_common_msgs.msg.dds.SO3StreamingMessage;
+import controller_msgs.JointspaceStreamingMessage;
+import controller_msgs.WholeBodyStreamingMessage;
+import ihmc_common_msgs.EuclideanStreamingMessage;
+import ihmc_common_msgs.SE3StreamingMessage;
+import ihmc_common_msgs.SO3StreamingMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -143,7 +143,6 @@ public class KSTStreamingMessageFactory
       output.setEnableUserPelvisControl(true);
       output.setTimestamp(timestamp);
       output.setSequenceId(id);
-      output.setUniqueId(id);
    }
 
    public void setEnableVelocity(boolean enable)
@@ -405,9 +404,9 @@ public class KSTStreamingMessageFactory
                                                 double integrationDuration,
                                                 JointspaceStreamingMessage messageToPack)
    {
-      messageToPack.getPositions().reset();
-      messageToPack.getVelocities().reset();
-      messageToPack.getAccelerations().reset();
+      messageToPack.getPositions().getBuffer().reset();
+      messageToPack.getVelocities().getBuffer().reset();
+      messageToPack.getAccelerations().getBuffer().reset();
 
       for (OneDoFJointReadOnly joint : joints)
       {
@@ -550,7 +549,7 @@ public class KSTStreamingMessageFactory
    public static void packCustomControlFrame(ReferenceFrame endEffectorFrame, ReferenceFrame controlFrame, SE3StreamingMessage messageToPack)
    {
       messageToPack.setUseCustomControlFrame(true);
-      Pose3D controlFramePose = messageToPack.getControlFramePose();
+      var controlFramePose = messageToPack.getControlFramePose().getPose();
       controlFramePose.setToZero();
       controlFrame.transformFromThisToDesiredFrame(endEffectorFrame, controlFramePose);
    }
@@ -560,9 +559,9 @@ public class KSTStreamingMessageFactory
                                                     Vector3DReadOnly angularAcceleration,
                                                     SO3StreamingMessage messageToPack)
    {
-      messageToPack.getOrientation().set(orientation);
-      messageToPack.getAngularVelocity().set(angularVelocity);
-      messageToPack.getAngularAcceleration().set(angularAcceleration);
+      messageToPack.getOrientation().getQuaternion().set(orientation);
+      messageToPack.getAngularVelocity().getVector().set(angularVelocity);
+      messageToPack.getAngularAcceleration().getVector().set(angularAcceleration);
    }
 
    public static void packSE3TrajectoryPointMessage(Pose3DReadOnly pose,
@@ -571,11 +570,11 @@ public class KSTStreamingMessageFactory
                                                     SE3StreamingMessage messageToPack)
    {
       messageToPack.getPosition().set(pose.getPosition());
-      messageToPack.getOrientation().set(pose.getOrientation());
-      messageToPack.getLinearVelocity().set(spatialVelocity.getLinearPart());
-      messageToPack.getAngularVelocity().set(spatialVelocity.getAngularPart());
-      messageToPack.getLinearAcceleration().set(spatialAcceleration.getLinearPart());
-      messageToPack.getAngularAcceleration().set(spatialAcceleration.getAngularPart());
+      messageToPack.getOrientation().getQuaternion().set(pose.getOrientation());
+      messageToPack.getLinearVelocity().getVector().set(spatialVelocity.getLinearPart());
+      messageToPack.getAngularVelocity().getVector().set(spatialVelocity.getAngularPart());
+      messageToPack.getLinearAcceleration().getVector().set(spatialAcceleration.getLinearPart());
+      messageToPack.getAngularAcceleration().getVector().set(spatialAcceleration.getAngularPart());
    }
 
    public static void packEuclideanTrajectoryPointMessage(Point3DReadOnly position,
@@ -583,7 +582,7 @@ public class KSTStreamingMessageFactory
                                                           EuclideanStreamingMessage messageToPack)
    {
       messageToPack.getPosition().set(position);
-      messageToPack.getLinearVelocity().set(linearVelocity);
+      messageToPack.getLinearVelocity().getVector().set(linearVelocity);
    }
 
    public FullHumanoidRobotModel getFullRobotModel()
@@ -656,10 +655,10 @@ public class KSTStreamingMessageFactory
 
       public void setFromMessage(SO3StreamingMessage message)
       {
-         orientation.set(message.getOrientation());
+         orientation.set(message.getOrientation().getQuaternion());
          orientation.getRotationVector(rotationVector);
-         angularVelocity.set(message.getAngularVelocity());
-         angularAcceleration.set(message.getAngularAcceleration());
+         angularVelocity.set(message.getAngularVelocity().getVector());
+         angularAcceleration.set(message.getAngularAcceleration().getVector());
       }
    }
 
@@ -687,13 +686,13 @@ public class KSTStreamingMessageFactory
 
       public void setFromMessage(SE3StreamingMessage message)
       {
-         position.set(message.getPosition());
-         orientation.set(message.getOrientation());
+         position.set(message.getPosition().getPoint());
+         orientation.set(message.getOrientation().getQuaternion());
          orientation.getRotationVector(rotationVector);
-         linearVelocity.set(message.getLinearVelocity());
-         angularVelocity.set(message.getAngularVelocity());
-         linearAcceleration.set(message.getLinearAcceleration());
-         angularAcceleration.set(message.getAngularAcceleration());
+         linearVelocity.set(message.getLinearVelocity().getVector());
+         angularVelocity.set(message.getAngularVelocity().getVector());
+         linearAcceleration.set(message.getLinearAcceleration().getVector());
+         angularAcceleration.set(message.getAngularAcceleration().getVector());
       }
    }
 
@@ -710,8 +709,8 @@ public class KSTStreamingMessageFactory
 
       public void setFromMessage(EuclideanStreamingMessage message)
       {
-         position.set(message.getPosition());
-         linearVelocity.set(message.getLinearVelocity());
+         position.set(message.getPosition().getPoint());
+         linearVelocity.set(message.getLinearVelocity().getVector());
       }
    }
 }

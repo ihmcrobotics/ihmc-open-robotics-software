@@ -2,8 +2,8 @@ package us.ihmc.avatar.networkProcessor.walkingPreview;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.FootstepStatusMessage;
+import controller_msgs.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -93,8 +93,9 @@ public class FootstepListPreviewTask implements WalkingPreviewTask
    {
       RobotSide side = RobotSide.fromByte(statusMessage.getRobotSide());
       FootstepStatus status = FootstepStatus.fromByte(statusMessage.getFootstepStatus());
-      FramePose3D desiredFootstep = new FramePose3D(worldFrame, statusMessage.getDesiredFootPositionInWorld(),
-                                                    statusMessage.getDesiredFootOrientationInWorld());
+      FramePose3D desiredFootstep = new FramePose3D(worldFrame,
+                                                    statusMessage.getDesiredFootPositionInWorld().getPoint(),
+                                                    statusMessage.getDesiredFootOrientationInWorld().getQuaternion());
 
       switch (status)
       {

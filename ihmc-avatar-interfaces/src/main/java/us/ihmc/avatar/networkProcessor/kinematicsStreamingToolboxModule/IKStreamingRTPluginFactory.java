@@ -1,10 +1,12 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import us.ihmc.jros2.ROS2Message;
+
+import controller_msgs.CapturabilityBasedStatus;
+import controller_msgs.WholeBodyStreamingMessage;
+import controller_msgs.WholeBodyTrajectoryMessage;
+import toolbox_msgs.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.avatar.AvatarControllerThreadInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
@@ -34,8 +36,8 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.time.ThreadTimer;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -246,7 +248,7 @@ public class IKStreamingRTPluginFactory
          kinematicsStreamingToolboxController.setCollisionModel(collisionModel);
 
          MessageUnpacker<WholeBodyStreamingMessage> wholeBodyStreamingMessageUnpacker = MessageUnpackingTools.createWholeBodyStreamingMessageUnpacker();
-         List<Settable<?>> unpackedMessages = new ArrayList<>();
+         List<ROS2Message<?>> unpackedMessages = new ArrayList<>();
 
          kinematicsStreamingToolboxController.setStreamingMessagePublisher(streamingMessage ->
                                                                            {
@@ -282,15 +284,15 @@ public class IKStreamingRTPluginFactory
          contextDataFactory.setSensorDataContext(new SensorDataContext(desiredFullRobotModel));
          humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
-         ros2Node.createSubscription(inputTopic.withTypeName(KinematicsStreamingToolboxInputMessage.class), s ->
+         ros2Node.createSubscription(inputTopic.withType(KinematicsStreamingToolboxInputMessage.class), s ->
          {
             if (robotMotionStatusHolder.getCurrentRobotMotionStatus() != RobotMotionStatus.STANDING)
                newToolboxStateRequestedRef.set(ToolboxState.WAKE_UP);
          });
          ToolboxStateMessage message = new ToolboxStateMessage();
-         ros2Node.createSubscription(inputTopic.withTypeName(ToolboxStateMessage.class), s ->
+         ros2Node.createSubscription(inputTopic.withType(ToolboxStateMessage.class), reader ->
          {
-            s.takeNextData(message, null);
+            reader.read(message);
             if (robotMotionStatusHolder.getCurrentRobotMotionStatus() != RobotMotionStatus.STANDING)
                newToolboxStateRequestedRef.set(ToolboxState.fromByte(message.getRequestedToolboxState()));
          });

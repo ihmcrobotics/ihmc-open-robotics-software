@@ -1,11 +1,9 @@
 package us.ihmc.footstepPlanning.log;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.HeightMapMessagePubSubType;
-import toolbox_msgs.msg.dds.*;
+import perception_msgs.HeightMapMessage;
+import toolbox_msgs.*;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -16,7 +14,7 @@ import us.ihmc.footstepPlanning.bodyPath.BodyPathLatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -33,14 +31,7 @@ import java.util.stream.Stream;
 
 public class FootstepPlannerLogLoader
 {
-   private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
-   private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersSerializer  = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
-   private final JSONSerializer<AStarBodyPathPlannerParametersPacket> bodyPathParametersSerializer = new JSONSerializer<>(new AStarBodyPathPlannerParametersPacketPubSubType());
-   private final JSONSerializer<SwingPlannerParametersPacket> swingParametersSerializer  = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
-   private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
-
    private FootstepPlannerLog log = null;
-   private final ObjectMapper objectMapper = new ObjectMapper();
 
    public enum LoadResult
    {
@@ -162,44 +153,29 @@ public class FootstepPlannerLogLoader
 
          // load request packet
          File requestFile = new File(logDirectory, FootstepPlannerLogger.requestPacketFileName);
-         InputStream requestPacketInputStream = new FileInputStream(requestFile);
-         JsonNode jsonNode = objectMapper.readTree(requestPacketInputStream);
-         log.getRequestPacket().set(requestPacketSerializer.deserialize(jsonNode.toString()));
-         requestPacketInputStream.close();
+         loadPacketFromFile(requestFile, log.getRequestPacket());
 
          // load footstep parameters packet
          File footstepParametersFile = new File(logDirectory, FootstepPlannerLogger.footstepParametersFileName);
-         InputStream footstepParametersPacketInputStream = new FileInputStream(footstepParametersFile);
-         jsonNode = objectMapper.readTree(footstepParametersPacketInputStream);
-         log.getFootstepParametersPacket().set(footstepParametersSerializer.deserialize(jsonNode.toString()));
-         footstepParametersPacketInputStream.close();
+         loadPacketFromFile(footstepParametersFile, log.getFootstepParametersPacket());
 
          // load body path parameters packet
          File bodyPathParametersFile = new File(logDirectory, FootstepPlannerLogger.bodyPathParametersFileName);
          if (bodyPathParametersFile.exists())
          {
-            InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
-            jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
-            log.getAStarBodyPathPlannerParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
-            bodyPathParametersPacketInputStream.close();
+            loadPacketFromFile(bodyPathParametersFile, log.getAStarBodyPathPlannerParametersPacket());
          }
 
          // load swing parameters packet
          File swingParametersFile = new File(logDirectory, FootstepPlannerLogger.swingParametersFileName);
          if (swingParametersFile.exists())
          {
-            InputStream swingParametersPacketInputStream = new FileInputStream(swingParametersFile);
-            jsonNode = objectMapper.readTree(swingParametersPacketInputStream);
-            log.getSwingPlannerParametersPacket().set(swingParametersSerializer.deserialize(jsonNode.toString()));
-            swingParametersPacketInputStream.close();
+            loadPacketFromFile(swingParametersFile, log.getSwingPlannerParametersPacket());
          }
 
          // load status packet
          File statusFile = new File(logDirectory, FootstepPlannerLogger.outputStatusPacketFileName);
-         InputStream statusPacketInputStream = new FileInputStream(statusFile);
-         jsonNode = objectMapper.readTree(statusPacketInputStream);
-         log.getStatusPacket().set(statusPacketSerializer.deserialize(jsonNode.toString()));
-         statusPacketInputStream.close();
+         loadPacketFromFile(statusFile, log.getStatusPacket());
 
          // load footstep header file
          File headerFile = new File(logDirectory, FootstepPlannerLogger.headerFileName);
@@ -463,6 +439,20 @@ public class FootstepPlannerLogLoader
       return polygon;
    }
 
+   private static <T extends ROS2Message<T>> void loadPacketFromFile(File file, T message) throws IOException
+   {
+      try (InputStream inputStream = new FileInputStream(file))
+      {
+         byte[] bytes = inputStream.readAllBytes();
+         if (ROS2MessageCdrFileTools.isLegacyDdsJson(bytes))
+         {
+            throw new IOException("Legacy JSON footstep planner log at " + file.getAbsolutePath()
+                                  + " is not supported after jros2 migration. Re-record the log with the current planner.");
+         }
+         ROS2MessageCdrFileTools.deserializeInto(bytes, message);
+      }
+   }
+
    public static void main(String[] args) throws IOException
    {
       FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
@@ -471,8 +461,7 @@ public class FootstepPlannerLogLoader
       FootstepPlannerLog log = logLoader.getLog();
       HeightMapMessage heightMapMessage = log.getRequestPacket().getHeightMapMessage();
 
-      JSONSerializer<HeightMapMessage> serializer = new JSONSerializer<>(new HeightMapMessagePubSubType());
-      byte[] serializedHeightMap = serializer.serializeToBytes(heightMapMessage);
+      byte[] serializedHeightMap = ROS2MessageCdrFileTools.serializeToBytes(heightMapMessage);
 
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       String fileName = "HeightMap" + dateFormat.format(new Date()) + ".json";

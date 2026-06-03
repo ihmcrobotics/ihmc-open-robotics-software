@@ -6,11 +6,11 @@ import java.util.function.ToDoubleFunction;
 
 import javax.vecmath.MismatchedSizeException;
 
-import toolbox_msgs.msg.dds.ReachingManifoldMessage;
-import toolbox_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
-import toolbox_msgs.msg.dds.WaypointBasedTrajectoryMessage;
-import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
+import toolbox_msgs.ReachingManifoldMessage;
+import toolbox_msgs.RigidBodyExplorationConfigurationMessage;
+import toolbox_msgs.WaypointBasedTrajectoryMessage;
+import toolbox_msgs.WholeBodyTrajectoryToolboxConfigurationMessage;
+import toolbox_msgs.WholeBodyTrajectoryToolboxMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -63,7 +63,8 @@ public class ReachingManifoldTools
    public static Graphics3DObject createManifoldMessageStaticGraphic(ReachingManifoldMessage reachingManifoldMessage, double radius,
                                                                      int resolutionForSingleSpace)
    {
-      Pose3D originPose = new Pose3D(reachingManifoldMessage.getManifoldOriginPosition(), reachingManifoldMessage.getManifoldOriginOrientation());
+      Pose3D originPose = new Pose3D(reachingManifoldMessage.getManifoldOriginPosition().getPoint(),
+                                     reachingManifoldMessage.getManifoldOriginOrientation().getQuaternion());
 
       int numberOfPoints = (int) Math.pow(resolutionForSingleSpace, reachingManifoldMessage.getManifoldConfigurationSpaceNames().size());
 

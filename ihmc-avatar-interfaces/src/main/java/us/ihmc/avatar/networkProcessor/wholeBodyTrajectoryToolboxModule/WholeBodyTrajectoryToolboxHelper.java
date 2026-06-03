@@ -6,9 +6,9 @@ import java.util.Collection;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.NormOps_DDRM;
 
-import toolbox_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
-import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
-import toolbox_msgs.msg.dds.WaypointBasedTrajectoryMessage;
+import toolbox_msgs.RigidBodyExplorationConfigurationMessage;
+import ihmc_common_msgs.SelectionMatrix3DMessage;
+import toolbox_msgs.WaypointBasedTrajectoryMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -24,9 +24,21 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
 
 public class WholeBodyTrajectoryToolboxHelper
 {
+   private static ConfigurationSpaceName[] fromBytes(IDLByteSequence enumListAsBytes)
+   {
+      if (enumListAsBytes == null || enumListAsBytes.size() == 0)
+         return new ConfigurationSpaceName[0];
+
+      byte[] bytes = new byte[enumListAsBytes.size()];
+      for (int i = 0; i < enumListAsBytes.size(); i++)
+         bytes[i] = enumListAsBytes.get(i);
+      return ConfigurationSpaceName.fromBytes(bytes);
+   }
+
    public static double kinematicsChainLimitScore(RigidBodyBasics start, RigidBodyBasics end)
    {
       return jointsLimitScore(MultiBodySystemTools.createOneDoFJointPath(start, end));
@@ -118,7 +130,7 @@ public class WholeBodyTrajectoryToolboxHelper
 
       if (explorationMessage != null)
       {
-         ConfigurationSpaceName[] degreesOfFreedomToExplore = ConfigurationSpaceName.fromBytes(explorationMessage.getConfigurationSpaceNamesToExplore());
+         ConfigurationSpaceName[] degreesOfFreedomToExplore = fromBytes(explorationMessage.getConfigurationSpaceNamesToExplore());
          for (int i = 0; i < degreesOfFreedomToExplore.length; i++)
          {
             if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.X || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Y
@@ -164,7 +176,7 @@ public class WholeBodyTrajectoryToolboxHelper
 
       if (explorationMessage != null)
       {
-         ConfigurationSpaceName[] degreesOfFreedomToExplore = ConfigurationSpaceName.fromBytes(explorationMessage.getConfigurationSpaceNamesToExplore());
+         ConfigurationSpaceName[] degreesOfFreedomToExplore = fromBytes(explorationMessage.getConfigurationSpaceNamesToExplore());
          for (int i = 0; i < degreesOfFreedomToExplore.length; i++)
          {
             if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.X || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Y

@@ -4,12 +4,12 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
-import ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
-import controller_msgs.msg.dds.WrenchTrajectoryMessage;
-import geometry_msgs.msg.dds.Wrench;
+import ihmc_common_msgs.EuclideanTrajectoryMessage;
+import controller_msgs.FootstepDataMessage;
+import ihmc_common_msgs.SE3TrajectoryMessage;
+import ihmc_common_msgs.SO3TrajectoryMessage;
+import controller_msgs.WrenchTrajectoryMessage;
+import geometry_msgs.Wrench;
 import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -106,14 +106,14 @@ public final class MessageTransformer
          public void transform(FootstepDataMessage message, RigidBodyTransform rigidBodyTransformToApply)
          {
             if (message.getLocation() != null)
-               message.getLocation().applyTransform(rigidBodyTransformToApply);
+               message.getLocation().getPoint().applyTransform(rigidBodyTransformToApply);
             if (message.getOrientation() != null)
-               message.getOrientation().applyTransform(rigidBodyTransformToApply);
+               message.getOrientation().getQuaternion().applyTransform(rigidBodyTransformToApply);
 
             if (message.getCustomPositionWaypoints() != null)
             {
                for (int i = 0; i < message.getCustomPositionWaypoints().size(); i++)
-                  message.getCustomPositionWaypoints().get(i).applyTransform(rigidBodyTransformToApply);
+                  message.getCustomPositionWaypoints().get(i).getPoint().applyTransform(rigidBodyTransformToApply);
             }
          }
       });
@@ -159,8 +159,20 @@ public final class MessageTransformer
          @Override
          public void transform(Wrench object, RigidBodyTransform rigidBodyTransformToApply)
          {
-            object.getForce().applyTransform(rigidBodyTransformToApply);
-            object.getTorque().applyTransform(rigidBodyTransformToApply);
+            us.ihmc.euclid.tuple3D.Vector3D force = new us.ihmc.euclid.tuple3D.Vector3D(object.getForce().getX(),
+                                                                                      object.getForce().getY(),
+                                                                                      object.getForce().getZ());
+            force.applyTransform(rigidBodyTransformToApply);
+            object.getForce().setX(force.getX());
+            object.getForce().setY(force.getY());
+            object.getForce().setZ(force.getZ());
+            us.ihmc.euclid.tuple3D.Vector3D torque = new us.ihmc.euclid.tuple3D.Vector3D(object.getTorque().getX(),
+                                                                                       object.getTorque().getY(),
+                                                                                       object.getTorque().getZ());
+            torque.applyTransform(rigidBodyTransformToApply);
+            object.getTorque().setX(torque.getX());
+            object.getTorque().setY(torque.getY());
+            object.getTorque().setZ(torque.getZ());
          }
       });
 

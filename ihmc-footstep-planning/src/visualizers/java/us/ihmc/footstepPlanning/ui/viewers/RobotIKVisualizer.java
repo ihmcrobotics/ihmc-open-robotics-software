@@ -10,7 +10,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.ToDoubleFunction;
 import java.util.zip.CRC32;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.RobotConfigurationData;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -242,8 +243,15 @@ public class RobotIKVisualizer
       if (robotConfigurationData.getJointNameHash() != jointNameHash)
          throw new RuntimeException("Joint names do not match for RobotConfigurationData");
 
-      newRootJointPoseReference.set(new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootPosition()));
-      newJointConfigurationReference.set(robotConfigurationData.getJointAngles().toArray());
+      newRootJointPoseReference.set(new RigidBodyTransform(robotConfigurationData.getRootOrientation().getQuaternion(),
+                                                           robotConfigurationData.getRootPosition().getPoint()));
+      IDLFloatSequence jointAngles = robotConfigurationData.getJointAngles();
+      float[] jointAngleArray = new float[jointAngles.size()];
+      for (int i = 0; i < jointAngles.size(); i++)
+      {
+         jointAngleArray[i] = jointAngles.get(i);
+      }
+      newJointConfigurationReference.set(jointAngleArray);
    }
 
    public void submitNewConfiguration(RigidBodyTransform rootJointTransform, ToDoubleFunction<String> jointAngles)

@@ -1,12 +1,12 @@
 package us.ihmc.communication.ros2.tf2;
 
-import builtin_interfaces.msg.dds.Time;
-import geometry_msgs.msg.dds.TransformStamped;
-import tf2_msgs.msg.dds.TFMessage;
+import builtin_interfaces.Time;
+import geometry_msgs.TransformStamped;
+import tf2_msgs.TFMessage;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 
 import static us.ihmc.communication.ros2.tf2.ROS2FrameTools.*;
 
@@ -47,7 +47,7 @@ public abstract class ROS2Frame extends ReferenceFrame
    {
       long currentTimeMillis = System.currentTimeMillis();
       updateTime.setSec((int) (currentTimeMillis / 1000));
-      updateTime.setNanosec((currentTimeMillis % 1000) * 1000000);
+      updateTime.setNanosec((int) ((currentTimeMillis % 1000) * 1000000));
    }
 
    protected void publishTFMessages()
@@ -86,9 +86,10 @@ public abstract class ROS2Frame extends ReferenceFrame
       hasBeenRemoved = true;
 
       super.remove();
+      ROS2Node ros2Node = ROS2TFTree.getInstance().getTFNode();
       if (tfPublisher != null)
-         tfPublisher.remove();
+         ros2Node.destroyPublisher(tfPublisher);
       if (tfStaticPublisher != null)
-         tfStaticPublisher.remove();
+         ros2Node.destroyPublisher(tfStaticPublisher);
    }
 }

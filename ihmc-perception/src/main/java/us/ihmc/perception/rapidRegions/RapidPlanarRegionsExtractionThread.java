@@ -13,7 +13,7 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.perception.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.jros2.ROS2Node;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui;
 
 import com.badlogic.gdx.graphics.Color;
-import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
+import ihmc_common_msgs.PrimitiveDataVectorMessage;
 import imgui.ImGui;
 import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.communication.property.StoredPropertySetROS2Input;
@@ -10,8 +10,8 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 public class ImGuiRemoteROS2StoredPropertySet

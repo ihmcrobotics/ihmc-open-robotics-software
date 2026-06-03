@@ -1,5 +1,7 @@
 package us.ihmc.avatar.warmup;
 
+import us.ihmc.jros2.ROS2Message;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -119,7 +121,7 @@ public abstract class HumanoidControllerWarmup
       }
    }
 
-   protected <M extends Settable<M>> void submitMessage(M message)
+   protected <M extends ROS2Message<M>> void submitMessage(M message)
    {
       commandInputManager.submitMessage(message);
    }

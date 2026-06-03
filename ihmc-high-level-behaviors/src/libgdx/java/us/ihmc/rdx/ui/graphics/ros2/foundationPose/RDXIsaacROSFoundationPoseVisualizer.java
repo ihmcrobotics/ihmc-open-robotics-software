@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import ihmc_common_msgs.msg.dds.Box3DMessage;
+import ihmc_common_msgs.Box3DMessage;
 import imgui.ImGui;
 import imgui.ImGuiStyle;
 import imgui.flag.ImGuiTableColumnFlags;
@@ -19,9 +19,9 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2MultiTopicVisualizer;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Subscription;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -137,10 +137,11 @@ public class RDXIsaacROSFoundationPoseVisualizer extends RDXROS2MultiTopicVisual
 
    private static class RDXIsaacROSFoundationPoseResultVisualizer implements RenderableProvider
    {
+      private final ROS2Node ros2Node;
       private final ROS2Subscription<Box3DMessage> resultSubscription;
       private final Box3D latestResult;
 
-      private final ROS2Subscription<std_msgs.msg.dds.Byte> stateSubscription;
+      private final ROS2Subscription<std_msgs.Byte> stateSubscription;
       private State state;
 
       private final RDXBoxVisualizer boxVisualizer;
@@ -148,6 +149,7 @@ public class RDXIsaacROSFoundationPoseVisualizer extends RDXROS2MultiTopicVisual
 
       public RDXIsaacROSFoundationPoseResultVisualizer(ROS2Node ros2Node, IsaacROSFoundationPoseObject object, ImGuiAveragedFrequencyText frequencyText)
       {
+         this.ros2Node = ros2Node;
          latestResult = new Box3D();
          latestResult.setToNaN();
 
@@ -159,15 +161,24 @@ public class RDXIsaacROSFoundationPoseVisualizer extends RDXROS2MultiTopicVisual
 
          referenceFrameGraphic = new RDXReferenceFrameGraphic(0.1);
 
-         stateSubscription = ros2Node.createSubscription2(object.topics.ihmcState(), message -> state = State.fromByte(message.getData()));
-
-         resultSubscription = ros2Node.createSubscription2(object.topics.ihmcResult(), message ->
+         stateSubscription = ros2Node.createSubscription(object.topics.ihmcState(), reader ->
          {
+            std_msgs.Byte stateMessage = reader.read();
+            if (stateMessage != null)
+               state = State.fromByte(stateMessage.getData());
+         });
+
+         resultSubscription = ros2Node.createSubscription(object.topics.ihmcResult(), reader ->
+         {
+            var message = reader.read();
+            if (message == null)
+               return;
+
             frequencyText.ping();
 
-            latestResult.getPose().set(message.getPose());
-            latestResult.getSize().set(message.getSize());
-            referenceFrameGraphic.getFramePose3D().set(message.getPose());
+            latestResult.getPose().set(message.getPose().getPose());
+            latestResult.getSize().set(message.getSize().getVector());
+            referenceFrameGraphic.getFramePose3D().set(message.getPose().getPose());
          });
       }
 
@@ -195,8 +206,8 @@ public class RDXIsaacROSFoundationPoseVisualizer extends RDXROS2MultiTopicVisual
       {
          boxVisualizer.dispose();
          referenceFrameGraphic.dispose();
-         resultSubscription.remove();
-         stateSubscription.remove();
+         ros2Node.destroySubscription(resultSubscription);
+         ros2Node.destroySubscription(stateSubscription);
       }
    }
 }

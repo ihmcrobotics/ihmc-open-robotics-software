@@ -1,9 +1,9 @@
 package us.ihmc.avatar.controllerAPI;
 
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.HandLoadBearingMessage;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
+import controller_msgs.ChestTrajectoryMessage;
+import controller_msgs.HandLoadBearingMessage;
+import controller_msgs.HandTrajectoryMessage;
+import ihmc_common_msgs.SE3TrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -149,8 +149,8 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       HandLoadBearingMessage loadBearingMessage = HumanoidMessageTools.createHandLoadBearingMessage(RobotSide.LEFT);
       loadBearingMessage.setLoad(true);
       loadBearingMessage.setCoefficientOfFriction(0.8);
-      loadBearingMessage.getContactPointInBodyFrame().set(0.0, 0.09, 0.0);
-      loadBearingMessage.getContactNormalInWorld().set(0.0, 0.0, 1.0);
+      loadBearingMessage.getContactPointInBodyFrame().getPoint().set(0.0, 0.09, 0.0);
+      loadBearingMessage.getContactNormalInWorld().getVector().set(0.0, 0.0, 1.0);
 
       simulationTestHelper.publishToController(loadBearingMessage);
       success = simulationTestHelper.simulateNow(1.0);

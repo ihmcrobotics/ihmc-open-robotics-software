@@ -1,6 +1,6 @@
 package us.ihmc.avatar.ros2.visualizer;
 
-import us.ihmc.pubsub.common.Guid;
+import us.ihmc.jros2.Guid;
 
 public class SCSROS2Participant
 {

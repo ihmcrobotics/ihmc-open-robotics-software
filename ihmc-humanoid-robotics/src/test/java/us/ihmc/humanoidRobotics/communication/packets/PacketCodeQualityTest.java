@@ -11,8 +11,8 @@ import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import ihmc_common_msgs.msg.dds.FrameInformation;
-import toolbox_msgs.msg.dds.FootstepPlannerStatusMessage;
+import ihmc_common_msgs.FrameInformation;
+import toolbox_msgs.FootstepPlannerStatusMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
@@ -21,11 +21,10 @@ import org.reflections.Reflections;
 
 import com.google.common.base.CaseFormat;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.*;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
@@ -40,11 +39,21 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLBoolSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLDoubleSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLIntSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLLongSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLShortSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLStringSequence;
+import us.ihmc.jros2.ROS2Message;
 
 public class PacketCodeQualityTest
 {
-   private static final String PACKETS_LOCATION = "controller_msgs.msg.dds";
+   private static final String PACKETS_LOCATION = "controller_msgs";
 
    @AfterEach
    public void tearDown()
@@ -68,16 +77,16 @@ public class PacketCodeQualityTest
       boolean verbose = true;
 
       Reflections reflections = new Reflections(PACKETS_LOCATION);
-      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      Set<Class<? extends ROS2Message>> allPacketTypes = reflections.getSubTypesOf(ROS2Message.class);
       allPacketTypes.removeAll(reaInternalComms);
 
-      Set<Class<? extends Packet>> packetTypesWithNullFields = new TreeSet<>((o1, o2) -> o1.getSimpleName().compareTo(o2.getSimpleName()));
+      Set<Class<? extends ROS2Message>> packetTypesWithNullFields = new TreeSet<>((o1, o2) -> o1.getSimpleName().compareTo(o2.getSimpleName()));
 
-      for (Class<? extends Packet> packetType : allPacketTypes)
+      for (Class<? extends ROS2Message> packetType : allPacketTypes)
       {
          try
          {
-            Packet packetInstance = packetType.newInstance();
+            ROS2Message packetInstance = packetType.newInstance();
             if (!areAllObjectFieldsNonNull(packetInstance))
             {
                packetTypesWithNullFields.add(packetType);
@@ -134,13 +143,13 @@ public class PacketCodeQualityTest
       boolean verbose = true;
 
       Reflections reflections = new Reflections(PACKETS_LOCATION);
-      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      Set<Class<? extends ROS2Message>> allPacketTypes = reflections.getSubTypesOf(ROS2Message.class);
       allPacketTypes.removeAll(reaInternalComms);
 
-      Map<Class<? extends Packet>, List<Method>> packetTypesWithConvenienceMethods = new TreeMap<>((o1, o2) -> o1.getSimpleName()
+      Map<Class<? extends ROS2Message>, List<Method>> packetTypesWithConvenienceMethods = new TreeMap<>((o1, o2) -> o1.getSimpleName()
                                                                                                                  .compareTo(o2.getSimpleName()));
 
-      for (Class<? extends Packet> packetType : allPacketTypes)
+      for (Class<? extends ROS2Message> packetType : allPacketTypes)
       {
          try
          {
@@ -166,8 +175,6 @@ public class PacketCodeQualityTest
             {
                String methodName = method.getName();
                if (methodName.equals("getPubSubType") && method.getParameterCount() == 0 && method.getReturnType() == Supplier.class)
-                  continue;
-               if (methodName.equals("getPubSubTypePacket") && method.getParameterCount() == 0 && method.getReturnType() == Supplier.class)
                   continue;
                if (methodName.equals("toString") && method.getParameterCount() == 0 && method.getReturnType() == String.class)
                   continue;
@@ -195,16 +202,18 @@ public class PacketCodeQualityTest
                if (methodName.equals("getPubSubType") && method.getParameterCount() == 0 && Supplier.class.isAssignableFrom(method.getReturnType()))
                   continue;
 
-               if (methodName.equals("set"))
+               if (methodName.equals("set") && method.getParameterCount() == 1 && method.getReturnType() == void.class)
                {
-                  if (method.getParameterCount() == 1 && method.getReturnType() == void.class)
-                  {
-                     Class<?> firstParameterType = method.getParameterTypes()[0];
-                     // This is due to implementing Settable<T>, the generic parameter gets "lost" at compilation and is replaced with Object :/
-                     if (firstParameterType == packetType || firstParameterType == Object.class)
-                        continue; // The method is an acceptable setter.
-                  }
+                  Class<?> firstParameterType = method.getParameterTypes()[0];
+                  if (packetType.isAssignableFrom(firstParameterType) || firstParameterType.isAssignableFrom(packetType) || firstParameterType == Object.class)
+                     continue;
                }
+               if (methodName.equals("serialize") && method.getParameterCount() == 1 && method.getReturnType() == void.class)
+                  continue;
+               if (methodName.equals("deserialize") && method.getParameterCount() == 1 && method.getReturnType() == void.class)
+                  continue;
+               if (methodName.equals("calculateSizeBytes") && method.getParameterCount() == 1 && method.getReturnType() == int.class)
+                  continue;
 
                if (setterNames.containsKey(methodName))
                { // Allowing setters with argument being a super-type of the field.
@@ -255,12 +264,12 @@ public class PacketCodeQualityTest
       boolean verbose = true;
 
       Reflections reflections = new Reflections(PACKETS_LOCATION);
-      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      Set<Class<? extends ROS2Message>> allPacketTypes = reflections.getSubTypesOf(ROS2Message.class);
       allPacketTypes.removeAll(reaInternalComms);
 
-      Map<Class<? extends Packet>, List<Class>> packetTypesWithIterableOrArrayField = new HashMap<>();
+      Map<Class<? extends ROS2Message>, List<Class>> packetTypesWithIterableOrArrayField = new HashMap<>();
 
-      for (Class<? extends Packet> packetType : allPacketTypes)
+      for (Class<? extends ROS2Message> packetType : allPacketTypes)
       {
          try
          {
@@ -272,8 +281,8 @@ public class PacketCodeQualityTest
 
                Class<?> typeToCheck = field.getType();
 
-               if (Iterable.class.isAssignableFrom(typeToCheck) && !IDLSequence.Object.class.isAssignableFrom(typeToCheck)
-                     && !IDLSequence.StringBuilderHolder.class.isAssignableFrom(typeToCheck))
+               if (Iterable.class.isAssignableFrom(typeToCheck) && !IDLSequence.class.isAssignableFrom(typeToCheck)
+                     && !IDLObjectSequence.class.isAssignableFrom(typeToCheck) && !IDLStringSequence.class.isAssignableFrom(typeToCheck))
                {
                   if (!packetTypesWithIterableOrArrayField.containsKey(packetType))
                      packetTypesWithIterableOrArrayField.put(packetType, new ArrayList<>());
@@ -311,18 +320,18 @@ public class PacketCodeQualityTest
       boolean verbose = true;
 
       Reflections reflections = new Reflections(PACKETS_LOCATION);
-      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      Set<Class<? extends ROS2Message>> allPacketTypes = reflections.getSubTypesOf(ROS2Message.class);
 
-      Set<Class<? extends Packet>> packetTypesWithAdditionalSuperTypes = new HashSet<>();
+      Set<Class<? extends ROS2Message>> packetTypesWithAdditionalSuperTypes = new HashSet<>();
 
-      for (Class<? extends Packet> packetType : allPacketTypes)
+      for (Class<? extends ROS2Message> packetType : allPacketTypes)
       {
          try
          {
-            if (packetType.getSuperclass() != Packet.class)
+            if (packetType.getSuperclass() != Object.class)
                packetTypesWithAdditionalSuperTypes.add(packetType);
 
-            if (Arrays.stream(packetType.getInterfaces()).filter(i -> !i.equals(EpsilonComparable.class)).filter(i -> !i.equals(Settable.class)).findAny()
+            if (Arrays.stream(packetType.getInterfaces()).filter(i -> !i.equals(EpsilonComparable.class)).filter(i -> !i.equals(Settable.class)).filter(i -> !i.equals(ROS2Message.class)).findAny()
                       .isPresent())
             {
                packetTypesWithAdditionalSuperTypes.add(packetType);
@@ -346,7 +355,7 @@ public class PacketCodeQualityTest
          }
       }
 
-      assertTrue("Packet sub-types should only extend Packet class.", packetTypesWithAdditionalSuperTypes.isEmpty());
+      assertTrue("ROS2 message types should only extend Object.", packetTypesWithAdditionalSuperTypes.isEmpty());
    }
 
    @SuppressWarnings("rawtypes")
@@ -356,11 +365,11 @@ public class PacketCodeQualityTest
       boolean verbose = true;
 
       Reflections reflections = new Reflections(PACKETS_LOCATION);
-      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      Set<Class<? extends ROS2Message>> allPacketTypes = reflections.getSubTypesOf(ROS2Message.class);
 
-      Set<Class<? extends Packet>> packetTypesWithNestedType = new HashSet<>();
+      Set<Class<? extends ROS2Message>> packetTypesWithNestedType = new HashSet<>();
 
-      for (Class<? extends Packet> packetType : allPacketTypes)
+      for (Class<? extends ROS2Message> packetType : allPacketTypes)
       {
          try
          {
@@ -397,11 +406,11 @@ public class PacketCodeQualityTest
       boolean verbose = true;
 
       Reflections reflections = new Reflections(PACKETS_LOCATION);
-      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      Set<Class<? extends ROS2Message>> allPacketTypes = reflections.getSubTypesOf(ROS2Message.class);
       TIntObjectHashMap<Class> allPacketSimpleNameBasedHashCode = new TIntObjectHashMap<>();
       int numberOfCollisions = 0;
 
-      for (Class<? extends Packet> packetType : allPacketTypes)
+      for (Class<? extends ROS2Message> packetType : allPacketTypes)
       {
          int simpleNameBasedHashCode = packetType.getSimpleName().hashCode();
          if (allPacketSimpleNameBasedHashCode.containsKey(simpleNameBasedHashCode))
@@ -425,12 +434,12 @@ public class PacketCodeQualityTest
       boolean verbose = true;
 
       Reflections reflections = new Reflections(PACKETS_LOCATION);
-      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      Set<Class<? extends ROS2Message>> allPacketTypes = reflections.getSubTypesOf(ROS2Message.class);
       allPacketTypes.removeAll(reaInternalComms);
 
-      Map<Class<? extends Packet>, List<Class>> packetTypesWithIllegalFieldTypes = new HashMap<>();
+      Map<Class<? extends ROS2Message>, List<Class>> packetTypesWithIllegalFieldTypes = new HashMap<>();
 
-      for (Class<? extends Packet> packetType : allPacketTypes)
+      for (Class<? extends ROS2Message> packetType : allPacketTypes)
       {
          try
          {
@@ -442,17 +451,11 @@ public class PacketCodeQualityTest
 
                Class<?> typeToCheck = field.getType();
 
-               if (IDLSequence.Object.class.isAssignableFrom(typeToCheck))
-               {
-                  Packet packetInstance = packetType.newInstance();
-                  Object fieldInstance = field.get(packetInstance);
-                  Field allocatorField = typeToCheck.getSuperclass().getDeclaredField("allocator");
-                  allocatorField.setAccessible(true);
-                  typeToCheck = (Class<?>) ((Supplier) allocatorField.get(fieldInstance)).get().getClass();
-               }
+               if (IDLObjectSequence.class.isAssignableFrom(typeToCheck))
+                  continue;
                while (typeToCheck.isArray())
                   typeToCheck = typeToCheck.getComponentType();
-               if (Packet.class.isAssignableFrom(typeToCheck))
+               if (ROS2Message.class.isAssignableFrom(typeToCheck))
                   continue;
                if (isPrimitive(typeToCheck))
                   continue;
@@ -503,11 +506,11 @@ public class PacketCodeQualityTest
       boolean verbose = true;
 
       Reflections reflections = new Reflections(PACKETS_LOCATION);
-      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      Set<Class<? extends ROS2Message>> allPacketTypes = reflections.getSubTypesOf(ROS2Message.class);
 
-      Set<Class<? extends Packet>> packetTypesWithNonFinalStaticFields = new HashSet<>();
+      Set<Class<? extends ROS2Message>> packetTypesWithNonFinalStaticFields = new HashSet<>();
 
-      for (Class<? extends Packet> packetType : allPacketTypes)
+      for (Class<? extends ROS2Message> packetType : allPacketTypes)
       {
          try
          {
@@ -546,11 +549,11 @@ public class PacketCodeQualityTest
       boolean verbose = true;
 
       Reflections reflections = new Reflections(PACKETS_LOCATION);
-      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      Set<Class<? extends ROS2Message>> allPacketTypes = reflections.getSubTypesOf(ROS2Message.class);
 
-      Set<Class<? extends Packet>> packetTypesWithEnumFields = new HashSet<>();
+      Set<Class<? extends ROS2Message>> packetTypesWithEnumFields = new HashSet<>();
 
-      for (Class<? extends Packet> packetType : allPacketTypes)
+      for (Class<? extends ROS2Message> packetType : allPacketTypes)
       {
          try
          {
@@ -595,7 +598,7 @@ public class PacketCodeQualityTest
 
       Reflections packetReflections = new Reflections(PACKETS_LOCATION);
       Reflections enumReflections = new Reflections("us.ihmc");
-      Set<Class<? extends Packet>> allPacketTypes = packetReflections.getSubTypesOf(Packet.class);
+      Set<Class<? extends ROS2Message>> allPacketTypes = packetReflections.getSubTypesOf(ROS2Message.class);
       Set<String> enumLowerCaseNames = enumReflections.getSubTypesOf(Enum.class).stream().filter(Class::isEnum).map(Class::getSimpleName)
                                                       .map(name -> name.toLowerCase()).collect(Collectors.toSet());
       enumLowerCaseNames.add("PilotAction".toLowerCase()); // In exo land
@@ -608,11 +611,11 @@ public class PacketCodeQualityTest
       enumLowerCaseNames.add("Type".toLowerCase()); // In path planner land
       enumLowerCaseNames.add("FootstepPlanningResult".toLowerCase()); // In path planner land
 
-      Set<Class<? extends Packet>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
+      Set<Class<? extends ROS2Message>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
 
       Set<Field> fieldsToIngore = new HashSet<>();
 
-      for (Class<? extends Packet> packetType : allPacketTypes)
+      for (Class<? extends ROS2Message> packetType : allPacketTypes)
       {
          try
          {
@@ -628,7 +631,7 @@ public class PacketCodeQualityTest
                while (typeToCheck.isArray())
                   typeToCheck = typeToCheck.getComponentType();
 
-               boolean isEnum = byte.class == typeToCheck || IDLSequence.Byte.class.isAssignableFrom(typeToCheck);
+               boolean isEnum = byte.class == typeToCheck || IDLByteSequence.class.isAssignableFrom(typeToCheck);
 
                if (isEnum)
                {
@@ -674,15 +677,15 @@ public class PacketCodeQualityTest
 
       Reflections packetReflections = new Reflections(PACKETS_LOCATION);
       Reflections enumReflections = new Reflections("us.ihmc");
-      Set<Class<? extends Packet>> allPacketTypes = packetReflections.getSubTypesOf(Packet.class);
+      Set<Class<? extends ROS2Message>> allPacketTypes = packetReflections.getSubTypesOf(ROS2Message.class);
       Map<String, Class<? extends Enum>> nameToEnumMap = new HashMap<>();
       enumReflections.getSubTypesOf(Enum.class).stream().filter(Class::isEnum).forEach(type -> nameToEnumMap.put(type.getSimpleName().toLowerCase(), type));
-      Set<Class<? extends Packet>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
+      Set<Class<? extends ROS2Message>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
 
       Set<Field> fieldsToIngore = new HashSet<>();
       fieldsToIngore.add(FootstepPlannerStatusMessage.class.getField("footstep_planner_status_")); // In footstep planner land
 
-      for (Class<? extends Packet> packetType : allPacketTypes)
+      for (Class<? extends ROS2Message> packetType : allPacketTypes)
       {
          try
          {
@@ -699,7 +702,7 @@ public class PacketCodeQualityTest
                Class<?> typeToCheck = field.getType();
                while (typeToCheck.isArray())
                   typeToCheck = typeToCheck.getComponentType();
-               if (byte.class != typeToCheck && !IDLSequence.Byte.class.isAssignableFrom(typeToCheck))
+               if (byte.class != typeToCheck && !IDLByteSequence.class.isAssignableFrom(typeToCheck))
                   continue;
                String expectedToContainEnumName = field.getName().toLowerCase().replace("_", "");
                Set<Entry<String, Class<? extends Enum>>> potentialMatchingEnums = nameToEnumMap.entrySet().stream()
@@ -813,12 +816,12 @@ public class PacketCodeQualityTest
       boolean verbose = false;
 
       Reflections reflections = new Reflections(PACKETS_LOCATION);
-      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      Set<Class<? extends ROS2Message>> allPacketTypes = reflections.getSubTypesOf(ROS2Message.class);
 
-      Set<Class<? extends Packet>> packetTypesWithoutEmptyConstructor = new HashSet<>();
-      Set<Class<? extends Packet>> packetTypesWithNonEmptyConstructors = new HashSet<>();
+      Set<Class<? extends ROS2Message>> packetTypesWithoutEmptyConstructor = new HashSet<>();
+      Set<Class<? extends ROS2Message>> packetTypesWithNonEmptyConstructors = new HashSet<>();
 
-      for (Class<? extends Packet> packetType : allPacketTypes)
+      for (Class<? extends ROS2Message> packetType : allPacketTypes)
       {
          try
          {
@@ -870,11 +873,11 @@ public class PacketCodeQualityTest
       boolean printPacketTypesWithRandomConstructor = false;
 
       Reflections reflections = new Reflections(PACKETS_LOCATION);
-      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      Set<Class<? extends ROS2Message>> allPacketTypes = reflections.getSubTypesOf(ROS2Message.class);
 
-      Set<Class<? extends Packet>> packetTypesWithRandomConstructor = new HashSet<>();
+      Set<Class<? extends ROS2Message>> packetTypesWithRandomConstructor = new HashSet<>();
 
-      for (Class<? extends Packet> packetType : allPacketTypes)
+      for (Class<? extends ROS2Message> packetType : allPacketTypes)
       {
          try
          {
@@ -893,24 +896,24 @@ public class PacketCodeQualityTest
    }
 
    @SuppressWarnings("rawtypes")
-   private static final Set<Class<? extends Packet>> reaInternalComms;
+   private static final Set<Class<? extends ROS2Message>> reaInternalComms;
    static
    {
       Reflections reflections = new Reflections("us.ihmc.robotEnvironmentAwareness");
-      reaInternalComms = reflections.getSubTypesOf(Packet.class);
+      reaInternalComms = reflections.getSubTypesOf(ROS2Message.class);
    }
 
    private static final Set<Class<?>> thirdPartySerializableClasses = new HashSet<>();
    static
    {
-      thirdPartySerializableClasses.add(IDLSequence.Object.class);
-      thirdPartySerializableClasses.add(IDLSequence.Byte.class);
-      thirdPartySerializableClasses.add(IDLSequence.Float.class);
-      thirdPartySerializableClasses.add(IDLSequence.Double.class);
-      thirdPartySerializableClasses.add(IDLSequence.Integer.class);
-      thirdPartySerializableClasses.add(IDLSequence.Boolean.class);
-      thirdPartySerializableClasses.add(IDLSequence.Long.class);
-      thirdPartySerializableClasses.add(IDLSequence.StringBuilderHolder.class);
+      thirdPartySerializableClasses.add(IDLObjectSequence.class);
+      thirdPartySerializableClasses.add(IDLByteSequence.class);
+      thirdPartySerializableClasses.add(IDLFloatSequence.class);
+      thirdPartySerializableClasses.add(IDLDoubleSequence.class);
+      thirdPartySerializableClasses.add(IDLIntSequence.class);
+      thirdPartySerializableClasses.add(IDLBoolSequence.class);
+      thirdPartySerializableClasses.add(IDLLongSequence.class);
+      thirdPartySerializableClasses.add(IDLStringSequence.class);
       thirdPartySerializableClasses.add(StringBuilder.class);
    }
 
@@ -926,5 +929,9 @@ public class PacketCodeQualityTest
       allowedEuclidTypes.add(Pose2D.class);
       allowedEuclidTypes.add(Pose3D.class);
       allowedEuclidTypes.add(Orientation2D.class);
+      allowedEuclidTypes.add(us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      allowedEuclidTypes.add(us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage.class);
+      allowedEuclidTypes.add(us.ihmc.euclid.jros2.messages.EuclidPose3DMessage.class);
+      allowedEuclidTypes.add(us.ihmc.euclid.jros2.messages.EuclidVector3DMessage.class);
    }
 }

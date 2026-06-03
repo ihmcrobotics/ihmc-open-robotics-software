@@ -1,10 +1,10 @@
 package us.ihmc.lerobot;
 
-import ihmc_common_msgs.msg.dds.YoRegistryMessage;
+import ihmc_common_msgs.YoRegistryMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.yoVariables.registry.YoRegistry;
 

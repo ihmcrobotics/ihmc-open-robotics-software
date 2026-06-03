@@ -1,13 +1,13 @@
 package us.ihmc.footstepPlanning.ui.components;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.messager.Messager;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -165,8 +165,8 @@ public class UIFootstepPlanManager
    {
       for (int i = 0; i < messageToSet.getFootstepDataList().size(); i++)
       {
-         Object<Point3D> contactPointsToCopy = messageToCopyFrom.getFootstepDataList().get(i).getPredictedContactPoints2d();
-         Object<Point3D> contactPointsToSet = messageToSet.getFootstepDataList().get(i).getPredictedContactPoints2d();
+         IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> contactPointsToCopy = messageToCopyFrom.getFootstepDataList().get(i).getPredictedContactPoints2d();
+         IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> contactPointsToSet = messageToSet.getFootstepDataList().get(i).getPredictedContactPoints2d();
          contactPointsToSet.set(contactPointsToCopy);
       }
    }

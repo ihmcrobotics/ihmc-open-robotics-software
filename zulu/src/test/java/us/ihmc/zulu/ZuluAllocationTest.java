@@ -1,9 +1,9 @@
 package us.ihmc.zulu;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.*;
 import gnu.trove.list.array.TIntArrayList;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.SE3TrajectoryMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.decomposition.bidiagonal.BidiagonalDecompositionRow_DDRM;
 import org.ejml.dense.row.decomposition.chol.CholeskyDecompositionCommon_DDRM;

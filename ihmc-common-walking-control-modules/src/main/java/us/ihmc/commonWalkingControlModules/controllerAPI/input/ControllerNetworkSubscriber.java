@@ -1,23 +1,20 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 
-import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
-import ihmc_common_msgs.msg.dds.MessageCollection;
-import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
+import ihmc_common_msgs.MessageCollection;
+import ihmc_common_msgs.MessageCollectionNotification;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2TopicNameTools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The ControllerNetworkSubscriber is meant to used as a generic interface between a network packet
- * communicator and the controller API. It automatically creates all the {@link PacketConsumer} for
+ * communicator and the controller API. It automatically creates ROS 2 subscriptions for
  * all the messages supported by the {@link CommandInputManager}. The status messages are send to
  * the network communicator on a separate thread to avoid any delay in the controller thread.
  *
@@ -50,17 +47,17 @@ public class ControllerNetworkSubscriber
    private final List<MessageCollector> messageCollectors = new ArrayList<>();
 
    /** All the possible status message that can be sent to the communicator. */
-   private final List<Class<? extends Settable<?>>> listOfSupportedStatusMessages;
+   private final List<Class<? extends ROS2Message<?>>> listOfSupportedStatusMessages;
 
    /** All the possible messages that can be sent to the communicator. */
-   private final List<Class<? extends Settable<?>>> listOfSupportedControlMessages;
+   private final List<Class<? extends ROS2Message<?>>> listOfSupportedControlMessages;
 
    /**
     * Local buffers for each message to ensure proper copying from the controller thread to the
     * communication thread.
     */
-   private final Map<Class<? extends Settable<?>>, ROS2Publisher<?>> statusMessagePublisherMap = new HashMap<>();
-   private final Map<Class<? extends Settable<?>>, ThrottledROS2Publisher<?>> lowFrequencyStatusMessagePublisherMap = new HashMap<>();
+   private final Map<Class<? extends ROS2Message<?>>, ROS2Publisher<?>> statusMessagePublisherMap = new HashMap<>();
+   private final Map<Class<? extends ROS2Message<?>>, ThrottledROS2Publisher> lowFrequencyStatusMessagePublisherMap = new HashMap<>();
 
    private final ROS2Node ros2Node;
 
@@ -87,38 +84,27 @@ public class ControllerNetworkSubscriber
       if (ros2Node == null)
          LogTools.error("No ROS2 node, {} cannot be created.", getClass().getSimpleName());
 
-      listOfSupportedStatusMessages.add(InvalidPacketNotificationPacket.class);
-
       createPublishersSubscribersForSupportedMessages();
       createGlobalStatusMessageListener();
    }
 
-   public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
-                                                                            int expectedMessageSize,
-                                                                            MessageUnpacker<T> messageUnpacker)
+   public <T extends ROS2Message<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
+                                                                             int expectedMessageSize,
+                                                                             MessageUnpacker<T> messageUnpacker)
    {
-      final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
+      final List<ROS2Message<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
-      try
+      T localInstance = ROS2Message.createInstance(multipleMessageType);
+      ros2Node.createSubscription(ControllerAPI.getTopic(inputTopic, multipleMessageType), reader ->
       {
-         T localInstance = multipleMessageType.newInstance();
-         NewMessageListener<T> messageListener = s ->
-         {
-            s.takeNextData(localInstance, null);
-            unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, localInstance);
-         };
-
-         ros2Node.createSubscription(ControllerAPI.getTopic(inputTopic, multipleMessageType), messageListener);
-      }
-      catch (InstantiationException | IllegalAccessException e)
-      {
-         throw new RuntimeException(e);
-      }
+         reader.read(localInstance);
+         unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, localInstance);
+      });
    }
 
-   private <T extends Settable<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass,
+   private <T extends ROS2Message<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass,
                                                            MessageUnpacker<T> messageUnpacker,
-                                                           List<Settable<?>> unpackedMessages,
+                                                           List<ROS2Message<?>> unpackedMessages,
                                                            T multipleMessageHolder)
    {
       if (DEBUG)
@@ -151,8 +137,9 @@ public class ControllerNetworkSubscriber
 
    public void addMessageCollectors(MessageIDExtractor messageIDExtractor, int numberOfSimultaneousCollectionsToSupport)
    {
-      ROS2Publisher<MessageCollectionNotification> publisher = createPublisher(MessageCollectionNotification.class);
-      listOfSupportedStatusMessages.add(MessageCollectionNotification.class);
+      @SuppressWarnings("unchecked")
+      ROS2Publisher<MessageCollectionNotification> publisher = (ROS2Publisher<MessageCollectionNotification>) statusMessagePublisherMap.computeIfAbsent(MessageCollectionNotification.class,
+                                                                                                                                                        messageClass -> createPublisher(messageClass));
 
       for (int i = 0; i < numberOfSimultaneousCollectionsToSupport; i++)
       {
@@ -161,9 +148,9 @@ public class ControllerNetworkSubscriber
 
       MessageCollection messageCollection = new MessageCollection();
 
-      ros2Node.createSubscription(ControllerAPI.getTopic(inputTopic, MessageCollection.class), s ->
+      ros2Node.createSubscription(ControllerAPI.getTopic(inputTopic, MessageCollection.class), reader ->
       {
-         s.takeNextData(messageCollection, null);
+         reader.read(messageCollection);
 
          for (int i = 0; i < numberOfSimultaneousCollectionsToSupport; i++)
          {
@@ -201,40 +188,45 @@ public class ControllerNetworkSubscriber
    }
 
    @SuppressWarnings("unchecked")
-   private <T extends Settable<T>> void createPublishersSubscribersForSupportedMessages()
+   private void createPublishersSubscribersForSupportedMessages()
    {
       for (int i = 0; i < listOfSupportedStatusMessages.size(); i++)
       {
-         Class<T> messageClass = (Class<T>) listOfSupportedStatusMessages.get(i);
-         statusMessagePublisherMap.put(messageClass, createPublisher(messageClass));
-         lowFrequencyStatusMessagePublisherMap.put(messageClass, createLowFrequencyPublisher(messageClass));
+         Class<? extends ROS2Message<?>> messageClass = listOfSupportedStatusMessages.get(i);
+         statusMessagePublisherMap.put(messageClass, createPublisher((Class<? extends ROS2Message<?>>) messageClass));
+         lowFrequencyStatusMessagePublisherMap.put(messageClass, createLowFrequencyPublisher((Class<? extends ROS2Message<?>>) messageClass));
       }
 
       for (int i = 0; i < listOfSupportedControlMessages.size(); i++)
       { // Creating the subscribers
-         Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
-         T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
+         Class<? extends ROS2Message<?>> messageClass = (Class<? extends ROS2Message<?>>) listOfSupportedControlMessages.get(i);
+         @SuppressWarnings({"unchecked", "rawtypes"})
+         Class messageClassRaw = messageClass;
 
-         ros2Node.createSubscription(ControllerAPI.getTopic(inputTopic, messageClass), s ->
+         ros2Node.createSubscription(ControllerAPI.getTopic(inputTopic, messageClassRaw), reader ->
          {
-            s.takeNextData(messageLocalInstance, null);
-            receivedMessage(messageLocalInstance);
+            ROS2Message<?> message = reader.read();
+            if (message != null)
+               receivedMessage(message);
          });
       }
    }
 
-   private <T extends Settable<T>> ROS2Publisher<T> createPublisher(Class<T> messageClass)
+   @SuppressWarnings({"unchecked", "rawtypes"})
+   private ROS2Publisher<?> createPublisher(Class<? extends ROS2Message<?>> messageClass)
    {
-      return ros2Node.createPublisher(ControllerAPI.getTopic(outputTopic, messageClass));
+      return ros2Node.createPublisher(ControllerAPI.getTopic(outputTopic, (Class) messageClass));
    }
 
-   private <T extends Settable<T>> ThrottledROS2Publisher<T> createLowFrequencyPublisher(Class<T> messageClass)
+   @SuppressWarnings({"unchecked", "rawtypes"})
+   private ThrottledROS2Publisher createLowFrequencyPublisher(Class<? extends ROS2Message<?>> messageClass)
    {
-      return new ThrottledROS2Publisher<>(ros2Node.createPublisher(ControllerAPI.getLowFrequencyTopic(outputTopic, messageClass)), LOW_FREQUENCY_PUBLISH_RATE);
+      return new ThrottledROS2Publisher(ros2Node.createPublisher(ControllerAPI.getLowFrequencyTopic(outputTopic, (Class) messageClass)),
+                                       LOW_FREQUENCY_PUBLISH_RATE);
    }
 
    @SuppressWarnings("unchecked")
-   private <T extends Settable<T>> void receivedMessage(Settable<?> message)
+   private <T extends ROS2Message<T>> void receivedMessage(ROS2Message<?> message)
    {
       if (DEBUG)
          LogTools.debug("Received message: {}, {}", message.getClass().getSimpleName(), message);
@@ -250,7 +242,7 @@ public class ControllerNetworkSubscriber
 
             if (!messageCollector.isCollecting())
             {
-               List<Settable<?>> collectedMessages = messageCollector.getCollectedMessages();
+               List<ROS2Message<?>> collectedMessages = messageCollector.getCollectedMessages();
                for (int i = 0; i < collectedMessages.size(); i++)
                {
                   receivedMessage(collectedMessages.get(i));
@@ -266,7 +258,7 @@ public class ControllerNetworkSubscriber
 
       if (errorMessage != null)
       {
-         reportInvalidMessage((Class<? extends Settable<?>>) message.getClass(), errorMessage);
+         reportInvalidMessage((Class<? extends ROS2Message<?>>) message.getClass(), errorMessage);
          return;
       }
 
@@ -274,12 +266,12 @@ public class ControllerNetworkSubscriber
          controllerCommandInputManager.submitMessage((T) message);
    }
 
-   private boolean testMessageWithMessageFilter(Settable<?> messageToTest)
+   private boolean testMessageWithMessageFilter(ROS2Message<?> messageToTest)
    {
       if (!messageFilter.get().isMessageValid(messageToTest))
       {
          if (DEBUG)
-            LogTools.error("Packet failed to validate filter! Filter class: {}, rejected message: {}",
+            LogTools.error("Message failed to validate filter! Filter class: {}, rejected message: {}",
                            messageFilter.get().getClass().getSimpleName(),
                            messageToTest.getClass().getSimpleName());
          return false;
@@ -290,7 +282,7 @@ public class ControllerNetworkSubscriber
    private void reportInvalidMessage(Class<?> messageClass, String errorMessage)
    {
       publishStatusMessage(MessageTools.createInvalidPacketNotificationPacket(messageClass, errorMessage));
-      LogTools.error("Packet failed to validate: {}", messageClass.getSimpleName());
+      LogTools.error("Message failed to validate: {}", messageClass.getSimpleName());
       LogTools.error(errorMessage);
    }
 
@@ -299,14 +291,14 @@ public class ControllerNetworkSubscriber
       controllerStatusOutputManager.attachGlobalStatusMessageListener(statusMessage -> publishStatusMessage(statusMessage));
    }
 
-   @SuppressWarnings("unchecked")
-   private <T> void publishStatusMessage(T message)
+   @SuppressWarnings({"unchecked", "rawtypes"})
+   private void publishStatusMessage(ROS2Message<?> message)
    {
-      ROS2Publisher<T> publisher = (ROS2Publisher<T>) statusMessagePublisherMap.get(message.getClass());
-      publisher.publish(message);
+      ROS2Publisher publisher = (ROS2Publisher) statusMessagePublisherMap.get(message.getClass());
+      publisher.publish((ROS2Message) message);
 
-      ThrottledROS2Publisher<T> throttledPublisher = (ThrottledROS2Publisher<T>) lowFrequencyStatusMessagePublisherMap.get(message.getClass());
-      throttledPublisher.publish(message);
+      ThrottledROS2Publisher throttledPublisher = lowFrequencyStatusMessagePublisherMap.get(message.getClass());
+      throttledPublisher.publish((ROS2Message<?>) message);
    }
 
    public static interface MessageFilter
@@ -319,21 +311,22 @@ public class ControllerNetworkSubscriber
       String validate(Object message);
    }
 
-   private static class ThrottledROS2Publisher<T>
+   private static class ThrottledROS2Publisher
    {
-      private final ROS2Publisher<T> publisher;
+      private final ROS2Publisher<?> publisher;
       private final Throttler throttler = new Throttler();
 
-      public ThrottledROS2Publisher(ROS2Publisher<T> publisher, double maxPublishFrequency)
+      public ThrottledROS2Publisher(ROS2Publisher<?> publisher, double maxPublishFrequency)
       {
          this.publisher = publisher;
          throttler.setFrequency(maxPublishFrequency);
       }
 
-      public void publish(T message)
+      @SuppressWarnings({"unchecked", "rawtypes"})
+      public void publish(ROS2Message<?> message)
       {
          if (throttler.run())
-            publisher.publish(message);
+            ((ROS2Publisher) publisher).publish(message);
       }
    }
 }

@@ -1,11 +1,11 @@
 package us.ihmc.avatar.ros2.networkTest.profiles;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.RobotConfigurationData;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestProfile;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2QoSProfile;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class RobotConfigurationData100HzNetworkTestProfile extends ROS2NetworkTestProfile
 {
-   public static final ROS2QosProfile QOS_PROFILE = ROS2QosProfile.RELIABLE();
+   public static final ROS2QoSProfile QOS_PROFILE = ROS2QoSProfile.RELIABLE;
 
    private static final ROS2Topic<RobotConfigurationData> TOPIC = ROS2Tools.IHMC_ROOT.withModule("rcd100Hz").withType(RobotConfigurationData.class);
 

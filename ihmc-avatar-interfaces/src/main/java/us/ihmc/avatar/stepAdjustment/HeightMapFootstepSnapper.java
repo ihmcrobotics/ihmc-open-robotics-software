@@ -1,6 +1,6 @@
 package us.ihmc.avatar.stepAdjustment;
 
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -81,8 +81,8 @@ public class HeightMapFootstepSnapper implements FootstepAdjustment
    @Override
    public boolean adjustFootstep(FramePose3DReadOnly stanceFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FootstepDataMessage adjustedPoseToPack)
    {
-      adjustedPoseToPack.getLocation().set(footstepPose.getPosition(), stanceFootPose.getZ());
-      adjustedPoseToPack.getOrientation().set(footstepPose.getOrientation());
+      adjustedPoseToPack.getLocation().getPoint().set(footstepPose.getPosition(), stanceFootPose.getZ());
+      adjustedPoseToPack.getOrientation().getQuaternion().set(footstepPose.getOrientation());
       hasHeightMap.set(heightMapCommand != null);
 
       if (!hasHeightMap.getValue() || !snapToHeightMap.getValue())
@@ -142,15 +142,15 @@ public class HeightMapFootstepSnapper implements FootstepAdjustment
 
       // Set position z of snapped foot
       double height = bestFitPlane.getZOnPlane(footstepPose.getX(), footstepPose.getY());
-      adjustedPoseToPack.getLocation().setZ(height);
+      adjustedPoseToPack.getLocation().getPoint().setZ(height);
       heightOfNewPose.set(height);
 
       // Set orientation of snapped foot
       if (includePitchAndRoll.getValue())
       {
          constructRotationToMatchSurfaceNormal(bestFitPlane.getNormal(), rotationMatrix);
-         adjustedPoseToPack.getOrientation().set(rotationMatrix);
-         adjustedPoseToPack.getOrientation().setToYawOrientation(footstepPose.getYaw());
+         adjustedPoseToPack.getOrientation().getQuaternion().set(rotationMatrix);
+         adjustedPoseToPack.getOrientation().getQuaternion().setToYawOrientation(footstepPose.getYaw());
       }
 
       return true;

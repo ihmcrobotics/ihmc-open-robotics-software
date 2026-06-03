@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.ArmActionStateMessage;
+import behavior_msgs.ArmActionStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.communication.crdt.*;
@@ -72,8 +72,8 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
       super.toMessage(message.getState());
 
       goalChestToWorldTransform.toMessage(message.getGoalChestTransformToWorld());
-      force.toMessage(message.getForce());
-      torque.toMessage(message.getTorque());
+      message.getForce().set(force.getValueReadOnly());
+      message.getTorque().set(torque.getValueReadOnly());
       for (int i = 0; i < MAX_NUMBER_OF_JOINTS; i++)
       {
          previewJointAngles.toMessage(message.getJointAngles());
@@ -87,8 +87,8 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
 
       super.fromMessage(message.getState());
 
-      force.fromMessage(message.getForce());
-      torque.fromMessage(message.getTorque());
+      force.fromMessage(message.getForce().getVector());
+      torque.fromMessage(message.getTorque().getVector());
       previewJointAngles.fromMessage(message.getJointAngles());
       solutionQuality.fromMessage(message.getSolutionQuality());
       goalChestToWorldTransform.fromMessage(message.getGoalChestTransformToWorld());

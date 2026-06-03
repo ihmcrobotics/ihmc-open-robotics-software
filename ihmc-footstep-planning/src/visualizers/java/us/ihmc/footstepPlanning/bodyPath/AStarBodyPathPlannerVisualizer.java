@@ -1,9 +1,6 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import perception_msgs.msg.dds.TerrainMapMessage;
-import perception_msgs.msg.dds.TerrainMapMessagePubSubType;
+import perception_msgs.TerrainMapMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -15,7 +12,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.pathPlanning.HeightMapDataSetIOTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
@@ -64,15 +61,10 @@ public class AStarBodyPathPlannerVisualizer
          return;
       }
 
-      ObjectMapper objectMapper = new ObjectMapper();
       TerrainMapMessage terrainMapMessage;
-      try
+      try (InputStream inputStream = new FileInputStream(file))
       {
-         JSONSerializer<TerrainMapMessage> serializer = new JSONSerializer<>(new TerrainMapMessagePubSubType());
-         InputStream inputStream = new FileInputStream(file);
-         JsonNode jsonNode = objectMapper.readTree(inputStream);
-         terrainMapMessage = serializer.deserialize(jsonNode.toString());
-         inputStream.close();
+         terrainMapMessage = HeightMapDataSetIOTools.loadTerrainMapMessage(inputStream);
       }
       catch (IOException e)
       {

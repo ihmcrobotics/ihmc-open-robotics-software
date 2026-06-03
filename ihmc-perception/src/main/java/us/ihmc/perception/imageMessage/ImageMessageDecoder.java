@@ -6,7 +6,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.ImageMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -47,7 +47,9 @@ public class ImageMessageDecoder
       intrinsics.setCy(messageToDecode.getPrincipalPointYPixels());
 
       CameraModel cameraModel = CameraModel.fromByte(messageToDecode.getCameraModel());
-      FramePose3D sensorPose = new FramePose3D(ReferenceFrame.getWorldFrame(), messageToDecode.getPosition(), messageToDecode.getOrientation());
+      FramePose3D sensorPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                               messageToDecode.getPosition().getPoint(),
+                                               messageToDecode.getOrientation().getQuaternion());
       Instant acquisitionTime = MessageTools.toInstant(messageToDecode.getAcquisitionTime());
       long sequenceNumber = messageToDecode.getSequenceNumber();
       float depthDiscretization = messageToDecode.getDepthDiscretization();

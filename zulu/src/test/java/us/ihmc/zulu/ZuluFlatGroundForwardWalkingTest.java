@@ -1,6 +1,6 @@
 package us.ihmc.zulu;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.FootstepDataListMessage;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.zulu.parameters.controller.ZuluICPControllerParameters;

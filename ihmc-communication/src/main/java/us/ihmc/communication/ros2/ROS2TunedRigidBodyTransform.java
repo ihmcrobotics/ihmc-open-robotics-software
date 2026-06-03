@@ -1,10 +1,10 @@
 package us.ihmc.communication.ros2;
 
-import controller_msgs.msg.dds.RigidBodyTransformMessage;
-import us.ihmc.ros2.ROS2Input;
+import controller_msgs.RigidBodyTransformMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.commons.thread.Throttler;
+import us.ihmc.commons.thread.TypedNotification;
 
 /**
  * This class is used to hava UI that tunes a transform running remotely on the robot.
@@ -17,7 +17,7 @@ public class ROS2TunedRigidBodyTransform
    private final ROS2Helper ros2;
    private final ROS2IOTopicPair<RigidBodyTransformMessage> topicPair;
    private final RigidBodyTransform rigidBodyTransformToSync;
-   private final ROS2Input<RigidBodyTransformMessage> frameUpdateSubscription;
+   private final TypedNotification<RigidBodyTransformMessage> frameUpdateSubscription;
    private final Throttler statusThrottler;
    private final RigidBodyTransformMessage statusMessage = new RigidBodyTransformMessage();
    private final boolean isRemoteTuner;
@@ -51,14 +51,14 @@ public class ROS2TunedRigidBodyTransform
       // The tuning part is higher frequency to see the updates smoother as you tune. (5 Hz)
       // The status is just and update of the current transform where an observer is not actively tuning. (2.5 Hz)
       statusThrottler = new Throttler().setFrequency(isRemoteTuner ? 5.0 : ROS2Heartbeat.STATUS_FREQUENCY);
-      frameUpdateSubscription = ros2.subscribe(isRemoteTuner ? topicPair.getStatusTopic() : topicPair.getCommandTopic());
+      frameUpdateSubscription = ros2.subscribeViaTypedNotification(isRemoteTuner ? topicPair.getStatusTopic() : topicPair.getCommandTopic());
    }
 
    public void update()
    {
-      if (acceptingUpdates && frameUpdateSubscription.getMessageNotification().poll())
+      if (acceptingUpdates && frameUpdateSubscription.poll())
       {
-         MessageTools.toEuclid(frameUpdateSubscription.getMessageNotification().read(), rigidBodyTransformToSync);
+         MessageTools.toEuclid(frameUpdateSubscription.read(), rigidBodyTransformToSync);
       }
 
       if (publishingStatus && statusThrottler.run())

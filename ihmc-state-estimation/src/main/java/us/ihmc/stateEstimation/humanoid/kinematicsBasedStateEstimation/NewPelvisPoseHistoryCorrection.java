@@ -1,7 +1,7 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import controller_msgs.msg.dds.PelvisPoseErrorPacket;
-import ihmc_common_msgs.msg.dds.StampedPosePacket;
+import controller_msgs.PelvisPoseErrorPacket;
+import ihmc_common_msgs.StampedPosePacket;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -257,7 +257,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       StampedPosePacket newPacket = pelvisPoseCorrectionCommunicator.getNewExternalPose();
       if (enableProcessNewPackets.getBooleanValue())
       {
-         timeStampedExternalPose.setTransform3D(newPacket.getPose());
+         timeStampedExternalPose.setTransform3D(newPacket.getPose().getPose());
          timeStampedExternalPose.setTimeStamp(newPacket.getTimestamp());
 
          if (outdatedPoseUpdater.stateEstimatorTimeStampedBufferIsInRange(timeStampedExternalPose.getTimeStamp()))

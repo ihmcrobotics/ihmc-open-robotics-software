@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 
-import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
+import controller_msgs.PelvisOrientationTrajectoryMessage;
 import org.junit.jupiter.api.*;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;

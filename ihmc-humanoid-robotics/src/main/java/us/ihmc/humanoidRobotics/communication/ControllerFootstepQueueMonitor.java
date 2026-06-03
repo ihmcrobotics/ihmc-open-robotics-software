@@ -1,19 +1,21 @@
 package us.ihmc.humanoidRobotics.communication;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepQueueStatusMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.PlanOffsetStatus;
-import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
-import ihmc_common_msgs.msg.dds.QueueableMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepQueueStatusMessage;
+import controller_msgs.FootstepStatusMessage;
+import controller_msgs.PlanOffsetStatus;
+import controller_msgs.QueuedFootstepStatusMessage;
+import controller_msgs.WalkingControllerFailureStatusMessage;
+import controller_msgs.WalkingStatusMessage;
+import ihmc_common_msgs.QueueableMessage;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.log.LogTools;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -25,7 +27,7 @@ import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 public class ControllerFootstepQueueMonitor
 {
    private int controllerQueueSize = 0;
-   private List<QueuedFootstepStatusMessage> controllerQueue;
+   private IDLObjectSequence<QueuedFootstepStatusMessage> controllerQueue;
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
    private final AtomicReference<PlanOffsetStatus> planOffsetMessage = new AtomicReference<>(new PlanOffsetStatus());
 
@@ -37,12 +39,12 @@ public class ControllerFootstepQueueMonitor
 
    public ControllerFootstepQueueMonitor(ROS2Node ros2Node, String simpleRobotName)
    {
-      ros2Node.createSubscription2(getLowFrequencyTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
-      ros2Node.createSubscription2(getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
-      ros2Node.createSubscription2(getLowFrequencyTopic(PlanOffsetStatus.class, simpleRobotName), this::acceptPlanOffsetStatus);
-      ros2Node.createSubscription2(getTopic(WalkingStatusMessage.class, simpleRobotName), this::acceptWalkingStatusMessage);
-      ros2Node.createSubscription2(getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), this::acceptWalkingControllerFailureStatusMessage);
-      ros2Node.createSubscription2(getTopic(FootstepDataListMessage.class, simpleRobotName), this::interceptFootstepDataListMessage);
+      ros2Node.createSubscription(getLowFrequencyTopic(FootstepQueueStatusMessage.class, simpleRobotName), reader -> ROS2Tools.readIfPresent(reader, this::footstepQueueStatusReceived));
+      ros2Node.createSubscription(getTopic(FootstepStatusMessage.class, simpleRobotName), reader -> ROS2Tools.readIfPresent(reader, this::footstepStatusReceived));
+      ros2Node.createSubscription(getLowFrequencyTopic(PlanOffsetStatus.class, simpleRobotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptPlanOffsetStatus));
+      ros2Node.createSubscription(getTopic(WalkingStatusMessage.class, simpleRobotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptWalkingStatusMessage));
+      ros2Node.createSubscription(getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptWalkingControllerFailureStatusMessage));
+      ros2Node.createSubscription(getTopic(FootstepDataListMessage.class, simpleRobotName), reader -> ROS2Tools.readIfPresent(reader, this::interceptFootstepDataListMessage));
    }
 
    private void interceptFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)
@@ -102,7 +104,7 @@ public class ControllerFootstepQueueMonitor
       this.planOffsetMessage.set(planOffsetMessage);
    }
 
-   public List<QueuedFootstepStatusMessage> getControllerFootstepQueue()
+   public IDLObjectSequence<QueuedFootstepStatusMessage> getControllerFootstepQueue()
    {
       return controllerQueue;
    }
@@ -124,8 +126,8 @@ public class ControllerFootstepQueueMonitor
    {
       FramePose3D previousFootstepPose = new FramePose3D();
 
-      previousFootstepPose.getPosition().set(controllerQueue.get(0).getLocation());
-      previousFootstepPose.getRotation().setToYawOrientation(controllerQueue.get(0).getOrientation().getYaw());
+      previousFootstepPose.getPosition().set(controllerQueue.get(0).getLocation().getPoint());
+      previousFootstepPose.getRotation().setToYawOrientation(controllerQueue.get(0).getOrientation().getQuaternion().getYaw());
 
       return previousFootstepPose;
    }
@@ -137,8 +139,8 @@ public class ControllerFootstepQueueMonitor
    {
       FramePose3D previousFootstepPose = new FramePose3D();
 
-      previousFootstepPose.getPosition().set(controllerQueue.get(controllerQueueSize - 1).getLocation());
-      previousFootstepPose.getRotation().setToYawOrientation(controllerQueue.get(controllerQueueSize - 1).getOrientation().getYaw());
+      previousFootstepPose.getPosition().set(controllerQueue.get(controllerQueueSize - 1).getLocation().getPoint());
+      previousFootstepPose.getRotation().setToYawOrientation(controllerQueue.get(controllerQueueSize - 1).getOrientation().getQuaternion().getYaw());
 
       return previousFootstepPose;
    }
@@ -155,8 +157,8 @@ public class ControllerFootstepQueueMonitor
       while (i >= 1 && controllerQueue.get(i).getRobotSide() == candidateFootstepSide.toByte())
          --i;
 
-      previousFootstepPose.getPosition().set(controllerQueue.get(i).getLocation());
-      previousFootstepPose.getRotation().setToYawOrientation(controllerQueue.get(i).getOrientation().getYaw());
+      previousFootstepPose.getPosition().set(controllerQueue.get(i).getLocation().getPoint());
+      previousFootstepPose.getRotation().setToYawOrientation(controllerQueue.get(i).getOrientation().getQuaternion().getYaw());
 
       return previousFootstepPose;
    }

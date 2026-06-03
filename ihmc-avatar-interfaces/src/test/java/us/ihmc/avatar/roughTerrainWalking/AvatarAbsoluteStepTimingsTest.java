@@ -9,8 +9,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -339,7 +339,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          footstepMessage.setRobotSide(side.toByte());
          footstepMessage.setTransferDuration(transferDuration);
          footstepMessage.setSwingDuration(swingDuration);
-         footstepMessage.getLocation().set(footstepPose.getPosition());
+         footstepMessage.getLocation().getPoint().set(footstepPose.getPosition());
          footstepMessage.getOrientation().set(footstepPose.getOrientation());
 
          expectPause.add(transferDuration > transferSwitchDuration);

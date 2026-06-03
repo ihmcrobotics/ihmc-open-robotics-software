@@ -7,7 +7,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL12;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.ImageMessage;
 
 import static org.bytedeco.ffmpeg.global.avutil.*;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;

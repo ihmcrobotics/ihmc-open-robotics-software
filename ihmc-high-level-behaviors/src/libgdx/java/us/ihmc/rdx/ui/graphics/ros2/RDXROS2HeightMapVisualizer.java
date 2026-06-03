@@ -10,9 +10,9 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
-import perception_msgs.msg.dds.ChunkMessage;
-import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.TerrainMapMessage;
+import perception_msgs.ChunkMessage;
+import perception_msgs.HeightMapMessage;
+import perception_msgs.TerrainMapMessage;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
@@ -28,8 +28,8 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXChunkedMapRenderer;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapRenderer;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -303,6 +303,15 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    @Override
    public void destroy()
    {
+      if (chunkMapRequestHeartbeat != null)
+         chunkMapRequestHeartbeat.destroy();
+      if (heightMapRequestHeartbeat != null)
+         heightMapRequestHeartbeat.destroy();
+      if (terrainMapRequestHeartbeat != null)
+         terrainMapRequestHeartbeat.destroy();
+      if (heightMapControllerRequestHeartbeat != null)
+         heightMapControllerRequestHeartbeat.destroy();
+
       super.destroy();
       executorService.destroy();
       chunkedMapRenderer.destroy();

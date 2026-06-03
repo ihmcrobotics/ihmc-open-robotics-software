@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.SpatialVectorMessage;
-import gnu.trove.list.array.TFloatArrayList;
-import us.ihmc.communication.net.PacketConsumer;
+import controller_msgs.RobotConfigurationData;
+import controller_msgs.SpatialVectorMessage;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
@@ -17,7 +16,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
-public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
+public class RobotDataReceiver
 {
 
    private final AtomicReference<RobotConfigurationData> packet = new AtomicReference<RobotConfigurationData>(null);
@@ -76,15 +75,15 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
             throw new RuntimeException("Joint names do not match for RobotConfigurationData");
          }
 
-         TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
+         IDLFloatSequence newJointAngles = robotConfigurationData.getJointAngles();
          for (int i = 0; i < newJointAngles.size(); i++)
          {
             allJoints[i].setQ(newJointAngles.get(i));
          }
 
-         Point3D translation = robotConfigurationData.getRootPosition();
+         Point3D translation = robotConfigurationData.getRootPosition().getPoint();
          rootJoint.getJointPose().getPosition().set(translation.getX(), translation.getY(), translation.getZ());
-         Quaternion orientation = robotConfigurationData.getRootOrientation();
+         Quaternion orientation = robotConfigurationData.getRootOrientation().getQuaternion();
          rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          rootJoint.getPredecessor().updateFramesRecursively();
 
@@ -96,7 +95,7 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
             {
                SpatialVectorMessage momentAndForceVectorForSensor = robotConfigurationData.getForceSensorData().get(i);
                forceSensorDataHolder.getData(forceSensorDataHolder.getForceSensorDefinitions().get(i))
-                                    .setWrench(momentAndForceVectorForSensor.getAngularPart(), momentAndForceVectorForSensor.getLinearPart());
+                                    .setWrench(momentAndForceVectorForSensor.getAngularPart().getVector(), momentAndForceVectorForSensor.getLinearPart().getVector());
             }
          }
          for (GraphicsUpdatable graphicsUpdatable : graphicsToUpdate)

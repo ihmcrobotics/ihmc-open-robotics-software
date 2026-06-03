@@ -1,9 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.Random;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -13,6 +11,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+
+import java.util.Random;
 
 public class FootstepDataListCorruptor
 {
@@ -42,10 +42,11 @@ public class FootstepDataListCorruptor
    
    public FootstepDataMessage corruptFootstepData(FootstepDataMessage footstepData)
    {
-      FootstepDataMessage ret = new FootstepDataMessage(footstepData);
+      FootstepDataMessage ret = new FootstepDataMessage();
+      ret.set(footstepData);
       
-      Point3D location = new Point3D(ret.getLocation());
-      Quaternion orientation = new Quaternion(ret.getOrientation());
+      Point3D location = new Point3D(ret.getLocation().getPoint());
+      Quaternion orientation = new Quaternion(ret.getOrientation().getQuaternion());
       
       corruptOrientation(orientation);
       ret.getOrientation().set(orientation);
@@ -74,5 +75,4 @@ public class FootstepDataListCorruptor
       Vector3DReadOnly randomVector = EuclidCoreRandomTools.nextVector3D(random, minLocationCorruption, maxLocationCorruption);
       location.add(randomVector);
    }
-   
 }

@@ -1,9 +1,10 @@
 package us.ihmc.behaviors.behaviorTree.log;
 
-import behavior_msgs.msg.dds.BehaviorTreeLogMessage;
+import behavior_msgs.BehaviorTreeLogMessage;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.message.ParameterizedMessage;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.communication.crdt.CRDTStatusField;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
@@ -37,13 +38,13 @@ public class BehaviorTreeNodeMessageLogger extends CRDTStatusField implements Lo
 
       BehaviorTreeLogMessage logMessage = new BehaviorTreeLogMessage();
       MessageTools.toMessage(now, logMessage.getInstant());
-      logMessage.setLogLevel(MessageTools.toMessage(level));
+      logMessage.setLogLevel((short) MessageTools.toMessage(level));
       MessageTools.packLongStringToByteSequence(message, logMessage.getLogMessage());
 
       recentMessages.add(new LogMessage(now, level, message));
    }
 
-   public void toMessage(us.ihmc.idl.IDLSequence.Object<BehaviorTreeLogMessage> recentLogMessages)
+   public void toMessage(IDLObjectSequence<BehaviorTreeLogMessage> recentLogMessages)
    {
       if (isRobotSide())
       {
@@ -60,13 +61,13 @@ public class BehaviorTreeNodeMessageLogger extends CRDTStatusField implements Lo
             LogMessage localMessage = recentMessages.get(i);
             BehaviorTreeLogMessage ddsMessage = recentLogMessages.add();
             MessageTools.toMessage(localMessage.instant(), ddsMessage.getInstant());
-            ddsMessage.setLogLevel(MessageTools.toMessage(localMessage.level()));
+            ddsMessage.setLogLevel((short) MessageTools.toMessage(localMessage.level()));
             MessageTools.packLongStringToByteSequence(localMessage.message(), ddsMessage.getLogMessage());
          }
       }
    }
 
-   public void fromMessage(us.ihmc.idl.IDLSequence.Object<BehaviorTreeLogMessage> recentLogMessages)
+   public void fromMessage(IDLObjectSequence<BehaviorTreeLogMessage> recentLogMessages)
    {
       if (!isRobotSide()) // Ignore on robot side
       {

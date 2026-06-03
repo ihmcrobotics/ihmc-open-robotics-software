@@ -1,14 +1,14 @@
 package us.ihmc.perception;
 
-import std_msgs.msg.dds.Empty;
+import std_msgs.Empty;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2DemandGraphTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.realsense.RealSenseImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
@@ -20,19 +20,19 @@ import java.util.Set;
 
 public class ROS2ImageSensors
 {
-   public static final Map<ROS2Topic<? extends Packet<?>>, Integer> STEPPING_REALSENSE_TOPIC_MAP = Map.of(PerceptionAPI.STEPPING_REALSENSE_COLOR,
+   public static final Map<ROS2Topic<? extends ROS2Message<?>>, Integer> STEPPING_REALSENSE_TOPIC_MAP = Map.of(PerceptionAPI.STEPPING_REALSENSE_COLOR,
                                                                                                           RealSenseImageSensor.COLOR_IMAGE_KEY,
                                                                                                           PerceptionAPI.STEPPING_REALSENSE_DEPTH,
                                                                                                           RealSenseImageSensor.DEPTH_IMAGE_KEY);
 
-   public static final Map<ROS2Topic<? extends Packet<?>>, Integer> EXPERIMENTAL_ZED_TOPIC_MAP = Map.of(PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT),
+   public static final Map<ROS2Topic<? extends ROS2Message<?>>, Integer> EXPERIMENTAL_ZED_TOPIC_MAP = Map.of(PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT),
                                                                                                         ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
                                                                                                         PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.RIGHT),
                                                                                                         ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY,
                                                                                                         PerceptionAPI.EXPERIMENTAL_ZED_DEPTH,
                                                                                                         ZEDImageSensor.DEPTH_IMAGE_KEY);
 
-   public static final Map<ROS2Topic<? extends Packet<?>>, Integer> STEPPING_ZED_TOPIC_MAP = Map.of(PerceptionAPI.STEPPING_ZED_COLOR.get(RobotSide.LEFT),
+   public static final Map<ROS2Topic<? extends ROS2Message<?>>, Integer> STEPPING_ZED_TOPIC_MAP = Map.of(PerceptionAPI.STEPPING_ZED_COLOR.get(RobotSide.LEFT),
                                                                                                         ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
                                                                                                         PerceptionAPI.STEPPING_ZED_COLOR.get(RobotSide.RIGHT),
                                                                                                         ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY,
@@ -68,17 +68,17 @@ public class ROS2ImageSensors
       }
    }
 
-   public void publishSensor(String sensorId, Map<ROS2Topic<? extends Packet<?>>, Integer> topicMap, ROS2Topic<Empty> demandTopic)
+   public void publishSensor(String sensorId, Map<ROS2Topic<? extends ROS2Message<?>>, Integer> topicMap, ROS2Topic<Empty> demandTopic)
    {
       publishSensor(sensorId, topicMap, demandTopic, ros2Node);
    }
 
-   public void publishSensor(String sensorId, Map<ROS2Topic<? extends Packet<?>>, Integer> topicMap, ROS2Topic<Empty> demandTopic, ROS2Node ros2Node)
+   public void publishSensor(String sensorId, Map<ROS2Topic<? extends ROS2Message<?>>, Integer> topicMap, ROS2Topic<Empty> demandTopic, ROS2Node ros2Node)
    {
       ImageSensor sensor = imageSensors.get(sensorId);
       ImageSensorPublishThread publishThread = new ImageSensorPublishThread(ros2Node, sensor);
 
-      for (Map.Entry<ROS2Topic<? extends Packet<?>>, Integer> entry : topicMap.entrySet())
+      for (Map.Entry<ROS2Topic<? extends ROS2Message<?>>, Integer> entry : topicMap.entrySet())
          publishThread.addTopic(entry.getKey(), entry.getValue());
 
       publishThreads.putIfAbsent(sensorId, new HashSet<>());

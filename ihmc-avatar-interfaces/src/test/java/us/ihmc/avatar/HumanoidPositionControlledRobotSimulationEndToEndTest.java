@@ -11,8 +11,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import controller_msgs.WholeBodyJointspaceTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
@@ -239,8 +239,8 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
       assertEquals(Arrays.hashCode(allJoints), ikSolution.getJointNameHash(), "Message incompatible with robot.");
 
       SixDoFJointBasics rootJoint = (SixDoFJointBasics) ghostRobot.getRootBody().getChildrenJoints().get(0);
-      rootJoint.setJointPosition(ikSolution.getDesiredRootPosition());
-      rootJoint.setJointOrientation(ikSolution.getDesiredRootOrientation());
+      rootJoint.setJointPosition(ikSolution.getDesiredRootPosition().getPoint());
+      rootJoint.setJointOrientation(ikSolution.getDesiredRootOrientation().getQuaternion());
 
       for (int i = 0; i < allJoints.length; i++)
       {

@@ -4,10 +4,10 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import perception_msgs.msg.dds.ImageMessage;
-import sensor_msgs.msg.dds.CameraInfo;
-import sensor_msgs.msg.dds.Image;
-import us.ihmc.communication.packets.Packet;
+import perception_msgs.ImageMessage;
+import sensor_msgs.CameraInfo;
+import sensor_msgs.Image;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -19,8 +19,8 @@ import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.perception.tools.RawImageTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import static us.ihmc.perception.imageMessage.CompressionType.*;
 
@@ -59,13 +59,13 @@ public class RawImagePublisher implements AutoCloseable
       this.publishScale = publishScale;
    }
 
-   public void publishImage(ROS2Topic<? extends Packet<?>> imageTopic, RawImage imageToPublish)
+   public void publishImage(ROS2Topic<? extends ROS2Message<?>> imageTopic, RawImage imageToPublish)
    {
       publishImage(imageTopic, imageToPublish, null);
    }
 
    @SuppressWarnings("unchecked") // Trust me bro, I know what I'm doing
-   public synchronized void publishImage(ROS2Topic<? extends Packet<?>> imageTopic, RawImage imageToPublish, ReferenceFrame sensorFrame)
+   public synchronized void publishImage(ROS2Topic<? extends ROS2Message<?>> imageTopic, RawImage imageToPublish, ReferenceFrame sensorFrame)
    {
       if (destroyed)
          return;

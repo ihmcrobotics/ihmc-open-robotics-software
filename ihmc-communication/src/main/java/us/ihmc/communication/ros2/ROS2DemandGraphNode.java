@@ -1,7 +1,7 @@
 package us.ihmc.communication.ros2;
-import std_msgs.msg.dds.Empty;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import std_msgs.Empty;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.Arrays;

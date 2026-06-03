@@ -43,7 +43,7 @@ public class TerrainMapExtractor
 
    /**
     * The types of these mats depend on the data we are trying to store.
-    * Check the {@link perception_msgs.msg.dds.TerrainMapMessage} to ensure these are the same
+    * Check the {@link perception_msgs.TerrainMapMessage} to ensure these are the same
     */
    private final GpuMat normalXMat;
    private final GpuMat normalYMat;

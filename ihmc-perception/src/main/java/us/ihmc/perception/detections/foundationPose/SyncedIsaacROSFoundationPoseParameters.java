@@ -1,18 +1,19 @@
 package us.ihmc.perception.detections.foundationPose;
 
-import perception_msgs.msg.dds.FoundationPoseParameters;
+import perception_msgs.FoundationPoseParameters;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Subscription;
 
 public class SyncedIsaacROSFoundationPoseParameters extends LatestTimestampModifiable
 {
    private final FoundationPoseParameters message;
 
+   private final ROS2Node ros2Node;
    private final ROS2Subscription<FoundationPoseParameters> subscription;
    private final ROS2Publisher<FoundationPoseParameters> publisher;
 
@@ -25,9 +26,15 @@ public class SyncedIsaacROSFoundationPoseParameters extends LatestTimestampModif
       super(crdtInfo);
       setModifierName("FoundationPose " + object.name() + " Parameters");
 
+      this.ros2Node = ros2Node;
       message = new FoundationPoseParameters();
 
-      subscription = ros2Node.createSubscription2(object.topics.ihmcParameters(), this::fromMessage);
+      subscription = ros2Node.createSubscription(object.topics.ihmcParameters(), reader ->
+      {
+         FoundationPoseParameters message = reader.read();
+         if (message != null)
+            this.fromMessage(message);
+      });
       publisher = ros2Node.createPublisher(object.topics.ihmcParameters());
 
       enabled = new CRDTBidirectionalBoolean(this, true);
@@ -66,8 +73,8 @@ public class SyncedIsaacROSFoundationPoseParameters extends LatestTimestampModif
 
    public void close()
    {
-      publisher.remove();
-      subscription.remove();
+      ros2Node.destroyPublisher(publisher);
+      ros2Node.destroySubscription(subscription);
    }
 
    private void toMessage(FoundationPoseParameters messageToPack)

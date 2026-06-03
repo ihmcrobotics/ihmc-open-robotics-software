@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.graphics.ros2.pointCloud;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.ImageMessage;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -11,9 +11,9 @@ import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2MultiTopicVisualizer;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Subscription;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.List;
 import java.util.Set;
@@ -112,8 +112,8 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
 
    private void subscribe()
    {
-      depthSubscription = ros2Node.createSubscription2(depthTopic, this::onDepthMessageReceived);
-      colorSubscription = ros2Node.createSubscription2(colorTopic, this::onColorMessageReceived);
+      depthSubscription = ros2Node.createSubscriptionSampler(depthTopic, this::onDepthMessageReceived);
+      colorSubscription = ros2Node.createSubscriptionSampler(colorTopic, this::onColorMessageReceived);
    }
 
    private void onDepthMessageReceived(ImageMessage message)
@@ -150,12 +150,12 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
    {
       if (depthSubscription != null)
       {
-         depthSubscription.remove();
+         ros2Node.destroySubscription(depthSubscription);
          depthSubscription = null;
       }
       if (colorSubscription != null)
       {
-         colorSubscription.remove();
+         ros2Node.destroySubscription(colorSubscription);
          colorSubscription = null;
       }
    }

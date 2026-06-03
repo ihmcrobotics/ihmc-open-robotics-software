@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-import controller_msgs.msg.dds.*;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import ihmc_common_msgs.msg.dds.*;
-import perception_msgs.msg.dds.*;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.*;
+import controller_msgs.RobotConfigurationData;
+import ihmc_common_msgs.*;
+import perception_msgs.*;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
@@ -314,7 +314,7 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static HandLoadBearingMessage nextLoadBearingMessage(Random random)
+   public static HandLoadBearingMessage nextHandLoadBearingMessage(Random random)
    {
       HandLoadBearingMessage next = new HandLoadBearingMessage();
       next.setLoad(random.nextBoolean());
@@ -419,9 +419,12 @@ public final class RandomHumanoidMessages
       next.setMonotonicTime(random.nextLong());
       next.setSyncTimestamp(random.nextLong());
       next.setJointNameHash(random.nextInt(10000));
-      next.getJointAngles().add(RandomNumbers.nextFloatArray(random, size, 1.0f));
-      next.getJointVelocities().add(RandomNumbers.nextFloatArray(random, size, 1.0f));
-      next.getJointTorques().add(RandomNumbers.nextFloatArray(random, size, 1.0f));
+      for (float v : RandomNumbers.nextFloatArray(random, size, 1.0f))
+         next.getJointAngles().add(v);
+      for (float v : RandomNumbers.nextFloatArray(random, size, 1.0f))
+         next.getJointVelocities().add(v);
+      for (float v : RandomNumbers.nextFloatArray(random, size, 1.0f))
+         next.getJointTorques().add(v);
       next.getRootPosition().set(EuclidCoreRandomTools.nextVector3D32(random));
       next.getPelvisLinearVelocity().set(EuclidCoreRandomTools.nextVector3D32(random));
       next.getPelvisAngularVelocity().set(EuclidCoreRandomTools.nextVector3D32(random));
@@ -569,7 +572,8 @@ public final class RandomHumanoidMessages
    public static DesiredAccelerationsMessage nextDesiredAccelerationsMessage(Random random)
    {
       DesiredAccelerationsMessage next = new DesiredAccelerationsMessage();
-      next.getDesiredJointAccelerations().add(RandomNumbers.nextDoubleArray(random, random.nextInt(16) + 1, 1.0));
+      for (double v : RandomNumbers.nextDoubleArray(random, random.nextInt(16) + 1, 1.0))
+         next.getDesiredJointAccelerations().add(v);
       next.getQueueingProperties().set(nextQueueableMessage(random));
       return next;
    }
@@ -608,7 +612,8 @@ public final class RandomHumanoidMessages
    {
       KinematicsToolboxOutputStatus next = new KinematicsToolboxOutputStatus();
       next.setJointNameHash(random.nextInt());
-      next.getDesiredJointAngles().add(RandomNumbers.nextFloatArray(random, random.nextInt(100), 1.0f));
+      for (float v : RandomNumbers.nextFloatArray(random, random.nextInt(100), 1.0f))
+         next.getDesiredJointAngles().add(v);
       next.getDesiredRootPosition().set(EuclidCoreRandomTools.nextVector3D32(random));
       next.getDesiredRootOrientation().set(EuclidCoreRandomTools.nextQuaternion32(random));
       next.setSolutionQuality(random.nextDouble());
@@ -625,7 +630,8 @@ public final class RandomHumanoidMessages
       next.setSkew(random.nextDouble());
       next.setCx(random.nextDouble());
       next.setCy(random.nextDouble());
-      next.getRadial().add(RandomNumbers.nextDoubleArray(random, random.nextInt(1000), 1.0));
+      for (double v : RandomNumbers.nextDoubleArray(random, random.nextInt(1000), 1.0))
+         next.getRadial().add(v);
       next.setT1(random.nextDouble());
       next.setT2(random.nextDouble());
       return next;
@@ -681,7 +687,8 @@ public final class RandomHumanoidMessages
    {
       HandJointAnglePacket next = new HandJointAnglePacket();
       next.setRobotSide(RandomNumbers.nextEnum(random, RobotSide.class).toByte());
-      next.getJointAngles().add(RandomNumbers.nextDoubleArray(random, random.nextInt(1000), 1.0));
+      for (double v : RandomNumbers.nextDoubleArray(random, random.nextInt(1000), 1.0))
+         next.getJointAngles().add(v);
       next.setConnected(random.nextBoolean());
       next.setCalibrated(random.nextBoolean());
       return next;

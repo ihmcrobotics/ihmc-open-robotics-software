@@ -3,15 +3,14 @@ package us.ihmc.perception.streaming;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.SRTStreamStatus;
+import perception_msgs.SRTStreamStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.net.InetSocketAddress;
 
@@ -20,14 +19,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ROS2StreamStatusMonitorTest
 {
-   private static final ROS2Node ROS2_NODE = new ROS2NodeBuilder().build("stream_status_monitor_test_node");
+   private static final ROS2Node ROS2_NODE = new ROS2Node("stream_status_monitor_test_node");
    private static final ROS2Helper ROS2_HELPER = new ROS2Helper(ROS2_NODE);
-   private static final ROS2Topic<SRTStreamStatus> TEST_TOPIC = new ROS2Topic<SRTStreamStatus>().withSuffix("srt_status_test").withType(SRTStreamStatus.class);
+   private static final ROS2Topic<SRTStreamStatus> TEST_TOPIC = new ROS2Topic<SRTStreamStatus>().appendedWith("srt_status_test").withType(SRTStreamStatus.class);
 
    @AfterAll
    public static void destroyNode()
    {
-      ROS2_NODE.destroy();
+      ROS2_NODE.close();
    }
 
    @AfterEach
@@ -51,8 +50,8 @@ public class ROS2StreamStatusMonitorTest
       SRTStreamStatus streamStatusMessage = new SRTStreamStatus();
       streamStatusMessage.setStreamerAddress(streamerAddress.getHostString());
       streamStatusMessage.setStreamerPort(streamerAddress.getPort());
-      streamStatusMessage.setImageWidth(imageWidth);
-      streamStatusMessage.setImageHeight(imageHeight);
+      streamStatusMessage.setImageWidth((short) imageWidth);
+      streamStatusMessage.setImageHeight((short) imageHeight);
       streamStatusMessage.setIsStreaming(true);
       streamStatusMessage.setExpectedPublishFrequency(messagePublishFrequency);
 

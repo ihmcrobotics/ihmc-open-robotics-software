@@ -6,9 +6,9 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import controller_msgs.RobotConfigurationData;
+import toolbox_msgs.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsSolver;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -17,7 +17,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -191,7 +190,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController impl
       humanoidKinematicsSolver = new HumanoidKinematicsSolver(drcRobotModel, registry);
 
       toolboxSolution = new WholeBodyTrajectoryToolboxOutputStatus();
-      toolboxSolution.setDestination(-1);
 
       configurationConverter = new KinematicsToolboxOutputConverter(drcRobotModel);
 
@@ -254,9 +252,10 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController impl
    {
       if (outputStatusToPack.getPlanningResult() == 4)
       {
-         MessageTools.copyData(path.stream().map(SpatialNode::getConfiguration).toArray(size -> new KinematicsToolboxOutputStatus[size]), outputStatusToPack.getRobotConfigurations());
-         outputStatusToPack.getTrajectoryTimes().reset();
-         outputStatusToPack.getTrajectoryTimes().add(path.stream().mapToDouble(SpatialNode::getTime).toArray());
+         KinematicsToolboxOutputStatus[] configurations = path.stream().map(SpatialNode::getConfiguration).toArray(KinematicsToolboxOutputStatus[]::new);
+         MessageTools.copyData(configurations, outputStatusToPack.getRobotConfigurations());
+         outputStatusToPack.getTrajectoryTimes().clear();
+         path.forEach(node -> outputStatusToPack.getTrajectoryTimes().add((float) node.getTime()));
 
          //if (VERBOSE)
          //   for (int i = 0; i < path.size(); i++)
@@ -751,8 +750,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController impl
          return false;
       }
 
-      initialConfiguration.getDesiredRootOrientation().set(currentRobotConfiguration.getRootOrientation());
-      initialConfiguration.getDesiredRootPosition().set(currentRobotConfiguration.getRootPosition());
+      initialConfiguration.getDesiredRootOrientation().getQuaternion().set(currentRobotConfiguration.getRootOrientation().getQuaternion());
+      initialConfiguration.getDesiredRootPosition().getPoint().set(currentRobotConfiguration.getRootPosition().getPoint());
 
       initialConfiguration.setJointNameHash(currentRobotConfiguration.getJointNameHash());
       int length = currentRobotConfiguration.getJointAngles().size();
@@ -764,8 +763,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController impl
 
    private void terminateToolboxController()
    {
-      toolboxSolution.setDestination(PacketDestination.BEHAVIOR_MODULE.ordinal());
-
       reportMessage(toolboxSolution);
 
       //nodePlotter.closeAll();

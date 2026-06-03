@@ -2,11 +2,11 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.List;
 
-import controller_msgs.msg.dds.StepConstraintsListMessage;
+import controller_msgs.StepConstraintsListMessage;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
-import controller_msgs.msg.dds.FootstepDataMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import controller_msgs.FootstepDataMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -103,10 +103,10 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       updateFootstepReferenceContinuously = message.getUpdateFootstepReferenceContinuously();
       disableCoPFeedbackControl = message.getDisableCopFeedbackControl();
       swingTrajectoryBlendDuration = message.getSwingTrajectoryBlendDuration();
-      position.setIncludingFrame(worldFrame, message.getLocation());
-      orientation.setIncludingFrame(worldFrame, message.getOrientation());
+      position.setIncludingFrame(worldFrame, message.getLocation().getPoint());
+      orientation.setIncludingFrame(worldFrame, message.getOrientation().getQuaternion());
 
-      us.ihmc.idl.IDLSequence.Double messageWaypointProportions = message.getCustomWaypointProportions();
+      var messageWaypointProportions = message.getCustomWaypointProportions();
       customWaypointProportions.clear();
       if (messageWaypointProportions != null && messageWaypointProportions.size() == 2)
       {
@@ -116,15 +116,15 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
          }
       }
 
-      List<Point3D> originalPositionWaypointList = message.getCustomPositionWaypoints();
+      var originalPositionWaypointList = message.getCustomPositionWaypoints();
       customPositionWaypoints.clear();
       if (originalPositionWaypointList != null)
       {
          for (int i = 0; i < originalPositionWaypointList.size(); i++)
-            customPositionWaypoints.add().setIncludingFrame(trajectoryFrame, originalPositionWaypointList.get(i));
+            customPositionWaypoints.add().setIncludingFrame(trajectoryFrame, originalPositionWaypointList.get(i).getPoint());
       }
 
-      List<SE3TrajectoryPointMessage> messageSwingTrajectory = message.getSwingTrajectory();
+      var messageSwingTrajectory = message.getSwingTrajectory();
       swingTrajectory.clear();
       if (messageSwingTrajectory != null)
       {
@@ -133,17 +133,17 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
             FrameSE3TrajectoryPoint point = swingTrajectory.add();
             point.setToZero(trajectoryFrame);
             SE3TrajectoryPointMessage trajectoryPoint = messageSwingTrajectory.get(i);
-            point.set(trajectoryPoint.getTime(), trajectoryPoint.getPosition(), trajectoryPoint.getOrientation(), trajectoryPoint.getLinearVelocity(),
-                      trajectoryPoint.getAngularVelocity());
+            point.set(trajectoryPoint.getTime(), trajectoryPoint.getPosition().getPoint(), trajectoryPoint.getOrientation().getQuaternion(), trajectoryPoint.getLinearVelocity().getVector(),
+                      trajectoryPoint.getAngularVelocity().getVector());
          }
       }
 
-      List<Point3D> originalPredictedContactPoints = message.getPredictedContactPoints2d();
+      var originalPredictedContactPoints = message.getPredictedContactPoints2d();
       predictedContactPoints.clear();
       if (originalPredictedContactPoints != null)
       {
          for (int i = 0; i < originalPredictedContactPoints.size(); i++)
-            predictedContactPoints.add().set(originalPredictedContactPoints.get(i));
+            predictedContactPoints.add().set(originalPredictedContactPoints.get(i).getPoint());
       }
 
       swingDuration = message.getSwingDuration();

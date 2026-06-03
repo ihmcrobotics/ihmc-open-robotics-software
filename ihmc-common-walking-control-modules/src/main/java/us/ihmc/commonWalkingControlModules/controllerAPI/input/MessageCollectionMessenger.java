@@ -7,10 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ihmc_common_msgs.msg.dds.MessageCollection;
-import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
+import ihmc_common_msgs.MessageCollection;
+import ihmc_common_msgs.MessageCollectionNotification;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.Packet;
 
 /**
  * Tool for setting up and sending collections of messages that are to be processed by the
@@ -30,7 +30,7 @@ public class MessageCollectionMessenger
    private PublishingTask publishingTask = null;
 
    private MessageCollection collection = new MessageCollection();
-   private List<Packet<?>> packets = new ArrayList<>();
+   private List<ROS2Message<?>> packets = new ArrayList<>();
    private final Map<Class, Method> sequenceIDSetterMap = new HashMap<>();
 
    /**
@@ -62,7 +62,7 @@ public class MessageCollectionMessenger
     * @param messages the messages to add.
     * @see #addMessage(Packet)
     */
-   public void addMessages(Iterable<Packet<?>> messages)
+   public void addMessages(Iterable<ROS2Message<?>> messages)
    {
       messages.forEach(this::addMessage);
    }
@@ -73,9 +73,9 @@ public class MessageCollectionMessenger
     * @param messages the messages to add.
     * @see #addMessage(Packet)
     */
-   public void addMessages(Packet<?>... messages)
+   public void addMessages(ROS2Message<?>... messages)
    {
-      for (Packet<?> message : messages)
+      for (ROS2Message<?> message : messages)
       {
          addMessage(message);
       }
@@ -92,9 +92,10 @@ public class MessageCollectionMessenger
     * @return {@code true} if the message was properly added to the collection, {@code false}
     *         otherwise.
     */
-   public boolean addMessage(Packet<?> message)
+   public boolean addMessage(ROS2Message<?> message)
    {
-      Class<? extends Packet> messageType = message.getClass();
+      @SuppressWarnings("unchecked")
+      Class<? extends ROS2Message<?>> messageType = (Class<? extends ROS2Message<?>>) message.getClass();
 
       Method sequenceIDSetter = sequenceIDSetterMap.get(messageType);
 
@@ -123,7 +124,7 @@ public class MessageCollectionMessenger
       }
 
       packets.add(message);
-      collection.getSequences().add(sequenceID);
+      collection.getSequences().add((int) sequenceID);
 
       incrementSequenceID();
 
@@ -237,7 +238,7 @@ public class MessageCollectionMessenger
 
    private void reset()
    {
-      collection.getSequences().reset();
+      collection.getSequences().clear();
       incrementSequenceID();
       collection.setSequenceId(sequenceID);
       incrementSequenceID();
@@ -256,7 +257,7 @@ public class MessageCollectionMessenger
        * 
        * @param message the message to be sent.
        */
-      void sendMessage(Packet<?> message);
+      void sendMessage(ROS2Message<?> message);
    }
 
    private class PublishingTask implements Runnable
@@ -265,10 +266,10 @@ public class MessageCollectionMessenger
       private final Object notificationSync = new Object();
       private final Messenger messenger;
       private final MessageCollection collection;
-      private final List<Packet<?>> packets;
+      private final List<ROS2Message<?>> packets;
       private final Runnable postProcess;
 
-      public PublishingTask(Messenger messenger, MessageCollection collection, List<Packet<?>> packets, Runnable postProcess)
+      public PublishingTask(Messenger messenger, MessageCollection collection, List<ROS2Message<?>> packets, Runnable postProcess)
       {
          this.messenger = messenger;
          this.collection = collection;
@@ -290,7 +291,7 @@ public class MessageCollectionMessenger
             catch (InterruptedException e)
             {
                e.printStackTrace();
-               collection.getSequences().reset();
+               collection.getSequences().clear();
                packets.clear();
                return;
             }

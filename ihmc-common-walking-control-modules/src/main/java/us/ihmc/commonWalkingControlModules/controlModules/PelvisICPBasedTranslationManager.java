@@ -1,13 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import controller_msgs.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -34,7 +33,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
-import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
+import static us.ihmc.communication.controllerAPI.ControllerMessageConstants.INVALID_MESSAGE_ID;
 
 public class PelvisICPBasedTranslationManager
 {
@@ -144,7 +143,7 @@ public class PelvisICPBasedTranslationManager
 
       String namePrefix = "PelvisXYTranslation";
       lastCommandId = new YoLong(namePrefix + "LastCommandId", registry);
-      lastCommandId.set(Packet.INVALID_MESSAGE_ID);
+      lastCommandId.set(INVALID_MESSAGE_ID);
 
       isReadyToHandleQueuedCommands = new YoBoolean(namePrefix + "IsReadyToHandleQueuedPelvisTrajectoryCommands", registry);
       numberOfQueuedCommands = new YoLong(namePrefix + "NumberOfQueuedCommands", registry);

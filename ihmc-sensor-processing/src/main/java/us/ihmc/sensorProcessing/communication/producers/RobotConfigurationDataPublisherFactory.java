@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.RobotConfigurationData;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -19,8 +19,8 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.sensorProcessing.imu.IMUSensor;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -48,7 +48,7 @@ public class RobotConfigurationDataPublisherFactory
 
    private final OptionalFactoryField<RobotMotionStatusHolder> robotMotionStatusHolderField = new OptionalFactoryField<>("robotMotionStatusHolder");
 
-   private final RequiredFactoryField<RealtimeROS2Node> realtimeROS2NodeField = new RequiredFactoryField<>("realtimeROS2Node");
+   private final RequiredFactoryField<ROS2Node> ros2NodeField = new RequiredFactoryField<>("ros2Node");
    private final RequiredFactoryField<ROS2Topic<?>> outputTopicField = new RequiredFactoryField<>("outputTopic");
 
    private final List<ReferenceFrame> frameDataToPublish = new ArrayList<>();
@@ -181,13 +181,13 @@ public class RobotConfigurationDataPublisherFactory
 
    /**
     * ROS 2 necessary information to create the real-time publisher.
-    * 
-    * @param ros2Node    the real-time node to create the publisher with.
+    *
+    * @param ros2Node    the ROS 2 node to create the publisher with.
     * @param outputTopic the generator to use for creating the topic name.
     */
-   public void setROS2Info(RealtimeROS2Node ros2Node, ROS2Topic<?> outputTopic)
+   public void setROS2Info(ROS2Node ros2Node, ROS2Topic<?> outputTopic)
    {
-      realtimeROS2NodeField.set(ros2Node);
+      ros2NodeField.set(ros2Node);
       outputTopicField.set(outputTopic);
    }
 
@@ -213,9 +213,9 @@ public class RobotConfigurationDataPublisherFactory
       List<OneDoFJointStateReadOnly> jointSensorDataToPublish = filterJointSensorDataToPublish();
       List<IMUSensorReadOnly> imuSensorDataToPublish = filterIMUSensorDataToPublish();
       List<ForceSensorDataReadOnly> forceSensorDataToPublish = filterForceSensorDataToPublish();
-      
 
-      RobotConfigurationDataPublisher publisher = new RobotConfigurationDataPublisher(realtimeROS2NodeField.get(),
+
+      RobotConfigurationDataPublisher publisher = new RobotConfigurationDataPublisher(ros2NodeField.get(),
                                                                                       outputTopicField.get(),
                                                                                       rootJointSensorData.get(),
                                                                                       jointSensorDataToPublish,

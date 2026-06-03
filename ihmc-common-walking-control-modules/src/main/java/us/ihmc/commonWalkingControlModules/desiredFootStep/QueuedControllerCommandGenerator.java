@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.FootstepStatusMessage;
+import controller_msgs.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -17,6 +17,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
@@ -119,6 +120,12 @@ public class QueuedControllerCommandGenerator implements Updatable, RobotMotionS
       {
          PelvisTrajectoryCommand pelvisTrajectoryControllerCommand = (PelvisTrajectoryCommand) controllerCommand;
          commandInputManager.submitCommand(pelvisTrajectoryControllerCommand);
+      }
+
+      else if (controllerCommand instanceof PauseWalkingCommand)
+      {
+         PauseWalkingCommand pauseWalkingCommand = (PauseWalkingCommand) controllerCommand;
+         commandInputManager.submitCommand(pauseWalkingCommand);
       }
 
       else

@@ -11,8 +11,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.sensors.ImageSensor;
 
 public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
@@ -24,7 +23,7 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
          ROS2Node ros2Node,
          ROS2PeerClockOffsetEstimator peerClockOffsetEstimator,
          DRCRobotModel robotModel,
-         TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
+         TriFunction<DRCRobotModel, ROS2Node, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
          ImageSensor imageSensor,
          YOLOv8DetectionExecutor yolo,
          IsaacROSFoundationPoseCommunicatorMap foundationPose,

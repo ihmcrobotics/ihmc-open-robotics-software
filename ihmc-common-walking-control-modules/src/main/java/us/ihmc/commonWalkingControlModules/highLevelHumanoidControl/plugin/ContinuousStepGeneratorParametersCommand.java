@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
-import controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage;
+import controller_msgs.ContinuousStepGeneratorParametersMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParameters;
 import us.ihmc.communication.controllerAPI.command.Command;
 

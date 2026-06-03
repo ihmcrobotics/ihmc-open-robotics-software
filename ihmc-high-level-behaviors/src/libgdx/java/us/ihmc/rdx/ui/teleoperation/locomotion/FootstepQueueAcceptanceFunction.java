@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.teleoperation.locomotion;
 
-import controller_msgs.msg.dds.FootstepQueueStatusMessage;
+import controller_msgs.FootstepQueueStatusMessage;
+import controller_msgs.QueuedFootstepStatusMessage;
 
 import java.util.function.BiFunction;
 
@@ -20,24 +21,31 @@ public class FootstepQueueAcceptanceFunction implements BiFunction<FootstepQueue
       if (previousMessage == newMessage)
          return false;
 
-      // Copying from FootstepQueueStatusMessage#epsilonEquals
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(previousMessage.is_first_step_in_swing_, newMessage.is_first_step_in_swing_, 1e-3))
+      if (previousMessage.getIsFirstStepInSwing() != newMessage.getIsFirstStepInSwing())
          return true;
 
-      if (previousMessage.queued_footstep_list_.size() != newMessage.queued_footstep_list_.size())
+      if (previousMessage.getQueuedFootstepList().size() != newMessage.getQueuedFootstepList().size())
       {
          return true;
       }
       else
       {
-         for (int i = 0; i < previousMessage.queued_footstep_list_.size(); i++)
+         for (int i = 0; i < previousMessage.getQueuedFootstepList().size(); i++)
          {
-            if (!previousMessage.queued_footstep_list_.get(i).epsilonEquals(newMessage.queued_footstep_list_.get(i), 1e-3))
+            if (!queuedFootstepsEqual(previousMessage.getQueuedFootstepList().get(i), newMessage.getQueuedFootstepList().get(i)))
                return true;
          }
       }
 
       return false;
+   }
+
+   private static boolean queuedFootstepsEqual(QueuedFootstepStatusMessage previous, QueuedFootstepStatusMessage current)
+   {
+      QueuedFootstepStatusMessage temp = new QueuedFootstepStatusMessage();
+      temp.set(previous);
+      return temp.getRobotSide() == current.getRobotSide()
+          && Math.abs(temp.getSwingDuration() - current.getSwingDuration()) < 1e-3
+          && Math.abs(temp.getTransferDuration() - current.getTransferDuration()) < 1e-3;
    }
 }

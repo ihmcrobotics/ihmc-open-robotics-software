@@ -1,15 +1,15 @@
 package us.ihmc.rdx.ui.affordances;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.QueueableMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.ArmTrajectoryMessage;
+import controller_msgs.GoHomeMessage;
+import controller_msgs.HandHybridJointspaceTaskspaceTrajectoryMessage;
+import controller_msgs.HandTrajectoryMessage;
+import controller_msgs.JointspaceTrajectoryMessage;
+import controller_msgs.OneDoFJointTrajectoryMessage;
+import ihmc_common_msgs.QueueableMessage;
+import ihmc_common_msgs.SE3TrajectoryMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.TrajectoryPoint1DMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImBoolean;
@@ -344,8 +344,8 @@ public class RDXArmManager
       se3TrajectoryPointMessage.setTime(teleoperationParameters.getTrajectoryTime());
       se3TrajectoryPointMessage.getPosition().set(desiredControlFramePose.getPosition());
       se3TrajectoryPointMessage.getOrientation().set(desiredControlFramePose.getOrientation());
-      se3TrajectoryPointMessage.getLinearVelocity().setToZero();
-      se3TrajectoryPointMessage.getAngularVelocity().setToZero();
+      se3TrajectoryPointMessage.getLinearVelocity().getVector().setToZero();
+      se3TrajectoryPointMessage.getAngularVelocity().getVector().setToZero();
       se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameID);
 
       switch (armControlMode)

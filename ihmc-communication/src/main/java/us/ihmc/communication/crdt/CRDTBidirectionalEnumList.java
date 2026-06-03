@@ -1,6 +1,6 @@
 package us.ihmc.communication.crdt;
 
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,10 +51,10 @@ public class CRDTBidirectionalEnumList<T extends Enum<T>> extends CRDTBidirectio
       return getValueInternal().size();
    }
 
-   public void toMessage(IDLSequence.Byte messageArray)
+   public void toMessage(IDLByteSequence messageArray)
    {
       List<T> values = getValueInternal();
-      messageArray.resetQuick();
+      messageArray.getBuffer().reset();
       for (int i = 0; i < getSize(); i++)
       {
          messageArray.add(values.get(i) == null ? -1 : (byte) values.get(i).ordinal());
@@ -70,7 +70,7 @@ public class CRDTBidirectionalEnumList<T extends Enum<T>> extends CRDTBidirectio
       }
    }
 
-   public void fromMessage(IDLSequence.Byte messageArray, T[] enumValues)
+   public void fromMessage(IDLByteSequence messageArray, T[] enumValues)
    {
       if (isModificationIncoming())
       {

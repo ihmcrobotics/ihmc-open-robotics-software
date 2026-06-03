@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCond;
 import imgui.type.ImBoolean;
-import std_msgs.msg.dds.Empty;
+import std_msgs.Empty;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -17,8 +17,8 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2MultiTopicVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2SingleTopicVisualizer;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -77,20 +77,14 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       if (this instanceof RDXROS2SingleTopicVisualizer<?> topicVisualizer)
       {
          rightAlignedContextText.append(topicVisualizer.getFrequency().getText());
-         rightAlignedContextTextTooltip.append(topicVisualizer.getTopic().getName())
-                                       .append(" (")
-                                       .append(topicVisualizer.getTopic().getQoS().getReliabilityKind().name())
-                                       .append(")");
+         rightAlignedContextTextTooltip.append(topicVisualizer.getTopic().getName());
       }
       else if (this instanceof RDXROS2MultiTopicVisualizer multiTopicVisualizer)
       {
          for (ROS2Topic<?> topic : multiTopicVisualizer.getTopics())
          {
             rightAlignedContextText.append(multiTopicVisualizer.getFrequency(topic).getText());
-            rightAlignedContextTextTooltip.append(topic.getName())
-                                          .append(" (")
-                                          .append(topic.getQoS().getReliabilityKind().name())
-                                          .append(")\n");
+            rightAlignedContextTextTooltip.append(topic.getName()).append("\n");
          }
       }
 

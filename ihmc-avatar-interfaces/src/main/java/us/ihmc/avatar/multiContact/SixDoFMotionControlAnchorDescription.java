@@ -7,15 +7,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessagePubSubType;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.jros2.ROS2Message;
 
 public class SixDoFMotionControlAnchorDescription
 {
@@ -28,7 +27,6 @@ public class SixDoFMotionControlAnchorDescription
    public static final String IK_SOLVER_MESSAGE_JSON = "ikSolverMessage";
 
    private static final ObjectMapper objectMapper = new ObjectMapper(new JsonFactory());
-   private static final JSONSerializer<KinematicsToolboxRigidBodyMessage> messageSerializer = new JSONSerializer<>(new KinematicsToolboxRigidBodyMessagePubSubType());
 
    private String rigidBodyName;
    private boolean isContactState;
@@ -48,7 +46,8 @@ public class SixDoFMotionControlAnchorDescription
       isTrackingController = other.isTrackingController;
       anchorId = other.anchorId;
       contactNormal = other.contactNormal;
-      inputMessage = new KinematicsToolboxRigidBodyMessage(other.inputMessage);
+      inputMessage = ROS2Message.createInstance(KinematicsToolboxRigidBodyMessage.class);
+      inputMessage.set(other.inputMessage);
    }
 
    public static SixDoFMotionControlAnchorDescription fromJSON(JsonNode node)
@@ -61,7 +60,9 @@ public class SixDoFMotionControlAnchorDescription
          description.setRigidBodyName(anchorNode.get(RIGID_BODY_NAME_JSON).asText());
          description.setContactState(anchorNode.get(IS_CONTACT_STATE_JSON).asBoolean());
          description.setTrackingController(anchorNode.get(IS_TRACKING_CONTROLLER_JSON).asBoolean());
-         description.setInputMessage(messageSerializer.deserialize(anchorNode.get(IK_SOLVER_MESSAGE_JSON).toString()));
+         KinematicsToolboxRigidBodyMessage inputMessage = ROS2Message.createInstance(KinematicsToolboxRigidBodyMessage.class);
+         ROS2MessageCdrFileTools.deserializeFromJsonNode(anchorNode.get(IK_SOLVER_MESSAGE_JSON), inputMessage);
+         description.setInputMessage(inputMessage);
 
          if (anchorNode.has(ANCHOR_ID_JSON))
             description.setAnchorId(anchorNode.get(ANCHOR_ID_JSON).asInt());
@@ -89,16 +90,8 @@ public class SixDoFMotionControlAnchorDescription
       if (contactNormal != null)
          anchorJSON.put(CONTACT_NORMAL_JSON, tuple3DToString(contactNormal));
 
-      try
-      {
-         anchorJSON.set(IK_SOLVER_MESSAGE_JSON, messageToJSON(messageSerializer, inputMessage));
-         return root;
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-         return null;
-      }
+      anchorJSON.set(IK_SOLVER_MESSAGE_JSON, ROS2MessageCdrFileTools.messageToJsonNode(objectMapper, inputMessage));
+      return root;
    }
 
    private static String tuple3DToString(Tuple3DReadOnly vector)
@@ -110,11 +103,6 @@ public class SixDoFMotionControlAnchorDescription
    {
       String[] tupleValues = string.split(",");
       return new FrameVector3D(ReferenceFrame.getWorldFrame(), Double.parseDouble(tupleValues[0]), Double.parseDouble(tupleValues[1]), Double.parseDouble(tupleValues[2]));
-   }
-
-   private static <T> JsonNode messageToJSON(JSONSerializer<T> serializer, T message) throws IOException
-   {
-      return objectMapper.readTree(serializer.serializeToString(message));
    }
 
    public String getRigidBodyName()
@@ -183,8 +171,8 @@ public class SixDoFMotionControlAnchorDescription
 
    public void applyTransform(Transform transform)
    {
-      inputMessage.getDesiredPositionInWorld().applyTransform(transform);
-      inputMessage.getDesiredOrientationInWorld().applyTransform(transform);
+      inputMessage.getDesiredPositionInWorld().getPoint().applyTransform(transform);
+      inputMessage.getDesiredOrientationInWorld().getQuaternion().applyTransform(transform);
    }
 
    @Override

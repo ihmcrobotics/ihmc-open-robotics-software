@@ -1,7 +1,7 @@
 package us.ihmc.avatar.footstepPlanning;
 
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.PlanarRegionsListMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;

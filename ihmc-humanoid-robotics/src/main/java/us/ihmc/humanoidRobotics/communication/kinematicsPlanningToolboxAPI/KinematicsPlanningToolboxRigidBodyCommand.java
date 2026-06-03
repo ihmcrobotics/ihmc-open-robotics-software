@@ -2,9 +2,9 @@ package us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI;
 
 import java.util.Map;
 
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
-import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
-import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
+import toolbox_msgs.KinematicsPlanningToolboxRigidBodyMessage;
+import ihmc_common_msgs.SelectionMatrix3DMessage;
+import ihmc_common_msgs.WeightMatrix3DMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -74,7 +74,7 @@ public class KinematicsPlanningToolboxRigidBodyCommand implements Command<Kinema
 
       for (int i = 0; i < message.getKeyFramePoses().size(); i++)
       {
-         waypoints.add().set(message.getKeyFramePoses().get(i));
+         waypoints.add().set(message.getKeyFramePoses().get(i).getPose());
          waypointTimes.add(message.getKeyFrameTimes().get(i));
       }
 
@@ -101,7 +101,7 @@ public class KinematicsPlanningToolboxRigidBodyCommand implements Command<Kinema
       }
 
       ReferenceFrame referenceFrame = endEffector == null ? null : endEffector.getBodyFixedFrame();
-      controlFramePose.setIncludingFrame(referenceFrame, message.getControlFramePositionInEndEffector(), message.getControlFrameOrientationInEndEffector());
+      controlFramePose.setIncludingFrame(referenceFrame, message.getControlFramePositionInEndEffector().getPoint(), message.getControlFrameOrientationInEndEffector().getQuaternion());
 
       for (int i = 0; i < message.getAllowablePositionDisplacement().size(); i++)
       {

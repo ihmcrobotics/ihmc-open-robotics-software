@@ -13,11 +13,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.StopAllTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.ArmTrajectoryMessage;
+import controller_msgs.JointspaceTrajectoryStatusMessage;
+import controller_msgs.OneDoFJointTrajectoryMessage;
+import controller_msgs.StopAllTrajectoryMessage;
+import ihmc_common_msgs.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -33,7 +33,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
-import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -323,7 +323,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
          JointspaceTrajectoryStatusMessage startedStatus = statusMessages.stream()
                                                                          .filter(m -> m.getTrajectoryExecutionStatus() == TrajectoryExecutionStatus.STARTED.toByte())
-                                                                         .filter(m -> m.getJointNames().getString(0).equals(armJoints[0].getName())).findFirst()
+                                                                         .filter(m -> m.getJointNames().getAsString(0).equals(armJoints[0].getName())).findFirst()
                                                                          .get();
 
          EndToEndTestTools.assertJointspaceTrajectoryStatus(armTrajectoryMessage.getSequenceId(),
@@ -361,7 +361,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
          JointspaceTrajectoryStatusMessage completedStatus = statusMessages.stream()
                                                                            .filter(m -> m.getTrajectoryExecutionStatus() == TrajectoryExecutionStatus.COMPLETED.toByte())
-                                                                           .filter(m -> m.getJointNames().getString(0).equals(armJoints[0].getName()))
+                                                                           .filter(m -> m.getJointNames().getAsString(0).equals(armJoints[0].getName()))
                                                                            .findFirst().get();
          EndToEndTestTools.assertJointspaceTrajectoryStatus(armTrajectoryMessages.get(robotSide).getSequenceId(),
                                                             TrajectoryExecutionStatus.COMPLETED,
@@ -607,14 +607,15 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       for (int inputIndex = 0; inputIndex < armTrajectoryMessages.size(); inputIndex++)
       {
          ArmTrajectoryMessage armTrajectoryMessage = armTrajectoryMessages.get(inputIndex);
-         double[] finalDesiredPositions = armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().stream()
-                                                              .mapToDouble(jointTrajectory -> jointTrajectory.getTrajectoryPoints().getLast().getPosition())
-                                                              .toArray();
-         Object<TrajectoryPoint1DMessage> firstJointTrajectoryPoints = armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().get(0)
+         IDLObjectSequence<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
+         double[] finalDesiredPositions = new double[jointTrajectoryMessages.size()];
+         for (int j = 0; j < jointTrajectoryMessages.size(); j++)
+            finalDesiredPositions[j] = jointTrajectoryMessages.get(j).getTrajectoryPoints().getLast().getPosition();
+         IDLObjectSequence<TrajectoryPoint1DMessage> firstJointTrajectoryPoints = armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().get(0)
                                                                                            .getTrajectoryPoints();
          double endTime = startTime + firstJointTrajectoryPoints.getLast().getTime();
          if (inputIndex > 0)
-            startTime += firstJointTrajectoryPoints.getFirst().getTime();
+            startTime += firstJointTrajectoryPoints.get(0).getTime();
          JointspaceTrajectoryStatusMessage startedStatusMessage = statusMessages.remove(0);
          JointspaceTrajectoryStatusMessage completedStatusMessage = statusMessages.remove(0);
          EndToEndTestTools.assertJointspaceTrajectoryStatus(armTrajectoryMessage.getSequenceId(),

@@ -1,14 +1,14 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
-import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.ArmTrajectoryMessage;
+import controller_msgs.HandHybridJointspaceTaskspaceTrajectoryMessage;
+import controller_msgs.JointspaceTrajectoryMessage;
+import controller_msgs.OneDoFJointTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
-import ihmc_common_msgs.msg.dds.QueueableMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import ihmc_common_msgs.QueueableMessage;
+import ihmc_common_msgs.SE3TrajectoryMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
@@ -231,7 +231,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       angularVelocities.clear();
       linearVelocities.clear();
-      trajectoryTimes.resetQuick();
+      trajectoryTimes.clear();
 
       // Set the initial velocity and time as zero
       angularVelocities.add().setToZero();

@@ -5,10 +5,10 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.HeightMapMessageForController;
+import perception_msgs.HeightMapMessage;
+import perception_msgs.HeightMapMessageForController;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.idl.IDLSequence.Float;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 
 public class HeightMapMessageTools
 {
@@ -103,9 +103,9 @@ public class HeightMapMessageTools
 
       float[] heightsFromData = heightMapData.getHeights();
 
-      messageToPack.getHeights().resetQuick();
-      Float heights = messageToPack.getHeights();
-      heights.add(heightsFromData);
+      messageToPack.getHeights().getBuffer().reset();
+      IDLFloatSequence heights = messageToPack.getHeights();
+      heights.addAll(heightsFromData);
    }
    /**
     * We don't want to do this unless we have too, it's too slow
@@ -116,6 +116,6 @@ public class HeightMapMessageTools
       messageToClear.setGridCenterX(-1.0);
       messageToClear.setGridCenterY(-1.0);
 
-      messageToClear.getHeights().resetQuick();
+      messageToClear.getHeights().getBuffer().reset();
    }
 }

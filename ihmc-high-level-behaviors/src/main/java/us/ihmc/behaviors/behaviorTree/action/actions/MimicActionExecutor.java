@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import controller_msgs.msg.dds.HighLevelStateMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.HighLevelStateMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
@@ -13,7 +13,7 @@ import us.ihmc.tools.NonWallTimer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
@@ -128,26 +128,26 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
       {
          if (!replayAlignmentInitialized)
          {
-            replayPelvisPositionOffset.set(actionStartPelvisPosition.getX() - status.getDesiredRootPosition().getX(),
-                                           actionStartPelvisPosition.getY() - status.getDesiredRootPosition().getY());
-            replayTorsoPositionOffset.set(actionStartTorsoPosition.getX() - status.getDesiredTorsoPosition().getX(),
-                                          actionStartTorsoPosition.getY() - status.getDesiredTorsoPosition().getY());
-            replayPelvisYawOffset = actionStartPelvisYaw - status.getDesiredRootOrientation().getYaw();
-            replayTorsoYawOffset = actionStartTorsoYaw - status.getDesiredTorsoOrientation().getYaw();
+            replayPelvisPositionOffset.set(actionStartPelvisPosition.getX() - status.getDesiredRootPosition().getPoint().getX(),
+                                           actionStartPelvisPosition.getY() - status.getDesiredRootPosition().getPoint().getY());
+            replayTorsoPositionOffset.set(actionStartTorsoPosition.getX() - status.getDesiredTorsoPosition().getPoint().getX(),
+                                          actionStartTorsoPosition.getY() - status.getDesiredTorsoPosition().getPoint().getY());
+            replayPelvisYawOffset = actionStartPelvisYaw - status.getDesiredRootOrientation().getQuaternion().getYaw();
+            replayTorsoYawOffset = actionStartTorsoYaw - status.getDesiredTorsoOrientation().getQuaternion().getYaw();
             replayAlignmentInitialized = true;
          }
 
-         status.getDesiredRootPosition().setX(status.getDesiredRootPosition().getX() + replayPelvisPositionOffset.getX());
-         status.getDesiredRootPosition().setY(status.getDesiredRootPosition().getY() + replayPelvisPositionOffset.getY());
-         status.getDesiredTorsoPosition().setX(status.getDesiredTorsoPosition().getX() + replayTorsoPositionOffset.getX());
-         status.getDesiredTorsoPosition().setY(status.getDesiredTorsoPosition().getY() + replayTorsoPositionOffset.getY());
+         status.getDesiredRootPosition().getPoint().setX(status.getDesiredRootPosition().getPoint().getX() + replayPelvisPositionOffset.getX());
+         status.getDesiredRootPosition().getPoint().setY(status.getDesiredRootPosition().getPoint().getY() + replayPelvisPositionOffset.getY());
+         status.getDesiredTorsoPosition().getPoint().setX(status.getDesiredTorsoPosition().getPoint().getX() + replayTorsoPositionOffset.getX());
+         status.getDesiredTorsoPosition().getPoint().setY(status.getDesiredTorsoPosition().getPoint().getY() + replayTorsoPositionOffset.getY());
 
-         status.getDesiredRootOrientation().setYawPitchRoll(status.getDesiredRootOrientation().getYaw() + replayPelvisYawOffset,
-                                                            status.getDesiredRootOrientation().getPitch(),
-                                                            status.getDesiredRootOrientation().getRoll());
-         status.getDesiredTorsoOrientation().setYawPitchRoll(status.getDesiredTorsoOrientation().getYaw() + replayTorsoYawOffset,
-                                                             status.getDesiredTorsoOrientation().getPitch(),
-                                                             status.getDesiredTorsoOrientation().getRoll());
+         status.getDesiredRootOrientation().getQuaternion().setYawPitchRoll(status.getDesiredRootOrientation().getQuaternion().getYaw() + replayPelvisYawOffset,
+                                                                            status.getDesiredRootOrientation().getQuaternion().getPitch(),
+                                                                            status.getDesiredRootOrientation().getQuaternion().getRoll());
+         status.getDesiredTorsoOrientation().getQuaternion().setYawPitchRoll(status.getDesiredTorsoOrientation().getQuaternion().getYaw() + replayTorsoYawOffset,
+                                                                               status.getDesiredTorsoOrientation().getQuaternion().getPitch(),
+                                                                               status.getDesiredTorsoOrientation().getQuaternion().getRoll());
       }
    }
 

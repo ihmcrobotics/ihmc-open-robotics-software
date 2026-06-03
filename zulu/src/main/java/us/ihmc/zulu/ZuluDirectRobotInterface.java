@@ -1,15 +1,15 @@
 package us.ihmc.zulu;
 
-import controller_msgs.msg.dds.AbortWalkingMessage;
-import controller_msgs.msg.dds.HighLevelStateMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.AbortWalkingMessage;
+import controller_msgs.HighLevelStateMessage;
+import controller_msgs.PauseWalkingMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 
 public class ZuluDirectRobotInterface implements RobotLowLevelMessenger
 {

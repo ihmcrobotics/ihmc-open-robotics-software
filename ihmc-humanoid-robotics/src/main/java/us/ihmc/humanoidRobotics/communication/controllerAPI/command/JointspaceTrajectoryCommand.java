@@ -3,11 +3,12 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import java.util.List;
 import java.util.Random;
 
-import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import us.ihmc.communication.controllerAPI.command.QueueableCommand;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
+import controller_msgs.JointspaceTrajectoryMessage;
+import controller_msgs.OneDoFJointTrajectoryMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.controllerAPI.command.QueueableCommand;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 
 public final class JointspaceTrajectoryCommand extends QueueableCommand<JointspaceTrajectoryCommand, JointspaceTrajectoryMessage>
 {
@@ -64,7 +65,7 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
       }
    }
 
-   private void set(List<OneDoFJointTrajectoryMessage> trajectoryPointListArray)
+   private void set(IDLObjectSequence<OneDoFJointTrajectoryMessage> trajectoryPointListArray)
    {
       jointTrajectoryInputs.clear();
 

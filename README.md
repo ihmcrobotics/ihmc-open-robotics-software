@@ -129,7 +129,7 @@ https://github.com/ihmcrobotics
 
 ## ROS APIs
 We provide a ROS 2 API for many of the core components in our software stack. 
-You can find the .msg definitions for use in your own projects in this project's ihmc-interfaces folder.
+You can find the .msg definitions for use in your own projects in this project's ihmc-interfaces-jros2/messages folder.
 
 ## Building .jars
 *IHMC Open Robotics Software* is pre-configured for generating Maven publications. 

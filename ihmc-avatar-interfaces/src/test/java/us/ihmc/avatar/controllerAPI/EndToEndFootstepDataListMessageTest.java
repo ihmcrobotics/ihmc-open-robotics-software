@@ -10,8 +10,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.controllerAPI.ControllerMessageConstants;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -125,12 +126,12 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
             stepsPackedInMessage++;
          }
          message.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
-         message.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
+         message.getQueueingProperties().setPreviousMessageId(ControllerMessageConstants.VALID_MESSAGE_DEFAULT_ID);
          messages.add(message);
       }
       FootstepDataListMessage r = messages.get(0);
       r.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      r.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
+      r.getQueueingProperties().setPreviousMessageId(ControllerMessageConstants.VALID_MESSAGE_DEFAULT_ID);
 
       YoVariable numberOfStepsInController = simulationTestHelper.findVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
       int expectedNumberOfSteps = 0;
@@ -197,9 +198,9 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       for (int i = 0; i < steps; i++)
       {
          FootstepDataMessage footstep = message.getFootstepDataList().get(i);
-         stepPose.setIncludingFrame(messageFrame, footstep.getLocation(), footstep.getOrientation());
+         stepPose.setIncludingFrame(messageFrame, footstep.getLocation().getPoint(), footstep.getOrientation().getQuaternion());
          stepPose.changeFrame(ReferenceFrame.getWorldFrame());
-         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getLocation().getPoint().set(stepPose.getPosition());
          footstep.getOrientation().set(stepPose.getOrientation());
       }
    }

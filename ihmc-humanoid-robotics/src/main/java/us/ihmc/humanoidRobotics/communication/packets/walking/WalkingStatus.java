@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.WalkingStatusMessage;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 
 public enum WalkingStatus
