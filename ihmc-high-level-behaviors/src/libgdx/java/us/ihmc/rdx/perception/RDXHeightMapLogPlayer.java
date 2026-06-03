@@ -2,7 +2,7 @@ package us.ihmc.rdx.perception;
 
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.HeightMapMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -23,9 +23,8 @@ import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
@@ -58,7 +57,7 @@ public class RDXHeightMapLogPlayer
 
    public RDXHeightMapLogPlayer()
    {
-      ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName());
+      ros2Node = new ROS2Node(getClass().getSimpleName());
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       baseUI = new RDXBaseUI();
 
@@ -124,7 +123,7 @@ public class RDXHeightMapLogPlayer
             zedPlaybackSensor.close();
             zedFrameGraphic.dispose();
 
-            ros2Node.destroy();
+            ros2Node.close();
             baseUI.dispose();
          }
       });

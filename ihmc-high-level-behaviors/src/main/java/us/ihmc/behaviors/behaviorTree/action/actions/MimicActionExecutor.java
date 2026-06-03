@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import controller_msgs.msg.dds.HighLevelStateMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.HighLevelStateMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
@@ -13,7 +13,7 @@ import us.ihmc.tools.NonWallTimer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;

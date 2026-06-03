@@ -10,7 +10,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
+import controller_msgs.SpineDesiredAccelerationsMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.EndToEndTestTools;

@@ -1,9 +1,9 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.CapturabilityBasedStatus;
+import controller_msgs.RobotConfigurationData;
+import controller_msgs.WholeBodyStreamingMessage;
+import controller_msgs.WholeBodyTrajectoryMessage;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
@@ -11,10 +11,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
@@ -50,12 +50,11 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Subscription;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.controller.interfaces.ControllerOutputBasics;
@@ -164,7 +163,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
       toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
 
-      RealtimeROS2Node toolboxROS2Node = new ROS2NodeBuilder().buildRealtime("toolbox_node");
+      AsyncROS2Node toolboxROS2Node = new AsyncROS2Node("toolbox_node");
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(toolboxInputTopic,
                                                                                                 commandInputManager,
                                                                                                 toolboxOutputTopic,
@@ -181,19 +180,19 @@ public abstract class KinematicsStreamingToolboxControllerTest
       RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
       toolboxController.setRobotStateUpdater(robotStateUpdater);
       ROS2Subscription<RobotConfigurationData> rcdSubscription = toolboxROS2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
-                                                                                                    s -> robotStateUpdater.setRobotConfigurationData(s.takeNextData()));
-      cleanupTasks.add(rcdSubscription::remove);
+                                                                                                    s -> robotStateUpdater.setRobotConfigurationData(s.read()));
+      cleanupTasks.add(() -> toolboxROS2Node.destroySubscription(rcdSubscription));
 
       ROS2Subscription<CapturabilityBasedStatus> cbsSubscription = toolboxROS2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic,
                                                                                                                              CapturabilityBasedStatus.class),
-                                                                                                      s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
-      cleanupTasks.add(cbsSubscription::remove);
+                                                                                                      s -> toolboxController.updateCapturabilityBasedStatus(s.read()));
+      cleanupTasks.add(() -> toolboxROS2Node.destroySubscription(cbsSubscription));
 
       inputPublisher = ros2Node.createPublisher(ControllerAPI.getTopic(toolboxInputTopic, KinematicsStreamingToolboxInputMessage.class));
-      statePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ToolboxStateMessage.class));
+      statePublisher = ros2Node.createPublisher(toolboxInputTopic.withType(ToolboxStateMessage.class));
 
       AtomicReference<KinematicsToolboxOutputStatus> toolboxViz = new AtomicReference<>(null);
-      ros2Node.createSubscription(ControllerAPI.getTopic(toolboxOutputTopic, KinematicsToolboxOutputStatus.class), s -> toolboxViz.set(s.takeNextData()));
+      ros2Node.createSubscription(ControllerAPI.getTopic(toolboxOutputTopic, KinematicsToolboxOutputStatus.class), s -> toolboxViz.set(s.read()));
 
       Controller toolboxUpdater = new Controller()
       {
@@ -230,8 +229,6 @@ public abstract class KinematicsStreamingToolboxControllerTest
          }
       };
       ghost.addThrottledController(toolboxUpdater, toolboxParameters.getToolboxUpdatePeriod());
-
-      toolboxROS2Node.spin();
    }
 
    public void setupNoWalkingController(RobotCollisionModel collisionModel)
@@ -351,7 +348,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       if (ros2Node != null)
       {
-         ros2Node.destroy();
+         ros2Node.close();
          ros2Node = null;
       }
 

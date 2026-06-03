@@ -1,11 +1,10 @@
 package us.ihmc.perception.streaming;
 
-import perception_msgs.msg.dds.SRTStreamStatus;
+import perception_msgs.SRTStreamStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +22,7 @@ public class ROS2SRTSensorStreamer
 
    public ROS2SRTSensorStreamer()
    {
-      this(new ROS2NodeBuilder().build(ROS2SRTSensorStreamer.class.getSimpleName().toLowerCase() + "_node"));
+      this(new ROS2Node(ROS2SRTSensorStreamer.class.getSimpleName().toLowerCase() + "_node"));
       destroyROS2Node = true;
    }
 
@@ -79,7 +78,7 @@ public class ROS2SRTSensorStreamer
          videoStreamer.destroy();
 
       if (destroyROS2Node)
-         ros2Node.destroy();
+         ros2Node.close();
    }
 
    private void addStreamWithGuessedParameters(ROS2Topic<SRTStreamStatus> streamTopic, RawImage exampleImage)

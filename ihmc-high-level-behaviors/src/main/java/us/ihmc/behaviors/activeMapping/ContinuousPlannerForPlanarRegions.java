@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.activeMapping;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.FootstepDataListMessage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;

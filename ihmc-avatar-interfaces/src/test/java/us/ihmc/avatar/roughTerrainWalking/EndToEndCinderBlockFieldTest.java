@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.FootstepDataListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
@@ -125,8 +125,8 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       success = simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters) + 10.0);
       assertTrue(success);
 
-      Point3D step1 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 1).getLocation();
-      Point3D step2 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 2).getLocation();
+      Point3D step1 = new Point3D(footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 1).getLocation().getPoint());
+      Point3D step2 = new Point3D(footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 2).getLocation().getPoint());
       Point3D expectedPelvis = new Point3D();
       expectedPelvis.interpolate(step1, step2, 0.5);
       expectedPelvis.setZ(desiredHeight);

@@ -1,6 +1,6 @@
 package us.ihmc.zulu;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.*;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -398,7 +398,7 @@ public class ZuluWalkingTrajectoryPathFrameTest
                                                                              true);
       for (int i = 6; i < numberOfSteps + 1; i++)
       {
-         steps.getFootstepDataList().get(i).getLocation().addX(0.3);
+         steps.getFootstepDataList().get(i).getLocation().getPoint().addX(0.3);
       }
       //      steps.getFootstepDataList().get(0).setTransferDuration(transferTime);
 

@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.swing;
 
-import perception_msgs.msg.dds.TerrainMapMessage;
+import perception_msgs.TerrainMapMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -12,7 +12,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -50,7 +50,7 @@ public class CollisionFreeSwingCalculatorLogViewer
 
       Graphics3DObject terrainGraphics = new Graphics3DObject();
 
-      IDLSequence.Float heights = terrainMapMessage.getHeightMap();
+      IDLFloatSequence heights = terrainMapMessage.getHeightMap();
       double gridResolutionXY = terrainMapMessage.getCellSizeInMeters();
       int centerIndex = HeightMapTools.computeCenterIndex(terrainMapMessage.getWidthInMeters(), gridResolutionXY);
 
@@ -82,7 +82,8 @@ public class CollisionFreeSwingCalculatorLogViewer
       scs.startOnAThread();
 
       FootstepPlan footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(log.getStatusPacket().getFootstepDataList());
-      SideDependentList<Pose3D> initialFootPoses = new SideDependentList<>(log.getRequestPacket().getStartLeftFootPose(), log.getRequestPacket().getStartRightFootPose());
+      SideDependentList<Pose3D> initialFootPoses = new SideDependentList<>(log.getRequestPacket().getStartLeftFootPose().getPose(),
+                                                                          log.getRequestPacket().getStartRightFootPose().getPose());
 
 //      swingCalculator.setPlanarRegionsList(planarRegionsList);
       swingCalculator.setTerrainMapData(terrainMapData);

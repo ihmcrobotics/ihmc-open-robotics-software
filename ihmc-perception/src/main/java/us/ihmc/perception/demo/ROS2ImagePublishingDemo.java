@@ -1,7 +1,7 @@
 package us.ihmc.perception.demo;
 
-import sensor_msgs.msg.dds.CameraInfo;
-import sensor_msgs.msg.dds.Image;
+import sensor_msgs.CameraInfo;
+import sensor_msgs.Image;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -9,10 +9,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.ImageSensorPublishThread;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImagePublisher;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
@@ -22,7 +20,7 @@ import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
 
 /**
  * Demo for publishing standard ROS 2 {@link Image} messages along with {@link CameraInfo} messages.
- * This demo does NOT publish IHMC's custom {@link perception_msgs.msg.dds.ImageMessage}.
+ * This demo does NOT publish IHMC's custom {@link perception_msgs.ImageMessage}.
  * <p>
  * The demo publishes messages on the following topics:
  * <ul>
@@ -85,18 +83,18 @@ class ROS2ImagePublishingDemo
    private ROS2ImagePublishingDemo()
    {
       // Create a ROS 2 Node
-      ros2Node = new ROS2NodeBuilder().build("image_publishing_demo");
+      ros2Node = new ROS2Node("image_publishing_demo");
 
       // ZED topic used to create color and depth topics. QoS must be reliable for RViz2 to receive the images.
-      ROS2Topic<?> zedTopic = new ROS2Topic<>().withPrefix("zed").withQoS(ROS2QosProfile.RELIABLE());
+      ROS2Topic<?> zedTopic = new ROS2Topic<>().prependedWith("zed");
 
       // Create the /zed/color/image_raw and /zed/color/camera_info topics
-      colorImageTopic = zedTopic.withModule("color").withSuffix("image_raw").withType(Image.class);
-      colorCameraInfoTopic = zedTopic.withModule("color").withSuffix("camera_info").withType(CameraInfo.class);
+      colorImageTopic = zedTopic.appendedWith("color").appendedWith("image_raw").withType(Image.class);
+      colorCameraInfoTopic = zedTopic.appendedWith("color").appendedWith("camera_info").withType(CameraInfo.class);
 
       // Create the /zed/depth/image_raw and /zed/depth/camera_info topics
-      depthImageTopic = zedTopic.withModule("depth").withSuffix("image_raw").withType(Image.class);
-      depthCameraInfoTopic = zedTopic.withModule("depth").withSuffix("camera_info").withType(CameraInfo.class);
+      depthImageTopic = zedTopic.appendedWith("depth").appendedWith("image_raw").withType(Image.class);
+      depthCameraInfoTopic = zedTopic.appendedWith("depth").appendedWith("camera_info").withType(CameraInfo.class);
 
       // Create a ZED sensor (in this case we use an SVO playback)
       zed = new ROS2ZEDSVOPlaybackSensor(new ROS2Helper(ros2Node), 0, ZEDModelData.ZED_2, SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
@@ -202,7 +200,7 @@ class ROS2ImagePublishingDemo
       zed.close();
 
       // Destroy the ROS2Node
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    public static void main(String[] args)

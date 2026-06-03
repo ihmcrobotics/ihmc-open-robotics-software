@@ -1,6 +1,6 @@
 package us.ihmc.avatar.controllerAPI;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -182,8 +182,8 @@ public abstract class EndToEndFootstepQueueStatusMessageTest implements MultiRob
    private static  void assertFootstepsEqual(FootstepDataMessage expected, QueuedFootstepStatusMessage queuedStep, double epsilon)
    {
       assertEquals(expected.getSequenceId(), queuedStep.getSequenceId());
-      EuclidCoreTestTools.assertEquals(expected.getLocation(), queuedStep.getLocation(), epsilon);
-      EuclidCoreTestTools.assertEquals(expected.getOrientation(), queuedStep.getOrientation(), epsilon);
+      EuclidCoreTestTools.assertEquals(expected.getLocation().getPoint(), queuedStep.getLocation().getPoint(), epsilon);
+      EuclidCoreTestTools.assertEquals(expected.getOrientation().getQuaternion(), queuedStep.getOrientation().getQuaternion(), epsilon);
       assertEquals(expected.getSwingDuration(), queuedStep.getSwingDuration(), epsilon);
       assertEquals(expected.getTransferDuration(), queuedStep.getTransferDuration(), epsilon);
    }

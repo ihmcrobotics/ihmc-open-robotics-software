@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import java.awt.*;
 
-import rcl_interfaces.msg.dds.Log;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentReachabilityConstraint;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;

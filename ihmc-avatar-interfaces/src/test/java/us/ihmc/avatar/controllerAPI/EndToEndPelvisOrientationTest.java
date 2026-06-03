@@ -1,13 +1,13 @@
 package us.ihmc.avatar.controllerAPI;
 
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
+import controller_msgs.ChestTrajectoryMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import controller_msgs.GoHomeMessage;
+import controller_msgs.PelvisOrientationTrajectoryMessage;
+import controller_msgs.TaskspaceTrajectoryStatusMessage;
+import ihmc_common_msgs.SO3TrajectoryMessage;
+import ihmc_common_msgs.SO3TrajectoryPointMessage;
 import org.jcodec.common.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

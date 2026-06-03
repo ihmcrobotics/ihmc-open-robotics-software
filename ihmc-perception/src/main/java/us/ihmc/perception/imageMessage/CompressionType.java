@@ -1,6 +1,6 @@
 package us.ihmc.perception.imageMessage;
 
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.ImageMessage;
 
 public enum CompressionType
 {

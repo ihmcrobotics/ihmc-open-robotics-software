@@ -11,7 +11,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.commons.thread.Throttler;
 

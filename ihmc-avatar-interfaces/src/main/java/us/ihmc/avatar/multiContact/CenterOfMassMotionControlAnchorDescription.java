@@ -7,10 +7,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType;
+import toolbox_msgs.KinematicsToolboxCenterOfMassMessage;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.jros2.ROS2Message;
 
 public class CenterOfMassMotionControlAnchorDescription
 {
@@ -19,7 +19,6 @@ public class CenterOfMassMotionControlAnchorDescription
    public static final String IK_SOLVER_MESSAGE_JSON = "ikSolverMessage";
 
    private static final ObjectMapper objectMapper = new ObjectMapper(new JsonFactory());
-   private static final JSONSerializer<KinematicsToolboxCenterOfMassMessage> messageSerializer = new JSONSerializer<>(new KinematicsToolboxCenterOfMassMessagePubSubType());
 
    private boolean isTrackingController;
    private KinematicsToolboxCenterOfMassMessage inputMessage;
@@ -31,7 +30,8 @@ public class CenterOfMassMotionControlAnchorDescription
    public CenterOfMassMotionControlAnchorDescription(CenterOfMassMotionControlAnchorDescription other)
    {
       isTrackingController = other.isTrackingController;
-      inputMessage = new KinematicsToolboxCenterOfMassMessage(other.inputMessage);
+      inputMessage = ROS2Message.createInstance(KinematicsToolboxCenterOfMassMessage.class);
+      inputMessage.set(other.inputMessage);
    }
 
    public static CenterOfMassMotionControlAnchorDescription fromJSON(JsonNode node)
@@ -56,7 +56,9 @@ public class CenterOfMassMotionControlAnchorDescription
       {
          CenterOfMassMotionControlAnchorDescription description = new CenterOfMassMotionControlAnchorDescription();
          description.setTrackingController(anchorNode.get(IS_TRACKING_CONTROLLER_JSON).asBoolean());
-         description.setInputMessage(messageSerializer.deserialize(anchorNode.get(IK_SOLVER_MESSAGE_JSON).toString()));
+         KinematicsToolboxCenterOfMassMessage inputMessage = ROS2Message.createInstance(KinematicsToolboxCenterOfMassMessage.class);
+         ROS2MessageCdrFileTools.deserializeFromJsonNode(anchorNode.get(IK_SOLVER_MESSAGE_JSON), inputMessage);
+         description.setInputMessage(inputMessage);
          return description;
       }
       catch (IOException e)
@@ -72,22 +74,8 @@ public class CenterOfMassMotionControlAnchorDescription
 
       anchorJSON.put(IS_TRACKING_CONTROLLER_JSON, isTrackingController);
 
-      try
-      {
-         anchorJSON.set(IK_SOLVER_MESSAGE_JSON, messageToJSON(messageSerializer, inputMessage));
-
-         return root;
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-         return null;
-      }
-   }
-
-   private static <T> JsonNode messageToJSON(JSONSerializer<T> serializer, T message) throws IOException
-   {
-      return objectMapper.readTree(serializer.serializeToString(message));
+      anchorJSON.set(IK_SOLVER_MESSAGE_JSON, ROS2MessageCdrFileTools.messageToJsonNode(objectMapper, inputMessage));
+      return root;
    }
 
    public boolean isTrackingController()
@@ -112,7 +100,7 @@ public class CenterOfMassMotionControlAnchorDescription
 
    public void applyTransform(Transform transform)
    {
-      inputMessage.getDesiredPositionInWorld().applyTransform(transform);
+      inputMessage.getDesiredPositionInWorld().getPoint().applyTransform(transform);
    }
 
    @Override

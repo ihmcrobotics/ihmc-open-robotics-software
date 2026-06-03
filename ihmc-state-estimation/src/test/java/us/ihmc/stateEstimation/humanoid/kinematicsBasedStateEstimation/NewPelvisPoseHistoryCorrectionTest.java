@@ -7,9 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.LocalizationPacket;
-import controller_msgs.msg.dds.PelvisPoseErrorPacket;
-import ihmc_common_msgs.msg.dds.StampedPosePacket;
+import controller_msgs.LocalizationPacket;
+import controller_msgs.PelvisPoseErrorPacket;
+import ihmc_common_msgs.StampedPosePacket;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;

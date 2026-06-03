@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.PrepareForLocomotionMessage;
+import controller_msgs.PrepareForLocomotionMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
 public class PrepareForLocomotionCommand implements Command<PrepareForLocomotionCommand, PrepareForLocomotionMessage>

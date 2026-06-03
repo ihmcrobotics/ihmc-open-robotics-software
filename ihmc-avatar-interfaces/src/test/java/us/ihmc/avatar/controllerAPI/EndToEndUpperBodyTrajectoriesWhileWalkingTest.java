@@ -1,9 +1,9 @@
 package us.ihmc.avatar.controllerAPI;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.ArmTrajectoryMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.HandTrajectoryMessage;
+import controller_msgs.OneDoFJointTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

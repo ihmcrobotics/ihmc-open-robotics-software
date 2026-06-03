@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui.hands.sakeEZGripper;
 
-import ihmc_hands_ros2.msg.dds.EZGripperCommand;
-import ihmc_hands_ros2.msg.dds.EZGripperState;
+import ihmc_hands_ros2.EZGripperCommand;
+import ihmc_hands_ros2.EZGripperState;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;

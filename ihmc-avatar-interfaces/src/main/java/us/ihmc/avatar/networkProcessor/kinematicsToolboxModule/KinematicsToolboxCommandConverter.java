@@ -1,11 +1,13 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionMessage;
+import us.ihmc.jros2.ROS2Message;
+
+import toolbox_msgs.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxInputCollectionMessage;
+import toolbox_msgs.KinematicsToolboxOneDoFJointMessage;
+import toolbox_msgs.KinematicsToolboxPrivilegedConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.KinematicsToolboxSupportRegionMessage;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -55,7 +57,7 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
     * Only converting {@link KinematicsToolboxRigidBodyMessage}.
     */
    @Override
-   public <C extends Command<?, M>, M extends Settable<M>> boolean isConvertible(C command, M message)
+   public <C extends Command<?, M>, M extends ROS2Message<M>> boolean isConvertible(C command, M message)
    {
       if (message instanceof KinematicsToolboxRigidBodyMessage)
          return true;
@@ -76,7 +78,7 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
     * Retrieves the end-effector and convert the message into its command counterpart.
     */
    @Override
-   public <C extends Command<?, M>, M extends Settable<M>> void process(C command, M message)
+   public <C extends Command<?, M>, M extends ROS2Message<M>> void process(C command, M message)
    {
       if (message instanceof KinematicsToolboxRigidBodyMessage rigidBodyMessage)
       {

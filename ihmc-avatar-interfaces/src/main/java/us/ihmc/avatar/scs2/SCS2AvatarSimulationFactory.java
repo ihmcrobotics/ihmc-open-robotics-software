@@ -2,7 +2,7 @@ package us.ihmc.avatar.scs2;
 
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import ihmc_common_msgs.msg.dds.StampedPosePacket;
+import ihmc_common_msgs.StampedPosePacket;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarEstimatorThreadFactory;
@@ -63,7 +63,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
@@ -123,7 +123,7 @@ public class SCS2AvatarSimulationFactory
          "highLevelHumanoidControllerFactory");
    protected final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
 
-   protected final OptionalFactoryField<RealtimeROS2Node> realtimeROS2Node = new OptionalFactoryField<>(
+   protected final OptionalFactoryField<AsyncROS2Node> realtimeROS2Node = new OptionalFactoryField<>(
          "realtimeROS2Node");
    protected final OptionalFactoryField<Double> simulationDT = new OptionalFactoryField<>("simulationDT");
    protected final OptionalFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>(
@@ -500,7 +500,7 @@ public class SCS2AvatarSimulationFactory
             pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeROS2Node.get(), robotName);
             realtimeROS2Node.get()
                             .createSubscription(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName),
-                                                s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
+                                                s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.read()));
          }
       }
 
@@ -528,7 +528,7 @@ public class SCS2AvatarSimulationFactory
       String robotName = robotModel.get().getSimpleRobotName();
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
 
-      RealtimeROS2Node ros2Node = null;
+      AsyncROS2Node ros2Node = null;
       if (realtimeROS2Node.hasBeenSet())
       {
          ros2Node = realtimeROS2Node.get();
@@ -564,7 +564,7 @@ public class SCS2AvatarSimulationFactory
          footstepAdjustment = new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get());
       }
 
-      RealtimeROS2Node ros2Node = null;
+      AsyncROS2Node ros2Node = null;
       if (realtimeROS2Node.hasBeenSet())
          ros2Node = realtimeROS2Node.get();
       stepGeneratorThread = new AvatarStepGeneratorThread(contextDataFactory,
@@ -1109,7 +1109,7 @@ public class SCS2AvatarSimulationFactory
       this.showGUI.set(showGUI);
    }
 
-   public void setRealtimeROS2Node(RealtimeROS2Node realtimeROS2Node)
+   public void setRealtimeROS2Node(AsyncROS2Node realtimeROS2Node)
    {
       this.realtimeROS2Node.set(realtimeROS2Node);
    }

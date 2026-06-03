@@ -1,6 +1,8 @@
 package us.ihmc.perception.gpuMapping;
 
-import perception_msgs.msg.dds.TerrainMapMessage;
+import perception_msgs.TerrainMapMessage;
+import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 
 public class TerrainMapMessageTools
 {
@@ -12,22 +14,22 @@ public class TerrainMapMessageTools
       message.setGridCenterX(terrainMapData.getGridCenterX());
       message.setGridCenterY(terrainMapData.getGridCenterY());
 
-      message.getHeightMap().resetQuick();
-      message.getHeightMap().add(terrainMapData.getHeightMap());
+      message.getHeightMap().clear();
+      message.getHeightMap().addAll(terrainMapData.getHeightMap());
 
-      message.getObstacleClearanceScore().resetQuick();
-      message.getObstacleClearanceScore().add(terrainMapData.getObstacleClearanceScoreMap());
-      message.getTraversabilityScore().resetQuick();
-      message.getTraversabilityScore().add(terrainMapData.getTraversabilityScoreMap());
-      message.getTraversabilityClass().resetQuick();
-      message.getTraversabilityClass().add(terrainMapData.getTraversabilityClassMap());
+      message.getObstacleClearanceScore().clear();
+      message.getObstacleClearanceScore().addAll(terrainMapData.getObstacleClearanceScoreMap());
+      message.getTraversabilityScore().clear();
+      message.getTraversabilityScore().addAll(terrainMapData.getTraversabilityScoreMap());
+      message.getTraversabilityClass().clear();
+      message.getTraversabilityClass().addAll(terrainMapData.getTraversabilityClassMap());
 
-      message.getSnappedNormalXData().resetQuick();
-      message.getSnappedNormalXData().add(terrainMapData.getSnapNormalXMap());
-      message.getSnappedNormalYData().resetQuick();
-      message.getSnappedNormalYData().add(terrainMapData.getSnapNormalYMap());
-      message.getSnappedNormalZData().resetQuick();
-      message.getSnappedNormalZData().add(terrainMapData.getSnapNormalZMap());
+      message.getSnappedNormalXData().clear();
+      message.getSnappedNormalXData().addAll(terrainMapData.getSnapNormalXMap());
+      message.getSnappedNormalYData().clear();
+      message.getSnappedNormalYData().addAll(terrainMapData.getSnapNormalYMap());
+      message.getSnappedNormalZData().clear();
+      message.getSnappedNormalZData().addAll(terrainMapData.getSnapNormalZMap());
    }
 
    public static TerrainMapData unpackMessage(TerrainMapMessage message)
@@ -37,33 +39,49 @@ public class TerrainMapMessageTools
                                                          message.getGridCenterX(),
                                                          message.getGridCenterY());
 
-      float[] heightMap = message.getHeightMap().toArray();
+      float[] heightMap = copyFloatSequenceToArray(message.getHeightMap());
       terrainMapData.setHeightMap(heightMap);
 
-      float[] obstacleClearanceScoreMap = message.getObstacleClearanceScore().toArray();
+      float[] obstacleClearanceScoreMap = copyFloatSequenceToArray(message.getObstacleClearanceScore());
       if (obstacleClearanceScoreMap.length > 0)
          terrainMapData.setObstacleClearanceScoreMap(obstacleClearanceScoreMap);
 
-      float[] traversabilityScoreMap = message.getTraversabilityScore().toArray();
+      float[] traversabilityScoreMap = copyFloatSequenceToArray(message.getTraversabilityScore());
       if (traversabilityScoreMap.length > 0)
          terrainMapData.setTraversabilityScoreMap(traversabilityScoreMap);
 
-      byte[] traversabilityClassMap = message.getTraversabilityClass().copyArray();
+      byte[] traversabilityClassMap = copyByteSequenceToArray(message.getTraversabilityClass());
       if (traversabilityClassMap.length > 0)
          terrainMapData.setTraversabilityClassMap(traversabilityClassMap);
 
-      byte[] snappedNormalXMap = message.getSnappedNormalXData().copyArray();
+      byte[] snappedNormalXMap = copyByteSequenceToArray(message.getSnappedNormalXData());
       if (snappedNormalXMap.length > 0)
          terrainMapData.setSnapNormalXMap(snappedNormalXMap);
 
-      byte[] snappedNormalYMap = message.getSnappedNormalYData().copyArray();
+      byte[] snappedNormalYMap = copyByteSequenceToArray(message.getSnappedNormalYData());
       if (snappedNormalYMap.length > 0)
          terrainMapData.setSnapNormalYMap(snappedNormalYMap);
 
-      byte[] snappedNormalZMap = message.getSnappedNormalZData().copyArray();
+      byte[] snappedNormalZMap = copyByteSequenceToArray(message.getSnappedNormalZData());
       if (snappedNormalZMap.length > 0)
          terrainMapData.setSnapNormalZMap(snappedNormalZMap);
 
       return terrainMapData;
+   }
+
+   private static float[] copyFloatSequenceToArray(IDLFloatSequence sequence)
+   {
+      float[] array = new float[sequence.size()];
+      for (int i = 0; i < array.length; i++)
+         array[i] = sequence.get(i);
+      return array;
+   }
+
+   private static byte[] copyByteSequenceToArray(IDLByteSequence sequence)
+   {
+      byte[] array = new byte[sequence.size()];
+      for (int i = 0; i < array.length; i++)
+         array[i] = sequence.get(i);
+      return array;
    }
 }

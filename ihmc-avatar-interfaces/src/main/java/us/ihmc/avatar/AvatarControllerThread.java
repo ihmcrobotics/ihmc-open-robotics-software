@@ -1,6 +1,6 @@
 package us.ihmc.avatar;
 
-import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.ControllerCrashNotificationPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
@@ -29,8 +29,8 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -100,7 +100,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                  HighLevelHumanoidControllerFactory controllerFactory,
                                  HumanoidRobotContextDataFactory contextDataFactory,
                                  DRCOutputProcessor outputProcessor,
-                                 RealtimeROS2Node realtimeROS2Node,
+                                 AsyncROS2Node realtimeROS2Node,
                                  double gravity,
                                  boolean kinematicsSimulation)
    {

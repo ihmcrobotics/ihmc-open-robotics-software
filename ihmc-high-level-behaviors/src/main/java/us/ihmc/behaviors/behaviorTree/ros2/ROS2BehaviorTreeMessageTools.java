@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import behavior_msgs.msg.dds.*;
+import behavior_msgs.*;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeState;
@@ -28,7 +28,7 @@ public class ROS2BehaviorTreeMessageTools
 {
    public static void clearLists(BehaviorTreeStateMessage treeStateMessage)
    {
-      treeStateMessage.getBehaviorTreeTypes().resetQuick();
+      treeStateMessage.getBehaviorTreeTypes().clear();
       treeStateMessage.getBehaviorTreeIndices().clear();
       treeStateMessage.getPartialDataNodes().clear();
       treeStateMessage.getRootNodes().clear();
@@ -517,7 +517,7 @@ public class ROS2BehaviorTreeMessageTools
             if (scene.getObjects().size() > i)
                yoDataMessage.getSceneObjectPose()[i].set(scene.getObjects().get(i).getTransformToWorld());
             else
-               yoDataMessage.getSceneObjectPose()[i].setToNaN();
+               yoDataMessage.getSceneObjectPose()[i].getPose().setToNaN();
          }
 
          yoDataMessage.setAutomaticExecution(rootNode.getState().getAutomaticExecution());
@@ -554,8 +554,8 @@ public class ROS2BehaviorTreeMessageTools
             yoDataMessage.getCurrentHandPose()[side.ordinal()].set(action.getState().getCurrentPose().getValueReadOnly());
             CRDTStatusSE3Trajectory commandedTrajectory = action.getState().getCommandedTrajectory();
             if (!commandedTrajectory.isEmpty())
-               yoDataMessage.getGoalHandPose()[side.ordinal()].set(commandedTrajectory.getLastValueReadOnly().getOrientation(),
-                                                                   commandedTrajectory.getLastValueReadOnly().getPosition());
+               yoDataMessage.getGoalHandPose()[side.ordinal()].getPose().set(commandedTrajectory.getLastValueReadOnly().getOrientation(),
+                                                                             commandedTrajectory.getLastValueReadOnly().getPosition());
          }
       }
    }

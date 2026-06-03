@@ -5,7 +5,7 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ChunkMessage;
+import perception_msgs.ChunkMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
 
 public class ChunkMessageTools

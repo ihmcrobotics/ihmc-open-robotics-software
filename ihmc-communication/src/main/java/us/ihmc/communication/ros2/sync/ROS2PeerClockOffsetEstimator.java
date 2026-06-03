@@ -1,18 +1,17 @@
 package us.ihmc.communication.ros2.sync;
 
-import ihmc_common_msgs.msg.dds.PeerClockOffsetEstimatorPingMessage;
+import ihmc_common_msgs.PeerClockOffsetEstimatorPingMessage;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.pubsub.common.Guid;
-import us.ihmc.pubsub.common.SampleInfo;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Subscription;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.Guid;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -34,6 +33,7 @@ public class ROS2PeerClockOffsetEstimator
    private final HashMap<Guid, ROS2PeerClockOffsetEstimatorPeer> peerMap = new HashMap<>();
    private final List<ROS2PeerClockOffsetEstimatorPeer> peerList = new ArrayList<>();
    private int nextPeerToPing = 0;
+   private final ROS2Node ros2Node;
    private final ROS2Publisher<PeerClockOffsetEstimatorPingMessage> publisher;
    private final Guid ourGuid;
    private final RepeatingTaskThread requestThread = new RepeatingTaskThread(getClass().getSimpleName(),
@@ -44,24 +44,31 @@ public class ROS2PeerClockOffsetEstimator
          = Executors.newCachedThreadPool(ThreadTools.createNamedThreadFactory(getClass().getSimpleName() + "PublishReply", true));
    private final PeerClockOffsetEstimatorPingMessage requestMessage = new PeerClockOffsetEstimatorPingMessage();
    private final PeerClockOffsetEstimatorPingMessage receivedMessage = new PeerClockOffsetEstimatorPingMessage();
-   private final SampleInfo sampleInfo = new SampleInfo();
    private final Guid receivedRequestTarget = new Guid();
    private final Guid receivedReplyTarget = new Guid();
 
    public ROS2PeerClockOffsetEstimator(ROS2Node ros2Node)
    {
+      this.ros2Node = ros2Node;
       publisher = ros2Node.createPublisher(TOPIC);
-      ourGuid = publisher.getPublisher().getGuid();
+      ourGuid = new Guid();
+      ourGuid.set(publisher.getGuid());
 
-      subscription = ros2Node.createSubscription(TOPIC, subscriber ->
+      subscription = ros2Node.createSubscription(TOPIC, reader ->
       {
-         subscriber.takeNextData(receivedMessage, sampleInfo);
+         PeerClockOffsetEstimatorPingMessage message = reader.read();
+         if (message == null)
+            return;
+
+         receivedMessage.set(message);
 
          MessageTools.fromMessage(receivedMessage.getRequestTarget(), receivedRequestTarget);
          MessageTools.fromMessage(receivedMessage.getReplyTarget(), receivedReplyTarget);
 
          if (receivedMessage.getIsRequest() && receivedRequestTarget.equals(ourGuid)) // Reply
          {
+            addPeerIfAbsent(receivedReplyTarget);
+
             PeerClockOffsetEstimatorPingMessage replyMessage = new PeerClockOffsetEstimatorPingMessage();
             replyMessage.set(receivedMessage);
             replyMessage.setIsRequest(false);
@@ -85,36 +92,37 @@ public class ROS2PeerClockOffsetEstimator
                            MessageTools.toInstant(receivedMessage.getReplySendTime()));
             }
          }
-      }, (subscriber, info) ->
+      }, (subscriber, publicationGuid, matched) ->
       {
-         Guid guid = info.getGuid();
-         if (!guid.equals(publisher.getPublisher().getGuid())) // Exclude our publisher
+         if (!publicationGuid.equals(ourGuid))
          {
-            switch (info.getStatus())
+            if (matched)
             {
-               case MATCHED_MATCHING ->
-               {
-                  if (!peerMap.containsKey(guid))
-                  {
-                     Guid guidCopy = new Guid();
-                     guidCopy.set(guid);
-
-                     ROS2PeerClockOffsetEstimatorPeer peer = new ROS2PeerClockOffsetEstimatorPeer(guidCopy);
-                     peerMap.put(guidCopy, peer);
-                     peerList.add(peer);
-                  }
-               }
-               case REMOVED_MATCHING ->
-               {
-                  peerMap.remove(guid);
-                  peerList.removeIf(peer -> peer.getGuid().equals(guid));
-               }
+               addPeerIfAbsent(publicationGuid);
+            }
+            else
+            {
+               peerMap.remove(publicationGuid);
+               peerList.removeIf(peer -> peer.getGuid().equals(publicationGuid));
             }
          }
       });
 
       requestThread.setFrequencyLimit(5.0);
       requestThread.startRepeating();
+   }
+
+   private void addPeerIfAbsent(Guid peerGuid)
+   {
+      if (peerGuid.equals(ourGuid) || peerMap.containsKey(peerGuid))
+         return;
+
+      Guid guidCopy = new Guid();
+      guidCopy.set(peerGuid);
+
+      ROS2PeerClockOffsetEstimatorPeer peer = new ROS2PeerClockOffsetEstimatorPeer(guidCopy);
+      peerMap.put(guidCopy, peer);
+      peerList.add(peer);
    }
 
    private void runRequestTask()
@@ -142,8 +150,8 @@ public class ROS2PeerClockOffsetEstimator
    {
       cachedThreadPool.shutdown();
       requestThread.kill();
-      subscription.remove();
-      publisher.remove();
+      ros2Node.destroySubscription(subscription);
+      ros2Node.destroyPublisher(publisher);
    }
 
    public Guid getOurGuid()

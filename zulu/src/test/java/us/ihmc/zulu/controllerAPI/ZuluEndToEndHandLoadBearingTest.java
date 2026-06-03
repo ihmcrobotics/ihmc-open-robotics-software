@@ -1,6 +1,6 @@
 package us.ihmc.zulu.controllerAPI;
 
-import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
+import controller_msgs.PelvisOrientationTrajectoryMessage;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.zulu.ZuluRobotModel;

@@ -1,6 +1,6 @@
 package us.ihmc.avatar.rrtWalkingPathTest;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.FootstepDataListMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -327,7 +327,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       for (int i = 0; i < footsteps.getFootstepDataList().size(); i++)
       {
          factory.identity();
-         factory.appendTranslation(footsteps.getFootstepDataList().get(i).getLocation());
+         factory.appendTranslation(footsteps.getFootstepDataList().get(i).getLocation().getPoint());
          if (footsteps.getFootstepDataList().get(i).getRobotSide() == RobotSide.RIGHT.toByte())
          {
             factory.addSphere(0.05, ColorDefinitions.Blue());
@@ -374,7 +374,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       for (int i = 0; i < footSteps.size(); i++)
       {
          ret.addAll(getPrintFootStep(footSteps.get(i)));
-         //         PrintTools.info(" "+footSteps.get(i).getLocation().getX()+" "+footSteps.get(i).getLocation().getY());
+         //         PrintTools.info(" "+footSteps.get(i).getLocation().getPoint().getX()+" "+footSteps.get(i).getLocation().getPoint().getY());
       }
 
       return ret;

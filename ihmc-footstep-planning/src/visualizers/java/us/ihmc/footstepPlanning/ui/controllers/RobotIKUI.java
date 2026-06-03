@@ -7,13 +7,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.NeckTrajectoryMessage;
-import controller_msgs.msg.dds.SpineTrajectoryMessage;
+import controller_msgs.ArmTrajectoryMessage;
+import controller_msgs.ChestTrajectoryMessage;
+import controller_msgs.FootTrajectoryMessage;
+import controller_msgs.HandTrajectoryMessage;
+import controller_msgs.HeadTrajectoryMessage;
+import controller_msgs.NeckTrajectoryMessage;
+import controller_msgs.SpineTrajectoryMessage;
 import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;

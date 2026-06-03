@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
-import us.ihmc.idl.IDLSequence;
+import java.util.List;
 
 public enum ConfigurationSpaceName
 {
@@ -87,7 +87,7 @@ public enum ConfigurationSpaceName
       return byteArray;
    }
 
-   public static ConfigurationSpaceName[] fromBytes(IDLSequence.Byte enumListAsBytes)
+   public static ConfigurationSpaceName[] fromBytes(List<Byte> enumListAsBytes)
    {
       if (enumListAsBytes == null)
          return null;

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import controller_msgs.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.CenterOfMassHeightControlState;

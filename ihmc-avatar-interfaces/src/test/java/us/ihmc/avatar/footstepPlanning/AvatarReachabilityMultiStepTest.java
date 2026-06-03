@@ -12,8 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
@@ -212,8 +212,8 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
          SixDoFMotionControlAnchorDescription footstep = snapshotToStep.getSixDoFAnchors().get(0);
          assert (footstep.getRigidBodyName().equals(fullRobotModel.getFoot(RobotSide.LEFT).getName()));
 
-         Point3D loadedPose = footstep.getInputMessage().getDesiredPositionInWorld();
-         Quaternion loadedOrientation = footstep.getInputMessage().getDesiredOrientationInWorld();
+         Point3D loadedPose = new Point3D(footstep.getInputMessage().getDesiredPositionInWorld().getPoint());
+         Quaternion loadedOrientation = new Quaternion(footstep.getInputMessage().getDesiredOrientationInWorld().getQuaternion());
 
          TransformReferenceFrame stanceFootFrame = new TransformReferenceFrame("stanceFootFrame", ReferenceFrame.getWorldFrame());
          stanceFootFrame.setTransformAndUpdate(new RigidBodyTransform(new Quaternion(previousYaw, 0, 0), previousPose));
@@ -299,7 +299,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
          int randIndex = random.nextInt(feasibleSolutions.size());
          KinematicsToolboxSnapshotDescription snapshotToTest = feasibleSolutions.get(randIndex);
          SixDoFMotionControlAnchorDescription leftFoot = snapshotToTest.getSixDoFAnchors().get(0);
-         Point3D desiredPosition = leftFoot.getInputMessage().getDesiredPositionInWorld();
+         Point3D desiredPosition = new Point3D(leftFoot.getInputMessage().getDesiredPositionInWorld().getPoint());
          switch (mode)
          {
             case FLAT_FORWARDS:

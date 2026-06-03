@@ -1,29 +1,29 @@
 package us.ihmc.rdx.ui.tools;
 
-import com.eprosima.xmlschemas.fastrtps_profiles.TransportDescriptorType;
 import imgui.ImGui;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import us.ihmc.pubsub.impl.fastRTPS.FastRTPSDomain;
-import us.ihmc.pubsub.impl.fastRTPS.FastRTPSParticipant;
-import us.ihmc.pubsub.participant.Participant;
-import us.ihmc.pubsub.publisher.Publisher;
-import us.ihmc.pubsub.subscriber.Subscriber;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Subscription;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.scs2.sessionVisualizer.jfx.controllers.RegularExpression;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.StringJoiner;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.TreeSet;
 
 public class RDXROS2StatsPanel extends RDXPanel
 {
+   private static final CopyOnWriteArrayList<ROS2Node> trackedNodes = new CopyOnWriteArrayList<>();
+
    private long numberOfMatchedSubscriptions;
    private long numberOfPublications;
    private long numberOfReceivedMessages;
@@ -38,30 +38,49 @@ public class RDXROS2StatsPanel extends RDXPanel
    private final ImBoolean hideInactiveTopics = new ImBoolean(true);
    private final ImString filter = new ImString();
 
-   private final HashMap<Publisher, PubSubPublisherStats> publisherStatsMap = new HashMap<>();
-   private final HashMap<Subscriber<?>, PubSubSubscriberStats> subscriberStatsMap = new HashMap<>();
-   private final TreeSet<Participant> participantsSortedByName = new TreeSet<>(Comparator.<Participant, String>comparing(o -> o.getAttributes().getName())
-                                                                                         .thenComparingInt(Object::hashCode));
+   private final HashMap<ROS2Publisher<?>, PubSubPublisherStats> publisherStatsMap = new HashMap<>();
+   private final HashMap<ROS2Subscription<?>, PubSubSubscriberStats> subscriberStatsMap = new HashMap<>();
+   private final TreeSet<ROS2Node> nodesSortedByName = new TreeSet<>(Comparator.comparing(ROS2Node::getName).thenComparingInt(System::identityHashCode));
    private final TreeSet<PubSubPublisherStats> publishersSortedBySize
-         = new TreeSet<>(Comparator.<PubSubPublisherStats, Long>comparing(o -> o.getPublisher().getLargestMessageSize())
+         = new TreeSet<>(Comparator.<PubSubPublisherStats, Long>comparing(PubSubPublisherStats::getLargestMessageSize)
                                    .reversed()
-                                   .thenComparingInt(Object::hashCode));
+                                   .thenComparingInt(System::identityHashCode));
    private final TreeSet<PubSubSubscriberStats> subscribersSortedBySize
-         = new TreeSet<>(Comparator.<PubSubSubscriberStats, Long>comparing(o -> o.getSubscriber().getLargestMessageSize())
+         = new TreeSet<>(Comparator.<PubSubSubscriberStats, Long>comparing(PubSubSubscriberStats::getLargestMessageSize)
                                    .reversed()
-                                   .thenComparingInt(Object::hashCode));
+                                   .thenComparingInt(System::identityHashCode));
    private final TreeSet<PubSubPublisherStats> publishersSortedByName
-         = new TreeSet<>(Comparator.<PubSubPublisherStats, String>comparing(o -> o.getPublisher().getAttributes().getTopicName())
-                                   .thenComparingInt(Object::hashCode));
+         = new TreeSet<>(Comparator.<PubSubPublisherStats, String>comparing(o -> o.getPublisher().getTopicName())
+                                   .thenComparingInt(System::identityHashCode));
    private final TreeSet<PubSubSubscriberStats> subscribersSortedByName
-         = new TreeSet<>(Comparator.<PubSubSubscriberStats, String>comparing(o -> o.getSubscriber().getAttributes().getTopicName())
-                                   .thenComparingInt(Object::hashCode));
+         = new TreeSet<>(Comparator.<PubSubSubscriberStats, String>comparing(o -> o.getSubscription().getTopicName())
+                                   .thenComparingInt(System::identityHashCode));
 
    public RDXROS2StatsPanel()
    {
       super("ROS 2 Stats", null, false, true);
 
       setRenderMethod(this::renderImGuiWidgets);
+   }
+
+   /**
+    * Register a {@link ROS2Node} whose publishers and subscriptions should appear in this panel.
+    * Closed nodes are removed automatically during rendering.
+    */
+   public static void registerNode(ROS2Node node)
+   {
+      if (node != null && !trackedNodes.contains(node))
+      {
+         trackedNodes.add(node);
+      }
+   }
+
+   /**
+    * Stop tracking a {@link ROS2Node} in this panel.
+    */
+   public static void unregisterNode(ROS2Node node)
+   {
+      trackedNodes.remove(node);
    }
 
    private void renderImGuiWidgets()
@@ -75,82 +94,90 @@ public class RDXROS2StatsPanel extends RDXPanel
       totalOutgoingBandwidth = 0.0;
       totalIncomingBandwidth = 0.0;
 
-      participantsSortedByName.clear();
+      nodesSortedByName.clear();
       publishersSortedBySize.clear();
       subscribersSortedBySize.clear();
       publishersSortedByName.clear();
       subscribersSortedByName.clear();
 
-      List<FastRTPSParticipant> participants = (List<FastRTPSParticipant>) FastRTPSDomain.accessInstance().getAllParticipantsForStatistics();
-      synchronized (participants)
+      for (Iterator<ROS2Node> nodeIterator = trackedNodes.iterator(); nodeIterator.hasNext();)
       {
-         for (Participant participant : participants)
+         ROS2Node node = nodeIterator.next();
+
+         if (node.isClosed())
          {
-            participantsSortedByName.add(participant);
+            nodeIterator.remove();
+            continue;
+         }
 
-            List<Publisher> publishers = participant.getAllPublishersForStatistics();
-            synchronized (publishers)
+         nodesSortedByName.add(node);
+
+         List<ROS2Publisher<?>> publishers = node.getPublishers();
+         synchronized (publishers)
+         {
+            for (ROS2Publisher<?> publisher : publishers)
             {
-               for (Publisher publisher : publishers)
+               PubSubPublisherStats publisherStats = publisherStatsMap.get(publisher);
+
+               if (publisherStats == null)
                {
-                  PubSubPublisherStats publisherStats = publisherStatsMap.get(publisher);
-
-                  if (publisherStats == null)
-                  {
-                     publisherStats = new PubSubPublisherStats(participant, publisher);
-                     publisherStatsMap.put(publisher, publisherStats);
-                  }
-
-                  if (sortByLargestMessageSize.get())
-                     publishersSortedBySize.add(publisherStats);
-                  else
-                     publishersSortedByName.add(publisherStats);
+                  publisherStats = new PubSubPublisherStats(node, publisher);
+                  publisherStatsMap.put(publisher, publisherStats);
                }
+
+               if (sortByLargestMessageSize.get())
+                  publishersSortedBySize.add(publisherStats);
+               else
+                  publishersSortedByName.add(publisherStats);
             }
+         }
 
-            List<Subscriber<?>> subscribers = participant.getAllSubscribersForStatistics();
-            synchronized (subscribers)
+         List<ROS2Subscription<?>> subscriptions = node.getSubscriptions();
+         synchronized (subscriptions)
+         {
+            for (ROS2Subscription<?> subscription : subscriptions)
             {
-               for (Subscriber<?> subscriber : subscribers)
+               PubSubSubscriberStats subscriberStats = subscriberStatsMap.get(subscription);
+
+               if (subscriberStats == null)
                {
-                  PubSubSubscriberStats subscriberStats = subscriberStatsMap.get(subscriber);
-
-                  if (subscriberStats == null)
-                  {
-                     subscriberStats = new PubSubSubscriberStats(participant, subscriber);
-                     subscriberStatsMap.put(subscriber, subscriberStats);
-                  }
-
-                  if (sortByLargestMessageSize.get())
-                     subscribersSortedBySize.add(subscriberStats);
-                  else
-                     subscribersSortedByName.add(subscriberStats);
+                  subscriberStats = new PubSubSubscriberStats(node, subscription);
+                  subscriberStatsMap.put(subscription, subscriberStats);
                }
+
+               if (sortByLargestMessageSize.get())
+                  subscribersSortedBySize.add(subscriberStats);
+               else
+                  subscribersSortedByName.add(subscriberStats);
             }
          }
       }
+
+      pruneClosedEndpoints();
 
       for (PubSubPublisherStats publisherStats : publisherStatsMap.values())
       {
          publisherStats.update();
 
-         numberOfPublications += publisherStats.getPublisher().getNumberOfPublications();
+         numberOfPublications += publisherStats.getSampleCount();
          totalOutgoingBandwidth += publisherStats.getBandwidth();
 
-         if (publisherStats.getPublisher().getLargestMessageSize() > largestMessageSize)
-            largestMessageSize = publisherStats.getPublisher().getLargestMessageSize();
+         if (publisherStats.getLargestMessageSize() > largestMessageSize)
+            largestMessageSize = publisherStats.getLargestMessageSize();
       }
 
       for (PubSubSubscriberStats subscriberStats : subscriberStatsMap.values())
       {
          subscriberStats.update();
 
-         numberOfMatchedSubscriptions += subscriberStats.getSubscriber().hasMatched() ? 1 : 0;
-         numberOfReceivedMessages += subscriberStats.getSubscriber().getNumberOfReceivedMessages();
+         if (subscriberStats.getSampleCount() > 0)
+            numberOfMatchedSubscriptions += 1;
+
+         numberOfReceivedMessages += subscriberStats.getSampleCount();
          totalIncomingBandwidth += subscriberStats.getBandwidth();
 
-         if (subscriberStats.getSubscriber().getLargestMessageSize() > largestMessageSize)
-            largestMessageSize = subscriberStats.getSubscriber().getLargestMessageSize();
+         if (subscriberStats.getLargestMessageSize() > largestMessageSize)
+            largestMessageSize = subscriberStats.getLargestMessageSize();
       }
 
       if (ImGui.beginMenuBar())
@@ -175,9 +202,6 @@ public class RDXROS2StatsPanel extends RDXPanel
       tableFlags += ImGuiTableFlags.SizingFixedFit;
       tableFlags += ImGuiTableFlags.Reorderable;
       tableFlags += ImGuiTableFlags.Hideable;
-      // ImGui.tableGetSortSpecs is missing
-      // tableFlags += ImGuiTableFlags.Sortable;
-      // tableFlags += ImGuiTableFlags.SortMulti;
       tableFlags += ImGuiTableFlags.RowBg;
       tableFlags += ImGuiTableFlags.BordersOuter;
       tableFlags += ImGuiTableFlags.BordersV;
@@ -190,7 +214,7 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.tableSetupColumn(labels.get("Nodes"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Publishers"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Subscribers"), ImGuiTableColumnFlags.WidthFixed);
-         ImGui.tableSetupColumn(labels.get("Matched Subscriptions"), ImGuiTableColumnFlags.WidthFixed);
+         ImGui.tableSetupColumn(labels.get("Active Subscriptions"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Publications"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Received Messages"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Publish Frequency"), ImGuiTableColumnFlags.WidthFixed);
@@ -204,7 +228,7 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.tableNextRow();
 
          ImGui.tableNextColumn();
-         ImGui.text("%d".formatted(participantsSortedByName.size()));
+         ImGui.text("%d".formatted(nodesSortedByName.size()));
          ImGui.tableNextColumn();
          ImGui.text("%d".formatted(publisherStatsMap.size()));
          ImGui.tableNextColumn();
@@ -231,50 +255,32 @@ public class RDXROS2StatsPanel extends RDXPanel
 
       ImGuiTools.separatorText("Nodes");
 
-      if (ImGui.beginTable(labels.get("Nodes"), 6, tableFlags))
+      if (ImGui.beginTable(labels.get("Nodes"), 5, tableFlags))
       {
          ImGui.tableSetupColumn(labels.get("Node Name"), ImGuiTableColumnFlags.WidthFixed);
-         ImGui.tableSetupColumn(labels.get("Transports"), ImGuiTableColumnFlags.WidthFixed);
-         ImGui.tableSetupColumn(labels.get("Intraprocess"), ImGuiTableColumnFlags.WidthFixed);
+         ImGui.tableSetupColumn(labels.get("Domain ID"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Publishers"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Subscribers"), ImGuiTableColumnFlags.WidthFixed);
-         ImGui.tableSetupColumn(labels.get("Removed"), ImGuiTableColumnFlags.WidthFixed);
+         ImGui.tableSetupColumn(labels.get("Closed"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupScrollFreeze(0, 1);
          ImGui.tableHeadersRow();
 
-         ImGui.tableNextRow();
-
-         for (Participant participant : participantsSortedByName)
+         for (ROS2Node node : nodesSortedByName)
          {
-            if (RegularExpression.check(participant.getAttributes().getName(), filter.get()))
+            if (matchesFilter(node.getName()))
             {
+               ImGui.tableNextRow();
+
                ImGui.tableNextColumn();
-               ImGui.text(participant.getAttributes().getName());
+               ImGui.text(node.getName());
                ImGui.tableNextColumn();
-               String transports = "";
-               if (participant.getAttributes().getProfile().getRtps().getUserTransports() != null)
-               {
-                  StringJoiner stringJoiner = new StringJoiner(", ");
-                  for (String transportId : participant.getAttributes().getProfile().getRtps().getUserTransports().getTransportId())
-                  {
-                     for (TransportDescriptorType transportDescriptorType : participant.getAttributes().getTransportDescriptors().getTransportDescriptor())
-                     {
-                        if (transportDescriptorType.getTransportId().equals(transportId))
-                           stringJoiner.add(transportDescriptorType.getType());
-                     }
-                  }
-                  transports = stringJoiner.toString();
-               }
-               ImGui.text(transports);
+               ImGui.text("%d".formatted(node.getDomainId()));
                ImGui.tableNextColumn();
-               String intraProcessDelivery = participant.getAttributes().getLibrarySettings().getIntraprocessDelivery();
-               ImGui.text(intraProcessDelivery == null ? "DISABLED" : intraProcessDelivery);
+               ImGui.text("%d".formatted(node.getPublishers().size()));
                ImGui.tableNextColumn();
-               ImGui.text("%d".formatted(participant.getAllPublishersForStatistics().size()));
+               ImGui.text("%d".formatted(node.getSubscriptions().size()));
                ImGui.tableNextColumn();
-               ImGui.text("%d".formatted(participant.getAllSubscribersForStatistics().size()));
-               ImGui.tableNextColumn();
-               ImGui.text("%b".formatted(participant.isRemoved()));
+               ImGui.text("%b".formatted(node.isClosed()));
             }
          }
 
@@ -283,18 +289,17 @@ public class RDXROS2StatsPanel extends RDXPanel
 
       ImGuiTools.separatorText("Publishers");
 
-      if (ImGui.beginTable(labels.get("Publishers"), 10, tableFlags))
+      if (ImGui.beginTable(labels.get("Publishers"), 9, tableFlags))
       {
          ImGui.tableSetupColumn(labels.get("Node Name"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Topic Name"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Type"), ImGuiTableColumnFlags.WidthFixed);
-         ImGui.tableSetupColumn(labels.get("Reliability"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Publications"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Bandwidth"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Frequency"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Largest Message Size"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Current Message Size"));
-         ImGui.tableSetupColumn(labels.get("Removed"));
+         ImGui.tableSetupColumn(labels.get("Closed"));
          ImGui.tableSetupScrollFreeze(0, 1);
          ImGui.tableHeadersRow();
 
@@ -310,19 +315,17 @@ public class RDXROS2StatsPanel extends RDXPanel
 
       ImGuiTools.separatorText("Subscribers");
 
-      if (ImGui.beginTable(labels.get("Subscribers"), 11, tableFlags))
+      if (ImGui.beginTable(labels.get("Subscribers"), 9, tableFlags))
       {
          ImGui.tableSetupColumn(labels.get("Node Name"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Topic Name"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Type"), ImGuiTableColumnFlags.WidthFixed);
-         ImGui.tableSetupColumn(labels.get("Reliability"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Received"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Bandwidth"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Frequency"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Largest Message Size"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Current Message Size"));
-         ImGui.tableSetupColumn(labels.get("Matched"));
-         ImGui.tableSetupColumn(labels.get("Removed"));
+         ImGui.tableSetupColumn(labels.get("Closed"));
          ImGui.tableSetupScrollFreeze(0, 1);
          ImGui.tableHeadersRow();
 
@@ -337,25 +340,28 @@ public class RDXROS2StatsPanel extends RDXPanel
       }
    }
 
+   private void pruneClosedEndpoints()
+   {
+      publisherStatsMap.entrySet().removeIf(entry -> entry.getKey().isClosed());
+      subscriberStatsMap.entrySet().removeIf(entry -> entry.getKey().isClosed());
+   }
+
    private void renderPublisherRow(PubSubPublisherStats publisherStats)
    {
-      String nodeName = publisherStats.getParticipant().getAttributes().getName();
-      String topicName = publisherStats.getPublisher().getAttributes().getTopicName();
-      String typeName = publisherStats.getPublisher().getAttributes().getTopicDataType().getName();
-      String reliabilityKindName = publisherStats.getPublisher().getAttributes().getReliabilityKind().name();
+      ROS2Node node = publisherStats.getNode();
+      ROS2Publisher<?> publisher = publisherStats.getPublisher();
+      String nodeName = node.getName();
+      String topicName = publisher.getTopicName();
+      String typeName = ROS2Message.getNameFromMessageClass(publisher.getTopicType());
 
       boolean show;
       if (!filter.isEmpty())
       {
-         show = false;
-         show |= RegularExpression.check(nodeName, filter.get());
-         show |= RegularExpression.check(topicName, filter.get());
-         show |= RegularExpression.check(typeName, filter.get());
-         show |= RegularExpression.check(reliabilityKindName, filter.get());
+         show = matchesFilter(nodeName, topicName, typeName);
       }
       else
       {
-         show = publisherStats.getPublisher().getNumberOfPublications() > 0 || !hideInactiveTopics.get();
+         show = publisherStats.getSampleCount() > 0 || !hideInactiveTopics.get();
       }
 
       if (show)
@@ -369,41 +375,36 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.tableNextColumn();
          ImGui.text(typeName);
          ImGui.tableNextColumn();
-         ImGui.text(reliabilityKindName);
-         ImGui.tableNextColumn();
-         ImGui.text("%d".formatted(publisherStats.getPublisher().getNumberOfPublications()));
+         ImGui.text("%d".formatted(publisherStats.getSampleCount()));
          ImGui.tableNextColumn();
          ImGui.text("%s/s".formatted(PubSubStatsTools.getHumanReadableBitSize(Math.round(publisherStats.getBandwidth()))));
          ImGui.tableNextColumn();
          ImGui.text("%.0f Hz".formatted(publisherStats.getPublishFrequency()));
          ImGui.tableNextColumn();
-         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableByteSize(publisherStats.getPublisher().getLargestMessageSize())));
+         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableByteSize(publisherStats.getLargestMessageSize())));
          ImGui.tableNextColumn();
-         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableByteSize(publisherStats.getPublisher().getCurrentMessageSize())));
+         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableByteSize(publisherStats.getCurrentMessageSize())));
          ImGui.tableNextColumn();
-         ImGui.text("%b".formatted(publisherStats.getPublisher().isRemoved()));
+         ImGui.text("%b".formatted(publisher.isClosed()));
       }
    }
 
    private void renderSubscriberRow(PubSubSubscriberStats subscriberStats)
    {
-      String nodeName = subscriberStats.getParticipant().getAttributes().getName();
-      String topicName = subscriberStats.getSubscriber().getAttributes().getTopicName();
-      String typeName = subscriberStats.getSubscriber().getAttributes().getTopicDataType().getName();
-      String reliabilityKindName = subscriberStats.getSubscriber().getAttributes().getReliabilityKind().name();
+      ROS2Node node = subscriberStats.getNode();
+      ROS2Subscription<?> subscription = subscriberStats.getSubscription();
+      String nodeName = node.getName();
+      String topicName = subscription.getTopicName();
+      String typeName = ROS2Message.getNameFromMessageClass(subscription.getTopicType());
 
       boolean show;
       if (!filter.isEmpty())
       {
-         show = false;
-         show |= RegularExpression.check(nodeName, filter.get());
-         show |= RegularExpression.check(topicName, filter.get());
-         show |= RegularExpression.check(typeName, filter.get());
-         show |= RegularExpression.check(reliabilityKindName, filter.get());
+         show = matchesFilter(nodeName, topicName, typeName);
       }
       else
       {
-         show = subscriberStats.getSubscriber().getNumberOfReceivedMessages() > 0 || !hideInactiveTopics.get();
+         show = subscriberStats.getSampleCount() > 0 || !hideInactiveTopics.get();
       }
 
       if (show)
@@ -417,21 +418,32 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.tableNextColumn();
          ImGui.text(typeName);
          ImGui.tableNextColumn();
-         ImGui.text(reliabilityKindName);
-         ImGui.tableNextColumn();
-         ImGui.text("%d".formatted(subscriberStats.getSubscriber().getNumberOfReceivedMessages()));
+         ImGui.text("%d".formatted(subscriberStats.getSampleCount()));
          ImGui.tableNextColumn();
          ImGui.text("%s/s".formatted(PubSubStatsTools.getHumanReadableBitSize(Math.round(subscriberStats.getBandwidth()))));
          ImGui.tableNextColumn();
          ImGui.text("%.0f Hz".formatted(subscriberStats.getReceiveFrequency()));
          ImGui.tableNextColumn();
-         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableByteSize(subscriberStats.getSubscriber().getLargestMessageSize())));
+         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableByteSize(subscriberStats.getLargestMessageSize())));
          ImGui.tableNextColumn();
-         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableByteSize(subscriberStats.getSubscriber().getCurrentMessageSize())));
+         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableByteSize(subscriberStats.getCurrentMessageSize())));
          ImGui.tableNextColumn();
-         ImGui.text("%b".formatted(subscriberStats.getSubscriber().hasMatched()));
-         ImGui.tableNextColumn();
-         ImGui.text("%b".formatted(subscriberStats.getSubscriber().isRemoved()));
+         ImGui.text("%b".formatted(subscription.isClosed()));
       }
+   }
+
+   private boolean matchesFilter(String... values)
+   {
+      if (filter.isEmpty())
+         return true;
+
+      String lowerFilter = filter.get().toLowerCase();
+      for (String value : values)
+      {
+         if (value != null && value.toLowerCase().contains(lowerFilter))
+            return true;
+      }
+
+      return false;
    }
 }

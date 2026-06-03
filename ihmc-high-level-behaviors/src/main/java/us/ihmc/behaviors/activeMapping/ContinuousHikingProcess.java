@@ -13,7 +13,7 @@ import us.ihmc.perception.ROS2ImageSensors;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractionThread;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 

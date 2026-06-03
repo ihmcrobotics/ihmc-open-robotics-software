@@ -1,25 +1,30 @@
 package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.CapturabilityBasedStatus;
+import controller_msgs.RobotConfigurationData;
 import gnu.trove.list.array.TDoubleArrayList;
 import org.fest.swing.util.Pair;
-import toolbox_msgs.msg.dds.*;
+import toolbox_msgs.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxCenterOfMassMessage;
+import toolbox_msgs.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.*;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxRigidBodyCommand;
@@ -109,7 +114,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
       fullRobotModelTrajectoryCalculator = new WholeBodyTrajectoryPointCalculator(drcRobotModel);
 
       solution = HumanoidMessageTools.createKinematicsPlanningToolboxOutputStatus();
-      solution.setDestination(-1);
       outputConverter = new KinematicsPlanningToolboxOutputConverter(drcRobotModel);
 
       this.commandInputManager = commandInputManager;
@@ -290,7 +294,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
          for (int j = 0; j < numberOfKeyFrames; j++)
          {
             KinematicsToolboxRigidBodyMessage nextMessage = ikRigidBodyMessages.get(j);
-            Pose3D nextDesiredPose = new Pose3D(nextMessage.getDesiredPositionInWorld(), nextMessage.getDesiredOrientationInWorld());
+            Pose3D nextDesiredPose = new Pose3D(nextMessage.getDesiredPositionInWorld().getPoint(), nextMessage.getDesiredOrientationInWorld().getQuaternion());
             for (int k = 0; k < numberOfInterpolatedPoints; k++)
             {
                double alpha = ((double) k + 1) / (numberOfInterpolatedPoints + 1);
@@ -308,7 +312,8 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
          ikRigidBodyMessages.clear();
          for (int j = 0; j < ikRigidBodyPoses.size(); j++)
          {
-            KinematicsToolboxRigidBodyMessage messageToAdd = new KinematicsToolboxRigidBodyMessage(rigidBodyMessageBuffer);
+            KinematicsToolboxRigidBodyMessage messageToAdd = new KinematicsToolboxRigidBodyMessage();
+            messageToAdd.set(rigidBodyMessageBuffer);
             messageToAdd.getDesiredPositionInWorld().set(ikRigidBodyPoses.get(j).getPosition());
             messageToAdd.getDesiredOrientationInWorld().set(ikRigidBodyPoses.get(j).getOrientation());
             ikRigidBodyMessages.add(messageToAdd);
@@ -316,13 +321,13 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
       }
 
       // create interpolated way points for com.
-      List<Point3D> comPoints = new ArrayList<Point3D>();
+      List<Point3D> comPoints = new ArrayList<>();
       CenterOfMassCalculator calculator = new CenterOfMassCalculator(getDesiredFullRobotModel().getRootBody(), worldFrame);
       calculator.reset();
       Point3D currentPoint = new Point3D(calculator.getCenterOfMass());
       for (int i = 0; i < ikCenterOfMassMessages.size(); i++)
       {
-         Point3D nextDesiredPoint = new Point3D(ikCenterOfMassMessages.get(i).getDesiredPositionInWorld());
+         Point3D nextDesiredPoint = new Point3D(ikCenterOfMassMessages.get(i).getDesiredPositionInWorld().getPoint());
          for (int j = 0; j < numberOfInterpolatedPoints; j++)
          {
             double alpha = ((double) j + 1) / (numberOfInterpolatedPoints + 1);
@@ -340,8 +345,9 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
       ikCenterOfMassMessages.clear();
       for (int j = 0; j < comPoints.size(); j++)
       {
-         KinematicsToolboxCenterOfMassMessage messageToAdd = new KinematicsToolboxCenterOfMassMessage(comMessageBuffer);
-         messageToAdd.getDesiredPositionInWorld().set(comPoints.get(j));
+         KinematicsToolboxCenterOfMassMessage messageToAdd = new KinematicsToolboxCenterOfMassMessage();
+         messageToAdd.set(comMessageBuffer);
+         messageToAdd.getDesiredPositionInWorld().getPoint().set(comPoints.get(j));
          ikCenterOfMassMessages.add(messageToAdd);
       }
 
@@ -516,7 +522,13 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
    private void generateTrajectoriesToPreview(boolean useKeyFrameOptimizer)
    {
       fullRobotModelTrajectoryCalculator.clear();
-      fullRobotModelTrajectoryCalculator.addKeyFrames(solution.getRobotConfigurations(), solution.getKeyFrameTimes());
+      ArrayList<KinematicsToolboxOutputStatus> keyFrames = new ArrayList<>();
+      for (int i = 0; i < solution.getRobotConfigurations().size(); i++)
+         keyFrames.add(solution.getRobotConfigurations().get(i));
+      gnu.trove.list.array.TDoubleArrayList keyFrameTimes = new gnu.trove.list.array.TDoubleArrayList();
+      for (int i = 0; i < solution.getKeyFrameTimes().size(); i++)
+         keyFrameTimes.add(solution.getKeyFrameTimes().get(i));
+      fullRobotModelTrajectoryCalculator.addKeyFrames(keyFrames, keyFrameTimes);
       fullRobotModelTrajectoryCalculator.initializeCalculator();
       if (useKeyFrameOptimizer)
          fullRobotModelTrajectoryCalculator.computeOptimizingKeyFrameTimes();
@@ -545,8 +557,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
 
    private void convertWholeBodyTrajectoryMessage()
    {
-      WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-      wholeBodyTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+      controller_msgs.WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new controller_msgs.WholeBodyTrajectoryMessage();
       outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
       outputConverter.computeWholeBodyTrajectoryMessage(solution);
       solution.getSuggestedControllerMessage().set(wholeBodyTrajectoryMessage);
@@ -554,7 +565,8 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
 
    private void appendRobotConfigurationOnToolboxSolution()
    {
-      KinematicsToolboxOutputStatus keyFrame = new KinematicsToolboxOutputStatus(ikController.getSolution());
+      KinematicsToolboxOutputStatus keyFrame = new KinematicsToolboxOutputStatus();
+      keyFrame.set(ikController.getSolution());
       solution.getRobotConfigurations().add().set(keyFrame);
 
       solution.setSolutionQuality(solution.getSolutionQuality() + ikController.getSolution().getSolutionQuality());

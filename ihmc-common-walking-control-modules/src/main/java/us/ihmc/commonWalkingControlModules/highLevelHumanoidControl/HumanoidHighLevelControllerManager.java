@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.RobotDesiredConfigurationData;
+import controller_msgs.HighLevelStateChangeStatusMessage;
+import controller_msgs.RobotDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;

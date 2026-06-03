@@ -9,8 +9,7 @@ import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.tools.TimestampProvider;
@@ -40,7 +39,7 @@ public class AvatarEstimatorProcessFactory
 
    // ROS stuff
    public final String IHMC_ROS_STATE_ESTIMATOR_NODE_NAME;
-   private final RealtimeROS2Node estimatorRealtimeROS2Node;
+   private final AsyncROS2Node estimatorRealtimeROS2Node;
 
    // The thread factories
    private final AvatarEstimatorThreadFactory estimatorThreadFactory;
@@ -94,7 +93,7 @@ public class AvatarEstimatorProcessFactory
       else
          ros2ThreadFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
 
-      estimatorRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME, ros2ThreadFactory);
+      estimatorRealtimeROS2Node = new AsyncROS2Node(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME);
 
       // Set up low-level output processor
       lowLevelOutputProcessor = new AvatarLowLevelOutputProcessor(robotModel.getSimpleRobotName().toLowerCase(), fullRobotModel.getControllableOneDoFJoints(), estimatorThreadDt, registry);
@@ -105,7 +104,6 @@ public class AvatarEstimatorProcessFactory
 
    public void start()
    {
-      estimatorRealtimeROS2Node.spin();
       hardwareCommunicationInterface.start();
       threadingManager.get().start();
    }
@@ -118,7 +116,6 @@ public class AvatarEstimatorProcessFactory
    public void stop()
    {
       System.out.println("Calling stop in the multi-threading factory");
-      estimatorRealtimeROS2Node.stopSpinning();
       hardwareCommunicationInterface.stop();
       threadingManager.get().stop();
    }
@@ -128,7 +125,7 @@ public class AvatarEstimatorProcessFactory
       this.stop();
       System.out.println("Calling destroy in the estimator-threading factory");
 
-      estimatorRealtimeROS2Node.destroy();
+      estimatorRealtimeROS2Node.close();
       System.out.println("Estimator node has been destroyed");
 
       hardwareCommunicationInterface.destroy();

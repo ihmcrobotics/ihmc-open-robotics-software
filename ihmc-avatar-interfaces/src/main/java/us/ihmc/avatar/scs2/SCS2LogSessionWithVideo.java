@@ -2,8 +2,7 @@ package us.ihmc.avatar.scs2;
 
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotDataLogger.Camera;
-import us.ihmc.robotDataLogger.CameraType;
+import logger_msgs.Camera;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.scs2.session.log.*;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -51,7 +50,7 @@ public class SCS2LogSessionWithVideo extends LogSession
             LogTools.info("Found camera: %s".formatted(camera.getName()));
             try
             {
-               if (camera.getTypeAsString().equals(CameraType.CAPTURE_CARD_MAGEWELL.toString()))
+               if (camera.getTypeAsString().equals("CAPTURE_CARD_MAGEWELL"))
                {
                   MagewellScrubber magewellScrubber = new MagewellScrubber(camera, logDirectory, logProperties.getVideo().getHasTimebase());
                   magewellScrubbers.add(magewellScrubber);

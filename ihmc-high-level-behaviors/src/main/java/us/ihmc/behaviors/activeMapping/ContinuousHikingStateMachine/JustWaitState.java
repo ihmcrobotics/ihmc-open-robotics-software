@@ -1,12 +1,12 @@
 package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
-import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
-import ihmc_common_msgs.msg.dds.PoseListMessage;
-import ihmc_common_msgs.msg.dds.QueueableMessage;
+import behavior_msgs.ContinuousHikingCommandMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.QueuedFootstepStatusMessage;
+import ihmc_common_msgs.PoseListMessage;
+import ihmc_common_msgs.QueueableMessage;
 import org.jetbrains.annotations.NotNull;
-import std_msgs.msg.dds.Float32;
+import std_msgs.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
@@ -14,6 +14,7 @@ import us.ihmc.behaviors.activeMapping.ActiveMappingParameterToolBox;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.TerrainPlanningDebugger;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
@@ -41,7 +42,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -300,7 +301,7 @@ public class JustWaitState implements State
       if (controllerQueueMonitor.getNumberOfIncompleteFootsteps() > 0)
       {
          firstStepInQueue = controllerQueueMonitor.getFirstFootstepInQueue();
-         List<QueuedFootstepStatusMessage> controllerFootstepQueue = controllerQueueMonitor.getControllerFootstepQueue();
+         IDLObjectSequence<QueuedFootstepStatusMessage> controllerFootstepQueue = controllerQueueMonitor.getControllerFootstepQueue();
 
          RobotSide robotSide = RobotSide.fromByte(controllerFootstepQueue.get(0).getRobotSide());
 

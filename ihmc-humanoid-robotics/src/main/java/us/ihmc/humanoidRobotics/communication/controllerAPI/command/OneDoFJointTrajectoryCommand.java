@@ -3,8 +3,8 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import java.util.List;
 import java.util.Random;
 
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.OneDoFJointTrajectoryMessage;
+import ihmc_common_msgs.TrajectoryPoint1DMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
@@ -50,7 +50,7 @@ public class OneDoFJointTrajectoryCommand extends OneDoFTrajectoryPointList impl
       this.clear();
       sequenceId = message.getSequenceId();
 
-      List<TrajectoryPoint1DMessage> trajectoryPointMessages = message.getTrajectoryPoints();
+      var trajectoryPointMessages = message.getTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
 
       for (int i = 0; i < numberOfPoints; i++)

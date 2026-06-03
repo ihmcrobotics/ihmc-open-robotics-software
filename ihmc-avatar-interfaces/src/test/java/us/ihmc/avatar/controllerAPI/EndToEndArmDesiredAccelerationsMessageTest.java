@@ -7,7 +7,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
+import controller_msgs.ArmDesiredAccelerationsMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;

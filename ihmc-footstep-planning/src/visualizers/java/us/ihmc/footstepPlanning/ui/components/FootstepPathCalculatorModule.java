@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.ui.components;
 
-import perception_msgs.msg.dds.TerrainMapMessage;
-import toolbox_msgs.msg.dds.FootstepPlanningTimingsMessage;
+import perception_msgs.TerrainMapMessage;
+import toolbox_msgs.FootstepPlanningTimingsMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.commons.FormattingTools;

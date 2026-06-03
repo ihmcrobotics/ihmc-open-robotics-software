@@ -6,7 +6,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.SRTStreamStatus;
+import perception_msgs.SRTStreamStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
@@ -20,9 +20,8 @@ import us.ihmc.perception.RawImageTest;
 import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -46,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SRTStreamerSubscriberTest
 {
-   private static final ROS2Node ROS2_NODE = new ROS2NodeBuilder().build("srt_streaming_test");
+   private static final ROS2Node ROS2_NODE = new ROS2Node("srt_streaming_test");
    private static final ROS2Helper ROS2_HELPER = new ROS2Helper(ROS2_NODE);
    private static final double FPS = 30.0;
    private static final double TEST_TIMEOUT = 5.0;
@@ -267,7 +266,7 @@ public class SRTStreamerSubscriberTest
       throttler.setFrequency(FPS);
 
       // ROS2 topic for the streamer and subscriber
-      ROS2Topic<SRTStreamStatus> requestTopic = new ROS2Topic<SRTStreamStatus>().withSuffix("srt_status_test").withType(SRTStreamStatus.class);
+      ROS2Topic<SRTStreamStatus> requestTopic = new ROS2Topic<SRTStreamStatus>().appendedWith("srt_status_test").withType(SRTStreamStatus.class);
 
       float depthDescretization = -1.0f;
       CameraIntrinsics cameraIntrinsics = new CameraIntrinsics(sampleImage.rows(),

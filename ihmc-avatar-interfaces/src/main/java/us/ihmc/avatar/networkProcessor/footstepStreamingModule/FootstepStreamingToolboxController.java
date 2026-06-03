@@ -1,6 +1,6 @@
 package us.ihmc.avatar.networkProcessor.footstepStreamingModule;
 
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.networkProcessor.footstepStreamingModule.FootstepStreamingToolboxParameters.ClockType;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
@@ -15,7 +15,7 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;

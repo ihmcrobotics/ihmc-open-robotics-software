@@ -21,7 +21,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
@@ -56,7 +56,7 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
                                     CommandInputManager controllerCommandInputManager,
                                     DRCRobotModel drcRobotModel,
                                     FootstepAdjustment footstepAdjustment,
-                                    RealtimeROS2Node ros2Node)
+                                    AsyncROS2Node ros2Node)
    {
       this.fullRobotModel = drcRobotModel.createFullRobotModel();
 

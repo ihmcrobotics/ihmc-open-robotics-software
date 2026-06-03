@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.RLModelSelectionMessage;
+import controller_msgs.RLModelSelectionMessage;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.RLModelSelectionCommand;
 
 import static org.junit.jupiter.api.Assertions.*;

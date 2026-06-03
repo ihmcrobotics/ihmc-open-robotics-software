@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.tools.PerceptionDebugTools;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.perception.gpuMapping.HeightMapTools;
 
 public class HumanoidActivePerceptionModule

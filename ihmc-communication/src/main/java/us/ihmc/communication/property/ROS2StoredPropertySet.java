@@ -1,8 +1,8 @@
 package us.ihmc.communication.property;
 
-import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
+import ihmc_common_msgs.PrimitiveDataVectorMessage;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 import us.ihmc.commons.thread.Throttler;
 

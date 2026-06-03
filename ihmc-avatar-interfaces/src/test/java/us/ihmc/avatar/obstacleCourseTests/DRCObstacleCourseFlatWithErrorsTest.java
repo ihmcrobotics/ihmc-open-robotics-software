@@ -1,12 +1,11 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import java.io.InputStream;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
+import us.ihmc.avatar.scriptCommandGenerator.ExerciseAndJUnitScript;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.thread.ThreadTools;
@@ -88,8 +87,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       boolean success = simulationTestHelper.simulateNow(1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.5);
 
-      String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
-      loadScriptFileInLeftSoleFrame(scriptName);
+      runExerciseScriptInLeftSoleFrame(ExerciseAndJUnitScript.SIMPLE_FLAT_GROUND_SCRIPT);
       success = success && simulationTestHelper.simulateNow(16.0);
 
       // TODO GITHUB WORKFLOWS
@@ -140,8 +138,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       boolean success = simulationTestHelper.simulateNow(1.0);
 
       // Load script file:
-      String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
-      loadScriptFileInLeftSoleFrame(scriptName);
+      runExerciseScriptInLeftSoleFrame(ExerciseAndJUnitScript.SIMPLE_FLAT_GROUND_SCRIPT);
 
       success = success && simulationTestHelper.simulateNow(16.0);
 
@@ -159,12 +156,11 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private void loadScriptFileInLeftSoleFrame(String scriptName)
+   private void runExerciseScriptInLeftSoleFrame(ExerciseAndJUnitScript script)
    {
       FullHumanoidRobotModel controllerFullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       ReferenceFrame leftSoleFrame = controllerFullRobotModel.getSoleFrame(RobotSide.LEFT);
-      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-      simulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame);
+      simulationTestHelper.runExerciseScript(script, leftSoleFrame);
    }
 
    @Test
@@ -299,8 +295,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.5);
 
-      String scriptName = "scripts/ExerciseAndJUnitScripts/LongSideStepsLeft.xml";
-      loadScriptFileInLeftSoleFrame(scriptName);
+      runExerciseScriptInLeftSoleFrame(ExerciseAndJUnitScript.LONG_SIDE_STEPS_LEFT);
 
       slipOnEachStepPerturber.setSlipNextStep(true);
       success = success && simulationTestHelper.simulateNow(14.0);
@@ -348,8 +343,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.5);
 
-      String scriptName = "scripts/ExerciseAndJUnitScripts/LongSideStepsLeft.xml";
-      loadScriptFileInLeftSoleFrame(scriptName);
+      runExerciseScriptInLeftSoleFrame(ExerciseAndJUnitScript.LONG_SIDE_STEPS_LEFT);
 
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.5);
       success = success && simulationTestHelper.simulateNow(9.0);

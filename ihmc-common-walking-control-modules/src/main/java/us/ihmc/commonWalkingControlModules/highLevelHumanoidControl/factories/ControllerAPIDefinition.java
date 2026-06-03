@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import us.ihmc.jros2.ROS2Message;
+
 import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateArmDesiredAccelerationsMessage;
 import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateArmTrajectoryMessage;
 import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateChestTrajectoryMessage;
@@ -22,8 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import controller_msgs.msg.dds.*;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.*;
+import perception_msgs.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.BipedTimedStepListCommand;
@@ -41,7 +43,7 @@ import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitPara
 public class ControllerAPIDefinition
 {
    private static final List<Class<? extends Command<?, ?>>> controllerSupportedCommands;
-   private static final List<Class<? extends Settable<?>>> controllerSupportedStatusMessages;
+   private static final List<Class<? extends ROS2Message<?>>> controllerSupportedStatusMessages;
 
    static
    {
@@ -108,14 +110,14 @@ public class ControllerAPIDefinition
       return controllerSupportedCommands;
    }
 
-   public static List<Class<? extends Settable<?>>> getControllerSupportedStatusMessages()
+   public static List<Class<? extends ROS2Message<?>>> getControllerSupportedStatusMessages()
    {
       return controllerSupportedStatusMessages;
    }
 
    public static MessageValidator createDefaultMessageValidation()
    {
-      Map<Class<? extends Settable<?>>, MessageValidator> validators = new HashMap<>();
+      Map<Class<? extends ROS2Message<?>>, MessageValidator> validators = new HashMap<>();
       validators.put(ArmTrajectoryMessage.class, message -> validateArmTrajectoryMessage((ArmTrajectoryMessage) message));
       validators.put(HandTrajectoryMessage.class, message -> validateHandTrajectoryMessage((HandTrajectoryMessage) message));
       validators.put(FootTrajectoryMessage.class, message -> validateFootTrajectoryMessage((FootTrajectoryMessage) message));
@@ -147,7 +149,7 @@ public class ControllerAPIDefinition
 
    public static MessageIDExtractor createDefaultMessageIDExtractor()
    {
-      Map<Class<? extends Settable<?>>, MessageIDExtractor> extractors = new HashMap<>();
+      Map<Class<? extends ROS2Message<?>>, MessageIDExtractor> extractors = new HashMap<>();
       extractors.put(ArmTrajectoryMessage.class, m -> ((ArmTrajectoryMessage) m).getSequenceId());
       extractors.put(HandTrajectoryMessage.class, m -> ((HandTrajectoryMessage) m).getSequenceId());
       extractors.put(FootTrajectoryMessage.class, m -> ((FootTrajectoryMessage) m).getSequenceId());

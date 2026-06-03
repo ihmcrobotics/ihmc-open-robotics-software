@@ -4,8 +4,9 @@ import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImInt;
 import imgui.type.ImString;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
+import us.ihmc.communication.ROS2Input;
 import us.ihmc.behaviors.behaviorTree.action.actions.MimicActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.MimicActionDefinition.MimicActionType;
 import us.ihmc.behaviors.behaviorTree.action.actions.MimicActionState;
@@ -18,7 +19,6 @@ import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -93,8 +93,8 @@ public class RDXMimicAction extends RDXActionNode<MimicActionState, MimicActionD
          if (latestStatus.getJointNameHash() != -1)
          {
             hasKinematicsStatus = true;
-            ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootPosition());
-            ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
+            ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootPosition().getPoint());
+            ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation().getQuaternion());
             for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
                ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
             ghostFullRobotModel.getElevator().updateFramesRecursively();

@@ -2,8 +2,8 @@ package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
 import imgui.type.ImInt;
-import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
-import std_msgs.msg.dds.Int64;
+import perception_msgs.ZEDSVOCurrentFileMessage;
+import std_msgs.Int64;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;

@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
-import controller_msgs.msg.dds.ControllerWalkToGoalStatusMessage;
-import controller_msgs.msg.dds.ControllerWaypointStatusMessage;
-import controller_msgs.msg.dds.VelocityBasedWalkingInputMessage;
+import controller_msgs.ControllerWalkToGoalStatusMessage;
+import controller_msgs.ControllerWaypointStatusMessage;
+import controller_msgs.VelocityBasedWalkingInputMessage;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerReleaseGoalCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerWaypointGoalCommand;

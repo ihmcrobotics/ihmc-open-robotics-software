@@ -1,6 +1,6 @@
 package us.ihmc.rdx.behaviorTree.scene;
 
-import behavior_msgs.msg.dds.PersistentDetectionStatusMessage;
+import behavior_msgs.PersistentDetectionStatusMessage;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;

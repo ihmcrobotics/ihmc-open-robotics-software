@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.Random;
 
-import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import controller_msgs.HeadTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;

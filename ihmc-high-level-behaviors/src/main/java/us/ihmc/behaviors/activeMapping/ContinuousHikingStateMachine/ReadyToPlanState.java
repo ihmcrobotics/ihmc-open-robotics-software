@@ -1,8 +1,8 @@
 package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
-import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import ihmc_common_msgs.msg.dds.PoseListMessage;
+import behavior_msgs.ContinuousHikingCommandMessage;
+import controller_msgs.FootstepDataListMessage;
+import ihmc_common_msgs.PoseListMessage;
 import org.apache.commons.lang3.time.StopWatch;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingLogger;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;

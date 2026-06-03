@@ -24,8 +24,7 @@ import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.widgets.ImGuiRootIconWidget;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -98,8 +97,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
       {
          if (previewRobot == null)
          {
-            ROS2NodeBuilder ros2NodeBuilder = new ROS2NodeBuilder().domainId(165); // TODO: Decide what domain is better
-            previewROS2Node = ros2NodeBuilder.build("behavior_preview");
+            previewROS2Node = new ROS2Node("behavior_preview", 165); // TODO: Decide what domain is better
             previewSyncedRobot = new ROS2SyncedRobotModel(rootNode.robotModel, previewROS2Node);
             previewRobotModel = robotModel.createFullRobotModel();
             previewRobot = new RDXMultiBodyGraphic(robotModel.getSimpleRobotName() + " (Behavior Preview)");
@@ -281,7 +279,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
       scene.destroy();
 
       if (previewROS2Node != null)
-         previewROS2Node.destroy();
+         previewROS2Node.close();
       if (previewSyncedRobot != null)
          previewSyncedRobot.destroy();
       if (previewRobot != null)

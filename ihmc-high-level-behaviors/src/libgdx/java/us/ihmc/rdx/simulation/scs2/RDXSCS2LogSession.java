@@ -24,7 +24,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
-import us.ihmc.robotDataLogger.Camera;
+import logger_msgs.Camera;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;

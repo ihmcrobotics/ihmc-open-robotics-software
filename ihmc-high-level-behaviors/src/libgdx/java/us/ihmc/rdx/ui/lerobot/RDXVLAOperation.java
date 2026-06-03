@@ -1,17 +1,17 @@
 package us.ihmc.rdx.ui.lerobot;
 
-import behavior_msgs.msg.dds.VLAOperationMessage;
+import behavior_msgs.VLAOperationMessage;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.ArmTrajectoryMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Throttler;
@@ -39,8 +39,8 @@ import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.tools.Timer;
 
 import static us.ihmc.lerobot.VLAUpdateThread.UI;
@@ -121,8 +121,8 @@ public class RDXVLAOperation
          controlRobot.fromMessage(status.getControlRobot());
          for (RobotSide side : RobotSide.values)
          {
-            actionHandPoseGraphics.get(side).setPoseInWorldFrame(status.getActionHandPoses()[side.ordinal()]);
-            actionForearmPoseGraphics.get(side).setPoseInWorldFrame(status.getActionForearmPoses()[side.ordinal()]);
+            actionHandPoseGraphics.get(side).setPoseInWorldFrame(status.getActionHandPoses()[side.ordinal()].getPose());
+            actionForearmPoseGraphics.get(side).setPoseInWorldFrame(status.getActionForearmPoses()[side.ordinal()].getPose());
          }
          statusMessage = status.getStatusMessageAsString();
       }

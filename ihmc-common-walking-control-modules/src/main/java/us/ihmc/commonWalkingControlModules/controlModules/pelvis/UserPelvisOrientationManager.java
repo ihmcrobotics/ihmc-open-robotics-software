@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import controller_msgs.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyOrientationController;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;

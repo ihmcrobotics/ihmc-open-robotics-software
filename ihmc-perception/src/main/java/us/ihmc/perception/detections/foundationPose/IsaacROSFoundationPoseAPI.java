@@ -1,19 +1,19 @@
 package us.ihmc.perception.detections.foundationPose;
 
-import ihmc_common_msgs.msg.dds.Box3DMessage;
-import perception_msgs.msg.dds.FoundationPoseParameters;
-import sensor_msgs.msg.dds.CameraInfo;
-import sensor_msgs.msg.dds.Image;
-import std_msgs.msg.dds.Byte;
-import std_msgs.msg.dds.Empty;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
-import vision_msgs.msg.dds.Detection3DArray;
+import ihmc_common_msgs.Box3DMessage;
+import perception_msgs.FoundationPoseParameters;
+import sensor_msgs.CameraInfo;
+import sensor_msgs.Image;
+import std_msgs.Byte;
+import std_msgs.Empty;
+import us.ihmc.communication.HumanoidROS2Topic;
+import us.ihmc.jros2.ROS2Topic;
+import vision_msgs.Detection3DArray;
 
 public class IsaacROSFoundationPoseAPI
 {
    // Base topic
-   static final ROS2Topic<?> FOUNDATION_POSE_TOPIC = new ROS2Topic<>().withPrefix("foundationpose").withQoS(ROS2QosProfile.RELIABLE());
+   static final HumanoidROS2Topic<?> FOUNDATION_POSE_TOPIC = new HumanoidROS2Topic<>().withPrefix("foundationpose");
 
    // Pose estimation topics
    static final ROS2Topic<Image> POSE_ESTIMATION_DEPTH_IMAGE = FOUNDATION_POSE_TOPIC.withSuffix("pose_estimation/depth_image").withType(Image.class);

@@ -1,9 +1,9 @@
 package us.ihmc.behaviors.activeMapping;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
-import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
-import perception_msgs.msg.dds.ImageMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.WalkingStatusMessage;
+import perception_msgs.FramePlanarRegionsListMessage;
+import perception_msgs.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
@@ -12,8 +12,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.LocalizationAndMappingTask;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;

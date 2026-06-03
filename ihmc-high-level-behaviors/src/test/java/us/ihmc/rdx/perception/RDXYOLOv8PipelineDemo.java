@@ -33,8 +33,7 @@ import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
@@ -58,7 +57,7 @@ public class RDXYOLOv8PipelineDemo
 
    private static final String SAVE_DIRECTORY = System.getProperty("user.home") + File.separator + "Documents" + File.separator;
 
-   private final ROS2Node ros2Node = new ROS2NodeBuilder().build(RDXYOLOv8PipelineDemo.class.getSimpleName());
+   private final ROS2Node ros2Node = new ROS2Node(RDXYOLOv8PipelineDemo.class.getSimpleName());
    private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
    private final ROS2ZEDSVOPlaybackSensor zedPlaybackSensor = new ROS2ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, zed.SL_DEPTH_MODE_NEURAL, SVO_FILE);
@@ -497,7 +496,7 @@ public class RDXYOLOv8PipelineDemo
       depthImageSegmenter.close();
       pointCloudExtractor.close();
       zedPlaybackSensor.close();
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    public static void main(String[] args) throws Exception

@@ -12,7 +12,7 @@ import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Size;
-import perception_msgs.msg.dds.YOLOv8ModelInfo;
+import perception_msgs.YOLOv8ModelInfo;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;

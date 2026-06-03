@@ -11,8 +11,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseFlatTest;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
-import java.io.IOException;
-
 public class ZuluObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
    private final DRCRobotModel robotModel = new ZuluRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
@@ -82,7 +80,7 @@ public class ZuluObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Tag("humanoid-flat-ground")
    @Override
    @Test
-   public void testSimpleScripts() throws IOException
+   public void testSimpleScripts()
    {
       super.testSimpleScripts();
    }

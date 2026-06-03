@@ -1,9 +1,10 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
-import ihmc_hands_ros2.msg.dds.AbilityHandCommand;
-import ihmc_hands_ros2.msg.dds.AbilityHandState;
+import ihmc_hands_ros2.AbilityHandCommand;
+import ihmc_hands_ros2.AbilityHandState;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
 import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
 import us.ihmc.handsros2.abilityHand.AbilityHandModel.AbilityHandJointName;
@@ -11,8 +12,8 @@ import us.ihmc.handsros2.abilityHand.AbilityHandROS2API;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 
 import static us.ihmc.handsros2.abilityHand.AbilityHand.*;
 
@@ -36,7 +37,7 @@ public class AbilityHandKinematicsSimulation
       for (AbilityHandJointName jointName : AbilityHandJointName.values)
          joints[jointName.ordinal()] = (RevoluteJoint) fullRobotModel.getOneDoFJointByName(jointName.getJointName(side));
 
-      ros2Node.createSubscription2(AbilityHandROS2API.COMMAND_TOPICS.get(side), commandNotification::set);
+      ros2Node.createSubscription(AbilityHandROS2API.COMMAND_TOPICS.get(side), reader -> ROS2Tools.readIfPresent(reader, commandNotification::set));
       statePublisher = ros2Node.createPublisher(AbilityHandROS2API.STATE_TOPICS.get(side));
 
       setGripGoals(AbilityHandGrip.RELAX);

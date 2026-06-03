@@ -17,8 +17,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -34,7 +33,7 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
          ROS2SyncedRobotModel syncedRobot,
          ROS2PeerClockOffsetEstimator peerClockEstimator,
          ROS2ControllerHelper ros2ControllerHelper,
-         TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
+         TriFunction<DRCRobotModel, ROS2Node, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
          ImageSensor imageSensor,
          YOLOv8DetectionExecutor yolo,
          IsaacROSFoundationPoseCommunicatorMap foundationPose,

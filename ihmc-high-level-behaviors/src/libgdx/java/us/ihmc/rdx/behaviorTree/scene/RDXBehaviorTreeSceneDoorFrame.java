@@ -1,7 +1,7 @@
 package us.ihmc.rdx.behaviorTree.scene;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
+import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.BehaviorTreeSceneObjectStateMessage;
 import imgui.ImGui;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -13,7 +13,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
-import static behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage.*;
+import static behavior_msgs.BehaviorTreeSceneObjectStateMessage.*;
 
 public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
 {

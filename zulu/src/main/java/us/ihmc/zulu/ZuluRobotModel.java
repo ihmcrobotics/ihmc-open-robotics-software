@@ -42,8 +42,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -362,7 +362,7 @@ public class ZuluRobotModel implements DRCRobotModel
    }
 
    @Override
-   public AvatarSimulatedHandControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node, boolean kinematicsSimulation)
+   public AvatarSimulatedHandControlThread createSimulatedHandController(AsyncROS2Node realtimeROS2Node, boolean kinematicsSimulation)
    {
       return null;
    }

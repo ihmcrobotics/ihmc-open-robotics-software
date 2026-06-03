@@ -9,8 +9,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -173,9 +173,9 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       FootstepDataListMessage firstStepUpList = new FootstepDataListMessage();
       FootstepDataMessage firstStepUp = firstStepUpList.getFootstepDataList().add();
       firstStepUp.setRobotSide(RobotSide.LEFT.toByte());
-      firstStepUp.getLocation().setX(startX + stepLength);
-      firstStepUp.getLocation().setY(stanceWidth / 2.0);
-      firstStepUp.getLocation().setZ(stepHeight);
+      firstStepUp.getLocation().getPoint().setX(startX + stepLength);
+      firstStepUp.getLocation().getPoint().setY(stanceWidth / 2.0);
+      firstStepUp.getLocation().getPoint().setZ(stepHeight);
       firstStepUp.setSwingDuration(swingDuration);
       firstStepUp.setTransferDuration(transferDuration);
 
@@ -186,9 +186,9 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       FootstepDataListMessage firstSquareUpList = new FootstepDataListMessage();
       FootstepDataMessage firstSquareUp = firstSquareUpList.getFootstepDataList().add();
       firstSquareUp.setRobotSide(RobotSide.RIGHT.toByte());
-      firstSquareUp.getLocation().setX(startX + stepLength);
-      firstSquareUp.getLocation().setY(-stanceWidth / 2.0);
-      firstSquareUp.getLocation().setZ(stepHeight);
+      firstSquareUp.getLocation().getPoint().setX(startX + stepLength);
+      firstSquareUp.getLocation().getPoint().setY(-stanceWidth / 2.0);
+      firstSquareUp.getLocation().getPoint().setZ(stepHeight);
       firstSquareUp.setSwingDuration(swingDuration);
       firstSquareUp.setTransferDuration(transferDuration);
 
@@ -199,9 +199,9 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       FootstepDataListMessage secondStepUpList = new FootstepDataListMessage();
       FootstepDataMessage secondStepUp = secondStepUpList.getFootstepDataList().add();
       secondStepUp.setRobotSide(RobotSide.LEFT.toByte());
-      secondStepUp.getLocation().setX(2.0 * startX + stepLength);
-      secondStepUp.getLocation().setY(stanceWidth / 2.0);
-      secondStepUp.getLocation().setZ(2.0 * stepHeight);
+      secondStepUp.getLocation().getPoint().setX(2.0 * startX + stepLength);
+      secondStepUp.getLocation().getPoint().setY(stanceWidth / 2.0);
+      secondStepUp.getLocation().getPoint().setZ(2.0 * stepHeight);
       secondStepUp.setSwingDuration(swingDuration);
       secondStepUp.setTransferDuration(transferDuration);
 
@@ -213,9 +213,9 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       FootstepDataListMessage secondSquareUpList = new FootstepDataListMessage();
       FootstepDataMessage secondSquareUp = secondSquareUpList.getFootstepDataList().add();
       secondSquareUp.setRobotSide(RobotSide.RIGHT.toByte());
-      secondSquareUp.getLocation().setX(2.0 * startX + stepLength);
-      secondSquareUp.getLocation().setY(-stanceWidth / 2.0);
-      secondSquareUp.getLocation().setZ(2.0 * stepHeight);
+      secondSquareUp.getLocation().getPoint().setX(2.0 * startX + stepLength);
+      secondSquareUp.getLocation().getPoint().setY(-stanceWidth / 2.0);
+      secondSquareUp.getLocation().getPoint().setZ(2.0 * stepHeight);
       secondSquareUp.setSwingDuration(swingDuration);
       secondSquareUp.setTransferDuration(transferDuration);
 
@@ -246,7 +246,7 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
    {
       for (int i = 0; i < message.getFootstepDataList().size(); i++)
       {
-         message.getFootstepDataList().get(i).getLocation().add(translation);
+         message.getFootstepDataList().get(i).getLocation().getPoint().add(translation);
       }
 
       return message;
@@ -265,10 +265,10 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
          for (int i = 0; i < footstepDataList.getFootstepDataList().size(); i++)
          {
             FootstepDataMessage footstep = footstepDataList.getFootstepDataList().get(i);
-            footstep.getLocation().addX(EuclidCoreRandomTools.nextDouble(random, rangeX));
-            footstep.getLocation().addY(EuclidCoreRandomTools.nextDouble(random, rangeY));
-            footstep.getLocation().addZ(EuclidCoreRandomTools.nextDouble(random, rangeZ));
-            YawPitchRoll yawPitchRoll = new YawPitchRoll(footstep.getOrientation());
+            footstep.getLocation().getPoint().addX(EuclidCoreRandomTools.nextDouble(random, rangeX));
+            footstep.getLocation().getPoint().addY(EuclidCoreRandomTools.nextDouble(random, rangeY));
+            footstep.getLocation().getPoint().addZ(EuclidCoreRandomTools.nextDouble(random, rangeZ));
+            YawPitchRoll yawPitchRoll = new YawPitchRoll(footstep.getOrientation().getQuaternion());
             yawPitchRoll.addYaw(EuclidCoreRandomTools.nextDouble(random, rangeYaw));
             yawPitchRoll.addPitch(EuclidCoreRandomTools.nextDouble(random, rangePitch));
             yawPitchRoll.addRoll(EuclidCoreRandomTools.nextDouble(random, rangeRoll));

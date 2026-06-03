@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.ArmActionStateMessage;
+import behavior_msgs.ArmActionStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.communication.crdt.*;

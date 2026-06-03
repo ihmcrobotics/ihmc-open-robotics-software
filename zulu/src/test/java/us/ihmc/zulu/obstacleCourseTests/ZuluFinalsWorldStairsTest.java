@@ -1,7 +1,7 @@
 package us.ihmc.zulu.obstacleCourseTests;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.PelvisHeightTrajectoryMessage;
 import org.junit.jupiter.api.*;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;

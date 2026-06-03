@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
+import ihmc_common_msgs.SE3TrajectoryMessage;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.SimpleContactPointPlaneBody;
 import us.ihmc.commonWalkingControlModules.controlModules.multiContact.WholeBodyPostureAdjustmentProvider;
@@ -386,8 +386,8 @@ public class RigidBodyControlManagerTest
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
       message.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
       message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
-      message.getControlFramePose().getPosition().set(controlFramePosition);
-      message.getControlFramePose().getOrientation().set(controlFrameOrientation);
+      message.getControlFramePose().getPose().getPosition().set(controlFramePosition);
+      message.getControlFramePose().getPose().getOrientation().set(controlFrameOrientation);
       message.setUseCustomControlFrame(true);
       message.getTaskspaceTrajectoryPoints()
              .add()

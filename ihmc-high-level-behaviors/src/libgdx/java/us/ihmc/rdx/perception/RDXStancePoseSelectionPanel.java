@@ -6,12 +6,12 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import ihmc_common_msgs.msg.dds.PoseListMessage;
+import ihmc_common_msgs.PoseListMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
-import perception_msgs.msg.dds.TerrainMapMessage;
-import perception_msgs.msg.dds.TerrainMapMessagePubSubType;
+import perception_msgs.TerrainMapMessage;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -22,7 +22,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -37,8 +36,8 @@ import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
@@ -273,8 +272,6 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       TerrainMapMessage terrainMapMessage = new TerrainMapMessage();
       TerrainMapMessageTools.toMessage(terrainMapData, terrainMapMessage);
 
-      JSONSerializer<TerrainMapMessage> heightMapSerializer = new JSONSerializer<>(new TerrainMapMessagePubSubType());
-
       String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));
       Path heightMapDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY;
 
@@ -287,7 +284,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
          String heightMapDirectoryString = heightMapDirectory.toString();
          File heightMapFile = new File(heightMapDirectoryString + "/" + timestamp + "_HeightMapData.json");
-         heightMapSerializer.serialize(heightMapFile, terrainMapMessage);
+         Files.writeString(heightMapFile.toPath(), ROS2MessageCdrFileTools.serializeToBase64(terrainMapMessage));
       }
       catch (IOException e)
       {

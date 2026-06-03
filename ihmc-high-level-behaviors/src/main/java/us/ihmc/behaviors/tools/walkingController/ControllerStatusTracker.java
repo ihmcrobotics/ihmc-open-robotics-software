@@ -1,20 +1,21 @@
 package us.ihmc.behaviors.tools.walkingController;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.PlanOffsetStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.CapturabilityBasedStatus;
+import controller_msgs.ControllerCrashNotificationPacket;
+import controller_msgs.HighLevelStateChangeStatusMessage;
+import controller_msgs.PlanOffsetStatus;
+import controller_msgs.RobotConfigurationData;
+import controller_msgs.WalkingControllerFailureStatusMessage;
+import controller_msgs.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.log.LogToolsWriteOnly;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
 
@@ -59,12 +60,12 @@ public class ControllerStatusTracker
       finishedWalkingNotification.set();
 
       robotModel.addRobotConfigurationDataReceivedCallback(this::acceptRobotConfigurationData);
-      ros2Node.createSubscription2(getTopic(HighLevelStateChangeStatusMessage.class, robotName), this::acceptHighLevelStateChangeStatusMessage);
-      ros2Node.createSubscription2(getTopic(WalkingControllerFailureStatusMessage.class, robotName), this::acceptWalkingControllerFailureStatusMessage);
-      ros2Node.createSubscription2(getLowFrequencyTopic(PlanOffsetStatus.class, robotName), this::acceptPlanOffsetStatus);
-      ros2Node.createSubscription2(getTopic(ControllerCrashNotificationPacket.class, robotName), this::acceptControllerCrashNotificationPacket);
-      ros2Node.createSubscription2(getLowFrequencyTopic(CapturabilityBasedStatus.class, robotName), this::acceptCapturabilityBasedStatus);
-      ros2Node.createSubscription2(getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatusMessage);
+      ros2Node.createSubscription(getTopic(HighLevelStateChangeStatusMessage.class, robotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptHighLevelStateChangeStatusMessage));
+      ros2Node.createSubscription(getTopic(WalkingControllerFailureStatusMessage.class, robotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptWalkingControllerFailureStatusMessage));
+      ros2Node.createSubscription(getLowFrequencyTopic(PlanOffsetStatus.class, robotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptPlanOffsetStatus));
+      ros2Node.createSubscription(getTopic(ControllerCrashNotificationPacket.class, robotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptControllerCrashNotificationPacket));
+      ros2Node.createSubscription(getLowFrequencyTopic(CapturabilityBasedStatus.class, robotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptCapturabilityBasedStatus));
+      ros2Node.createSubscription(getTopic(WalkingStatusMessage.class, robotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptWalkingStatusMessage));
    }
 
    public void registerAbortedListener(Notification abortedListener)
@@ -116,11 +117,11 @@ public class ControllerStatusTracker
 
    private void acceptPlanOffsetStatus(PlanOffsetStatus message)
    {
-      if (!message.getOffsetVector().epsilonEquals(lastPlanOffset, 1e-3))
+      if (!message.getOffsetVector().getVector().epsilonEquals(lastPlanOffset, 1e-3))
       {
-         statusLogger.info("Remaining footsteps shifted! offset vector: {}", message.getOffsetVector());
+         statusLogger.info("Remaining footsteps shifted! offset vector: {}", message.getOffsetVector().getVector());
       }
-      lastPlanOffset.set(message.getOffsetVector());
+      lastPlanOffset.set(message.getOffsetVector().getVector());
    }
 
    private void acceptControllerCrashNotificationPacket(ControllerCrashNotificationPacket message)

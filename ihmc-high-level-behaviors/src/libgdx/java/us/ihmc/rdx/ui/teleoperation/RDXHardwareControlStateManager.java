@@ -1,11 +1,11 @@
 package us.ihmc.rdx.ui.teleoperation;
 
-import controller_msgs.msg.dds.EStopMasterGainCommandMessage;
-import controller_msgs.msg.dds.EStopMasterGainStatusMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.HighLevelStateMessage;
-import controller_msgs.msg.dds.StopAllTrajectoryMessage;
+import controller_msgs.EStopMasterGainCommandMessage;
+import controller_msgs.EStopMasterGainStatusMessage;
+import controller_msgs.GoHomeMessage;
+import controller_msgs.HighLevelStateChangeStatusMessage;
+import controller_msgs.HighLevelStateMessage;
+import controller_msgs.StopAllTrajectoryMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;

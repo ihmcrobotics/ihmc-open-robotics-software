@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.*;
+import controller_msgs.*;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;

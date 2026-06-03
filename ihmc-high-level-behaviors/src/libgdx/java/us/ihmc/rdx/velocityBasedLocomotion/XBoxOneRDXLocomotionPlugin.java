@@ -9,7 +9,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.joystickBasedLocomotion.AbstractJoystickLocomotionPlugin;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
 import us.ihmc.commons.DeadbandTools;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.jros2.ROS2Node;
 
 /**
  * This is a plugin for an RDX application. It can convert inputs coming from an Xbox One

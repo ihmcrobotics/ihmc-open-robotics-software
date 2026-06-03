@@ -4,22 +4,19 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.BigVideoPacket;
+import perception_msgs.BigVideoPacket;
 import us.ihmc.perception.imageMessage.PixelFormat;
-import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.tools.string.StringTools;
 
 public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPacket>
 {
    private final String titleBeforeAdditions;
    private final ROS2Topic<BigVideoPacket> topic;
-   private RealtimeROS2Node realtimeROS2Node = null;
+   private AsyncROS2Node realtimeROS2Node = null;
    private final BigVideoPacket videoPacket = new BigVideoPacket();
-   private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();
    private final BytePointer messageEncodedBytePointer = new BytePointer(25000000);
    private final Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
@@ -48,7 +45,7 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPa
 
    private void subscribe()
    {
-      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime(StringTools.titleToSnakeCase(titleBeforeAdditions));
+      realtimeROS2Node = new AsyncROS2Node(StringTools.titleToSnakeCase(titleBeforeAdditions));
       // imdecode takes the longest by far out of all this stuff
       // synchronize with the update method
       // YUV I420 has 1.5 times the height of the image
@@ -56,8 +53,8 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPa
       {
          synchronized (syncObject)
          {
-            videoPacket.getData().resetQuick();
-            subscriber.takeNextData(videoPacket, sampleInfo);
+            if (!subscriber.read(videoPacket))
+               return;
             //            delayPlot.addValue(TimeTools.calculateDelay(videoPacket.getAcquisitionTimeSecondsSinceEpoch(), videoPacket.getAcquisitionTimeAdditionalNanos()));
          }
          submitImageUpdate(imageVisualizer ->
@@ -85,7 +82,6 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPa
             getFrequency().ping();
          });
       });
-      realtimeROS2Node.spin();
    }
 
    @Override
@@ -109,7 +105,7 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPa
    {
       if (realtimeROS2Node != null)
       {
-         realtimeROS2Node.destroy();
+         realtimeROS2Node.close();
          realtimeROS2Node = null;
       }
    }

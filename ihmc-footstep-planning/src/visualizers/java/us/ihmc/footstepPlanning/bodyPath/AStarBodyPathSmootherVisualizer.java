@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
-import perception_msgs.msg.dds.TerrainMapMessage;
-import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import perception_msgs.TerrainMapMessage;
+import toolbox_msgs.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -242,7 +242,11 @@ public class AStarBodyPathSmootherVisualizer
       FootstepPlannerLog log = loader.getLog();
 
       FootstepPlanningToolboxOutputStatus statusPacket = log.getStatusPacket();
-      List<Pose3D> bodyPathPoseWaypoints = statusPacket.getBodyPath();
+      List<Pose3D> bodyPathPoseWaypoints = new ArrayList<>();
+      for (int i = 0; i < statusPacket.getBodyPath().size(); i++)
+      {
+         bodyPathPoseWaypoints.add(new Pose3D(statusPacket.getBodyPath().get(i).getPose()));
+      }
       TerrainMapMessage terrainMapMessage = log.getRequestPacket().getTerrainMapMessage();
 
       TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);

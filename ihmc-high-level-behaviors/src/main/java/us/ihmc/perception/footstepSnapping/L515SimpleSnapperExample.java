@@ -7,7 +7,7 @@ import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.Random;
 
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataMessage;
 import org.bytedeco.librealsense2.rs2_error;
 import org.bytedeco.librealsense2.rs2_frame;
 import org.bytedeco.librealsense2.global.realsense2;
@@ -246,7 +246,7 @@ public class L515SimpleSnapperExample implements FootstepAdjustment, L515DepthIm
          return false;
       }
         
-      if(highestPoint.getZ() < adjustedFootstep.getLocation().getZ() + 0.3)
+        if(highestPoint.getZ() < adjustedFootstep.getLocation().getPoint().getZ() + 0.3)
       {
          //just update the Z height
          updatedFootStepPose.setIncludingFrame(footstepPose);

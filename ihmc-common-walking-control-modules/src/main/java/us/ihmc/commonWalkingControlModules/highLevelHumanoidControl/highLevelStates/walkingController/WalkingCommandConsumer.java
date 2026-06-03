@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.ManipulationAbortedStatus;
+import controller_msgs.ManipulationAbortedStatus;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;

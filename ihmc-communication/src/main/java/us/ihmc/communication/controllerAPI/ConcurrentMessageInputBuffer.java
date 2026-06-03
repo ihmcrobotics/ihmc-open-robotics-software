@@ -3,7 +3,7 @@ package us.ihmc.communication.controllerAPI;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
@@ -38,17 +38,17 @@ public class ConcurrentMessageInputBuffer
     * Map from the registered messages to their associated buffer. These buffers CANNOT be visible or
     * accessed from outside this class.
     */
-   private final Map<Class<? extends Settable<?>>, ConcurrentRingBuffer<? extends Settable<?>>> messageClassToBufferMap = new HashMap<>();
+   private final Map<Class<? extends ROS2Message<?>>, ConcurrentRingBuffer<? extends ROS2Message<?>>> messageClassToBufferMap = new HashMap<>();
 
    /**
     * Controller's copy of the new message to be processed.
     */
-   private final Map<Class<? extends Settable<?>>, RecyclingArrayList<? extends Settable<?>>> messagesMap = new HashMap<>();
+   private final Map<Class<? extends ROS2Message<?>>, RecyclingArrayList<? extends ROS2Message<?>>> messagesMap = new HashMap<>();
 
    /**
     * Exhaustive list of all the supported messages that this API can process.
     */
-   private final List<Class<? extends Settable<?>>> listOfSupportedMessages = new ArrayList<>();
+   private final List<Class<? extends ROS2Message<?>>> listOfSupportedMessages = new ArrayList<>();
 
    /**
     * List of the listeners that should get notified when receiving a new valid message.
@@ -60,7 +60,7 @@ public class ConcurrentMessageInputBuffer
     *
     * @param messagesToRegister list of the messages that this API should support.
     */
-   public ConcurrentMessageInputBuffer(List<Class<? extends Settable<?>>> messagesToRegister)
+   public ConcurrentMessageInputBuffer(List<Class<? extends ROS2Message<?>>> messagesToRegister)
    {
       this(null, messagesToRegister);
    }
@@ -72,7 +72,7 @@ public class ConcurrentMessageInputBuffer
     *                           distinguish the different modules using this class.
     * @param messagesToRegister list of the messages that this API should support.
     */
-   public ConcurrentMessageInputBuffer(String name, List<Class<? extends Settable<?>>> messagesToRegister)
+   public ConcurrentMessageInputBuffer(String name, List<Class<? extends ROS2Message<?>>> messagesToRegister)
    {
       this(name, messagesToRegister, 16);
    }
@@ -85,7 +85,7 @@ public class ConcurrentMessageInputBuffer
     * @param messagesToRegister list of the messages that this API should support.
     * @param buffersCapacity    the capacity of the internal buffers, should be a power of 2.
     */
-   public ConcurrentMessageInputBuffer(String name, List<Class<? extends Settable<?>>> messagesToRegister, int buffersCapacity)
+   public ConcurrentMessageInputBuffer(String name, List<Class<? extends ROS2Message<?>>> messagesToRegister, int buffersCapacity)
    {
       this.printStatementPrefix = name == null ? "" : name + ": ";
       this.buffersCapacity = buffersCapacity;
@@ -98,7 +98,7 @@ public class ConcurrentMessageInputBuffer
     * @param messagesToRegister
     */
    @SuppressWarnings("unchecked")
-   private <C extends Settable<C>, M extends Settable<M>> void registerNewMessages(List<Class<? extends Settable<?>>> messagesToRegister)
+   private <C extends ROS2Message<C>, M extends ROS2Message<M>> void registerNewMessages(List<Class<? extends ROS2Message<?>>> messagesToRegister)
    {
       for (int i = 0; i < messagesToRegister.size(); i++)
          registerNewMessage((Class<C>) messagesToRegister.get(i));
@@ -109,7 +109,7 @@ public class ConcurrentMessageInputBuffer
     *
     * @param messageClass
     */
-   private <M extends Settable<M>> void registerNewMessage(Class<M> messageClass)
+   private <M extends ROS2Message<M>> void registerNewMessage(Class<M> messageClass)
    {
       Builder<M> builder = CommandInputManager.createBuilderWithEmptyConstructor(messageClass);
       ConcurrentRingBuffer<M> newBuffer = new ConcurrentRingBuffer<>(builder, buffersCapacity);
@@ -134,13 +134,13 @@ public class ConcurrentMessageInputBuffer
     *
     * @param message message to be submitted to the controller.
     */
-   public <M extends Settable<M>> void submitMessage(M message)
+   public <M extends ROS2Message<M>> void submitMessage(M message)
    {
       submitMessageInternal(message);
    }
 
    @SuppressWarnings({"unchecked", "rawtypes"})
-   private <M extends Settable<M>> void submitMessageInternal(M message)
+   private <M extends ROS2Message<M>> void submitMessageInternal(M message)
    {
       if (message == null)
       {
@@ -179,7 +179,7 @@ public class ConcurrentMessageInputBuffer
     * @param messages list of messages to be submitted to the controller.
     */
    @SuppressWarnings("unchecked")
-   public <M extends Settable<M>> void submitMessages(List<? extends Settable<?>> messages)
+   public <M extends ROS2Message<M>> void submitMessages(List<? extends ROS2Message<?>> messages)
    {
       for (int i = 0; i < messages.size(); i++)
          submitMessage((M) messages.get(i));
@@ -201,7 +201,7 @@ public class ConcurrentMessageInputBuffer
     * @param messageClassToCheck class of the message to check availability.
     * @return true if at least one new message is available.
     */
-   public boolean isNewMessageAvailable(Class<? extends Settable<?>> messageClassToCheck)
+   public boolean isNewMessageAvailable(Class<? extends ROS2Message<?>> messageClassToCheck)
    {
       return messageClassToBufferMap.get(messageClassToCheck).poll();
    }
@@ -220,7 +220,7 @@ public class ConcurrentMessageInputBuffer
     *
     * @param messageClassToCLear Used to know what type of message is to be thrown away.
     */
-   public <C extends Settable<C>> void clearMessages(Class<C> messageClassToCLear)
+   public <C extends ROS2Message<C>> void clearMessages(Class<C> messageClassToCLear)
    {
       clearBuffer(messageClassToBufferMap.get(messageClassToCLear));
    }
@@ -232,7 +232,7 @@ public class ConcurrentMessageInputBuffer
     * @param messageClassToPoll Used to know what type of message is to be polled.
     * @return the new message to be processed, returns null if there is no new available message.
     */
-   public <C extends Settable<C>> C pollNewestMessage(Class<C> messageClassToPoll)
+   public <C extends ROS2Message<C>> C pollNewestMessage(Class<C> messageClassToPoll)
    {
       return ((RecyclingArrayList<C>) pollNewMessages(messageClassToPoll)).getLast();
    }
@@ -245,7 +245,7 @@ public class ConcurrentMessageInputBuffer
     *       new available message.
     */
    @SuppressWarnings("unchecked")
-   public <C extends Settable<C>> List<C> pollNewMessages(Class<C> messageClassToPoll)
+   public <C extends ROS2Message<C>> List<C> pollNewMessages(Class<C> messageClassToPoll)
    {
       RecyclingArrayList<C> messages = (RecyclingArrayList<C>) messagesMap.get(messageClassToPoll);
       ConcurrentRingBuffer<C> buffer = (ConcurrentRingBuffer<C>) messageClassToBufferMap.get(messageClassToPoll);
@@ -279,7 +279,7 @@ public class ConcurrentMessageInputBuffer
     * @param messagesToPack Used to copy and store all the new available messages. This list will be
     *                       empty is there is no new available messages.
     */
-   private static <C extends Settable<C>> void pollNewMessages(ConcurrentRingBuffer<C> buffer, RecyclingArrayList<C> messagesToPack)
+   private static <C extends ROS2Message<C>> void pollNewMessages(ConcurrentRingBuffer<C> buffer, RecyclingArrayList<C> messagesToPack)
    {
       messagesToPack.clear();
 
@@ -297,7 +297,7 @@ public class ConcurrentMessageInputBuffer
    /**
     * @return The list of all the messages supported by this API.
     */
-   public List<Class<? extends Settable<?>>> getListOfSupportedMessages()
+   public List<Class<? extends ROS2Message<?>>> getListOfSupportedMessages()
    {
       return listOfSupportedMessages;
    }
@@ -307,6 +307,6 @@ public class ConcurrentMessageInputBuffer
     */
    public static interface HasReceivedInputListener
    {
-      public void hasReceivedInput(Class<? extends Settable<?>> messageClass);
+      public void hasReceivedInput(Class<? extends ROS2Message<?>> messageClass);
    }
 }

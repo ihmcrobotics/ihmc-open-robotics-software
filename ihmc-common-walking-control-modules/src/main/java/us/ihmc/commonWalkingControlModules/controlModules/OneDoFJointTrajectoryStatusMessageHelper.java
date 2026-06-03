@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
+import controller_msgs.JointspaceTrajectoryStatusMessage;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -22,8 +22,8 @@ public class OneDoFJointTrajectoryStatusMessageHelper extends TrajectoryStatusMe
    {
       super.clear();
 
-      statusMessage.getActualJointPositions().set(0, Double.NaN);
-      statusMessage.getDesiredJointPositions().set(0, Double.NaN);
+      statusMessage.getActualJointPositions().getBuffer().put(0, Double.NaN);
+      statusMessage.getDesiredJointPositions().getBuffer().put(0, Double.NaN);
    }
 
    public void registerNewTrajectory(OneDoFJointTrajectoryCommand command, ExecutionMode executionMode)
@@ -49,8 +49,8 @@ public class OneDoFJointTrajectoryStatusMessageHelper extends TrajectoryStatusMe
       statusMessage.setSequenceId(currentStatus.getSequenceID());
       statusMessage.setTimestamp(currentStatus.getTimeInTrajectory());
       statusMessage.setTrajectoryExecutionStatus(currentStatus.getStatus().toByte());
-      statusMessage.getActualJointPositions().set(0, qCurrent);
-      statusMessage.getDesiredJointPositions().set(0, qDesired);
+      statusMessage.getActualJointPositions().getBuffer().put(0, qCurrent);
+      statusMessage.getDesiredJointPositions().getBuffer().put(0, qDesired);
 
       return statusMessage;
    }

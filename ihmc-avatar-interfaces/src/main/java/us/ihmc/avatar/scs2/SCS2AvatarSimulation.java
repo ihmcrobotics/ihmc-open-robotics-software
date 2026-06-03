@@ -1,11 +1,14 @@
 package us.ihmc.avatar.scs2;
 
+import us.ihmc.jros2.ROS2Message;
+
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarStepGeneratorThread;
 import us.ihmc.avatar.ControllerTask;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
+import us.ihmc.avatar.factory.BarrierScheduledRobotController;
 import us.ihmc.avatar.factory.DisposableRobotController;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLoggerOld;
@@ -15,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -26,7 +28,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.state.interfaces.SixDoFJointStateBasics;
@@ -63,7 +65,7 @@ public class SCS2AvatarSimulation
    private DRCRobotModel robotModel;
    private boolean showGUI;
    private boolean automaticallyStartSimulation;
-   private RealtimeROS2Node realtimeROS2Node;
+   private AsyncROS2Node realtimeROS2Node;
    private ROS2Heartbeat heartbeat;
 
    private boolean systemExitOnDestroy = true;
@@ -104,8 +106,6 @@ public class SCS2AvatarSimulation
 
    public void afterSessionThreadStart()
    {
-      if (realtimeROS2Node != null)
-         realtimeROS2Node.spin();
       if (simulationConstructionSet.isVisualizerEnabled())
          simulationConstructionSet.waitUntilVisualizerFullyUp();
    }
@@ -118,8 +118,17 @@ public class SCS2AvatarSimulation
       LogTools.info("Destroying simulation");
       hasBeenDestroyed = true;
 
+      if (simulationConstructionSet != null)
+      {
+         simulationConstructionSet.pause();
+         if (simulationConstructionSet.isSimulationThreadRunning())
+            simulationConstructionSet.stopSimulationThread();
+      }
+
       if (robotController != null)
       {
+         if (robotController instanceof BarrierScheduledRobotController barrierScheduledRobotController)
+            barrierScheduledRobotController.waitUntilTasksDone();
          robotController.dispose();
          robotController = null;
       }
@@ -130,9 +139,15 @@ public class SCS2AvatarSimulation
          yoVariableServer = null;
       }
 
-      if (realtimeROS2Node != null)
+      if (heartbeat != null)
       {
-         realtimeROS2Node.destroy();
+         heartbeat.destroy();
+         heartbeat = null;
+      }
+
+      if (realtimeROS2Node != null && !realtimeROS2Node.isClosed())
+      {
+         realtimeROS2Node.close();
          realtimeROS2Node = null;
       }
 
@@ -140,12 +155,6 @@ public class SCS2AvatarSimulation
       {
          simulationConstructionSet.shutdownSession();
          simulationConstructionSet = null;
-      }
-
-      if (heartbeat != null)
-      {
-         heartbeat.destroy();
-         heartbeat = null;
       }
 
       if (systemExitOnDestroy)
@@ -369,6 +378,11 @@ public class SCS2AvatarSimulation
    public void setSystemExitOnDestroy(boolean systemExitOnDestroy)
    {
       this.systemExitOnDestroy = systemExitOnDestroy;
+   }
+
+   public boolean isSystemExitOnDestroy()
+   {
+      return systemExitOnDestroy;
    }
 
    public void setJavaFXThreadImplicitExit(boolean javaFXThreadImplicitExit)
@@ -605,7 +619,7 @@ public class SCS2AvatarSimulation
       stepGeneratorThread.getCsgCommandInputManager().getCommandInputManager().submitCommand(command);
    }
 
-   public <S extends Settable<S>> void attachStepGeneratorStatusMessageListener(Class<S> statusMessageClass, StatusMessageListener<S> statusMessageListener)
+   public <S extends ROS2Message<S>> void attachStepGeneratorStatusMessageListener(Class<S> statusMessageClass, StatusMessageListener<S> statusMessageListener)
    {
       stepGeneratorThread.getStatusOutputManager().attachStatusMessageListener(statusMessageClass, statusMessageListener);
    }
@@ -615,7 +629,7 @@ public class SCS2AvatarSimulation
       this.automaticallyStartSimulation = automaticallyStartSimulation;
    }
 
-   public void setRealTimeROS2Node(RealtimeROS2Node realtimeROS2Node)
+   public void setRealTimeROS2Node(AsyncROS2Node realtimeROS2Node)
    {
       this.realtimeROS2Node = realtimeROS2Node;
    }

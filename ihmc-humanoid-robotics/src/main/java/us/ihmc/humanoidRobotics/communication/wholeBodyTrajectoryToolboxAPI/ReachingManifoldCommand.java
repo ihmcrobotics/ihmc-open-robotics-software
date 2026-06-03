@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import toolbox_msgs.msg.dds.ReachingManifoldMessage;
+import toolbox_msgs.ReachingManifoldMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -86,8 +86,8 @@ public class ReachingManifoldCommand
       else
          rigidBody = rigidBodyHashMap.get(rigidBodyHashCode);
 
-      this.manifoldOriginPosition.set(message.getManifoldOriginPosition());
-      this.manifoldOriginOrientation.set(message.getManifoldOriginOrientation());
+      this.manifoldOriginPosition.set(message.getManifoldOriginPosition().getPoint());
+      this.manifoldOriginOrientation.set(message.getManifoldOriginOrientation().getQuaternion());
 
       for (int i = 0; i < message.getManifoldConfigurationSpaceNames().size(); i++)
       {

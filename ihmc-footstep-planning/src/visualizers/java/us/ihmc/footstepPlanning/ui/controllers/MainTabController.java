@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.FootstepDataListMessage;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;

@@ -8,7 +8,7 @@ import us.ihmc.avatar.joystickBasedJavaFXController.ButtonState;
 import us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController;
 import us.ihmc.avatar.joystickBasedLocomotion.AbstractJoystickLocomotionPlugin;
 import us.ihmc.messager.SharedMemoryMessager;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 
 import java.util.concurrent.atomic.AtomicBoolean;
