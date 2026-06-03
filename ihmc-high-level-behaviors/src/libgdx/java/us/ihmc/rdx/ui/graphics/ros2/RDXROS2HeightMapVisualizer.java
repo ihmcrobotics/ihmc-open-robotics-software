@@ -303,6 +303,15 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    @Override
    public void destroy()
    {
+      if (chunkMapRequestHeartbeat != null)
+         chunkMapRequestHeartbeat.destroy();
+      if (heightMapRequestHeartbeat != null)
+         heightMapRequestHeartbeat.destroy();
+      if (terrainMapRequestHeartbeat != null)
+         terrainMapRequestHeartbeat.destroy();
+      if (heightMapControllerRequestHeartbeat != null)
+         heightMapControllerRequestHeartbeat.destroy();
+
       super.destroy();
       executorService.destroy();
       chunkedMapRenderer.destroy();

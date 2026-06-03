@@ -1,7 +1,6 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
 
 import controller_msgs.FootstepDataListMessage;
-import controller_msgs.FootstepDataMessage;
 import toolbox_msgs.FootstepPlannerActionMessage;
 import toolbox_msgs.FootstepPlannerParametersPacket;
 import toolbox_msgs.FootstepPlanningRequestPacket;
@@ -11,7 +10,6 @@ import toolbox_msgs.SwingPlanningRequestPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.FootstepPlannerAPI;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -27,7 +25,6 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -36,7 +33,6 @@ import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -45,29 +41,12 @@ public class FootstepPlanningModuleLauncher
    private static final String LOG_DIRECTORY_ENVIRONMENT_VARIABLE = "IHMC_FOOTSTEP_PLANNER_LOG_DIR";
    private static final String LOG_DIRECTORY;
 
-   // TODO publish version of ihmc-commons with access to capacity of RecyclingArrayList so that ros message field capacities can be accessed from the field's java object
-   private static final int defaultFootstepPlanCapacity = 50;
    private static final int footstepPlanCapacity;
 
    static
    {
-      int footstepListCapacity = defaultFootstepPlanCapacity;
-
-      try
-      {
-         FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-         IDLObjectSequence<FootstepDataMessage> footstepDataList = footstepDataListMessage.getFootstepDataList();
-         Field valuesField = RecyclingArrayList.class.getDeclaredField("values");
-         valuesField.setAccessible(true);
-         Object[] values = (Object[]) valuesField.get(footstepDataList);
-         footstepListCapacity = values.length;
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
-
-      footstepPlanCapacity = footstepListCapacity;
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+      footstepPlanCapacity = footstepDataListMessage.getFootstepDataList().capacity();
    }
 
    static
