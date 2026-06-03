@@ -19,6 +19,11 @@ mainDependencies {
    api("us.ihmc:ihmc-high-level-behaviors:source")
 }
 
+rdxDependencies {
+   api(ihmc.sourceSetProject("main"))
+   api("us.ihmc:ihmc-high-level-behaviors-libgdx:source")
+}
+
 testDependencies {
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
    api("us.ihmc:ihmc-sensor-processing-test:source")
