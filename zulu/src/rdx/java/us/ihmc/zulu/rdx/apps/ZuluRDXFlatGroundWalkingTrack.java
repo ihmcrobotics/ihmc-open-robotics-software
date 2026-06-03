@@ -6,8 +6,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.scs2.RDXSCS2HumanoidSimulationManager;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.zulu.ZuluVersion;
@@ -42,12 +44,20 @@ public class ZuluRDXFlatGroundWalkingTrack
             {
                scs2HumanoidSimulationManager.setPauseAtEndOfBuffer(false);
                SimulationConstructionSet2 scs = scs2HumanoidSimulationManager.getAvatarSimulation().getSimulationConstructionSet();
-               YoBoolean ignoreWalkInputProvider = (YoBoolean) scs.findVariable("ignoreWalkInputProviderCSG");
-               YoBoolean overrideHeartbeat = (YoBoolean) scs.findVariable("overrideHeartbeat_StepGeneratorCommandInputManager");
-               if (ignoreWalkInputProvider != null)
+               if (scs.findVariable("ignoreWalkInputProviderCSG") instanceof YoBoolean ignoreWalkInputProvider)
                   ignoreWalkInputProvider.set(true);
-               if (overrideHeartbeat != null)
+               if (scs.findVariable("overrideHeartbeat_StepGeneratorCommandInputManager") instanceof YoBoolean overrideHeartbeat)
                   overrideHeartbeat.set(true);
+
+               ThreadTools.startAsDaemon(() ->
+               {
+                  ThreadTools.park(1.0);
+                  scs2HumanoidSimulationManager.getSession().setSessionMode(SessionMode.RUNNING);
+
+                  ThreadTools.park(1.0);
+                  if (scs.findVariable("walkCSG") instanceof YoBoolean walkCSG)
+                     walkCSG.set(true);
+               }, getClass().getSimpleName() + "Startup");
             });
             scs2HumanoidSimulationManager.setExternalFactorySetup(factory ->
             {
