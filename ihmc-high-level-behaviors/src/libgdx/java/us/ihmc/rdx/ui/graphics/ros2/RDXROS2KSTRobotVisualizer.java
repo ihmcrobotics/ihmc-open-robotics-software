@@ -67,7 +67,9 @@ public class RDXROS2KSTRobotVisualizer extends RDXROS2SingleTopicVisualizer<Kine
       ros2Node.createSubscription(topic, reader ->
       {
          getFrequency().ping();
-         statusSubscription.set(reader.read());
+         KinematicsToolboxOutputStatus status = reader.read();
+         if (status != null)
+            statusSubscription.set(status);
       });
 
       toolboxStatePublisher = ros2Node.createPublisher(ToolboxAPIs.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotModel.getSimpleRobotName())

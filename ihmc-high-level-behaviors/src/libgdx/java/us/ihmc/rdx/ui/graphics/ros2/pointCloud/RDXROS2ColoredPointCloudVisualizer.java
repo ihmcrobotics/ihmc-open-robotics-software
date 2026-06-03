@@ -112,8 +112,8 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
 
    private void subscribe()
    {
-      depthSubscription = ros2Node.createSubscription(depthTopic, reader -> this.onDepthMessageReceived(reader.read()));
-      colorSubscription = ros2Node.createSubscription(colorTopic, reader -> this.onColorMessageReceived(reader.read()));
+      depthSubscription = ros2Node.createSubscriptionSampler(depthTopic, this::onDepthMessageReceived);
+      colorSubscription = ros2Node.createSubscriptionSampler(colorTopic, this::onColorMessageReceived);
    }
 
    private void onDepthMessageReceived(ImageMessage message)

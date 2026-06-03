@@ -161,13 +161,21 @@ public class RDXIsaacROSFoundationPoseVisualizer extends RDXROS2MultiTopicVisual
 
          referenceFrameGraphic = new RDXReferenceFrameGraphic(0.1);
 
-         stateSubscription = ros2Node.createSubscription(object.topics.ihmcState(), reader -> state = State.fromByte(reader.read().getData()));
+         stateSubscription = ros2Node.createSubscription(object.topics.ihmcState(), reader ->
+         {
+            std_msgs.Byte stateMessage = reader.read();
+            if (stateMessage != null)
+               state = State.fromByte(stateMessage.getData());
+         });
 
          resultSubscription = ros2Node.createSubscription(object.topics.ihmcResult(), reader ->
          {
+            var message = reader.read();
+            if (message == null)
+               return;
+
             frequencyText.ping();
 
-            var message = reader.read();
             latestResult.getPose().set(message.getPose().getPose());
             latestResult.getSize().set(message.getSize().getVector());
             referenceFrameGraphic.getFramePose3D().set(message.getPose().getPose());

@@ -6,6 +6,7 @@ import controller_msgs.FootstepQueueStatusMessage;
 import controller_msgs.FootstepStatusMessage;
 import controller_msgs.QueuedFootstepStatusMessage;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -48,11 +49,11 @@ public class WalkingFootstepTracker
    {
       this.ros2Node = ros2Node;
       footstepDataListSubscriber = ros2Node.createSubscription(getTopic(FootstepDataListMessage.class, robotName),
-                                                               reader -> interceptFootstepDataListMessage(reader.read()));
+                                                               reader -> ROS2Tools.readIfPresent(reader, this::interceptFootstepDataListMessage));
       footstepStatusSubscriber = ros2Node.createSubscription(getTopic(FootstepStatusMessage.class, robotName),
-                                                             reader -> acceptFootstepStatusMessage(reader.read()));
+                                                             reader -> ROS2Tools.readIfPresent(reader, this::acceptFootstepStatusMessage));
       footstepQueueStatusSubscriber = ros2Node.createSubscription(getLowFrequencyTopic(FootstepQueueStatusMessage.class, robotName),
-                                                                  reader -> acceptFootstepQueueStatusMessage(reader.read()));
+                                                                  reader -> ROS2Tools.readIfPresent(reader, this::acceptFootstepQueueStatusMessage));
    }
 
    public void registerFootstepQueuedMessageListener(TypedNotification<FootstepQueueStatusMessage> footstepQueueListener)

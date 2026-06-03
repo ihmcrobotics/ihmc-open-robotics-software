@@ -42,7 +42,7 @@ public class ROS2Helper
 
    public <T extends ROS2Message<T>> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
-      ros2Node.createSubscription(topic, reader -> callback.accept(reader.read()));
+      ros2Node.createSubscription(topic, reader -> ROS2Tools.readIfPresent(reader, callback));
    }
 
    /**
@@ -139,7 +139,7 @@ public class ROS2Helper
    public TypedNotification<Boolean> subscribeViaBooleanNotification(ROS2Topic<Bool> topic)
    {
       TypedNotification<Boolean> typedNotification = new TypedNotification<>();
-      ros2Node.createSubscription(topic, reader -> typedNotification.set(reader.read().getData()));
+      ros2Node.createSubscription(topic, reader -> ROS2Tools.readIfPresent(reader, message -> typedNotification.set(message.getData())));
       return typedNotification;
    }
 

@@ -95,7 +95,7 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXROS2SingleTopicVisualizer
    {
       ros2Node = new ROS2Node(StringTools.titleToSnakeCase(titleBeforeAdditions));
 
-      ros2Node.createSubscription(topic, reader -> this.queueRenderRigidBodyPose(reader.read()));
+      ros2Node.createSubscriptionSampler(topic, this::queueRenderRigidBodyPose);
    }
 
    private void unsubscribe()

@@ -72,20 +72,48 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
       this.robotName = robotName;
       ros2Node = new AsyncROS2Node("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "KinematicsStreamingToolboxMessageLogger"));
 
-      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
-                                  reader -> robotConfigurationData.set(reader.read()));
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName),
-                                  reader -> capturabilityBasedStatus.set(reader.read()));
+      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), reader ->
+      {
+         RobotConfigurationData message = reader.read();
+         if (message != null)
+            robotConfigurationData.set(message);
+      });
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName), reader ->
+      {
+         CapturabilityBasedStatus message = reader.read();
+         if (message != null)
+            capturabilityBasedStatus.set(message);
+      });
 
       ros2Node.createSubscription(KinematicsStreamingToolboxModule.getInputTopic(robotName).withType(ToolboxStateMessage.class),
-                                  reader -> processToolboxStateMessage(reader.read()));
+                                  reader ->
+                                  {
+                                     ToolboxStateMessage message = reader.read();
+                                     if (message != null)
+                                        processToolboxStateMessage(message);
+                                  });
       ros2Node.createSubscription(KinematicsStreamingToolboxModule.getInputTopic(robotName).withType(KinematicsToolboxConfigurationMessage.class),
-                                  reader -> kinematicsToolboxConfigurationMessage.set(reader.read()));
+                                  reader ->
+                                  {
+                                     KinematicsToolboxConfigurationMessage message = reader.read();
+                                     if (message != null)
+                                        kinematicsToolboxConfigurationMessage.set(message);
+                                  });
       ros2Node.createSubscription(KinematicsStreamingToolboxModule.getInputTopic(robotName).withType(KinematicsStreamingToolboxInputMessage.class),
-                                  reader -> kinematicsStreamingToolboxInputMessage.set(reader.read()));
+                                  reader ->
+                                  {
+                                     KinematicsStreamingToolboxInputMessage message = reader.read();
+                                     if (message != null)
+                                        kinematicsStreamingToolboxInputMessage.set(message);
+                                  });
 
       ros2Node.createSubscription(KinematicsStreamingToolboxModule.getOutputTopic(robotName).withType(KinematicsToolboxOutputStatus.class),
-                                  reader -> kinematicsToolboxOutputStatus.set(reader.read()));
+                                  reader ->
+                                  {
+                                     KinematicsToolboxOutputStatus message = reader.read();
+                                     if (message != null)
+                                        kinematicsToolboxOutputStatus.set(message);
+                                  });
    }
 
    private void processToolboxStateMessage(ToolboxStateMessage message)

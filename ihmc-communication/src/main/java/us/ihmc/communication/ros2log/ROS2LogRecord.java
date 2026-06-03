@@ -47,6 +47,9 @@ public class ROS2LogRecord
       ros2Node.createSubscription(getROS2LogTopic(), reader ->
       {
          ROS2LogMessage message = reader.read();
+         if (message == null)
+            return;
+
          ROS2LoggerRequestedState requestedState = ROS2LoggerRequestedState.fromByte(message.getRequestedState());
          if (requestedState == ROS2LoggerRequestedState.START)
             start();

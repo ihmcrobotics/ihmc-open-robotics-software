@@ -29,7 +29,12 @@ public class SyncedIsaacROSFoundationPoseParameters extends LatestTimestampModif
       this.ros2Node = ros2Node;
       message = new FoundationPoseParameters();
 
-      subscription = ros2Node.createSubscription(object.topics.ihmcParameters(), reader -> this.fromMessage(reader.read()));
+      subscription = ros2Node.createSubscription(object.topics.ihmcParameters(), reader ->
+      {
+         FoundationPoseParameters message = reader.read();
+         if (message != null)
+            this.fromMessage(message);
+      });
       publisher = ros2Node.createPublisher(object.topics.ihmcParameters());
 
       enabled = new CRDTBidirectionalBoolean(this, true);

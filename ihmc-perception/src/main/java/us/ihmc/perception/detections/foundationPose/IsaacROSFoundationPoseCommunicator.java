@@ -77,8 +77,18 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       resetRequestPublisher = ros2Node.createPublisher(objectToTrack.topics.reset());
       resultRelayPublisher = ros2Node.createPublisher(objectToTrack.topics.ihmcResult());
       statePublisher = ros2Node.createPublisher(objectToTrack.topics.ihmcState());
-      poseEstimationResultSubscription = ros2Node.createSubscription(objectToTrack.topics.poseEstimationOutput(), reader -> this.updateLatestResult(reader.read()));
-      trackingResultSubscription = ros2Node.createSubscription(objectToTrack.topics.trackingOutput(), reader -> this.updateLatestResult(reader.read()));
+      poseEstimationResultSubscription = ros2Node.createSubscription(objectToTrack.topics.poseEstimationOutput(), reader ->
+      {
+         Detection3DArray message = reader.read();
+         if (message != null)
+            this.updateLatestResult(message);
+      });
+      trackingResultSubscription = ros2Node.createSubscription(objectToTrack.topics.trackingOutput(), reader ->
+      {
+         Detection3DArray message = reader.read();
+         if (message != null)
+            this.updateLatestResult(message);
+      });
       resetRequestSubscription = ros2Node.createSubscription(objectToTrack.topics.reset(), reader -> changeState(State.ESTIMATING_POSE));
 
       parameters = new SyncedIsaacROSFoundationPoseParameters(ros2Node, crdtInfo, objectToTrack);

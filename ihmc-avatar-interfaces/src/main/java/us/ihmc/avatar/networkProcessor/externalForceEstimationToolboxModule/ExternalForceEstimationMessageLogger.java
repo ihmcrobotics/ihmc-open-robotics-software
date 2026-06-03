@@ -62,16 +62,32 @@ public class ExternalForceEstimationMessageLogger
       ros2Node = new AsyncROS2Node("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ExternalForceEstimationMessageLogger"));
 
       ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
-      ros2Node.createSubscription(controllerOutputTopic.withType(RobotConfigurationData.class),
-                                  reader -> robotConfigurationData.set(reader.read()));
-      ros2Node.createSubscription(controllerOutputTopic.withType(RobotDesiredConfigurationData.class),
-                                  reader -> robotDesiredConfigurationData.set(reader.read()));
+      ros2Node.createSubscription(controllerOutputTopic.withType(RobotConfigurationData.class), reader ->
+      {
+         RobotConfigurationData message = reader.read();
+         if (message != null)
+            robotConfigurationData.set(message);
+      });
+      ros2Node.createSubscription(controllerOutputTopic.withType(RobotDesiredConfigurationData.class), reader ->
+      {
+         RobotDesiredConfigurationData message = reader.read();
+         if (message != null)
+            robotDesiredConfigurationData.set(message);
+      });
 
       ROS2Topic<?> toolboxInputTopic = ExternalForceEstimationToolboxModule.getInputTopic(robotName);
-      ros2Node.createSubscription(toolboxInputTopic.withType(ToolboxStateMessage.class),
-                                  reader -> processToolboxStateMessage(reader.read()));
-      ros2Node.createSubscription(toolboxInputTopic.withType(ExternalForceEstimationConfigurationMessage.class),
-                                  reader -> externalForceEstimationConfigurationMessage.set(reader.read()));
+      ros2Node.createSubscription(toolboxInputTopic.withType(ToolboxStateMessage.class), reader ->
+      {
+         ToolboxStateMessage message = reader.read();
+         if (message != null)
+            processToolboxStateMessage(message);
+      });
+      ros2Node.createSubscription(toolboxInputTopic.withType(ExternalForceEstimationConfigurationMessage.class), reader ->
+      {
+         ExternalForceEstimationConfigurationMessage message = reader.read();
+         if (message != null)
+            externalForceEstimationConfigurationMessage.set(message);
+      });
    }
 
    private void processToolboxStateMessage(ToolboxStateMessage message)

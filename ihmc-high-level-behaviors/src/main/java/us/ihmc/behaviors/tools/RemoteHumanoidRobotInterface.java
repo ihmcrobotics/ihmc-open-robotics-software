@@ -24,6 +24,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.ROS2Input;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
@@ -87,8 +88,8 @@ public class RemoteHumanoidRobotInterface
       controllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotName);
       publisherMap = new ROS2PublisherMap(ros2Node);
       
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, robotName), reader -> acceptWalkingStatus(reader.read()));
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, robotName), reader -> footstepStatusMessage.set(reader.read()));
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, robotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptWalkingStatus));
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, robotName), reader -> ROS2Tools.readIfPresent(reader, footstepStatusMessage::set));
 
       HighLevelStateChangeStatusMessage initialState = new HighLevelStateChangeStatusMessage();
       initialState.setInitialHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
@@ -133,7 +134,12 @@ public class RemoteHumanoidRobotInterface
 
    public void createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
    {
-      ros2Node.createSubscription(((HumanoidROS2Topic<?>) topicName).withOutput().withType(FootstepStatusMessage.class), reader -> consumer.accept(reader.read()));
+      ros2Node.createSubscription(((HumanoidROS2Topic<?>) topicName).withOutput().withType(FootstepStatusMessage.class), reader ->
+      {
+         FootstepStatusMessage message = reader.read();
+         if (message != null)
+            consumer.accept(message);
+      });
    }
 
    public FootstepStatusMessage getLatestFootstepStatusMessage()

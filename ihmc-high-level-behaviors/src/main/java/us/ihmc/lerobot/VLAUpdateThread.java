@@ -115,7 +115,7 @@ public class VLAUpdateThread extends VLAYoRegistry
       kstFullRobotModel = robotModel.createFullRobotModel();
       kstReferenceFrames = new HumanoidReferenceFrames(kstFullRobotModel, robotModel.getSensorInformation());
       kstOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(kstFullRobotModel);
-      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()), reader -> kstStatusSubscription.set(reader.read()));
+      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()), reader -> ROS2Tools.readIfPresent(reader, kstStatusSubscription::set));
 
       kstInputPublisher = ros2Node.createPublisher(ToolboxAPIs.getIKStreamingInputTopic(robotModel.getSimpleRobotName()));
       kstStatePublisher = ros2Node.createPublisher(ToolboxAPIs.getIKStreamingStateTopic(robotModel.getSimpleRobotName()));

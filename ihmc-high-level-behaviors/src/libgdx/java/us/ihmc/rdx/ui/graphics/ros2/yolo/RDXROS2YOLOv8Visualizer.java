@@ -62,7 +62,7 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2MultiTopicVisualizer
       };
 
       latestAnnotationInfo = new YOLOv8AnnotationInfoList();
-      annotationInfoSubscription = ros2Node.createSubscription(PerceptionAPI.YOLO_ANNOTATION_INFO, reader -> this.setLatestAnnotationInfo(reader.read()));
+      annotationInfoSubscription = ros2Node.createSubscriptionSampler(PerceptionAPI.YOLO_ANNOTATION_INFO, this::setLatestAnnotationInfo);
 
       demandYOLO = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_YOLO);
 

@@ -33,10 +33,11 @@ public enum ROS2LogTimeSource
             ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
             ROS2Topic<RobotConfigurationData> robotConfigurationData = controllerOutputTopic.withType(RobotConfigurationData.class);
             ros2Node.createSubscription(robotConfigurationData, reader ->
-           {
-              RobotConfigurationData message = reader.read();
-              timestamp.set(Conversions.nanosecondsToMilliseconds(message.getSyncTimestamp()));
-           });
+            {
+               RobotConfigurationData message = reader.read();
+               if (message != null)
+                  timestamp.set(Conversions.nanosecondsToMilliseconds(message.getSyncTimestamp()));
+            });
          }
 
          return timestamp::get;

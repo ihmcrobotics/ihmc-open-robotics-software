@@ -182,7 +182,12 @@ public class ROS2RelayImageSensor extends ImageSensor
          decodeMat = new Mat(1, 1, opencv_core.CV_8UC1);
          decoder = new ImageMessageDecoder();
 
-         subscription = ros2Node.createSubscription(imageTopic, reader -> this.receiveImage(reader.read()));
+         subscription = ros2Node.createSubscription(imageTopic, reader ->
+         {
+            ImageMessage message = reader.read();
+            if (message != null)
+               this.receiveImage(message);
+         });
       }
 
       private void receiveImage(ImageMessage imageMessage)

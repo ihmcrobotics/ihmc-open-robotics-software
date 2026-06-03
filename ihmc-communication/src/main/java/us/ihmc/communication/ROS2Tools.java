@@ -5,6 +5,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2MessageReader;
 import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.tools.thread.SwapReference;
 
@@ -37,17 +38,21 @@ public final class ROS2Tools
 
    public static final HumanoidROS2Topic<?> IHMC_ROOT = new HumanoidROS2Topic<>().withPrefix(IHMC_TOPIC_PREFIX);
 
+   /** Invokes the callback only when {@link ROS2MessageReader#read()} returns a non-null message. */
+   public static <T extends ROS2Message<T>> void readIfPresent(ROS2MessageReader<T> reader, Consumer<T> callback)
+   {
+      T message = reader.read();
+      if (message != null)
+         callback.accept(message);
+   }
+
    /**
     * Volatile callback where the user only has access to the message in the callback.
     * The message is only valid within the callback.
     */
    public static <T extends ROS2Message<T>> void createVolatileCallbackSubscription(ROS2Node ros2Node, ROS2Topic<T> topic, Consumer<T> callback)
    {
-      ros2Node.createSubscription(topic, reader ->
-      {
-         T message = reader.read();
-         callback.accept(message);
-      });
+      ros2Node.createSubscription(topic, reader -> readIfPresent(reader, callback));
    }
 
    /** Use when you only need the latest message with swap reference pattern. */
@@ -57,8 +62,11 @@ public final class ROS2Tools
 
       ros2Node.createSubscription(topic, reader ->
       {
-         T messageToPack = swapReference.getForThreadOne();
          T readMessage = reader.read();
+         if (readMessage == null)
+            return;
+
+         T messageToPack = swapReference.getForThreadOne();
          messageToPack.set(readMessage);
          swapReference.swap();
          callback.accept(messageToPack);
@@ -75,7 +83,7 @@ public final class ROS2Tools
    public static <T extends ROS2Message<T>> TypedNotification<T> createNotificationSubscription(ROS2Node ros2Node, ROS2Topic<T> topic)
    {
       TypedNotification<T> typedNotification = new TypedNotification<>();
-      ros2Node.createSubscription(topic, reader -> typedNotification.set(reader.read()));
+      ros2Node.createSubscription(topic, reader -> readIfPresent(reader, typedNotification::set));
       return typedNotification;
    }
 }

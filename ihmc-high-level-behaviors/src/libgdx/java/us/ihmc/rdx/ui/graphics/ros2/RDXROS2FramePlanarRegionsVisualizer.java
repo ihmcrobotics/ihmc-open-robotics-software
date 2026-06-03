@@ -41,7 +41,7 @@ public class RDXROS2FramePlanarRegionsVisualizer extends RDXROS2SingleTopicVisua
       int queueSize = 1;
       executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), daemon, queueSize);
 
-      ros2Node.createSubscription(topic, reader -> this.acceptMessage(reader.read()));
+      ros2Node.createSubscriptionSampler(topic, this::acceptMessage);
    }
 
    private void acceptMessage(FramePlanarRegionsListMessage framePlanarRegionsListMessage)

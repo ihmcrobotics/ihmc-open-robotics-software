@@ -6,6 +6,7 @@ import behavior_msgs.AI2RNavigationMessage;
 import behavior_msgs.AI2RObjectMessage;
 import behavior_msgs.AI2RStatusMessage;
 import us.ihmc.communication.AutonomyAPI;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -77,7 +78,7 @@ public class AI2RPredefinedCommandPublisher
       ros2Node = new ROS2Node("ai2r_predefined_behavior_coordinator");
       commandPublisher = ros2Node.createPublisher(AutonomyAPI.AI2R_COMMAND);
 
-      ros2Node.createSubscription(AutonomyAPI.AI2R_STATUS, reader -> onStatus(reader.read()));
+      ros2Node.createSubscription(AutonomyAPI.AI2R_STATUS, reader -> ROS2Tools.readIfPresent(reader, this::onStatus));
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getSimpleName() + "Shutdown"));
 

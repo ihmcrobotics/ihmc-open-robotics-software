@@ -165,7 +165,12 @@ public class StepGeneratorNetworkSubscriber
          @SuppressWarnings({"unchecked", "rawtypes"})
          Class messageClassRaw = messageClass;
 
-         realtimeROS2Node.createSubscription(ControllerAPI.getTopic(baseTopic, messageClassRaw), reader -> receivedMessage(reader.read()));
+         realtimeROS2Node.createSubscription(ControllerAPI.getTopic(baseTopic, messageClassRaw), reader ->
+         {
+            ROS2Message<?> message = reader.read();
+            if (message != null)
+               receivedMessage(message);
+         });
       }
    }
 

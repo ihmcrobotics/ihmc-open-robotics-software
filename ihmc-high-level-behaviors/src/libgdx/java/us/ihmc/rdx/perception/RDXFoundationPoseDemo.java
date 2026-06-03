@@ -10,6 +10,7 @@ import perception_msgs.ImageMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDATools;
@@ -133,7 +134,7 @@ public class RDXFoundationPoseDemo
       removePublisher = ros2Node.createPublisher(REMOVE_TOPIC);
       removeMessage = new std_msgs.String_();
 
-      ros2Node.createSubscription(RESULT_TOPIC, reader -> this.receivePose(reader.read()));
+      ros2Node.createSubscription(RESULT_TOPIC, reader -> ROS2Tools.readIfPresent(reader, this::receivePose));
 
       boolean enableNeuralMode = CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getDeviceName(0), "RTX 3080");
       zed = new ZEDImageSensor(0, ZEDModelData.ZED_2, SL_INPUT_TYPE_USB);

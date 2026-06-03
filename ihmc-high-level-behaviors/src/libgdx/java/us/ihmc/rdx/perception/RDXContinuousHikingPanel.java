@@ -25,6 +25,7 @@ import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -146,9 +147,9 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ros2Node.createSubscription(getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
                                   (s) -> terrainPlanningDebugger.reset());
 
-      ros2Node.createSubscription(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS, reader -> this.onStartAndGoalPosesReceived(reader.read()));
-      ros2Node.createSubscription(ContinuousHikingAPI.PLANNED_FOOTSTEPS, reader -> this.onPlannedFootstepsReceived(reader.read()));
-      ros2Node.createSubscription(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, reader -> this.onMonteCarloPlanReceived(reader.read()));
+      ros2Node.createSubscription(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS, reader -> ROS2Tools.readIfPresent(reader, this::onStartAndGoalPosesReceived));
+      ros2Node.createSubscription(ContinuousHikingAPI.PLANNED_FOOTSTEPS, reader -> ROS2Tools.readIfPresent(reader, this::onPlannedFootstepsReceived));
+      ros2Node.createSubscription(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, reader -> ROS2Tools.readIfPresent(reader, this::onMonteCarloPlanReceived));
 
       commandPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND);
       squareUpPublisher = ros2Node.createPublisher(ContinuousHikingAPI.SQUARE_UP_STEP);

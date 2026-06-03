@@ -66,7 +66,12 @@ public class ROS2FoundationPoseCommunicator
       colorMessage = new ImageMessage();
       depthMessage = new ImageMessage();
 
-      ros2Node.createSubscription(RESULT_TOPIC, reader -> this.onResultReceived(reader.read()));
+      ros2Node.createSubscription(RESULT_TOPIC, reader ->
+      {
+         FoundationPoseResult result = reader.read();
+         if (result != null)
+            this.onResultReceived(result);
+      });
 
       this.imageSensor = imageSensor;
       this.colorKey = colorKey;

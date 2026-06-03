@@ -203,7 +203,12 @@ public class ControllerNetworkSubscriber
          @SuppressWarnings({"unchecked", "rawtypes"})
          Class messageClassRaw = messageClass;
 
-         ros2Node.createSubscription(ControllerAPI.getTopic(inputTopic, messageClassRaw), reader -> receivedMessage(reader.read()));
+         ros2Node.createSubscription(ControllerAPI.getTopic(inputTopic, messageClassRaw), reader ->
+         {
+            ROS2Message<?> message = reader.read();
+            if (message != null)
+               receivedMessage(message);
+         });
       }
    }
 

@@ -39,6 +39,9 @@ class RecordTopicManager<T extends ROS2Message<T>>
          ros2Node.createSubscription(ros2Topic, reader ->
          {
             T message = reader.read();
+            if (message == null)
+               return;
+
             long timestamp = timestampSupplier.getAsLong();
             latestData.set(Pair.of(timestamp, message));
          });
