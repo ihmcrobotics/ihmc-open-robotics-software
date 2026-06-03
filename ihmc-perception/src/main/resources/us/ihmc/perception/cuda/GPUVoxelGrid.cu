@@ -38,6 +38,7 @@ __global__ void updateLogOddsHits(
     float   resolution,
     float   anchorX, float anchorY, float anchorZ,
     float3* points,
+    float*  pointWeights,   // per-point confidence in (0, 1]; may be null for full-weight hits
     int     numPoints)
 {
     int i      = blockIdx.x * blockDim.x + threadIdx.x;
@@ -54,8 +55,16 @@ __global__ void updateLogOddsHits(
         if (ix < 0 || ix >= NX || iy < 0 || iy >= NY || iz < 0 || iz >= NZ)
             continue;
 
+        // Scale the hit log-odds by the measurement confidence: distant (higher-variance)
+        // points nudge occupancy less, so the nearer-ranging camera dominates the fused map.
+        int hitLogOdds = (pointWeights == nullptr)
+                       ? LOG_ODDS_HIT
+                       : (int)lroundf(LOG_ODDS_HIT * pointWeights[i]);
+        if (hitLogOdds <= 0)
+            continue;
+
         clampedAtomicAdd(&grid[flatVoxelIndex(ix, iy, iz, NY, NZ)],
-                         LOG_ODDS_HIT, LOG_ODDS_MIN, LOG_ODDS_MAX);
+                         hitLogOdds, LOG_ODDS_MIN, LOG_ODDS_MAX);
     }
 }
 
@@ -193,68 +202,114 @@ __global__ void dilateOccupancyXY(
 }
 
 /**
- * Extracts a 2-D height scan for an RL policy.
+ * Extracts a robot-centric, yaw-aligned 3-D binary occupancy crop from the persistent world grid,
+ * for use as an RL observation (Gallant-style: arXiv:2511.14625).
  *
- * For each (scanX[i], scanY[i]) in robot base frame, transforms to world frame,
- * searches a square neighbourhood of radius {@code searchRadiusVoxels}, and reports
- * the highest occupied voxel height relative to base Z.
- * Falls back to {@code defaultRelativeHeight} when the neighbourhood is entirely unknown.
+ * Unlike the height scan, this preserves full vertical / multi-layer structure (walls, overhangs,
+ * undersides), so the policy can reason about pushing off vertical surfaces during fall recovery.
+ *
+ * The persistent grid is world-anchored (it retains geometry mapped before a fall); this kernel
+ * samples a crop that is translated to the robot position and rotated by the robot yaw only
+ * (gravity-aligned z), so the observation stays upright even when the robot is prone.
+ *
+ * Crop local axes: x forward, y left, z up, centred on the robot. Output layout is z-as-channel
+ * (matching the paper's z-grouped 2D CNN): out[cz*(cropNY*cropNX) + cy*cropNX + cx].
+ * A voxel reads 1.0 when occupied (log-odds > threshold), else 0.0 (unknown and free both read 0).
  */
 extern "C"
-__global__ void extractHeightScan(
-    const int*   grid,
+__global__ void extractVoxelOccupancyCrop(
+    const int* grid,
     int     NX, int NY, int NZ,
     float   resolution,
     float   anchorX, float anchorY, float anchorZ,
-    const float* scanX,
-    const float* scanY,
-    int     numScanPoints,
-    const float* baseToWorldTransform,  // row-major 4×4
-    int     searchRadiusVoxels,
-    float   defaultRelativeHeight,
-    float*  heightsToPack)
+    float   robotX, float robotY, float robotZ,   // crop centre in world frame
+    float   cosYaw, float sinYaw,                  // robot yaw (gravity-aligned crop)
+    int     cropNX, int cropNY, int cropNZ,
+    float   cropResolution,
+    float*  occupancyToPack)
 {
     int i      = blockIdx.x * blockDim.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
 
-    float baseZ = baseToWorldTransform[11];
+    int cropTotal = cropNX * cropNY * cropNZ;
 
-    for (; i < numScanPoints; i += stride)
+    float halfX = 0.5f * (cropNX - 1);
+    float halfY = 0.5f * (cropNY - 1);
+    float halfZ = 0.5f * (cropNZ - 1);
+
+    for (; i < cropTotal; i += stride)
     {
-        float bx = scanX[i];
-        float by = scanY[i];
+        int cx =  i % cropNX;
+        int cy = (i / cropNX) % cropNY;
+        int cz =  i / (cropNX * cropNY);
 
-        float wx = baseToWorldTransform[0]*bx + baseToWorldTransform[1]*by + baseToWorldTransform[3];
-        float wy = baseToWorldTransform[4]*bx + baseToWorldTransform[5]*by + baseToWorldTransform[7];
+        // Crop-local position (robot frame), centred on the robot.
+        float lx = (cx - halfX) * cropResolution;
+        float ly = (cy - halfY) * cropResolution;
+        float lz = (cz - halfZ) * cropResolution;
 
-        int cx = (int)floorf((wx - anchorX) / resolution);
-        int cy = (int)floorf((wy - anchorY) / resolution);
+        // Rotate by yaw (z stays gravity-aligned) and translate to world.
+        float wx = robotX + cosYaw * lx - sinYaw * ly;
+        float wy = robotY + sinYaw * lx + cosYaw * ly;
+        float wz = robotZ + lz;
 
-        float found = defaultRelativeHeight;
-        int R = searchRadiusVoxels;
+        int ix = (int)floorf((wx - anchorX) / resolution);
+        int iy = (int)floorf((wy - anchorY) / resolution);
+        int iz = (int)floorf((wz - anchorZ) / resolution);
 
-        for (int dr = 0; dr <= R && found == defaultRelativeHeight; dr++)
+        // Emit occupancy PROBABILITY, not a hard 0/1, so the policy can tell apart
+        //   ~0.5 = unknown (no evidence, or outside the world grid),
+        //   ->0  = confidently free (carved by ray misses),
+        //   ->1  = confidently occupied (confidence-weighted hits from both cameras).
+        // Log-odds are fixed-point (scale 1000); probability = sigmoid(logOdds).
+        float probability = 0.5f; // unknown / out-of-bounds
+        if (ix >= 0 && ix < NX && iy >= 0 && iy < NY && iz >= 0 && iz < NZ)
         {
-            for (int dx = -dr; dx <= dr && found == defaultRelativeHeight; dx++)
-            for (int dy = -dr; dy <= dr && found == defaultRelativeHeight; dy++)
-            {
-                if (abs(dx) != dr && abs(dy) != dr) continue; // only the shell at distance dr
-
-                int ix = cx + dx;
-                int iy = cy + dy;
-                if (ix < 0 || ix >= NX || iy < 0 || iy >= NY) continue;
-
-                for (int iz = NZ - 1; iz >= 0; iz--)
-                {
-                    if (grid[flatVoxelIndex(ix, iy, iz, NY, NZ)] > LOG_ODDS_THRESHOLD)
-                    {
-                        found = (anchorZ + (iz + 0.5f) * resolution) - baseZ;
-                        break;
-                    }
-                }
-            }
+            float logOdds = grid[flatVoxelIndex(ix, iy, iz, NY, NZ)] / 1000.0f;
+            probability = 1.0f / (1.0f + expf(-logOdds));
         }
 
-        heightsToPack[i] = found;
+        occupancyToPack[cz * (cropNY * cropNX) + cy * cropNX + cx] = probability;
+    }
+}
+
+/**
+ * Collects all occupied-leaning voxels (log-odds > threshold) of the whole world grid into compact
+ * world-frame position + occupancy-probability buffers, for visualising the entire fused map in RDX.
+ * Probability = sigmoid(log-odds) so the viewer can colour by confidence rather than a flat binary.
+ */
+extern "C"
+__global__ void extractOccupiedVoxelsWithProbability(
+    const int* grid,
+    int     NX, int NY, int NZ,
+    float   resolution,
+    float   anchorX, float anchorY, float anchorZ,
+    float3* outPositions,
+    float*  outProbabilities,
+    int*    outCount,
+    int     maxVoxels)
+{
+    int i      = blockIdx.x * blockDim.x + threadIdx.x;
+    int stride = blockDim.x * gridDim.x;
+    int total  = NX * NY * NZ;
+
+    for (; i < total; i += stride)
+    {
+        int logOddsFixed = grid[i];
+        if (logOddsFixed <= LOG_ODDS_THRESHOLD)
+            continue; // only occupied-leaning voxels are drawn
+
+        int iz =  i % NZ;
+        int iy = (i / NZ) % NY;
+        int ix =  i / (NY * NZ);
+
+        int slot = atomicAdd(outCount, 1);
+        if (slot >= maxVoxels)
+            continue;
+
+        outPositions[slot] = make_float3(anchorX + (ix + 0.5f) * resolution,
+                                         anchorY + (iy + 0.5f) * resolution,
+                                         anchorZ + (iz + 0.5f) * resolution);
+        outProbabilities[slot] = 1.0f / (1.0f + expf(-(logOddsFixed / 1000.0f)));
     }
 }

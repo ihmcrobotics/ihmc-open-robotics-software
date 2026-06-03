@@ -2,12 +2,12 @@
 #version 410
 
 /*
- * Renders pre-extracted world-frame 3D points with per-vertex RGB colour sampled from
- * the source camera image during CUDA extraction. Intended for the fused voxel map.
+ * Renders pre-extracted world-frame 3D points with a per-vertex RGB colour. Used for the fused
+ * voxel map, where colour encodes per-voxel occupancy probability.
  */
 
 layout(location = 0) in vec3 a_position; // world-frame (x, y, z)
-layout(location = 1) in vec3 a_color;    // normalised (r, g, b) from camera image
+layout(location = 1) in vec3 a_color;    // normalised (r, g, b)
 
 out vec4 v_color;
 

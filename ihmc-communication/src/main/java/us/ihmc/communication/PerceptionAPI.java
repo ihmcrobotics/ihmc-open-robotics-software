@@ -179,12 +179,13 @@ public final class PerceptionAPI
    public static final ROS2Topic<TerrainMapMessage> YOLO_TERRAIN_MAP = TERRAIN_MAP_MODULE.withSuffix("yolo").withOutput().withTypeName(TerrainMapMessage.class);
 
    /*
-    * Voxel map height scan — 187 float heights (17×11 grid in robot base frame)
-    * published by the autonomy process from the dual-camera GPU voxel grid.
-    * Used as the terrain observation by the fall-recovery RL controller.
+    * Robot-centric 3-D voxel occupancy crop — a 32×32×40 binary grid (z-as-channel, 40960 floats)
+    * in a yaw-aligned frame centred on the robot, published by the autonomy process from the
+    * dual-camera persistent GPU log-odds voxel grid. Used as the terrain observation by the
+    * fall-recovery RL controller (Gallant-style voxel input, arXiv:2511.14625).
     */
-   public static final ROS2Topic<perception_msgs.msg.dds.Float32MultiArrayHack> VOXEL_HEIGHT_SCAN =
-         PERCEPTION_MODULE.withSuffix("voxel_height_scan").withOutput().withType(perception_msgs.msg.dds.Float32MultiArrayHack.class);
+   public static final ROS2Topic<perception_msgs.msg.dds.Float32MultiArrayHack> VOXEL_OCCUPANCY =
+         PERCEPTION_MODULE.withSuffix("voxel_occupancy").withOutput().withType(perception_msgs.msg.dds.Float32MultiArrayHack.class);
 
    /*
     * SLAM (old, not used)

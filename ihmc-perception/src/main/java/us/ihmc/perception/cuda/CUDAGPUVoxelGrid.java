@@ -4,6 +4,7 @@ import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
 import java.net.URL;
@@ -15,12 +16,15 @@ import static org.bytedeco.cuda.global.cudart.*;
  */
 public class CUDAGPUVoxelGrid implements AutoCloseable
 {
-   public static final int   SCAN_NX          = 17;
-   public static final int   SCAN_NY          = 11;
-   public static final int   NUM_SCAN_POINTS  = SCAN_NX * SCAN_NY;
-   private static final float SCAN_X_MIN      = -0.8f;
-   private static final float SCAN_Y_MIN      = -0.5f;
-   private static final float SCAN_STEP       = 0.10f;
+   // Robot-centric 3-D occupancy crop emitted as the RL observation (Gallant, arXiv:2511.14625).
+   // 32 x 32 x 32 voxels at 5 cm = a ±0.8 m box centred on the robot. Dimensions must match
+   // VoxelOccupancyPacking (the wire format) and the IsaacLab voxelizer.
+   public static final int   CROP_NX          = 32;
+   public static final int   CROP_NY          = 32;
+   public static final int   CROP_NZ          = 32;
+   public static final float CROP_RESOLUTION  = 0.05f;
+   /** Total floats in one {@link #extractVoxelObservation} crop (z-as-channel layout). */
+   public static final int   VOXEL_CROP_SIZE  = CROP_NX * CROP_NY * CROP_NZ;
 
    private static final int BLOCK_SIZE_1D     = 256;
 
@@ -30,8 +34,12 @@ public class CUDAGPUVoxelGrid implements AutoCloseable
    private final CUDAKernel  kernelClear;
    private final CUDAKernel  kernelDecay;
    private final CUDAKernel  kernelDilate;
-   private final CUDAKernel  kernelExtractScan;
+   private final CUDAKernel  kernelExtractVoxelCrop;
+   private final CUDAKernel  kernelExtractOccupiedVoxels;
    private final CUstream_st stream;
+
+   /** Max occupied voxels read back per frame for whole-grid RDX visualisation. */
+   private static final int MAX_RENDER_VOXELS = 1_000_000;
 
    private final int   nx, ny, nz;
    private final float resolution;
@@ -39,14 +47,20 @@ public class CUDAGPUVoxelGrid implements AutoCloseable
 
    private float anchorX, anchorY, anchorZ;
 
-   private final IntPointer   gpuGrid;        // nx*ny*nz ints
-   private final FloatPointer gpuScanX;       // NUM_SCAN_POINTS floats
-   private final FloatPointer gpuScanY;       // NUM_SCAN_POINTS floats
-   private final FloatPointer gpuHeightsOut;  // NUM_SCAN_POINTS floats
+   private final IntPointer   gpuGrid;          // nx*ny*nz ints
+   private final FloatPointer gpuVoxelCropOut;  // VOXEL_CROP_SIZE floats (robot-centric occupancy)
 
-   private final FloatPointer gpuBaseTransform;       // 16 floats on device
-   private final FloatPointer baseTransformStaging;   // 16 floats pinned host, staging for upload
-   private final FloatPointer heightsReadbackPtr;     // NUM_SCAN_POINTS floats pinned host
+   // RigidBodyTransformReadOnly has no array getter, so copy into a concrete transform to extract the 4x4.
+   private final RigidBodyTransform baseToWorldCopy = new RigidBodyTransform();
+   private final float[] baseTransformArray = new float[16];
+   private final FloatPointer voxelCropReadbackPtr;   // VOXEL_CROP_SIZE floats pinned host
+
+   // Whole-grid occupied-voxel readback (for RDX viz): GPU scratch + pinned-host mirrors + atomic count.
+   private final FloatPointer gpuOccupiedPositions;         // 3 * MAX_RENDER_VOXELS floats
+   private final FloatPointer gpuOccupiedProbabilities;     // MAX_RENDER_VOXELS floats
+   private final IntPointer   gpuOccupiedCount;             // single atomic counter (pinned host, device-accessible)
+   private final FloatPointer occupiedPositionsReadback;    // pinned host mirror
+   private final FloatPointer occupiedProbabilitiesReadback;// pinned host mirror
 
    /**
     * Creates a GPU voxel grid with configurable dimensions.
@@ -74,7 +88,8 @@ public class CUDAGPUVoxelGrid implements AutoCloseable
          kernelClear        = program.loadKernel("clearGrid");
          kernelDecay        = program.loadKernel("decayLogOdds");
          kernelDilate       = program.loadKernel("dilateOccupancyXY");
-         kernelExtractScan  = program.loadKernel("extractHeightScan");
+         kernelExtractVoxelCrop = program.loadKernel("extractVoxelOccupancyCrop");
+         kernelExtractOccupiedVoxels = program.loadKernel("extractOccupiedVoxelsWithProbability");
       }
       catch (Exception e)
       {
@@ -87,36 +102,25 @@ public class CUDAGPUVoxelGrid implements AutoCloseable
       CUDATools.mallocAsync(gpuGrid, (long) totalVoxels, stream);
       gpuGrid.limit((long) totalVoxels);
 
-      gpuHeightsOut = new FloatPointer();
-      CUDATools.mallocAsync(gpuHeightsOut, (long) NUM_SCAN_POINTS, stream);
-      gpuHeightsOut.limit((long) NUM_SCAN_POINTS);
+      gpuVoxelCropOut = new FloatPointer();
+      CUDATools.mallocAsync(gpuVoxelCropOut, (long) VOXEL_CROP_SIZE, stream);
+      gpuVoxelCropOut.limit((long) VOXEL_CROP_SIZE);
 
-      float[] patternX = buildScanPattern(true);
-      float[] patternY = buildScanPattern(false);
+      voxelCropReadbackPtr = new FloatPointer();
+      CUDATools.mallocHost(voxelCropReadbackPtr, (long) VOXEL_CROP_SIZE);
 
-      gpuScanX = new FloatPointer(NUM_SCAN_POINTS);
-      gpuScanY = new FloatPointer(NUM_SCAN_POINTS);
-      CUDATools.mallocAsync(gpuScanX, (long) NUM_SCAN_POINTS, stream);
-      CUDATools.mallocAsync(gpuScanY, (long) NUM_SCAN_POINTS, stream);
-      gpuScanX.limit((long) NUM_SCAN_POINTS);
-      gpuScanY.limit((long) NUM_SCAN_POINTS);
-
-      FloatPointer tmpX = new FloatPointer(patternX);
-      FloatPointer tmpY = new FloatPointer(patternY);
-      CUDATools.memcpyAsync(gpuScanX, tmpX, NUM_SCAN_POINTS, stream);
-      CUDATools.memcpyAsync(gpuScanY, tmpY, NUM_SCAN_POINTS, stream);
-      tmpX.close();
-      tmpY.close();
-
-      gpuBaseTransform = new FloatPointer();
-      CUDATools.mallocAsync(gpuBaseTransform, 16L, stream);
-      gpuBaseTransform.limit(16L);
-
-      baseTransformStaging = new FloatPointer();
-      CUDATools.mallocHost(baseTransformStaging, 16L);
-
-      heightsReadbackPtr = new FloatPointer();
-      CUDATools.mallocHost(heightsReadbackPtr, (long) NUM_SCAN_POINTS);
+      gpuOccupiedPositions = new FloatPointer();
+      CUDATools.mallocAsync(gpuOccupiedPositions, 3L * MAX_RENDER_VOXELS, stream);
+      gpuOccupiedPositions.limit(3L * MAX_RENDER_VOXELS);
+      gpuOccupiedProbabilities = new FloatPointer();
+      CUDATools.mallocAsync(gpuOccupiedProbabilities, (long) MAX_RENDER_VOXELS, stream);
+      gpuOccupiedProbabilities.limit((long) MAX_RENDER_VOXELS);
+      gpuOccupiedCount = new IntPointer();
+      CUDATools.mallocHost(gpuOccupiedCount, 1L);
+      occupiedPositionsReadback = new FloatPointer();
+      CUDATools.mallocHost(occupiedPositionsReadback, 3L * MAX_RENDER_VOXELS);
+      occupiedProbabilitiesReadback = new FloatPointer();
+      CUDATools.mallocHost(occupiedProbabilitiesReadback, (long) MAX_RENDER_VOXELS);
 
       CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
 
@@ -145,13 +149,34 @@ public class CUDAGPUVoxelGrid implements AutoCloseable
                 robotZ - nz * resolution * 0.25f);
    }
 
+   /** Null device pointer used when hits are inserted without per-point confidence weights. */
+   private static final FloatPointer NULL_POINTER = new FloatPointer();
+
    /**
     * Inserts a GPU-resident float3 point cloud as hit observations without a CPU round-trip.
+    * Every point contributes a full-strength log-odds hit.
     *
     * @param gpuPoints GPU float3 buffer (world-frame points).
     * @param numPoints Number of points in the buffer.
     */
    public void updateHits(FloatPointer gpuPoints, int numPoints)
+   {
+      updateHits(gpuPoints, NULL_POINTER, numPoints);
+   }
+
+   /**
+    * Inserts a GPU-resident float3 point cloud as confidence-weighted hit observations.
+    *
+    * <p>Each point's log-odds hit is scaled by its weight in {@code gpuPointWeights} (0–1), so
+    * distant, higher-variance measurements nudge occupancy less than nearby ones. This lets two
+    * cameras be weighted differently and makes the nearer-ranging camera dominate the fused map.
+    *
+    * @param gpuPoints       GPU float3 buffer (world-frame points).
+    * @param gpuPointWeights GPU float buffer of per-point weights parallel to {@code gpuPoints};
+    *                        pass a null pointer for full-strength hits.
+    * @param numPoints       Number of points in the buffers.
+    */
+   public void updateHits(FloatPointer gpuPoints, FloatPointer gpuPointWeights, int numPoints)
    {
       if (numPoints <= 0 || gpuPoints.isNull())
          return;
@@ -166,40 +191,12 @@ public class CUDAGPUVoxelGrid implements AutoCloseable
             .withFloat(resolution)
             .withFloat(anchorX).withFloat(anchorY).withFloat(anchorZ)
             .withPointer(gpuPoints)
+            .withPointer(gpuPointWeights == null ? NULL_POINTER : gpuPointWeights)
             .withInt(numPoints)
             .run(stream, grid, block, 0);
 
       block.close();
       grid.close();
-   }
-
-   /**
-    * Uploads CPU-side points to a temporary GPU buffer and calls {@link #updateHits(FloatPointer, int)}.
-    */
-   public void updateHitsFromList(java.util.List<us.ihmc.euclid.tuple3D.Point3D32> points)
-   {
-      if (points == null || points.isEmpty())
-         return;
-
-      int count     = points.size();
-      long nFloats  = 3L * count;
-      float[] arr   = new float[(int) nFloats];
-      for (int i = 0; i < count; i++)
-      {
-         arr[3 * i]     = points.get(i).getX32();
-         arr[3 * i + 1] = points.get(i).getY32();
-         arr[3 * i + 2] = points.get(i).getZ32();
-      }
-
-      FloatPointer cpuPtr = new FloatPointer(arr);
-      FloatPointer gpuPtr = new FloatPointer();
-      CUDATools.mallocAsync(gpuPtr, nFloats, stream);
-      gpuPtr.limit(nFloats);
-      CUDATools.memcpyAsync(gpuPtr, cpuPtr, nFloats, stream);
-      updateHits(gpuPtr, count);
-      CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
-      CUDATools.checkCUDAError(cudaFreeAsync(gpuPtr, stream));
-      cpuPtr.close();
    }
 
    /**
@@ -230,45 +227,99 @@ public class CUDAGPUVoxelGrid implements AutoCloseable
       grid.close();
    }
 
-   /**
-    * Extracts a 187-element height-scan observation vector into {@code heightsToPack} at {@code startIndex}.
-    *
-    * @param baseToWorld  Current robot base pose in world frame.
-    * @param heightsToPack Target float[] — the RL observation vector.
-    * @param startIndex   Offset into {@code heightsToPack}.
-    */
-   public void extractHeightScan(RigidBodyTransformReadOnly baseToWorld,
-                                  float[] heightsToPack, int startIndex)
-   {
-      float[] arr = new float[16];
-      baseToWorld.get(arr); // row-major 4x4
-      baseTransformStaging.put(arr);
-      CUDATools.memcpyAsync(gpuBaseTransform, baseTransformStaging, 16L, stream);
 
-      int gridSize = (NUM_SCAN_POINTS + BLOCK_SIZE_1D - 1) / BLOCK_SIZE_1D;
+   /**
+    * Extracts a robot-centric, yaw-aligned 3-D binary occupancy crop ({@value #VOXEL_CROP_SIZE} floats,
+    * z-as-channel layout) as the RL observation — the voxel-grid input from Gallant (arXiv:2511.14625).
+    *
+    * The persistent grid is world-anchored (it remembers geometry mapped before a fall); this samples a
+    * {@link #CROP_NX}×{@link #CROP_NY}×{@link #CROP_NZ} box centred on the robot, rotated by yaw only so
+    * the crop stays gravity-aligned even when the robot is prone. Occupied = 1.0, unknown/free = 0.0.
+    *
+    * @param baseToWorld   Current robot base pose in world frame.
+    * @param occupancyToPack Target float[] — the RL observation vector.
+    * @param startIndex    Offset into {@code occupancyToPack}.
+    */
+   public void extractVoxelObservation(RigidBodyTransformReadOnly baseToWorld, float[] occupancyToPack, int startIndex)
+   {
+      baseToWorldCopy.set(baseToWorld);
+      baseToWorldCopy.get(baseTransformArray); // row-major 4x4
+
+      float robotX = baseTransformArray[3];
+      float robotY = baseTransformArray[7];
+      float robotZ = baseTransformArray[11];
+      float yaw    = (float) Math.atan2(baseTransformArray[4], baseTransformArray[0]); // atan2(r10, r00)
+      float cosYaw = (float) Math.cos(yaw);
+      float sinYaw = (float) Math.sin(yaw);
+
+      int gridSize = (VOXEL_CROP_SIZE + BLOCK_SIZE_1D - 1) / BLOCK_SIZE_1D;
       dim3 block = new dim3(BLOCK_SIZE_1D, 1, 1);
       dim3 grid  = new dim3(gridSize, 1, 1);
 
-      kernelExtractScan
+      kernelExtractVoxelCrop
             .withPointer(gpuGrid)
             .withInt(nx).withInt(ny).withInt(nz)
             .withFloat(resolution)
             .withFloat(anchorX).withFloat(anchorY).withFloat(anchorZ)
-            .withPointer(gpuScanX)
-            .withPointer(gpuScanY)
-            .withInt(NUM_SCAN_POINTS)
-            .withPointer(gpuBaseTransform)
-            .withInt(2)              // searchRadiusVoxels: 2 voxels = 10 cm at 5 cm res
-            .withFloat(-1.0f)        // defaultRelativeHeight: unknown → -1 m
-            .withPointer(gpuHeightsOut)
+            .withFloat(robotX).withFloat(robotY).withFloat(robotZ)
+            .withFloat(cosYaw).withFloat(sinYaw)
+            .withInt(CROP_NX).withInt(CROP_NY).withInt(CROP_NZ)
+            .withFloat(CROP_RESOLUTION)
+            .withPointer(gpuVoxelCropOut)
             .run(stream, grid, block, 0);
 
       block.close();
       grid.close();
 
-      CUDATools.memcpyAsync(heightsReadbackPtr, gpuHeightsOut, NUM_SCAN_POINTS, stream);
+      CUDATools.memcpyAsync(voxelCropReadbackPtr, gpuVoxelCropOut, VOXEL_CROP_SIZE, stream);
       CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
-      heightsReadbackPtr.get(heightsToPack, startIndex, NUM_SCAN_POINTS);
+      voxelCropReadbackPtr.get(occupancyToPack, startIndex, VOXEL_CROP_SIZE);
+   }
+
+   /** Whole-grid occupied-voxel snapshot for visualisation: parallel world positions and occupancy probabilities. */
+   public record OccupiedVoxels(float[] positions, float[] probabilities, int count) { }
+
+   /**
+    * Reads back every occupied-leaning voxel (log-odds &gt; threshold) of the entire world grid as
+    * world-frame centres and occupancy probabilities (sigmoid of log-odds), for rendering the full
+    * fused map in RDX coloured by confidence. Capped at {@value #MAX_RENDER_VOXELS} voxels.
+    */
+   public OccupiedVoxels extractOccupiedVoxels()
+   {
+      gpuOccupiedCount.put(0);
+
+      int gridSize = (totalVoxels + BLOCK_SIZE_1D - 1) / BLOCK_SIZE_1D;
+      dim3 block = new dim3(BLOCK_SIZE_1D, 1, 1);
+      dim3 grid  = new dim3(gridSize, 1, 1);
+
+      kernelExtractOccupiedVoxels
+            .withPointer(gpuGrid)
+            .withInt(nx).withInt(ny).withInt(nz)
+            .withFloat(resolution)
+            .withFloat(anchorX).withFloat(anchorY).withFloat(anchorZ)
+            .withPointer(gpuOccupiedPositions)
+            .withPointer(gpuOccupiedProbabilities)
+            .withPointer(gpuOccupiedCount)
+            .withInt(MAX_RENDER_VOXELS)
+            .run(stream, grid, block, 0);
+
+      block.close();
+      grid.close();
+
+      CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
+      int count = Math.min(gpuOccupiedCount.get(), MAX_RENDER_VOXELS);
+      if (count <= 0)
+         return new OccupiedVoxels(new float[0], new float[0], 0);
+
+      CUDATools.memcpyAsync(occupiedPositionsReadback, gpuOccupiedPositions, 3L * count, stream);
+      CUDATools.memcpyAsync(occupiedProbabilitiesReadback, gpuOccupiedProbabilities, (long) count, stream);
+      CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
+
+      float[] positions = new float[3 * count];
+      float[] probabilities = new float[count];
+      occupiedPositionsReadback.get(positions, 0, 3 * count);
+      occupiedProbabilitiesReadback.get(probabilities, 0, count);
+      return new OccupiedVoxels(positions, probabilities, count);
    }
 
    /**
@@ -330,34 +381,25 @@ public class CUDAGPUVoxelGrid implements AutoCloseable
    public float getAnchorY()         { return anchorY; }
    public float getAnchorZ()         { return anchorZ; }
 
-   private static float[] buildScanPattern(boolean xAxis)
-   {
-      float[] pattern = new float[NUM_SCAN_POINTS];
-      int idx = 0;
-      for (int xi = 0; xi < SCAN_NX; xi++)
-         for (int yi = 0; yi < SCAN_NY; yi++)
-            pattern[idx++] = xAxis ? SCAN_X_MIN + xi * SCAN_STEP
-                                   : SCAN_Y_MIN + yi * SCAN_STEP;
-      return pattern;
-   }
-
    @Override
    public void close()
    {
       CUDATools.checkCUDAError(cudaFreeAsync(gpuGrid, stream));
-      CUDATools.checkCUDAError(cudaFreeAsync(gpuScanX, stream));
-      CUDATools.checkCUDAError(cudaFreeAsync(gpuScanY, stream));
-      CUDATools.checkCUDAError(cudaFreeAsync(gpuHeightsOut, stream));
-      CUDATools.checkCUDAError(cudaFreeAsync(gpuBaseTransform, stream));
-      CUDATools.freeHost(baseTransformStaging);
-      CUDATools.freeHost(heightsReadbackPtr);
+      CUDATools.checkCUDAError(cudaFreeAsync(gpuVoxelCropOut, stream));
+      CUDATools.checkCUDAError(cudaFreeAsync(gpuOccupiedPositions, stream));
+      CUDATools.checkCUDAError(cudaFreeAsync(gpuOccupiedProbabilities, stream));
+      CUDATools.freeHost(voxelCropReadbackPtr);
+      CUDATools.freeHost(gpuOccupiedCount);
+      CUDATools.freeHost(occupiedPositionsReadback);
+      CUDATools.freeHost(occupiedProbabilitiesReadback);
       CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
       kernelUpdateHits.close();
       kernelUpdateMisses.close();
       kernelClear.close();
       kernelDecay.close();
       kernelDilate.close();
-      kernelExtractScan.close();
+      kernelExtractVoxelCrop.close();
+      kernelExtractOccupiedVoxels.close();
       program.close();
       CUDAStreamManager.releaseStream(stream);
    }
