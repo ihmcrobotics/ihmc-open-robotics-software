@@ -15,8 +15,9 @@ import us.ihmc.rdx.imgui.RDXPanel;
 
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.TreeSet;
 
@@ -100,15 +101,10 @@ public class RDXROS2StatsPanel extends RDXPanel
       publishersSortedByName.clear();
       subscribersSortedByName.clear();
 
-      for (Iterator<ROS2Node> nodeIterator = trackedNodes.iterator(); nodeIterator.hasNext();)
+      for (ROS2Node node : collectTrackedNodes())
       {
-         ROS2Node node = nodeIterator.next();
-
          if (node.isClosed())
-         {
-            nodeIterator.remove();
             continue;
-         }
 
          nodesSortedByName.add(node);
 
@@ -338,6 +334,14 @@ public class RDXROS2StatsPanel extends RDXPanel
 
          ImGui.endTable();
       }
+   }
+
+   private static Set<ROS2Node> collectTrackedNodes()
+   {
+      Set<ROS2Node> nodes = new HashSet<>();
+      nodes.addAll(ROS2Node.getActiveNodes());
+      nodes.addAll(trackedNodes);
+      return nodes;
    }
 
    private void pruneClosedEndpoints()
