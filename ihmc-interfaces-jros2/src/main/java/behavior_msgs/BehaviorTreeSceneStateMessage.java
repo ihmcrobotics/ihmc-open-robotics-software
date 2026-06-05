@@ -53,8 +53,8 @@ public class BehaviorTreeSceneStateMessage implements ROS2Message<BehaviorTreeSc
    public BehaviorTreeSceneStateMessage()
    {
       latest_modification_to_list_ = new ihmc_common_msgs.LatestModificationMessage();
-      objects_ = new IDLObjectSequence<behavior_msgs.BehaviorTreeSceneObjectStateMessage>(100, behavior_msgs.BehaviorTreeSceneObjectStateMessage.class);
-      persistent_detections_ = new IDLObjectSequence<behavior_msgs.PersistentDetectionStatusMessage>(100, behavior_msgs.PersistentDetectionStatusMessage.class);
+      objects_ = new IDLObjectSequence<behavior_msgs.BehaviorTreeSceneObjectStateMessage>(0, 100, behavior_msgs.BehaviorTreeSceneObjectStateMessage.class);
+      persistent_detections_ = new IDLObjectSequence<behavior_msgs.PersistentDetectionStatusMessage>(0, 100, behavior_msgs.PersistentDetectionStatusMessage.class);
 
    }
 

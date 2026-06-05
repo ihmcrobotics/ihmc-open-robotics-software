@@ -43,7 +43,7 @@ public class WalkingControllerPreviewOutputMessage implements ROS2Message<Walkin
 
    public WalkingControllerPreviewOutputMessage()
    {
-      robot_configurations_ = new IDLObjectSequence<toolbox_msgs.KinematicsToolboxOutputStatus>(1000, toolbox_msgs.KinematicsToolboxOutputStatus.class);
+      robot_configurations_ = new IDLObjectSequence<toolbox_msgs.KinematicsToolboxOutputStatus>(0, 1000, toolbox_msgs.KinematicsToolboxOutputStatus.class);
 
    }
 

@@ -46,6 +46,7 @@ public class ROS2PeerClockOffsetEstimator
    private final PeerClockOffsetEstimatorPingMessage receivedMessage = new PeerClockOffsetEstimatorPingMessage();
    private final Guid receivedRequestTarget = new Guid();
    private final Guid receivedReplyTarget = new Guid();
+   private volatile boolean destroyed = false;
 
    public ROS2PeerClockOffsetEstimator(ROS2Node ros2Node)
    {
@@ -56,6 +57,9 @@ public class ROS2PeerClockOffsetEstimator
 
       subscription = ros2Node.createSubscription(TOPIC, reader ->
       {
+         if (destroyed)
+            return;
+
          PeerClockOffsetEstimatorPingMessage message = reader.read();
          if (message == null)
             return;
@@ -67,6 +71,9 @@ public class ROS2PeerClockOffsetEstimator
 
          if (receivedMessage.getIsRequest() && receivedRequestTarget.equals(ourGuid)) // Reply
          {
+            if (destroyed)
+               return;
+
             addPeerIfAbsent(receivedReplyTarget);
 
             PeerClockOffsetEstimatorPingMessage replyMessage = new PeerClockOffsetEstimatorPingMessage();
@@ -74,13 +81,19 @@ public class ROS2PeerClockOffsetEstimator
             replyMessage.setIsRequest(false);
             MessageTools.toMessage(Instant.now(), replyMessage.getReplySendTime());
 
-            cachedThreadPool.submit(() -> ExceptionTools.handle(() ->
+            if (!cachedThreadPool.isShutdown())
             {
-               synchronized (publisher)
+               cachedThreadPool.submit(() -> ExceptionTools.handle(() ->
                {
-                  publisher.publish(replyMessage);
-               }
-            }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE));
+                  if (destroyed)
+                     return;
+
+                  synchronized (publisher)
+                  {
+                     publisher.publish(replyMessage);
+                  }
+               }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE));
+            }
          }
          else if (!receivedMessage.getIsRequest() && receivedReplyTarget.equals(ourGuid)) // Update clock offset estimate
          {
@@ -127,30 +140,32 @@ public class ROS2PeerClockOffsetEstimator
 
    private void runRequestTask()
    {
-      if (!peerList.isEmpty())
+      if (destroyed || peerList.isEmpty())
+         return;
+
+      if (nextPeerToPing >= peerList.size())
+         nextPeerToPing = 0;
+
+      ROS2PeerClockOffsetEstimatorPeer peer = peerList.get(nextPeerToPing);
+      requestMessage.setIsRequest(true);
+      MessageTools.toMessage(peer.getGuid(), requestMessage.getRequestTarget());
+      MessageTools.toMessage(ourGuid, requestMessage.getReplyTarget());
+      MessageTools.toMessage(Instant.now(), requestMessage.getRequestSendTime());
+      synchronized (publisher)
       {
-         if (nextPeerToPing >= peerList.size())
-            nextPeerToPing = 0;
-
-         ROS2PeerClockOffsetEstimatorPeer peer = peerList.get(nextPeerToPing);
-         requestMessage.setIsRequest(true);
-         MessageTools.toMessage(peer.getGuid(), requestMessage.getRequestTarget());
-         MessageTools.toMessage(ourGuid, requestMessage.getReplyTarget());
-         MessageTools.toMessage(Instant.now(), requestMessage.getRequestSendTime());
-         synchronized (publisher)
-         {
-            publisher.publish(requestMessage);
-         }
-
-         ++nextPeerToPing;
+         publisher.publish(requestMessage);
       }
+
+      ++nextPeerToPing;
    }
 
    public void destroy()
    {
-      cachedThreadPool.shutdown();
-      requestThread.kill();
+      destroyed = true;
+
+      requestThread.blockingKill();
       ros2Node.destroySubscription(subscription);
+      cachedThreadPool.shutdown();
       ros2Node.destroyPublisher(publisher);
    }
 

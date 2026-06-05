@@ -47,9 +47,9 @@ public class YOLOv8ExecutorParameters implements ROS2Message<YOLOv8ExecutorParam
    public YOLOv8ExecutorParameters()
    {
       latest_timestamp_modifiable_ = new ihmc_common_msgs.LatestModificationMessage();
-      available_yolo_models_ = new IDLObjectSequence<perception_msgs.YOLOv8ModelInfo>(16, perception_msgs.YOLOv8ModelInfo.class);
-      models_to_run_ = new IDLStringSequence(16);
-      model_settings_ = new IDLObjectSequence<perception_msgs.YOLOv8ModelParameters>(16, perception_msgs.YOLOv8ModelParameters.class);
+      available_yolo_models_ = new IDLObjectSequence<perception_msgs.YOLOv8ModelInfo>(0, 16, perception_msgs.YOLOv8ModelInfo.class);
+      models_to_run_ = new IDLStringSequence(0);
+      model_settings_ = new IDLObjectSequence<perception_msgs.YOLOv8ModelParameters>(0, 16, perception_msgs.YOLOv8ModelParameters.class);
 
    }
 

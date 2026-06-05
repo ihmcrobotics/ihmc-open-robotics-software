@@ -33,7 +33,7 @@ public class BigVideoPacket implements ROS2Message<BigVideoPacket>
 
    public BigVideoPacket()
    {
-      data_ = new IDLByteSequence(25000000);
+      data_ = new IDLByteSequence(0, 25000000);
 
    }
 

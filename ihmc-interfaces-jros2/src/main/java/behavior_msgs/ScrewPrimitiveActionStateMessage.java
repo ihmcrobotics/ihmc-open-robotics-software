@@ -74,7 +74,7 @@ public class ScrewPrimitiveActionStateMessage implements ROS2Message<ScrewPrimit
    {
       state_ = new behavior_msgs.ActionNodeStateMessage();
       definition_ = new behavior_msgs.ScrewPrimitiveActionDefinitionMessage();
-      preview_trajectory_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage>(50, us.ihmc.euclid.jros2.messages.EuclidPose3DMessage.class);
+      preview_trajectory_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage>(0, 50, us.ihmc.euclid.jros2.messages.EuclidPose3DMessage.class);
       force_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
       torque_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
       preview_joint_angles_ = new double[7];

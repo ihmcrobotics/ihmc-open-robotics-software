@@ -91,7 +91,7 @@ public class SE3TrajectoryMessage implements ROS2Message<SE3TrajectoryMessage>
 
    public SE3TrajectoryMessage()
    {
-      taskspace_trajectory_points_ = new IDLObjectSequence<ihmc_common_msgs.SE3TrajectoryPointMessage>(50, ihmc_common_msgs.SE3TrajectoryPointMessage.class);
+      taskspace_trajectory_points_ = new IDLObjectSequence<ihmc_common_msgs.SE3TrajectoryPointMessage>(0, 50, ihmc_common_msgs.SE3TrajectoryPointMessage.class);
       angular_selection_matrix_ = new ihmc_common_msgs.SelectionMatrix3DMessage();
       linear_selection_matrix_ = new ihmc_common_msgs.SelectionMatrix3DMessage();
       frame_information_ = new ihmc_common_msgs.FrameInformation();

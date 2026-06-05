@@ -42,6 +42,7 @@ public class GpuMappingThread extends RepeatingTaskThread
    private final HeightMapParameters heightMapParameters;
    private final ROS2Publisher<ImageMessage> filteredDepthPublisher;
    private final BlockingQueue<RawImage> rawImageCollection;
+   private final ImageMessage filteredDepthImageMessage = new ImageMessage();
 
    private final ROS2DemandGraphNode publishChunkMap;
    private final ROS2DemandGraphNode publishHeightMap;
@@ -123,7 +124,8 @@ public class GpuMappingThread extends RepeatingTaskThread
             OpenCVTools.compressImagePNG(cpuDepthImage, bytePointer);
             cpuDepthImage.close();
 
-            ImageMessage imageMessage = new ImageMessage();
+            ImageMessage imageMessage = filteredDepthImageMessage;
+            imageMessage.getData().clear();
             PerceptionMessageTools.packImageMessage(depthImage, bytePointer, compressionType, imageMessage);
             filteredDepthPublisher.publish(imageMessage);
 

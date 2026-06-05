@@ -64,7 +64,10 @@ public enum PixelFormat
 
    public static PixelFormat fromByte(byte pixelFormatAsByte)
    {
-      return values()[pixelFormatAsByte];
+      int ordinal = pixelFormatAsByte & 0xFF;
+      if (ordinal < 0 || ordinal > UNKNOWN.ordinal())
+         return UNKNOWN;
+      return values()[ordinal];
    }
 
    public static PixelFormat fromImageMessage(ImageMessage imageMessage)

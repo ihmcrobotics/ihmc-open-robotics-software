@@ -79,13 +79,13 @@ public class StepConstraintsListMessage implements ROS2Message<StepConstraintsLi
 
    public StepConstraintsListMessage()
    {
-      region_origin_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(20, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
-      region_orientation_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage>(20, us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage.class);
-      region_normal_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage>(20, us.ihmc.euclid.jros2.messages.EuclidVector3DMessage.class);
-      concave_hulls_size_ = new IDLIntSequence(100);
-      number_of_holes_in_region_ = new IDLIntSequence(100);
-      hole_polygons_size_ = new IDLIntSequence(100);
-      vertex_buffer_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(5000, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      region_origin_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(0, 20, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      region_orientation_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage>(0, 20, us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage.class);
+      region_normal_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage>(0, 20, us.ihmc.euclid.jros2.messages.EuclidVector3DMessage.class);
+      concave_hulls_size_ = new IDLIntSequence(0, 100);
+      number_of_holes_in_region_ = new IDLIntSequence(0, 100);
+      hole_polygons_size_ = new IDLIntSequence(0, 100);
+      vertex_buffer_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(0, 5000, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
 
    }
 

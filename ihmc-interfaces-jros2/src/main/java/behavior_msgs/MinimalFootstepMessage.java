@@ -57,7 +57,7 @@ public class MinimalFootstepMessage implements ROS2Message<MinimalFootstepMessag
    {
       position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
       orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
-      support_polygon_ = new IDLObjectSequence<ihmc_common_msgs.Point2DMessage>(16, ihmc_common_msgs.Point2DMessage.class);
+      support_polygon_ = new IDLObjectSequence<ihmc_common_msgs.Point2DMessage>(0, 16, ihmc_common_msgs.Point2DMessage.class);
       description_ = new StringBuilder();
 
    }

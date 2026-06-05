@@ -1,5 +1,4 @@
-# Image message. It has a large capacity.
-# It's recommended to reuse instances to avoid excessive memory allocation.
+# Image message. Reuse instances when publishing to avoid repeated allocation.
 
 # Sequence number. Used for detecting out of order or dropped messages
 uint32 sequence_number
@@ -21,7 +20,7 @@ uint16 image_height
 float32 depth_discretization
 
 # The raw data for the image
-byte[<=25000000] data
+byte[] data
 
 # The pixel format. Ordinal of ImageFormat's PixelFormat
 uint8 pixel_format

@@ -57,7 +57,7 @@ public class OneDoFJointTrajectoryMessage implements ROS2Message<OneDoFJointTraj
 
    public OneDoFJointTrajectoryMessage()
    {
-      trajectory_points_ = new IDLObjectSequence<ihmc_common_msgs.TrajectoryPoint1DMessage>(50, ihmc_common_msgs.TrajectoryPoint1DMessage.class);
+      trajectory_points_ = new IDLObjectSequence<ihmc_common_msgs.TrajectoryPoint1DMessage>(0, 50, ihmc_common_msgs.TrajectoryPoint1DMessage.class);
       weight_ = (double) -1;
 
    }

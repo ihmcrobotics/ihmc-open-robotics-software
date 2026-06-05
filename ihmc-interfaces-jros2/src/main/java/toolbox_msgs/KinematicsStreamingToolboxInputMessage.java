@@ -122,7 +122,7 @@ public class KinematicsStreamingToolboxInputMessage implements ROS2Message<Kinem
       stream_initial_blend_duration_ = (double) -1.0;
       angular_rate_limitation_ = (double) -1.0;
       linear_rate_limitation_ = (double) -1.0;
-      inputs_ = new IDLObjectSequence<toolbox_msgs.KinematicsToolboxRigidBodyMessage>(10, toolbox_msgs.KinematicsToolboxRigidBodyMessage.class);
+      inputs_ = new IDLObjectSequence<toolbox_msgs.KinematicsToolboxRigidBodyMessage>(0, 10, toolbox_msgs.KinematicsToolboxRigidBodyMessage.class);
       use_center_of_mass_input_ = (boolean) false;
       center_of_mass_input_ = new toolbox_msgs.KinematicsToolboxCenterOfMassMessage();
       demonstration_task_id_ = (int) -1;

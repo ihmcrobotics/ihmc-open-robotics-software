@@ -54,7 +54,7 @@ public class SystemServiceStatusMessage implements ROS2Message<SystemServiceStat
       service_name_ = new StringBuilder();
       status_ = new StringBuilder();
       refresh_ = (boolean) false;
-      log_data_ = new IDLByteSequence(25000000);
+      log_data_ = new IDLByteSequence(0, 25000000);
 
    }
 

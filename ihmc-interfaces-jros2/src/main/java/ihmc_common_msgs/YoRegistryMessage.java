@@ -25,7 +25,7 @@ public class YoRegistryMessage implements ROS2Message<YoRegistryMessage>
 
    public YoRegistryMessage()
    {
-      data_ = new IDLByteSequence(10000);
+      data_ = new IDLByteSequence(0, 10000);
 
    }
 

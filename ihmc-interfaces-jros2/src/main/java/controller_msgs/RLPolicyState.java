@@ -37,7 +37,7 @@ public class RLPolicyState implements ROS2Message<RLPolicyState>
 
    public RLPolicyState()
    {
-      available_models_ = new IDLStringSequence(16);
+      available_models_ = new IDLStringSequence(0);
 
    }
 

@@ -77,8 +77,8 @@ public class ExternalForceEstimationConfigurationMessage implements ROS2Message<
       estimator_gain_ = (double) 0.5;
       solver_alpha_ = (double) 0.005;
       calculate_root_joint_wrench_ = (boolean) true;
-      rigid_body_hash_codes_ = new IDLIntSequence(10);
-      contact_point_positions_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(10, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      rigid_body_hash_codes_ = new IDLIntSequence(0, 10);
+      contact_point_positions_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(0, 10, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
       estimate_contact_location_ = (boolean) false;
 
    }

@@ -54,7 +54,7 @@ public class FootstepQueueStatusMessage implements ROS2Message<FootstepQueueStat
    public FootstepQueueStatusMessage()
    {
       is_first_step_in_swing_ = (boolean) false;
-      queued_footstep_list_ = new IDLObjectSequence<controller_msgs.QueuedFootstepStatusMessage>(50, controller_msgs.QueuedFootstepStatusMessage.class);
+      queued_footstep_list_ = new IDLObjectSequence<controller_msgs.QueuedFootstepStatusMessage>(0, 50, controller_msgs.QueuedFootstepStatusMessage.class);
 
    }
 

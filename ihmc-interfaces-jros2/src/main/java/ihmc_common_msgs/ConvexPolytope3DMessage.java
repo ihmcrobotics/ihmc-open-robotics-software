@@ -28,7 +28,7 @@ public class ConvexPolytope3DMessage implements ROS2Message<ConvexPolytope3DMess
 
    public ConvexPolytope3DMessage()
    {
-      vertices_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(50, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      vertices_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(0, 50, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
 
    }
 

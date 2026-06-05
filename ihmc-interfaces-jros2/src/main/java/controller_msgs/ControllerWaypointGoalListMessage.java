@@ -40,7 +40,7 @@ public class ControllerWaypointGoalListMessage implements ROS2Message<Controller
 
    public ControllerWaypointGoalListMessage()
    {
-      waypoints_ = new IDLObjectSequence<controller_msgs.ControllerWaypointGoalMessage>(50, controller_msgs.ControllerWaypointGoalMessage.class);
+      waypoints_ = new IDLObjectSequence<controller_msgs.ControllerWaypointGoalMessage>(0, 50, controller_msgs.ControllerWaypointGoalMessage.class);
 
    }
 

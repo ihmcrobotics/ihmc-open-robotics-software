@@ -48,9 +48,9 @@ public class PrimitiveDataVectorMessage implements ROS2Message<PrimitiveDataVect
 
    public PrimitiveDataVectorMessage()
    {
-      double_values_ = new IDLDoubleSequence(200);
-      integer_values_ = new IDLIntSequence(200);
-      boolean_values_ = new IDLBoolSequence(200);
+      double_values_ = new IDLDoubleSequence(0, 200);
+      integer_values_ = new IDLIntSequence(0, 200);
+      boolean_values_ = new IDLBoolSequence(0, 200);
 
    }
 

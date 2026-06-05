@@ -77,7 +77,7 @@ public class ChunkMessage implements ROS2Message<ChunkMessage>
    {
       origin_x_ = (float) 0.0;
       origin_y_ = (float) 0.0;
-      heights_ = new IDLByteSequence(20000);
+      heights_ = new IDLByteSequence(0, 20000);
 
    }
 

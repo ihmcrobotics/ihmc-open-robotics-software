@@ -78,7 +78,7 @@ public class EuclideanTrajectoryMessage implements ROS2Message<EuclideanTrajecto
 
    public EuclideanTrajectoryMessage()
    {
-      taskspace_trajectory_points_ = new IDLObjectSequence<ihmc_common_msgs.EuclideanTrajectoryPointMessage>(50, ihmc_common_msgs.EuclideanTrajectoryPointMessage.class);
+      taskspace_trajectory_points_ = new IDLObjectSequence<ihmc_common_msgs.EuclideanTrajectoryPointMessage>(0, 50, ihmc_common_msgs.EuclideanTrajectoryPointMessage.class);
       selection_matrix_ = new ihmc_common_msgs.SelectionMatrix3DMessage();
       frame_information_ = new ihmc_common_msgs.FrameInformation();
       weight_matrix_ = new ihmc_common_msgs.WeightMatrix3DMessage();

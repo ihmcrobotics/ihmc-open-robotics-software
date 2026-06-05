@@ -41,7 +41,7 @@ public class BehaviorTreeLogMessage implements ROS2Message<BehaviorTreeLogMessag
    public BehaviorTreeLogMessage()
    {
       instant_ = new ihmc_common_msgs.InstantMessage();
-      log_message_ = new IDLByteSequence(2048);
+      log_message_ = new IDLByteSequence(0, 2048);
 
    }
 

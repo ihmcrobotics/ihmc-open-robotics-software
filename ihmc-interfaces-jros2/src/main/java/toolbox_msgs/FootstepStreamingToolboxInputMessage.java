@@ -72,7 +72,7 @@ public class FootstepStreamingToolboxInputMessage implements ROS2Message<Footste
    {
       robot_swing_side_ = (byte) 255;
       is_robot_swing_foot_landing_ = (boolean) false;
-      side_ = new IDLObjectSequence<toolbox_msgs.FootstepStreamingToolboxSideMessage>(2, toolbox_msgs.FootstepStreamingToolboxSideMessage.class);
+      side_ = new IDLObjectSequence<toolbox_msgs.FootstepStreamingToolboxSideMessage>(0, 2, toolbox_msgs.FootstepStreamingToolboxSideMessage.class);
 
    }
 

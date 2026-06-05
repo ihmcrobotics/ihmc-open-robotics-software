@@ -25,7 +25,7 @@ public class MinimalFootstepListMessage implements ROS2Message<MinimalFootstepLi
 
    public MinimalFootstepListMessage()
    {
-      minimal_footsteps_ = new IDLObjectSequence<behavior_msgs.MinimalFootstepMessage>(200, behavior_msgs.MinimalFootstepMessage.class);
+      minimal_footsteps_ = new IDLObjectSequence<behavior_msgs.MinimalFootstepMessage>(0, 200, behavior_msgs.MinimalFootstepMessage.class);
 
    }
 

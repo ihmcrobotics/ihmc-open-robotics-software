@@ -83,9 +83,9 @@ public class ActionNodeStateMessage implements ROS2Message<ActionNodeStateMessag
    public ActionNodeStateMessage()
    {
       state_ = new behavior_msgs.LeafNodeStateMessage();
-      commanded_trajectory_ = new IDLObjectSequence<ihmc_common_msgs.SE3TrajectoryPointMessage>(500, ihmc_common_msgs.SE3TrajectoryPointMessage.class);
+      commanded_trajectory_ = new IDLObjectSequence<ihmc_common_msgs.SE3TrajectoryPointMessage>(0, 500, ihmc_common_msgs.SE3TrajectoryPointMessage.class);
       current_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
-      commanded_joint_trajectories_ = new IDLObjectSequence<controller_msgs.OneDoFJointTrajectoryMessage>(7, controller_msgs.OneDoFJointTrajectoryMessage.class);
+      commanded_joint_trajectories_ = new IDLObjectSequence<controller_msgs.OneDoFJointTrajectoryMessage>(0, 7, controller_msgs.OneDoFJointTrajectoryMessage.class);
       current_joint_angles_ = new double[7];
 
    }

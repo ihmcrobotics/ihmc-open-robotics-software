@@ -99,16 +99,16 @@ public class RobotConfigurationData implements ROS2Message<RobotConfigurationDat
 
    public RobotConfigurationData()
    {
-      joint_angles_ = new IDLFloatSequence(50);
-      joint_velocities_ = new IDLFloatSequence(50);
-      joint_torques_ = new IDLFloatSequence(50);
+      joint_angles_ = new IDLFloatSequence(0, 50);
+      joint_velocities_ = new IDLFloatSequence(0, 50);
+      joint_torques_ = new IDLFloatSequence(0, 50);
       root_position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
       root_orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
       pelvis_linear_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
       pelvis_angular_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
       pelvis_linear_acceleration_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
-      force_sensor_data_ = new IDLObjectSequence<controller_msgs.SpatialVectorMessage>(50, controller_msgs.SpatialVectorMessage.class);
-      imu_sensor_data_ = new IDLObjectSequence<controller_msgs.IMUPacket>(50, controller_msgs.IMUPacket.class);
+      force_sensor_data_ = new IDLObjectSequence<controller_msgs.SpatialVectorMessage>(0, 50, controller_msgs.SpatialVectorMessage.class);
+      imu_sensor_data_ = new IDLObjectSequence<controller_msgs.IMUPacket>(0, 50, controller_msgs.IMUPacket.class);
       robot_motion_status_ = (byte) 255;
 
    }

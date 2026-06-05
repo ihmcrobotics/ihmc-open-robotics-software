@@ -122,13 +122,13 @@ public class WalkActionStateMessage implements ROS2Message<WalkActionStateMessag
       state_ = new behavior_msgs.ActionNodeStateMessage();
       definition_ = new behavior_msgs.WalkActionDefinitionMessage();
       latest_modification_state_data_ = new ihmc_common_msgs.LatestModificationMessage();
-      footsteps_ = new IDLObjectSequence<behavior_msgs.WalkActionFootstepStateMessage>(50, behavior_msgs.WalkActionFootstepStateMessage.class);
+      footsteps_ = new IDLObjectSequence<behavior_msgs.WalkActionFootstepStateMessage>(0, 50, behavior_msgs.WalkActionFootstepStateMessage.class);
       goal_transform_to_parent_ = new controller_msgs.RigidBodyTransformMessage();
-      desired_left_footsteps_ = new IDLObjectSequence<ihmc_common_msgs.SE3TrajectoryPointMessage>(50, ihmc_common_msgs.SE3TrajectoryPointMessage.class);
-      desired_right_footsteps_ = new IDLObjectSequence<ihmc_common_msgs.SE3TrajectoryPointMessage>(50, ihmc_common_msgs.SE3TrajectoryPointMessage.class);
+      desired_left_footsteps_ = new IDLObjectSequence<ihmc_common_msgs.SE3TrajectoryPointMessage>(0, 50, ihmc_common_msgs.SE3TrajectoryPointMessage.class);
+      desired_right_footsteps_ = new IDLObjectSequence<ihmc_common_msgs.SE3TrajectoryPointMessage>(0, 50, ihmc_common_msgs.SE3TrajectoryPointMessage.class);
       current_left_foot_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       current_right_foot_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
-      preview_footsteps_ = new IDLObjectSequence<behavior_msgs.WalkActionFootstepDefinitionMessage>(50, behavior_msgs.WalkActionFootstepDefinitionMessage.class);
+      preview_footsteps_ = new IDLObjectSequence<behavior_msgs.WalkActionFootstepDefinitionMessage>(0, 50, behavior_msgs.WalkActionFootstepDefinitionMessage.class);
 
    }
 

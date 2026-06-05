@@ -75,11 +75,11 @@ public class YOLOv8ModelParameters implements ROS2Message<YOLOv8ModelParameters>
    {
       latest_timestamp_modifiable_ = new ihmc_common_msgs.LatestModificationMessage();
       model_name_ = new StringBuilder();
-      ignored_object_classes_ = new IDLBoolSequence(96);
-      confidence_thresholds_ = new IDLFloatSequence(96);
-      mask_thresholds_ = new IDLFloatSequence(96);
-      erosion_kernel_radii_ = new IDLShortSequence(96);
-      outlier_thresholds_ = new IDLFloatSequence(96);
+      ignored_object_classes_ = new IDLBoolSequence(0, 96);
+      confidence_thresholds_ = new IDLFloatSequence(0, 96);
+      mask_thresholds_ = new IDLFloatSequence(0, 96);
+      erosion_kernel_radii_ = new IDLShortSequence(0, 96);
+      outlier_thresholds_ = new IDLFloatSequence(0, 96);
 
    }
 
