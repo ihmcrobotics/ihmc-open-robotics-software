@@ -251,12 +251,13 @@ public class RDXROS2StatsPanel extends RDXPanel
 
       ImGuiTools.separatorText("Nodes");
 
-      if (ImGui.beginTable(labels.get("Nodes"), 5, tableFlags))
+      if (ImGui.beginTable(labels.get("Nodes"), 6, tableFlags))
       {
          ImGui.tableSetupColumn(labels.get("Node Name"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Domain ID"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Publishers"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Subscribers"), ImGuiTableColumnFlags.WidthFixed);
+         ImGui.tableSetupColumn(labels.get("Async"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Closed"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupScrollFreeze(0, 1);
          ImGui.tableHeadersRow();
@@ -275,6 +276,8 @@ public class RDXROS2StatsPanel extends RDXPanel
                ImGui.text("%d".formatted(node.getPublishers().size()));
                ImGui.tableNextColumn();
                ImGui.text("%d".formatted(node.getSubscriptions().size()));
+               ImGui.tableNextColumn();
+               ImGui.text("%b".formatted(node.isAsync()));
                ImGui.tableNextColumn();
                ImGui.text("%b".formatted(node.isClosed()));
             }

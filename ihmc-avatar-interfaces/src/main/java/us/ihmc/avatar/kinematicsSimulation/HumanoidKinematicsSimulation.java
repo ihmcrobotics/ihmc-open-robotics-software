@@ -295,7 +295,14 @@ public class HumanoidKinematicsSimulation
 
       for (RobotSide side : RobotSide.values)
          if (robotModel.getRobotVersion().getHandType(side) == HandType.ABILITY_HAND)
-            abilityHands.put(side, new AbilityHandKinematicsSimulation(side, ros2Node, fullRobotModel));
+         {
+            AbilityHandKinematicsSimulation handSimulation = new AbilityHandKinematicsSimulation(side,
+                                                                                                 ros2Node,
+                                                                                                 fullRobotModel,
+                                                                                                 robotModel.getHandModel(side));
+            if (handSimulation.isEnabled())
+               abilityHands.put(side, handSimulation);
+         }
 
       robotConfigurationDataPublisher = createRobotConfigurationDataPublisher(robotModel.getSimpleRobotName());
 

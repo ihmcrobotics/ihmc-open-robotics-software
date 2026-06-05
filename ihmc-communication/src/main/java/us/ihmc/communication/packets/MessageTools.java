@@ -1565,8 +1565,26 @@ public class MessageTools
 
    public static void toMessage(YoRegistry registry, YoRegistryMessage message)
    {
-      message.getData().getBuffer().position(0);
-      toMessageInternal(registry, message.getData().getBuffer());
+      IDLByteSequence data = message.getData();
+      int numberOfLongs = countYoVariables(registry);
+      int sizeBytes = numberOfLongs * Long.BYTES;
+
+      data.clear();
+      if (!data.ensureMinCapacity(sizeBytes))
+      {
+         throw new IllegalArgumentException("YoRegistry data size %d exceeds max %d".formatted(sizeBytes, data.getMaxSize()));
+      }
+
+      ByteBuffer buffer = data.getBuffer();
+      toMessageInternal(registry, buffer);
+   }
+
+   private static int countYoVariables(YoRegistry registry)
+   {
+      int count = registry.getVariables().size();
+      for (YoRegistry child : registry.getChildren())
+         count += countYoVariables(child);
+      return count;
    }
 
    private static void toMessageInternal(YoRegistry registry, ByteBuffer buffer)
@@ -1579,7 +1597,10 @@ public class MessageTools
 
    public static void fromMessage(YoRegistryMessage message, YoRegistry registry)
    {
-      fromMessageInternal(message.getData().getBuffer(), registry);
+      ByteBuffer buffer = message.getData().getBuffer();
+      buffer.limit(message.getData().size());
+      buffer.position(0);
+      fromMessageInternal(buffer, registry);
    }
 
    private static void fromMessageInternal(ByteBuffer buffer, YoRegistry registry)

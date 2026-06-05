@@ -7,6 +7,8 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
 import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
+import us.ihmc.handsros2.HandModel;
+import us.ihmc.handsros2.abilityHand.AbilityHandModel;
 import us.ihmc.handsros2.abilityHand.AbilityHandModel.AbilityHandJointName;
 import us.ihmc.handsros2.abilityHand.AbilityHandROS2API;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -27,15 +29,26 @@ public class AbilityHandKinematicsSimulation
    private final double[] goalPositions = new double[ACTUATOR_COUNT];
    private final double[] goalVelocities = new double[ACTUATOR_COUNT];
    private final double[] actuatorPositions = new double[ACTUATOR_COUNT];
+   private final boolean enabled;
 
    private AbilityHandControlMode controlMode = AbilityHandControlMode.POSITION;
    private int gripStage = 0;
    private long lastTime = -1;
 
-   public AbilityHandKinematicsSimulation(RobotSide side, ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel)
+   public AbilityHandKinematicsSimulation(RobotSide side, ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HandModel handModel)
    {
+      AbilityHandModel abilityHandModel = handModel instanceof AbilityHandModel model ? model : new AbilityHandModel();
+      boolean allJointsFound = true;
+
       for (AbilityHandJointName jointName : AbilityHandJointName.values)
-         joints[jointName.ordinal()] = (RevoluteJoint) fullRobotModel.getOneDoFJointByName(jointName.getJointName(side));
+      {
+         String jointNameString = abilityHandModel.getAbilityHandJointName(side, jointName);
+         RevoluteJoint joint = (RevoluteJoint) fullRobotModel.getOneDoFJointByName(jointNameString);
+         joints[jointName.ordinal()] = joint;
+         allJointsFound &= joint != null;
+      }
+
+      enabled = allJointsFound;
 
       ros2Node.createSubscription(AbilityHandROS2API.COMMAND_TOPICS.get(side), reader -> ROS2Tools.readIfPresent(reader, commandNotification::set));
       statePublisher = ros2Node.createPublisher(AbilityHandROS2API.STATE_TOPICS.get(side));
@@ -43,8 +56,15 @@ public class AbilityHandKinematicsSimulation
       setGripGoals(AbilityHandGrip.RELAX);
    }
 
+   public boolean isEnabled()
+   {
+      return enabled;
+   }
+
    public void update()
    {
+      if (!enabled)
+         return;
       if (commandNotification.poll())
       {
          AbilityHandCommand commandMessage = commandNotification.read();
