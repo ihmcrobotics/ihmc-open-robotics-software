@@ -27,7 +27,7 @@ import static us.ihmc.perception.imageMessage.CompressionType.*;
 public class RawImagePublisher implements AutoCloseable
 {
    private final ROS2Helper ros2Helper;
-   private final ImageMessage imageMessage;
+   private ImageMessage imageMessage;
    private final Image ros2Image;
 
    private CUDAJPEGProcessor nvJPEG;
@@ -38,7 +38,6 @@ public class RawImagePublisher implements AutoCloseable
    public RawImagePublisher(ROS2Node ros2Node)
    {
       ros2Helper = new ROS2Helper(ros2Node);
-      imageMessage = new ImageMessage();
       ros2Image = new Image();
 
       if (CUDATools.hasNVJPEG())
@@ -162,8 +161,9 @@ public class RawImagePublisher implements AutoCloseable
       }
 
       // Pack the message and send it off
-      PerceptionMessageTools.packImageMessage(imageToCompress, compressedImage, compressionType, imageMessage);
-      ros2Helper.publish(imageTopic, imageMessage);
+      ImageMessage messageToPublish = getOrCreateImageMessage();
+      PerceptionMessageTools.packImageMessage(imageToCompress, compressedImage, compressionType, messageToPublish);
+      ros2Helper.publish(imageTopic, messageToPublish);
 
       // Close stuff
       compressedImage.close();
@@ -214,6 +214,13 @@ public class RawImagePublisher implements AutoCloseable
 
       // Publish the message
       ros2Helper.publish(cameraInfoTopic, cameraInfo);
+   }
+
+   private ImageMessage getOrCreateImageMessage()
+   {
+      if (imageMessage == null)
+         imageMessage = new ImageMessage();
+      return imageMessage;
    }
 
    @Override

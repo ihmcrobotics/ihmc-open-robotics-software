@@ -67,9 +67,9 @@ public class MultiContactBalanceStatus implements ROS2Message<MultiContactBalanc
    {
       capture_point_2d_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
       center_of_mass_3d_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
-      contact_points_in_world_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(16, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
-      surface_normals_in_world_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage>(16, us.ihmc.euclid.jros2.messages.EuclidVector3DMessage.class);
-      support_rigid_body_ids_ = new IDLIntSequence(16);
+      contact_points_in_world_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(0, 16, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      surface_normals_in_world_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage>(0, 16, us.ihmc.euclid.jros2.messages.EuclidVector3DMessage.class);
+      support_rigid_body_ids_ = new IDLIntSequence(0, 16);
 
    }
 

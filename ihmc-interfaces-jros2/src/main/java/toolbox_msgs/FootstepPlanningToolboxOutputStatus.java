@@ -147,7 +147,7 @@ public class FootstepPlanningToolboxOutputStatus implements ROS2Message<Footstep
       goal_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
       planner_timings_ = new toolbox_msgs.FootstepPlanningTimingsMessage();
       exception_message_ = new StringBuilder();
-      stacktrace_ = new IDLStringSequence(20);
+      stacktrace_ = new IDLStringSequence(0);
 
    }
 

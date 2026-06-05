@@ -41,7 +41,7 @@ public class BehaviorTreeNodeStateMessage implements ROS2Message<BehaviorTreeNod
    public BehaviorTreeNodeStateMessage()
    {
       is_active_ = (boolean) false;
-      recent_log_messages_ = new IDLObjectSequence<behavior_msgs.BehaviorTreeLogMessage>(50, behavior_msgs.BehaviorTreeLogMessage.class);
+      recent_log_messages_ = new IDLObjectSequence<behavior_msgs.BehaviorTreeLogMessage>(0, 50, behavior_msgs.BehaviorTreeLogMessage.class);
 
    }
 

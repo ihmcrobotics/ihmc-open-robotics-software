@@ -55,10 +55,10 @@ public class KinematicsToolboxInputCollectionMessage implements ROS2Message<Kine
 
    public KinematicsToolboxInputCollectionMessage()
    {
-      center_of_mass_inputs_ = new IDLObjectSequence<toolbox_msgs.KinematicsToolboxCenterOfMassMessage>(3, toolbox_msgs.KinematicsToolboxCenterOfMassMessage.class);
-      rigid_body_inputs_ = new IDLObjectSequence<toolbox_msgs.KinematicsToolboxRigidBodyMessage>(20, toolbox_msgs.KinematicsToolboxRigidBodyMessage.class);
-      joint_inputs_ = new IDLObjectSequence<toolbox_msgs.KinematicsToolboxOneDoFJointMessage>(20, toolbox_msgs.KinematicsToolboxOneDoFJointMessage.class);
-      contact_state_input_ = new IDLObjectSequence<toolbox_msgs.KinematicsToolboxSupportRegionMessage>(1, toolbox_msgs.KinematicsToolboxSupportRegionMessage.class);
+      center_of_mass_inputs_ = new IDLObjectSequence<toolbox_msgs.KinematicsToolboxCenterOfMassMessage>(0, 3, toolbox_msgs.KinematicsToolboxCenterOfMassMessage.class);
+      rigid_body_inputs_ = new IDLObjectSequence<toolbox_msgs.KinematicsToolboxRigidBodyMessage>(0, 20, toolbox_msgs.KinematicsToolboxRigidBodyMessage.class);
+      joint_inputs_ = new IDLObjectSequence<toolbox_msgs.KinematicsToolboxOneDoFJointMessage>(0, 20, toolbox_msgs.KinematicsToolboxOneDoFJointMessage.class);
+      contact_state_input_ = new IDLObjectSequence<toolbox_msgs.KinematicsToolboxSupportRegionMessage>(0, 1, toolbox_msgs.KinematicsToolboxSupportRegionMessage.class);
 
    }
 

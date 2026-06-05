@@ -160,7 +160,7 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
       desired_joint_velocities_ = new IDLFloatSequence();
       desired_root_linear_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
       desired_root_angular_velocity_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
-      support_region_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(32, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      support_region_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(0, 32, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
       desired_joint_velocities_publishing_period_ = new IDLFloatSequence();
       desired_root_linear_velocity_publishing_period_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
       desired_root_angular_velocity_publishing_period_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();

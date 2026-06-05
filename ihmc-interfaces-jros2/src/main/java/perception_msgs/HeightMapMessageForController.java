@@ -74,7 +74,7 @@ public class HeightMapMessageForController implements ROS2Message<HeightMapMessa
    {
       grid_center_x_ = (double) 0.0;
       grid_center_y_ = (double) 0.0;
-      heights_ = new IDLFloatSequence(255000);
+      heights_ = new IDLFloatSequence(0, 255000);
 
    }
 

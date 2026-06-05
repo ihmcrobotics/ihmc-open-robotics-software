@@ -119,9 +119,9 @@ public class SceneActionDefinitionMessage implements ROS2Message<SceneActionDefi
       definition_ = new behavior_msgs.ActionNodeDefinitionMessage();
       scene_object_definition_ = new behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage();
       nominal_object_pose_ = new controller_msgs.RigidBodyTransformMessage();
-      enabled_yolo_models_ = new IDLShortSequence(10);
-      yolo_model_parameters_ = new IDLObjectSequence<perception_msgs.YOLOv8ModelParameters>(10, perception_msgs.YOLOv8ModelParameters.class);
-      enabled_foundation_pose_models_ = new IDLByteSequence(10);
+      enabled_yolo_models_ = new IDLShortSequence(0, 10);
+      yolo_model_parameters_ = new IDLObjectSequence<perception_msgs.YOLOv8ModelParameters>(0, 10, perception_msgs.YOLOv8ModelParameters.class);
+      enabled_foundation_pose_models_ = new IDLByteSequence(0, 10);
 
    }
 

@@ -66,7 +66,7 @@ public class RobotDesiredConfigurationData implements ROS2Message<RobotDesiredCo
 
    public RobotDesiredConfigurationData()
    {
-      joint_desired_output_list_ = new IDLObjectSequence<controller_msgs.JointDesiredOutputMessage>(50, controller_msgs.JointDesiredOutputMessage.class);
+      joint_desired_output_list_ = new IDLObjectSequence<controller_msgs.JointDesiredOutputMessage>(0, 50, controller_msgs.JointDesiredOutputMessage.class);
       has_desired_root_joint_position_data_ = (boolean) false;
       desired_root_joint_translation_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
       desired_root_joint_orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();

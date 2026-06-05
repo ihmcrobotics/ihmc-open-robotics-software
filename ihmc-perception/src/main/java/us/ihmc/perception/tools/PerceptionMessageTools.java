@@ -88,18 +88,32 @@ public class PerceptionMessageTools
    public static void packDataArray(IDLByteSequence dataToPack, ByteBuffer dataBuffer)
    {
       ByteBuffer source = dataBuffer.duplicate();
-      if (!source.hasRemaining())
-         source.rewind();
-
       int byteCount = source.remaining();
+
       dataToPack.clear();
+      if (byteCount <= 0)
+         return;
+
       dataToPack.ensureMinCapacity(byteCount);
       dataToPack.getBuffer().put(source);
    }
 
    public static void packDataArray(IDLByteSequence dataToPack, BytePointer dataPointer)
    {
-      packDataArray(dataToPack, dataPointer.asBuffer());
+      int start = (int) dataPointer.position();
+      int end = (int) dataPointer.limit();
+      int byteCount = end - start;
+
+      dataToPack.clear();
+      if (byteCount <= 0)
+         return;
+
+      dataToPack.ensureMinCapacity(byteCount);
+
+      ByteBuffer source = dataPointer.asBuffer().duplicate();
+      source.position(start);
+      source.limit(end);
+      dataToPack.getBuffer().put(source);
    }
 
    public static void packImageMessageData(ImageMessage imageMessage, Mat mat)
@@ -138,7 +152,7 @@ public class PerceptionMessageTools
 
    public static void packImageMessageData(ImageMessage imageMessage, BytePointer dataPointer)
    {
-      packImageMessageData(imageMessage, dataPointer.asBuffer());
+      packDataArray(imageMessage.getData(), dataPointer);
    }
 
    /**
@@ -231,8 +245,12 @@ public class PerceptionMessageTools
       imageMessageToPack.setCompressionType(compressionType.toByte());
       if (ousterBeamAltitudeAngles != null)
          MessageTools.packIDLSequence(ousterBeamAltitudeAngles, imageMessageToPack.getOusterBeamAltitudeAngles());
+      else
+         imageMessageToPack.getOusterBeamAltitudeAngles().clear();
       if (ousterBeamAzimuthAngles != null)
          MessageTools.packIDLSequence(ousterBeamAzimuthAngles, imageMessageToPack.getOusterBeamAzimuthAngles());
+      else
+         imageMessageToPack.getOusterBeamAzimuthAngles().clear();
    }
 
    public static void packImageMessage(RawImage image, String cameraFrameId, Image messageToPack)
@@ -257,9 +275,6 @@ public class PerceptionMessageTools
       };
       messageToPack.setEncoding(encoding);
 
-      // Get the message's internal buffer
-      ByteBuffer dataBuffer = messageToPack.getData().getBuffer();
-
       // Set byte order
       messageToPack.setIsBigendian((byte) 0);
 
@@ -268,8 +283,7 @@ public class PerceptionMessageTools
       messageToPack.setStep((int) cpuImage.step());
 
       // Set data
-      int memorySize = (int) OpenCVTools.memorySize(cpuImage);
-      dataBuffer.position(0).put(cpuImage.data().limit(memorySize).asByteBuffer());
+      packDataArray(messageToPack.getData(), cpuImage);
    }
 
    private static String getOpenCVTypeString(int openCVType)

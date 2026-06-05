@@ -43,8 +43,8 @@ public class ConfirmableRequestMessage implements ROS2Message<ConfirmableRequest
 
    public ConfirmableRequestMessage()
    {
-      request_numbers_ = new IDLIntSequence(10);
-      confirmation_numbers_ = new IDLIntSequence(250);
+      request_numbers_ = new IDLIntSequence(0, 10);
+      confirmation_numbers_ = new IDLIntSequence(0, 250);
 
    }
 

@@ -69,7 +69,7 @@ public class ValkyrieHandFingerTrajectoryMessage implements ROS2Message<Valkyrie
    public ValkyrieHandFingerTrajectoryMessage()
    {
       robot_side_ = (byte) 255;
-      valkyrie_finger_motor_names_ = new IDLByteSequence(6);
+      valkyrie_finger_motor_names_ = new IDLByteSequence(0, 6);
       jointspace_trajectory_ = new controller_msgs.JointspaceTrajectoryMessage();
 
    }

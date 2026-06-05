@@ -53,7 +53,7 @@ public class ControllerCrashNotificationPacket implements ROS2Message<Controller
       controller_crash_location_ = (byte) 255;
       exception_type_ = new StringBuilder();
       error_message_ = new StringBuilder();
-      stacktrace_ = new IDLStringSequence(50);
+      stacktrace_ = new IDLStringSequence(0);
 
    }
 

@@ -219,8 +219,8 @@ public class WalkActionDefinitionMessage implements ROS2Message<WalkActionDefini
       definition_ = new behavior_msgs.ActionNodeDefinitionMessage();
       parent_frame_name_ = new StringBuilder();
       is_manually_placed_ = (boolean) false;
-      waypoints_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage>(40, us.ihmc.euclid.jros2.messages.EuclidPose3DMessage.class);
-      footsteps_ = new IDLObjectSequence<behavior_msgs.WalkActionFootstepDefinitionMessage>(50, behavior_msgs.WalkActionFootstepDefinitionMessage.class);
+      waypoints_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage>(0, 40, us.ihmc.euclid.jros2.messages.EuclidPose3DMessage.class);
+      footsteps_ = new IDLObjectSequence<behavior_msgs.WalkActionFootstepDefinitionMessage>(0, 50, behavior_msgs.WalkActionFootstepDefinitionMessage.class);
       goal_stance_point_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
       goal_focal_point_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
       planner_walk_with_goal_orientation_ = (boolean) false;

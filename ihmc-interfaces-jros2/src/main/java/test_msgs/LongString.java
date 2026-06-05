@@ -26,7 +26,7 @@ public class LongString implements ROS2Message<LongString>
 
    public LongString()
    {
-      long_string_ = new IDLByteSequence(2048);
+      long_string_ = new IDLByteSequence(0, 2048);
 
    }
 

@@ -65,7 +65,7 @@ public class WrenchTrajectoryMessage implements ROS2Message<WrenchTrajectoryMess
 
    public WrenchTrajectoryMessage()
    {
-      wrench_trajectory_points_ = new IDLObjectSequence<controller_msgs.WrenchTrajectoryPointMessage>(50, controller_msgs.WrenchTrajectoryPointMessage.class);
+      wrench_trajectory_points_ = new IDLObjectSequence<controller_msgs.WrenchTrajectoryPointMessage>(0, 50, controller_msgs.WrenchTrajectoryPointMessage.class);
       frame_information_ = new ihmc_common_msgs.FrameInformation();
       use_custom_control_frame_ = (boolean) false;
       control_frame_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();

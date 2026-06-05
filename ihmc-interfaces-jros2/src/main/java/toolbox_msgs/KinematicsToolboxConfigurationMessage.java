@@ -145,8 +145,8 @@ public class KinematicsToolboxConfigurationMessage implements ROS2Message<Kinema
       enable_input_persistence_ = (boolean) false;
       enable_support_polygon_constraint_ = (boolean) false;
       disable_support_polygon_constraint_ = (boolean) false;
-      joints_to_deactivate_ = new IDLIntSequence(10);
-      joints_to_activate_ = new IDLIntSequence(10);
+      joints_to_deactivate_ = new IDLIntSequence(0, 10);
+      joints_to_activate_ = new IDLIntSequence(0, 10);
 
    }
 

@@ -31,7 +31,7 @@ public class UInt16MultiArrayHack implements ROS2Message<UInt16MultiArrayHack>
    public UInt16MultiArrayHack()
    {
       layout_ = new std_msgs.MultiArrayLayout();
-      data_ = new IDLShortSequence(1024);
+      data_ = new IDLShortSequence(0, 1024);
 
    }
 

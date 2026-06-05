@@ -102,8 +102,8 @@ public class DetectedObjectPacket implements ROS2Message<DetectedObjectPacket>
       {
          bounding_box_vertices_[i] = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
       }
-      object_point_cloud_ = new IDLObjectSequence<geometry_msgs.Point32>(32768, geometry_msgs.Point32.class);
-      segmented_point_cloud_ = new IDLObjectSequence<geometry_msgs.Point32>(32768, geometry_msgs.Point32.class);
+      object_point_cloud_ = new IDLObjectSequence<geometry_msgs.Point32>(0, 32768, geometry_msgs.Point32.class);
+      segmented_point_cloud_ = new IDLObjectSequence<geometry_msgs.Point32>(0, 32768, geometry_msgs.Point32.class);
 
    }
 

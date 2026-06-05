@@ -111,13 +111,13 @@ public class TerrainMapMessage implements ROS2Message<TerrainMapMessage>
    {
       grid_center_x_ = (double) 0.0;
       grid_center_y_ = (double) 0.0;
-      height_map_ = new IDLFloatSequence(255000);
-      obstacle_clearance_score_ = new IDLFloatSequence(255000);
-      traversability_score_ = new IDLFloatSequence(255000);
-      traversability_class_ = new IDLByteSequence(255000);
-      snapped_normal_x_data_ = new IDLByteSequence(255000);
-      snapped_normal_y_data_ = new IDLByteSequence(255000);
-      snapped_normal_z_data_ = new IDLByteSequence(255000);
+      height_map_ = new IDLFloatSequence(0, 255000);
+      obstacle_clearance_score_ = new IDLFloatSequence(0, 255000);
+      traversability_score_ = new IDLFloatSequence(0, 255000);
+      traversability_class_ = new IDLByteSequence(0, 255000);
+      snapped_normal_x_data_ = new IDLByteSequence(0, 255000);
+      snapped_normal_y_data_ = new IDLByteSequence(0, 255000);
+      snapped_normal_z_data_ = new IDLByteSequence(0, 255000);
 
    }
 

@@ -32,7 +32,7 @@ public class Float32MultiArrayHack implements ROS2Message<Float32MultiArrayHack>
    public Float32MultiArrayHack()
    {
       layout_ = new std_msgs.MultiArrayLayout();
-      data_ = new IDLFloatSequence(1024);
+      data_ = new IDLFloatSequence(0, 1024);
 
    }
 

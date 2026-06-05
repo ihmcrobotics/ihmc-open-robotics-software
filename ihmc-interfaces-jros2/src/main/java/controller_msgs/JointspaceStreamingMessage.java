@@ -30,9 +30,9 @@ public class JointspaceStreamingMessage implements ROS2Message<JointspaceStreami
 
    public JointspaceStreamingMessage()
    {
-      positions_ = new IDLFloatSequence(12);
-      velocities_ = new IDLFloatSequence(12);
-      accelerations_ = new IDLFloatSequence(12);
+      positions_ = new IDLFloatSequence(0, 12);
+      velocities_ = new IDLFloatSequence(0, 12);
+      accelerations_ = new IDLFloatSequence(0, 12);
 
    }
 

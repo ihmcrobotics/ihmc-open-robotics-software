@@ -9,12 +9,10 @@ import us.ihmc.fastddsjava.cdr.idl.*;
 import us.ihmc.jros2.ROS2Message;
 
 /**
-Image message. It has a large capacity.
-It's recommended to reuse instances to avoid excessive memory allocation.
+Image message. Reuse instances when publishing to avoid repeated allocation.
 <p>Source (perception_msgs/ImageMessage):
 <pre>{@code
-# Image message. It has a large capacity.
-# It's recommended to reuse instances to avoid excessive memory allocation.
+# Image message. Reuse instances when publishing to avoid repeated allocation.
 
 # Sequence number. Used for detecting out of order or dropped messages
 uint32 sequence_number
@@ -36,7 +34,7 @@ uint16 image_height
 float32 depth_discretization
 
 # The raw data for the image
-byte[<=25000000] data
+byte[] data
 
 # The pixel format. Ordinal of ImageFormat's PixelFormat
 uint8 pixel_format
@@ -152,11 +150,11 @@ public class ImageMessage implements ROS2Message<ImageMessage>
    public ImageMessage()
    {
       acquisition_time_ = new ihmc_common_msgs.InstantMessage();
-      data_ = new IDLByteSequence(25000000);
+      data_ = new IDLByteSequence();
       position_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
       orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
-      ouster_beam_altitude_angles_ = new IDLFloatSequence(128);
-      ouster_beam_azimuth_angles_ = new IDLFloatSequence(128);
+      ouster_beam_altitude_angles_ = new IDLFloatSequence(0, 128);
+      ouster_beam_azimuth_angles_ = new IDLFloatSequence(0, 128);
 
    }
 

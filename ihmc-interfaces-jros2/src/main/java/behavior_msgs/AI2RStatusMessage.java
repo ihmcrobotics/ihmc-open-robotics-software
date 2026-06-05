@@ -99,8 +99,8 @@ public class AI2RStatusMessage implements ROS2Message<AI2RStatusMessage>
    public AI2RStatusMessage()
    {
       robot_mid_feet_under_pelvis_pose_in_world_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
-      objects_ = new IDLObjectSequence<behavior_msgs.AI2RObjectMessage>(200, behavior_msgs.AI2RObjectMessage.class);
-      available_behaviors_ = new IDLStringSequence(200);
+      objects_ = new IDLObjectSequence<behavior_msgs.AI2RObjectMessage>(0, 200, behavior_msgs.AI2RObjectMessage.class);
+      available_behaviors_ = new IDLStringSequence(0);
       behavior_in_progress_ = new StringBuilder();
       completed_behavior_ = new StringBuilder();
       failed_behavior_ = new StringBuilder();

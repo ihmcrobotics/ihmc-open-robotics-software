@@ -140,7 +140,7 @@ public class FootstepDataListMessage implements ROS2Message<FootstepDataListMess
 
    public FootstepDataListMessage()
    {
-      footstep_data_list_ = new IDLObjectSequence<controller_msgs.FootstepDataMessage>(50, controller_msgs.FootstepDataMessage.class);
+      footstep_data_list_ = new IDLObjectSequence<controller_msgs.FootstepDataMessage>(0, 50, controller_msgs.FootstepDataMessage.class);
       execution_timing_ = (byte) 0;
       default_swing_duration_ = (double) -1.0;
       default_transfer_duration_ = (double) -1.0;

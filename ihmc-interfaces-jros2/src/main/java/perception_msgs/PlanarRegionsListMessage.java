@@ -93,14 +93,14 @@ public class PlanarRegionsListMessage implements ROS2Message<PlanarRegionsListMe
    public PlanarRegionsListMessage()
    {
       last_updated_ = new ihmc_common_msgs.InstantMessage();
-      region_id_ = new IDLIntSequence(3000);
-      region_origin_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(3000, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
-      region_orientation_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage>(3000, us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage.class);
-      region_normal_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage>(3000, us.ihmc.euclid.jros2.messages.EuclidVector3DMessage.class);
-      concave_hulls_size_ = new IDLIntSequence(3000);
-      number_of_convex_polygons_ = new IDLIntSequence(3000);
-      convex_polygons_size_ = new IDLIntSequence(3000);
-      vertex_buffer_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(50000, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      region_id_ = new IDLIntSequence(0, 3000);
+      region_origin_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(0, 3000, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      region_orientation_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage>(0, 3000, us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage.class);
+      region_normal_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage>(0, 3000, us.ihmc.euclid.jros2.messages.EuclidVector3DMessage.class);
+      concave_hulls_size_ = new IDLIntSequence(0, 3000);
+      number_of_convex_polygons_ = new IDLIntSequence(0, 3000);
+      convex_polygons_size_ = new IDLIntSequence(0, 3000);
+      vertex_buffer_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(0, 50000, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
 
    }
 

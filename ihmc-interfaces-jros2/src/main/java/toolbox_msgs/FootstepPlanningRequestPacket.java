@@ -215,7 +215,7 @@ public class FootstepPlanningRequestPacket implements ROS2Message<FootstepPlanni
       plan_body_path_ = (boolean) false;
       plan_footsteps_ = (boolean) true;
       perform_a_star_search_ = (boolean) true;
-      body_path_waypoints_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage>(50, us.ihmc.euclid.jros2.messages.EuclidPose3DMessage.class);
+      body_path_waypoints_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage>(0, 50, us.ihmc.euclid.jros2.messages.EuclidPose3DMessage.class);
       goal_distance_proximity_ = (double) -1.0;
       goal_yaw_proximity_ = (double) -1.0;
       timeout_ = (double) 5.0;

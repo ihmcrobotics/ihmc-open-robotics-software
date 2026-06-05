@@ -56,10 +56,10 @@ public class MultiContactTimedContactSequenceMessage implements ROS2Message<Mult
 
    public MultiContactTimedContactSequenceMessage()
    {
-      left_arm_contact_intervals_ = new IDLObjectSequence<ihmc_common_msgs.TimeIntervalMessage>(25, ihmc_common_msgs.TimeIntervalMessage.class);
-      right_arm_contact_intervals_ = new IDLObjectSequence<ihmc_common_msgs.TimeIntervalMessage>(25, ihmc_common_msgs.TimeIntervalMessage.class);
-      left_leg_contact_intervals_ = new IDLObjectSequence<ihmc_common_msgs.TimeIntervalMessage>(25, ihmc_common_msgs.TimeIntervalMessage.class);
-      right_leg_contact_intervals_ = new IDLObjectSequence<ihmc_common_msgs.TimeIntervalMessage>(25, ihmc_common_msgs.TimeIntervalMessage.class);
+      left_arm_contact_intervals_ = new IDLObjectSequence<ihmc_common_msgs.TimeIntervalMessage>(0, 25, ihmc_common_msgs.TimeIntervalMessage.class);
+      right_arm_contact_intervals_ = new IDLObjectSequence<ihmc_common_msgs.TimeIntervalMessage>(0, 25, ihmc_common_msgs.TimeIntervalMessage.class);
+      left_leg_contact_intervals_ = new IDLObjectSequence<ihmc_common_msgs.TimeIntervalMessage>(0, 25, ihmc_common_msgs.TimeIntervalMessage.class);
+      right_leg_contact_intervals_ = new IDLObjectSequence<ihmc_common_msgs.TimeIntervalMessage>(0, 25, ihmc_common_msgs.TimeIntervalMessage.class);
 
    }
 

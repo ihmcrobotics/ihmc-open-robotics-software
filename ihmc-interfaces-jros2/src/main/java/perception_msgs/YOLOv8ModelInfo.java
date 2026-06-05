@@ -37,7 +37,7 @@ public class YOLOv8ModelInfo implements ROS2Message<YOLOv8ModelInfo>
    public YOLOv8ModelInfo()
    {
       model_name_ = new StringBuilder();
-      detectable_object_classes_ = new IDLStringSequence(96);
+      detectable_object_classes_ = new IDLStringSequence(0);
 
    }
 

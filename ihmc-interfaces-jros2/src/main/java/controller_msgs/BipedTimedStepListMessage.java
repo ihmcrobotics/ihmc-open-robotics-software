@@ -31,7 +31,7 @@ public class BipedTimedStepListMessage implements ROS2Message<BipedTimedStepList
 
    public BipedTimedStepListMessage()
    {
-      timed_step_list_ = new IDLObjectSequence<controller_msgs.BipedTimedStepMessage>(50, controller_msgs.BipedTimedStepMessage.class);
+      timed_step_list_ = new IDLObjectSequence<controller_msgs.BipedTimedStepMessage>(0, 50, controller_msgs.BipedTimedStepMessage.class);
 
    }
 

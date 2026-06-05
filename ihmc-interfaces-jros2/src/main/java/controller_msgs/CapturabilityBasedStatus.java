@@ -100,10 +100,10 @@ public class CapturabilityBasedStatus implements ROS2Message<CapturabilityBasedS
       capture_point_2d_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
       desired_capture_point_2d_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
       center_of_mass_3d_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
-      left_foot_support_polygon_3d_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(8, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
-      right_foot_support_polygon_3d_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(8, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
-      left_hand_contact_points_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(1, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
-      right_hand_contact_points_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(1, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      left_foot_support_polygon_3d_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(0, 8, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      right_foot_support_polygon_3d_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(0, 8, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      left_hand_contact_points_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(0, 1, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      right_hand_contact_points_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(0, 1, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
       left_hand_contact_normal_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
       right_hand_contact_normal_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
 

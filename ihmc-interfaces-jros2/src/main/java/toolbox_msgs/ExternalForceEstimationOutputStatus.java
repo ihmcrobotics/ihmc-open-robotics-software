@@ -58,7 +58,7 @@ public class ExternalForceEstimationOutputStatus implements ROS2Message<External
 
    public ExternalForceEstimationOutputStatus()
    {
-      estimated_external_forces_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage>(10, us.ihmc.euclid.jros2.messages.EuclidVector3DMessage.class);
+      estimated_external_forces_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidVector3DMessage>(0, 10, us.ihmc.euclid.jros2.messages.EuclidVector3DMessage.class);
       estimated_root_joint_wrench_ = new geometry_msgs.Wrench();
       contact_point_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
 

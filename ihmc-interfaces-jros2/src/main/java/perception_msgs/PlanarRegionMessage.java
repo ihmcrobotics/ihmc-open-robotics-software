@@ -60,8 +60,8 @@ public class PlanarRegionMessage implements ROS2Message<PlanarRegionMessage>
       region_origin_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
       region_orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
       region_normal_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
-      vertex_buffer_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(1000, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
-      convex_polygons_size_ = new IDLIntSequence(20);
+      vertex_buffer_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(0, 1000, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      convex_polygons_size_ = new IDLIntSequence(0, 20);
 
    }
 

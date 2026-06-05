@@ -231,12 +231,12 @@ public class FootstepDataMessage implements ROS2Message<FootstepDataMessage>
       robot_side_ = (byte) 255;
       location_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
       orientation_ = new us.ihmc.euclid.jros2.messages.EuclidQuaternionMessage();
-      predicted_contact_points_2d_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(10, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      predicted_contact_points_2d_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(0, 10, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
       trajectory_type_ = (byte) 0;
       swing_height_ = (double) -1.0;
-      custom_waypoint_proportions_ = new IDLDoubleSequence(2);
-      custom_position_waypoints_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(12, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
-      swing_trajectory_ = new IDLObjectSequence<ihmc_common_msgs.SE3TrajectoryPointMessage>(12, ihmc_common_msgs.SE3TrajectoryPointMessage.class);
+      custom_waypoint_proportions_ = new IDLDoubleSequence(0, 2);
+      custom_position_waypoints_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage>(0, 12, us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage.class);
+      swing_trajectory_ = new IDLObjectSequence<ihmc_common_msgs.SE3TrajectoryPointMessage>(0, 12, ihmc_common_msgs.SE3TrajectoryPointMessage.class);
       swing_trajectory_blend_duration_ = (double) 0.0;
       swing_duration_ = (double) -1.0;
       transfer_duration_ = (double) -1.0;

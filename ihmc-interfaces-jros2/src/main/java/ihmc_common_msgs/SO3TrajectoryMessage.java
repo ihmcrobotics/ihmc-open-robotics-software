@@ -79,7 +79,7 @@ public class SO3TrajectoryMessage implements ROS2Message<SO3TrajectoryMessage>
 
    public SO3TrajectoryMessage()
    {
-      taskspace_trajectory_points_ = new IDLObjectSequence<ihmc_common_msgs.SO3TrajectoryPointMessage>(50, ihmc_common_msgs.SO3TrajectoryPointMessage.class);
+      taskspace_trajectory_points_ = new IDLObjectSequence<ihmc_common_msgs.SO3TrajectoryPointMessage>(0, 50, ihmc_common_msgs.SO3TrajectoryPointMessage.class);
       selection_matrix_ = new ihmc_common_msgs.SelectionMatrix3DMessage();
       frame_information_ = new ihmc_common_msgs.FrameInformation();
       weight_matrix_ = new ihmc_common_msgs.WeightMatrix3DMessage();

@@ -55,7 +55,7 @@ public class MultiContactTrajectoryMessage implements ROS2Message<MultiContactTr
 
    public MultiContactTrajectoryMessage()
    {
-      joint_angles_ = new IDLDoubleSequence(50);
+      joint_angles_ = new IDLDoubleSequence(0, 50);
       root_joint_pose_ = new us.ihmc.euclid.jros2.messages.EuclidPose3DMessage();
 
    }

@@ -50,8 +50,8 @@ public class WholeBodyTrajectoryToolboxOutputStatus implements ROS2Message<Whole
    public WholeBodyTrajectoryToolboxOutputStatus()
    {
       planning_result_ = (int) 0;
-      trajectory_times_ = new IDLDoubleSequence(50);
-      robot_configurations_ = new IDLObjectSequence<toolbox_msgs.KinematicsToolboxOutputStatus>(50, toolbox_msgs.KinematicsToolboxOutputStatus.class);
+      trajectory_times_ = new IDLDoubleSequence(0, 50);
+      robot_configurations_ = new IDLObjectSequence<toolbox_msgs.KinematicsToolboxOutputStatus>(0, 50, toolbox_msgs.KinematicsToolboxOutputStatus.class);
 
    }
 

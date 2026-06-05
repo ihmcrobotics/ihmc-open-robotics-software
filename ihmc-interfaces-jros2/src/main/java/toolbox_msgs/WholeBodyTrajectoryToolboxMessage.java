@@ -40,9 +40,9 @@ public class WholeBodyTrajectoryToolboxMessage implements ROS2Message<WholeBodyT
    public WholeBodyTrajectoryToolboxMessage()
    {
       configuration_ = new toolbox_msgs.WholeBodyTrajectoryToolboxConfigurationMessage();
-      end_effector_trajectories_ = new IDLObjectSequence<toolbox_msgs.WaypointBasedTrajectoryMessage>(10, toolbox_msgs.WaypointBasedTrajectoryMessage.class);
-      exploration_configurations_ = new IDLObjectSequence<toolbox_msgs.RigidBodyExplorationConfigurationMessage>(10, toolbox_msgs.RigidBodyExplorationConfigurationMessage.class);
-      reaching_manifolds_ = new IDLObjectSequence<toolbox_msgs.ReachingManifoldMessage>(10, toolbox_msgs.ReachingManifoldMessage.class);
+      end_effector_trajectories_ = new IDLObjectSequence<toolbox_msgs.WaypointBasedTrajectoryMessage>(0, 10, toolbox_msgs.WaypointBasedTrajectoryMessage.class);
+      exploration_configurations_ = new IDLObjectSequence<toolbox_msgs.RigidBodyExplorationConfigurationMessage>(0, 10, toolbox_msgs.RigidBodyExplorationConfigurationMessage.class);
+      reaching_manifolds_ = new IDLObjectSequence<toolbox_msgs.ReachingManifoldMessage>(0, 10, toolbox_msgs.ReachingManifoldMessage.class);
 
    }
 

@@ -21,7 +21,7 @@ public class AI2RScanMessage implements ROS2Message<AI2RScanMessage>
 
    public AI2RScanMessage()
    {
-      object_names_ = new IDLStringSequence(200);
+      object_names_ = new IDLStringSequence(0);
 
    }
 

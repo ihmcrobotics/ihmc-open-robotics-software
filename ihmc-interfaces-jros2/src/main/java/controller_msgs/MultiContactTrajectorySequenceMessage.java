@@ -35,7 +35,7 @@ public class MultiContactTrajectorySequenceMessage implements ROS2Message<MultiC
 
    public MultiContactTrajectorySequenceMessage()
    {
-      trajectory_sequence_ = new IDLObjectSequence<controller_msgs.MultiContactTrajectoryMessage>(50, controller_msgs.MultiContactTrajectoryMessage.class);
+      trajectory_sequence_ = new IDLObjectSequence<controller_msgs.MultiContactTrajectoryMessage>(0, 50, controller_msgs.MultiContactTrajectoryMessage.class);
 
    }
 

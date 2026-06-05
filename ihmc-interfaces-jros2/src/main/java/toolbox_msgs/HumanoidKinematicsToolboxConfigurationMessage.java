@@ -88,8 +88,8 @@ public class HumanoidKinematicsToolboxConfigurationMessage implements ROS2Messag
       enable_auto_support_polygon_ = (boolean) true;
       enable_stability_objective_ = (boolean) false;
       enable_joint_limit_reduction_ = (boolean) true;
-      joint_limit_reduction_factors_ = new IDLFloatSequence(20);
-      joint_limit_reduction_hash_codes_ = new IDLIntSequence(20);
+      joint_limit_reduction_factors_ = new IDLFloatSequence(0, 20);
+      joint_limit_reduction_hash_codes_ = new IDLIntSequence(0, 20);
 
    }
 
