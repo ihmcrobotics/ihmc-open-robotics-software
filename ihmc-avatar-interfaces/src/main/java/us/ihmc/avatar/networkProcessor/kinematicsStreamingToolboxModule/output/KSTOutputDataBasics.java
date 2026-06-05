@@ -255,13 +255,13 @@ public interface KSTOutputDataBasics extends KSTOutputDataReadOnly
          @Override
          public void setJointPosition(int jointIndex, double position)
          {
-            outputStatus.getDesiredJointAngles().getBuffer().put(jointIndex, (float) position);
+            outputStatus.getDesiredJointAngles().putAt(jointIndex, (float) position);
          }
 
          @Override
          public void setJointVelocity(int jointIndex, double velocity)
          {
-            outputStatus.getDesiredJointVelocities().getBuffer().put(jointIndex, (float) velocity);
+            outputStatus.getDesiredJointVelocities().putAt(jointIndex, (float) velocity);
          }
       };
    }

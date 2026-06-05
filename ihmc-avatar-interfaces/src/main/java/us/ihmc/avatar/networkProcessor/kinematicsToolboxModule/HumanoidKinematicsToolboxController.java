@@ -587,7 +587,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          return;
 
       KinematicsToolboxOutputStatus solution = getSolution();
-      solution.getDesiredJointVelocitiesPublishingPeriod().getBuffer().reset();
+      solution.getDesiredJointVelocitiesPublishingPeriod().clear();
 
       double dt = currentTime - previousPublishedSolutionTime;
       boolean hasPreviousPublishedSolution = Double.isFinite(previousPublishedSolutionTime) && dt > 1.0e-6;

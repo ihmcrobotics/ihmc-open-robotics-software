@@ -193,7 +193,7 @@ public class WholeBodyTrajectoryPointCalculator
       for (int i = 0; i < robotConfigurations.size(); i++)
       {
          KinematicsToolboxOutputStatus keyFrameSolution = robotConfigurations.get(i);
-         keyFrameSolution.getDesiredJointVelocities().getBuffer().reset();
+         keyFrameSolution.getDesiredJointVelocities().clear();
 
          for (String jointName : jointNames)
          {

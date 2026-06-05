@@ -48,12 +48,12 @@ public class WalkingFootstepTracker
    public WalkingFootstepTracker(ROS2Node ros2Node, String robotName)
    {
       this.ros2Node = ros2Node;
-      footstepDataListSubscriber = ros2Node.createSubscription(getTopic(FootstepDataListMessage.class, robotName),
-                                                               reader -> ROS2Tools.readIfPresent(reader, this::interceptFootstepDataListMessage));
-      footstepStatusSubscriber = ros2Node.createSubscription(getTopic(FootstepStatusMessage.class, robotName),
-                                                             reader -> ROS2Tools.readIfPresent(reader, this::acceptFootstepStatusMessage));
-      footstepQueueStatusSubscriber = ros2Node.createSubscription(getLowFrequencyTopic(FootstepQueueStatusMessage.class, robotName),
-                                                                  reader -> ROS2Tools.readIfPresent(reader, this::acceptFootstepQueueStatusMessage));
+      footstepDataListSubscriber = ROS2Tools.createSubscription(ros2Node, getTopic(FootstepDataListMessage.class, robotName),
+                                                                this::interceptFootstepDataListMessage);
+      footstepStatusSubscriber = ROS2Tools.createSubscription(ros2Node, getTopic(FootstepStatusMessage.class, robotName),
+                                                             this::acceptFootstepStatusMessage);
+      footstepQueueStatusSubscriber = ROS2Tools.createSubscription(ros2Node, getLowFrequencyTopic(FootstepQueueStatusMessage.class, robotName),
+                                                                   this::acceptFootstepQueueStatusMessage);
    }
 
    public void registerFootstepQueuedMessageListener(TypedNotification<FootstepQueueStatusMessage> footstepQueueListener)

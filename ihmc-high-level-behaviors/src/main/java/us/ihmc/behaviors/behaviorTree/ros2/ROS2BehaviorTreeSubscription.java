@@ -32,6 +32,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
    private long outOfOrderCount = 0;
    private long sequenceId;
    private int numberOfOnRobotNodes = 0;
+   private final ROS2Helper.QueuedSubscription<BehaviorTreeStateMessage> behaviorTreeStateMessageSubscription;
    private final ConcurrentRingBuffer<BehaviorTreeStateMessage> behaviorTreeStateMessageQueue;
    private final ROS2BehaviorTreeSubscriptionNode subscriptionRootNode = new ROS2BehaviorTreeSubscriptionNode();
    private final HashMap<Long, ROS2BehaviorTreeSubscriptionNode> idToSubscriptionNodesMap = new HashMap<>();
@@ -44,7 +45,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
 
       topic = AutonomyAPI.BEHAVIOR_TREE.getTopic(behaviorTree.getCRDTInfo().getActorDesignation().getIncomingQualifier());
       int maxClientSoftLimit = 3; // This buffer prevents race conditions between clients
-      behaviorTreeStateMessageQueue = ros2PublishSubscribeAPI.subscribeViaQueue(topic, maxClientSoftLimit, behaviorTreeStateMessage ->
+      behaviorTreeStateMessageSubscription = ros2PublishSubscribeAPI.subscribeViaQueueWithHandle(topic, maxClientSoftLimit, behaviorTreeStateMessage ->
       {
          ++numberOfMessagesReceived;
          for (Runnable messageRecievedCallback : messageRecievedCallbacks)
@@ -73,6 +74,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
             previousSequenceID = receivedSequenceID;
          }
       });
+      behaviorTreeStateMessageQueue = behaviorTreeStateMessageSubscription.getQueue();
    }
 
    public void update()
@@ -265,7 +267,8 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
 
    public void destroy()
    {
-
+      messageRecievedCallbacks.clear();
+      behaviorTreeStateMessageSubscription.destroy();
    }
 
    public void registerMessageReceivedCallback(Runnable callback)

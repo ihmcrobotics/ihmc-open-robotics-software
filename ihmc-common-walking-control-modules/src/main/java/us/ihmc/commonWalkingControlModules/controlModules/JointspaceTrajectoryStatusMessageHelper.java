@@ -27,10 +27,11 @@ public class JointspaceTrajectoryStatusMessageHelper extends TrajectoryStatusMes
    {
       super.clear();
 
-      for (int jointIndex = 0; jointIndex < statusMessage.getDesiredJointPositions().size(); jointIndex++)
+      int jointCount = statusMessage.getJointNames().size();
+      for (int jointIndex = 0; jointIndex < jointCount; jointIndex++)
       {
-         statusMessage.getActualJointPositions().getBuffer().put(jointIndex, Double.NaN);
-         statusMessage.getDesiredJointPositions().getBuffer().put(jointIndex, Double.NaN);
+         statusMessage.getActualJointPositions().putAt(jointIndex, Double.NaN);
+         statusMessage.getDesiredJointPositions().putAt(jointIndex, Double.NaN);
       }
    }
 
@@ -69,8 +70,8 @@ public class JointspaceTrajectoryStatusMessageHelper extends TrajectoryStatusMes
          OneDoFJointFeedbackControlCommand jointCommand = feedbackControlCommand.getJointCommand(jointIndex);
          double qCurrent = jointCommand.getJoint().getQ();
          double qDesired = jointCommand.getReferencePosition();
-         statusMessage.getActualJointPositions().getBuffer().put(jointIndex, qCurrent);
-         statusMessage.getDesiredJointPositions().getBuffer().put(jointIndex, qDesired);
+         statusMessage.getActualJointPositions().putAt(jointIndex, qCurrent);
+         statusMessage.getDesiredJointPositions().putAt(jointIndex, qDesired);
       }
    }
 }

@@ -63,7 +63,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2ImageVisualizer<ImageM
 
       // Pack the message data into thread 1's image message object
       ImageMessage imageMessageA = imageMessageSwapReference.getForThreadOne();
-      imageMessageA.getData().getBuffer().reset();
+      imageMessageA.getData().clear();
       imageMessageA.set(imageMessage);
 
       // Update some message statistics

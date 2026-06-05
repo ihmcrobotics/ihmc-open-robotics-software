@@ -31,7 +31,10 @@ public class ImageMessageDataPacker
       int numberOfDataBytes = (int) imageDataBytePointer.limit();
       imageDataBytePointer.get(heapByteArrayData, 0, numberOfDataBytes);
       imageMessageToPack.getData().clear();
-      imageMessageToPack.getData().ensureMinCapacity(numberOfDataBytes);
-      imageMessageToPack.getData().getBuffer().put(heapByteArrayData, 0, numberOfDataBytes);
+      if (numberOfDataBytes > 0)
+      {
+         imageMessageToPack.getData().ensureMinCapacity(numberOfDataBytes);
+         imageMessageToPack.getData().getBuffer().put(heapByteArrayData, 0, numberOfDataBytes);
+      }
    }
 }

@@ -14,7 +14,9 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Subscription;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.thread.SwapReference;
 
 import java.util.function.Consumer;
@@ -67,6 +69,31 @@ public class ROS2Helper
       return ROS2Tools.createSwapReferenceSubscription(ros2Node, topic, callback);
    }
 
+   public static class QueuedSubscription<T extends ROS2Message<T>> implements Destroyable
+   {
+      private final ConcurrentRingBuffer<T> queue;
+      private final ROS2Subscription<T> subscription;
+      private final ROS2Node ros2Node;
+
+      private QueuedSubscription(ConcurrentRingBuffer<T> queue, ROS2Subscription<T> subscription, ROS2Node ros2Node)
+      {
+         this.queue = queue;
+         this.subscription = subscription;
+         this.ros2Node = ros2Node;
+      }
+
+      public ConcurrentRingBuffer<T> getQueue()
+      {
+         return queue;
+      }
+
+      @Override
+      public void destroy()
+      {
+         ros2Node.destroySubscription(subscription);
+      }
+   }
+
    /** Allocation free version with size 16 ring buffer. */
    public <T extends ROS2Message<T>> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic)
    {
@@ -76,10 +103,22 @@ public class ROS2Helper
    /** Allocation free version with size 16 ring buffer. Callback allows immediate temporary access to message. */
    public <T extends ROS2Message<T>> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic, int queueSize, Consumer<T> callback)
    {
+      return subscribeViaQueueWithHandle(topic, queueSize, callback).getQueue();
+   }
+
+   /** Like {@link #subscribeViaQueue}, but returns a handle that can destroy the underlying subscription. */
+   public <T extends ROS2Message<T>> QueuedSubscription<T> subscribeViaQueueWithHandle(ROS2Topic<T> topic)
+   {
+      return subscribeViaQueueWithHandle(topic, 16, message -> { });
+   }
+
+   /** Like {@link #subscribeViaQueue}, but returns a handle that can destroy the underlying subscription. */
+   public <T extends ROS2Message<T>> QueuedSubscription<T> subscribeViaQueueWithHandle(ROS2Topic<T> topic, int queueSize, Consumer<T> callback)
+   {
       ConcurrentRingBuffer<T> concurrentQueue = new ConcurrentRingBuffer<>(() -> ROS2Message.createInstance(topic.getType()), queueSize);
       Throttler warningThrottler = new Throttler().setFrequency(1.0);
       MutableInt droppedMessages = new MutableInt(0);
-      ros2Node.createSubscription(topic, reader ->
+      ROS2Subscription<T> subscription = ros2Node.createSubscription(topic, reader ->
       {
          // Make sure we are recieving newer data and throw out old data
          T nextData;
@@ -106,7 +145,7 @@ public class ROS2Helper
             concurrentQueue.commit();
          }
       });
-      return concurrentQueue;
+      return new QueuedSubscription<>(concurrentQueue, subscription, ros2Node);
    }
 
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback)

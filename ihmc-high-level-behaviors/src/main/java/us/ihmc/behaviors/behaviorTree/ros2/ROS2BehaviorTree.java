@@ -24,6 +24,7 @@ public class ROS2BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
    private final BehaviorTreeStateMessage publishMessage = new BehaviorTreeStateMessage();
 
    private final ROS2BehaviorTreeSubscription<T> behaviorTreeSubscription;
+   private boolean destroyed = false;
 
    /**
     * The complexity of this constructor is to support the UI having nodes that extend the base
@@ -49,6 +50,9 @@ public class ROS2BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
     */
    public void updateSubscription()
    {
+      if (destroyed)
+         return;
+
       behaviorTreeSubscription.update();
    }
 
@@ -59,6 +63,9 @@ public class ROS2BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
     */
    public void updatePublication()
    {
+      if (destroyed)
+         return;
+
       behaviorTree.toMessage(publishMessage);
       ros2.publish(publishTopic, publishMessage);
 
@@ -69,6 +76,10 @@ public class ROS2BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
 
    public void destroy()
    {
+      if (destroyed)
+         return;
+
+      destroyed = true;
       behaviorTreeSubscription.destroy();
    }
 

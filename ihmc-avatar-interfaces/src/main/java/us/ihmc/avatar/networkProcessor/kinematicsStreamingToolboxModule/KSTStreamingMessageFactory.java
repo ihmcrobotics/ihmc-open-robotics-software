@@ -404,9 +404,9 @@ public class KSTStreamingMessageFactory
                                                 double integrationDuration,
                                                 JointspaceStreamingMessage messageToPack)
    {
-      messageToPack.getPositions().getBuffer().reset();
-      messageToPack.getVelocities().getBuffer().reset();
-      messageToPack.getAccelerations().getBuffer().reset();
+      messageToPack.getPositions().clear();
+      messageToPack.getVelocities().clear();
+      messageToPack.getAccelerations().clear();
 
       for (OneDoFJointReadOnly joint : joints)
       {

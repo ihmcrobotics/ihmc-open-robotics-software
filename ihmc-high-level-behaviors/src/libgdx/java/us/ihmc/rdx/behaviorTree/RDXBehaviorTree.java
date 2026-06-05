@@ -12,6 +12,7 @@ import imgui.flag.ImGuiMouseCursor;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
@@ -390,6 +391,8 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
 
    public void destroy()
    {
+      modifyTreeTopology(BehaviorTreeTopologyOperationQueue::queueDestroyEntireTree);
+
       RDXBaseUI.getInstance().getPrimaryScene().removeRenderable(this);
       RDXBaseUI.getInstance().getVRManager().getContext().removeVRPickCalculator(this);
       RDXBaseUI.getInstance().getVRManager().getContext().removeVRInputProcessor(this);

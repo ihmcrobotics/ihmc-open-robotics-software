@@ -103,7 +103,7 @@ public class HeightMapMessageTools
 
       float[] heightsFromData = heightMapData.getHeights();
 
-      messageToPack.getHeights().getBuffer().reset();
+      messageToPack.getHeights().clear();
       IDLFloatSequence heights = messageToPack.getHeights();
       heights.addAll(heightsFromData);
    }
@@ -116,6 +116,6 @@ public class HeightMapMessageTools
       messageToClear.setGridCenterX(-1.0);
       messageToClear.setGridCenterY(-1.0);
 
-      messageToClear.getHeights().getBuffer().reset();
+      messageToClear.getHeights().clear();
    }
 }

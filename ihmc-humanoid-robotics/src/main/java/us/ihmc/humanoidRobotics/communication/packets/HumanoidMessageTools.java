@@ -371,7 +371,7 @@ public class HumanoidMessageTools
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore1.length
                                     + ", explorationRangeLowerLimits.length = ");
 
-      message.getConfigurationSpaceNamesToExplore().getBuffer().reset();
+      message.getConfigurationSpaceNamesToExplore().clear();
       message.getExplorationRangeUpperLimits().clear();
       message.getExplorationRangeLowerLimits().clear();
 
@@ -401,7 +401,7 @@ public class HumanoidMessageTools
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore1.length
                                     + ", explorationRangeLowerLimits.length = ");
 
-      message.getConfigurationSpaceNamesToExplore().getBuffer().reset();
+      message.getConfigurationSpaceNamesToExplore().clear();
       message.getExplorationRangeUpperLimits().clear();
       message.getExplorationRangeLowerLimits().clear();
 

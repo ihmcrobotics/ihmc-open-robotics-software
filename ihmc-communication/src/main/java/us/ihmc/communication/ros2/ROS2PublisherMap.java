@@ -2,6 +2,7 @@ package us.ihmc.communication.ros2;
 
 import std_msgs.Bool;
 import std_msgs.Empty;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
@@ -29,7 +30,7 @@ public class ROS2PublisherMap
       ROS2Publisher publisher = map.get(topic);
       if (publisher == null)
       {
-         publisher = ros2Node.createPublisher(topic);
+         publisher = ros2Node.createPublisher(topic, ROS2Tools.getTopicQoS(topic));
          map.put(topic, publisher);
       }
 
