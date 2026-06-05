@@ -4,6 +4,7 @@ import ihmc_common_msgs.MessageCollection;
 import ihmc_common_msgs.MessageCollectionNotification;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.commons.thread.Throttler;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
@@ -203,9 +204,8 @@ public class ControllerNetworkSubscriber
          @SuppressWarnings({"unchecked", "rawtypes"})
          Class messageClassRaw = messageClass;
 
-         ros2Node.createSubscription(ControllerAPI.getTopic(inputTopic, messageClassRaw), reader ->
+         ROS2Tools.createSubscription(ros2Node, ControllerAPI.getTopic(inputTopic, messageClassRaw), message ->
          {
-            ROS2Message<?> message = reader.read();
             if (message != null)
                receivedMessage(message);
          });
@@ -215,13 +215,14 @@ public class ControllerNetworkSubscriber
    @SuppressWarnings({"unchecked", "rawtypes"})
    private ROS2Publisher<?> createPublisher(Class<? extends ROS2Message<?>> messageClass)
    {
-      return ros2Node.createPublisher(ControllerAPI.getTopic(outputTopic, (Class) messageClass));
+      return ros2Node.createPublisher(ControllerAPI.getTopic(outputTopic, (Class) messageClass), ControllerAPI.getQoS(messageClass));
    }
 
    @SuppressWarnings({"unchecked", "rawtypes"})
    private ThrottledROS2Publisher createLowFrequencyPublisher(Class<? extends ROS2Message<?>> messageClass)
    {
-      return new ThrottledROS2Publisher(ros2Node.createPublisher(ControllerAPI.getLowFrequencyTopic(outputTopic, (Class) messageClass)),
+      return new ThrottledROS2Publisher(ros2Node.createPublisher(ControllerAPI.getLowFrequencyTopic(outputTopic, (Class) messageClass),
+                                                                 ControllerAPI.getQoS(messageClass)),
                                        LOW_FREQUENCY_PUBLISH_RATE);
    }
 

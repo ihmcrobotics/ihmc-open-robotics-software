@@ -60,12 +60,12 @@ public class ControllerStatusTracker
       finishedWalkingNotification.set();
 
       robotModel.addRobotConfigurationDataReceivedCallback(this::acceptRobotConfigurationData);
-      ros2Node.createSubscription(getTopic(HighLevelStateChangeStatusMessage.class, robotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptHighLevelStateChangeStatusMessage));
-      ros2Node.createSubscription(getTopic(WalkingControllerFailureStatusMessage.class, robotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptWalkingControllerFailureStatusMessage));
-      ros2Node.createSubscription(getLowFrequencyTopic(PlanOffsetStatus.class, robotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptPlanOffsetStatus));
-      ros2Node.createSubscription(getTopic(ControllerCrashNotificationPacket.class, robotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptControllerCrashNotificationPacket));
-      ros2Node.createSubscription(getLowFrequencyTopic(CapturabilityBasedStatus.class, robotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptCapturabilityBasedStatus));
-      ros2Node.createSubscription(getTopic(WalkingStatusMessage.class, robotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptWalkingStatusMessage));
+      ROS2Tools.createSubscription(ros2Node, getTopic(HighLevelStateChangeStatusMessage.class, robotName), this::acceptHighLevelStateChangeStatusMessage);
+      ROS2Tools.createSubscription(ros2Node, getTopic(WalkingControllerFailureStatusMessage.class, robotName), this::acceptWalkingControllerFailureStatusMessage);
+      ROS2Tools.createSubscription(ros2Node, getLowFrequencyTopic(PlanOffsetStatus.class, robotName), this::acceptPlanOffsetStatus);
+      ROS2Tools.createSubscription(ros2Node, getTopic(ControllerCrashNotificationPacket.class, robotName), this::acceptControllerCrashNotificationPacket);
+      ROS2Tools.createSubscription(ros2Node, getLowFrequencyTopic(CapturabilityBasedStatus.class, robotName), this::acceptCapturabilityBasedStatus);
+      ROS2Tools.createSubscription(ros2Node, getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatusMessage);
    }
 
    public void registerAbortedListener(Notification abortedListener)
@@ -89,6 +89,8 @@ public class ControllerStatusTracker
    {
       robotConfigurationDataTimer.reset();
       isWalkingFromConfigurationData = RobotMotionStatus.fromByte(message.getRobotMotionStatus()) == RobotMotionStatus.IN_MOTION;
+      if (!isWalkingFromConfigurationData)
+         isWalking = false;
    }
 
    private void acceptHighLevelStateChangeStatusMessage(HighLevelStateChangeStatusMessage message)

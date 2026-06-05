@@ -22,8 +22,8 @@ public class OneDoFJointTrajectoryStatusMessageHelper extends TrajectoryStatusMe
    {
       super.clear();
 
-      statusMessage.getActualJointPositions().getBuffer().put(0, Double.NaN);
-      statusMessage.getDesiredJointPositions().getBuffer().put(0, Double.NaN);
+      statusMessage.getActualJointPositions().putAt(0, Double.NaN);
+      statusMessage.getDesiredJointPositions().putAt(0, Double.NaN);
    }
 
    public void registerNewTrajectory(OneDoFJointTrajectoryCommand command, ExecutionMode executionMode)
@@ -49,8 +49,8 @@ public class OneDoFJointTrajectoryStatusMessageHelper extends TrajectoryStatusMe
       statusMessage.setSequenceId(currentStatus.getSequenceID());
       statusMessage.setTimestamp(currentStatus.getTimeInTrajectory());
       statusMessage.setTrajectoryExecutionStatus(currentStatus.getStatus().toByte());
-      statusMessage.getActualJointPositions().getBuffer().put(0, qCurrent);
-      statusMessage.getDesiredJointPositions().getBuffer().put(0, qDesired);
+      statusMessage.getActualJointPositions().putAt(0, qCurrent);
+      statusMessage.getDesiredJointPositions().putAt(0, qDesired);
 
       return statusMessage;
    }

@@ -1408,7 +1408,7 @@ public class MessageTools
 
    public static void packIDLSequence(ByteBuffer sourceBuffer, IDLByteSequence sequenceToPack)
    {
-      sequenceToPack.getBuffer().reset();
+      sequenceToPack.clear();
       // A lot of data goes through here. We wish we could do a direct memcopy, but our message data is on the Java heap.
       for (int i = 0; i < sourceBuffer.limit(); i++)
       {
@@ -1418,7 +1418,7 @@ public class MessageTools
 
    public static void packIDLSequenceCastingIntsToBytes(ByteBuffer sourceBuffer, IDLByteSequence sequenceToPack)
    {
-      sequenceToPack.getBuffer().reset();
+      sequenceToPack.clear();
       int numberOfIntegers = sourceBuffer.limit() / Integer.BYTES;
       for (int i = 0; i < numberOfIntegers; i++)
       {
@@ -1429,7 +1429,7 @@ public class MessageTools
    public static void packIDLSequence(ByteBuffer sourceBuffer, IDLFloatSequence sequenceToPack)
    {
       // It is important to call resetQuick, which does not set the full sequence to zeros
-      sequenceToPack.getBuffer().reset();
+      sequenceToPack.clear();
       // A lot of data goes through here. We wish we could do a direct memcopy, but our message data is on the Java heap.
       int numberOfFloats = sourceBuffer.limit() / java.lang.Float.BYTES;
       for (int i = 0; i < numberOfFloats; i++)
@@ -1521,7 +1521,7 @@ public class MessageTools
     */
    public static void packLongStringToByteSequence(String longString, IDLByteSequence byteSequence)
    {
-      byteSequence.getBuffer().reset();
+      byteSequence.clear();
       byte[] longStringBytes = longString.getBytes(StandardCharsets.US_ASCII);
       byteSequence.addAll(longStringBytes);
    }

@@ -65,7 +65,7 @@ public class CRDTBidirectionalIntegerList extends CRDTBidirectionalMutableField<
 
    public void toMessage(IDLByteSequence message)
    {
-      message.getBuffer().reset();
+      message.clear();
       for (int i = 0; i < getSize(); ++i)
          message.add((byte) getValueReadOnly(i));
    }
