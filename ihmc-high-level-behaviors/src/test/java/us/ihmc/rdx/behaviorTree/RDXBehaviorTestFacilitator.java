@@ -19,7 +19,6 @@ import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeExecutor;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
@@ -66,8 +65,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.zed.global.zed;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -77,7 +74,7 @@ import java.util.function.Supplier;
 public class RDXBehaviorTestFacilitator
 {
    /** Disable perception if CUDA 12.9.1 is not installed or not working */
-   private boolean runPerception = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() && CUDATools.hasNVJPEG() && ZEDJavaAPINativeLibrary.load();
+   private final boolean runPerception = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() && CUDATools.hasNVJPEG() && ZEDJavaAPINativeLibrary.load();
    private final String svoFile;
    private final Supplier<DRCRobotModel> robotModelBuilder;
    private final TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;
@@ -120,8 +117,6 @@ public class RDXBehaviorTestFacilitator
       this.baseUIBuilder = baseUIBuilder;
       this.treeFilesDirectory = treeFilesDirectory;
       this.selectionCollisionModelBuilder = selectionCollisionModelBuilder;
-
-      runPerception &= svoFile != null && Files.exists(Paths.get(svoFile));
 
       ros2NodeBuilder = () ->
       {
