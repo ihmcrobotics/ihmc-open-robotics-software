@@ -146,7 +146,8 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
    {
       if (ros2LogRecord == null)
       {
-         if (isExecuting(this, "Wait before push door walk") || isExecuting(this, "Wait before walk through pull door"))
+         if (isExecuting(this, "Wait before closed left push door walk")
+          || isExecuting(this, "Wait before closed right pull door walk"))
          {
             initialWalkingPose.set(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getTransformToRoot());
             ros2LogRecord = new ROS2LogRecord(robotModel.getSimpleRobotName(), List.of(kstOutputTopic), ROS2LogTimeSource.SYSTEM, ROS2LogSerialization.JSON);
@@ -154,7 +155,8 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
             awaitingCompletion = false;
          }
       }
-      else if (isExecuting(this, "Wait after push door walk") || isExecuting(this, "Wait after walk through pull door"))
+      else if (isExecuting(this, "Wait after closed left push door walk")
+            || isExecuting(this, "Wait after closed right pull door walk"))
          awaitingCompletion = true;
       else if (awaitingCompletion)
       {

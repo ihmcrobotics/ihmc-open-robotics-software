@@ -60,6 +60,7 @@ public class BehaviorTreeSceneCompositeFrameExecutor extends BehaviorTreeSceneOb
       }
 
       referenceFrame.update();
+      setValid(true);
    }
 
    @Override

@@ -44,6 +44,7 @@ public class BehaviorTreeSceneDoorPanelExecutor extends BehaviorTreeSceneObjectE
              && transform.getValueReadOnly().getTranslation().epsilonEquals(mechanismPosition, 1e-5))))
             transform.getValueAndModify().set(orientation, mechanismPosition);
          referenceFrame.update();
+         setValid(true);
       }
    }
 

@@ -105,11 +105,6 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
       definition.updateName();
    }
 
-   public void drawToSVG()
-   {
-      new BehaviorTreeSVGWriter(this);
-   }
-
    public void destroy()
    {
 

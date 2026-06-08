@@ -102,6 +102,7 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
                frameTransform.getTranslation().set(hingePoint);
                EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X, searchHingeToLatchPost, frameTransform.getRotation());
                referenceFrame.update();
+               setValid(true);
                break;
             }
          }

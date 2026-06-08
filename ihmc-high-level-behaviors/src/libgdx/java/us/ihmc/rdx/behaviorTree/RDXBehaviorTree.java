@@ -39,6 +39,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
    private transient final TLongObjectMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
    private final RDXPanel scenePanel = new RDXPanel("Scene", this::renderScenePanel);
+   private final RDXBehaviorTreeTimeline timeline = new RDXBehaviorTreeTimeline();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXBehaviorTreeNodeCreationMenu nodeCreationMenu;
    private final RDXBehaviorTreeWidgetsVerticalLayout treeWidgetsVerticalLayout;
@@ -76,10 +77,13 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
       baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
+      panel.addChild(timeline);
    }
 
    public void update()
    {
+      timeline.setRootNode(rootNode);
+
       idToNodeMap.clear();
 
       if (rootNode != null)
@@ -177,6 +181,9 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
       }
       if (ImGui.beginMenu(labels.get("View")))
       {
+         RDXBehaviorTreeTimeline.renderIcon();
+         ImGui.sameLine();
+         ImGui.menuItem(labels.get("Show Timeline"), null, timeline.getIsShowing());
          if (rootNode != null)
          {
             ImGui.text("Progress Widgets:");
