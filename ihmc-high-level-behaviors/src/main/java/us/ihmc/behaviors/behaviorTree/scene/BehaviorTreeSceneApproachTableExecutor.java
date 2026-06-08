@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
+import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.BehaviorTreeSceneObjectStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -123,8 +123,8 @@ public class BehaviorTreeSceneApproachTableExecutor extends BehaviorTreeSceneObj
       super.toMessage(message);
 
       message.getPersistentDetection().setIsStable(isStable());
-      message.setLeftTablePoints(tablePoints.get(RobotSide.LEFT));
-      message.setRightTablePoints(tablePoints.get(RobotSide.RIGHT));
+      message.setLeftTablePoints(tablePoints.get(RobotSide.LEFT).intValue());
+      message.setRightTablePoints(tablePoints.get(RobotSide.RIGHT).intValue());
       capsuleCenter.get(RobotSide.LEFT).changeFrame(ReferenceFrame.getWorldFrame());
       capsuleCenter.get(RobotSide.RIGHT).changeFrame(ReferenceFrame.getWorldFrame());
       message.getLeftCapsuleCenter().set(capsuleCenter.get(RobotSide.LEFT));
