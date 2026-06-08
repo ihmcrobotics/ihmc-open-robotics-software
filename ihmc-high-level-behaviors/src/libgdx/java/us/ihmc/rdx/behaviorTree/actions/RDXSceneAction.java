@@ -48,6 +48,8 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
    private final ImFloatWrapper historyDurationWidget;
    private final ImIntegerWrapper minPostPointsWidget;
    private final ImIntegerWrapper minRecessPointsWidget;
+   private final ImIntegerWrapper minCapsulePointsWidget;
+   private final ImFloatWrapper searchStartXWidget;
    private final ImStringWrapper compositeFrameNameWidget;
    private final ImGuiReferenceFrameLibraryCombo compositeFrameAComboBox;
    private final ImGuiReferenceFrameLibraryCombo compositeFrameBComboBox;
@@ -112,6 +114,12 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
       minRecessPointsWidget = new ImIntegerWrapper(() -> definition.getSceneObjectDefinition().getMinRecessPoints(),
                                                    value -> definition.getSceneObjectDefinition().setMinRecessPoints(value),
                                                    imInteger -> ImGui.inputInt(labels.get("Min Recess Points"), imInteger));
+      minCapsulePointsWidget = new ImIntegerWrapper(() -> definition.getSceneObjectDefinition().getMinCapsulePoints(),
+                                                    value -> definition.getSceneObjectDefinition().setMinCapsulePoints(value),
+                                                    imInteger -> ImGui.inputInt(labels.get("Min Capsule Points"), imInteger));
+      searchStartXWidget = new ImFloatWrapper(() -> definition.getSceneObjectDefinition().getSearchStartX(),
+                                              value -> definition.getSceneObjectDefinition().setSearchStartX(value),
+                                              imFloat -> ImGui.inputFloat(labels.get("Search Start X"), imFloat, 0.01f, 0.1f));
       compositeFrameNameWidget = new ImStringWrapper(() -> definition.getSceneObjectDefinition().getCompositeFrameName(),
                                                      value -> definition.getSceneObjectDefinition().setCompositeFrameName(value),
                                                      imString -> ImGui.inputText(labels.get("Composite Frame Name"), imString));
@@ -205,13 +213,6 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
                   objectDefinition.setFoundationPoseObjectType(IsaacROSFoundationPoseObject.values()[imFPType.get()]);
                ImGui.popItemWidth();
             }
-            else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.DOOR_FRAME)
-            {
-               ImGui.pushItemWidth(100.0f);
-               minPostPointsWidget.renderImGuiWidget();
-               minRecessPointsWidget.renderImGuiWidget();
-               ImGui.popItemWidth();
-            }
             else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.COMPOSITE_FRAME)
             {
                ImGui.pushItemWidth(200.0f);
@@ -234,6 +235,20 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
                ImGui.pushItemWidth(100.0f);
                if (objectDefinition.getCompositeFrameType() == CompositeFrameType.APPROACH)
                   compositeFrameDistanceWidget.renderImGuiWidget();
+               ImGui.popItemWidth();
+            }
+            else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.DOOR_FRAME)
+            {
+               ImGui.pushItemWidth(100.0f);
+               minPostPointsWidget.renderImGuiWidget();
+               minRecessPointsWidget.renderImGuiWidget();
+               ImGui.popItemWidth();
+            }
+            else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.APPROACH_TABLE)
+            {
+               ImGui.pushItemWidth(100.0f);
+               minCapsulePointsWidget.renderImGuiWidget();
+               searchStartXWidget.renderImGuiWidget();
                ImGui.popItemWidth();
             }
 
