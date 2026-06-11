@@ -48,7 +48,8 @@ import us.ihmc.yoVariables.variable.YoEnum;
 public class DRCKinematicsBasedStateEstimator implements StateEstimatorController
 {
    public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
-   private static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = true;
+   // CHANGE THIS BACK TO TRUE
+   private static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = false;
 
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
