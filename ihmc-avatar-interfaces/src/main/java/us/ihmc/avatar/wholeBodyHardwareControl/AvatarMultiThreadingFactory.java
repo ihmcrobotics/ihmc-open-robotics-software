@@ -621,11 +621,11 @@ public class AvatarMultiThreadingFactory
          controllerFactory.setInitialState(highLevelControllerParameters.getDefaultInitialControllerState());
          controllerFactory.addCustomControlState(standPrepStateFactory);
          controllerFactory.addCustomControlState(freezeStateFactory);
-         controllerFactory.useDefaultStandTransitionControlState(STAND_PREP_STATE, WALKING);
-         controllerFactory.useDefaultWalkingControlState();
+//         controllerFactory.useDefaultStandTransitionControlState(STAND_PREP_STATE, WALKING);
+//         controllerFactory.useDefaultWalkingControlState();
          controllerFactory.useDefaultDoNothingControlState();
          controllerFactory.useDefaultFallingControlState();
-         controllerFactory.useDefaultExitWalkingTransitionControlState(STAND_PREP_STATE);
+//         controllerFactory.useDefaultExitWalkingTransitionControlState(STAND_PREP_STATE);
 
          // setup transitions
          HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
@@ -633,7 +633,7 @@ public class AvatarMultiThreadingFactory
          controllerFactory.addRequestableTransition(STAND_PREP_STATE, STAND_TRANSITION_STATE);
          controllerFactory.addRequestableTransition(STAND_TRANSITION_STATE, STAND_PREP_STATE);
          controllerFactory.addRequestableTransition(FREEZE_STATE, STAND_PREP_STATE);
-         controllerFactory.addRequestableTransition(WALKING, EXIT_WALKING);
+//         controllerFactory.addRequestableTransition(WALKING, EXIT_WALKING);
          controllerFactory.addRequestableTransition(FALLING_STATE, STAND_PREP_STATE);
 
          // Always be able to request to go to freeze, falling, do nothing, and whatever the fallback state is
@@ -654,12 +654,12 @@ public class AvatarMultiThreadingFactory
             controllerFactory.addControllerFailureTransition(highLevelControllerName, fallbackControllerState);
          }
 
-         controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING, false);
+//         controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING, false);
          controllerFactory.addFinishedTransition(EXIT_WALKING, FREEZE_STATE);
 
-         controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE,
-                                                                               controllerFactory,
-                                                                               !highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady()));
+//         controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE,
+//                                                                               controllerFactory,
+//                                                                               !highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady()));
 
          // Transition to DO_NOTHING when the robot is unservoed
          lowLevelOutputProcessor.addMasterGainListener(change ->
