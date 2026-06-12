@@ -164,6 +164,9 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
                if (hand == null)
                   continue;
 
+               if (joint.getName().contains("SPINE") || joint.getName().contains("PEDESTAL"))
+                  return false;
+
                if (predecessor == hand || MultiBodySystemTools.isAncestor(predecessor, hand))
                   return false;
             }
