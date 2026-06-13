@@ -19,26 +19,36 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
 {
    public static final double DEFAULT_TRAJECTORY_DURATION = 4.0;
    public static final boolean DEFAULT_IS_JOINTSPACE_MODE = true;
-   public static final boolean DEFAULT_USE_PREDEFINED_JOINT_ANGLES = false;
+   public static final boolean DEFAULT_DEFINED_IN_JOINTSPACE = false;
    public static final int MAX_NUMBER_OF_JOINTS = 7;
    public static final String CUSTOM_ANGLES_NAME = "CUSTOM_ANGLES";
-   public static final boolean DEFAULT_HOLD_POSE =  false;
+   public static final boolean DEFAULT_HOLD_POSE = false;
    public static final double DEFAULT_LINEAR_POSITION_WEIGHT = 50.0;
    public static final double DEFAULT_ANGULAR_POSITION_WEIGHT = 50.0;
    public static final double DEFAULT_JOINTSPACE_WEIGHT = -1.0;
    public static final double DEFAULT_POSITION_ERROR_TOLERANCE = 0.3;
    public static final double DEFAULT_ORIENTATION_ERROR_TOLERANCE = Math.toRadians(20.0);
+   public static final double DEFAULT_SCREW_TRANSLATION = 0.1;
+   public static final double DEFAULT_SCREW_ROTATION = 0.0;
+   public static final double DEFAULT_MAX_LINEAR_VELOCITY = 0.1;
+   public static final double DEFAULT_MAX_ANGULAR_VELOCITY = 0.6;
 
    private final CRDTBidirectionalEnumField<RobotSide> side;
    private final CRDTBidirectionalDouble trajectoryDuration;
    private final CRDTBidirectionalBoolean holdPoseInWorldLater;
    private final CRDTBidirectionalBoolean jointspaceOnly;
-   private final CRDTBidirectionalBoolean usePredefinedJointAngles;
+   private final CRDTBidirectionalBoolean definedInJointspace;
+   private final CRDTBidirectionalEnumField<ArmActionTaskspaceTrajectoryMode> taskspaceTrajectoryMode;
    /** Preset is null when using explicitly specified custom joint angles */
    private final CRDTBidirectionalEnumField<PresetArmConfiguration> preset;
    private final CRDTBidirectionalDoubleArray jointAngles;
    private final CRDTBidirectionalString palmParentFrameName;
    private final CRDTBidirectionalRigidBodyTransform palmTransformToParent;
+   private final CRDTBidirectionalRigidBodyTransform screwAxisPoseInObjectFrame;
+   private final CRDTBidirectionalDouble translation;
+   private final CRDTBidirectionalDouble rotation;
+   private final CRDTBidirectionalDouble maxLinearVelocity;
+   private final CRDTBidirectionalDouble maxAngularVelocity;
    private final CRDTBidirectionalDouble linearPositionWeight;
    private final CRDTBidirectionalDouble angularPositionWeight;
    private final CRDTBidirectionalDouble jointspaceWeight;
@@ -50,11 +60,17 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
    private double onDiskTrajectoryDuration;
    private boolean onDiskHoldPoseInWorldLater;
    private boolean onDiskJointspaceOnly;
-   private boolean onDiskUsePredefinedJointAngles;
+   private boolean onDiskDefinedInJointspace;
+   private ArmActionTaskspaceTrajectoryMode onDiskTaskspaceTrajectoryMode;
    private PresetArmConfiguration onDiskPreset;
    private final double[] onDiskJointAngles = new double[MAX_NUMBER_OF_JOINTS];
    private String onDiskPalmParentFrameName;
    private final RigidBodyTransform onDiskPalmTransformToParent = new RigidBodyTransform();
+   private final RigidBodyTransform onDiskScrewAxisPoseInObjectFrame = new RigidBodyTransform();
+   private double onDiskTranslation;
+   private double onDiskRotation;
+   private double onDiskMaxLinearVelocity;
+   private double onDiskMaxAngularVelocity;
    private double onDiskLinearPositionWeight;
    private double onDiskAngularPositionWeight;
    private double onDiskJointspaceWeight;
@@ -69,17 +85,22 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
       trajectoryDuration = new CRDTBidirectionalDouble(this, DEFAULT_TRAJECTORY_DURATION);
       holdPoseInWorldLater = new CRDTBidirectionalBoolean(this, DEFAULT_HOLD_POSE);
       jointspaceOnly = new CRDTBidirectionalBoolean(this, DEFAULT_IS_JOINTSPACE_MODE);
-      usePredefinedJointAngles = new CRDTBidirectionalBoolean(this, DEFAULT_USE_PREDEFINED_JOINT_ANGLES);
+      definedInJointspace = new CRDTBidirectionalBoolean(this, DEFAULT_DEFINED_IN_JOINTSPACE);
+      taskspaceTrajectoryMode = new CRDTBidirectionalEnumField<>(this, ArmActionTaskspaceTrajectoryMode.SINGLE_POSE);
       preset = new CRDTBidirectionalEnumField<>(this, PresetArmConfiguration.HOME);
       jointAngles = new CRDTBidirectionalDoubleArray(this, MAX_NUMBER_OF_JOINTS);
       palmParentFrameName = new CRDTBidirectionalString(this, "Chest");
       palmTransformToParent = new CRDTBidirectionalRigidBodyTransform(this);
+      screwAxisPoseInObjectFrame = new CRDTBidirectionalRigidBodyTransform(this);
+      translation = new CRDTBidirectionalDouble(this, DEFAULT_SCREW_TRANSLATION);
+      rotation = new CRDTBidirectionalDouble(this, DEFAULT_SCREW_ROTATION);
+      maxLinearVelocity = new CRDTBidirectionalDouble(this, DEFAULT_MAX_LINEAR_VELOCITY);
+      maxAngularVelocity = new CRDTBidirectionalDouble(this, DEFAULT_MAX_ANGULAR_VELOCITY);
       linearPositionWeight = new CRDTBidirectionalDouble(this, DEFAULT_LINEAR_POSITION_WEIGHT);
       angularPositionWeight = new CRDTBidirectionalDouble(this, DEFAULT_ANGULAR_POSITION_WEIGHT);
       jointspaceWeight = new CRDTBidirectionalDouble(this, DEFAULT_JOINTSPACE_WEIGHT);
       positionErrorTolerance = new CRDTBidirectionalDouble(this, DEFAULT_POSITION_ERROR_TOLERANCE);
       orientationErrorTolerance = new CRDTBidirectionalDouble(this, DEFAULT_ORIENTATION_ERROR_TOLERANCE);
-
    }
 
    @Override
@@ -88,11 +109,11 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
       super.saveToFile(jsonNode);
 
       jsonNode.put("side", side.getValue().getLowerCaseName());
-      jsonNode.put("trajectoryDuration", trajectoryDuration.getValue());
-      jsonNode.put("usePredefinedJointAngles", usePredefinedJointAngles.getValue());
+      jsonNode.put("definedInJointspace", definedInJointspace.getValue());
 
-      if (usePredefinedJointAngles.getValue())
+      if (definedInJointspace.getValue())
       {
+         jsonNode.put("trajectoryDuration", trajectoryDuration.getValue());
          jsonNode.put("preset", preset.getValue() == null ? CUSTOM_ANGLES_NAME : preset.getValue().name());
          if (preset.getValue() == null)
             for (int i = 0; i < MAX_NUMBER_OF_JOINTS; i++)
@@ -100,13 +121,28 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
       }
       else
       {
+         jsonNode.put("taskspaceTrajectoryMode", taskspaceTrajectoryMode.getValue().name());
          jsonNode.put("parentFrame", palmParentFrameName.getValue());
-         JSONTools.toJSON(jsonNode, palmTransformToParent.getValueReadOnly());
-         jsonNode.put("jointspaceOnly", jointspaceOnly.getValue());
-         jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater.getValue());
-         jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
-         jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
-         jsonNode.put("orientationErrorToleranceDegrees", Double.parseDouble("%.3f".formatted(Math.toDegrees(orientationErrorTolerance.getValue()))));
+
+         if (taskspaceTrajectoryMode.getValue() == ArmActionTaskspaceTrajectoryMode.SINGLE_POSE)
+         {
+            jsonNode.put("trajectoryDuration", trajectoryDuration.getValue());
+            JSONTools.toJSON(jsonNode, palmTransformToParent.getValueReadOnly());
+            jsonNode.put("jointspaceOnly", jointspaceOnly.getValue());
+            jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater.getValue());
+            jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
+            jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
+            jsonNode.put("orientationErrorToleranceDegrees", Double.parseDouble("%.3f".formatted(Math.toDegrees(orientationErrorTolerance.getValue()))));
+         }
+         else
+         {
+            JSONTools.toJSON(jsonNode.putObject("screwAxisPose"), screwAxisPoseInObjectFrame.getValueReadOnly());
+            jsonNode.put("translation", translation.getValue());
+            jsonNode.put("rotation", rotation.getValue());
+            jsonNode.put("maxLinearVelocity", maxLinearVelocity.getValue());
+            jsonNode.put("maxAngularVelocity", maxAngularVelocity.getValue());
+            jsonNode.put("orientationErrorToleranceDegrees", Double.parseDouble("%.3f".formatted(Math.toDegrees(orientationErrorTolerance.getValue()))));
+         }
       }
 
       jsonNode.put("positionErrorTolerance", Double.parseDouble("%.3f".formatted(positionErrorTolerance.getValue())));
@@ -119,11 +155,17 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
       super.loadFromFile(jsonNode);
 
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
-      trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
-      usePredefinedJointAngles.setValue(jsonNode.get("usePredefinedJointAngles").asBoolean());
 
-      if (usePredefinedJointAngles.getValue())
+      if (jsonNode.has("definedInJointspace"))
+         definedInJointspace.setValue(jsonNode.get("definedInJointspace").asBoolean());
+      else if (jsonNode.has("usePredefinedJointAngles"))
+         definedInJointspace.setValue(jsonNode.get("usePredefinedJointAngles").asBoolean());
+      else
+         definedInJointspace.setValue(DEFAULT_DEFINED_IN_JOINTSPACE);
+
+      if (definedInJointspace.getValue())
       {
+         trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
          String presetName = jsonNode.get("preset").textValue();
          preset.setValue(presetName.equals(CUSTOM_ANGLES_NAME) ? null : PresetArmConfiguration.valueOf(presetName));
          if (preset.getValue() == null)
@@ -132,13 +174,39 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
       }
       else
       {
-         palmParentFrameName.setValue(jsonNode.get("parentFrame").textValue());
-         JSONTools.toEuclid(jsonNode, palmTransformToParent.getValueAndModify());
-         holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
-         jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
-         linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
-         angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
-         orientationErrorTolerance.setValue(Math.toRadians(jsonNode.get("orientationErrorToleranceDegrees").asDouble()));
+         if (jsonNode.has("taskspaceTrajectoryMode"))
+            taskspaceTrajectoryMode.setValue(ArmActionTaskspaceTrajectoryMode.valueOf(jsonNode.get("taskspaceTrajectoryMode").asText()));
+         else
+            taskspaceTrajectoryMode.setValue(ArmActionTaskspaceTrajectoryMode.SINGLE_POSE);
+
+         if (jsonNode.has("parentFrame"))
+            palmParentFrameName.setValue(jsonNode.get("parentFrame").textValue());
+         else if (jsonNode.has("objectFrame"))
+            palmParentFrameName.setValue(jsonNode.get("objectFrame").textValue());
+
+         if (taskspaceTrajectoryMode.getValue() == ArmActionTaskspaceTrajectoryMode.SINGLE_POSE)
+         {
+            trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
+            JSONTools.toEuclid(jsonNode, palmTransformToParent.getValueAndModify());
+            holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
+            jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
+            linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
+            angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
+            orientationErrorTolerance.setValue(Math.toRadians(jsonNode.get("orientationErrorToleranceDegrees").asDouble()));
+         }
+         else
+         {
+            if (jsonNode.get("screwAxisPose") instanceof ObjectNode objectNode)
+               JSONTools.toEuclid(objectNode, screwAxisPoseInObjectFrame.getValueAndModify());
+            translation.setValue(jsonNode.get("translation").asDouble());
+            rotation.setValue(jsonNode.get("rotation").asDouble());
+            maxLinearVelocity.setValue(jsonNode.get("maxLinearVelocity").asDouble());
+            maxAngularVelocity.setValue(jsonNode.get("maxAngularVelocity").asDouble());
+            if (jsonNode.has("jointspaceOnly"))
+               jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
+            if (jsonNode.has("orientationErrorToleranceDegrees"))
+               orientationErrorTolerance.setValue(Math.toRadians(jsonNode.get("orientationErrorToleranceDegrees").asDouble()));
+         }
       }
 
       if (jsonNode.get("positionErrorTolerance") instanceof NumericNode node)
@@ -155,12 +223,18 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
       onDiskTrajectoryDuration = trajectoryDuration.getValue();
       onDiskHoldPoseInWorldLater = holdPoseInWorldLater.getValue();
       onDiskJointspaceOnly = jointspaceOnly.getValue();
-      onDiskUsePredefinedJointAngles = usePredefinedJointAngles.getValue();
+      onDiskDefinedInJointspace = definedInJointspace.getValue();
+      onDiskTaskspaceTrajectoryMode = taskspaceTrajectoryMode.getValue();
       onDiskPreset = preset.getValue();
       for (int i = 0; i < jointAngles.getLength(); i++)
          onDiskJointAngles[i] = jointAngles.getValueReadOnly(i);
       onDiskPalmParentFrameName = palmParentFrameName.getValue();
       onDiskPalmTransformToParent.set(palmTransformToParent.getValueReadOnly());
+      onDiskScrewAxisPoseInObjectFrame.set(screwAxisPoseInObjectFrame.getValueReadOnly());
+      onDiskTranslation = translation.getValue();
+      onDiskRotation = rotation.getValue();
+      onDiskMaxLinearVelocity = maxLinearVelocity.getValue();
+      onDiskMaxAngularVelocity = maxAngularVelocity.getValue();
       onDiskLinearPositionWeight = linearPositionWeight.getValue();
       onDiskAngularPositionWeight = angularPositionWeight.getValue();
       onDiskJointspaceWeight = jointspaceWeight.getValue();
@@ -179,12 +253,18 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
          trajectoryDuration.setValue(onDiskTrajectoryDuration);
          holdPoseInWorldLater.setValue(onDiskHoldPoseInWorldLater);
          jointspaceOnly.setValue(onDiskJointspaceOnly);
-         usePredefinedJointAngles.setValue(onDiskUsePredefinedJointAngles);
+         definedInJointspace.setValue(onDiskDefinedInJointspace);
+         taskspaceTrajectoryMode.setValue(onDiskTaskspaceTrajectoryMode);
          preset.setValue(onDiskPreset);
          for (int i = 0; i < jointAngles.getLength(); i++)
             jointAngles.setValue(i, onDiskJointAngles[i]);
          palmParentFrameName.setValue(onDiskPalmParentFrameName);
          palmTransformToParent.getValueAndModify().set(onDiskPalmTransformToParent);
+         screwAxisPoseInObjectFrame.getValueAndModify().set(onDiskScrewAxisPoseInObjectFrame);
+         translation.setValue(onDiskTranslation);
+         rotation.setValue(onDiskRotation);
+         maxLinearVelocity.setValue(onDiskMaxLinearVelocity);
+         maxAngularVelocity.setValue(onDiskMaxAngularVelocity);
          linearPositionWeight.setValue(onDiskLinearPositionWeight);
          angularPositionWeight.setValue(onDiskAngularPositionWeight);
          jointspaceWeight.setValue(onDiskJointspaceWeight);
@@ -199,11 +279,11 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
       boolean unchanged = !super.hasChanges();
 
       unchanged &= side.getValue() == onDiskSide;
-      unchanged &= trajectoryDuration.getValue() == onDiskTrajectoryDuration;
-      unchanged &= usePredefinedJointAngles.getValue() == onDiskUsePredefinedJointAngles;
+      unchanged &= definedInJointspace.getValue() == onDiskDefinedInJointspace;
 
-      if (usePredefinedJointAngles.getValue()) // Only mark changed for relevant fields
+      if (definedInJointspace.getValue())
       {
+         unchanged &= trajectoryDuration.getValue() == onDiskTrajectoryDuration;
          unchanged &= preset.getValue() == onDiskPreset;
          if (preset.getValue() == null)
             for (int i = 0; i < jointAngles.getLength(); i++)
@@ -211,13 +291,28 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
       }
       else
       {
-         unchanged &= holdPoseInWorldLater.getValue() == onDiskHoldPoseInWorldLater;
-         unchanged &= jointspaceOnly.getValue() == onDiskJointspaceOnly;
+         unchanged &= taskspaceTrajectoryMode.getValue() == onDiskTaskspaceTrajectoryMode;
          unchanged &= palmParentFrameName.getValue().equals(onDiskPalmParentFrameName);
-         unchanged &= palmTransformToParent.getValueReadOnly().equals(onDiskPalmTransformToParent);
-         unchanged &= linearPositionWeight.getValue() == onDiskLinearPositionWeight;
-         unchanged &= angularPositionWeight.getValue() == onDiskAngularPositionWeight;
-         unchanged &= orientationErrorTolerance.getValue() == onDiskOrientationErrorTolerance;
+
+         if (taskspaceTrajectoryMode.getValue() == ArmActionTaskspaceTrajectoryMode.SINGLE_POSE)
+         {
+            unchanged &= trajectoryDuration.getValue() == onDiskTrajectoryDuration;
+            unchanged &= holdPoseInWorldLater.getValue() == onDiskHoldPoseInWorldLater;
+            unchanged &= jointspaceOnly.getValue() == onDiskJointspaceOnly;
+            unchanged &= palmTransformToParent.getValueReadOnly().equals(onDiskPalmTransformToParent);
+            unchanged &= linearPositionWeight.getValue() == onDiskLinearPositionWeight;
+            unchanged &= angularPositionWeight.getValue() == onDiskAngularPositionWeight;
+            unchanged &= orientationErrorTolerance.getValue() == onDiskOrientationErrorTolerance;
+         }
+         else
+         {
+            unchanged &= screwAxisPoseInObjectFrame.getValueReadOnly().equals(onDiskScrewAxisPoseInObjectFrame);
+            unchanged &= translation.getValue() == onDiskTranslation;
+            unchanged &= rotation.getValue() == onDiskRotation;
+            unchanged &= maxLinearVelocity.getValue() == onDiskMaxLinearVelocity;
+            unchanged &= maxAngularVelocity.getValue() == onDiskMaxAngularVelocity;
+            unchanged &= orientationErrorTolerance.getValue() == onDiskOrientationErrorTolerance;
+         }
       }
 
       unchanged &= positionErrorTolerance.getValue() == onDiskPositionErrorTolerance;
@@ -236,9 +331,15 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
       message.setTrajectoryDuration(trajectoryDuration.toMessage());
       message.setHoldPoseInWorld(holdPoseInWorldLater.toMessage());
       message.setJointSpaceControl(jointspaceOnly.toMessage());
-      message.setUsePredefinedJointAngles(usePredefinedJointAngles.toMessage());
+      message.setDefinedInJointspace(definedInJointspace.toMessage());
+      message.setTaskspaceTrajectoryMode((byte) taskspaceTrajectoryMode.getValue().ordinal());
       message.setPreset(preset.toMessageOrdinal());
       jointAngles.toMessage(message.getJointAngles());
+      screwAxisPoseInObjectFrame.toMessage(message.getScrewAxisPose());
+      message.setTranslation(translation.toMessage());
+      message.setRotation(rotation.toMessage());
+      message.setMaxLinearVelocity(maxLinearVelocity.toMessage());
+      message.setMaxAngularVelocity(maxAngularVelocity.toMessage());
       message.setLinearPositionWeight(linearPositionWeight.toMessage());
       message.setAngularPositionWeight(angularPositionWeight.toMessage());
       message.setJointspaceWeight(jointspaceWeight.toMessage());
@@ -256,9 +357,15 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
       trajectoryDuration.fromMessage(message.getTrajectoryDuration());
       holdPoseInWorldLater.fromMessage(message.getHoldPoseInWorld());
       jointspaceOnly.fromMessage(message.getJointSpaceControl());
-      usePredefinedJointAngles.fromMessage(message.getUsePredefinedJointAngles());
+      definedInJointspace.fromMessage(message.getDefinedInJointspace());
+      taskspaceTrajectoryMode.fromMessageOrdinal(message.getTaskspaceTrajectoryMode(), ArmActionTaskspaceTrajectoryMode.values);
       preset.fromMessageOrdinal(message.getPreset(), PresetArmConfiguration.values);
       jointAngles.fromMessage(message.getJointAngles());
+      screwAxisPoseInObjectFrame.fromMessage(message.getScrewAxisPose());
+      translation.fromMessage(message.getTranslation());
+      rotation.fromMessage(message.getRotation());
+      maxLinearVelocity.fromMessage(message.getMaxLinearVelocity());
+      maxAngularVelocity.fromMessage(message.getMaxAngularVelocity());
       linearPositionWeight.fromMessage(message.getLinearPositionWeight());
       angularPositionWeight.fromMessage(message.getAngularPositionWeight());
       jointspaceWeight.fromMessage(message.getJointspaceWeight());
@@ -307,14 +414,24 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
       this.jointspaceOnly.setValue(jointspaceOnly);
    }
 
-   public boolean getUsePredefinedJointAngles()
+   public boolean getDefinedInJointspace()
    {
-      return usePredefinedJointAngles.getValue();
+      return definedInJointspace.getValue();
    }
 
-   public void setUsePredefinedJointAngles(boolean usePredefinedJointAngles)
+   public void setDefinedInJointspace(boolean definedInJointspace)
    {
-      this.usePredefinedJointAngles.setValue(usePredefinedJointAngles);
+      this.definedInJointspace.setValue(definedInJointspace);
+   }
+
+   public ArmActionTaskspaceTrajectoryMode getTaskspaceTrajectoryMode()
+   {
+      return taskspaceTrajectoryMode.getValue();
+   }
+
+   public void setTaskspaceTrajectoryMode(ArmActionTaskspaceTrajectoryMode taskspaceTrajectoryMode)
+   {
+      this.taskspaceTrajectoryMode.setValue(taskspaceTrajectoryMode);
    }
 
    @Nullable
@@ -351,6 +468,51 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
    public CRDTBidirectionalRigidBodyTransform getPalmTransformToParent()
    {
       return palmTransformToParent;
+   }
+
+   public CRDTBidirectionalRigidBodyTransform getScrewAxisPoseInObjectFrame()
+   {
+      return screwAxisPoseInObjectFrame;
+   }
+
+   public double getTranslation()
+   {
+      return translation.getValue();
+   }
+
+   public void setTranslation(double translation)
+   {
+      this.translation.setValue(translation);
+   }
+
+   public double getRotation()
+   {
+      return rotation.getValue();
+   }
+
+   public void setRotation(double rotation)
+   {
+      this.rotation.setValue(rotation);
+   }
+
+   public double getMaxLinearVelocity()
+   {
+      return maxLinearVelocity.getValue();
+   }
+
+   public void setMaxLinearVelocity(double maxLinearVelocity)
+   {
+      this.maxLinearVelocity.setValue(maxLinearVelocity);
+   }
+
+   public double getMaxAngularVelocity()
+   {
+      return maxAngularVelocity.getValue();
+   }
+
+   public void setMaxAngularVelocity(double maxAngularVelocity)
+   {
+      this.maxAngularVelocity.setValue(maxAngularVelocity);
    }
 
    public double getLinearPositionWeight()

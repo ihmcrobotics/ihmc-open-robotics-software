@@ -6,6 +6,7 @@ import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -14,7 +15,11 @@ import static us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition.
 
 public class ArmActionState extends ActionNodeState<ArmActionDefinition>
 {
+   /** This limit is defined in the .msg file and limited to the size in the SE3TrajectoryMessage. */
+   public static final int TRAJECTORY_SIZE_LIMIT = new ArmActionStateMessage().getPreviewTrajectory().getCurrentCapacity();
+
    private final CRDTDetachableReferenceFrame palmFrame;
+   private final DetachableReferenceFrame screwFrame;
    /**
     * This is the estimated goal chest frame as the robot executes a potential whole body action.
     * This is used to compute joint angles that achieve the desired and previewed end pose
@@ -26,6 +31,13 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
    private final CRDTStatusVector3D torque;
    private final CRDTStatusDoubleArray previewJointAngles;
    private final CRDTStatusDouble solutionQuality;
+   private final CRDTStatusPoseList previewTrajectory;
+   private final CRDTStatusDouble previewTrajectoryDuration;
+   private final CRDTStatusDouble previewTrajectoryLinearVelocity;
+   private final CRDTStatusDouble previewTrajectoryAngularVelocity;
+   private final CRDTStatusDouble previewRequestedTime;
+   private final CRDTStatusDoubleArray screwPreviewJointAngles;
+   private final CRDTStatusDouble previewSolutionQuality;
    private final SideDependentList<Integer> numberOfJoints = new SideDependentList<>();
 
    public ArmActionState(long id, BehaviorTreeRootNodeState rootNode)
@@ -35,6 +47,7 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
       palmFrame = new CRDTDetachableReferenceFrame(scene::findFrameByName,
                                                    definition.getCRDTPalmParentFrameName(),
                                                    definition.getPalmTransformToParent());
+      screwFrame = new DetachableReferenceFrame(scene::findFrameByName, definition.getScrewAxisPoseInObjectFrame().getValueReadOnly());
       goalChestToWorldTransform = new CRDTStatusRigidBodyTransform(ROS2ActorDesignation.ROBOT, crdtInfo);
       goalChestFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                               goalChestToWorldTransform.getValueReadOnly());
@@ -42,6 +55,13 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
       torque = new CRDTStatusVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
       previewJointAngles = new CRDTStatusDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, MAX_NUMBER_OF_JOINTS);
       solutionQuality = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      previewTrajectory = new CRDTStatusPoseList(ROS2ActorDesignation.ROBOT, crdtInfo);
+      previewTrajectoryDuration = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, -1.0);
+      previewTrajectoryLinearVelocity = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, -1.0);
+      previewTrajectoryAngularVelocity = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, -1.0);
+      previewRequestedTime = new CRDTStatusDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.0);
+      screwPreviewJointAngles = new CRDTStatusDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, MAX_NUMBER_OF_JOINTS);
+      previewSolutionQuality = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
 
       for (RobotSide side : RobotSide.values)
          numberOfJoints.put(side, robotModel.getJointMap().getArmJointNamesAsStrings(side).size());
@@ -51,6 +71,7 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
    public void update()
    {
       palmFrame.update();
+      screwFrame.update(definition.getPalmParentFrameName());
    }
 
    @Override
@@ -62,6 +83,13 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
       hasStatus |= torque.pollHasStatus();
       hasStatus |= previewJointAngles.pollHasStatus();
       hasStatus |= solutionQuality.pollHasStatus();
+      hasStatus |= previewTrajectory.pollHasStatus();
+      hasStatus |= previewTrajectoryDuration.pollHasStatus();
+      hasStatus |= previewTrajectoryLinearVelocity.pollHasStatus();
+      hasStatus |= previewTrajectoryAngularVelocity.pollHasStatus();
+      hasStatus |= previewRequestedTime.pollHasStatus();
+      hasStatus |= screwPreviewJointAngles.pollHasStatus();
+      hasStatus |= previewSolutionQuality.pollHasStatus();
       return hasStatus;
    }
 
@@ -74,11 +102,15 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
       goalChestToWorldTransform.toMessage(message.getGoalChestTransformToWorld());
       force.toMessage(message.getForce());
       torque.toMessage(message.getTorque());
-      for (int i = 0; i < MAX_NUMBER_OF_JOINTS; i++)
-      {
-         previewJointAngles.toMessage(message.getJointAngles());
-      }
+      previewJointAngles.toMessage(message.getJointAngles());
       message.setSolutionQuality(solutionQuality.toMessage());
+      previewTrajectory.toMessage(message.getPreviewTrajectory());
+      message.setPreviewTrajectoryDuration(previewTrajectoryDuration.toMessage());
+      message.setPreviewTrajectoryLinearVelocity(previewTrajectoryLinearVelocity.toMessage());
+      message.setPreviewTrajectoryAngularVelocity(previewTrajectoryAngularVelocity.toMessage());
+      message.setPreviewRequestedTime(previewRequestedTime.toMessage());
+      screwPreviewJointAngles.toMessage(message.getPreviewJointAngles());
+      message.setPreviewSolutionQuality(previewSolutionQuality.toMessage());
    }
 
    public void fromMessage(ArmActionStateMessage message)
@@ -93,11 +125,23 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
       solutionQuality.fromMessage(message.getSolutionQuality());
       goalChestToWorldTransform.fromMessage(message.getGoalChestTransformToWorld());
       goalChestFrame.update();
+      previewTrajectory.fromMessage(message.getPreviewTrajectory());
+      previewTrajectoryDuration.fromMessage(message.getPreviewTrajectoryDuration());
+      previewTrajectoryLinearVelocity.fromMessage(message.getPreviewTrajectoryLinearVelocity());
+      previewTrajectoryAngularVelocity.fromMessage(message.getPreviewTrajectoryAngularVelocity());
+      previewRequestedTime.fromMessage(message.getPreviewRequestedTime());
+      screwPreviewJointAngles.fromMessage(message.getPreviewJointAngles());
+      previewSolutionQuality.fromMessage(message.getPreviewSolutionQuality());
    }
 
    public CRDTDetachableReferenceFrame getPalmFrame()
    {
       return palmFrame;
+   }
+
+   public DetachableReferenceFrame getScrewFrame()
+   {
+      return screwFrame;
    }
 
    public CRDTStatusRigidBodyTransform getGoalChestToWorldTransform()
@@ -123,6 +167,41 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
    public CRDTStatusDoubleArray getPreviewJointAngles()
    {
       return previewJointAngles;
+   }
+
+   public CRDTStatusPoseList getPreviewTrajectory()
+   {
+      return previewTrajectory;
+   }
+
+   public CRDTStatusDouble getPreviewTrajectoryDuration()
+   {
+      return previewTrajectoryDuration;
+   }
+
+   public CRDTStatusDouble getPreviewTrajectoryLinearVelocity()
+   {
+      return previewTrajectoryLinearVelocity;
+   }
+
+   public CRDTStatusDouble getPreviewTrajectoryAngularVelocity()
+   {
+      return previewTrajectoryAngularVelocity;
+   }
+
+   public CRDTStatusDouble getPreviewRequestedTime()
+   {
+      return previewRequestedTime;
+   }
+
+   public CRDTStatusDoubleArray getScrewPreviewJointAngles()
+   {
+      return screwPreviewJointAngles;
+   }
+
+   public CRDTStatusDouble getPreviewSolutionQuality()
+   {
+      return previewSolutionQuality;
    }
 
    public int getNumberOfJoints()

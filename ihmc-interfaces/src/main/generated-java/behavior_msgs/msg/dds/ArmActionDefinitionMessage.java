@@ -25,13 +25,17 @@ public class ArmActionDefinitionMessage extends Packet<ArmActionDefinitionMessag
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_parent_;
    /**
-            * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
+            * Whether the rigid body is controlled in jointspace (true) or hybrid (false) during single-point taskspace execution
             */
    public boolean joint_space_control_;
    /**
-            * Whether to use predefined joint angles
+            * Whether the action is defined in jointspace (true) or taskspace (false)
             */
-   public boolean use_predefined_joint_angles_;
+   public boolean defined_in_jointspace_;
+   /**
+            * Taskspace trajectory mode: 0 = single pose, 1 = screw primitive
+            */
+   public byte taskspace_trajectory_mode_;
    /**
             * Preset arm configuration
             */
@@ -53,6 +57,14 @@ public class ArmActionDefinitionMessage extends Packet<ArmActionDefinitionMessag
    public double jointspace_weight_;
    public double position_error_tolerance_;
    public double orientation_error_tolerance_;
+   /**
+            * Screw primitive fields
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage screw_axis_pose_;
+   public double translation_;
+   public double rotation_;
+   public double max_linear_velocity_;
+   public double max_angular_velocity_;
 
    public ArmActionDefinitionMessage()
    {
@@ -61,6 +73,7 @@ public class ArmActionDefinitionMessage extends Packet<ArmActionDefinitionMessag
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
       joint_angles_ = new double[7];
 
+      screw_axis_pose_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
    public ArmActionDefinitionMessage(ArmActionDefinitionMessage other)
@@ -80,7 +93,9 @@ public class ArmActionDefinitionMessage extends Packet<ArmActionDefinitionMessag
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_parent_, transform_to_parent_);
       joint_space_control_ = other.joint_space_control_;
 
-      use_predefined_joint_angles_ = other.use_predefined_joint_angles_;
+      defined_in_jointspace_ = other.defined_in_jointspace_;
+
+      taskspace_trajectory_mode_ = other.taskspace_trajectory_mode_;
 
       preset_ = other.preset_;
 
@@ -103,6 +118,15 @@ public class ArmActionDefinitionMessage extends Packet<ArmActionDefinitionMessag
       position_error_tolerance_ = other.position_error_tolerance_;
 
       orientation_error_tolerance_ = other.orientation_error_tolerance_;
+
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.screw_axis_pose_, screw_axis_pose_);
+      translation_ = other.translation_;
+
+      rotation_ = other.rotation_;
+
+      max_linear_velocity_ = other.max_linear_velocity_;
+
+      max_angular_velocity_ = other.max_angular_velocity_;
 
    }
 
@@ -164,14 +188,14 @@ public class ArmActionDefinitionMessage extends Packet<ArmActionDefinitionMessag
    }
 
    /**
-            * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
+            * Whether the rigid body is controlled in jointspace (true) or hybrid (false) during single-point taskspace execution
             */
    public void setJointSpaceControl(boolean joint_space_control)
    {
       joint_space_control_ = joint_space_control;
    }
    /**
-            * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
+            * Whether the rigid body is controlled in jointspace (true) or hybrid (false) during single-point taskspace execution
             */
    public boolean getJointSpaceControl()
    {
@@ -179,18 +203,33 @@ public class ArmActionDefinitionMessage extends Packet<ArmActionDefinitionMessag
    }
 
    /**
-            * Whether to use predefined joint angles
+            * Whether the action is defined in jointspace (true) or taskspace (false)
             */
-   public void setUsePredefinedJointAngles(boolean use_predefined_joint_angles)
+   public void setDefinedInJointspace(boolean defined_in_jointspace)
    {
-      use_predefined_joint_angles_ = use_predefined_joint_angles;
+      defined_in_jointspace_ = defined_in_jointspace;
    }
    /**
-            * Whether to use predefined joint angles
+            * Whether the action is defined in jointspace (true) or taskspace (false)
             */
-   public boolean getUsePredefinedJointAngles()
+   public boolean getDefinedInJointspace()
    {
-      return use_predefined_joint_angles_;
+      return defined_in_jointspace_;
+   }
+
+   /**
+            * Taskspace trajectory mode: 0 = single pose, 1 = screw primitive
+            */
+   public void setTaskspaceTrajectoryMode(byte taskspace_trajectory_mode)
+   {
+      taskspace_trajectory_mode_ = taskspace_trajectory_mode;
+   }
+   /**
+            * Taskspace trajectory mode: 0 = single pose, 1 = screw primitive
+            */
+   public byte getTaskspaceTrajectoryMode()
+   {
+      return taskspace_trajectory_mode_;
    }
 
    /**
@@ -293,6 +332,51 @@ public class ArmActionDefinitionMessage extends Packet<ArmActionDefinitionMessag
    }
 
 
+   /**
+            * Screw primitive fields
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage getScrewAxisPose()
+   {
+      return screw_axis_pose_;
+   }
+
+   public void setTranslation(double translation)
+   {
+      translation_ = translation;
+   }
+   public double getTranslation()
+   {
+      return translation_;
+   }
+
+   public void setRotation(double rotation)
+   {
+      rotation_ = rotation;
+   }
+   public double getRotation()
+   {
+      return rotation_;
+   }
+
+   public void setMaxLinearVelocity(double max_linear_velocity)
+   {
+      max_linear_velocity_ = max_linear_velocity;
+   }
+   public double getMaxLinearVelocity()
+   {
+      return max_linear_velocity_;
+   }
+
+   public void setMaxAngularVelocity(double max_angular_velocity)
+   {
+      max_angular_velocity_ = max_angular_velocity;
+   }
+   public double getMaxAngularVelocity()
+   {
+      return max_angular_velocity_;
+   }
+
+
    public static Supplier<ArmActionDefinitionMessagePubSubType> getPubSubType()
    {
       return ArmActionDefinitionMessagePubSubType::new;
@@ -318,7 +402,9 @@ public class ArmActionDefinitionMessage extends Packet<ArmActionDefinitionMessag
       if (!this.transform_to_parent_.epsilonEquals(other.transform_to_parent_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.joint_space_control_, other.joint_space_control_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_predefined_joint_angles_, other.use_predefined_joint_angles_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.defined_in_jointspace_, other.defined_in_jointspace_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.taskspace_trajectory_mode_, other.taskspace_trajectory_mode_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.preset_, other.preset_, epsilon)) return false;
 
@@ -341,6 +427,15 @@ public class ArmActionDefinitionMessage extends Packet<ArmActionDefinitionMessag
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.orientation_error_tolerance_, other.orientation_error_tolerance_, epsilon)) return false;
 
+      if (!this.screw_axis_pose_.epsilonEquals(other.screw_axis_pose_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.translation_, other.translation_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.rotation_, other.rotation_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_linear_velocity_, other.max_linear_velocity_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_angular_velocity_, other.max_angular_velocity_, epsilon)) return false;
+
 
       return true;
    }
@@ -362,7 +457,9 @@ public class ArmActionDefinitionMessage extends Packet<ArmActionDefinitionMessag
       if (!this.transform_to_parent_.equals(otherMyClass.transform_to_parent_)) return false;
       if(this.joint_space_control_ != otherMyClass.joint_space_control_) return false;
 
-      if(this.use_predefined_joint_angles_ != otherMyClass.use_predefined_joint_angles_) return false;
+      if(this.defined_in_jointspace_ != otherMyClass.defined_in_jointspace_) return false;
+
+      if(this.taskspace_trajectory_mode_ != otherMyClass.taskspace_trajectory_mode_) return false;
 
       if(this.preset_ != otherMyClass.preset_) return false;
 
@@ -385,6 +482,15 @@ public class ArmActionDefinitionMessage extends Packet<ArmActionDefinitionMessag
 
       if(this.orientation_error_tolerance_ != otherMyClass.orientation_error_tolerance_) return false;
 
+      if (!this.screw_axis_pose_.equals(otherMyClass.screw_axis_pose_)) return false;
+      if(this.translation_ != otherMyClass.translation_) return false;
+
+      if(this.rotation_ != otherMyClass.rotation_) return false;
+
+      if(this.max_linear_velocity_ != otherMyClass.max_linear_velocity_) return false;
+
+      if(this.max_angular_velocity_ != otherMyClass.max_angular_velocity_) return false;
+
 
       return true;
    }
@@ -405,8 +511,10 @@ public class ArmActionDefinitionMessage extends Packet<ArmActionDefinitionMessag
       builder.append(this.transform_to_parent_);      builder.append(", ");
       builder.append("joint_space_control=");
       builder.append(this.joint_space_control_);      builder.append(", ");
-      builder.append("use_predefined_joint_angles=");
-      builder.append(this.use_predefined_joint_angles_);      builder.append(", ");
+      builder.append("defined_in_jointspace=");
+      builder.append(this.defined_in_jointspace_);      builder.append(", ");
+      builder.append("taskspace_trajectory_mode=");
+      builder.append(this.taskspace_trajectory_mode_);      builder.append(", ");
       builder.append("preset=");
       builder.append(this.preset_);      builder.append(", ");
       builder.append("joint_angles=");
@@ -424,7 +532,17 @@ public class ArmActionDefinitionMessage extends Packet<ArmActionDefinitionMessag
       builder.append("position_error_tolerance=");
       builder.append(this.position_error_tolerance_);      builder.append(", ");
       builder.append("orientation_error_tolerance=");
-      builder.append(this.orientation_error_tolerance_);
+      builder.append(this.orientation_error_tolerance_);      builder.append(", ");
+      builder.append("screw_axis_pose=");
+      builder.append(this.screw_axis_pose_);      builder.append(", ");
+      builder.append("translation=");
+      builder.append(this.translation_);      builder.append(", ");
+      builder.append("rotation=");
+      builder.append(this.rotation_);      builder.append(", ");
+      builder.append("max_linear_velocity=");
+      builder.append(this.max_linear_velocity_);      builder.append(", ");
+      builder.append("max_angular_velocity=");
+      builder.append(this.max_angular_velocity_);
       builder.append("}");
       return builder.toString();
    }

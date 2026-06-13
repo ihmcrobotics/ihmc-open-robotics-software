@@ -336,8 +336,6 @@ public class RDXActionProgressWidgets
       CRDTStatusVector3D forceCRDT = null;
       if (action instanceof RDXArmAction armAction)
          forceCRDT = armAction.getState().getForce();
-      else if (action instanceof RDXScrewPrimitiveAction screwPrimitiveAction)
-         forceCRDT = screwPrimitiveAction.getState().getForce();
 
       if (forceCRDT != null)
       {
@@ -373,8 +371,6 @@ public class RDXActionProgressWidgets
       CRDTStatusVector3D torqueCRDT = null;
       if (action instanceof RDXArmAction armAction)
          torqueCRDT = armAction.getState().getTorque();
-      else if (action instanceof RDXScrewPrimitiveAction screwPrimitiveAction)
-         torqueCRDT = screwPrimitiveAction.getState().getTorque();
 
       if (torqueCRDT != null)
       {

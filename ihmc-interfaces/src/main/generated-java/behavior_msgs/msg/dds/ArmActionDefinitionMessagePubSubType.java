@@ -15,7 +15,7 @@ public class ArmActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "330f2ec5c5738c622ba345b448f9569e40a8e8c75ae99bb88a861fc083b16307";
+   		return "e6063bd16b18dca45b516425f96b0a5b9e2855ca5cfa1f4fb1823be61407f377";
    }
    
    @Override
@@ -65,6 +65,8 @@ public class ArmActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -72,6 +74,16 @@ public class ArmActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -112,6 +124,9 @@ public class ArmActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -121,6 +136,20 @@ public class ArmActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getScrewAxisPose(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -150,7 +179,9 @@ public class ArmActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Topi
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToParent(), cdr);
       cdr.write_type_7(data.getJointSpaceControl());
 
-      cdr.write_type_7(data.getUsePredefinedJointAngles());
+      cdr.write_type_7(data.getDefinedInJointspace());
+
+      cdr.write_type_9(data.getTaskspaceTrajectoryMode());
 
       cdr.write_type_9(data.getPreset());
 
@@ -173,6 +204,15 @@ public class ArmActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Topi
 
       cdr.write_type_6(data.getOrientationErrorTolerance());
 
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getScrewAxisPose(), cdr);
+      cdr.write_type_6(data.getTranslation());
+
+      cdr.write_type_6(data.getRotation());
+
+      cdr.write_type_6(data.getMaxLinearVelocity());
+
+      cdr.write_type_6(data.getMaxAngularVelocity());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ArmActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -184,7 +224,9 @@ public class ArmActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Topi
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToParent(), cdr);	
       data.setJointSpaceControl(cdr.read_type_7());
       	
-      data.setUsePredefinedJointAngles(cdr.read_type_7());
+      data.setDefinedInJointspace(cdr.read_type_7());
+      	
+      data.setTaskspaceTrajectoryMode(cdr.read_type_9());
       	
       data.setPreset(cdr.read_type_9());
       	
@@ -208,6 +250,15 @@ public class ArmActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Topi
       	
       data.setOrientationErrorTolerance(cdr.read_type_6());
       	
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getScrewAxisPose(), cdr);	
+      data.setTranslation(cdr.read_type_6());
+      	
+      data.setRotation(cdr.read_type_6());
+      	
+      data.setMaxLinearVelocity(cdr.read_type_6());
+      	
+      data.setMaxAngularVelocity(cdr.read_type_6());
+      	
 
    }
 
@@ -221,7 +272,8 @@ public class ArmActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       ser.write_type_7("joint_space_control", data.getJointSpaceControl());
-      ser.write_type_7("use_predefined_joint_angles", data.getUsePredefinedJointAngles());
+      ser.write_type_7("defined_in_jointspace", data.getDefinedInJointspace());
+      ser.write_type_9("taskspace_trajectory_mode", data.getTaskspaceTrajectoryMode());
       ser.write_type_9("preset", data.getPreset());
       ser.write_type_f("joint_angles", data.getJointAngles());
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
@@ -231,6 +283,12 @@ public class ArmActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.write_type_6("jointspace_weight", data.getJointspaceWeight());
       ser.write_type_6("position_error_tolerance", data.getPositionErrorTolerance());
       ser.write_type_6("orientation_error_tolerance", data.getOrientationErrorTolerance());
+      ser.write_type_a("screw_axis_pose", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getScrewAxisPose());
+
+      ser.write_type_6("translation", data.getTranslation());
+      ser.write_type_6("rotation", data.getRotation());
+      ser.write_type_6("max_linear_velocity", data.getMaxLinearVelocity());
+      ser.write_type_6("max_angular_velocity", data.getMaxAngularVelocity());
    }
 
    @Override
@@ -243,7 +301,8 @@ public class ArmActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
       data.setJointSpaceControl(ser.read_type_7("joint_space_control"));
-      data.setUsePredefinedJointAngles(ser.read_type_7("use_predefined_joint_angles"));
+      data.setDefinedInJointspace(ser.read_type_7("defined_in_jointspace"));
+      data.setTaskspaceTrajectoryMode(ser.read_type_9("taskspace_trajectory_mode"));
       data.setPreset(ser.read_type_9("preset"));
       ser.read_type_f("joint_angles", data.getJointAngles());
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
@@ -253,6 +312,12 @@ public class ArmActionDefinitionMessagePubSubType implements us.ihmc.pubsub.Topi
       data.setJointspaceWeight(ser.read_type_6("jointspace_weight"));
       data.setPositionErrorTolerance(ser.read_type_6("position_error_tolerance"));
       data.setOrientationErrorTolerance(ser.read_type_6("orientation_error_tolerance"));
+      ser.read_type_a("screw_axis_pose", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getScrewAxisPose());
+
+      data.setTranslation(ser.read_type_6("translation"));
+      data.setRotation(ser.read_type_6("rotation"));
+      data.setMaxLinearVelocity(ser.read_type_6("max_linear_velocity"));
+      data.setMaxAngularVelocity(ser.read_type_6("max_angular_velocity"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ArmActionDefinitionMessage src, behavior_msgs.msg.dds.ArmActionDefinitionMessage dest)

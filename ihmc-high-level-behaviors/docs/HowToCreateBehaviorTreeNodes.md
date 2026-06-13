@@ -27,7 +27,12 @@ Register the node in `BehaviorTreeStateMessage.msg`:
 1. Add a new `byte MY_NODE = N` constant (use the next available number).
 2. Add a typed list field, e.g. `behavior_msgs/MyNodeStateMessage[<=120] my_nodes`.
 
-Build the messages by running `us.ihmc.idl.IHMCInterfacesGenerateMessages` from `ihmc-open-robotics-software/ihmc-interfaces` (see `docs/maintainer/Making A Release.md`).
+Build the messages from `ihmc-interfaces`:
+
+```bash
+cd ihmc-interfaces
+gradle generateMessages
+```
 
 ## 2. Definition and state Java classes
 
