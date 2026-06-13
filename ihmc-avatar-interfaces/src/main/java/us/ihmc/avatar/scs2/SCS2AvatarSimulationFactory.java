@@ -176,6 +176,8 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> useMujocoPhysicsEngine = new OptionalFactoryField<>(
          "useMujocoPhysicsEngine",
          false);
+   protected final OptionalFactoryField<MujocoSimulationParameters> mujocoSimulationParameters = new OptionalFactoryField<>(
+         "mujocoSimulationParameters");
    protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>(
          "impulseBasedPhysicsEngineParameters");
    protected final OptionalFactoryField<GroundContactModelParameters> groundContactModelParameters = new OptionalFactoryField<>(
@@ -350,9 +352,12 @@ public class SCS2AvatarSimulationFactory
       else if (useMujocoPhysicsEngine.hasValue() && useMujocoPhysicsEngine.get())
       {
          // MuJoCo requires its internal timestep to match the SCS2 session DT, otherwise sim time
-         // diverges from wall time. Capture simulationDT here rather than at construction so
-         // factory-level overrides ordering doesn't matter.
-         MujocoSimulationParameters mujocoParameters = new MujocoSimulationParameters();
+         // diverges from wall time. Start from caller-supplied parameters if present, then
+         // override timestep so ordering of setSimulationDT vs setMujocoSimulationParameters
+         // doesn't matter.
+         MujocoSimulationParameters mujocoParameters = mujocoSimulationParameters.hasValue()
+               ? mujocoSimulationParameters.get()
+               : new MujocoSimulationParameters();
          mujocoParameters.setTimestep(simulationDT.get());
          physicsEngineFactory = (inertialFrame, rootRegistry) -> new MujocoPhysicsEngine(inertialFrame, rootRegistry, mujocoParameters);
       }
@@ -1155,6 +1160,11 @@ public class SCS2AvatarSimulationFactory
    public void setUseMujocoPhysicsEngine(boolean useMujocoPhysicsEngine)
    {
       this.useMujocoPhysicsEngine.set(useMujocoPhysicsEngine);
+   }
+
+   public void setMujocoSimulationParameters(MujocoSimulationParameters mujocoSimulationParameters)
+   {
+      this.mujocoSimulationParameters.set(mujocoSimulationParameters);
    }
 
    public void setEnableSimulatedRobotDamping(boolean enableSimulatedRobotDamping)
