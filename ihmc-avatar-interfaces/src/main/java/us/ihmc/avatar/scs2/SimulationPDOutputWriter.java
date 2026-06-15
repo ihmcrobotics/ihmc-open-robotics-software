@@ -1,11 +1,16 @@
 package us.ihmc.avatar.scs2;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
@@ -25,31 +30,87 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Used to apply some corruption to the desired torque, velocity, and position outputs
- * from the controller and apply PD control on the torque to track them. These torques
- * then get passed on to the simulation for physics calculation.
+ * Sim-thread variant of {@link SCS2OutputWriter}: applies the low-level joint PD
+ * ({@code tau = tau_ff + kp*(q_d - q) + kd*(qd_d - qd)}) on the simulation thread, i.e. every physics tick
+ * (~10 kHz), rather than on the estimator/feedback thread (~500 Hz - 1 kHz). The computed effort is passed straight
+ * to the simulation for physics integration.
  *
- * This class also tracks unstable velocities with some counters.
+ * <p>Closing the PD at the physics rate gives tighter tracking than the slower estimator-rate path and mirrors the
+ * hardware twitter board, which closes its local PD/current loop at ~4 kHz independent of the 1 kHz EtherCAT setpoint
+ * update.
+ *
+ * <p>This writer carries the SAME safety nets as the estimator-thread {@link SCS2OutputWriter}: the position/velocity
+ * feedback max-error clamps AND the unstable-velocity damping backoff (when a joint's velocity reverses repeatedly,
+ * its damping is scaled down for a short window). The backoff is load-bearing here: the SCS2 sim joints lack the
+ * armature / rotor reflected inertia present on hardware (and assumed by the controller's damping gains), so the bare
+ * 10 kHz velocity damping at full commanded gains diverges; the backoff keeps it stable. Once the sim models armature
+ * inertia, the backoff should rarely engage. The {@code scs2.simPD.kpScale} / {@code scs2.simPD.kdScale} system
+ * properties (default 1.0) scale the applied gains for tuning/diagnostics.
  */
 public class SimulationPDOutputWriter implements SimulationThreadOutputWriter
 {
+   // Diagnostic knobs to scale the low-level PD gains applied on the sim thread (default 1.0 = use the commanded
+   // stiffness/damping). Used to probe whether the sim-thread PD instability is a gain-magnitude (esp. damping) issue.
+   private static final double KP_SCALE = Double.parseDouble(System.getProperty("scs2.simPD.kpScale", "1.0"));
+   private static final double KD_SCALE = Double.parseDouble(System.getProperty("scs2.simPD.kdScale", "1.0"));
+   // Set -Dscs2.simPD.backoff=false to disable the unstable-velocity damping backoff (e.g. to validate that a retuned
+   // set of damping gains is stable on its own and the backoff never needs to engage).
+   private static final boolean BACKOFF_ENABLED = Boolean.parseBoolean(System.getProperty("scs2.simPD.backoff", "true"));
+   // Sim-only inertia-scaled damping. When enabled, the commanded kd is replaced by kd = 2*zeta*sqrt(kp*M_ii), where
+   // M_ii is the joint's apparent inertia in the SCS2 model (mass-matrix diagonal at the startup pose). This gives a
+   // consistent damping ratio across joints whose inertia spans ~1500x (hip ~3.5 vs ankle ~0.0024 kg*m^2), instead of
+   // the flat controller gains which over-damp the light distal joints and destabilize them. Does NOT touch the shared
+   // controller gain set, so hardware gains are unaffected.
+   private static final boolean INERTIA_SCALED_KD = Boolean.parseBoolean(System.getProperty("scs2.simPD.inertiaScaledKd", "true"));
+   private static final double INERTIA_SCALED_ZETA = Double.parseDouble(System.getProperty("scs2.simPD.zeta", "1.5"));
+   // Sim-only inertia-scaled stiffness: kp = M_ii * omegaN^2, giving every joint the same closed-loop natural
+   // frequency omegaN (rad/s) regardless of inertia (the "uniform bandwidth" heuristic). With INERTIA_SCALED_KD on as
+   // well, kd = 2*zeta*M_ii*omegaN, so the whole robot has a single (omegaN, zeta). The flat controller kp=10 instead
+   // implies omegaN from ~1.7 rad/s (hips) to ~64 rad/s (ankles); the default below (~median) keeps overall stiffness.
+   private static final boolean INERTIA_SCALED_KP = Boolean.parseBoolean(System.getProperty("scs2.simPD.inertiaScaledKp", "true"));
+   private static final double INERTIA_SCALED_OMEGA_N = Double.parseDouble(System.getProperty("scs2.simPD.omegaN", "5.5"));
+   // Gravity-load floor for the inertia-scaled stiffness: kp >= |tau_gravity| / deltaTheta, so a joint can hold its
+   // static gravity load within deltaTheta radians of deflection. Combined with the bandwidth rule this gives
+   // kp = max(M*omegaN^2, |tau_gravity|/deltaTheta) -- this stops the light posture joints (neck, wrist) from sagging
+   // when uniform-bandwidth scaling alone would under-stiffen them. deltaTheta default ~3 degrees.
+   private static final double INERTIA_SCALED_DELTA_THETA = Double.parseDouble(System.getProperty("scs2.simPD.deltaTheta", "0.05"));
+   private static final double GRAVITY_Z = Double.parseDouble(System.getProperty("scs2.simPD.gravityZ", "-9.81"));
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final ControllerInput controllerInput;
    private final ControllerOutput controllerOutput;
    private final List<JointController> jointControllers = new ArrayList<>();
    private final Map<String, JointController> jointControllerMap = new HashMap<>();
 
+   // Unstable-velocity damping backoff (ported from SCS2OutputWriter). When a joint's velocity reverses sign more
+   // than unstableVelocityNumberThreshold times in a row (beyond unstableVelocityThreshold), its damping kd is scaled
+   // down to unstableVelocityLowDampingScale for unstableVelocityLowDampingDuration seconds. This is the same safety
+   // net that keeps the 1 kHz estimator-thread PD alive; without it the 10 kHz sim-thread PD diverges because the
+   // commanded damping is too high for the SCS2 sim joints (which lack the rotor/armature inertia present on hardware).
+   private final YoDouble unstableVelocityThreshold = new YoDouble("unstableVelocityThreshold", registry);
+   private final YoInteger unstableVelocityNumberThreshold = new YoInteger("unstableVelocityNumberThreshold", registry);
+   private final YoDouble unstableVelocityLowDampingScale = new YoDouble("unstableVelocityLowDampingScale", registry);
+   private final YoDouble unstableVelocityLowDampingDuration = new YoDouble("unstableVelocityLowDampingDuration", registry);
+
+   private boolean apparentInertiaApplied = false;
+
    public SimulationPDOutputWriter(ControllerInput controllerInput,
                                    ControllerOutput controllerOutput)
    {
       this.controllerInput = controllerInput;
       this.controllerOutput = controllerOutput;
+
+      unstableVelocityThreshold.set(0.45);
+      unstableVelocityNumberThreshold.set(10);
+      unstableVelocityLowDampingScale.set(0.25);
+      unstableVelocityLowDampingDuration.set(0.5);
    }
 
    @Override
    public void setJointDesiredOutputList(JointDesiredOutputListBasics jointDesiredOutputList)
    {
       jointControllers.clear();
+      apparentInertiaApplied = false;
 
       for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
       {
@@ -120,13 +181,51 @@ public class SimulationPDOutputWriter implements SimulationThreadOutputWriter
    @Override
    public void doControl()
    {
+      if (INERTIA_SCALED_KD && !apparentInertiaApplied)
+      {
+         computeAndApplyApparentInertias();
+         apparentInertiaApplied = true;
+      }
+
       for (int i = 0; i < jointControllers.size(); i++)
       {
          jointControllers.get(i).doControl();
       }
    }
 
+   /**
+    * Computes the joint-space mass-matrix diagonal (apparent inertia) of the simulated robot at the current pose and
+    * hands each joint controller its inertia so it can size its damping. Done once, lazily, on the first tick so the
+    * sim has settled the robot frames.
+    */
+   private void computeAndApplyApparentInertias()
+   {
+      MultiBodySystemReadOnly system = controllerInput.getInput();
 
+      CompositeRigidBodyMassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(system);
+      DMatrixRMaj massMatrix = massMatrixCalculator.getMassMatrix();
+
+      // Gravity term G(q) only: no Coriolis/centrifugal, no joint accelerations. Gives the static torque each joint
+      // must hold against gravity at the current pose, used for the kp gravity-load floor.
+      InverseDynamicsCalculator gravityCalculator = new InverseDynamicsCalculator(system, false, false);
+      gravityCalculator.setGravitationalAcceleration(GRAVITY_Z);
+      gravityCalculator.compute();
+
+      int column = 0;
+      for (JointReadOnly joint : system.getJointsToConsider())
+      {
+         if (joint.getDegreesOfFreedom() == 1)
+         {
+            JointController jointController = jointControllerMap.get(joint.getName());
+            if (jointController != null)
+            {
+               jointController.setApparentInertia(massMatrix.get(column, column));
+               jointController.setGravityTorque(gravityCalculator.getComputedJointTau(joint).get(0, 0));
+            }
+         }
+         column += joint.getDegreesOfFreedom();
+      }
+   }
 
    @Override
    public YoRegistry getYoRegistry()
@@ -137,9 +236,13 @@ public class SimulationPDOutputWriter implements SimulationThreadOutputWriter
    private interface JointController
    {
       void doControl();
+
+      void setApparentInertia(double inertia);
+
+      void setGravityTorque(double gravityTorque);
    }
 
-   private static class OneDoFJointController implements JointController
+   private class OneDoFJointController implements JointController
    {
       private final OneDoFJointReadOnly simOutput;
       private final OneDoFJointStateBasics simInput;
@@ -149,6 +252,12 @@ public class SimulationPDOutputWriter implements SimulationThreadOutputWriter
       private final YoDouble yoPositionError, yoVelocityError;
       private final YoDouble yoControllerTau, yoPositionTau, yoVelocityTau;
 
+      private final YoInteger unstableVelocityCounter;
+      private final YoDouble previousVelocity;
+      private final YoDouble unstableVelocityStartTime;
+
+      private double apparentInertia = Double.NaN;
+      private double gravityTorque = 0.0;
 
       public OneDoFJointController(OneDoFJointReadOnly simOutput,
                                    OneDoFJointStateBasics simInput,
@@ -168,6 +277,21 @@ public class SimulationPDOutputWriter implements SimulationThreadOutputWriter
          yoPositionTau = new YoDouble(prefix + "PositionTau", registry);
          yoVelocityTau = new YoDouble(prefix + "VelocityTau", registry);
 
+         unstableVelocityCounter = new YoInteger(prefix + "UnstableVelocityCounter", registry);
+         previousVelocity = new YoDouble(prefix + "PreviousVelocity", registry);
+         unstableVelocityStartTime = new YoDouble(prefix + "UnstableVelocityStartTime", registry);
+      }
+
+      @Override
+      public void setApparentInertia(double inertia)
+      {
+         this.apparentInertia = inertia;
+      }
+
+      @Override
+      public void setGravityTorque(double gravityTorque)
+      {
+         this.gravityTorque = gravityTorque;
       }
 
       @Override
@@ -211,16 +335,60 @@ public class SimulationPDOutputWriter implements SimulationThreadOutputWriter
          yoPositionError.set(positionError);
          yoVelocityError.set(velocityError);
 
-         kp.set(jointDesiredOutput.hasStiffness() ? jointDesiredOutput.getStiffness() : 0.0);
-         kd.set(jointDesiredOutput.hasDamping() ? jointDesiredOutput.getDamping() : 0.0);
+         double kpValue = (jointDesiredOutput.hasStiffness() ? jointDesiredOutput.getStiffness() : 0.0) * KP_SCALE;
+         double kdValue = (jointDesiredOutput.hasDamping() ? jointDesiredOutput.getDamping() : 0.0) * KD_SCALE;
+         // Sim-only inertia-scaled stiffness: kp = max(M_ii*omegaN^2, |tau_gravity|/deltaTheta) -- the uniform-
+         // bandwidth target, floored so the joint can still hold its static gravity load within deltaTheta.
+         if (INERTIA_SCALED_KP && apparentInertia > 0.0)
+         {
+            double kpBandwidth = apparentInertia * INERTIA_SCALED_OMEGA_N * INERTIA_SCALED_OMEGA_N;
+            double kpGravityFloor = Math.abs(gravityTorque) / INERTIA_SCALED_DELTA_THETA;
+            kpValue = Math.max(kpBandwidth, kpGravityFloor);
+         }
+         // Sim-only inertia-scaled damping: kd = 2*zeta*sqrt(kp*M_ii), sized to this joint's apparent inertia.
+         if (INERTIA_SCALED_KD && kpValue > 0.0 && apparentInertia > 0.0)
+            kdValue = 2.0 * INERTIA_SCALED_ZETA * Math.sqrt(kpValue * apparentInertia);
+         kp.set(kpValue);
+         kd.set(kdValue);
+
+         if (BACKOFF_ENABLED)
+         {
+            updateUnstableVelocityCounter();
+            double time = controllerInput.getTime();
+            if (unstableVelocityCounter.getValue() >= unstableVelocityNumberThreshold.getValue())
+               unstableVelocityStartTime.set(time);
+
+            if (time - unstableVelocityStartTime.getValue() <= unstableVelocityLowDampingDuration.getValue())
+            {
+               double alpha = MathTools.clamp(
+                     (time - unstableVelocityStartTime.getValue()) / unstableVelocityLowDampingDuration.getValue(),
+                     0.0,
+                     1.0);
+               kd.mul(EuclidCoreTools.interpolate(unstableVelocityLowDampingScale.getValue(), 1.0, alpha));
+            }
+         }
 
          yoPositionTau.set(kp.getValue() * yoPositionError.getValue());
          yoVelocityTau.set(kd.getValue() * yoVelocityError.getValue());
          simInput.setEffort(yoControllerTau.getValue() + yoPositionTau.getValue() + yoVelocityTau.getValue());
+         previousVelocity.set(simOutput.getQd());
+      }
+
+      private void updateUnstableVelocityCounter()
+      {
+         boolean unstable = simOutput.getQd() * previousVelocity.getValue() < 0.0;
+
+         if (unstable)
+            unstable = !EuclidCoreTools.epsilonEquals(simOutput.getQd(), previousVelocity.getValue(), unstableVelocityThreshold.getValue());
+
+         if (unstable)
+            unstableVelocityCounter.set(Math.min(unstableVelocityCounter.getValue() + 1, unstableVelocityNumberThreshold.getValue()));
+         else
+            unstableVelocityCounter.set(Math.max(unstableVelocityCounter.getValue() - 1, 0));
       }
    }
 
-   private static class CrossFourBarJointController implements JointController
+   private class CrossFourBarJointController implements JointController
    {
       private final CrossFourBarJoint localFourBarJoint;
       private final OneDoFJointReadOnly[] simOutputs;
@@ -231,6 +399,13 @@ public class SimulationPDOutputWriter implements SimulationThreadOutputWriter
       private final YoDouble kp, kd;
       private final YoDouble yoPositionError, yoVelocityError;
       private final YoDouble yoControllerTau, yoPositionTau, yoVelocityTau;
+
+      private final YoInteger unstableVelocityCounter;
+      private final YoDouble previousVelocity;
+      private final YoDouble unstableVelocityStartTime;
+
+      private double apparentInertia = Double.NaN;
+      private double gravityTorque = 0.0;
 
       public CrossFourBarJointController(CrossFourBarJointBasics controllerFourBarJoint,
                                          OneDoFJointReadOnly[] simOutputs,
@@ -256,6 +431,22 @@ public class SimulationPDOutputWriter implements SimulationThreadOutputWriter
          yoControllerTau = new YoDouble(prefix + "ControllerTau", registry);
          yoPositionTau = new YoDouble(prefix + "PositionTau", registry);
          yoVelocityTau = new YoDouble(prefix + "VelocityTau", registry);
+
+         unstableVelocityCounter = new YoInteger(prefix + "UnstableVelocityCounter", registry);
+         previousVelocity = new YoDouble(prefix + "PreviousVelocity", registry);
+         unstableVelocityStartTime = new YoDouble(prefix + "UnstableVelocityStartTime", registry);
+      }
+
+      @Override
+      public void setApparentInertia(double inertia)
+      {
+         this.apparentInertia = inertia;
+      }
+
+      @Override
+      public void setGravityTorque(double gravityTorque)
+      {
+         this.gravityTorque = gravityTorque;
       }
 
       @Override
@@ -301,8 +492,38 @@ public class SimulationPDOutputWriter implements SimulationThreadOutputWriter
          yoPositionError.set(positionError);
          yoVelocityError.set(velocityError);
 
-         kp.set(jointDesiredOutput.hasStiffness() ? jointDesiredOutput.getStiffness() : 0.0);
-         kd.set(jointDesiredOutput.hasDamping() ? jointDesiredOutput.getDamping() : 0.0);
+         double kpValue = (jointDesiredOutput.hasStiffness() ? jointDesiredOutput.getStiffness() : 0.0) * KP_SCALE;
+         double kdValue = (jointDesiredOutput.hasDamping() ? jointDesiredOutput.getDamping() : 0.0) * KD_SCALE;
+         // Sim-only inertia-scaled stiffness: kp = max(M_ii*omegaN^2, |tau_gravity|/deltaTheta) -- the uniform-
+         // bandwidth target, floored so the joint can still hold its static gravity load within deltaTheta.
+         if (INERTIA_SCALED_KP && apparentInertia > 0.0)
+         {
+            double kpBandwidth = apparentInertia * INERTIA_SCALED_OMEGA_N * INERTIA_SCALED_OMEGA_N;
+            double kpGravityFloor = Math.abs(gravityTorque) / INERTIA_SCALED_DELTA_THETA;
+            kpValue = Math.max(kpBandwidth, kpGravityFloor);
+         }
+         // Sim-only inertia-scaled damping: kd = 2*zeta*sqrt(kp*M_ii), sized to this joint's apparent inertia.
+         if (INERTIA_SCALED_KD && kpValue > 0.0 && apparentInertia > 0.0)
+            kdValue = 2.0 * INERTIA_SCALED_ZETA * Math.sqrt(kpValue * apparentInertia);
+         kp.set(kpValue);
+         kd.set(kdValue);
+
+         if (BACKOFF_ENABLED)
+         {
+            updateUnstableVelocityCounter();
+            double time = controllerInput.getTime();
+            if (unstableVelocityCounter.getValue() >= unstableVelocityNumberThreshold.getValue())
+               unstableVelocityStartTime.set(time);
+
+            if (time - unstableVelocityStartTime.getValue() <= unstableVelocityLowDampingDuration.getValue())
+            {
+               double alpha = MathTools.clamp(
+                     (time - unstableVelocityStartTime.getValue()) / unstableVelocityLowDampingDuration.getValue(),
+                     0.0,
+                     1.0);
+               kd.mul(EuclidCoreTools.interpolate(unstableVelocityLowDampingScale.getValue(), 1.0, alpha));
+            }
+         }
 
          yoPositionTau.set(kp.getValue() * yoPositionError.getValue());
          yoVelocityTau.set(kd.getValue() * yoVelocityError.getValue());
@@ -324,6 +545,8 @@ public class SimulationPDOutputWriter implements SimulationThreadOutputWriter
             double tau = 0.5 * tau_actuated / localFourBarJoint.getFourBarFunction().getLoopJacobian().get(torqueSourceIndex);
             simInputs[torqueSourceIndex].setEffort(tau);
          }
+
+         previousVelocity.set(localFourBarJoint.getQd());
       }
 
       private void updateFourBarJoint()
@@ -331,6 +554,19 @@ public class SimulationPDOutputWriter implements SimulationThreadOutputWriter
          localFourBarJoint.setQ(simOutputs[torqueSourceIndices[0]].getQ() + simOutputs[torqueSourceIndices[1]].getQ());
          localFourBarJoint.setQd(simOutputs[torqueSourceIndices[0]].getQd() + simOutputs[torqueSourceIndices[1]].getQd());
          localFourBarJoint.updateFrame();
+      }
+
+      private void updateUnstableVelocityCounter()
+      {
+         boolean unstable = localFourBarJoint.getQd() * previousVelocity.getValue() < 0.0;
+
+         if (unstable)
+            unstable = !EuclidCoreTools.epsilonEquals(localFourBarJoint.getQd(), previousVelocity.getValue(), unstableVelocityThreshold.getValue());
+
+         if (unstable)
+            unstableVelocityCounter.set(Math.min(unstableVelocityCounter.getValue() + 1, unstableVelocityNumberThreshold.getValue()));
+         else
+            unstableVelocityCounter.set(Math.max(unstableVelocityCounter.getValue() - 1, 0));
       }
    }
 }
