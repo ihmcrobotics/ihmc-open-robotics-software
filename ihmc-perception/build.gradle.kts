@@ -40,8 +40,6 @@ mainDependencies {
 
    api("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
 
-   api("net.sf.trove4j:trove4j:3.0.3")
-
    api("us.ihmc:joctomap:1.12.7")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-robot-data-logger:0.37.3")
