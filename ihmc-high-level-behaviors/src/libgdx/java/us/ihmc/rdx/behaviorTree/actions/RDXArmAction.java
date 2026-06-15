@@ -62,8 +62,13 @@ public class RDXArmAction extends RDXActionNode<ArmActionState, ArmActionDefinit
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiArmIconWidget armIconWidget = new ImGuiArmIconWidget();
+   private final ImBooleanWrapper definedInJointspaceWrapper;
+   private final ImDoubleWrapper trajectoryDurationWidget;
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
+   private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
+   private final ImBooleanWrapper jointSpaceControlWrapper;
+   private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
    private final RDXScrewPrimitive screwPrimitive;
    private final SideDependentList<RigidBodyTransformReadOnly> handGraphicToControlFrameTransforms = new SideDependentList<>();
    private final MutableReferenceFrame graphicFrame = new MutableReferenceFrame();
@@ -72,8 +77,6 @@ public class RDXArmAction extends RDXActionNode<ArmActionState, ArmActionDefinit
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
    private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
-   private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
-   private final ImDoubleWrapper trajectoryDurationWidget;
    private final String[] configurations = new String[PresetArmConfiguration.values().length + 1];
    private final ImInt currentConfiguration = new ImInt(PresetArmConfiguration.HOME.ordinal() + 1);
    private final ImDoubleWrapper[] jointAngleWidgets = new ImDoubleWrapper[MAX_NUMBER_OF_JOINTS];
@@ -84,9 +87,6 @@ public class RDXArmAction extends RDXActionNode<ArmActionState, ArmActionDefinit
    private final ImGuiSliderDoubleWrapper linearPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper angularPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper jointspaceWeightWidget;
-   private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
-   private final ImBooleanWrapper jointSpaceControlWrapper;
-   private final ImBooleanWrapper definedInJointspaceWrapper;
    private final ImDoubleWrapper positionErrorToleranceInput;
    private final ImDoubleWrapper orientationErrorToleranceDegreesInput;
    private final SideDependentList<RDXArmMultiBodyGraphic> armMultiBodyGraphics = new SideDependentList<>();
@@ -475,6 +475,7 @@ public class RDXArmAction extends RDXActionNode<ArmActionState, ArmActionDefinit
       }
       else if (isSinglePoseTaskspace())
       {
+         parentFrameComboBox.render();
          ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
          jointSpaceControlWrapper.renderImGuiWidget();
          if (!definition.getJointspaceOnly())
@@ -482,7 +483,6 @@ public class RDXArmAction extends RDXActionNode<ArmActionState, ArmActionDefinit
             ImGui.sameLine();
             holdPoseInWorldLaterWrapper.renderImGuiWidget();
          }
-         parentFrameComboBox.render();
          if (definition.getJointspaceOnly())
             ImGui.beginDisabled();
          linearPositionWeightWidget.renderImGuiWidget();

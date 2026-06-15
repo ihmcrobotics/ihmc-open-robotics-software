@@ -55,26 +55,6 @@ public class ArmActionExecutor extends ActionNodeExecutor<ArmActionState, ArmAct
       screwPrimitive = new ScrewPrimitiveExecutor(this);
    }
 
-   SideDependentList<ArmIKSolver> getArmIKSolvers()
-   {
-      return armIKSolvers;
-   }
-
-   TrajectoryTrackingErrorCalculator getTrackingCalculator()
-   {
-      return trackingCalculator;
-   }
-
-   ROS2SyncedRobotModel getSyncedRobot()
-   {
-      return syncedRobot;
-   }
-
-   ROS2ControllerHelper getRos2ControllerHelper()
-   {
-      return ros2ControllerHelper;
-   }
-
    @Override
    public void update()
    {
@@ -83,17 +63,11 @@ public class ArmActionExecutor extends ActionNodeExecutor<ArmActionState, ArmAct
       trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
       if (definition.getDefinedInJointspace())
-      {
          updateJointspacePreview();
-      }
       else if (definition.getTaskspaceTrajectoryMode() == ArmActionTaskspaceTrajectoryMode.SCREW_PRIMITIVE)
-      {
          screwPrimitive.updatePreview();
-      }
       else
-      {
          updateSinglePosePreview();
-      }
    }
 
    private void updateJointspacePreview()
@@ -138,18 +112,14 @@ public class ArmActionExecutor extends ActionNodeExecutor<ArmActionState, ArmAct
       }
 
       if (concurrentSpineAction == null && concurrentPelvisAction == null)
-      {
          state.getGoalChestToWorldTransform().accessValue().set(syncedRobot.getReferenceFrames().getChestFrame().getTransformToRoot());
-      }
       else if (concurrentPelvisAction == null)
       {
          concurrentSpineAction.update();
          state.getGoalChestToWorldTransform().accessValue().set(concurrentSpineAction.getChestFrame().getReferenceFrame().getTransformToRoot());
       }
       else if (concurrentSpineAction == null)
-      {
          state.getGoalChestToWorldTransform().accessValue().set(syncedRobot.getReferenceFrames().getChestFrame().getTransformToRoot());
-      }
       else
       {
          concurrentSpineAction.update();
@@ -188,17 +158,11 @@ public class ArmActionExecutor extends ActionNodeExecutor<ArmActionState, ArmAct
       super.triggerExecution();
 
       if (definition.getDefinedInJointspace())
-      {
          triggerJointspaceExecution();
-      }
       else if (definition.getTaskspaceTrajectoryMode() == ArmActionTaskspaceTrajectoryMode.SCREW_PRIMITIVE)
-      {
          screwPrimitive.triggerExecution();
-      }
       else
-      {
          triggerSinglePoseExecution();
-      }
    }
 
    private void triggerJointspaceExecution()
@@ -223,9 +187,7 @@ public class ArmActionExecutor extends ActionNodeExecutor<ArmActionState, ArmAct
       JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildJointspaceTrajectoryMessage();
 
       if (definition.getJointspaceOnly())
-      {
          publishJointspaceCommand(jointspaceTrajectoryMessage);
-      }
       else
       {
          ReferenceFrame taskspaceTrajectoryFrame = ReferenceFrame.getWorldFrame();
@@ -289,26 +251,18 @@ public class ArmActionExecutor extends ActionNodeExecutor<ArmActionState, ArmAct
          state.setIsExecuting(false);
          state.setFailed(true);
          if (!definition.getDefinedInJointspace() && definition.getTaskspaceTrajectoryMode() == ArmActionTaskspaceTrajectoryMode.SINGLE_POSE)
-         {
             state.getLogger().error("%s  %s"
                     .formatted("Position error: %.3f / %.3f".formatted(trackingCalculator.getPositionError(), definition.getPositionErrorTolerance()),
                                "Orientation error: %.3f / %.3f".formatted(trackingCalculator.getOrientationError(), definition.getOrientationErrorTolerance())));
-         }
          return;
       }
 
       if (definition.getDefinedInJointspace())
-      {
          updateJointspaceExecution();
-      }
       else if (definition.getTaskspaceTrajectoryMode() == ArmActionTaskspaceTrajectoryMode.SCREW_PRIMITIVE)
-      {
          screwPrimitive.updateExecution();
-      }
       else
-      {
          updateSinglePoseExecution();
-      }
    }
 
    private void updateJointspaceExecution()
@@ -391,5 +345,25 @@ public class ArmActionExecutor extends ActionNodeExecutor<ArmActionState, ArmAct
       }
 
       return jointspaceTrajectoryMessage;
+   }
+
+   SideDependentList<ArmIKSolver> getArmIKSolvers()
+   {
+      return armIKSolvers;
+   }
+
+   TrajectoryTrackingErrorCalculator getTrackingCalculator()
+   {
+      return trackingCalculator;
+   }
+
+   ROS2SyncedRobotModel getSyncedRobot()
+   {
+      return syncedRobot;
+   }
+
+   ROS2ControllerHelper getRos2ControllerHelper()
+   {
+      return ros2ControllerHelper;
    }
 }

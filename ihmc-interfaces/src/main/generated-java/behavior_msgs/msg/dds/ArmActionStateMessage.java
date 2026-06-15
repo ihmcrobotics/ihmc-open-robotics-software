@@ -21,14 +21,6 @@ public class ArmActionStateMessage extends Packet<ArmActionStateMessage> impleme
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage goal_chest_transform_to_world_;
    /**
-            * Hand force
-            */
-   public us.ihmc.euclid.tuple3D.Vector3D force_;
-   /**
-            * Hand torque
-            */
-   public us.ihmc.euclid.tuple3D.Vector3D torque_;
-   /**
             * Joint angles
             */
    public double[] joint_angles_;
@@ -49,19 +41,27 @@ public class ArmActionStateMessage extends Packet<ArmActionStateMessage> impleme
    public double preview_requested_time_;
    public double[] preview_joint_angles_;
    public double preview_solution_quality_;
+   /**
+            * Hand force
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D force_;
+   /**
+            * Hand torque
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D torque_;
 
    public ArmActionStateMessage()
    {
       state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.ArmActionDefinitionMessage();
       goal_chest_transform_to_world_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
-      force_ = new us.ihmc.euclid.tuple3D.Vector3D();
-      torque_ = new us.ihmc.euclid.tuple3D.Vector3D();
       joint_angles_ = new double[7];
 
       preview_trajectory_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (50, new geometry_msgs.msg.dds.PosePubSubType());
       preview_joint_angles_ = new double[7];
 
+      force_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      torque_ = new us.ihmc.euclid.tuple3D.Vector3D();
 
    }
 
@@ -76,8 +76,6 @@ public class ArmActionStateMessage extends Packet<ArmActionStateMessage> impleme
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.ArmActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.goal_chest_transform_to_world_, goal_chest_transform_to_world_);
-      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.force_, force_);
-      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.torque_, torque_);
       for(int i1 = 0; i1 < joint_angles_.length; ++i1)
       {
             joint_angles_[i1] = other.joint_angles_[i1];
@@ -103,6 +101,8 @@ public class ArmActionStateMessage extends Packet<ArmActionStateMessage> impleme
 
       preview_solution_quality_ = other.preview_solution_quality_;
 
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.force_, force_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.torque_, torque_);
    }
 
 
@@ -130,24 +130,6 @@ public class ArmActionStateMessage extends Packet<ArmActionStateMessage> impleme
    public controller_msgs.msg.dds.RigidBodyTransformMessage getGoalChestTransformToWorld()
    {
       return goal_chest_transform_to_world_;
-   }
-
-
-   /**
-            * Hand force
-            */
-   public us.ihmc.euclid.tuple3D.Vector3D getForce()
-   {
-      return force_;
-   }
-
-
-   /**
-            * Hand torque
-            */
-   public us.ihmc.euclid.tuple3D.Vector3D getTorque()
-   {
-      return torque_;
    }
 
 
@@ -241,6 +223,24 @@ public class ArmActionStateMessage extends Packet<ArmActionStateMessage> impleme
    }
 
 
+   /**
+            * Hand force
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D getForce()
+   {
+      return force_;
+   }
+
+
+   /**
+            * Hand torque
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D getTorque()
+   {
+      return torque_;
+   }
+
+
    public static Supplier<ArmActionStateMessagePubSubType> getPubSubType()
    {
       return ArmActionStateMessagePubSubType::new;
@@ -261,8 +261,6 @@ public class ArmActionStateMessage extends Packet<ArmActionStateMessage> impleme
       if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!this.goal_chest_transform_to_world_.epsilonEquals(other.goal_chest_transform_to_world_, epsilon)) return false;
-      if (!this.force_.epsilonEquals(other.force_, epsilon)) return false;
-      if (!this.torque_.epsilonEquals(other.torque_, epsilon)) return false;
       for(int i5 = 0; i5 < joint_angles_.length; ++i5)
       {
                 if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_angles_[i5], other.joint_angles_[i5], epsilon)) return false;
@@ -292,6 +290,8 @@ public class ArmActionStateMessage extends Packet<ArmActionStateMessage> impleme
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.preview_solution_quality_, other.preview_solution_quality_, epsilon)) return false;
 
+      if (!this.force_.epsilonEquals(other.force_, epsilon)) return false;
+      if (!this.torque_.epsilonEquals(other.torque_, epsilon)) return false;
 
       return true;
    }
@@ -308,8 +308,6 @@ public class ArmActionStateMessage extends Packet<ArmActionStateMessage> impleme
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if (!this.goal_chest_transform_to_world_.equals(otherMyClass.goal_chest_transform_to_world_)) return false;
-      if (!this.force_.equals(otherMyClass.force_)) return false;
-      if (!this.torque_.equals(otherMyClass.torque_)) return false;
       for(int i9 = 0; i9 < joint_angles_.length; ++i9)
       {
                 if(this.joint_angles_[i9] != otherMyClass.joint_angles_[i9]) return false;
@@ -333,6 +331,8 @@ public class ArmActionStateMessage extends Packet<ArmActionStateMessage> impleme
       }
       if(this.preview_solution_quality_ != otherMyClass.preview_solution_quality_) return false;
 
+      if (!this.force_.equals(otherMyClass.force_)) return false;
+      if (!this.torque_.equals(otherMyClass.torque_)) return false;
 
       return true;
    }
@@ -349,10 +349,6 @@ public class ArmActionStateMessage extends Packet<ArmActionStateMessage> impleme
       builder.append(this.definition_);      builder.append(", ");
       builder.append("goal_chest_transform_to_world=");
       builder.append(this.goal_chest_transform_to_world_);      builder.append(", ");
-      builder.append("force=");
-      builder.append(this.force_);      builder.append(", ");
-      builder.append("torque=");
-      builder.append(this.torque_);      builder.append(", ");
       builder.append("joint_angles=");
       builder.append(java.util.Arrays.toString(this.joint_angles_));      builder.append(", ");
       builder.append("solution_quality=");
@@ -370,7 +366,11 @@ public class ArmActionStateMessage extends Packet<ArmActionStateMessage> impleme
       builder.append("preview_joint_angles=");
       builder.append(java.util.Arrays.toString(this.preview_joint_angles_));      builder.append(", ");
       builder.append("preview_solution_quality=");
-      builder.append(this.preview_solution_quality_);
+      builder.append(this.preview_solution_quality_);      builder.append(", ");
+      builder.append("force=");
+      builder.append(this.force_);      builder.append(", ");
+      builder.append("torque=");
+      builder.append(this.torque_);
       builder.append("}");
       return builder.toString();
    }

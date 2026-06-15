@@ -38,14 +38,13 @@ public class ScrewPrimitiveDefinition
       maxAngularVelocity = new CRDTBidirectionalDouble(latestTimestampModifiable, DEFAULT_MAX_ANGULAR_VELOCITY);
    }
 
-   public void saveToFile(ObjectNode jsonNode, double orientationErrorToleranceDegrees)
+   public void saveToFile(ObjectNode jsonNode)
    {
       JSONTools.toJSON(jsonNode.putObject("screwAxisPose"), screwAxisPoseInObjectFrame.getValueReadOnly());
       jsonNode.put("translation", translation.getValue());
       jsonNode.put("rotation", rotation.getValue());
       jsonNode.put("maxLinearVelocity", maxLinearVelocity.getValue());
       jsonNode.put("maxAngularVelocity", maxAngularVelocity.getValue());
-      jsonNode.put("orientationErrorToleranceDegrees", orientationErrorToleranceDegrees);
    }
 
    public void loadFromFile(JsonNode jsonNode)
@@ -117,19 +116,14 @@ public class ScrewPrimitiveDefinition
       return screwAxisPoseInObjectFrame;
    }
 
-   public double getTranslation()
-   {
-      return translation.getValue();
-   }
-
    public void setTranslation(double translation)
    {
       this.translation.setValue(translation);
    }
 
-   public double getRotation()
+   public double getTranslation()
    {
-      return rotation.getValue();
+      return translation.getValue();
    }
 
    public void setRotation(double rotation)
@@ -137,9 +131,9 @@ public class ScrewPrimitiveDefinition
       this.rotation.setValue(rotation);
    }
 
-   public double getMaxLinearVelocity()
+   public double getRotation()
    {
-      return maxLinearVelocity.getValue();
+      return rotation.getValue();
    }
 
    public void setMaxLinearVelocity(double maxLinearVelocity)
@@ -147,13 +141,18 @@ public class ScrewPrimitiveDefinition
       this.maxLinearVelocity.setValue(maxLinearVelocity);
    }
 
-   public double getMaxAngularVelocity()
+   public double getMaxLinearVelocity()
    {
-      return maxAngularVelocity.getValue();
+      return maxLinearVelocity.getValue();
    }
 
    public void setMaxAngularVelocity(double maxAngularVelocity)
    {
       this.maxAngularVelocity.setValue(maxAngularVelocity);
+   }
+
+   public double getMaxAngularVelocity()
+   {
+      return maxAngularVelocity.getValue();
    }
 }

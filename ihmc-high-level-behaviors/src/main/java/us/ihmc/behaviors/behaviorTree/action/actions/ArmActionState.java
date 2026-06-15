@@ -15,10 +15,7 @@ import static us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition.
 
 public class ArmActionState extends ActionNodeState<ArmActionDefinition>
 {
-   public static final int TRAJECTORY_SIZE_LIMIT = ScrewPrimitiveState.TRAJECTORY_SIZE_LIMIT;
-
    private final CRDTDetachableReferenceFrame palmFrame;
-   private final ScrewPrimitiveState screwPrimitive;
    /**
     * This is the estimated goal chest frame as the robot executes a potential whole body action.
     * This is used to compute joint angles that achieve the desired and previewed end pose
@@ -26,10 +23,11 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
     */
    private final CRDTStatusRigidBodyTransform goalChestToWorldTransform;
    private final ReferenceFrame goalChestFrame;
-   private final CRDTStatusVector3D force;
-   private final CRDTStatusVector3D torque;
    private final CRDTStatusDoubleArray previewJointAngles;
    private final CRDTStatusDouble solutionQuality;
+   private final ScrewPrimitiveState screwPrimitive;
+   private final CRDTStatusVector3D force;
+   private final CRDTStatusVector3D torque;
    private final SideDependentList<Integer> numberOfJoints = new SideDependentList<>();
 
    public ArmActionState(long id, BehaviorTreeRootNodeState rootNode)
@@ -39,14 +37,14 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
       palmFrame = new CRDTDetachableReferenceFrame(scene::findFrameByName,
                                                    definition.getCRDTPalmParentFrameName(),
                                                    definition.getPalmTransformToParent());
-      screwPrimitive = new ScrewPrimitiveState(scene, crdtInfo, definition.getScrewPrimitive());
       goalChestToWorldTransform = new CRDTStatusRigidBodyTransform(ROS2ActorDesignation.ROBOT, crdtInfo);
       goalChestFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                               goalChestToWorldTransform.getValueReadOnly());
-      force = new CRDTStatusVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
-      torque = new CRDTStatusVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
       previewJointAngles = new CRDTStatusDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, MAX_NUMBER_OF_JOINTS);
       solutionQuality = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      screwPrimitive = new ScrewPrimitiveState(scene, crdtInfo, definition.getScrewPrimitive());
+      force = new CRDTStatusVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
+      torque = new CRDTStatusVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
 
       for (RobotSide side : RobotSide.values)
          numberOfJoints.put(side, robotModel.getJointMap().getArmJointNamesAsStrings(side).size());
@@ -64,11 +62,11 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
    {
       boolean hasStatus = super.hasStatus();
       hasStatus |= goalChestToWorldTransform.pollHasStatus();
-      hasStatus |= force.pollHasStatus();
-      hasStatus |= torque.pollHasStatus();
       hasStatus |= previewJointAngles.pollHasStatus();
       hasStatus |= solutionQuality.pollHasStatus();
       hasStatus |= screwPrimitive.pollHasStatus();
+      hasStatus |= force.pollHasStatus();
+      hasStatus |= torque.pollHasStatus();
       return hasStatus;
    }
 
@@ -79,11 +77,11 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
       super.toMessage(message.getState());
 
       goalChestToWorldTransform.toMessage(message.getGoalChestTransformToWorld());
-      force.toMessage(message.getForce());
-      torque.toMessage(message.getTorque());
       previewJointAngles.toMessage(message.getJointAngles());
       message.setSolutionQuality(solutionQuality.toMessage());
       screwPrimitive.toMessage(message);
+      force.toMessage(message.getForce());
+      torque.toMessage(message.getTorque());
    }
 
    public void fromMessage(ArmActionStateMessage message)
@@ -92,13 +90,13 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
 
       super.fromMessage(message.getState());
 
-      force.fromMessage(message.getForce());
-      torque.fromMessage(message.getTorque());
-      previewJointAngles.fromMessage(message.getJointAngles());
-      solutionQuality.fromMessage(message.getSolutionQuality());
       goalChestToWorldTransform.fromMessage(message.getGoalChestTransformToWorld());
       goalChestFrame.update();
+      previewJointAngles.fromMessage(message.getJointAngles());
+      solutionQuality.fromMessage(message.getSolutionQuality());
       screwPrimitive.fromMessage(message);
+      force.fromMessage(message.getForce());
+      torque.fromMessage(message.getTorque());
    }
 
    public CRDTDetachableReferenceFrame getPalmFrame()

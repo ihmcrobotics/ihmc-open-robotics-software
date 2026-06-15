@@ -7,12 +7,6 @@ behavior_msgs/ArmActionDefinitionMessage definition
 # This is the estimated goal chest frame as the robot executes a potential whole body action.
 controller_msgs/RigidBodyTransformMessage goal_chest_transform_to_world
 
-# Hand force
-geometry_msgs/Vector3 force
-
-# Hand torque
-geometry_msgs/Vector3 torque
-
 # Joint angles
 float64[7] joint_angles
 
@@ -34,3 +28,9 @@ float64 preview_requested_time
 float64[7] preview_joint_angles
 
 float64 preview_solution_quality
+
+# Hand force
+geometry_msgs/Vector3 force
+
+# Hand torque
+geometry_msgs/Vector3 torque

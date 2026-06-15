@@ -23,6 +23,26 @@ module behavior_msgs
         @defaultValue(value=255)
         octet robot_side;
         /**
+         * Whether the action is defined in jointspace (true) or taskspace (false)
+         */
+        boolean defined_in_jointspace;
+        /**
+         * Taskspace trajectory mode: 0 = single pose, 1 = screw primitive
+         */
+        octet taskspace_trajectory_mode;
+        /**
+         * The trajectory duration
+         */
+        double trajectory_duration;
+        /**
+         * Preset arm configuration
+         */
+        octet preset;
+        /**
+         * Joint angles
+         */
+        double joint_angles[7];
+        /**
          * Name of the frame the this action is expressed in
          */
         string parent_frame_name;
@@ -35,34 +55,9 @@ module behavior_msgs
          */
         boolean joint_space_control;
         /**
-         * Whether the action is defined in jointspace (true) or taskspace (false)
-         */
-        boolean defined_in_jointspace;
-        /**
-         * Taskspace trajectory mode: 0 = single pose, 1 = screw primitive
-         */
-        octet taskspace_trajectory_mode;
-        /**
-         * Preset arm configuration
-         */
-        octet preset;
-        /**
-         * Joint angles
-         */
-        double joint_angles[7];
-        /**
-         * The trajectory duration
-         */
-        double trajectory_duration;
-        /**
          * Whether maintaining the rigid body controlled in world after the action is complete
          */
         boolean hold_pose_in_world;
-        double linear_position_weight;
-        double angular_position_weight;
-        double jointspace_weight;
-        double position_error_tolerance;
-        double orientation_error_tolerance;
         /**
          * Screw primitive fields
          */
@@ -71,6 +66,11 @@ module behavior_msgs
         double rotation;
         double max_linear_velocity;
         double max_angular_velocity;
+        double linear_position_weight;
+        double angular_position_weight;
+        double jointspace_weight;
+        double position_error_tolerance;
+        double orientation_error_tolerance;
       };
     };
   };

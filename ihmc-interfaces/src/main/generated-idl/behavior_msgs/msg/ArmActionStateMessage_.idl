@@ -29,14 +29,6 @@ module behavior_msgs
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage goal_chest_transform_to_world;
         /**
-         * Hand force
-         */
-        geometry_msgs::msg::dds::Vector3 force;
-        /**
-         * Hand torque
-         */
-        geometry_msgs::msg::dds::Vector3 torque;
-        /**
          * Joint angles
          */
         double joint_angles[7];
@@ -57,6 +49,14 @@ module behavior_msgs
         double preview_requested_time;
         double preview_joint_angles[7];
         double preview_solution_quality;
+        /**
+         * Hand force
+         */
+        geometry_msgs::msg::dds::Vector3 force;
+        /**
+         * Hand torque
+         */
+        geometry_msgs::msg::dds::Vector3 torque;
       };
     };
   };

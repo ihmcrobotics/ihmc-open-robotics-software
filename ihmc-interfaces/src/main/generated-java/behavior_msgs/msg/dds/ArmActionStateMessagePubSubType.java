@@ -15,7 +15,7 @@ public class ArmActionStateMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d0d708c8aa74dd5c5c406b256ce4306bc2db9a0a010b19cc1743b82d1e4f0c3d";
+   		return "03536c09dfec4ae17d6b4f18dfd4c7edbf014b0abcd727264c3783861fc1d026";
    }
    
    @Override
@@ -58,10 +58,6 @@ public class ArmActionStateMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
-
       current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -81,6 +77,10 @@ public class ArmActionStateMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -99,10 +99,6 @@ public class ArmActionStateMessagePubSubType implements us.ihmc.pubsub.TopicData
       current_alignment += behavior_msgs.msg.dds.ArmActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getGoalChestTransformToWorld(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getForce(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getTorque(), current_alignment);
 
       current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -129,6 +125,10 @@ public class ArmActionStateMessagePubSubType implements us.ihmc.pubsub.TopicData
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getForce(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getTorque(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -138,8 +138,6 @@ public class ArmActionStateMessagePubSubType implements us.ihmc.pubsub.TopicData
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.write(data.getState(), cdr);
       behavior_msgs.msg.dds.ArmActionDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getGoalChestTransformToWorld(), cdr);
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getForce(), cdr);
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getTorque(), cdr);
       for(int i0 = 0; i0 < data.getJointAngles().length; ++i0)
       {
         	cdr.write_type_6(data.getJointAngles()[i0]);	
@@ -166,6 +164,8 @@ public class ArmActionStateMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       cdr.write_type_6(data.getPreviewSolutionQuality());
 
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getForce(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getTorque(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.ArmActionStateMessage data, us.ihmc.idl.CDR cdr)
@@ -173,8 +173,6 @@ public class ArmActionStateMessagePubSubType implements us.ihmc.pubsub.TopicData
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.ArmActionDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getGoalChestTransformToWorld(), cdr);	
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getForce(), cdr);	
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getTorque(), cdr);	
       for(int i0 = 0; i0 < data.getJointAngles().length; ++i0)
       {
         	data.getJointAngles()[i0] = cdr.read_type_6();
@@ -200,6 +198,8 @@ public class ArmActionStateMessagePubSubType implements us.ihmc.pubsub.TopicData
       	
       data.setPreviewSolutionQuality(cdr.read_type_6());
       	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getForce(), cdr);	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getTorque(), cdr);	
 
    }
 
@@ -212,10 +212,6 @@ public class ArmActionStateMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       ser.write_type_a("goal_chest_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getGoalChestTransformToWorld());
 
-      ser.write_type_a("force", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getForce());
-
-      ser.write_type_a("torque", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getTorque());
-
       ser.write_type_f("joint_angles", data.getJointAngles());
       ser.write_type_6("solution_quality", data.getSolutionQuality());
       ser.write_type_e("preview_trajectory", data.getPreviewTrajectory());
@@ -225,6 +221,10 @@ public class ArmActionStateMessagePubSubType implements us.ihmc.pubsub.TopicData
       ser.write_type_6("preview_requested_time", data.getPreviewRequestedTime());
       ser.write_type_f("preview_joint_angles", data.getPreviewJointAngles());
       ser.write_type_6("preview_solution_quality", data.getPreviewSolutionQuality());
+      ser.write_type_a("force", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getForce());
+
+      ser.write_type_a("torque", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getTorque());
+
    }
 
    @Override
@@ -236,10 +236,6 @@ public class ArmActionStateMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       ser.read_type_a("goal_chest_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getGoalChestTransformToWorld());
 
-      ser.read_type_a("force", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getForce());
-
-      ser.read_type_a("torque", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getTorque());
-
       ser.read_type_f("joint_angles", data.getJointAngles());
       data.setSolutionQuality(ser.read_type_6("solution_quality"));
       ser.read_type_e("preview_trajectory", data.getPreviewTrajectory());
@@ -249,6 +245,10 @@ public class ArmActionStateMessagePubSubType implements us.ihmc.pubsub.TopicData
       data.setPreviewRequestedTime(ser.read_type_6("preview_requested_time"));
       ser.read_type_f("preview_joint_angles", data.getPreviewJointAngles());
       data.setPreviewSolutionQuality(ser.read_type_6("preview_solution_quality"));
+      ser.read_type_a("force", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getForce());
+
+      ser.read_type_a("torque", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getTorque());
+
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ArmActionStateMessage src, behavior_msgs.msg.dds.ArmActionStateMessage dest)
