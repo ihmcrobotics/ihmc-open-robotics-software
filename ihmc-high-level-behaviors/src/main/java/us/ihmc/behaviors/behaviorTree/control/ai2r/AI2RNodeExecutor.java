@@ -136,6 +136,10 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private static final double ARM_DURATION_MAX_SECONDS = 4.0;
    private static final double DURATION_MIN_SECONDS = 1.0;
    private static final double DURATION_MAX_SECONDS = 4.0;
+   private static final double SHOULDER_PITCH_MIN_RADIANS = Math.toRadians(-105.0);
+   private static final double SHOULDER_PITCH_MAX_RADIANS = Math.toRadians(45.0);
+   private static final double SHOULDER_ROLL_MIN_RADIANS = Math.toRadians(-5.0);
+   private static final double SHOULDER_ROLL_MAX_RADIANS = Math.toRadians(95.0);
 
    public AI2RNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
@@ -656,7 +660,8 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private void applyRightHandSetting(ArmActionState rightArmAction)
    {
       var actionDefinition = rightArmAction.getDefinition();
-      double[] randomizedJointPositions = generateRandomJointPositions(random, getArmJoints(RobotSide.RIGHT));
+      ArmJointName[] armJointNames = getArmJointNames(RobotSide.RIGHT);
+      double[] randomizedJointPositions = generateRandomJointPositions(random, RobotSide.RIGHT, armJointNames, getArmJoints(RobotSide.RIGHT, armJointNames));
       actionDefinition.setUsePredefinedJointAngles(true);
       actionDefinition.setPreset(null); // CUSTOM_ANGLES
       for (int i = 0; i < Math.min(actionDefinition.getJointAngles().getLength(), randomizedJointPositions.length); i++)
@@ -679,7 +684,8 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private void applyLeftHandSetting(ArmActionState leftArmAction)
    {
       var actionDefinition = leftArmAction.getDefinition();
-      double[] randomizedJointPositions = generateRandomJointPositions(random, getArmJoints(RobotSide.LEFT));
+      ArmJointName[] armJointNames = getArmJointNames(RobotSide.LEFT);
+      double[] randomizedJointPositions = generateRandomJointPositions(random, RobotSide.LEFT, armJointNames, getArmJoints(RobotSide.LEFT, armJointNames));
       actionDefinition.setUsePredefinedJointAngles(true);
       actionDefinition.setPreset(null); // CUSTOM_ANGLES
       for (int i = 0; i < Math.min(actionDefinition.getJointAngles().getLength(), randomizedJointPositions.length); i++)
@@ -699,22 +705,59 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       actionDefinition.modify();
    }
 
-   private OneDoFJointBasics[] getArmJoints(RobotSide side)
+   private ArmJointName[] getArmJointNames(RobotSide side)
    {
-      ArmJointName[] armJointNames = syncedRobot.getRobotModel().getJointMap().getArmJointNames(side);
+      return syncedRobot.getRobotModel().getJointMap().getArmJointNames(side);
+   }
+
+   private OneDoFJointBasics[] getArmJoints(RobotSide side, ArmJointName[] armJointNames)
+   {
       OneDoFJointBasics[] armJoints = new OneDoFJointBasics[armJointNames.length];
       for (int i = 0; i < armJointNames.length; i++)
          armJoints[i] = syncedRobot.getFullRobotModel().getArmJoint(side, armJointNames[i]);
       return armJoints;
    }
 
-   private static double[] generateRandomJointPositions(Random random, OneDoFJointBasics[] armJoints)
+   private static double[] generateRandomJointPositions(Random random, RobotSide side, ArmJointName[] armJointNames, OneDoFJointBasics[] armJoints)
    {
       double[] desiredJointPositions = new double[armJoints.length];
       for (int i = 0; i < armJoints.length; i++)
       {
          OneDoFJointBasics joint = armJoints[i];
-         desiredJointPositions[i] = RandomNumbers.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
+         double lowerLimit = joint.getJointLimitLower();
+         double upperLimit = joint.getJointLimitUpper();
+
+         if (i < armJointNames.length)
+         {
+            if (armJointNames[i] == ArmJointName.SHOULDER_PITCH)
+            {
+               lowerLimit = Math.max(lowerLimit, SHOULDER_PITCH_MIN_RADIANS);
+               upperLimit = Math.min(upperLimit, SHOULDER_PITCH_MAX_RADIANS);
+            }
+            else if (armJointNames[i] == ArmJointName.SHOULDER_ROLL)
+            {
+               double shoulderRollMin = SHOULDER_ROLL_MIN_RADIANS;
+               double shoulderRollMax = SHOULDER_ROLL_MAX_RADIANS;
+
+               if (side == RobotSide.RIGHT)
+               {
+                  shoulderRollMin = -SHOULDER_ROLL_MAX_RADIANS;
+                  shoulderRollMax = -SHOULDER_ROLL_MIN_RADIANS;
+               }
+
+               lowerLimit = Math.max(lowerLimit, shoulderRollMin);
+               upperLimit = Math.min(upperLimit, shoulderRollMax);
+            }
+         }
+
+         if (lowerLimit > upperLimit)
+         {
+            LogTools.warn("Invalid randomization bounds for %s. Falling back to joint limits.", joint.getName());
+            lowerLimit = joint.getJointLimitLower();
+            upperLimit = joint.getJointLimitUpper();
+         }
+
+         desiredJointPositions[i] = RandomNumbers.nextDouble(random, lowerLimit, upperLimit);
       }
       return desiredJointPositions;
    }
