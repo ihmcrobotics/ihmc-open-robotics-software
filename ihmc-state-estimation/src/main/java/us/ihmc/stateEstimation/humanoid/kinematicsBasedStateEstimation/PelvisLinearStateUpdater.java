@@ -727,6 +727,8 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       {
          rootJointVelocity.set(rootJointNewLinearVelocityEstimate);
       }
+
+      rootJointVelocity.setMatchingFrame(worldFrame, 0.0, 0.0, 0.0);
    }
 
    private void computePositionFromMergingMeasurements()
@@ -746,6 +748,8 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       {
          rootJointPosition.set(rootJointPositionEstimate);
       }
+
+      rootJointPosition.setMatchingFrame(worldFrame, 0.0, 0.0, -1.2);
    }
 
    private void updateTrustedFeetLists()

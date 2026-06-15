@@ -246,12 +246,16 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    @Override
    public FrameOrientation3DReadOnly getEstimatedOrientation()
    {
+      yoRootJointFrameQuaternion.checkReferenceFrameMatch(worldFrame);
+      yoRootJointFrameQuaternion.setToZero();
       return yoRootJointFrameQuaternion;
    }
 
    @Override
    public FrameVector3DReadOnly getEstimatedAngularVelocity()
    {
+      yoRootJointAngularVelocityInWorld.checkReferenceFrameMatch(worldFrame);
+      yoRootJointAngularVelocityInWorld.setToZero();
       return yoRootJointAngularVelocityInWorld;
    }
 }
