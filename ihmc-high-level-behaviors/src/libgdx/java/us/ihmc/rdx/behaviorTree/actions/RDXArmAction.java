@@ -176,47 +176,48 @@ public class RDXArmAction extends RDXActionNode<ArmActionState, ArmActionDefinit
                                                          definition::setHoldPoseInWorldLater,
                                                          imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
       definedInJointspaceWrapper = new ImBooleanWrapper(definition::getDefinedInJointspace,
-                                                      definition::setDefinedInJointspace,
-                                                      imBoolean ->
-                        {
-                           ImGui.text("Definition:");
-                           ImGui.sameLine();
-                           if (ImGui.radioButton(labels.get("Jointspace"), imBoolean.get()) && !imBoolean.get())
-                           {
-                              imBoolean.set(true);
-                              definition.setPreset(null);
-                              for (int i = 0; i < state.getPreviewJointAngles().getLength(); i++)
-                                 definition.getJointAngles().setValue(i, state.getPreviewJointAngles().getValueReadOnly(i));
-                           }
-                           ImGui.sameLine();
-                           if (ImGui.radioButton(labels.get("Taskspace"), !imBoolean.get()) && imBoolean.get())
-                           {
-                              imBoolean.set(false);
-                              if (definition.getTaskspaceTrajectoryMode() == ArmActionTaskspaceTrajectoryMode.SINGLE_POSE
-                                  && state.getPalmFrame().isChildOfWorld())
-                              {
-                                 CRDTDetachableReferenceFrame actionPalmFrame = state.getPalmFrame();
-                                 CRDTBidirectionalRigidBodyTransform palmTransformToParent = definition.getPalmTransformToParent();
-                                 ReferenceFrame previewPalmFrame = armMultiBodyGraphics.get(definition.getSide()).getHandControlFrame();
-                                 FramePose3D previewPalmPose = new FramePose3D();
-                                 previewPalmPose.setToZero(previewPalmFrame);
-                                 previewPalmPose.changeFrame(actionPalmFrame.getReferenceFrame().getParent());
-                                 palmTransformToParent.getValueAndModify().set(previewPalmPose);
-                                 actionPalmFrame.update();
-                              }
-                           }
-                        });
+                                                        definition::setDefinedInJointspace,
+                                                        imBoolean ->
+      {
+         ImGui.text("Definition:");
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get("Jointspace"), imBoolean.get()) && !imBoolean.get())
+         {
+            imBoolean.set(true);
+            definition.setPreset(null);
+            for (int i = 0; i < state.getPreviewJointAngles().getLength(); i++)
+               definition.getJointAngles().setValue(i, state.getPreviewJointAngles().getValueReadOnly(i));
+         }
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get("Taskspace"), !imBoolean.get()) && imBoolean.get())
+         {
+            imBoolean.set(false);
+            if (definition.getTaskspaceTrajectoryMode() == ArmActionTaskspaceTrajectoryMode.SINGLE_POSE
+                && state.getPalmFrame().isChildOfWorld())
+            {
+               CRDTDetachableReferenceFrame actionPalmFrame = state.getPalmFrame();
+               CRDTBidirectionalRigidBodyTransform palmTransformToParent = definition.getPalmTransformToParent();
+               ReferenceFrame previewPalmFrame = armMultiBodyGraphics.get(definition.getSide()).getHandControlFrame();
+               FramePose3D previewPalmPose = new FramePose3D();
+               previewPalmPose.setToZero(previewPalmFrame);
+               previewPalmPose.changeFrame(actionPalmFrame.getReferenceFrame().getParent());
+               palmTransformToParent.getValueAndModify().set(previewPalmPose);
+               actionPalmFrame.update();
+            }
+         }
+      });
       jointSpaceControlWrapper = new ImBooleanWrapper(definition::getJointspaceOnly,
                                                       definition::setJointspaceOnly,
-                                                      imBoolean -> {
-                                                         ImGui.text("Control mode:");
-                                                         ImGui.sameLine();
-                                                         if (ImGui.radioButton(labels.get("Hybrid"), !imBoolean.get()))
-                                                            imBoolean.set(false);
-                                                         ImGui.sameLine();
-                                                         if (ImGui.radioButton(labels.get("Jointspace Only"), imBoolean.get()))
-                                                            imBoolean.set(true);
-                                                      });
+                                                      imBoolean ->
+      {
+         ImGui.text("Control mode:");
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get("Hybrid"), !imBoolean.get()))
+            imBoolean.set(false);
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get("Jointspace Only"), imBoolean.get()))
+            imBoolean.set(true);
+      });
       ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
       linearPositionWeightWidget = new ImGuiSliderDoubleWrapper("Linear Position Weight", "%.2f", 0.0, 100.0,
                                                                 definition::getLinearPositionWeight,
@@ -482,9 +483,7 @@ public class RDXArmAction extends RDXActionNode<ArmActionState, ArmActionDefinit
 
       ImGui.sameLine();
       if (isScrewTaskspace())
-      {
          ImGui.textDisabled("Screw");
-      }
       else
       {
          boolean gizmoWasSelected = poseGizmo.getSelected().get();
