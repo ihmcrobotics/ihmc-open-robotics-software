@@ -49,6 +49,7 @@ public class BehaviorTreeSceneObjectExecutor extends BehaviorTreeSceneObjectStat
              && transform.getValueReadOnly().getTranslation().epsilonEquals(translation, 1e-5)))
             transform.getValueAndModify().set(orientation, translation);
          referenceFrame.update();
+         setValid(true);
       }
    }
 

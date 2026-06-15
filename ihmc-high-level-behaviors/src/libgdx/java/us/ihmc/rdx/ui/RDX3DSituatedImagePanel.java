@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.vr;
+package us.ihmc.rdx.ui;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
@@ -7,8 +7,6 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
-import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -16,32 +14,28 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Set;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
-import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
 
 public class RDX3DSituatedImagePanel
 {
-   private static final double JOYSTICK_CONTROL_THRESHOLD = 0.7;
-   private static final float JOYSTICK_INCREMENT = 0.01f;
-   private float panelDistance = 0.77f;
+   protected float panelDistance = 0.77f;
 
    private ModelInstance modelInstance;
-   private ModelInstance hoverFrustumMesh;
-   private Texture texture;
+   protected ModelInstance hoverFrustumMesh;
+   protected Texture texture;
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final Vector3 topLeftPosition = new Vector3();
    private final Vector3 bottomLeftPosition = new Vector3();
@@ -56,23 +50,20 @@ public class RDX3DSituatedImagePanel
    private final Vector2 bottomRightUV = new Vector2();
    private final Vector2 topRightUV = new Vector2();
 
-   private final RigidBodyTransform floatingPanelTransformToWorld = new RigidBodyTransform();
-   private final ReferenceFrame floatingPanelFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+   protected final RigidBodyTransform floatingPanelTransformToWorld = new RigidBodyTransform();
+   protected final ReferenceFrame floatingPanelFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                                             floatingPanelTransformToWorld);
-   private boolean isShowing = false;
+   protected boolean isShowing = false;
 
-   private static final boolean RENDER_FRUSTUM = false;
-   private final boolean checkCollison;
-   private CameraPanelFrustumCollision frustumCollidable;
-   private boolean frustumInitialized = false;
-   private final RigidBodyTransform frustumTransformOriginInWorld = new RigidBodyTransform();
-   private final RDXVRModeControls vrControls;
+   protected static final boolean RENDER_FRUSTUM = false;
+   protected final boolean checkCollison;
+   protected CameraPanelFrustumCollision frustumCollidable;
+   protected boolean frustumInitialized = false;
+   protected final RigidBodyTransform frustumTransformOriginInWorld = new RigidBodyTransform();
 
-   public RDX3DSituatedImagePanel(RDXVRContext context, RDXVRModeControls vrControls, boolean checkCollision)
+   public RDX3DSituatedImagePanel(boolean checkCollision)
    {
-      this.vrControls = vrControls;
       this.checkCollison = checkCollision;
-      context.addVRInputProcessor(this::processVRInput);
    }
 
    public void create(Texture texture, Vector3[] points, ReferenceFrame centerOfPanelFrame, boolean flipY, float verticalFOV)
@@ -234,7 +225,7 @@ public class RDX3DSituatedImagePanel
       // Prevent ever having an invisible panel out there, which is very confusing
       // to the VR user when the controllers are colliding with and invisible box.
       boolean somethingToShow = imageTexture != null || texture != null;
-      isShowing = somethingToShow && vrControls.getShowFloatingVideoPanel().get();
+      isShowing = somethingToShow;
 
       // Update the texture if necessary
       if (isShowing && imageTexture != null)
@@ -275,23 +266,6 @@ public class RDX3DSituatedImagePanel
          {
             frustumCollidable.updateCorners(newFrustumTransform);
          }
-      }
-   }
-
-   public void processVRInput(RDXVRContext vrContext)
-   {
-      if (isShowing)
-      {
-         vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
-         {
-            double joystickForwardValue = controller.getJoystickActionData().y();
-            if (Math.abs(joystickForwardValue) > JOYSTICK_CONTROL_THRESHOLD)
-            {
-               panelDistance =
-                     panelDistance + ((float) Math.signum(joystickForwardValue) * JOYSTICK_INCREMENT);
-               panelDistance = Math.max(0.0f, Math.min(panelDistance, 1.5f));
-            }
-         });
       }
    }
 
@@ -340,12 +314,5 @@ public class RDX3DSituatedImagePanel
    public Texture getTexture()
    {
       return texture;
-   }
-
-   public boolean isOccludingView(Point3DReadOnly point)
-   {
-      Vector3 pickPos = new Vector3();
-      LibGDXTools.toLibGDX(point, pickPos);
-      return frustumCollidable != null && frustumCollidable.isPointInside(pickPos);
    }
 }

@@ -710,6 +710,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    public String toString()
    {
       String stringOfMomentumRate = EuclidCoreIOTools.getStringOf("(", ")", ",", momentumRateOfChange.getData());
-      return getClass().getSimpleName() + ": momentum rate: " + stringOfMomentumRate + ", selection matrix = " + selectionMatrix;
+      return getClass().getSimpleName() + ": momentum rate = " + stringOfMomentumRate + ", selection matrix = " + selectionMatrix
+            + ", weight = " + weightMatrix;
    }
 }
