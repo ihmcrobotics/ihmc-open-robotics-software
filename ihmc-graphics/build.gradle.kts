@@ -46,7 +46,7 @@ libgdxDependencies {
    val gdxVersion = "1.12.1"
    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
    api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
-   api("com.github.mgsx-dev.gdx-gltf:core:2.2.1")
+   api("us.ihmc:gdx-gltf-core:2.2.1") // Hosted on https://robotlabfiles.ihmc.us/repository
 
    val lwjglVersion = "3.3.3"
    api("org.lwjgl:lwjgl-openvr:$lwjglVersion")
