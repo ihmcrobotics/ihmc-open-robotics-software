@@ -28,10 +28,6 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
    public static final double DEFAULT_JOINTSPACE_WEIGHT = -1.0;
    public static final double DEFAULT_POSITION_ERROR_TOLERANCE = 0.3;
    public static final double DEFAULT_ORIENTATION_ERROR_TOLERANCE = Math.toRadians(20.0);
-   public static final double DEFAULT_SCREW_TRANSLATION = 0.1;
-   public static final double DEFAULT_SCREW_ROTATION = 0.0;
-   public static final double DEFAULT_MAX_LINEAR_VELOCITY = 0.1;
-   public static final double DEFAULT_MAX_ANGULAR_VELOCITY = 0.6;
 
    private final CRDTBidirectionalEnumField<RobotSide> side;
    private final CRDTBidirectionalDouble trajectoryDuration;
@@ -44,11 +40,7 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
    private final CRDTBidirectionalDoubleArray jointAngles;
    private final CRDTBidirectionalString palmParentFrameName;
    private final CRDTBidirectionalRigidBodyTransform palmTransformToParent;
-   private final CRDTBidirectionalRigidBodyTransform screwAxisPoseInObjectFrame;
-   private final CRDTBidirectionalDouble translation;
-   private final CRDTBidirectionalDouble rotation;
-   private final CRDTBidirectionalDouble maxLinearVelocity;
-   private final CRDTBidirectionalDouble maxAngularVelocity;
+   private final ScrewPrimitiveDefinition screwPrimitive;
    private final CRDTBidirectionalDouble linearPositionWeight;
    private final CRDTBidirectionalDouble angularPositionWeight;
    private final CRDTBidirectionalDouble jointspaceWeight;
@@ -66,11 +58,6 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
    private final double[] onDiskJointAngles = new double[MAX_NUMBER_OF_JOINTS];
    private String onDiskPalmParentFrameName;
    private final RigidBodyTransform onDiskPalmTransformToParent = new RigidBodyTransform();
-   private final RigidBodyTransform onDiskScrewAxisPoseInObjectFrame = new RigidBodyTransform();
-   private double onDiskTranslation;
-   private double onDiskRotation;
-   private double onDiskMaxLinearVelocity;
-   private double onDiskMaxAngularVelocity;
    private double onDiskLinearPositionWeight;
    private double onDiskAngularPositionWeight;
    private double onDiskJointspaceWeight;
@@ -91,11 +78,7 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
       jointAngles = new CRDTBidirectionalDoubleArray(this, MAX_NUMBER_OF_JOINTS);
       palmParentFrameName = new CRDTBidirectionalString(this, "Chest");
       palmTransformToParent = new CRDTBidirectionalRigidBodyTransform(this);
-      screwAxisPoseInObjectFrame = new CRDTBidirectionalRigidBodyTransform(this);
-      translation = new CRDTBidirectionalDouble(this, DEFAULT_SCREW_TRANSLATION);
-      rotation = new CRDTBidirectionalDouble(this, DEFAULT_SCREW_ROTATION);
-      maxLinearVelocity = new CRDTBidirectionalDouble(this, DEFAULT_MAX_LINEAR_VELOCITY);
-      maxAngularVelocity = new CRDTBidirectionalDouble(this, DEFAULT_MAX_ANGULAR_VELOCITY);
+      screwPrimitive = new ScrewPrimitiveDefinition(this);
       linearPositionWeight = new CRDTBidirectionalDouble(this, DEFAULT_LINEAR_POSITION_WEIGHT);
       angularPositionWeight = new CRDTBidirectionalDouble(this, DEFAULT_ANGULAR_POSITION_WEIGHT);
       jointspaceWeight = new CRDTBidirectionalDouble(this, DEFAULT_JOINTSPACE_WEIGHT);
@@ -136,12 +119,7 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
          }
          else
          {
-            JSONTools.toJSON(jsonNode.putObject("screwAxisPose"), screwAxisPoseInObjectFrame.getValueReadOnly());
-            jsonNode.put("translation", translation.getValue());
-            jsonNode.put("rotation", rotation.getValue());
-            jsonNode.put("maxLinearVelocity", maxLinearVelocity.getValue());
-            jsonNode.put("maxAngularVelocity", maxAngularVelocity.getValue());
-            jsonNode.put("orientationErrorToleranceDegrees", Double.parseDouble("%.3f".formatted(Math.toDegrees(orientationErrorTolerance.getValue()))));
+            screwPrimitive.saveToFile(jsonNode, Double.parseDouble("%.3f".formatted(Math.toDegrees(orientationErrorTolerance.getValue()))));
          }
       }
 
@@ -196,12 +174,7 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
          }
          else
          {
-            if (jsonNode.get("screwAxisPose") instanceof ObjectNode objectNode)
-               JSONTools.toEuclid(objectNode, screwAxisPoseInObjectFrame.getValueAndModify());
-            translation.setValue(jsonNode.get("translation").asDouble());
-            rotation.setValue(jsonNode.get("rotation").asDouble());
-            maxLinearVelocity.setValue(jsonNode.get("maxLinearVelocity").asDouble());
-            maxAngularVelocity.setValue(jsonNode.get("maxAngularVelocity").asDouble());
+            screwPrimitive.loadFromFile(jsonNode);
             if (jsonNode.has("jointspaceOnly"))
                jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
             if (jsonNode.has("orientationErrorToleranceDegrees"))
@@ -230,11 +203,7 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
          onDiskJointAngles[i] = jointAngles.getValueReadOnly(i);
       onDiskPalmParentFrameName = palmParentFrameName.getValue();
       onDiskPalmTransformToParent.set(palmTransformToParent.getValueReadOnly());
-      onDiskScrewAxisPoseInObjectFrame.set(screwAxisPoseInObjectFrame.getValueReadOnly());
-      onDiskTranslation = translation.getValue();
-      onDiskRotation = rotation.getValue();
-      onDiskMaxLinearVelocity = maxLinearVelocity.getValue();
-      onDiskMaxAngularVelocity = maxAngularVelocity.getValue();
+      screwPrimitive.setOnDiskFields();
       onDiskLinearPositionWeight = linearPositionWeight.getValue();
       onDiskAngularPositionWeight = angularPositionWeight.getValue();
       onDiskJointspaceWeight = jointspaceWeight.getValue();
@@ -260,11 +229,7 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
             jointAngles.setValue(i, onDiskJointAngles[i]);
          palmParentFrameName.setValue(onDiskPalmParentFrameName);
          palmTransformToParent.getValueAndModify().set(onDiskPalmTransformToParent);
-         screwAxisPoseInObjectFrame.getValueAndModify().set(onDiskScrewAxisPoseInObjectFrame);
-         translation.setValue(onDiskTranslation);
-         rotation.setValue(onDiskRotation);
-         maxLinearVelocity.setValue(onDiskMaxLinearVelocity);
-         maxAngularVelocity.setValue(onDiskMaxAngularVelocity);
+         screwPrimitive.undoAllNontopologicalChanges();
          linearPositionWeight.setValue(onDiskLinearPositionWeight);
          angularPositionWeight.setValue(onDiskAngularPositionWeight);
          jointspaceWeight.setValue(onDiskJointspaceWeight);
@@ -306,11 +271,7 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
          }
          else
          {
-            unchanged &= screwAxisPoseInObjectFrame.getValueReadOnly().equals(onDiskScrewAxisPoseInObjectFrame);
-            unchanged &= translation.getValue() == onDiskTranslation;
-            unchanged &= rotation.getValue() == onDiskRotation;
-            unchanged &= maxLinearVelocity.getValue() == onDiskMaxLinearVelocity;
-            unchanged &= maxAngularVelocity.getValue() == onDiskMaxAngularVelocity;
+            unchanged &= !screwPrimitive.hasChanges();
             unchanged &= orientationErrorTolerance.getValue() == onDiskOrientationErrorTolerance;
          }
       }
@@ -335,11 +296,7 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
       message.setTaskspaceTrajectoryMode((byte) taskspaceTrajectoryMode.getValue().ordinal());
       message.setPreset(preset.toMessageOrdinal());
       jointAngles.toMessage(message.getJointAngles());
-      screwAxisPoseInObjectFrame.toMessage(message.getScrewAxisPose());
-      message.setTranslation(translation.toMessage());
-      message.setRotation(rotation.toMessage());
-      message.setMaxLinearVelocity(maxLinearVelocity.toMessage());
-      message.setMaxAngularVelocity(maxAngularVelocity.toMessage());
+      screwPrimitive.toMessage(message);
       message.setLinearPositionWeight(linearPositionWeight.toMessage());
       message.setAngularPositionWeight(angularPositionWeight.toMessage());
       message.setJointspaceWeight(jointspaceWeight.toMessage());
@@ -361,11 +318,7 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
       taskspaceTrajectoryMode.fromMessageOrdinal(message.getTaskspaceTrajectoryMode(), ArmActionTaskspaceTrajectoryMode.values);
       preset.fromMessageOrdinal(message.getPreset(), PresetArmConfiguration.values);
       jointAngles.fromMessage(message.getJointAngles());
-      screwAxisPoseInObjectFrame.fromMessage(message.getScrewAxisPose());
-      translation.fromMessage(message.getTranslation());
-      rotation.fromMessage(message.getRotation());
-      maxLinearVelocity.fromMessage(message.getMaxLinearVelocity());
-      maxAngularVelocity.fromMessage(message.getMaxAngularVelocity());
+      screwPrimitive.fromMessage(message);
       linearPositionWeight.fromMessage(message.getLinearPositionWeight());
       angularPositionWeight.fromMessage(message.getAngularPositionWeight());
       jointspaceWeight.fromMessage(message.getJointspaceWeight());
@@ -470,49 +423,54 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
       return palmTransformToParent;
    }
 
+   public ScrewPrimitiveDefinition getScrewPrimitive()
+   {
+      return screwPrimitive;
+   }
+
    public CRDTBidirectionalRigidBodyTransform getScrewAxisPoseInObjectFrame()
    {
-      return screwAxisPoseInObjectFrame;
+      return screwPrimitive.getScrewAxisPoseInObjectFrame();
    }
 
    public double getTranslation()
    {
-      return translation.getValue();
+      return screwPrimitive.getTranslation();
    }
 
    public void setTranslation(double translation)
    {
-      this.translation.setValue(translation);
+      screwPrimitive.setTranslation(translation);
    }
 
    public double getRotation()
    {
-      return rotation.getValue();
+      return screwPrimitive.getRotation();
    }
 
    public void setRotation(double rotation)
    {
-      this.rotation.setValue(rotation);
+      screwPrimitive.setRotation(rotation);
    }
 
    public double getMaxLinearVelocity()
    {
-      return maxLinearVelocity.getValue();
+      return screwPrimitive.getMaxLinearVelocity();
    }
 
    public void setMaxLinearVelocity(double maxLinearVelocity)
    {
-      this.maxLinearVelocity.setValue(maxLinearVelocity);
+      screwPrimitive.setMaxLinearVelocity(maxLinearVelocity);
    }
 
    public double getMaxAngularVelocity()
    {
-      return maxAngularVelocity.getValue();
+      return screwPrimitive.getMaxAngularVelocity();
    }
 
    public void setMaxAngularVelocity(double maxAngularVelocity)
    {
-      this.maxAngularVelocity.setValue(maxAngularVelocity);
+      screwPrimitive.setMaxAngularVelocity(maxAngularVelocity);
    }
 
    public double getLinearPositionWeight()
