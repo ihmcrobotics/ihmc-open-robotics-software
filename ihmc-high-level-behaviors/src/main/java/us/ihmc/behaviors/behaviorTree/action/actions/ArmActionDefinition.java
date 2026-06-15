@@ -188,9 +188,12 @@ public class ArmActionDefinition extends ActionNodeDefinition implements SidedOb
             screwPrimitive.loadFromFile(jsonNode);
             if (jsonNode.has("jointspaceOnly"))
                jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
-            linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
-            angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
-            jointspaceWeight.setValue(jsonNode.get("jointspaceWeight").asDouble());
+            if (jsonNode.has("linearPositionWeight"))
+               linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
+            if (jsonNode.has("angularPositionWeight"))
+               angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
+            if (jsonNode.has("jointspaceWeight"))
+               jointspaceWeight.setValue(jsonNode.get("jointspaceWeight").asDouble());
             if (jsonNode.get("positionErrorTolerance") instanceof NumericNode node)
                positionErrorTolerance.setValue(node.asDouble());
             if (jsonNode.has("orientationErrorToleranceDegrees"))
