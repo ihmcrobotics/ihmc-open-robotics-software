@@ -24,6 +24,17 @@ public interface InertialEstimationParameters
 
    InertialEstimatorType getTypeOfEstimatorToUse();
 
+   /**
+    * When true (and using the physically-consistent EKF), each estimated body uses the generalized
+    * parameterization (Eq. (11) of Rucker and Wensing): a physically-consistent deviation from the body's
+    * known nominal inertia, rather than the absolute parameterization (Eq. (1)). Intended for estimating a
+    * payload added to a link whose nominal inertia is known a priori. Defaults to false (absolute).
+    */
+   default boolean useGeneralizedPhysicalConsistency()
+   {
+      return false;
+   }
+
    Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] getBasisSets();
 
    default String[] getBasisNames()

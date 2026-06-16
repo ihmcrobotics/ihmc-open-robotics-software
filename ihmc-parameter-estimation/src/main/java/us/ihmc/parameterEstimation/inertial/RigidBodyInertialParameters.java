@@ -74,6 +74,20 @@ public class RigidBodyInertialParameters
    boolean isThetaBasisUpToDate;
 
    /**
+    * Generalized (Eq. (11) of Rucker & Wensing) parameterization. When enabled, the Theta-basis vector is a
+    * physically-consistent DEVIATION from a fixed nominal inertia: the pseudo-inertia is J = U(theta) J0 U(theta)^T
+    * with J0 the nominal pseudo-inertia, so theta = 0 corresponds exactly to the nominal. This is intended for
+    * estimating a payload added to a link whose nominal inertia is known a priori (the parameter magnitudes then
+    * measure the deviation from nominal). When disabled, the Theta-basis is the absolute Eq. (1) parameterization.
+    */
+   private boolean generalized = false;
+   private final DMatrixRMaj nominalThetaBasis = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+   // Preallocated scratch for the generalized conversions (called every control tick from the EKF).
+   private final DMatrixRMaj composedThetaScratch = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+   private final DMatrixRMaj eq1JacobianScratch = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, PARAMETERS_PER_RIGID_BODY);
+   private final DMatrixRMaj composeJacobianScratch = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, PARAMETERS_PER_RIGID_BODY);
+
+   /**
     * Creates a {@code RigidBodyInertialParameters} object from a rigid body's {@code SpatialInertia}, in order to store the inertial parameters
     * in both default mass / first moment of mass / moment of inertia form (Pi basis) and a fully physically consistent form (Theta basis).
     * <p>
@@ -147,7 +161,15 @@ public class RigidBodyInertialParameters
     */
    private void fromPiBasisToThetaBasis()
    {
-      fromPiBasisToThetaBasis(parameterVectorPiBasis, parameterVectorThetaBasis);
+      if (generalized)
+      {  // Pi -> absolute theta' -> deviation theta relative to the nominal.
+         fromPiBasisToThetaBasis(parameterVectorPiBasis, composedThetaScratch);
+         decomposeThetaBasis(composedThetaScratch, nominalThetaBasis, parameterVectorThetaBasis);
+      }
+      else
+      {
+         fromPiBasisToThetaBasis(parameterVectorPiBasis, parameterVectorThetaBasis);
+      }
    }
 
    /**
@@ -155,7 +177,57 @@ public class RigidBodyInertialParameters
     */
    private void fromThetaBasisToPiBasis()
    {
-      fromThetaBasisToPiBasis(parameterVectorThetaBasis, parameterVectorPiBasis);
+      if (generalized)
+      {  // deviation theta -> absolute theta' (compose with nominal) -> Pi.
+         composeThetaBasis(parameterVectorThetaBasis, nominalThetaBasis, composedThetaScratch);
+         fromThetaBasisToPiBasis(composedThetaScratch, parameterVectorPiBasis);
+      }
+      else
+      {
+         fromThetaBasisToPiBasis(parameterVectorThetaBasis, parameterVectorPiBasis);
+      }
+   }
+
+   /**
+    * Switches this parameter set to the generalized (Eq. (11)) parameterization, fixing the CURRENT inertia as
+    * the nominal. After this call the Theta-basis vector is a physically-consistent deviation from that nominal
+    * (zero deviation = nominal). Requires the Pi basis to be up to date (it captures the current inertia as J0).
+    */
+   public void enableGeneralizedParameterization()
+   {
+      if (generalized)
+         return;
+      // Capture the current inertia as the nominal in absolute Theta basis, then represent it as zero deviation.
+      fromPiBasisToThetaBasis(parameterVectorPiBasis, nominalThetaBasis);
+      generalized = true;
+      parameterVectorThetaBasis.zero();
+      isPiBasisUpToDate = true;
+      isThetaBasisUpToDate = true;
+   }
+
+   public boolean isGeneralized()
+   {
+      return generalized;
+   }
+
+   /**
+    * Packs the Jacobian d(pi)/d(theta) at the current Theta-basis value, dispatching on the parameterization mode.
+    * In generalized mode this is the chain rule G(theta') * d(theta')/d(theta) (Eq. (11)); otherwise it is the
+    * plain Eq. (1) Jacobian. The EKF measurement-model linearization uses this.
+    */
+   public void packThetaToPiBasisJacobian(DMatrixRMaj jacobianToPack)
+   {
+      if (generalized)
+      {
+         composeThetaBasis(parameterVectorThetaBasis, nominalThetaBasis, composedThetaScratch);
+         fromThetaBasisToPiBasisJacobian(composedThetaScratch, eq1JacobianScratch);
+         composeThetaBasisJacobian(parameterVectorThetaBasis, nominalThetaBasis, composeJacobianScratch);
+         CommonOps_DDRM.mult(eq1JacobianScratch, composeJacobianScratch, jacobianToPack);
+      }
+      else
+      {
+         fromThetaBasisToPiBasisJacobian(parameterVectorThetaBasis, jacobianToPack);
+      }
    }
 
    /**
@@ -358,6 +430,103 @@ public class RigidBodyInertialParameters
       jacobianToPack.set(9, 6, 2.0 * exp2Alpha * s23);
       jacobianToPack.set(9, 7, 2.0 * exp2Alpha * t1);
       jacobianToPack.set(9, 8, 2.0 * exp2Alpha * t2);
+   }
+
+   /**
+    * Compose a deviation Theta-basis vector with a nominal Theta-basis vector, returning the absolute
+    * Theta-basis vector theta' such that U(theta') = U(deviation) U(nominal) (Eq. (11): J = U J0 U^T with
+    * J0 = U(nominal) U(nominal)^T). A zero deviation returns the nominal unchanged.
+    */
+   public static void composeThetaBasis(DMatrixRMaj deviation, DMatrixRMaj nominal, DMatrixRMaj composedToPack)
+   {
+      double a = deviation.get(0), d1 = deviation.get(1), d2 = deviation.get(2), d3 = deviation.get(3);
+      double s12 = deviation.get(4), s13 = deviation.get(5), s23 = deviation.get(6);
+      double t1 = deviation.get(7), t2 = deviation.get(8), t3 = deviation.get(9);
+      double a0 = nominal.get(0), d10 = nominal.get(1), d20 = nominal.get(2), d30 = nominal.get(3);
+      double s120 = nominal.get(4), s130 = nominal.get(5), s230 = nominal.get(6);
+      double t10 = nominal.get(7), t20 = nominal.get(8), t30 = nominal.get(9);
+      double eD1 = Math.exp(d1), eD2 = Math.exp(d2), eD3 = Math.exp(d3), eD20 = Math.exp(d20), eD30 = Math.exp(d30);
+
+      composedToPack.set(0, a + a0);
+      composedToPack.set(1, d1 + d10);
+      composedToPack.set(2, d2 + d20);
+      composedToPack.set(3, d3 + d30);
+      composedToPack.set(4, eD1 * s120 + s12 * eD20);
+      composedToPack.set(5, eD1 * s130 + s12 * s230 + s13 * eD30);
+      composedToPack.set(6, eD2 * s230 + s23 * eD30);
+      composedToPack.set(7, eD1 * t10 + s12 * t20 + s13 * t30 + t1);
+      composedToPack.set(8, eD2 * t20 + s23 * t30 + t2);
+      composedToPack.set(9, eD3 * t30 + t3);
+   }
+
+   /** Inverse of {@link #composeThetaBasis}: recover the deviation from an absolute Theta-basis vector and the nominal. */
+   public static void decomposeThetaBasis(DMatrixRMaj composed, DMatrixRMaj nominal, DMatrixRMaj deviationToPack)
+   {
+      double ap = composed.get(0), d1p = composed.get(1), d2p = composed.get(2), d3p = composed.get(3);
+      double s12p = composed.get(4), s13p = composed.get(5), s23p = composed.get(6);
+      double t1p = composed.get(7), t2p = composed.get(8), t3p = composed.get(9);
+      double a0 = nominal.get(0), d10 = nominal.get(1), d20 = nominal.get(2), d30 = nominal.get(3);
+      double s120 = nominal.get(4), s130 = nominal.get(5), s230 = nominal.get(6);
+      double t10 = nominal.get(7), t20 = nominal.get(8), t30 = nominal.get(9);
+
+      double d1 = d1p - d10, d2 = d2p - d20, d3 = d3p - d30;
+      double eD1 = Math.exp(d1), eD2 = Math.exp(d2), eD3 = Math.exp(d3), eD20 = Math.exp(d20), eD30 = Math.exp(d30);
+      double s12 = (s12p - eD1 * s120) / eD20;
+      double s23 = (s23p - eD2 * s230) / eD30;
+      double s13 = (s13p - eD1 * s130 - s12 * s230) / eD30;
+      double t3 = t3p - eD3 * t30;
+      double t2 = t2p - eD2 * t20 - s23 * t30;
+      double t1 = t1p - eD1 * t10 - s12 * t20 - s13 * t30;
+
+      deviationToPack.set(0, ap - a0);
+      deviationToPack.set(1, d1);
+      deviationToPack.set(2, d2);
+      deviationToPack.set(3, d3);
+      deviationToPack.set(4, s12);
+      deviationToPack.set(5, s13);
+      deviationToPack.set(6, s23);
+      deviationToPack.set(7, t1);
+      deviationToPack.set(8, t2);
+      deviationToPack.set(9, t3);
+   }
+
+   /** Jacobian d(theta')/d(deviation) of {@link #composeThetaBasis} at {@code deviation}, for the given {@code nominal}. */
+   public static void composeThetaBasisJacobian(DMatrixRMaj deviation, DMatrixRMaj nominal, DMatrixRMaj jacobianToPack)
+   {
+      double d1 = deviation.get(1), d2 = deviation.get(2), d3 = deviation.get(3);
+      double d20 = nominal.get(2), d30 = nominal.get(3);
+      double s120 = nominal.get(4), s130 = nominal.get(5), s230 = nominal.get(6);
+      double t10 = nominal.get(7), t20 = nominal.get(8), t30 = nominal.get(9);
+      double eD1 = Math.exp(d1), eD2 = Math.exp(d2), eD3 = Math.exp(d3), eD20 = Math.exp(d20), eD30 = Math.exp(d30);
+
+      CommonOps_DDRM.fill(jacobianToPack, 0.0);
+      // alpha' = alpha + alpha0; dk' = dk + dk0
+      jacobianToPack.set(0, 0, 1.0);
+      jacobianToPack.set(1, 1, 1.0);
+      jacobianToPack.set(2, 2, 1.0);
+      jacobianToPack.set(3, 3, 1.0);
+      // s12' = e^d1 s120 + s12 e^d20
+      jacobianToPack.set(4, 1, eD1 * s120);
+      jacobianToPack.set(4, 4, eD20);
+      // s13' = e^d1 s130 + s12 s230 + s13 e^d30
+      jacobianToPack.set(5, 1, eD1 * s130);
+      jacobianToPack.set(5, 4, s230);
+      jacobianToPack.set(5, 5, eD30);
+      // s23' = e^d2 s230 + s23 e^d30
+      jacobianToPack.set(6, 2, eD2 * s230);
+      jacobianToPack.set(6, 6, eD30);
+      // t1' = e^d1 t10 + s12 t20 + s13 t30 + t1
+      jacobianToPack.set(7, 1, eD1 * t10);
+      jacobianToPack.set(7, 4, t20);
+      jacobianToPack.set(7, 5, t30);
+      jacobianToPack.set(7, 7, 1.0);
+      // t2' = e^d2 t20 + s23 t30 + t2
+      jacobianToPack.set(8, 2, eD2 * t20);
+      jacobianToPack.set(8, 6, t30);
+      jacobianToPack.set(8, 8, 1.0);
+      // t3' = e^d3 t30 + t3
+      jacobianToPack.set(9, 3, eD3 * t30);
+      jacobianToPack.set(9, 9, 1.0);
    }
 
    /**

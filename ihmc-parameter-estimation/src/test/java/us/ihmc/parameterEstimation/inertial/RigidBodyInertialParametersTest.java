@@ -269,6 +269,97 @@ public class RigidBodyInertialParametersTest
       }
    }
 
+   private static DMatrixRMaj nextTheta(Random random)
+   {
+      DMatrixRMaj theta = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      theta.set(0, EuclidCoreRandomTools.nextDouble(random, 0.3));         // alpha
+      for (int j = 1; j <= 3; ++j)
+         theta.set(j, EuclidCoreRandomTools.nextDouble(random, 0.5));      // d1, d2, d3
+      for (int j = 4; j <= 6; ++j)
+         theta.set(j, EuclidCoreRandomTools.nextDouble(random, 0.3));      // s12, s13, s23
+      for (int j = 7; j <= 9; ++j)
+         theta.set(j, EuclidCoreRandomTools.nextDouble(random, 0.4));      // t1, t2, t3
+      return theta;
+   }
+
+   @Test
+   public void testGeneralizedCompositionRoundTrip()
+   {
+      // Generalized (Eq. (11)) parameterization: compose a deviation with a nominal, map to pi, and recover the
+      // deviation. Also check that a zero deviation maps exactly to the nominal inertia.
+      Random random = new Random(2024);
+      DMatrixRMaj composed = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      DMatrixRMaj pi = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      DMatrixRMaj composedBack = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      DMatrixRMaj deviationBack = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      DMatrixRMaj piNominal = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+
+      for (int i = 0; i < ITERATIONS; ++i)
+      {
+         DMatrixRMaj nominal = nextTheta(random);
+         DMatrixRMaj deviation = nextTheta(random);
+
+         RigidBodyInertialParameters.composeThetaBasis(deviation, nominal, composed);
+         RigidBodyInertialParameters.fromThetaBasisToPiBasis(composed, pi);
+         RigidBodyInertialParameters.fromPiBasisToThetaBasis(pi, composedBack);
+         RigidBodyInertialParameters.decomposeThetaBasis(composedBack, nominal, deviationBack);
+         assertArrayEquals(deviation.getData(), deviationBack.getData(), EPSILON);
+
+         // Zero deviation must reproduce the nominal inertia exactly.
+         DMatrixRMaj zero = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+         RigidBodyInertialParameters.composeThetaBasis(zero, nominal, composed);
+         RigidBodyInertialParameters.fromThetaBasisToPiBasis(composed, pi);
+         RigidBodyInertialParameters.fromThetaBasisToPiBasis(nominal, piNominal);
+         assertArrayEquals(piNominal.getData(), pi.getData(), EPSILON);
+      }
+   }
+
+   @Test
+   public void testGeneralizedJacobianMatchesFiniteDifference()
+   {
+      // The generalized Jacobian d(pi)/d(deviation) = G(theta') * d(theta')/d(deviation) must match a central
+      // finite difference of (deviation -> compose -> pi).
+      Random random = new Random(2025);
+      double h = 1.0e-6;
+      double fdTolerance = 1.0e-4;
+
+      DMatrixRMaj composed = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      DMatrixRMaj eq1Jacobian = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, PARAMETERS_PER_RIGID_BODY);
+      DMatrixRMaj composeJacobian = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, PARAMETERS_PER_RIGID_BODY);
+      DMatrixRMaj analyticJacobian = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, PARAMETERS_PER_RIGID_BODY);
+      DMatrixRMaj deviationPerturbed = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      DMatrixRMaj piPlus = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      DMatrixRMaj piMinus = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+
+      for (int iter = 0; iter < ITERATIONS; ++iter)
+      {
+         DMatrixRMaj nominal = nextTheta(random);
+         DMatrixRMaj deviation = nextTheta(random);
+
+         RigidBodyInertialParameters.composeThetaBasis(deviation, nominal, composed);
+         RigidBodyInertialParameters.fromThetaBasisToPiBasisJacobian(composed, eq1Jacobian);
+         RigidBodyInertialParameters.composeThetaBasisJacobian(deviation, nominal, composeJacobian);
+         org.ejml.dense.row.CommonOps_DDRM.mult(eq1Jacobian, composeJacobian, analyticJacobian);
+
+         for (int col = 0; col < PARAMETERS_PER_RIGID_BODY; ++col)
+         {
+            deviationPerturbed.set(deviation);
+            deviationPerturbed.set(col, deviation.get(col) + h);
+            RigidBodyInertialParameters.composeThetaBasis(deviationPerturbed, nominal, composed);
+            RigidBodyInertialParameters.fromThetaBasisToPiBasis(composed, piPlus);
+            deviationPerturbed.set(col, deviation.get(col) - h);
+            RigidBodyInertialParameters.composeThetaBasis(deviationPerturbed, nominal, composed);
+            RigidBodyInertialParameters.fromThetaBasisToPiBasis(composed, piMinus);
+
+            for (int row = 0; row < PARAMETERS_PER_RIGID_BODY; ++row)
+            {
+               double fd = (piPlus.get(row) - piMinus.get(row)) / (2.0 * h);
+               assertEquals(fd, analyticJacobian.get(row, col), fdTolerance, "Generalized Jacobian mismatch at (" + row + ", " + col + ")");
+            }
+         }
+      }
+   }
+
    @Test
    public void testFromThetaBasisToPiBasisJacobianOnKnownExample()
    {

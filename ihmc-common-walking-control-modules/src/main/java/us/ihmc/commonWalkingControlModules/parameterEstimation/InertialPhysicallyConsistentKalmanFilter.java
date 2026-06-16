@@ -112,7 +112,12 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
          }
          else
          {
-            inertialParameters.add(new RigidBodyInertialParameters(modelBodies[i].getInertia()));
+            RigidBodyInertialParameters bodyParameters = new RigidBodyInertialParameters(modelBodies[i].getInertia());
+            // Generalized (Eq. (11)) parameterization: estimate a physically-consistent deviation from the
+            // known nominal inertia of this body (theta = 0 is the nominal). Off by default (absolute Eq. (1)).
+            if (parameters.useGeneralizedPhysicalConsistency())
+               bodyParameters.enableGeneralizedParameterization();
+            inertialParameters.add(bodyParameters);
             inertialParametersPiBasisWatchers.add(new YoMatrix("pi_" + modelBodies[i].getName() + "_", 10, 1, RigidBodyInertialParametersTools.getNamesForPiBasis(), null, registry));
             inertialParametersThetaBasisWatchers.add(new YoMatrix("theta_" + modelBodies[i].getName() + "_", 10, 1, RigidBodyInertialParametersTools.getNamesForThetaBasis(), null, registry));
             nBodies++;
@@ -190,8 +195,8 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
    {
       for (int i = 0; i < nBodies; ++i)
       {
-         // Set the relevant block of the process jacobian
-         RigidBodyInertialParameters.fromThetaBasisToPiBasisJacobian(inertialParameters.get(i).getParameterVectorThetaBasis(), measurementJacobianBlock);
+         // Set the relevant block of the process jacobian (dispatches on absolute Eq. (1) vs generalized Eq. (11))
+         inertialParameters.get(i).packThetaToPiBasisJacobian(measurementJacobianBlock);
          MatrixMissingTools.setMatrixBlock(measurementJacobianContainer,
                                            i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
                                            i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
