@@ -134,7 +134,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private static final double ARM_DURATION_MEAN_SECONDS = 1.5;
    private static final double ARM_DURATION_MIN_SECONDS = 0.8;
    private static final double ARM_DURATION_MAX_SECONDS = 4.0;
-   private static final double DURATION_MIN_SECONDS = 1.0;
+   private static final double DURATION_MIN_SECONDS = 0.8;
    private static final double DURATION_MAX_SECONDS = 4.0;
    private static final double SHOULDER_PITCH_MIN_RADIANS = Math.toRadians(-105.0);
    private static final double SHOULDER_PITCH_MAX_RADIANS = Math.toRadians(45.0);
@@ -666,7 +666,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       actionDefinition.setPreset(null); // CUSTOM_ANGLES
       for (int i = 0; i < Math.min(actionDefinition.getJointAngles().getLength(), randomizedJointPositions.length); i++)
          actionDefinition.getJointAngles().setValue(i, randomizedJointPositions[i]);
-      actionDefinition.setTrajectoryDuration(randomArmDuration());
+      actionDefinition.setTrajectoryDuration(randomDuration());
       actionDefinition.modify();
    }
 
