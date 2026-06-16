@@ -3,4 +3,26 @@ behavior_msgs/BehaviorTreeNodeDefinitionMessage definition
 
 # Randomized Go-To action controls
 bool randomize_go_to_action
+bool randomize_whole_body_action
 int32 number_of_randomizations
+
+# Whole body randomization trigger and parameters
+int32 whole_body_randomization_request_id
+controller_msgs/RigidBodyTransformMessage right_hand_transform_to_chest
+controller_msgs/RigidBodyTransformMessage left_hand_transform_to_chest
+float64 spine_pitch_degrees
+float64 spine_roll_degrees
+float64 spine_yaw_degrees
+controller_msgs/RigidBodyTransformMessage pelvis_transform_to_parent
+float64 right_hand_trajectory_duration
+float64 left_hand_trajectory_duration
+float64 spine_trajectory_duration
+float64 pelvis_trajectory_duration
+int32 left_hand_mask
+int32 right_hand_mask
+int32 spine_mask
+int32 pelvis_mask
+float64 probability_one_enabled
+float64 probability_two_enabled
+float64 probability_three_enabled
+float64 probability_four_enabled

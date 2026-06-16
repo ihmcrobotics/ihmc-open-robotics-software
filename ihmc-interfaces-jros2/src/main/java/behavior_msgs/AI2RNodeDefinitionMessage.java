@@ -16,7 +16,29 @@ behavior_msgs/BehaviorTreeNodeDefinitionMessage definition
 
 # Randomized Go-To action controls
 bool randomize_go_to_action
+bool randomize_whole_body_action
 int32 number_of_randomizations
+
+# Whole body randomization trigger and parameters
+int32 whole_body_randomization_request_id
+controller_msgs/RigidBodyTransformMessage right_hand_transform_to_chest
+controller_msgs/RigidBodyTransformMessage left_hand_transform_to_chest
+float64 spine_pitch_degrees
+float64 spine_roll_degrees
+float64 spine_yaw_degrees
+controller_msgs/RigidBodyTransformMessage pelvis_transform_to_parent
+float64 right_hand_trajectory_duration
+float64 left_hand_trajectory_duration
+float64 spine_trajectory_duration
+float64 pelvis_trajectory_duration
+int32 left_hand_mask
+int32 right_hand_mask
+int32 spine_mask
+int32 pelvis_mask
+float64 probability_one_enabled
+float64 probability_two_enabled
+float64 probability_three_enabled
+float64 probability_four_enabled
 }</pre>
 */
 public class AI2RNodeDefinitionMessage implements ROS2Message<AI2RNodeDefinitionMessage>
@@ -31,12 +53,39 @@ public class AI2RNodeDefinitionMessage implements ROS2Message<AI2RNodeDefinition
       Randomized Go-To action controls
    */
    private boolean randomize_go_to_action_;
+   private boolean randomize_whole_body_action_;
    private int number_of_randomizations_;
+   /**
+      Whole body randomization trigger and parameters
+   */
+   private int whole_body_randomization_request_id_;
+   private final controller_msgs.RigidBodyTransformMessage right_hand_transform_to_chest_;
+   private final controller_msgs.RigidBodyTransformMessage left_hand_transform_to_chest_;
+   private double spine_pitch_degrees_;
+   private double spine_roll_degrees_;
+   private double spine_yaw_degrees_;
+   private final controller_msgs.RigidBodyTransformMessage pelvis_transform_to_parent_;
+   private double right_hand_trajectory_duration_;
+   private double left_hand_trajectory_duration_;
+   private double spine_trajectory_duration_;
+   private double pelvis_trajectory_duration_;
+   private int left_hand_mask_;
+   private int right_hand_mask_;
+   private int spine_mask_;
+   private int pelvis_mask_;
+   private double probability_one_enabled_;
+   private double probability_two_enabled_;
+   private double probability_three_enabled_;
+   private double probability_four_enabled_;
 
    public AI2RNodeDefinitionMessage()
    {
       definition_ = new behavior_msgs.BehaviorTreeNodeDefinitionMessage();
       randomize_go_to_action_ = (boolean) false;
+      randomize_whole_body_action_ = (boolean) false;
+      right_hand_transform_to_chest_ = new controller_msgs.RigidBodyTransformMessage();
+      left_hand_transform_to_chest_ = new controller_msgs.RigidBodyTransformMessage();
+      pelvis_transform_to_parent_ = new controller_msgs.RigidBodyTransformMessage();
 
    }
 
@@ -47,7 +96,27 @@ public class AI2RNodeDefinitionMessage implements ROS2Message<AI2RNodeDefinition
 
       currentAlignment += definition_.calculateSizeBytes(currentAlignment);
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // randomize_go_to_action_
+      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // randomize_whole_body_action_
       currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // number_of_randomizations_
+      currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // whole_body_randomization_request_id_
+      currentAlignment += right_hand_transform_to_chest_.calculateSizeBytes(currentAlignment);
+      currentAlignment += left_hand_transform_to_chest_.calculateSizeBytes(currentAlignment);
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // spine_pitch_degrees_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // spine_roll_degrees_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // spine_yaw_degrees_
+      currentAlignment += pelvis_transform_to_parent_.calculateSizeBytes(currentAlignment);
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // right_hand_trajectory_duration_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // left_hand_trajectory_duration_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // spine_trajectory_duration_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // pelvis_trajectory_duration_
+      currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // left_hand_mask_
+      currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // right_hand_mask_
+      currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // spine_mask_
+      currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // pelvis_mask_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // probability_one_enabled_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // probability_two_enabled_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // probability_three_enabled_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // probability_four_enabled_
 
       return currentAlignment - initialAlignment;
    }
@@ -57,7 +126,27 @@ public class AI2RNodeDefinitionMessage implements ROS2Message<AI2RNodeDefinition
    {
       definition_.serialize(buffer);
       buffer.writeBoolean(randomize_go_to_action_);
+      buffer.writeBoolean(randomize_whole_body_action_);
       buffer.writeInt(number_of_randomizations_);
+      buffer.writeInt(whole_body_randomization_request_id_);
+      right_hand_transform_to_chest_.serialize(buffer);
+      left_hand_transform_to_chest_.serialize(buffer);
+      buffer.writeDouble(spine_pitch_degrees_);
+      buffer.writeDouble(spine_roll_degrees_);
+      buffer.writeDouble(spine_yaw_degrees_);
+      pelvis_transform_to_parent_.serialize(buffer);
+      buffer.writeDouble(right_hand_trajectory_duration_);
+      buffer.writeDouble(left_hand_trajectory_duration_);
+      buffer.writeDouble(spine_trajectory_duration_);
+      buffer.writeDouble(pelvis_trajectory_duration_);
+      buffer.writeInt(left_hand_mask_);
+      buffer.writeInt(right_hand_mask_);
+      buffer.writeInt(spine_mask_);
+      buffer.writeInt(pelvis_mask_);
+      buffer.writeDouble(probability_one_enabled_);
+      buffer.writeDouble(probability_two_enabled_);
+      buffer.writeDouble(probability_three_enabled_);
+      buffer.writeDouble(probability_four_enabled_);
 
    }
 
@@ -66,7 +155,27 @@ public class AI2RNodeDefinitionMessage implements ROS2Message<AI2RNodeDefinition
    {
       definition_.deserialize(buffer);
       randomize_go_to_action_ = buffer.readBoolean();
+      randomize_whole_body_action_ = buffer.readBoolean();
       number_of_randomizations_ = buffer.readInt();
+      whole_body_randomization_request_id_ = buffer.readInt();
+      right_hand_transform_to_chest_.deserialize(buffer);
+      left_hand_transform_to_chest_.deserialize(buffer);
+      spine_pitch_degrees_ = buffer.readDouble();
+      spine_roll_degrees_ = buffer.readDouble();
+      spine_yaw_degrees_ = buffer.readDouble();
+      pelvis_transform_to_parent_.deserialize(buffer);
+      right_hand_trajectory_duration_ = buffer.readDouble();
+      left_hand_trajectory_duration_ = buffer.readDouble();
+      spine_trajectory_duration_ = buffer.readDouble();
+      pelvis_trajectory_duration_ = buffer.readDouble();
+      left_hand_mask_ = buffer.readInt();
+      right_hand_mask_ = buffer.readInt();
+      spine_mask_ = buffer.readInt();
+      pelvis_mask_ = buffer.readInt();
+      probability_one_enabled_ = buffer.readDouble();
+      probability_two_enabled_ = buffer.readDouble();
+      probability_three_enabled_ = buffer.readDouble();
+      probability_four_enabled_ = buffer.readDouble();
 
    }
 
@@ -75,7 +184,27 @@ public class AI2RNodeDefinitionMessage implements ROS2Message<AI2RNodeDefinition
    {
       definition_.set(from.definition_);
       randomize_go_to_action_ = from.randomize_go_to_action_;
+      randomize_whole_body_action_ = from.randomize_whole_body_action_;
       number_of_randomizations_ = from.number_of_randomizations_;
+      whole_body_randomization_request_id_ = from.whole_body_randomization_request_id_;
+      right_hand_transform_to_chest_.set(from.right_hand_transform_to_chest_);
+      left_hand_transform_to_chest_.set(from.left_hand_transform_to_chest_);
+      spine_pitch_degrees_ = from.spine_pitch_degrees_;
+      spine_roll_degrees_ = from.spine_roll_degrees_;
+      spine_yaw_degrees_ = from.spine_yaw_degrees_;
+      pelvis_transform_to_parent_.set(from.pelvis_transform_to_parent_);
+      right_hand_trajectory_duration_ = from.right_hand_trajectory_duration_;
+      left_hand_trajectory_duration_ = from.left_hand_trajectory_duration_;
+      spine_trajectory_duration_ = from.spine_trajectory_duration_;
+      pelvis_trajectory_duration_ = from.pelvis_trajectory_duration_;
+      left_hand_mask_ = from.left_hand_mask_;
+      right_hand_mask_ = from.right_hand_mask_;
+      spine_mask_ = from.spine_mask_;
+      pelvis_mask_ = from.pelvis_mask_;
+      probability_one_enabled_ = from.probability_one_enabled_;
+      probability_two_enabled_ = from.probability_two_enabled_;
+      probability_three_enabled_ = from.probability_three_enabled_;
+      probability_four_enabled_ = from.probability_four_enabled_;
 
    }
 
@@ -94,6 +223,16 @@ public class AI2RNodeDefinitionMessage implements ROS2Message<AI2RNodeDefinition
       this.randomize_go_to_action_ = randomize_go_to_action_;
    }
 
+   public boolean getRandomizeWholeBodyAction()
+   {
+      return randomize_whole_body_action_;
+   }
+
+   public void setRandomizeWholeBodyAction(boolean randomize_whole_body_action_)
+   {
+      this.randomize_whole_body_action_ = randomize_whole_body_action_;
+   }
+
    public int getNumberOfRandomizations()
    {
       return number_of_randomizations_;
@@ -102,6 +241,181 @@ public class AI2RNodeDefinitionMessage implements ROS2Message<AI2RNodeDefinition
    public void setNumberOfRandomizations(int number_of_randomizations_)
    {
       this.number_of_randomizations_ = number_of_randomizations_;
+   }
+
+   public int getWholeBodyRandomizationRequestId()
+   {
+      return whole_body_randomization_request_id_;
+   }
+
+   public void setWholeBodyRandomizationRequestId(int whole_body_randomization_request_id_)
+   {
+      this.whole_body_randomization_request_id_ = whole_body_randomization_request_id_;
+   }
+
+   public controller_msgs.RigidBodyTransformMessage getRightHandTransformToChest()
+   {
+      return right_hand_transform_to_chest_;
+   }
+
+   public controller_msgs.RigidBodyTransformMessage getLeftHandTransformToChest()
+   {
+      return left_hand_transform_to_chest_;
+   }
+
+   public double getSpinePitchDegrees()
+   {
+      return spine_pitch_degrees_;
+   }
+
+   public void setSpinePitchDegrees(double spine_pitch_degrees_)
+   {
+      this.spine_pitch_degrees_ = spine_pitch_degrees_;
+   }
+
+   public double getSpineRollDegrees()
+   {
+      return spine_roll_degrees_;
+   }
+
+   public void setSpineRollDegrees(double spine_roll_degrees_)
+   {
+      this.spine_roll_degrees_ = spine_roll_degrees_;
+   }
+
+   public double getSpineYawDegrees()
+   {
+      return spine_yaw_degrees_;
+   }
+
+   public void setSpineYawDegrees(double spine_yaw_degrees_)
+   {
+      this.spine_yaw_degrees_ = spine_yaw_degrees_;
+   }
+
+   public controller_msgs.RigidBodyTransformMessage getPelvisTransformToParent()
+   {
+      return pelvis_transform_to_parent_;
+   }
+
+   public double getRightHandTrajectoryDuration()
+   {
+      return right_hand_trajectory_duration_;
+   }
+
+   public void setRightHandTrajectoryDuration(double right_hand_trajectory_duration_)
+   {
+      this.right_hand_trajectory_duration_ = right_hand_trajectory_duration_;
+   }
+
+   public double getLeftHandTrajectoryDuration()
+   {
+      return left_hand_trajectory_duration_;
+   }
+
+   public void setLeftHandTrajectoryDuration(double left_hand_trajectory_duration_)
+   {
+      this.left_hand_trajectory_duration_ = left_hand_trajectory_duration_;
+   }
+
+   public double getSpineTrajectoryDuration()
+   {
+      return spine_trajectory_duration_;
+   }
+
+   public void setSpineTrajectoryDuration(double spine_trajectory_duration_)
+   {
+      this.spine_trajectory_duration_ = spine_trajectory_duration_;
+   }
+
+   public double getPelvisTrajectoryDuration()
+   {
+      return pelvis_trajectory_duration_;
+   }
+
+   public void setPelvisTrajectoryDuration(double pelvis_trajectory_duration_)
+   {
+      this.pelvis_trajectory_duration_ = pelvis_trajectory_duration_;
+   }
+
+   public int getLeftHandMask()
+   {
+      return left_hand_mask_;
+   }
+
+   public void setLeftHandMask(int left_hand_mask_)
+   {
+      this.left_hand_mask_ = left_hand_mask_;
+   }
+
+   public int getRightHandMask()
+   {
+      return right_hand_mask_;
+   }
+
+   public void setRightHandMask(int right_hand_mask_)
+   {
+      this.right_hand_mask_ = right_hand_mask_;
+   }
+
+   public int getSpineMask()
+   {
+      return spine_mask_;
+   }
+
+   public void setSpineMask(int spine_mask_)
+   {
+      this.spine_mask_ = spine_mask_;
+   }
+
+   public int getPelvisMask()
+   {
+      return pelvis_mask_;
+   }
+
+   public void setPelvisMask(int pelvis_mask_)
+   {
+      this.pelvis_mask_ = pelvis_mask_;
+   }
+
+   public double getProbabilityOneEnabled()
+   {
+      return probability_one_enabled_;
+   }
+
+   public void setProbabilityOneEnabled(double probability_one_enabled_)
+   {
+      this.probability_one_enabled_ = probability_one_enabled_;
+   }
+
+   public double getProbabilityTwoEnabled()
+   {
+      return probability_two_enabled_;
+   }
+
+   public void setProbabilityTwoEnabled(double probability_two_enabled_)
+   {
+      this.probability_two_enabled_ = probability_two_enabled_;
+   }
+
+   public double getProbabilityThreeEnabled()
+   {
+      return probability_three_enabled_;
+   }
+
+   public void setProbabilityThreeEnabled(double probability_three_enabled_)
+   {
+      this.probability_three_enabled_ = probability_three_enabled_;
+   }
+
+   public double getProbabilityFourEnabled()
+   {
+      return probability_four_enabled_;
+   }
+
+   public void setProbabilityFourEnabled(double probability_four_enabled_)
+   {
+      this.probability_four_enabled_ = probability_four_enabled_;
    }
 
 
@@ -114,8 +428,48 @@ public class AI2RNodeDefinitionMessage implements ROS2Message<AI2RNodeDefinition
       builder.append(definition_);
       builder.append("randomize_go_to_action_=");
       builder.append(randomize_go_to_action_);
+      builder.append("randomize_whole_body_action_=");
+      builder.append(randomize_whole_body_action_);
       builder.append("number_of_randomizations_=");
       builder.append(number_of_randomizations_);
+      builder.append("whole_body_randomization_request_id_=");
+      builder.append(whole_body_randomization_request_id_);
+      builder.append("right_hand_transform_to_chest_=");
+      builder.append(right_hand_transform_to_chest_);
+      builder.append("left_hand_transform_to_chest_=");
+      builder.append(left_hand_transform_to_chest_);
+      builder.append("spine_pitch_degrees_=");
+      builder.append(spine_pitch_degrees_);
+      builder.append("spine_roll_degrees_=");
+      builder.append(spine_roll_degrees_);
+      builder.append("spine_yaw_degrees_=");
+      builder.append(spine_yaw_degrees_);
+      builder.append("pelvis_transform_to_parent_=");
+      builder.append(pelvis_transform_to_parent_);
+      builder.append("right_hand_trajectory_duration_=");
+      builder.append(right_hand_trajectory_duration_);
+      builder.append("left_hand_trajectory_duration_=");
+      builder.append(left_hand_trajectory_duration_);
+      builder.append("spine_trajectory_duration_=");
+      builder.append(spine_trajectory_duration_);
+      builder.append("pelvis_trajectory_duration_=");
+      builder.append(pelvis_trajectory_duration_);
+      builder.append("left_hand_mask_=");
+      builder.append(left_hand_mask_);
+      builder.append("right_hand_mask_=");
+      builder.append(right_hand_mask_);
+      builder.append("spine_mask_=");
+      builder.append(spine_mask_);
+      builder.append("pelvis_mask_=");
+      builder.append(pelvis_mask_);
+      builder.append("probability_one_enabled_=");
+      builder.append(probability_one_enabled_);
+      builder.append("probability_two_enabled_=");
+      builder.append(probability_two_enabled_);
+      builder.append("probability_three_enabled_=");
+      builder.append(probability_three_enabled_);
+      builder.append("probability_four_enabled_=");
+      builder.append(probability_four_enabled_);
 
       builder.append("}");
       return builder.toString();
