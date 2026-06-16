@@ -90,7 +90,7 @@ public class ROS2LogIOTools
                timestamps.add(timestampsToLog.get(message_idx) - firstTimestamp);
                @SuppressWarnings({"unchecked", "rawtypes"})
                ROS2Message message = (ROS2Message) messagesToLog.get(message_idx);
-               ROS2LogMessageCodec.serializeMessage(objectMapper, message, messages);
+               ROS2LogMessageCodec.serializeMessage(serialization, message, messages);
             }
          }
 
@@ -161,7 +161,7 @@ public class ROS2LogIOTools
                long timestamp = timestamps.get(message_idx).longValue();
                @SuppressWarnings({"unchecked", "rawtypes"})
                Class messageClassRaw = (Class) messageClass;
-               ROS2Message message = ROS2LogMessageCodec.deserializeMessage(objectMapper, messages.get(message_idx), messageClassRaw);
+               ROS2Message message = ROS2LogMessageCodec.deserializeMessage(serialization, messages.get(message_idx), messageClassRaw);
 
                topicManager.getTimestamps().add(timestamp);
                @SuppressWarnings({"unchecked", "rawtypes"})
