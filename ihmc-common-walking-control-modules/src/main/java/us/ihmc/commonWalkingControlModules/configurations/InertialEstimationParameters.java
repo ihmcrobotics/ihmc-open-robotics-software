@@ -35,6 +35,22 @@ public interface InertialEstimationParameters
       return false;
    }
 
+   /**
+    * Per-body prior (co)variance for a Tikhonov "soft constraint" pseudo-measurement that pulls the estimate
+    * toward {@code theta = 0} (nominal, in the generalized parameterization). Returns the diagonal of {@code
+    * R_prior} for one body (length {@code PARAMETERS_PER_RIGID_BODY}, Theta ordering {@code
+    * [alpha,d1,d2,d3,s12,s13,s23,t1,t2,t3]}); the filter repeats it per estimated body and, each tick after the
+    * torque update, applies the soft-constraint update {@code x <- R_prior (P+R_prior)^-1 x},
+    * {@code P <- R_prior (P+R_prior)^-1 P}. Make entries LARGE where you trust the data (e.g. mass) so the prior
+    * is negligible, and SMALL where the parameter is weakly observable (first moment / inertia) so it is held
+    * near nominal. See Simon, "Optimal State Estimation" (2006) Ch. 7 (soft constraints / pseudo-measurements).
+    * Return {@code null} (default) to disable the prior entirely.
+    */
+   default double[] getParameterPriorVariance()
+   {
+      return null;
+   }
+
    Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] getBasisSets();
 
    default String[] getBasisNames()

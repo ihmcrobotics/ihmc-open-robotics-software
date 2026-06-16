@@ -4,6 +4,7 @@ import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.SpatialInertiaBasisOption;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
@@ -45,6 +46,18 @@ import java.util.Set;
 class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter implements OnlineInertialEstimator
 {
    private final DMatrixRMaj IDENTITY;
+
+   // Optional Tikhonov "soft constraint" pseudo-measurement (z=0, H=I, covariance R_prior) applied after the
+   // torque update each tick: pulls weakly-observable parameter directions toward theta=0 (nominal) while
+   // strongly-observed ones (mass) are nearly untouched. Disabled unless getParameterPriorVariance() != null.
+   private final boolean applyPrior;
+   private final DMatrixRMaj priorCovarianceDiag;   // R_prior (full state size, block-diagonal per body)
+   private final DMatrixRMaj priorInnovationCovariance; // S = P + R_prior
+   private final DMatrixRMaj priorInnovationCovarianceInv;
+   private final DMatrixRMaj priorGain;             // K = P S^-1
+   private final DMatrixRMaj priorThetaFull;        // gathered theta of all bodies (the EKF covariance is theta-space)
+   private final DMatrixRMaj priorStateContainer;
+   private final DMatrixRMaj priorCovarianceContainer;
 
    private final DMatrixRMaj torqueFromNominal;
    private final DMatrixRMaj torqueFromBias;
@@ -123,6 +136,36 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
             nBodies++;
          }
       }
+
+      // Tikhonov soft-constraint prior toward nominal (theta=0). Only meaningful with the generalized
+      // parameterization. R_prior is block-diagonal: the per-body diagonal pattern repeated across estimated bodies.
+      double[] perBodyPriorVariance = parameters.getParameterPriorVariance();
+      applyPrior = perBodyPriorVariance != null && parameters.useGeneralizedPhysicalConsistency();
+      int stateSize = partitionSizes[0];
+      if (applyPrior)
+      {
+         if (perBodyPriorVariance.length != RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY)
+            throw new RuntimeException("getParameterPriorVariance() must have length " + RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+         priorCovarianceDiag = new DMatrixRMaj(stateSize, stateSize);
+         for (int b = 0; b < nBodies; ++b)
+            for (int p = 0; p < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; ++p)
+            {
+               int idx = b * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY + p;
+               priorCovarianceDiag.set(idx, idx, perBodyPriorVariance[p]);
+            }
+         LogTools.info("InertialPhysicallyConsistentKalmanFilter: Tikhonov soft-constraint prior ON (per-body R_prior diag = "
+                       + java.util.Arrays.toString(perBodyPriorVariance) + ")");
+      }
+      else
+      {
+         priorCovarianceDiag = new DMatrixRMaj(0, 0);
+      }
+      priorInnovationCovariance = new DMatrixRMaj(stateSize, stateSize);
+      priorInnovationCovarianceInv = new DMatrixRMaj(stateSize, stateSize);
+      priorGain = new DMatrixRMaj(stateSize, stateSize);
+      priorThetaFull = new DMatrixRMaj(stateSize, 1);
+      priorStateContainer = new DMatrixRMaj(stateSize, 1);
+      priorCovarianceContainer = new DMatrixRMaj(stateSize, stateSize);
 
       measurementJacobianBlock = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
                                                  RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
@@ -264,11 +307,66 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
       getMeasurementResidual().set(filteredResidual);
    }
 
-   /** Post solve, update the watchers for the inertial parameters. */
+   /** Post solve, optionally apply the Tikhonov prior toward nominal, then update the watchers. */
    @Override
    public void postSolveHook()
    {
+      if (applyPrior)
+         applyTikhonovPrior();
       updateWatchers();
+   }
+
+   /**
+    * Tikhonov soft-constraint pseudo-measurement (z=0, H=I, covariance R_prior) pulling the estimate toward
+    * theta=0 (nominal, in the generalized parameterization). The EKF covariance {@code covariance} is theta-space
+    * and the persistent theta lives in {@code inertialParameters}, so the standard pseudo-measurement update
+    * S = P + R_prior, K = P S^-1, theta <- theta - K theta, P <- (I-K) P is applied directly on the gathered
+    * theta vector. In strongly-observed directions P << R_prior so K ~ 0 (mass untouched); in weakly-observed
+    * directions P >> R_prior so K ~ I and theta is pulled toward 0 (CoM/inertia held near nominal). The updated
+    * theta is scattered back to the per-body parameters (and the vestigial pi-basis state refreshed).
+    */
+   private void applyTikhonovPrior()
+   {
+      for (int i = 0; i < nBodies; ++i)
+         MatrixMissingTools.setMatrixRows(priorThetaFull,
+                                          i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                          inertialParameters.get(i).getParameterVectorThetaBasis(),
+                                          0,
+                                          RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+
+      // S = P + R_prior ; K = P S^-1
+      CommonOps_DDRM.add(covariance, priorCovarianceDiag, priorInnovationCovariance);
+      if (!CommonOps_DDRM.invert(priorInnovationCovariance, priorInnovationCovarianceInv))
+         return; // singular -- skip this tick rather than corrupt the estimate
+      CommonOps_DDRM.mult(covariance, priorInnovationCovarianceInv, priorGain);
+
+      // theta <- theta - K theta
+      CommonOps_DDRM.mult(priorGain, priorThetaFull, priorStateContainer);
+      CommonOps_DDRM.subtractEquals(priorThetaFull, priorStateContainer);
+
+      // P <- P - K P   (reads covariance before it is overwritten)
+      CommonOps_DDRM.mult(priorGain, covariance, priorCovarianceContainer);
+      CommonOps_DDRM.subtractEquals(covariance, priorCovarianceContainer);
+
+      // scatter theta back, refresh pi basis (drives the watchers and the body inertia consumed downstream)
+      for (int i = 0; i < nBodies; ++i)
+      {
+         CommonOps_DDRM.extract(priorThetaFull,
+                                i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                (i + 1) * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                0,
+                                1,
+                                parameterThetaBasisContainer,
+                                0,
+                                0);
+         inertialParameters.get(i).setParameterVectorThetaBasis(parameterThetaBasisContainer);
+         inertialParameters.get(i).update();
+         MatrixMissingTools.setMatrixRows(state,
+                                          i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                          inertialParameters.get(i).getParameterVectorPiBasis(),
+                                          0,
+                                          RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+      }
    }
 
    @Override
