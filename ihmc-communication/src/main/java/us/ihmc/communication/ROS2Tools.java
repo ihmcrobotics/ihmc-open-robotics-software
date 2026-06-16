@@ -20,7 +20,6 @@ import java.util.function.Consumer;
  * <ul>
  *    <li>{@link ActiveMappingAPI}</li>
  *    <li>{@link AutonomyAPI}</li>
- *    <li>{@link DeprecatedAPIs}</li>
  *    <li>{@link FootstepPlannerAPI}</li>
  *    <li>{@link us.ihmc.communication.controllerAPI.ControllerAPI}</li>
  *    <li>{@link HumanoidControllerAPI}</li>

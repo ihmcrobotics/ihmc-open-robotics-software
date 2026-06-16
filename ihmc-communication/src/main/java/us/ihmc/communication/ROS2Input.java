@@ -14,6 +14,10 @@ import us.ihmc.jros2.ROS2Topic;
 
 /**
  * An atomic reference to the latest received message through an optional filter.
+ * <p>
+ * TODO: Replace call sites with {@link us.ihmc.jros2.ROS2Subscription#readLatest} on control-thread
+ * hot paths and direct {@link us.ihmc.jros2.ROS2Subscription} subscriptions elsewhere, then remove
+ * this class.
  */
 public class ROS2Input<T extends ROS2Message<T>>
 {
