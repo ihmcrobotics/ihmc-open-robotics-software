@@ -141,7 +141,8 @@ public class RigidBodyInertialParameters
    /**
     * Internal method for converting from Pi basis to Theta basis.
     * <p>
-    * This is taken from <a href="https://github.com/ebianchi/dair_pll/blob/e5908a1826ca6b9beaed8930887bf5e7a5d81e01/dair_pll/inertia.py#LL238C15-L238C15">LINK</a>
+    * Implements the inverse of the corrected forward mapping (Eq. (1) of Rucker and Wensing 2026, "Correction
+    * to Smooth Parameterization of Rigid-Body Inertia"), i.e. the J = U U^T decomposition.
     * </p>
     */
    private void fromPiBasisToThetaBasis()
@@ -160,7 +161,8 @@ public class RigidBodyInertialParameters
    /**
     * Static method for converting from Pi basis to Theta basis.
     * <p>
-    * This is taken from <a href="https://github.com/ebianchi/dair_pll/blob/e5908a1826ca6b9beaed8930887bf5e7a5d81e01/dair_pll/inertia.py#LL238C15-L238C15">LINK</a>
+    * Implements the inverse of the corrected forward mapping (Eq. (1) of Rucker and Wensing 2026, "Correction
+    * to Smooth Parameterization of Rigid-Body Inertia"), i.e. the J = U U^T decomposition.
     * </p>
     *
     * @param parameterVectorPiBasis parameter vector in the default Pi basis.
@@ -180,27 +182,39 @@ public class RigidBodyInertialParameters
       double Iyz = parameterVectorPiBasis.get(8);
       double Izz = parameterVectorPiBasis.get(9);
 
-      double expAlphaExpD1 = Math.sqrt(0.5 * (Iyy + Izz - Ixx));
-      double expAlphaS12 = -Ixy / expAlphaExpD1;
-      double expAlphaS13 = -Ixz / expAlphaExpD1;
-      double expAlphaExpD2 = Math.sqrt(Izz - MathTools.pow(expAlphaExpD1, 2) - MathTools.pow(expAlphaS12, 2));
-      double expAlphaS23 = (-Iyz - expAlphaS12 * expAlphaS13) / expAlphaExpD2;
-      double expAlphaExpD3 = Math.sqrt(Iyy - MathTools.pow(expAlphaExpD1, 2) - MathTools.pow(expAlphaS13, 2) - MathTools.pow(expAlphaS23, 2));
-      double expAlphaT1 = hx / expAlphaExpD1;
-      double expAlphaT2 = (hy - expAlphaT1 * expAlphaS12) / expAlphaExpD2;
-      double expAlphaT3 = (hz - expAlphaT1 * expAlphaS13 - expAlphaT2 * expAlphaS23) / expAlphaExpD3;
-      double expAlpha = Math.sqrt(m - MathTools.pow(expAlphaT1, 2) - MathTools.pow(expAlphaT2, 2) - MathTools.pow(expAlphaT3, 2));
+      // Inverse of the corrected mapping (Eq. (1) of the 2026 correction). Because h = m * t in the corrected
+      // mapping, the translation parameters are just the center of mass, and the d/s parameters follow from the
+      // center-of-mass-relative (barycentric) inertia. Derived by inverting the forward map term by term.
+      double alpha = 0.5 * Math.log(m);
+      double t1 = hx / m;
+      double t2 = hy / m;
+      double t3 = hz / m;
 
-      parameterVectorThetaBasisToPack.set(0, Math.log(expAlpha));
-      parameterVectorThetaBasisToPack.set(1, Math.log(expAlphaExpD1 / expAlpha));
-      parameterVectorThetaBasisToPack.set(2, Math.log(expAlphaExpD2 / expAlpha));
-      parameterVectorThetaBasisToPack.set(3, Math.log(expAlphaExpD3 / expAlpha));
-      parameterVectorThetaBasisToPack.set(4, expAlphaS12 / expAlpha);
-      parameterVectorThetaBasisToPack.set(5, expAlphaS13 / expAlpha);
-      parameterVectorThetaBasisToPack.set(6, expAlphaS23 / expAlpha);
-      parameterVectorThetaBasisToPack.set(7, expAlphaT1 / expAlpha);
-      parameterVectorThetaBasisToPack.set(8, expAlphaT2 / expAlpha);
-      parameterVectorThetaBasisToPack.set(9, expAlphaT3 / expAlpha);
+      // Barycentric inertia entries divided by mass (subtract the parallel-axis translation terms).
+      double a = Ixx / m - (t2 * t2 + t3 * t3); // = s23^2 + e^(2 d2) + e^(2 d3)
+      double b = Iyy / m - (t1 * t1 + t3 * t3); // = s12^2 + s13^2 + e^(2 d1) + e^(2 d3)
+      double c = Izz / m - (t1 * t1 + t2 * t2); // = s12^2 + s13^2 + s23^2 + e^(2 d1) + e^(2 d2)
+      double dd = Ixy / m + t1 * t2;            // = -s13 s23 - s12 e^(d2)
+      double e = Iyz / m + t2 * t3;             // = -s23 e^(d3)
+      double f = Ixz / m + t1 * t3;             // = -s13 e^(d3)
+
+      double expD3 = Math.sqrt(0.5 * (a + b - c)); // a + b - c = 2 e^(2 d3)
+      double s13 = -f / expD3;
+      double s23 = -e / expD3;
+      double expD2 = Math.sqrt(a - s23 * s23 - expD3 * expD3);
+      double s12 = (-dd - s13 * s23) / expD2;
+      double expD1 = Math.sqrt(b - s12 * s12 - s13 * s13 - expD3 * expD3);
+
+      parameterVectorThetaBasisToPack.set(0, alpha);
+      parameterVectorThetaBasisToPack.set(1, Math.log(expD1));
+      parameterVectorThetaBasisToPack.set(2, Math.log(expD2));
+      parameterVectorThetaBasisToPack.set(3, Math.log(expD3));
+      parameterVectorThetaBasisToPack.set(4, s12);
+      parameterVectorThetaBasisToPack.set(5, s13);
+      parameterVectorThetaBasisToPack.set(6, s23);
+      parameterVectorThetaBasisToPack.set(7, t1);
+      parameterVectorThetaBasisToPack.set(8, t2);
+      parameterVectorThetaBasisToPack.set(9, t3);
    }
 
    /**
@@ -226,20 +240,31 @@ public class RigidBodyInertialParameters
       double expD1 = Math.exp(d1);
       double expD2 = Math.exp(d2);
       double expD3 = Math.exp(d3);
+      double squareExpD1 = expD1 * expD1;
+      double squareExpD2 = expD2 * expD2;
+      double squareExpD3 = expD3 * expD3;
       double squareS12 = MathTools.pow(s12, 2);
       double squareS13 = MathTools.pow(s13, 2);
       double squareS23 = MathTools.pow(s23, 2);
+      double squareT1 = MathTools.pow(t1, 2);
+      double squareT2 = MathTools.pow(t2, 2);
+      double squareT3 = MathTools.pow(t3, 2);
 
-      parameterVectorPiBasisToPack.set(0, MathTools.pow(t1, 2) + MathTools.pow(t2, 2) + MathTools.pow(t3, 2) + 1);
-      parameterVectorPiBasisToPack.set(1, t1 * expD1);
-      parameterVectorPiBasisToPack.set(2, t1 * s12 + t2 * expD2);
-      parameterVectorPiBasisToPack.set(3, t1 * s13 + t2 * s23 + t3 * expD3);
-      parameterVectorPiBasisToPack.set(4, squareS12 + squareS13 + squareS23 + expD2 * expD2 + expD3 * expD3);
-      parameterVectorPiBasisToPack.set(5, -s12 * expD1);
-      parameterVectorPiBasisToPack.set(6, -s13 * expD1);
-      parameterVectorPiBasisToPack.set(7, squareS13 + squareS23 + expD1 * expD1 + expD3 * expD3);
-      parameterVectorPiBasisToPack.set(8, -s12 * s13 - s23 * expD2);
-      parameterVectorPiBasisToPack.set(9, squareS12 + expD1 * expD1 + expD2 * expD2);
+      // Corrected mapping (Eq. (1) of Rucker & Wensing 2026 "Correction to Smooth Parameterization of
+      // Rigid-Body Inertia"), consistent with the decomposition J = U U^T (Eq. (7) of the 2022 paper). The
+      // earlier code implemented Eq. (9) of the 2022 paper, which was derived from J = U^T U and is thus
+      // inconsistent. With the correct mapping the translation parameters are the center-of-mass directly
+      // (h = m * t). Packed in the Pi-basis order (m, hx, hy, hz, Ixx, Ixy, Ixz, Iyy, Iyz, Izz).
+      parameterVectorPiBasisToPack.set(0, 1.0);                                                              // m
+      parameterVectorPiBasisToPack.set(1, t1);                                                               // hx
+      parameterVectorPiBasisToPack.set(2, t2);                                                               // hy
+      parameterVectorPiBasisToPack.set(3, t3);                                                               // hz
+      parameterVectorPiBasisToPack.set(4, squareS23 + squareT2 + squareT3 + squareExpD2 + squareExpD3);      // Ixx
+      parameterVectorPiBasisToPack.set(5, -s13 * s23 - t1 * t2 - s12 * expD2);                               // Ixy
+      parameterVectorPiBasisToPack.set(6, -t1 * t3 - s13 * expD3);                                           // Ixz
+      parameterVectorPiBasisToPack.set(7, squareS12 + squareS13 + squareT1 + squareT3 + squareExpD1 + squareExpD3); // Iyy
+      parameterVectorPiBasisToPack.set(8, -t2 * t3 - s23 * expD3);                                           // Iyz
+      parameterVectorPiBasisToPack.set(9, squareS12 + squareS13 + squareS23 + squareT1 + squareT2 + squareExpD1 + squareExpD2); // Izz
       CommonOps_DDRM.scale(Math.exp(2 * alpha), parameterVectorPiBasisToPack);
    }
 
@@ -262,120 +287,77 @@ public class RigidBodyInertialParameters
       double expD1 = Math.exp(d1);
       double expD2 = Math.exp(d2);
       double expD3 = Math.exp(d3);
+      double squareExpD1 = expD1 * expD1;
+      double squareExpD2 = expD2 * expD2;
+      double squareExpD3 = expD3 * expD3;
       double squareS12 = MathTools.pow(s12, 2);
       double squareS13 = MathTools.pow(s13, 2);
       double squareS23 = MathTools.pow(s23, 2);
+      double squareT1 = MathTools.pow(t1, 2);
+      double squareT2 = MathTools.pow(t2, 2);
+      double squareT3 = MathTools.pow(t3, 2);
 
-      // First row, derivatives of mass with respect to theta
-      jacobianToPack.set(0, 0, 2 * exp2Alpha * (MathTools.pow(t1, 2) + MathTools.pow(t2, 2) + MathTools.pow(t3, 2) + 1));
-      jacobianToPack.set(0, 1, 0);
-      jacobianToPack.set(0, 2, 0);
-      jacobianToPack.set(0, 3, 0);
-      jacobianToPack.set(0, 4, 0);
-      jacobianToPack.set(0, 5, 0);
-      jacobianToPack.set(0, 6, 0);
-      jacobianToPack.set(0, 7, 2 * exp2Alpha * t1);
-      jacobianToPack.set(0, 8, 2 * exp2Alpha * t2);
-      jacobianToPack.set(0, 9, 2 * exp2Alpha * t3);
-      // Second row, derivatives of hx with respect to theta
-      jacobianToPack.set(1, 0, 2 * t1 * exp2Alpha * expD1);
-      jacobianToPack.set(1, 1, t1 * exp2Alpha * expD1);
-      jacobianToPack.set(1, 2, 0);
-      jacobianToPack.set(1, 3, 0);
-      jacobianToPack.set(1, 4, 0);
-      jacobianToPack.set(1, 5, 0);
-      jacobianToPack.set(1, 6, 0);
-      jacobianToPack.set(1, 7, exp2Alpha * expD1);
-      jacobianToPack.set(1, 8, 0);
-      jacobianToPack.set(1, 9, 0);
-      // Third row, derivatives of hy with respect to theta
-      jacobianToPack.set(2, 0, 2 * exp2Alpha * t1 * s12 + t2 * expD2);
-      jacobianToPack.set(2, 1, 0);
-      jacobianToPack.set(2, 2, t2 * exp2Alpha * expD2);
-      jacobianToPack.set(2, 3, 0);
-      jacobianToPack.set(2, 4, t1 * exp2Alpha);
-      jacobianToPack.set(2, 5, 0);
-      jacobianToPack.set(2, 6, 0);
-      jacobianToPack.set(2, 7, s12 * exp2Alpha);
-      jacobianToPack.set(2, 8, exp2Alpha * expD2);
-      jacobianToPack.set(2, 9, 0);
-      // Fourth row, derivatives of hz with respect to theta
-      jacobianToPack.set(3, 0, 2 * exp2Alpha * t1 * s13 + t2 * s23 + t3 * expD3);
-      jacobianToPack.set(3, 1, 0);
-      jacobianToPack.set(3, 2, 0);
-      jacobianToPack.set(3, 3, t3 * exp2Alpha * expD3);
-      jacobianToPack.set(3, 4, 0);
-      jacobianToPack.set(3, 5, t1 * exp2Alpha);
-      jacobianToPack.set(3, 6, t2 * exp2Alpha);
-      jacobianToPack.set(3, 7, s13 * exp2Alpha);
-      jacobianToPack.set(3, 8, s23 * exp2Alpha);
-      jacobianToPack.set(3, 9, exp2Alpha * expD3);
-      // Fifth row, derivatives of Ixx with respect to theta
-      jacobianToPack.set(4, 0, 2 * exp2Alpha * (squareS12 + squareS13 + squareS23 + expD2 * expD2 + expD3 * expD3));
-      jacobianToPack.set(4, 1, 0);
-      jacobianToPack.set(4, 2, 2 * exp2Alpha * expD2 * expD2);
-      jacobianToPack.set(4, 3, 2 * exp2Alpha * expD3 * expD3);
-      jacobianToPack.set(4, 4, 2 * exp2Alpha * s12);
-      jacobianToPack.set(4, 5, 2 * exp2Alpha * s13);
-      jacobianToPack.set(4, 6, 2 * exp2Alpha * s23);
-      jacobianToPack.set(4, 7, 0);
-      jacobianToPack.set(4, 8, 0);
-      jacobianToPack.set(4, 9, 0);
-      // Sixth row, derivatives of Ixy with respect to theta
-      jacobianToPack.set(5, 0, -2 * s12 * exp2Alpha * expD1);
-      jacobianToPack.set(5, 1, -s12 * exp2Alpha * expD1);
-      jacobianToPack.set(5, 2, 0);
-      jacobianToPack.set(5, 3, 0);
-      jacobianToPack.set(5, 4, -exp2Alpha * expD1);
-      jacobianToPack.set(5, 5, 0);
-      jacobianToPack.set(5, 6, 0);
-      jacobianToPack.set(5, 7, 0);
-      jacobianToPack.set(5, 8, 0);
-      jacobianToPack.set(5, 9, 0);
-      // Seventh row, derivatives of Ixz with respect to theta
-      jacobianToPack.set(6, 0, -2 * s13 * exp2Alpha * expD1);
-      jacobianToPack.set(6, 1, -s13 * exp2Alpha * expD1);
-      jacobianToPack.set(6, 2, 0);
-      jacobianToPack.set(6, 3, 0);
-      jacobianToPack.set(6, 4, 0);
-      jacobianToPack.set(6, 5, -exp2Alpha * expD1);
-      jacobianToPack.set(6, 6, 0);
-      jacobianToPack.set(6, 7, 0);
-      jacobianToPack.set(6, 8, 0);
-      jacobianToPack.set(6, 9, 0);
-      // Eighth row, derivatives of Iyy with respect to theta
-      jacobianToPack.set(7, 0, 2 * exp2Alpha * (squareS13 + squareS23 + expD1 * expD1 + expD3 * expD3));
-      jacobianToPack.set(7, 1, 2 * exp2Alpha * expD1 * expD1);
-      jacobianToPack.set(7, 2, 0);
-      jacobianToPack.set(7, 3, 2 * exp2Alpha * expD3 * expD3);
-      jacobianToPack.set(7, 4, 0);
-      jacobianToPack.set(7, 5, 2 * exp2Alpha * s13);
-      jacobianToPack.set(7, 6, 2 * exp2Alpha * s23);
-      jacobianToPack.set(7, 7, 0);
-      jacobianToPack.set(7, 8, 0);
-      jacobianToPack.set(7, 9, 0);
-      // Ninth row, derivatives of Iyz with respect to theta
-      jacobianToPack.set(8, 0, 2 * exp2Alpha * (-s12 * s13 - s23 * expD2));
-      jacobianToPack.set(8, 1, 0);
-      jacobianToPack.set(8, 2, -s23 * exp2Alpha * expD2);
-      jacobianToPack.set(8, 3, 0);
-      jacobianToPack.set(8, 4, -s13 * exp2Alpha);
-      jacobianToPack.set(8, 5, -s12 * exp2Alpha);
-      jacobianToPack.set(8, 6, -exp2Alpha * expD2);
-      jacobianToPack.set(8, 7, 0);
-      jacobianToPack.set(8, 8, 0);
-      jacobianToPack.set(8, 9, 0);
-      // Tenth row, derivatives of Izz with respect to theta
-      jacobianToPack.set(9, 0, 2 * exp2Alpha * (squareS12 + expD1 * expD1 + expD2 * expD2));
-      jacobianToPack.set(9, 1, 2 * exp2Alpha * expD1 * expD1);
-      jacobianToPack.set(9, 2, 2 * exp2Alpha * expD2 * expD2);
-      jacobianToPack.set(9, 3, 0);
-      jacobianToPack.set(9, 4, 2 * exp2Alpha * s12);
-      jacobianToPack.set(9, 5, 0);
-      jacobianToPack.set(9, 6, 0);
-      jacobianToPack.set(9, 7, 0);
-      jacobianToPack.set(9, 8, 0);
-      jacobianToPack.set(9, 9, 0);
+      // Analytic Jacobian d(pi)/d(theta) of the corrected forward map (Eq. (1) of the 2026 correction).
+      // Rows are the Pi-basis params (m, hx, hy, hz, Ixx, Ixy, Ixz, Iyy, Iyz, Izz); columns are the Theta-basis
+      // params (alpha, d1, d2, d3, s12, s13, s23, t1, t2, t3). Every pi_i = e^(2 alpha) * g_i, so the alpha
+      // column (0) is 2 * pi_i and other columns are e^(2 alpha) * dg_i.
+      CommonOps_DDRM.fill(jacobianToPack, 0.0);
+
+      // Row 0: m = e^(2a)
+      jacobianToPack.set(0, 0, 2.0 * exp2Alpha);
+      // Row 1: hx = e^(2a) t1
+      jacobianToPack.set(1, 0, 2.0 * exp2Alpha * t1);
+      jacobianToPack.set(1, 7, exp2Alpha);
+      // Row 2: hy = e^(2a) t2
+      jacobianToPack.set(2, 0, 2.0 * exp2Alpha * t2);
+      jacobianToPack.set(2, 8, exp2Alpha);
+      // Row 3: hz = e^(2a) t3
+      jacobianToPack.set(3, 0, 2.0 * exp2Alpha * t3);
+      jacobianToPack.set(3, 9, exp2Alpha);
+      // Row 4: Ixx = e^(2a)(s23^2 + t2^2 + t3^2 + e^(2 d2) + e^(2 d3))
+      jacobianToPack.set(4, 0, 2.0 * exp2Alpha * (squareS23 + squareT2 + squareT3 + squareExpD2 + squareExpD3));
+      jacobianToPack.set(4, 2, 2.0 * exp2Alpha * squareExpD2);
+      jacobianToPack.set(4, 3, 2.0 * exp2Alpha * squareExpD3);
+      jacobianToPack.set(4, 6, 2.0 * exp2Alpha * s23);
+      jacobianToPack.set(4, 8, 2.0 * exp2Alpha * t2);
+      jacobianToPack.set(4, 9, 2.0 * exp2Alpha * t3);
+      // Row 5: Ixy = e^(2a)(-s13 s23 - t1 t2 - s12 e^(d2))
+      jacobianToPack.set(5, 0, 2.0 * exp2Alpha * (-s13 * s23 - t1 * t2 - s12 * expD2));
+      jacobianToPack.set(5, 2, exp2Alpha * (-s12 * expD2));
+      jacobianToPack.set(5, 4, exp2Alpha * (-expD2));
+      jacobianToPack.set(5, 5, exp2Alpha * (-s23));
+      jacobianToPack.set(5, 6, exp2Alpha * (-s13));
+      jacobianToPack.set(5, 7, exp2Alpha * (-t2));
+      jacobianToPack.set(5, 8, exp2Alpha * (-t1));
+      // Row 6: Ixz = e^(2a)(-t1 t3 - s13 e^(d3))
+      jacobianToPack.set(6, 0, 2.0 * exp2Alpha * (-t1 * t3 - s13 * expD3));
+      jacobianToPack.set(6, 3, exp2Alpha * (-s13 * expD3));
+      jacobianToPack.set(6, 5, exp2Alpha * (-expD3));
+      jacobianToPack.set(6, 7, exp2Alpha * (-t3));
+      jacobianToPack.set(6, 9, exp2Alpha * (-t1));
+      // Row 7: Iyy = e^(2a)(s12^2 + s13^2 + t1^2 + t3^2 + e^(2 d1) + e^(2 d3))
+      jacobianToPack.set(7, 0, 2.0 * exp2Alpha * (squareS12 + squareS13 + squareT1 + squareT3 + squareExpD1 + squareExpD3));
+      jacobianToPack.set(7, 1, 2.0 * exp2Alpha * squareExpD1);
+      jacobianToPack.set(7, 3, 2.0 * exp2Alpha * squareExpD3);
+      jacobianToPack.set(7, 4, 2.0 * exp2Alpha * s12);
+      jacobianToPack.set(7, 5, 2.0 * exp2Alpha * s13);
+      jacobianToPack.set(7, 7, 2.0 * exp2Alpha * t1);
+      jacobianToPack.set(7, 9, 2.0 * exp2Alpha * t3);
+      // Row 8: Iyz = e^(2a)(-t2 t3 - s23 e^(d3))
+      jacobianToPack.set(8, 0, 2.0 * exp2Alpha * (-t2 * t3 - s23 * expD3));
+      jacobianToPack.set(8, 3, exp2Alpha * (-s23 * expD3));
+      jacobianToPack.set(8, 6, exp2Alpha * (-expD3));
+      jacobianToPack.set(8, 8, exp2Alpha * (-t3));
+      jacobianToPack.set(8, 9, exp2Alpha * (-t2));
+      // Row 9: Izz = e^(2a)(s12^2 + s13^2 + s23^2 + t1^2 + t2^2 + e^(2 d1) + e^(2 d2))
+      jacobianToPack.set(9, 0, 2.0 * exp2Alpha * (squareS12 + squareS13 + squareS23 + squareT1 + squareT2 + squareExpD1 + squareExpD2));
+      jacobianToPack.set(9, 1, 2.0 * exp2Alpha * squareExpD1);
+      jacobianToPack.set(9, 2, 2.0 * exp2Alpha * squareExpD2);
+      jacobianToPack.set(9, 4, 2.0 * exp2Alpha * s12);
+      jacobianToPack.set(9, 5, 2.0 * exp2Alpha * s13);
+      jacobianToPack.set(9, 6, 2.0 * exp2Alpha * s23);
+      jacobianToPack.set(9, 7, 2.0 * exp2Alpha * t1);
+      jacobianToPack.set(9, 8, 2.0 * exp2Alpha * t2);
    }
 
    /**

@@ -284,12 +284,14 @@ public class RigidBodyInertialParametersTest
       DMatrixRMaj jacobian = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, PARAMETERS_PER_RIGID_BODY);
       RigidBodyInertialParameters.fromThetaBasisToPiBasisJacobian(theta, jacobian);
 
-      // Furthermore, it should always result in the following Jacobian
+      // Furthermore, it should always result in the following Jacobian. With the corrected mapping (Eq. (1) of
+      // the 2026 correction) h = m * t, so d(hx)/d(t1) = d(hy)/d(t2) = d(hz)/d(t3) = e^(2 alpha) = 1 here
+      // (the earlier Eq. (9) implementation gave e^(2 alpha) * e^(d) = 0.70710677 for these entries).
       DMatrixRMaj expectedJacobian = new DMatrixRMaj(new double[][] {
             {2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-            {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.70710677, 0.0, 0.0},
-            {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.70710677, 0.0},
-            {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.70710677},
+            {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0},
+            {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0},
+            {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0},
             {2.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
             {0.0, 0.0, 0.0, 0.0, -0.70710677, 0.0, 0.0, 0.0, 0.0, 0.0},
             {0.0, 0.0, 0.0, 0.0, 0.0, -0.70710677, 0.0, 0.0, 0.0, 0.0},
@@ -298,6 +300,77 @@ public class RigidBodyInertialParametersTest
             {2.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
       });
       assertArrayEquals(expectedJacobian.getData(), jacobian.getData(), EPSILON);
+   }
+
+   @Test
+   public void testRandomRoundTripThetaToPiToTheta()
+   {
+      // Generate random fully-consistent theta vectors, map to pi and back, and check we recover the theta.
+      // Generating from theta guarantees physical consistency by construction.
+      Random random = new Random(1738);
+      DMatrixRMaj theta = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      DMatrixRMaj pi = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      DMatrixRMaj thetaRecovered = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+
+      for (int i = 0; i < ITERATIONS; ++i)
+      {
+         theta.set(0, EuclidCoreRandomTools.nextDouble(random, 0.5));            // alpha
+         for (int j = 1; j <= 3; ++j)
+            theta.set(j, EuclidCoreRandomTools.nextDouble(random, 0.7));         // d1, d2, d3
+         for (int j = 4; j <= 6; ++j)
+            theta.set(j, EuclidCoreRandomTools.nextDouble(random, 0.4));         // s12, s13, s23
+         for (int j = 7; j <= 9; ++j)
+            theta.set(j, EuclidCoreRandomTools.nextDouble(random, 0.5));         // t1, t2, t3
+
+         RigidBodyInertialParameters.fromThetaBasisToPiBasis(theta, pi);
+         RigidBodyInertialParameters.fromPiBasisToThetaBasis(pi, thetaRecovered);
+
+         assertArrayEquals(theta.getData(), thetaRecovered.getData(), EPSILON);
+      }
+   }
+
+   @Test
+   public void testJacobianMatchesFiniteDifference()
+   {
+      // The analytic Jacobian d(pi)/d(theta) must match a central finite-difference of the forward map. This is
+      // the check that catches errors in the hand-derived Jacobian (e.g. operator-precedence bugs).
+      Random random = new Random(1739);
+      double h = 1.0e-6;
+      double fdTolerance = 1.0e-4;
+
+      DMatrixRMaj theta = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      DMatrixRMaj thetaPerturbed = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      DMatrixRMaj piPlus = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      DMatrixRMaj piMinus = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      DMatrixRMaj analyticJacobian = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, PARAMETERS_PER_RIGID_BODY);
+
+      for (int iter = 0; iter < ITERATIONS; ++iter)
+      {
+         theta.set(0, EuclidCoreRandomTools.nextDouble(random, 0.5));
+         for (int j = 1; j <= 3; ++j)
+            theta.set(j, EuclidCoreRandomTools.nextDouble(random, 0.7));
+         for (int j = 4; j <= 6; ++j)
+            theta.set(j, EuclidCoreRandomTools.nextDouble(random, 0.4));
+         for (int j = 7; j <= 9; ++j)
+            theta.set(j, EuclidCoreRandomTools.nextDouble(random, 0.5));
+
+         RigidBodyInertialParameters.fromThetaBasisToPiBasisJacobian(theta, analyticJacobian);
+
+         for (int col = 0; col < PARAMETERS_PER_RIGID_BODY; ++col)
+         {
+            thetaPerturbed.set(theta);
+            thetaPerturbed.set(col, theta.get(col) + h);
+            RigidBodyInertialParameters.fromThetaBasisToPiBasis(thetaPerturbed, piPlus);
+            thetaPerturbed.set(col, theta.get(col) - h);
+            RigidBodyInertialParameters.fromThetaBasisToPiBasis(thetaPerturbed, piMinus);
+
+            for (int row = 0; row < PARAMETERS_PER_RIGID_BODY; ++row)
+            {
+               double fd = (piPlus.get(row) - piMinus.get(row)) / (2.0 * h);
+               assertEquals(fd, analyticJacobian.get(row, col), fdTolerance, "Jacobian mismatch at (" + row + ", " + col + ")");
+            }
+         }
+      }
    }
 
    @Test
