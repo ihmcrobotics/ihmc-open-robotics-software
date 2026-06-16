@@ -1,16 +1,16 @@
 package us.ihmc.communication.ros2log;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
+import us.ihmc.idl.serializers.extra.ROS2AbstractSerializer;
 import us.ihmc.jros2.ROS2Message;
 
 import java.io.IOException;
 
 /**
  * Encodes/decodes {@link ROS2Message} instances stored in ROS 2 log files (JSON or YAML arrays).
- * Messages are stored as base64 CDR payloads via {@link ROS2MessageCdrFileTools}.
+ * Messages are stored as human-readable JSON/YAML strings (same format as pre-jros2 logs).
  */
 final class ROS2LogMessageCodec
 {
@@ -18,14 +18,15 @@ final class ROS2LogMessageCodec
    {
    }
 
-   static void serializeMessage(ObjectMapper objectMapper, ROS2Message<?> message, ArrayNode messagesArray)
+   static void serializeMessage(ROS2LogSerialization serialization, ROS2Message<?> message, ArrayNode messagesArray) throws IOException
    {
       @SuppressWarnings({"unchecked", "rawtypes"})
-      ROS2Message rawMessage = message;
-      messagesArray.add(ROS2MessageCdrFileTools.messageToJsonNode(objectMapper, rawMessage));
+      Class messageClass = message.getClass();
+      ROS2AbstractSerializer serializer = serialization.createSerializer(messageClass);
+      messagesArray.add(serializer.serializeToString(message));
    }
 
-   static <T extends ROS2Message<T>> T deserializeMessage(ObjectMapper objectMapper, JsonNode node, Class<T> messageClass) throws IOException
+   static <T extends ROS2Message<T>> T deserializeMessage(ROS2LogSerialization serialization, JsonNode node, Class<T> messageClass) throws IOException
    {
       T message = ROS2Message.createInstance(messageClass);
 
@@ -37,21 +38,21 @@ final class ROS2LogMessageCodec
          String text = node.asText().trim();
          if (text.startsWith("{"))
          {
-            throw new IOException("Legacy DDS JSON log entries are not supported; re-record the log with jros2");
+            ROS2AbstractSerializer<T> serializer = serialization.createSerializer(messageClass);
+            return serializer.deserialize(text);
          }
+
          ROS2MessageCdrFileTools.deserializeFromBase64(text, message);
-      }
-      else
-      {
-         ROS2MessageCdrFileTools.deserializeFromJsonNode(node, message);
+         return message;
       }
 
-      return message;
+      ROS2AbstractSerializer<T> serializer = serialization.createSerializer(messageClass);
+      return serializer.deserialize(node.toString());
    }
 
    static String topicKeyForMessageClass(Class<?> messageClass)
    {
-      return messageClass.getName();
+      return legacyTopicKeyForMessageClass(messageClass);
    }
 
    static String legacyTopicKeyForMessageClass(Class<?> messageClass)
@@ -69,6 +70,6 @@ final class ROS2LogMessageCodec
       if (topicObject != null)
          return topicObject;
 
-      return rootNode.get(legacyTopicKeyForMessageClass(messageClass));
+      return rootNode.get(messageClass.getName());
    }
 }
