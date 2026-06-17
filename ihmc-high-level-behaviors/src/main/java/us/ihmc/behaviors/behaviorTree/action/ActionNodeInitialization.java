@@ -46,13 +46,6 @@ public class ActionNodeInitialization
          }
          armAction.update();
       }
-      else if (newAction instanceof ScrewPrimitiveActionState screwPrimitiveAction)
-      {
-         screwPrimitiveAction.getDefinition().setSide(sideOfNewAction);
-         screwPrimitiveAction.getDefinition()
-                             .setObjectFrameName(findConvenientParentFrameName(actionSequence, ArmActionState.class, indexOfInsertion, sideOfNewAction));
-         screwPrimitiveAction.update();
-      }
       if (newAction instanceof LegActionState legAction)
       {
          // Set the new action to where the last one was for faster authoring
