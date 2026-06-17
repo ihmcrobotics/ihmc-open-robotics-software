@@ -317,12 +317,12 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          actionSequence.setExecutionNextIndex(goToCheckpointLeafIndex);
          actionSequence.setAutomaticExecution(true);
          statusMessage.setBehaviorInProgress(goToCheckpointName);
-         startGoToRecording();
+         startRecording();
          randomizationRunInProgress = true;
       }
       else if (randomizationRunInProgress && !actionSequence.getAutomaticExecution())
       {
-         stopGoToRecording();
+         stopRecording();
          randomizationsCompleted++;
          definition.setNumberOfRandomizationsValue(Math.max(0, randomizationTargetCount - randomizationsCompleted));
          definition.modify();
@@ -408,7 +408,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    }
 
 
-   private void startGoToRecording()
+   private void startRecording()
    {
       if (ros2LogRecord != null)
          return;
@@ -418,7 +418,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       ros2LogRecord.start();
    }
 
-   private void stopGoToRecording()
+   private void stopRecording()
    {
       if (ros2LogRecord == null)
          return;
@@ -435,7 +435,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
 
    private void resetRandomizationSession()
    {
-      stopGoToRecording();
+      stopRecording();
 
       // Restore the original points captured at the beginning of the session.
       if (goToAction != null)
@@ -584,22 +584,24 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          actionSequence.setExecutionNextIndex(wholeBodyStartLeafIndex);
          actionSequence.setAutomaticExecution(true);
          statusMessage.setBehaviorInProgress(wholeBodyBehaviorName);
-         startGoToRecording();
+         startRecording();
          wholeBodyRandomizationRunInProgress = true;
       }
       else if (wholeBodyRandomizationRunInProgress && !actionSequence.getAutomaticExecution())
       {
-         stopGoToRecording();
          wholeBodyRandomizationsCompleted++;
-         definition.setNumberOfRandomizationsValue(Math.max(0, wholeBodyRandomizationTargetCount - wholeBodyRandomizationsCompleted));
+         int randomizationsRemaining = Math.max(0, wholeBodyRandomizationTargetCount - wholeBodyRandomizationsCompleted);
+         definition.setNumberOfRandomizationsValue(randomizationsRemaining);
          definition.modify();
+         if (randomizationsRemaining == 0)
+            stopRecording();
          wholeBodyRandomizationRunInProgress = false;
       }
    }
 
    private void resetWholeBodyRandomizationSession()
    {
-      stopGoToRecording();
+      stopRecording();
 
       if (wholeBodyRightArmAction != null)
          restoreRightHandDefaults(wholeBodyRightArmAction);
