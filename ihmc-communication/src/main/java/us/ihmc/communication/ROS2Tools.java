@@ -3,6 +3,7 @@ package us.ihmc.communication;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
+import us.ihmc.fastddsjava.profiles.TransportDescriptorTypeTools;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2QoSProfile;
 import us.ihmc.jros2.ROS2Subscription;
@@ -39,6 +40,18 @@ public final class ROS2Tools
    public static final String IHMC_TOPIC_PREFIX = "ihmc";
 
    public static final HumanoidROS2Topic<?> IHMC_ROOT = new HumanoidROS2Topic<>().withPrefix(IHMC_TOPIC_PREFIX);
+
+   /** Creates a ROS 2 node restricted to the loopback interface for local-only pub/sub. */
+   public static ROS2Node createLoopbackNode(String nodeName)
+   {
+      return new ROS2Node(nodeName, 0, TransportDescriptorTypeTools.createUDPv4Transport("127.0.0.1"));
+   }
+
+   /** Creates an async ROS 2 node restricted to the loopback interface for local-only pub/sub. */
+   public static AsyncROS2Node createAsyncLoopbackNode(String nodeName)
+   {
+      return new AsyncROS2Node(nodeName, 0, TransportDescriptorTypeTools.createUDPv4Transport("127.0.0.1"));
+   }
 
    /** Invokes the callback only when {@link ROS2MessageReader#read()} returns a non-null message. */
    public static <T extends ROS2Message<T>> void readIfPresent(ROS2MessageReader<T> reader, Consumer<T> callback)
