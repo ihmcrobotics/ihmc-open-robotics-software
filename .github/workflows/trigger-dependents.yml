@@ -9,5 +9,6 @@ jobs:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/trigger-dependents.yml@main
     secrets:
       ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
+      DEPENDENCY_GRAPH: ${{ secrets.DEPENDENCY_GRAPH }}
     with:
       source-repo: ihmc-open-robotics-software
