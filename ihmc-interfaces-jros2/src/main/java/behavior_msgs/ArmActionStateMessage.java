@@ -20,17 +20,33 @@ behavior_msgs/ArmActionDefinitionMessage definition
 # This is the estimated goal chest frame as the robot executes a potential whole body action.
 controller_msgs/RigidBodyTransformMessage goal_chest_transform_to_world
 
-# Hand force
-geometry_msgs/Vector3 force
-
-# Hand torque
-geometry_msgs/Vector3 torque
-
 # Joint angles
 float64[7] joint_angles
 
 # Quality of the IK solution
 float64 solution_quality
+
+# Screw primitive preview fields
+geometry_msgs/Pose[<=50] preview_trajectory
+
+float64 preview_trajectory_duration
+
+float64 preview_trajectory_linear_velocity
+
+float64 preview_trajectory_angular_velocity
+
+# The user requested IK preview time normalized from 0.0 to 1.0
+float64 preview_requested_time
+
+float64[7] preview_joint_angles
+
+float64 preview_solution_quality
+
+# Hand force
+geometry_msgs/Vector3 force
+
+# Hand torque
+geometry_msgs/Vector3 torque
 }</pre>
 */
 public class ArmActionStateMessage implements ROS2Message<ArmActionStateMessage>
@@ -50,14 +66,6 @@ public class ArmActionStateMessage implements ROS2Message<ArmActionStateMessage>
    */
    private final controller_msgs.RigidBodyTransformMessage goal_chest_transform_to_world_;
    /**
-      Hand force
-   */
-   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage force_;
-   /**
-      Hand torque
-   */
-   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage torque_;
-   /**
       Joint angles
    */
    private final double[] joint_angles_;
@@ -65,15 +73,38 @@ public class ArmActionStateMessage implements ROS2Message<ArmActionStateMessage>
       Quality of the IK solution
    */
    private double solution_quality_;
+   /**
+      Screw primitive preview fields
+   */
+   private final IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> preview_trajectory_;
+   private double preview_trajectory_duration_;
+   private double preview_trajectory_linear_velocity_;
+   private double preview_trajectory_angular_velocity_;
+   /**
+      The user requested IK preview time normalized from 0.0 to 1.0
+   */
+   private double preview_requested_time_;
+   private final double[] preview_joint_angles_;
+   private double preview_solution_quality_;
+   /**
+      Hand force
+   */
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage force_;
+   /**
+      Hand torque
+   */
+   private final us.ihmc.euclid.jros2.messages.EuclidVector3DMessage torque_;
 
    public ArmActionStateMessage()
    {
       state_ = new behavior_msgs.ActionNodeStateMessage();
       definition_ = new behavior_msgs.ArmActionDefinitionMessage();
       goal_chest_transform_to_world_ = new controller_msgs.RigidBodyTransformMessage();
+      joint_angles_ = new double[7];
+      preview_trajectory_ = new IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage>(0, 50, us.ihmc.euclid.jros2.messages.EuclidPose3DMessage.class);
+      preview_joint_angles_ = new double[7];
       force_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
       torque_ = new us.ihmc.euclid.jros2.messages.EuclidVector3DMessage();
-      joint_angles_ = new double[7];
 
    }
 
@@ -85,10 +116,17 @@ public class ArmActionStateMessage implements ROS2Message<ArmActionStateMessage>
       currentAlignment += state_.calculateSizeBytes(currentAlignment);
       currentAlignment += definition_.calculateSizeBytes(currentAlignment);
       currentAlignment += goal_chest_transform_to_world_.calculateSizeBytes(currentAlignment);
-      currentAlignment += force_.calculateSizeBytes(currentAlignment);
-      currentAlignment += torque_.calculateSizeBytes(currentAlignment);
       currentAlignment += (7 * 8) + CDRBuffer.alignment(currentAlignment, (7 * 8)); // joint_angles_
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // solution_quality_
+      currentAlignment += preview_trajectory_.calculateSizeBytes(currentAlignment);
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // preview_trajectory_duration_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // preview_trajectory_linear_velocity_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // preview_trajectory_angular_velocity_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // preview_requested_time_
+      currentAlignment += (7 * 8) + CDRBuffer.alignment(currentAlignment, (7 * 8)); // preview_joint_angles_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // preview_solution_quality_
+      currentAlignment += force_.calculateSizeBytes(currentAlignment);
+      currentAlignment += torque_.calculateSizeBytes(currentAlignment);
 
       return currentAlignment - initialAlignment;
    }
@@ -99,13 +137,23 @@ public class ArmActionStateMessage implements ROS2Message<ArmActionStateMessage>
       state_.serialize(buffer);
       definition_.serialize(buffer);
       goal_chest_transform_to_world_.serialize(buffer);
-      force_.serialize(buffer);
-      torque_.serialize(buffer);
       for (int i = 0; i < joint_angles_.length; ++i)
       {
          buffer.writeDouble(joint_angles_[i]);
       }
       buffer.writeDouble(solution_quality_);
+      preview_trajectory_.serialize(buffer);
+      buffer.writeDouble(preview_trajectory_duration_);
+      buffer.writeDouble(preview_trajectory_linear_velocity_);
+      buffer.writeDouble(preview_trajectory_angular_velocity_);
+      buffer.writeDouble(preview_requested_time_);
+      for (int i = 0; i < preview_joint_angles_.length; ++i)
+      {
+         buffer.writeDouble(preview_joint_angles_[i]);
+      }
+      buffer.writeDouble(preview_solution_quality_);
+      force_.serialize(buffer);
+      torque_.serialize(buffer);
 
    }
 
@@ -115,13 +163,23 @@ public class ArmActionStateMessage implements ROS2Message<ArmActionStateMessage>
       state_.deserialize(buffer);
       definition_.deserialize(buffer);
       goal_chest_transform_to_world_.deserialize(buffer);
-      force_.deserialize(buffer);
-      torque_.deserialize(buffer);
       for (int i = 0; i < joint_angles_.length; ++i)
       {
          joint_angles_[i] = buffer.readDouble();
       }
       solution_quality_ = buffer.readDouble();
+      preview_trajectory_.deserialize(buffer);
+      preview_trajectory_duration_ = buffer.readDouble();
+      preview_trajectory_linear_velocity_ = buffer.readDouble();
+      preview_trajectory_angular_velocity_ = buffer.readDouble();
+      preview_requested_time_ = buffer.readDouble();
+      for (int i = 0; i < preview_joint_angles_.length; ++i)
+      {
+         preview_joint_angles_[i] = buffer.readDouble();
+      }
+      preview_solution_quality_ = buffer.readDouble();
+      force_.deserialize(buffer);
+      torque_.deserialize(buffer);
 
    }
 
@@ -131,13 +189,23 @@ public class ArmActionStateMessage implements ROS2Message<ArmActionStateMessage>
       state_.set(from.state_);
       definition_.set(from.definition_);
       goal_chest_transform_to_world_.set(from.goal_chest_transform_to_world_);
-      force_.set(from.force_);
-      torque_.set(from.torque_);
       for (int i = 0; i < joint_angles_.length; ++i)
       {
          joint_angles_[i] = from.joint_angles_[i];
       }
       solution_quality_ = from.solution_quality_;
+      preview_trajectory_.set(from.preview_trajectory_);
+      preview_trajectory_duration_ = from.preview_trajectory_duration_;
+      preview_trajectory_linear_velocity_ = from.preview_trajectory_linear_velocity_;
+      preview_trajectory_angular_velocity_ = from.preview_trajectory_angular_velocity_;
+      preview_requested_time_ = from.preview_requested_time_;
+      for (int i = 0; i < preview_joint_angles_.length; ++i)
+      {
+         preview_joint_angles_[i] = from.preview_joint_angles_[i];
+      }
+      preview_solution_quality_ = from.preview_solution_quality_;
+      force_.set(from.force_);
+      torque_.set(from.torque_);
 
    }
 
@@ -156,16 +224,6 @@ public class ArmActionStateMessage implements ROS2Message<ArmActionStateMessage>
       return goal_chest_transform_to_world_;
    }
 
-   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getForce()
-   {
-      return force_;
-   }
-
-   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getTorque()
-   {
-      return torque_;
-   }
-
    public double[] getJointAngles()
    {
       return joint_angles_;
@@ -181,6 +239,76 @@ public class ArmActionStateMessage implements ROS2Message<ArmActionStateMessage>
       this.solution_quality_ = solution_quality_;
    }
 
+   public IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> getPreviewTrajectory()
+   {
+      return preview_trajectory_;
+   }
+
+   public double getPreviewTrajectoryDuration()
+   {
+      return preview_trajectory_duration_;
+   }
+
+   public void setPreviewTrajectoryDuration(double preview_trajectory_duration_)
+   {
+      this.preview_trajectory_duration_ = preview_trajectory_duration_;
+   }
+
+   public double getPreviewTrajectoryLinearVelocity()
+   {
+      return preview_trajectory_linear_velocity_;
+   }
+
+   public void setPreviewTrajectoryLinearVelocity(double preview_trajectory_linear_velocity_)
+   {
+      this.preview_trajectory_linear_velocity_ = preview_trajectory_linear_velocity_;
+   }
+
+   public double getPreviewTrajectoryAngularVelocity()
+   {
+      return preview_trajectory_angular_velocity_;
+   }
+
+   public void setPreviewTrajectoryAngularVelocity(double preview_trajectory_angular_velocity_)
+   {
+      this.preview_trajectory_angular_velocity_ = preview_trajectory_angular_velocity_;
+   }
+
+   public double getPreviewRequestedTime()
+   {
+      return preview_requested_time_;
+   }
+
+   public void setPreviewRequestedTime(double preview_requested_time_)
+   {
+      this.preview_requested_time_ = preview_requested_time_;
+   }
+
+   public double[] getPreviewJointAngles()
+   {
+      return preview_joint_angles_;
+   }
+
+   public double getPreviewSolutionQuality()
+   {
+      return preview_solution_quality_;
+   }
+
+   public void setPreviewSolutionQuality(double preview_solution_quality_)
+   {
+      this.preview_solution_quality_ = preview_solution_quality_;
+   }
+
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getForce()
+   {
+      return force_;
+   }
+
+   public us.ihmc.euclid.jros2.messages.EuclidVector3DMessage getTorque()
+   {
+      return torque_;
+   }
+
 
    @Override
    public java.lang.String toString()
@@ -193,14 +321,28 @@ public class ArmActionStateMessage implements ROS2Message<ArmActionStateMessage>
       builder.append(definition_);
       builder.append("goal_chest_transform_to_world_=");
       builder.append(goal_chest_transform_to_world_);
-      builder.append("force_=");
-      builder.append(force_);
-      builder.append("torque_=");
-      builder.append(torque_);
       builder.append("joint_angles_=");
       builder.append(java.util.Arrays.toString(joint_angles_));
       builder.append("solution_quality_=");
       builder.append(solution_quality_);
+      builder.append("preview_trajectory_=");
+      builder.append(preview_trajectory_);
+      builder.append("preview_trajectory_duration_=");
+      builder.append(preview_trajectory_duration_);
+      builder.append("preview_trajectory_linear_velocity_=");
+      builder.append(preview_trajectory_linear_velocity_);
+      builder.append("preview_trajectory_angular_velocity_=");
+      builder.append(preview_trajectory_angular_velocity_);
+      builder.append("preview_requested_time_=");
+      builder.append(preview_requested_time_);
+      builder.append("preview_joint_angles_=");
+      builder.append(java.util.Arrays.toString(preview_joint_angles_));
+      builder.append("preview_solution_quality_=");
+      builder.append(preview_solution_quality_);
+      builder.append("force_=");
+      builder.append(force_);
+      builder.append("torque_=");
+      builder.append(torque_);
 
       builder.append("}");
       return builder.toString();

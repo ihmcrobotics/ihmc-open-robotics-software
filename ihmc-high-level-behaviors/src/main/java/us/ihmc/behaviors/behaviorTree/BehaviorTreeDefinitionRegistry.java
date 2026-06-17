@@ -36,7 +36,6 @@ public class BehaviorTreeDefinitionRegistry
       new DefinitionMapping(WalkActionDefinition.class, BehaviorTreeStateMessage.WALK_ACTION),
       new DefinitionMapping(ArmActionDefinition.class, BehaviorTreeStateMessage.ARM_ACTION),
       new DefinitionMapping(HandWrenchActionDefinition.class, BehaviorTreeStateMessage.HAND_WRENCH_ACTION),
-      new DefinitionMapping(ScrewPrimitiveActionDefinition.class, BehaviorTreeStateMessage.SCREW_PRIMITIVE_ACTION),
       new DefinitionMapping(PelvisActionDefinition.class, BehaviorTreeStateMessage.PELVIS_ACTION),
       new DefinitionMapping(AbilityHandActionDefinition.class, BehaviorTreeStateMessage.ABILITY_HAND_ACTION),
       new DefinitionMapping(EZGripperActionDefinition.class, BehaviorTreeStateMessage.EZGRIPPER_ACTION),

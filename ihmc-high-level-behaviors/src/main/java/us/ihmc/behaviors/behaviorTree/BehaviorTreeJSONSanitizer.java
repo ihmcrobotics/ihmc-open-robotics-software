@@ -1,7 +1,9 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.mutable.MutableObject;
+import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionTaskspaceTrajectoryMode;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
@@ -100,6 +102,12 @@ public class BehaviorTreeJSONSanitizer
       {
          String typeName = jsonNode.get("type").textValue();
 
+         if ("ScrewPrimitiveActionDefinition".equals(typeName))
+         {
+            jsonNode = convertScrewPrimitiveToArmAction(jsonNode);
+            typeName = "ArmActionDefinition";
+         }
+
          Class<?> definitionType = BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName);
 
          if (parentNode == null)
@@ -156,5 +164,19 @@ public class BehaviorTreeJSONSanitizer
       }
 
       return loadedNode.getValue();
+   }
+
+   private static ObjectNode convertScrewPrimitiveToArmAction(JsonNode source)
+   {
+      ObjectNode jsonNode = (ObjectNode) source.deepCopy();
+      jsonNode.put("type", "ArmActionDefinition");
+      jsonNode.put("definedInJointspace", false);
+      jsonNode.put("taskspaceTrajectoryMode", ArmActionTaskspaceTrajectoryMode.SCREW_PRIMITIVE.name());
+      if (jsonNode.has("objectFrame"))
+      {
+         jsonNode.put("parentFrame", jsonNode.get("objectFrame").asText());
+         jsonNode.remove("objectFrame");
+      }
+      return jsonNode;
    }
 }
