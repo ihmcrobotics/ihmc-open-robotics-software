@@ -23,4 +23,5 @@ testDependencies {
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
    api("us.ihmc:ihmc-sensor-processing-test:source")
    api("us.ihmc:ihmc-simulation-toolkit-test:source")
+   api("us.ihmc:ihmc-high-level-behaviors-test:source")
 }

@@ -1,16 +1,16 @@
 package us.ihmc.communication.ros2log;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
+import us.ihmc.idl.serializers.extra.ROS2AbstractSerializer;
 import us.ihmc.jros2.ROS2Message;
 
 import java.io.IOException;
 
 /**
  * Encodes/decodes {@link ROS2Message} instances stored in ROS 2 log files (JSON or YAML arrays).
- * Messages are stored as base64 CDR payloads via {@link ROS2MessageCdrFileTools}.
+ * Messages are stored as human-readable JSON/YAML strings (same format as pre-jros2 logs).
  */
 final class ROS2LogMessageCodec
 {
@@ -18,57 +18,74 @@ final class ROS2LogMessageCodec
    {
    }
 
-   static void serializeMessage(ObjectMapper objectMapper, ROS2Message<?> message, ArrayNode messagesArray)
+   static void serializeMessage(ROS2LogSerialization serialization, ROS2Message<?> message, ArrayNode messagesArray) throws IOException
    {
-      @SuppressWarnings({"unchecked", "rawtypes"})
-      ROS2Message rawMessage = message;
-      messagesArray.add(ROS2MessageCdrFileTools.messageToJsonNode(objectMapper, rawMessage));
+      messagesArray.add(serializeToString(serialization, message));
    }
 
-   static <T extends ROS2Message<T>> T deserializeMessage(ObjectMapper objectMapper, JsonNode node, Class<T> messageClass) throws IOException
+   static <T extends ROS2Message<T>> T deserializeMessage(ROS2LogSerialization serialization, JsonNode node, Class<T> messageClass) throws IOException
    {
       T message = ROS2Message.createInstance(messageClass);
 
       if (node == null || node.isNull())
          return message;
 
+      ROS2AbstractSerializer<T> serializer = serialization.createSerializer(messageClass);
       if (node.isTextual())
-      {
-         String text = node.asText().trim();
-         if (text.startsWith("{"))
-         {
-            throw new IOException("Legacy DDS JSON log entries are not supported; re-record the log with jros2");
-         }
-         ROS2MessageCdrFileTools.deserializeFromBase64(text, message);
-      }
-      else
-      {
-         ROS2MessageCdrFileTools.deserializeFromJsonNode(node, message);
-      }
+         return deserializeTextNode(serialization, serializer, message, node.asText().trim());
 
-      return message;
+      return serializer.deserialize(node.toString());
    }
 
    static String topicKeyForMessageClass(Class<?> messageClass)
    {
-      return messageClass.getName();
+      return ROS2LogTopicKeyResolver.topicKeyForMessageClass(messageClass);
    }
 
    static String legacyTopicKeyForMessageClass(Class<?> messageClass)
    {
-      String name = messageClass.getName();
-      int lastDot = name.lastIndexOf('.');
-      if (lastDot <= 0)
-         return name;
-      return name.substring(0, lastDot) + ".msg.dds." + name.substring(lastDot + 1);
+      return ROS2LogTopicKeyResolver.legacyTopicKeyForMessageClass(messageClass);
    }
 
    static JsonNode findTopicNode(JsonNode rootNode, Class<?> messageClass)
    {
-      JsonNode topicObject = rootNode.get(topicKeyForMessageClass(messageClass));
-      if (topicObject != null)
-         return topicObject;
+      return ROS2LogTopicKeyResolver.findTopicNode(rootNode, messageClass);
+   }
 
-      return rootNode.get(legacyTopicKeyForMessageClass(messageClass));
+   private static <T extends ROS2Message<T>> T deserializeTextNode(ROS2LogSerialization serialization,
+                                                                    ROS2AbstractSerializer<T> serializer,
+                                                                    T emptyMessage,
+                                                                    String text) throws IOException
+   {
+      if (text.startsWith("{"))
+         return deserializeJsonText(serialization, serializer, text);
+
+      try
+      {
+         return serializer.deserialize(text);
+      }
+      catch (Exception ignored)
+      {
+         ROS2MessageCdrFileTools.deserializeFromBase64(text, emptyMessage);
+         return emptyMessage;
+      }
+   }
+
+   private static <T extends ROS2Message<T>> T deserializeJsonText(ROS2LogSerialization serialization,
+                                                                    ROS2AbstractSerializer<T> serializer,
+                                                                    String text) throws IOException
+   {
+      String normalizedText = ROS2LogLegacyEuclidAdapter.normalizeText(serialization, text);
+      T deserialized = serializer.deserialize(normalizedText);
+      ROS2LogLegacyEuclidAdapter.applyValuesSafely(serialization, deserialized, normalizedText);
+      return deserialized;
+   }
+
+   @SuppressWarnings({"unchecked", "rawtypes"})
+   private static String serializeToString(ROS2LogSerialization serialization, ROS2Message<?> message) throws IOException
+   {
+      Class messageClass = message.getClass();
+      ROS2AbstractSerializer serializer = serialization.createSerializer(messageClass);
+      return serializer.serializeToString(message);
    }
 }

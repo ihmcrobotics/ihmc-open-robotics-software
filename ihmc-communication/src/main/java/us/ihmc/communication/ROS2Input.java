@@ -8,11 +8,16 @@ import java.util.function.Consumer;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2QoSProfile;
 import us.ihmc.jros2.ROS2Subscription;
 import us.ihmc.jros2.ROS2Topic;
 
 /**
  * An atomic reference to the latest received message through an optional filter.
+ * <p>
+ * TODO: Replace call sites with {@link us.ihmc.jros2.ROS2Subscription#readLatest} on control-thread
+ * hot paths and direct {@link us.ihmc.jros2.ROS2Subscription} subscriptions elsewhere, then remove
+ * this class.
  */
 public class ROS2Input<T extends ROS2Message<T>>
 {
@@ -42,6 +47,11 @@ public class ROS2Input<T extends ROS2Message<T>>
 
    public ROS2Input(ROS2Node ros2Node, ROS2Topic<T> topic, T initialValue, MessageFilter<T> messageFilter)
    {
+      this(ros2Node, topic, initialValue, messageFilter, ROS2QoSProfile.DEFAULT);
+   }
+
+   public ROS2Input(ROS2Node ros2Node, ROS2Topic<T> topic, T initialValue, MessageFilter<T> messageFilter, ROS2QoSProfile qosProfile)
+   {
       this.ros2Node = ros2Node;
       reuseBuffer = initialValue != null;
       atomicReference = new AtomicReference<>(initialValue);
@@ -63,7 +73,7 @@ public class ROS2Input<T extends ROS2Message<T>>
             atomicReference.set(incoming);
             messageReceivedCallback(incoming);
          }
-      });
+      }, qosProfile);
    }
 
    public interface MessageFilter<T extends ROS2Message<T>>

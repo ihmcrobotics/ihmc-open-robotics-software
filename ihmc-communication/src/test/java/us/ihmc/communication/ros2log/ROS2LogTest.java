@@ -14,6 +14,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ROS2LogTest
 {
@@ -66,5 +67,27 @@ public class ROS2LogTest
 
          ros2Node.close();
       }
+   }
+
+   @Test
+   public void testReplayWaitsUntilFirstTimestamp()
+   {
+      ROS2Topic<RobotConfigurationData> topic = HumanoidControllerAPI.getOutputTopic("Robot").withType(RobotConfigurationData.class);
+      AtomicInteger publishCount = new AtomicInteger();
+      ReplayTopicManager<RobotConfigurationData> replayTopicManager = new ReplayTopicManager<>(topic, ignored -> publishCount.incrementAndGet());
+
+      RobotConfigurationData message = new RobotConfigurationData();
+      message.setSequenceId(1L);
+      replayTopicManager.getTimestamps().add(10L);
+      replayTopicManager.getMessages().add(message);
+
+      Assertions.assertFalse(replayTopicManager.update(0L));
+      Assertions.assertEquals(0, publishCount.get());
+
+      Assertions.assertFalse(replayTopicManager.update(9L));
+      Assertions.assertEquals(0, publishCount.get());
+
+      Assertions.assertTrue(replayTopicManager.update(11L));
+      Assertions.assertEquals(1, publishCount.get());
    }
 }
