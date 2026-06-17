@@ -8,40 +8,34 @@ import us.ihmc.idl.serializers.extra.ROS2JSONSerializer;
 import us.ihmc.idl.serializers.extra.ROS2YAMLSerializer;
 import us.ihmc.jros2.ROS2Message;
 
+import java.util.Locale;
+
 public enum ROS2LogSerialization
 {
    JSON, YAML;
 
    public ObjectMapper createObjectMapper()
    {
-      switch (this)
+      return switch (this)
       {
-         case JSON:
-            return new ObjectMapper(new JsonFactory());
-         case YAML:
-            return new ObjectMapper(new YAMLFactory());
-         default:
-            throw new RuntimeException("Unrecognized serialization entry: " + this);
-      }
+         case JSON -> new ObjectMapper(new JsonFactory());
+         case YAML -> new ObjectMapper(new YAMLFactory());
+      };
    }
 
    @SuppressWarnings({"rawtypes", "unchecked"})
    public <T extends ROS2Message<T>> ROS2AbstractSerializer<T> createSerializer(Class<T> messageClass)
    {
-      switch (this)
+      return switch (this)
       {
-         case JSON:
-            return new ROS2JSONSerializer<>(messageClass);
-         case YAML:
-            return new ROS2YAMLSerializer<>(messageClass);
-         default:
-            throw new RuntimeException("Unrecognized serialization entry: " + this);
-      }
+         case JSON -> new ROS2JSONSerializer<>(messageClass);
+         case YAML -> new ROS2YAMLSerializer<>(messageClass);
+      };
    }
 
    public String getFilePostfix()
    {
-      return name().toLowerCase();
+      return name().toLowerCase(Locale.ROOT);
    }
 
    public static ROS2LogSerialization fromFileName(String fileName)

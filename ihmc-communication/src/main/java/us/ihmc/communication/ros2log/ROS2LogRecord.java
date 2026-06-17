@@ -102,9 +102,9 @@ public class ROS2LogRecord
          return;
 
       boolean hasData = false;
-      for (int i = 0; i < topicManagers.size(); i++)
+      for (RecordTopicManager<?> topicManager : topicManagers)
       {
-         hasData |= topicManagers.get(i).update();
+         hasData |= topicManager.update();
       }
 
       if (hasData)
@@ -113,20 +113,7 @@ public class ROS2LogRecord
          stopRequested.set(true);
 
       if (stopRequested.getAndSet(false))
-      {
-         LogTools.info("Stopping ROS 2 logger, writing to file...");
-
-         // write log file
-         ROS2LogIOTools.writeLogFile(topicManagers, serialization);
-         runnable = null;
-         executorService.shutdown();
-
-         // clear old data
-         for (int i = 0; i < topicManagers.size(); i++)
-         {
-            topicManagers.get(i).clear();
-         }
-      }
+         stopAndFlush();
    }
 
    public void destroy()
@@ -146,12 +133,25 @@ public class ROS2LogRecord
    @SuppressWarnings("unchecked")
    private <T extends ROS2Message<T>> RecordTopicManager<T> getTopicManager(ROS2Topic<T> topic)
    {
-      for (int i = 0; i < topicManagers.size(); i++)
+      for (RecordTopicManager<?> manager : topicManagers)
       {
-         RecordTopicManager<?> manager = topicManagers.get(i);
          if (manager.getTopic().equals(topic))
             return (RecordTopicManager<T>) manager;
       }
       return null;
+   }
+
+   private void stopAndFlush()
+   {
+      LogTools.info("Stopping ROS 2 logger, writing to file...");
+
+      ROS2LogIOTools.writeLogFile(topicManagers, serialization);
+      runnable = null;
+      executorService.shutdown();
+
+      for (RecordTopicManager<?> topicManager : topicManagers)
+      {
+         topicManager.clear();
+      }
    }
 }
