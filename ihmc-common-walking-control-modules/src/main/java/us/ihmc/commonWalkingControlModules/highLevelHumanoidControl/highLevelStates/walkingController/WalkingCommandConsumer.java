@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.ManipulationAbortedStatus;
+import rcl_interfaces.msg.dds.Log;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -435,6 +436,7 @@ public class WalkingCommandConsumer
       for (int i = 0; i < armTrajectoryCommands.size(); i++)
       {
          ArmTrajectoryCommand command = armTrajectoryCommands.get(i);
+         LogTools.info("RECEIVED ON CONTROLLER SIDE!!! JOINT COMMANDS ARE: " + command.getJointspaceTrajectory().getTrajectoryEndTime());
          RobotSide robotSide = command.getRobotSide();
          RigidBodyControlManager handManager = handManagers.get(robotSide);
          if (handManager != null && (allowCommand || command.getForceExecution()))
