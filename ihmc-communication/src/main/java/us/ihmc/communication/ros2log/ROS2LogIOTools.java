@@ -115,6 +115,7 @@ public class ROS2LogIOTools
       });
    }
 
+   @SuppressWarnings({"rawtypes", "unchecked"})
    public static List<ReplayTopicManager<?>> loadLogFile(File logFile, List<ROS2Topic<?>> loggedTopics, Function<ROS2Topic, Consumer> messageConsumerGenerator)
    {
       try
@@ -139,7 +140,7 @@ public class ROS2LogIOTools
 
          for (ROS2Topic<?> topic : loggedTopics)
          {
-            ReplayTopicManager<?> topicManager = loadTopic(serialization, rootNode, topic, messageConsumerGenerator.apply(topic));
+            ReplayTopicManager<?> topicManager = loadTopic(serialization, rootNode, topic, messageConsumerGenerator);
             if (topicManager == null)
                continue;
 
@@ -191,10 +192,18 @@ public class ROS2LogIOTools
    private static ReplayTopicManager<?> loadTopic(ROS2LogSerialization serialization,
                                                   ObjectNode rootNode,
                                                   ROS2Topic<?> topic,
-                                                  Consumer<?> messageConsumer) throws Exception
+                                                  Function<ROS2Topic, Consumer> messageConsumerGenerator) throws Exception
    {
-      Class<? extends ROS2Message<?>> messageClass = topic.getType();
-      ObjectNode topicObject = (ObjectNode) ROS2LogMessageCodec.findTopicNode(rootNode, messageClass);
+      return loadTypedTopic(serialization, rootNode, (ROS2Topic) topic, (Consumer) messageConsumerGenerator.apply(topic));
+   }
+
+   private static <T extends ROS2Message<T>> ReplayTopicManager<T> loadTypedTopic(ROS2LogSerialization serialization,
+                                                                                   ObjectNode rootNode,
+                                                                                   ROS2Topic<T> topic,
+                                                                                   Consumer<T> messageConsumer) throws Exception
+   {
+      Class<T> messageClass = topic.getType();
+      ObjectNode topicObject = (ObjectNode) ROS2LogTopicKeyResolver.findTopicNode(rootNode, messageClass);
       if (topicObject == null || topicObject.isEmpty())
          return null;
 
@@ -209,13 +218,11 @@ public class ROS2LogIOTools
          throw new IllegalStateException("Mismatched message/timestamp counts");
       }
 
-      ReplayTopicManager topicManager = new ReplayTopicManager(topic, messageConsumer);
-      Class messageClassRaw = (Class) messageClass;
-
+      ReplayTopicManager<T> topicManager = new ReplayTopicManager<>(topic, messageConsumer);
       for (int messageIndex = 0; messageIndex < timestamps.size(); messageIndex++)
       {
          long timestamp = timestamps.get(messageIndex).longValue();
-         ROS2Message<?> message = ROS2LogMessageCodec.deserializeMessage(serialization, messages.get(messageIndex), messageClassRaw);
+         T message = ROS2LogMessageCodec.deserializeMessage(serialization, messages.get(messageIndex), messageClass);
          topicManager.getTimestamps().add(timestamp);
          topicManager.getMessages().add(message);
       }
