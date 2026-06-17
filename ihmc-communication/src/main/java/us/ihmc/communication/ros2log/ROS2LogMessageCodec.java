@@ -19,6 +19,15 @@ import java.util.Map;
  */
 final class ROS2LogMessageCodec
 {
+   private static final String POINT_FIELD = "point";
+   private static final String VECTOR_FIELD = "vector";
+   private static final String QUATERNION_FIELD = "quaternion";
+   private static final String X_FIELD = "x";
+   private static final String Y_FIELD = "y";
+   private static final String Z_FIELD = "z";
+   private static final String W_FIELD = "w";
+   private static final String S_FIELD = "s";
+
    private ROS2LogMessageCodec()
    {
    }
@@ -38,33 +47,10 @@ final class ROS2LogMessageCodec
       if (node == null || node.isNull())
          return message;
 
-      if (node.isTextual())
-      {
-         String text = node.asText().trim();
-         if (text.startsWith("{"))
-         {
-            String normalizedText = normalizeLegacyEuclidWrapperFields(serialization, text);
-            ROS2AbstractSerializer<T> serializer = serialization.createSerializer(messageClass);
-            T deserialized = serializer.deserialize(normalizedText);
-
-            try
-            {
-               ObjectMapper objectMapper = serialization.createObjectMapper();
-               JsonNode rootNode = objectMapper.readTree(normalizedText);
-               applyLegacyEuclidValues(deserialized, rootNode);
-            }
-            catch (Exception ignored)
-            {
-            }
-
-            return deserialized;
-         }
-
-         ROS2MessageCdrFileTools.deserializeFromBase64(text, message);
-         return message;
-      }
-
       ROS2AbstractSerializer<T> serializer = serialization.createSerializer(messageClass);
+      if (node.isTextual())
+         return deserializeTextNode(serialization, serializer, message, node.asText().trim());
+
       return serializer.deserialize(node.toString());
    }
 
@@ -146,7 +132,7 @@ final class ROS2LogMessageCodec
                double[] parsedTuple = parseLegacyTuple(valueNode.asText());
                if (parsedTuple != null)
                {
-                  if ("point".equals(fieldName) || "vector".equals(fieldName))
+                  if (POINT_FIELD.equals(fieldName) || VECTOR_FIELD.equals(fieldName))
                   {
                      if (parsedTuple.length == 3)
                      {
@@ -154,7 +140,7 @@ final class ROS2LogMessageCodec
                         continue;
                      }
                   }
-                  else if ("quaternion".equals(fieldName))
+                  else if (QUATERNION_FIELD.equals(fieldName))
                   {
                      if (parsedTuple.length == 4)
                      {
@@ -181,14 +167,14 @@ final class ROS2LogMessageCodec
    private static ObjectNode createTupleNode(ObjectNode owner, double[] values, boolean isQuaternion)
    {
       ObjectNode tupleNode = owner.objectNode();
-      tupleNode.put("x", values[0]);
-      tupleNode.put("y", values[1]);
-      tupleNode.put("z", values[2]);
+      tupleNode.put(X_FIELD, values[0]);
+      tupleNode.put(Y_FIELD, values[1]);
+      tupleNode.put(Z_FIELD, values[2]);
 
       if (isQuaternion)
       {
-         tupleNode.put("w", values[3]);
-         tupleNode.put("s", values[3]);
+         tupleNode.put(W_FIELD, values[3]);
+         tupleNode.put(S_FIELD, values[3]);
       }
 
       return tupleNode;
@@ -196,9 +182,9 @@ final class ROS2LogMessageCodec
 
    private static boolean applyPointLikeNode(Object target, JsonNode node)
    {
-      double[] point = extractTuple(node, "point", 3);
+      double[] point = extractTuple(node, POINT_FIELD, 3);
       if (point == null)
-         point = extractTuple(node, "vector", 3);
+         point = extractTuple(node, VECTOR_FIELD, 3);
       if (point == null)
          point = extractDirectTuple(node, 3, false);
 
@@ -211,7 +197,7 @@ final class ROS2LogMessageCodec
             return true;
       }
 
-      double[] quaternion = extractTuple(node, "quaternion", 4);
+      double[] quaternion = extractTuple(node, QUATERNION_FIELD, 4);
       if (quaternion == null)
          quaternion = extractDirectTuple(node, 4, true);
       if (quaternion != null)
@@ -247,9 +233,9 @@ final class ROS2LogMessageCodec
       if (!node.isObject())
          return null;
 
-      JsonNode xNode = node.get("x");
-      JsonNode yNode = node.get("y");
-      JsonNode zNode = node.get("z");
+      JsonNode xNode = node.get(X_FIELD);
+      JsonNode yNode = node.get(Y_FIELD);
+      JsonNode zNode = node.get(Z_FIELD);
       if (xNode == null || yNode == null || zNode == null || !xNode.isNumber() || !yNode.isNumber() || !zNode.isNumber())
          return null;
 
@@ -258,9 +244,9 @@ final class ROS2LogMessageCodec
          return new double[] {xNode.asDouble(), yNode.asDouble(), zNode.asDouble()};
       }
 
-      JsonNode wNode = node.get("w");
+      JsonNode wNode = node.get(W_FIELD);
       if (wNode == null && quaternion)
-         wNode = node.get("s");
+         wNode = node.get(S_FIELD);
       if (wNode == null || !wNode.isNumber())
          return null;
 
@@ -443,5 +429,47 @@ final class ROS2LogMessageCodec
          return topicObject;
 
       return rootNode.get(messageClass.getName());
+   }
+
+   private static <T extends ROS2Message<T>> T deserializeTextNode(ROS2LogSerialization serialization,
+                                                                    ROS2AbstractSerializer<T> serializer,
+                                                                    T emptyMessage,
+                                                                    String text) throws IOException
+   {
+      if (text.startsWith("{"))
+         return deserializeJsonText(serialization, serializer, text);
+
+      try
+      {
+         return serializer.deserialize(text);
+      }
+      catch (Exception ignored)
+      {
+         ROS2MessageCdrFileTools.deserializeFromBase64(text, emptyMessage);
+         return emptyMessage;
+      }
+   }
+
+   private static <T extends ROS2Message<T>> T deserializeJsonText(ROS2LogSerialization serialization,
+                                                                    ROS2AbstractSerializer<T> serializer,
+                                                                    String text) throws IOException
+   {
+      String normalizedText = normalizeLegacyEuclidWrapperFields(serialization, text);
+      T deserialized = serializer.deserialize(normalizedText);
+      applyLegacyEuclidValuesSafe(serialization, deserialized, normalizedText);
+      return deserialized;
+   }
+
+   private static void applyLegacyEuclidValuesSafe(ROS2LogSerialization serialization, Object target, String normalizedText)
+   {
+      try
+      {
+         ObjectMapper objectMapper = serialization.createObjectMapper();
+         JsonNode rootNode = objectMapper.readTree(normalizedText);
+         applyLegacyEuclidValues(target, rootNode);
+      }
+      catch (Exception ignored)
+      {
+      }
    }
 }

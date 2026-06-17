@@ -35,7 +35,15 @@ class ReplayTopicManager<T extends ROS2Message<T>>
 
    private void updateInternal(long currentTime)
    {
+      if (timestamps.isEmpty())
+      {
+         isDone = true;
+         return;
+      }
+
       int latestIndex = getLatestIndex(currentTime);
+      if (latestIndex < 0)
+         return;
 
       if (latestIndex != lastSentIndex)
       {
@@ -73,7 +81,8 @@ class ReplayTopicManager<T extends ROS2Message<T>>
       return topicName;
    }
 
-   public void setMutator(ObjLongConsumer<?> mutator)
+   @SuppressWarnings("unchecked")
+   public <S extends ROS2Message<S>> void setMutator(ObjLongConsumer<S> mutator)
    {
       this.mutator = (ObjLongConsumer<T>) mutator;
    }

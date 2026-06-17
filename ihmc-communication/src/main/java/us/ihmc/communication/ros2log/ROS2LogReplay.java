@@ -81,12 +81,13 @@ public class ROS2LogReplay
 
    private void populateTopicManagers()
    {
+      topicManagersMap.clear();
       if (topicManagers == null)
          return;
 
-      for (int i = 0; i < topicManagers.size(); i++)
+      for (ReplayTopicManager<?> topicManager : topicManagers)
       {
-         topicManagersMap.put(topicManagers.get(i).getTopicName(), topicManagers.get(i));
+         topicManagersMap.put(topicManager.getTopicName(), topicManager);
       }
    }
 
@@ -95,48 +96,32 @@ public class ROS2LogReplay
     */
    public boolean doIncrementalReplay()
    {
+      if (!isReady())
+      {
+         LogTools.warn("No ROS 2 log loaded. Call load(...) before replay.");
+         return false;
+      }
+
       if (timeSource == ROS2LogTimeSource.SIMULATION && timestampSupplier.getAsLong() == -1)
       {
          return false;
       }
-      else if (firstUpdate)
-      {
-         startTime = timestampSupplier.getAsLong();
-         totalPausedDuration = 0L;
-         firstUpdate = false;
-      }
+      initializeTimingIfNeeded();
 
-      // Handle pending pause now that time has advanced
-      if (pendingPause && lastReplayTime > 0)
-      {
-         paused = true;
-         pauseStartTime = timestampSupplier.getAsLong();
-         pendingPause = false;
-         LogTools.info("Replay paused (pending request fulfilled)");
-      }
+      handlePendingPause();
 
       if (paused)
       {
-         // Keep publishing the last known message while paused
          for (ReplayTopicManager<?> topicManager : topicManagers)
          {
             topicManager.updateInternalRepeat(lastReplayTime);
          }
-         return false; // replay not advancing while paused
+         return false;
       }
 
-      long elapsed = timestampSupplier.getAsLong() - startTime - totalPausedDuration;
-      long now = (long) (elapsed * replaySpeed);
+      long now = computeReplayTime();
       lastReplayTime = now;
-      boolean isDone = true;
-
-      for (int topic_idx = 0; topic_idx < topicManagers.size(); topic_idx++)
-      {
-         ReplayTopicManager<?> topicManager = topicManagers.get(topic_idx);
-         isDone = topicManager.update(now) && isDone;
-      }
-
-      return isDone;
+      return updateTopics(now);
    }
 
    /**
@@ -144,6 +129,12 @@ public class ROS2LogReplay
     */
    public void doFullReplay()
    {
+      if (!isReady())
+      {
+         LogTools.warn("No ROS 2 log loaded. Call load(...) before replay.");
+         return;
+      }
+
       if (timeSource == ROS2LogTimeSource.SIMULATION)
       {
          while (timestampSupplier.getAsLong() == -1)
@@ -170,11 +161,9 @@ public class ROS2LogReplay
          long elapsed = timestampSupplier.getAsLong() - startTime;
          long now = (long) (elapsed * replaySpeed);
          boolean isDone = true;
-
-         for (int topic_idx = 0; topic_idx < topicManagers.size(); topic_idx++)
+         for (ReplayTopicManager<?> topicManager : topicManagers)
          {
-            ReplayTopicManager<?> topicManager = topicManagers.get(topic_idx);
-            isDone = topicManager.update(now) && isDone;
+            isDone &= topicManager.update(now);
          }
 
          if (isDone)
@@ -213,18 +202,11 @@ public class ROS2LogReplay
    {
       if (isReady())
       {
-         for (int topic_idx = 0; topic_idx < topicManagers.size(); topic_idx++)
+         for (ReplayTopicManager<?> topicManager : topicManagers)
          {
-            ReplayTopicManager<?> topicManager = topicManagers.get(topic_idx);
             topicManager.reset();
          }
-         firstUpdate = true;
-         totalPausedDuration = 0L;
-         pauseStartTime = 0L;
-         pendingPause = false;
-         paused = false;
-         lastReplayTime = 0L;
-         startTime = 0L;
+         resetPlaybackState();
       }
    }
 
@@ -264,5 +246,53 @@ public class ROS2LogReplay
          return;
       }
       topicManager.setMutator(mutator);
+   }
+
+   private void initializeTimingIfNeeded()
+   {
+      if (!firstUpdate)
+         return;
+
+      startTime = timestampSupplier.getAsLong();
+      totalPausedDuration = 0L;
+      firstUpdate = false;
+   }
+
+   private void handlePendingPause()
+   {
+      if (!pendingPause || lastReplayTime <= 0)
+         return;
+
+      paused = true;
+      pauseStartTime = timestampSupplier.getAsLong();
+      pendingPause = false;
+      LogTools.info("Replay paused (pending request fulfilled)");
+   }
+
+   private long computeReplayTime()
+   {
+      long elapsed = timestampSupplier.getAsLong() - startTime - totalPausedDuration;
+      return (long) (elapsed * replaySpeed);
+   }
+
+   private boolean updateTopics(long replayTime)
+   {
+      boolean isDone = true;
+      for (ReplayTopicManager<?> topicManager : topicManagers)
+      {
+         isDone &= topicManager.update(replayTime);
+      }
+      return isDone;
+   }
+
+   private void resetPlaybackState()
+   {
+      firstUpdate = true;
+      totalPausedDuration = 0L;
+      pauseStartTime = 0L;
+      pendingPause = false;
+      paused = false;
+      lastReplayTime = 0L;
+      startTime = 0L;
    }
 }
