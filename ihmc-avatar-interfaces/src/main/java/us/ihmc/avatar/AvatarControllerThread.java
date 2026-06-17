@@ -1,6 +1,7 @@
 package us.ihmc.avatar;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
@@ -117,6 +118,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(controllerFullRobotModel);
       LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
+      contextDataFactory.setFeedbackCurrents(new double[controllerFullRobotModel.getOneDoFJoints().length]);
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);
       contextDataFactory.setCenterOfMassDataHolder(centerOfMassDataHolderForController);
       contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForEstimator);
@@ -152,6 +154,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                   controllerTime,
                                                   gravity,
                                                   forceSensorDataHolderForController,
+                                                  humanoidRobotContextData.getFeedbackCurrents(),
                                                   centerOfMassDataHolderForController,
                                                   centerOfPressureDataHolderForEstimator,
                                                   sensorInformation,
@@ -232,6 +235,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                             YoDouble yoTime,
                                                             double gravity,
                                                             ForceSensorDataHolderReadOnly forceSensorDataHolderForController,
+                                                            double[] feedbackCurrents,
                                                             CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                             HumanoidRobotSensorInformation sensorInformation,
@@ -262,6 +266,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                         yoTime,
                                                         sensorInformation,
                                                         forceSensorDataHolderForController,
+                                                        feedbackCurrents,
                                                         centerOfMassDataHolderForController,
                                                         centerOfPressureDataHolderForEstimator,
                                                         lowLevelControllerOutput,

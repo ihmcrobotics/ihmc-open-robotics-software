@@ -6,6 +6,7 @@ import java.util.List;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -100,6 +101,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
                                              WholeBodyControllerCoreFactory controllerCoreFactory,
                                              HighLevelHumanoidControllerToolbox controllerToolbox,
                                              CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+                                             double[] feedbackCurrents,
                                              ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                              JointDesiredOutputListBasics lowLevelControllerOutput,
                                              DoubleProvider controlDT)
@@ -123,6 +125,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       controllerFactoryHelper.setLowLevelControllerOutput(lowLevelControllerOutput);
       controllerFactoryHelper.setRequestedHighLevelControllerState(requestedHighLevelControllerState);
       controllerFactoryHelper.setForceSensorDataHolder(forceSensorDataHolder);
+      controllerFactoryHelper.setFeedbackCurrents(feedbackCurrents);
 
       stateMachine = setUpStateMachine(initialControllerState,
                                        controllerStateFactories,

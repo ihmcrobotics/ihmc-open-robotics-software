@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
@@ -16,6 +17,7 @@ public class HumanoidRobotContextDataFactory
 {
    protected final RequiredFactoryField<HumanoidRobotContextJointData> processedJointData = new RequiredFactoryField<>("processedJointData");
    protected final RequiredFactoryField<ForceSensorDataHolder> forceSensorDataHolder = new RequiredFactoryField<>("forceSensorDataHolder");
+   protected final RequiredFactoryField<double[]> feedbackCurrents = new RequiredFactoryField<>("feedbackCurrents");
    protected final RequiredFactoryField<CenterOfMassDataHolder> centerOfMassDataHolder = new RequiredFactoryField<>("centerOfMassDataHolder");
    protected final RequiredFactoryField<CenterOfPressureDataHolder> centerOfPressureDataHolder = new RequiredFactoryField<>("centerOfPressureDataHolder");
    protected final RequiredFactoryField<RobotMotionStatusHolder> robotMotionStatusHolder = new RequiredFactoryField<>("robotMotionStatusHolder");
@@ -28,6 +30,7 @@ public class HumanoidRobotContextDataFactory
 
       return new HumanoidRobotContextData(processedJointData.get(),
                                           forceSensorDataHolder.get(),
+                                          feedbackCurrents.get(),
                                           centerOfMassDataHolder.get(),
                                           centerOfPressureDataHolder.get(),
                                           robotMotionStatusHolder.get(),
@@ -38,6 +41,11 @@ public class HumanoidRobotContextDataFactory
    public void setProcessedJointData(HumanoidRobotContextJointData value)
    {
       processedJointData.set(value);
+   }
+
+   public void setFeedbackCurrents(double[] value)
+   {
+      feedbackCurrents.set(value);
    }
 
    public void setForceSensorDataHolder(ForceSensorDataHolder value)

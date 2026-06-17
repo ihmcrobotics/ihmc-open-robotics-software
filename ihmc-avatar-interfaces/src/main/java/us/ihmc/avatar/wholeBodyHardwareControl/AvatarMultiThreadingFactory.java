@@ -1086,6 +1086,11 @@ public class AvatarMultiThreadingFactory
       externalMasterThread.set(masterThread);
    }
 
+   public HumanoidRobotContextData getEstimatorContext()
+   {
+      return avatarEstimator.getHumanoidRobotContextData();
+   }
+
    public void setExternalMasterThread(RepeatingTaskThread masterThread)
    {
       externalMasterThread.set(masterThread);

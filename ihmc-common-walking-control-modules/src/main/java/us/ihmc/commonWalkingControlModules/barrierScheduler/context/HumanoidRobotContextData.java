@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 import java.util.Arrays;
 import java.util.List;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
 import us.ihmc.euclid.interfaces.Settable;
@@ -46,6 +47,8 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
     */
    private final HumanoidRobotContextJointData processedJointData;
 
+   private final double[] feedbackCurrents;
+
    /**
     * The processed force sensor data. Set by the estimator.
     */
@@ -85,6 +88,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    {
       processedJointData = new HumanoidRobotContextJointData();
       forceSensorDataHolder = new ForceSensorDataHolder();
+      feedbackCurrents = new double[0];
       centerOfMassDataHolder = new CenterOfMassDataHolder();
       centerOfPressureDataHolder = new CenterOfPressureDataHolder();
       robotMotionStatusHolder = new RobotMotionStatusHolder();
@@ -94,6 +98,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
 
    public HumanoidRobotContextData(HumanoidRobotContextJointData processedJointData,
                                    ForceSensorDataHolder forceSensorDataHolder,
+                                   double[] feedbackCurrents,
                                    CenterOfMassDataHolder centerOfMassDataHolder,
                                    CenterOfPressureDataHolder centerOfPressureDataHolder,
                                    RobotMotionStatusHolder robotMotionStatusHolder,
@@ -102,6 +107,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    {
       this.processedJointData = processedJointData;
       this.forceSensorDataHolder = forceSensorDataHolder;
+      this.feedbackCurrents = feedbackCurrents;
       this.centerOfMassDataHolder = centerOfMassDataHolder;
       this.centerOfPressureDataHolder = centerOfPressureDataHolder;
       this.robotMotionStatusHolder = robotMotionStatusHolder;
@@ -113,6 +119,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    {
       processedJointData = new HumanoidRobotContextJointData(fullRobotModel.getOneDoFJoints().length);
       forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
+      feedbackCurrents = new double[fullRobotModel.getControllableOneDoFJoints().length];
       centerOfMassDataHolder = new CenterOfMassDataHolder();
       centerOfPressureDataHolder = new CenterOfPressureDataHolder(fullRobotModel);
       robotMotionStatusHolder = new RobotMotionStatusHolder();
@@ -124,6 +131,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    {
       processedJointData = new HumanoidRobotContextJointData();
       forceSensorDataHolder = new ForceSensorDataHolder();
+      feedbackCurrents = new double[joints.size()];
       centerOfMassDataHolder = new CenterOfMassDataHolder();
       centerOfPressureDataHolder = new CenterOfPressureDataHolder();
       robotMotionStatusHolder = new RobotMotionStatusHolder();
@@ -139,6 +147,11 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    public ForceSensorDataHolder getForceSensorDataHolder()
    {
       return forceSensorDataHolder;
+   }
+
+   public double[] getFeedbackCurrents()
+   {
+      return feedbackCurrents;
    }
 
    public CenterOfMassDataHolder getCenterOfMassDataHolder()
@@ -181,6 +194,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       estimatorRan = src.estimatorRan;
       perceptionRan = src.perceptionRan;
       processedJointData.set(src.processedJointData);
+      System.arraycopy(feedbackCurrents, 0, src.feedbackCurrents, 0, src.feedbackCurrents.length);
       forceSensorDataHolder.set(src.forceSensorDataHolder);
       centerOfMassDataHolder.set(src.centerOfMassDataHolder);
       centerOfPressureDataHolder.set(src.centerOfPressureDataHolder);
@@ -262,6 +276,8 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
          if (!processedJointData.equals(other.processedJointData))
             return false;
          if (!forceSensorDataHolder.equals(other.forceSensorDataHolder))
+            return false;
+         if (!feedbackCurrents.equals(other.feedbackCurrents))
             return false;
          if (!centerOfMassDataHolder.equals(other.centerOfMassDataHolder))
             return false;

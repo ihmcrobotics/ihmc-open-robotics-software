@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
 import java.util.EnumMap;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -29,6 +30,7 @@ public class HighLevelControllerFactoryHelper
    private JointDesiredOutputListBasics lowLevelControllerOutput;
    private YoEnum<HighLevelControllerName> requestedHighLevelControllerState;
    private ForceSensorDataHolderReadOnly forceSensorDataHolder;
+   private double[] feedbackCurrents;
 
    public void setLowLevelControllerOutput(JointDesiredOutputListBasics lowLevelControllerOutput)
    {
@@ -74,6 +76,16 @@ public class HighLevelControllerFactoryHelper
    public void setRequestedHighLevelControllerState(YoEnum<HighLevelControllerName> requestedHighLevelControllerState)
    {
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
+   }
+
+   public void setFeedbackCurrents(double[] feedbackCurrents)
+   {
+      this.feedbackCurrents = feedbackCurrents;
+   }
+
+   public double[] getFeedbackCurrents()
+   {
+      return feedbackCurrents;
    }
 
    public void setForceSensorDataHolder(ForceSensorDataHolderReadOnly forceSensorDataHolder)

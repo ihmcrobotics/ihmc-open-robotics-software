@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
@@ -167,6 +168,11 @@ public class CrossRobotCommandResolver
       }
    }
 
+   public void resolveFeedbackCurrents(double[] in, double[] out)
+   {
+      System.arraycopy(out, 0, in, 0, in.length);
+   }
+
    public void resolveForceSensorData(ForceSensorData in, ForceSensorData out)
    {
       out.set(in);
@@ -232,6 +238,7 @@ public class CrossRobotCommandResolver
    {
       resolveHumanoidRobotContextJointData(in.getProcessedJointData(), out.getProcessedJointData());
       resolveForceSensorDataHolder(in.getForceSensorDataHolder(), out.getForceSensorDataHolder());
+      resolveFeedbackCurrents(in.getFeedbackCurrents(), out.getFeedbackCurrents());
       resolveCenterOfMassDataHolder(in.getCenterOfMassDataHolder(), out.getCenterOfMassDataHolder());
       out.setEstimatorRan(in.getEstimatorRan());
    }

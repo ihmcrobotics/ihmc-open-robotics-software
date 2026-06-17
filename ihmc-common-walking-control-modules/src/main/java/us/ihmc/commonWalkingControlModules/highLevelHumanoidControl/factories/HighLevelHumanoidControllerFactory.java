@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -385,6 +386,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                            YoDouble yoTime,
                                                            HumanoidRobotSensorInformation sensorInformation,
                                                            ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                                           double[] feedbackCurrents,
                                                            CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
                                                            CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                            JointDesiredOutputListBasics lowLevelControllerOutput,
@@ -515,6 +517,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                   controllerCoreFactory,
                                                                                   controllerToolbox,
                                                                                   centerOfPressureDataHolderForEstimator,
+                                                                                  feedbackCurrents,
                                                                                   forceSensorDataHolder,
                                                                                   lowLevelControllerOutput,
                                                                                   controlDT);

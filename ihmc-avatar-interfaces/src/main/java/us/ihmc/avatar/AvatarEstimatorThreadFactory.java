@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.ReinitializeStateEstimatorMessage;
 import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
@@ -112,6 +113,7 @@ public class AvatarEstimatorThreadFactory
    private final OptionalFactoryField<RobotMotionStatusHolder> robotMotionStatusFromControllerField = new OptionalFactoryField<>("robotMotionStatusFromController");
    private final OptionalFactoryField<CenterOfPressureDataHolder> centerOfPressureDataHolderFromControllerField = new OptionalFactoryField<>("centerOfPressureDataHolderFromController");
    private final OptionalFactoryField<ForceSensorDataHolder> forceSensorDataHolderField = new OptionalFactoryField<>("forceSensorDataHolder");
+   private final OptionalFactoryField<double[]> feedbackCurrentsField = new OptionalFactoryField<>("feedbackCurrents");
    private final OptionalFactoryField<CenterOfMassDataHolder> centerOfMassDataHolderField = new OptionalFactoryField<>("centerOfMassDataHolder");
    private final OptionalFactoryField<ForceSensorDefinition[]> forceSensorDefinitionsField = new OptionalFactoryField<>("forceSensorDefinitionsField");
    private final OptionalFactoryField<IMUDefinition[]> imuDefinitionsField = new OptionalFactoryField<>("imuDefinitions");
@@ -588,6 +590,7 @@ public class AvatarEstimatorThreadFactory
       {
          HumanoidRobotContextDataFactory contextDataFactory = getHumanoidRobotContextDataFactory();
          contextDataFactory.setForceSensorDataHolder(getForceSensorDataHolder());
+         contextDataFactory.setFeedbackCurrents(getFeedbackCurrents());
          contextDataFactory.setCenterOfMassDataHolder(getCenterOfMassDataHolder());
          contextDataFactory.setCenterOfPressureDataHolder(getCenterOfPressureDataHolderFromController());
          contextDataFactory.setRobotMotionStatusHolder(getRobotMotionStatusFromController());
@@ -625,6 +628,13 @@ public class AvatarEstimatorThreadFactory
       if (!forceSensorDataHolderField.hasValue())
          forceSensorDataHolderField.set(new ForceSensorDataHolder(getForceSensorDefinitions()));
       return forceSensorDataHolderField.get();
+   }
+
+   public double[] getFeedbackCurrents()
+   {
+      if (!feedbackCurrentsField.hasValue())
+         feedbackCurrentsField.set(new double[getEstimatorFullRobotModel().getControllableOneDoFJoints().length]);
+      return feedbackCurrentsField.get();
    }
 
    public CenterOfMassDataHolder getCenterOfMassDataHolder()
