@@ -149,7 +149,7 @@ final class ROS2LogLegacyEuclidAdapter
             Object childTarget = getter.invoke(target);
             applyValues(childTarget, field.getValue());
          }
-         catch (Exception ignored)
+         catch (ReflectiveOperationException ignored)
          {
          }
       }
@@ -241,7 +241,7 @@ final class ROS2LogLegacyEuclidAdapter
             set.invoke(tupleTarget, values[0], values[1], values[2], values[3]);
             return true;
          }
-         catch (Exception ignored)
+         catch (ReflectiveOperationException ignored)
          {
          }
       }
@@ -252,7 +252,7 @@ final class ROS2LogLegacyEuclidAdapter
          set.invoke(tupleTarget, values[0], values[1], values[2]);
          return true;
       }
-      catch (Exception ignored)
+      catch (ReflectiveOperationException ignored)
       {
       }
 
@@ -267,7 +267,7 @@ final class ROS2LogLegacyEuclidAdapter
          setUnsafe.invoke(tupleTarget, values[0], values[1], values[2], values[3]);
          return true;
       }
-      catch (Exception ignored)
+      catch (ReflectiveOperationException ignored)
       {
       }
 
@@ -293,7 +293,7 @@ final class ROS2LogLegacyEuclidAdapter
          setS.invoke(tupleTarget, values[3]);
          return true;
       }
-      catch (Exception ignored)
+      catch (ReflectiveOperationException ignored)
       {
          return false;
       }
@@ -306,7 +306,7 @@ final class ROS2LogLegacyEuclidAdapter
          Method getter = target.getClass().getMethod(getterName);
          return getter.invoke(target);
       }
-      catch (Exception ignored)
+      catch (ReflectiveOperationException ignored)
       {
          return null;
       }

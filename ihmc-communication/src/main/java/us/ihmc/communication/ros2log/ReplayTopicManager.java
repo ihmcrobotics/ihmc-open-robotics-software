@@ -92,6 +92,19 @@ class ReplayTopicManager<T extends ROS2Message<T>>
       return messages;
    }
 
+   long replayTimeUntilNextMessage(long currentTime)
+   {
+      if (isDone || timestamps.isEmpty())
+         return Long.MAX_VALUE;
+
+      int nextIndex = lastSentIndex + 1;
+      if (nextIndex >= timestamps.size())
+         return Long.MAX_VALUE;
+
+      long nextTimestamp = timestamps.get(nextIndex);
+      return Math.max(0L, nextTimestamp - currentTime);
+   }
+
    TLongArrayList getTimestamps()
    {
       return timestamps;

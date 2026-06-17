@@ -145,7 +145,6 @@ public class ROS2LogReplay
       }
 
       startReplayInternal(topicManagers, timestampSupplier);
-      System.exit(0);
    }
 
    public ROS2Node getROS2Node()
@@ -168,7 +167,24 @@ public class ROS2LogReplay
 
          if (isDone)
             break;
+
+         sleepUntilNextReplayMessage(topicManagers, now);
       }
+   }
+
+   private void sleepUntilNextReplayMessage(List<ReplayTopicManager<?>> topicManagers, long replayTimeNow)
+   {
+      long replayDeltaMillis = Long.MAX_VALUE;
+      for (ReplayTopicManager<?> topicManager : topicManagers)
+      {
+         replayDeltaMillis = Math.min(replayDeltaMillis, topicManager.replayTimeUntilNextMessage(replayTimeNow));
+      }
+
+      if (replayDeltaMillis == Long.MAX_VALUE || replayDeltaMillis <= 0L)
+         return;
+
+      long wallClockSleepMillis = Math.max(1L, (long) Math.floor(replayDeltaMillis / replaySpeed));
+      ThreadTools.sleep(Math.min(wallClockSleepMillis, 25L));
    }
 
    public void pauseReplay(boolean pause)
