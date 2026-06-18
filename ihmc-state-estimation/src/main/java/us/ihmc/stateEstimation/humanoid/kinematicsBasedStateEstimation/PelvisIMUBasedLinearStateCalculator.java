@@ -21,6 +21,7 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -41,6 +42,7 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
 
    private final BooleanProvider useAccelerometerForEstimation;
    private final BooleanProvider cancelGravityFromAccelerationMeasurement;
+   private final DoubleParameter imuLinearAccelerationSpikeRejectionThreshold = new DoubleParameter("imuLinearAccelerationSpikeRejectionThreshold",registry, 200.0);
 
    private final FrameVector3DReadOnly gravityVector;
 
@@ -142,6 +144,10 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
          linearAcceleration.changeFrame(worldFrame);
          linearAcceleration.add(gravityVector);
       }
+
+      double threshold = imuLinearAccelerationSpikeRejectionThreshold.getValue();
+      if (linearAcceleration.normSquared() > threshold * threshold)
+         linearAcceleration.setToZero();
 
       yoLinearAccelerationMeasurementInWorld.setMatchingFrame(linearAcceleration);
       yoLinearAccelerationMeasurement.setMatchingFrame(linearAcceleration);
