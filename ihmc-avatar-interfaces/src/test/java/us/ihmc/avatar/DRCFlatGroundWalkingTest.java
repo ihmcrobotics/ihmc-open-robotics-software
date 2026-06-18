@@ -41,7 +41,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    private static final double yawingTimeDuration = 0.5;
    private static final double standingTimeDuration = RigidBodyControlManager.INITIAL_GO_HOME_TIME;
-   private static final double defaultWalkingTimeDuration = CITools.isEveryCommitBuild() ? 45.0 : 90.0;
+   private static final double defaultWalkingTimeDuration = (CITools.isEveryCommitBuild() || "true".equals(System.getProperty("runningOnCIServer"))) ? 45.0 : 90.0;
    private static final boolean useVelocityAndHeadingScript = true;
    private static String physicsEngineName;
 
@@ -204,6 +204,8 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       YoDouble controllerICPErrorY = (YoDouble) simulationTestHelper.findVariable("controllerICPErrorY");
 
       assertTrue(simulationTestHelper.simulateNow(standingTimeDuration), "Simulation has failed");
+      if ("true".equals(System.getProperty("runningOnCIServer")))
+         assertTrue(simulationTestHelper.simulateNow(2.0), "Simulation has failed");
 
       walk.set(false);
       overrideHeartbeat.set(false);
