@@ -78,6 +78,7 @@ import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoPhysicsEngine;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParameters;
+import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
@@ -176,7 +177,7 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> useMujocoPhysicsEngine = new OptionalFactoryField<>(
          "useMujocoPhysicsEngine",
          false);
-   protected final OptionalFactoryField<MujocoSimulationParameters> mujocoSimulationParameters = new OptionalFactoryField<>(
+   protected final OptionalFactoryField<MujocoSimulationParametersReadOnly> mujocoSimulationParameters = new OptionalFactoryField<>(
          "mujocoSimulationParameters");
    protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>(
          "impulseBasedPhysicsEngineParameters");
@@ -355,9 +356,11 @@ public class SCS2AvatarSimulationFactory
          // diverges from wall time. Start from caller-supplied parameters if present, then
          // override timestep so ordering of setSimulationDT vs setMujocoSimulationParameters
          // doesn't matter.
-         MujocoSimulationParameters mujocoParameters = mujocoSimulationParameters.hasValue()
-               ? mujocoSimulationParameters.get()
-               : new MujocoSimulationParameters();
+         // Copy into a mutable instance so we can override the timestep without mutating the
+         // caller-supplied (read-only) parameters.
+         MujocoSimulationParameters mujocoParameters = new MujocoSimulationParameters();
+         if (mujocoSimulationParameters.hasValue())
+            mujocoParameters.set(mujocoSimulationParameters.get());
          mujocoParameters.setTimestep(simulationDT.get());
          physicsEngineFactory = (inertialFrame, rootRegistry) -> new MujocoPhysicsEngine(inertialFrame, rootRegistry, mujocoParameters);
       }
@@ -1162,7 +1165,7 @@ public class SCS2AvatarSimulationFactory
       this.useMujocoPhysicsEngine.set(useMujocoPhysicsEngine);
    }
 
-   public void setMujocoSimulationParameters(MujocoSimulationParameters mujocoSimulationParameters)
+   public void setMujocoSimulationParameters(MujocoSimulationParametersReadOnly mujocoSimulationParameters)
    {
       this.mujocoSimulationParameters.set(mujocoSimulationParameters);
    }
