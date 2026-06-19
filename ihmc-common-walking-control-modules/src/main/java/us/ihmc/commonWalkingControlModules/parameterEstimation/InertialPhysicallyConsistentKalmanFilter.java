@@ -22,6 +22,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +51,15 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
 
    // Optional Tikhonov "soft constraint" pseudo-measurement (z=0, H=I, covariance R_prior) applied after the
    // torque update each tick: pulls weakly-observable parameter directions toward theta=0 (nominal) while
-   // strongly-observed ones (mass) are nearly untouched. Disabled unless getParameterPriorVariance() != null.
-   private final boolean applyPrior;
+   // strongly-observed ones (mass) are nearly untouched. Available only in generalized mode (theta=0 = nominal).
+   // The enable flag and the four per-parameter prior variances are exposed as YoVariables for LIVE tuning;
+   // R_prior is rebuilt from them each tick. Initialized from getParameterPriorVariance() (null -> start disabled).
+   private final boolean priorAvailable;
+   private final YoBoolean tikhonovPriorEnabled;
+   private final YoDouble tikhonovPriorVarianceAlpha; // mass (loose -> data dominates)
+   private final YoDouble tikhonovPriorVarianceD;     // inertia diagonal
+   private final YoDouble tikhonovPriorVarianceS;     // inertia off-diagonal
+   private final YoDouble tikhonovPriorVarianceT;     // first moment / CoM (tight -> held near nominal)
    private final DMatrixRMaj priorCovarianceDiag;   // R_prior (full state size, block-diagonal per body)
    private final DMatrixRMaj priorInnovationCovariance; // S = P + R_prior
    private final DMatrixRMaj priorInnovationCovarianceInv;
@@ -138,26 +147,38 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
       }
 
       // Tikhonov soft-constraint prior toward nominal (theta=0). Only meaningful with the generalized
-      // parameterization. R_prior is block-diagonal: the per-body diagonal pattern repeated across estimated bodies.
-      double[] perBodyPriorVariance = parameters.getParameterPriorVariance();
-      applyPrior = perBodyPriorVariance != null && parameters.useGeneralizedPhysicalConsistency();
+      // parameterization. The enable flag + four per-parameter variances are YoVariables so they can be tuned
+      // LIVE; R_prior is rebuilt from them each tick. getParameterPriorVariance() (Theta ordering
+      // [alpha,d,d,d,s,s,s,t,t,t]) seeds the initial values and whether it starts enabled (null -> disabled).
       int stateSize = partitionSizes[0];
-      if (applyPrior)
+      priorAvailable = parameters.useGeneralizedPhysicalConsistency();
+      double[] perBodyPriorVariance = parameters.getParameterPriorVariance();
+      if (perBodyPriorVariance != null && perBodyPriorVariance.length != RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY)
+         throw new RuntimeException("getParameterPriorVariance() must have length " + RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+      if (priorAvailable)
       {
-         if (perBodyPriorVariance.length != RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY)
-            throw new RuntimeException("getParameterPriorVariance() must have length " + RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+         tikhonovPriorEnabled = new YoBoolean("tikhonovPriorEnabled", registry);
+         tikhonovPriorEnabled.set(perBodyPriorVariance != null);
+         tikhonovPriorVarianceAlpha = new YoDouble("tikhonovPriorVarianceAlpha", registry);
+         tikhonovPriorVarianceD = new YoDouble("tikhonovPriorVarianceD", registry);
+         tikhonovPriorVarianceS = new YoDouble("tikhonovPriorVarianceS", registry);
+         tikhonovPriorVarianceT = new YoDouble("tikhonovPriorVarianceT", registry);
+         // index map within a body: 0=alpha, 1..3=d, 4..6=s, 7..9=t
+         tikhonovPriorVarianceAlpha.set(perBodyPriorVariance != null ? perBodyPriorVariance[0] : 1.0e6);
+         tikhonovPriorVarianceD.set(perBodyPriorVariance != null ? perBodyPriorVariance[1] : 1.0e-2);
+         tikhonovPriorVarianceS.set(perBodyPriorVariance != null ? perBodyPriorVariance[4] : 1.0e-2);
+         tikhonovPriorVarianceT.set(perBodyPriorVariance != null ? perBodyPriorVariance[7] : 1.0e-2);
          priorCovarianceDiag = new DMatrixRMaj(stateSize, stateSize);
-         for (int b = 0; b < nBodies; ++b)
-            for (int p = 0; p < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; ++p)
-            {
-               int idx = b * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY + p;
-               priorCovarianceDiag.set(idx, idx, perBodyPriorVariance[p]);
-            }
-         LogTools.info("InertialPhysicallyConsistentKalmanFilter: Tikhonov soft-constraint prior ON (per-body R_prior diag = "
-                       + java.util.Arrays.toString(perBodyPriorVariance) + ")");
+         LogTools.info("InertialPhysicallyConsistentKalmanFilter: Tikhonov prior available (live YoVariables); enabled="
+                       + tikhonovPriorEnabled.getValue());
       }
       else
       {
+         tikhonovPriorEnabled = null;
+         tikhonovPriorVarianceAlpha = null;
+         tikhonovPriorVarianceD = null;
+         tikhonovPriorVarianceS = null;
+         tikhonovPriorVarianceT = null;
          priorCovarianceDiag = new DMatrixRMaj(0, 0);
       }
       priorInnovationCovariance = new DMatrixRMaj(stateSize, stateSize);
@@ -311,7 +332,7 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
    @Override
    public void postSolveHook()
    {
-      if (applyPrior)
+      if (priorAvailable && tikhonovPriorEnabled.getValue())
          applyTikhonovPrior();
       updateWatchers();
    }
@@ -327,6 +348,25 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
     */
    private void applyTikhonovPrior()
    {
+      // Rebuild R_prior from the (live-tunable) per-parameter variances. Per-body diagonal pattern, repeated:
+      // index 0 = alpha (mass), 1..3 = d (inertia diag), 4..6 = s (inertia off-diag), 7..9 = t (first moment).
+      double varAlpha = tikhonovPriorVarianceAlpha.getValue();
+      double varD = tikhonovPriorVarianceD.getValue();
+      double varS = tikhonovPriorVarianceS.getValue();
+      double varT = tikhonovPriorVarianceT.getValue();
+      priorCovarianceDiag.zero();
+      for (int b = 0; b < nBodies; ++b)
+      {
+         int base = b * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY;
+         priorCovarianceDiag.set(base, base, varAlpha);
+         for (int p = 1; p <= 3; ++p)
+            priorCovarianceDiag.set(base + p, base + p, varD);
+         for (int p = 4; p <= 6; ++p)
+            priorCovarianceDiag.set(base + p, base + p, varS);
+         for (int p = 7; p <= 9; ++p)
+            priorCovarianceDiag.set(base + p, base + p, varT);
+      }
+
       for (int i = 0; i < nBodies; ++i)
          MatrixMissingTools.setMatrixRows(priorThetaFull,
                                           i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
