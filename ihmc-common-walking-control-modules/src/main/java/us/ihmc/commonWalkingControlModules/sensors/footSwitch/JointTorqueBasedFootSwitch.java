@@ -553,7 +553,13 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 
       public WrenchReadOnly getWrench()
       {
-         return compensateGravity.getValue() ? wrench : wrenchNoGravity;
+         // NOTE: the field names are misleading. "wrench" = (J^T)^-1(-tau) is the NON-gravity-compensated
+         // estimate; "wrenchNoGravity" = (J^T)^-1(tau_gravity - tau) is the gravity-COMPENSATED one. When
+         // compensateGravity is true we must return the compensated estimate, matching the selection used'
+         // for touchdown detection in calculate() (updateFootSwitch). The previous ternary was inverted, so
+         // getMeasuredWrench() returned the uncompensated wrench and under-read true GRF by the leg's own
+         // gravity (~10% of body weight in static stance, verified in sim).
+         return compensateGravity.getValue() ? wrenchNoGravity : wrench;
       }
 
       public double getFootLoadPercentage()
