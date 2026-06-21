@@ -7,6 +7,9 @@ uint64 sequence_id
 # If true, start stepping. If false, stand in place
 bool walk
 
+# If true, jump
+bool jump
+
 # Desired velocity setpoints
 float64 forward_velocity
 float64 lateral_velocity

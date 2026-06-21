@@ -7,6 +7,7 @@ public class VelocityBasedWalkingInputCommand implements Command<VelocityBasedWa
 {
    private long sequenceId;
    private boolean walk;
+   private boolean jump;
    private double forwardVelocity;
    private double lateralVelocity;
    private double turnVelocity;
@@ -18,6 +19,7 @@ public class VelocityBasedWalkingInputCommand implements Command<VelocityBasedWa
       clear();
 
       walk = other.walk;
+      jump = other.jump;
       sequenceId = other.sequenceId;
       forwardVelocity = other.forwardVelocity;
       lateralVelocity = other.lateralVelocity;
@@ -29,6 +31,7 @@ public class VelocityBasedWalkingInputCommand implements Command<VelocityBasedWa
    public void clear()
    {
       walk = false;
+      jump = false;
       sequenceId = 0;
       forwardVelocity = 0.0;
       lateralVelocity = 0.0;
@@ -46,6 +49,7 @@ public class VelocityBasedWalkingInputCommand implements Command<VelocityBasedWa
    {
       clear();
       walk = message.getWalk();
+      jump = message.getJump();
       sequenceId = message.getSequenceId();
       forwardVelocity = message.getForwardVelocity();
       lateralVelocity = message.getLateralVelocity();
@@ -74,6 +78,11 @@ public class VelocityBasedWalkingInputCommand implements Command<VelocityBasedWa
    public boolean getWalk()
    {
       return walk;
+   }
+
+   public boolean getJump()
+   {
+      return jump;
    }
 
    public double getForwardVelocity()

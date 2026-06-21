@@ -24,6 +24,10 @@ module controller_msgs
          */
         boolean walk;
         /**
+         * If true, jump
+         */
+        boolean jump;
+        /**
          * Desired velocity setpoints
          */
         double forward_velocity;
