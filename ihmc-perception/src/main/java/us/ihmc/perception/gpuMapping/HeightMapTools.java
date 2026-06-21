@@ -1,9 +1,17 @@
 package us.ihmc.perception.gpuMapping;
 
 import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.nio.FloatBuffer;
 
@@ -172,5 +180,138 @@ public class HeightMapTools
       floatPointer.get(values);
 
       heightMapDataToPack.setHeights(values);
+   }
+
+   /**
+    * Computes the best-fit rigid-body transform (SE(3)) that aligns a set of local 3D points
+    * to a set of global 3D points using Singular Value Decomposition (SVD).
+    * <p>
+    * This method implements the standard point-to-point ICP alignment step:
+    * <ol>
+    * <li>Compute centroids of the matched local and global point sets</li>
+    * <li>Build the 3×3 cross-covariance matrix</li>
+    * <li>Compute the optimal rotation using SVD (Umeyama / Horn method)</li>
+    * <li>Compute the translation that aligns the centroids</li>
+    * </ol>
+    * The resulting transform minimizes:
+    * <pre>
+    * Σ || R * p_i + t − q_{c(i)} ||²
+    * </pre>
+    * where {@code p_i} are local points and {@code q_{c(i)}} are their corresponding global points.
+    * <p>
+    * A reflection correction is applied if the computed rotation has a negative determinant.
+    *
+    * <h3>Data Layout</h3>
+    * Points are stored in flat float arrays as:
+    * <pre>
+    * [x0, y0, z0, x1, y1, z1, ..., xN, yN, zN]
+    * </pre>
+    * The {@code corrArray} maps each local point index {@code i} to a global
+    * point index {@code j}.
+    *
+    * <h3>Usage Context</h3>
+    * This method is optimized for high-frequency calls by using Java heap arrays to avoid
+    * JNI overhead. It is intended for use inside an ICP loop where correspondences are
+    * recomputed each iteration.
+    *
+    * @param localArray     Flat array containing the local/source points (size = {@code numberOfPoints * 3})
+    * @param globalArray    Flat array containing the global/target points (size >= max(correspondence_index) * 3)
+    * @param corrArray      For each local point {@code i}, contains the index {@code j} of the corresponding global point
+    * @param numberOfPoints Number of valid point correspondences to use
+    * @return 4×4 homogeneous transformation matrix mapping local points into the global frame
+    * @throws IllegalArgumentException if {@code numberOfPoints < 3} (insufficient points to compute a unique transform)
+    */
+   public static DMatrixRMaj computeTransformSVD(float[] localArray, float[] globalArray, int[] corrArray, int numberOfPoints)
+   {
+      final int stride = 4; // 4 floats per point (x, y, z, w)
+
+      // Compute centroids
+      double localCentroidX = 0, localCentroidY = 0, localCentroidZ = 0;
+      double globalCentroidX = 0, globalCentroidY = 0, globalCentroidZ = 0;
+
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         int baseLocal = i * stride;
+         localCentroidX += localArray[baseLocal + 0];
+         localCentroidY += localArray[baseLocal + 1];
+         localCentroidZ += localArray[baseLocal + 2];
+
+         int j = corrArray[i];
+         int baseGlobal = j * stride;
+         globalCentroidX += globalArray[baseGlobal + 0];
+         globalCentroidY += globalArray[baseGlobal + 1];
+         globalCentroidZ += globalArray[baseGlobal + 2];
+      }
+
+      localCentroidX /= numberOfPoints;
+      localCentroidY /= numberOfPoints;
+      localCentroidZ /= numberOfPoints;
+      globalCentroidX /= numberOfPoints;
+      globalCentroidY /= numberOfPoints;
+      globalCentroidZ /= numberOfPoints;
+
+      // Compute cross-covariance matrix H
+      DMatrixRMaj H = new DMatrixRMaj(3, 3);
+
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         int baseLocal = i * stride;
+         double lx = localArray[baseLocal + 0] - localCentroidX;
+         double ly = localArray[baseLocal + 1] - localCentroidY;
+         double lz = localArray[baseLocal + 2] - localCentroidZ;
+
+         int j = corrArray[i];
+         int baseGlobal = j * stride;
+         double gx = globalArray[baseGlobal + 0] - globalCentroidX;
+         double gy = globalArray[baseGlobal + 1] - globalCentroidY;
+         double gz = globalArray[baseGlobal + 2] - globalCentroidZ;
+
+         // Accumulate H matrix values
+         H.data[0] += lx * gx;
+         H.data[1] += lx * gy;
+         H.data[2] += lx * gz;
+         H.data[3] += ly * gx;
+         H.data[4] += ly * gy;
+         H.data[5] += ly * gz;
+         H.data[6] += lz * gx;
+         H.data[7] += lz * gy;
+         H.data[8] += lz * gz;
+      }
+
+      // --- SVD and Rotation Logic ---
+      SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(3, 3, true, true, false);
+      if (!svd.decompose(H))
+         return null;
+
+      DMatrixRMaj U = svd.getU(null, false);
+      DMatrixRMaj V = svd.getV(null, false);
+      DMatrixRMaj Ut = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.transpose(U, Ut);
+
+      DMatrixRMaj rotation = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.mult(V, Ut, rotation);
+
+      if (CommonOps_DDRM.det(rotation) < 0)
+      {
+         V.set(0, 2, -V.get(0, 2));
+         V.set(1, 2, -V.get(1, 2));
+         V.set(2, 2, -V.get(2, 2));
+         CommonOps_DDRM.mult(V, Ut, rotation);
+      }
+
+      // Translation calculation
+      DMatrixRMaj localCentroidVec = new DMatrixRMaj(new double[][] {{localCentroidX}, {localCentroidY}, {localCentroidZ}});
+      DMatrixRMaj globalCentroidVec = new DMatrixRMaj(new double[][] {{globalCentroidX}, {globalCentroidY}, {globalCentroidZ}});
+      DMatrixRMaj translation = new DMatrixRMaj(3, 1);
+
+      CommonOps_DDRM.mult(rotation, localCentroidVec, translation);
+      CommonOps_DDRM.subtract(globalCentroidVec, translation, translation);
+
+      // Final 4x4 Transformation Matrix
+      DMatrixRMaj transform = CommonOps_DDRM.identity(4);
+      CommonOps_DDRM.insert(rotation, transform, 0, 0);
+      CommonOps_DDRM.insert(translation, transform, 0, 3);
+
+      return transform;
    }
 }

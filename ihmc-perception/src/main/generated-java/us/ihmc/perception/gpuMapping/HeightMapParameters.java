@@ -19,8 +19,8 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final BooleanStoredPropertyKey driftOffsetFilter = keys.addBooleanKey("Drift offset filter");
+   public static final BooleanStoredPropertyKey icpFilter = keys.addBooleanKey("ICP filter");
    public static final BooleanStoredPropertyKey flyingPointsFilter = keys.addBooleanKey("Flying points filter");
-   public static final BooleanStoredPropertyKey logHeightMap = keys.addBooleanKey("Log height map");
    public static final DoubleStoredPropertyKey minDepthToAccept = keys.addDoubleKey("Min Depth To Accept");
    public static final DoubleStoredPropertyKey minHeightRegistration = keys.addDoubleKey("Min height registration");
    public static final DoubleStoredPropertyKey maxHeightRegistration = keys.addDoubleKey("Max height registration");
@@ -34,6 +34,12 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final DoubleStoredPropertyKey cellSize = keys.addDoubleKey("Cell size");
    public static final DoubleStoredPropertyKey localWidthInMeters = keys.addDoubleKey("Local width in meters");
    public static final DoubleStoredPropertyKey globalWidthInMeters = keys.addDoubleKey("Global width in meters");
+   public static final IntegerStoredPropertyKey icpMaxIterations = keys.addIntegerKey("Icp max iterations");
+   public static final DoubleStoredPropertyKey icpConvergence = keys.addDoubleKey("Icp convergence");
+   public static final DoubleStoredPropertyKey icpMaxPointDistance = keys.addDoubleKey("Icp max point distance");
+   public static final DoubleStoredPropertyKey icpMaxDriftDistance = keys.addDoubleKey("Icp max drift distance");
+   public static final IntegerStoredPropertyKey icpValidPoints = keys.addIntegerKey("Icp valid points");
+   public static final DoubleStoredPropertyKey icpAlphaFilter = keys.addDoubleKey("Icp alpha filter");
 
    /**
     * Loads this property set.

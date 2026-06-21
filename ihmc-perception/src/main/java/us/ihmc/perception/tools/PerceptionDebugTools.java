@@ -19,6 +19,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.perception.gpuMapping.HeightMapData;
 
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -221,6 +222,11 @@ public class PerceptionDebugTools
       LogTools.info(matToString(name, image, 0, 0, image.rows(), image.cols(), skip));
    }
 
+   public static void printIntMat(String name, Mat image, int skip)
+   {
+      LogTools.info(matToIntString(name, image, 0, 0, image.rows(), image.cols(), skip));
+   }
+
    public static void printMat(String name, Mat image, int rowBegin, int colBegin, int rowEnd, int colEnd, int skip)
    {
       LogTools.info(matToString(name, image, rowBegin, colBegin, rowEnd, colEnd, skip));
@@ -256,6 +262,35 @@ public class PerceptionDebugTools
          }
          matString.append("\n");
       }
+      return matString.toString();
+   }
+
+   public static String matToIntString(String name, Mat image, int rowBegin, int colBegin, int rowEnd, int colEnd, int skip)
+   {
+      if (image.type() != opencv_core.CV_32SC1)
+      {
+         return "Error: Mat [" + name + "] is not CV_32SC1. It is " + image.type();
+      }
+
+      StringBuilder matString = new StringBuilder("Mat: [" + name + "], Int Values:\n");
+
+      IntBuffer buffer = image.createBuffer();
+      int cols = image.cols();
+
+      int actualRowEnd = Math.min(rowEnd, image.rows());
+      int actualColEnd = Math.min(colEnd, cols);
+
+      for (int i = rowBegin; i < actualRowEnd; i += skip)
+      {
+         matString.append("Row ").append(i).append(": ");
+         for (int j = colBegin; j < actualColEnd; j += skip)
+         {
+            int value = buffer.get(i * cols + j);
+            matString.append(value).append(" ");
+         }
+         matString.append("\n");
+      }
+
       return matString.toString();
    }
 

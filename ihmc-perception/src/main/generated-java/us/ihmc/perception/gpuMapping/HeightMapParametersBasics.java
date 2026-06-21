@@ -13,14 +13,14 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.driftOffsetFilter, driftOffsetFilter);
    }
 
+   default void setICPFilter(boolean icpFilter)
+   {
+      set(HeightMapParameters.icpFilter, icpFilter);
+   }
+
    default void setFlyingPointsFilter(boolean flyingPointsFilter)
    {
       set(HeightMapParameters.flyingPointsFilter, flyingPointsFilter);
-   }
-
-   default void setLogHeightMap(boolean logHeightMap)
-   {
-      set(HeightMapParameters.logHeightMap, logHeightMap);
    }
 
    default void setMinDepthToAccept(double minDepthToAccept)
@@ -86,5 +86,35 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setGlobalWidthInMeters(double globalWidthInMeters)
    {
       set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
+   }
+
+   default void setIcpMaxIterations(int icpMaxIterations)
+   {
+      set(HeightMapParameters.icpMaxIterations, icpMaxIterations);
+   }
+
+   default void setIcpConvergence(double icpConvergence)
+   {
+      set(HeightMapParameters.icpConvergence, icpConvergence);
+   }
+
+   default void setIcpMaxPointDistance(double icpMaxPointDistance)
+   {
+      set(HeightMapParameters.icpMaxPointDistance, icpMaxPointDistance);
+   }
+
+   default void setIcpMaxDriftDistance(double icpMaxDriftDistance)
+   {
+      set(HeightMapParameters.icpMaxDriftDistance, icpMaxDriftDistance);
+   }
+
+   default void setIcpValidPoints(int icpValidPoints)
+   {
+      set(HeightMapParameters.icpValidPoints, icpValidPoints);
+   }
+
+   default void setIcpAlphaFilter(double icpAlphaFilter)
+   {
+      set(HeightMapParameters.icpAlphaFilter, icpAlphaFilter);
    }
 }

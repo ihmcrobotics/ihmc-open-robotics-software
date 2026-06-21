@@ -13,12 +13,15 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.gpuMapping.HeightMapExtractor;
 import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
 import us.ihmc.perception.gpuMapping.HeightMapParameters;
 import us.ihmc.perception.gpuMapping.worldModel.ChunkedMapManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
@@ -45,6 +48,7 @@ public class RDXHeightMapLogPlayer
 
    private final ROS2ZEDSVOPlaybackSensor zedPlaybackSensor;
    private final RDXZEDSVORecorderPanel zedSVOPanel;
+   private final RDXStoredPropertySetTuner heightMapParametersPanel;
    private RDXReferenceFrameGraphic zedFrameGraphic;
 
    private final RDXRawImagePointCloudVisualizer zedPointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud", true);
@@ -56,13 +60,15 @@ public class RDXHeightMapLogPlayer
    private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
    private long heightMapSequenceId = 0;
 
+   private final ImGuiRemoteROS2StoredPropertySetGroup hostStoredPropertySets;
+
    public RDXHeightMapLogPlayer()
    {
       ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName());
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       baseUI = new RDXBaseUI();
 
-      zedPlaybackSensor = new ROS2ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_X_MINI, zed.SL_DEPTH_MODE_NEURAL_LIGHT, SVO_FILE);
+      zedPlaybackSensor = new ROS2ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_X_MINI, zed.SL_DEPTH_MODE_NEURAL, SVO_FILE);
       zedPlaybackSensor.setTrackedPoseOffset(new Pose3D(0.0, 0.0, 1.0, 0.0, 0.0, 0.0));
       zedPlaybackSensor.useTrackedPose(true);
       BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
@@ -79,6 +85,11 @@ public class RDXHeightMapLogPlayer
       heightMapExtractor = new HeightMapExtractor(heightMapParameters);
       heightMapMessage = new HeightMapMessage();
       heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
+
+      hostStoredPropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Node);
+      heightMapParametersPanel = new RDXStoredPropertySetTuner("Height Map Parameters (CH)");
+      heightMapParametersPanel.create(heightMapParameters, false);
+      hostStoredPropertySets.registerRemotePropertySet(heightMapParameters, PerceptionComms.HEIGHT_MAP_PARAMETERS);
 
       RepeatingTaskThread imageThread = new RepeatingTaskThread("Image Thread", this::runMethod);
       imageThread.startRepeating();
@@ -100,6 +111,7 @@ public class RDXHeightMapLogPlayer
             baseUI.getImGuiPanelManager().addPanel("ZED SVO", zedSVOPanel::render);
             baseUI.getImGuiPanelManager().addPanel("ZED Point Cloud", zedPointCloudVisualizer::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel("Height Map Renderer", heightMapVisualizer::renderImGuiWidgets);
+            baseUI.getImGuiPanelManager().addPanel(heightMapParametersPanel);
 
             baseUI.getPrimaryScene().addRenderableProvider(zedPointCloudVisualizer);
             baseUI.getPrimaryScene().addRenderableProvider(heightMapVisualizer);
@@ -112,6 +124,8 @@ public class RDXHeightMapLogPlayer
             zedSVOPanel.update();
             zedPointCloudVisualizer.update();
             heightMapVisualizer.update();
+
+            hostStoredPropertySets.setPropertyChanged();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -160,14 +174,7 @@ public class RDXHeightMapLogPlayer
          // Update the Z translation of the sensor to match the world transform (to handle the sensor's vertical position)
          sensorToGround.getTranslation().setZ(sensorToWorld.getTranslation().getZ());
 
-         heightMapExtractor.update(depthImage.getGpuImageMat(),
-                                   depthImage.getIntrinsicsCopy(),
-                                   sensorToWorld,
-                                   sensorToGround,
-                                   groundToWorld,
-                                   0,
-                                   heightMapCenterOrigin,
-                                   0);
+         heightMapExtractor.update(depthImage.getGpuImageMat(), depthImage.getIntrinsicsCopy(), sensorToWorld, sensorToGround, groundToWorld, 0, 0);
 
          // Publish the height map to anyone who is subscribing
          Mat hostGlobalHeightMap = new Mat();

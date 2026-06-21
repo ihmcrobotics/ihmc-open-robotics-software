@@ -1,8 +1,13 @@
 package us.ihmc.perception.gpuMapping;
 
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -14,8 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class HeightMapToolsTest
 {
-   private final int iterations = 1000;
    private final static float MILLISECOND_TOLERANCE = 1.0f;
+   private final int iterations = 1000;
    private final HeightMapParameters heightMapParameters = new HeightMapParameters();
 
    /**
@@ -225,5 +230,172 @@ public class HeightMapToolsTest
          int keyFromIndices = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
          Assertions.assertEquals(keyFromCoordinates, keyFromIndices);
       }
+   }
+
+   @Test
+   public void testComputeTransformSVDTranslationOnly()
+   {
+      float[] localData = new float[] {
+            0f, 0f, 0f, 1f,
+            1f, 0f, 0f, 1f,
+            0f, 1f, 0f, 1f
+      };
+
+      float[] globalData = new float[] {
+            1f, 2f, 3f, 1f,
+            2f, 2f, 3f, 1f,
+            1f, 3f, 3f, 1f
+      };
+
+      int[] corr = new int[] {0, 1, 2};
+      int numPoints = 3;
+
+      DMatrixRMaj transform = HeightMapTools.computeTransformSVD(localData, globalData, corr, numPoints);
+
+      // Translation should be (1,2,3)
+      assertEquals(1.0, transform.get(0, 3), 1e-6);
+      assertEquals(2.0, transform.get(1, 3), 1e-6);
+      assertEquals(3.0, transform.get(2, 3), 1e-6);
+
+      // Rotation should be identity
+      assertEquals(1.0, transform.get(0, 0), 1e-6);
+      assertEquals(1.0, transform.get(1, 1), 1e-6);
+      assertEquals(1.0, transform.get(2, 2), 1e-6);
+
+      assertEquals(0.0, transform.get(0, 1), 1e-6);
+      assertEquals(0.0, transform.get(0, 2), 1e-6);
+      assertEquals(0.0, transform.get(1, 0), 1e-6);
+      assertEquals(0.0, transform.get(1, 2), 1e-6);
+      assertEquals(0.0, transform.get(2, 0), 1e-6);
+      assertEquals(0.0, transform.get(2, 1), 1e-6);
+   }
+
+   @Test
+   public void testComputeTransformSVDRotationAndTranslation()
+   {
+      // 3 points forming a triangle in local frame
+      float[] localData = new float[] {
+            0f, 0f, 0f, 1f,
+            1f, 0f, 0f, 1f,
+            0f, 1f, 0f, 1f
+      };
+
+      // Apply 90° rotation around Z-axis + translation (1, 2, 3)
+      // Rotation 90° CCW around Z: x' = -y, y' = x, z' = z
+      float[] globalData = new float[] {
+            1f, 2f, 3f, 1f,   // (0,0,0) + translation
+            1f, 3f, 3f, 1f,   // (1,0,0) rotated 90° + translation
+            0f, 2f, 3f, 1f    // (0,1,0) rotated 90° + translation
+      };
+
+      // Correspondences are 0->0, 1->1, 2->2
+      int[] corr = new int[] {0, 1, 2};
+      int numPoints = 3;
+
+      DMatrixRMaj transform = HeightMapTools.computeTransformSVD(localData, globalData, corr, numPoints);
+
+      // Translation should be (1,2,3)
+      assertEquals(1.0, transform.get(0, 3), 1e-6);
+      assertEquals(2.0, transform.get(1, 3), 1e-6);
+      assertEquals(3.0, transform.get(2, 3), 1e-6);
+
+      // Rotation should be 90° around Z
+      assertEquals(0.0, transform.get(0, 0), 1e-6);
+      assertEquals(-1.0, transform.get(0, 1), 1e-6);
+      assertEquals(0.0, transform.get(0, 2), 1e-6);
+
+      assertEquals(1.0, transform.get(1, 0), 1e-6);
+      assertEquals(0.0, transform.get(1, 1), 1e-6);
+      assertEquals(0.0, transform.get(1, 2), 1e-6);
+
+      assertEquals(0.0, transform.get(2, 0), 1e-6);
+      assertEquals(0.0, transform.get(2, 1), 1e-6);
+      assertEquals(1.0, transform.get(2, 2), 1e-6);
+   }
+
+   @Test
+   public void testReflectionIsCorrected()
+   {
+      // Local points: simple right triangle
+      float[] localData = new float[] {
+            0f, 0f, 0f, 1f,
+            1f, 0f, 0f, 1f,
+            0f, 1f, 0f, 1f
+      };
+
+      // Global points: mirrored across Y axis + translated
+      float[] globalData = new float[] {
+            1f, 2f, 3f, 1f,  // mirrored + translation
+            0f, 2f, 3f, 1f,
+            1f, 3f, 3f, 1f
+      };
+
+      // Identity correspondences
+      int[] corr = new int[] {0, 1, 2};
+      int numberOfPoints = 3;
+
+      DMatrixRMaj T = HeightMapTools.computeTransformSVD(localData, globalData, corr, numberOfPoints);
+
+      DMatrixRMaj rotation = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.extract(T, 0, 3, 0, 3, rotation, 0, 0);
+
+      // Ensure it is a proper rotation (det > 0)
+      assertTrue(CommonOps_DDRM.det(rotation) > 0.0);
+   }
+
+   @Test
+   public void testComputeTransformSVDWithMoreThanThreePoints()
+   {
+      // Local points (forming a square + diagonal)
+      float[] localData = new float[] {
+            0f, 0f, 0f, 1f,
+            1f, 0f, 0f, 1f,
+            0f, 1f, 0f, 1f,
+            1f, 1f, 0f, 1f,
+            0.5f, 0.5f, 0f, 1f
+      };
+
+      // Apply rotation 90° around Z + translation (1,2,3)
+      // x' = -y, y' = x, z' = z
+      float[] globalData = new float[] {
+            1f, 2f, 3f, 1f,    // rotated + translated
+            1f, 3f, 3f, 1f,
+            0f, 2f, 3f, 1f,
+            0f, 3f, 3f, 1f,
+            0.5f, 2.5f, 3f, 1f
+      };
+
+      // Identity correspondences
+      int[] corr = new int[] {0, 1, 2, 3, 4};
+      int numberOfPoints = 5;
+
+      DMatrixRMaj T = HeightMapTools.computeTransformSVD(localData, globalData, corr, numberOfPoints);
+
+      DMatrixRMaj rotation = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.extract(T, 0, 3, 0, 3, rotation, 0, 0);
+
+      double tx = T.get(0, 3);
+      double ty = T.get(1, 3);
+      double tz = T.get(2, 3);
+
+      assertEquals(1.0, tx, 1e-6);
+      assertEquals(2.0, ty, 1e-6);
+      assertEquals(3.0, tz, 1e-6);
+
+      // Rotation should be 90° around Z
+      assertEquals(0.0, rotation.get(0, 0), 1e-6);
+      assertEquals(-1.0, rotation.get(0, 1), 1e-6);
+      assertEquals(0.0, rotation.get(0, 2), 1e-6);
+
+      assertEquals(1.0, rotation.get(1, 0), 1e-6);
+      assertEquals(0.0, rotation.get(1, 1), 1e-6);
+      assertEquals(0.0, rotation.get(1, 2), 1e-6);
+
+      assertEquals(0.0, rotation.get(2, 0), 1e-6);
+      assertEquals(0.0, rotation.get(2, 1), 1e-6);
+      assertEquals(1.0, rotation.get(2, 2), 1e-6);
+
+      // Rotation determinant should be positive
+      assertTrue(CommonOps_DDRM.det(rotation) > 0.0);
    }
 }

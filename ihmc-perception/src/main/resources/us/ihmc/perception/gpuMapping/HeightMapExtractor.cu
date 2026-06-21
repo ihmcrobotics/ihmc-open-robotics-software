@@ -46,7 +46,8 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
                                           float* __restrict__ sumOfSquaresMap, size_t pitchSumSq,
                                           float* __restrict__ motionVarianceSumMap, size_t pitchMotionVar,
                                           const float* __restrict__ params,
-                                          const float* __restrict__ sensorToZUpFrameTf,
+                                          float* sensorToZUpFrameTf,
+                                          float* sensorToWorldFrameTf,
                                           const float linearMotionMagnitude,
                                           const float angularMotionMagnitude)
 {
@@ -79,9 +80,29 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
     float3 queryPointInSensorFrame = back_project_perspective(make_int2(xIndex, yIndex), depth, params);
     float3 queryPointInZUpFrame = transformPoint3D(queryPointInSensorFrame, sensorToZUpFrameTf);
 
+    // 1. Get the raw world position from the transform matrix
+    float worldCamX = sensorToWorldFrameTf[3];
+    float worldCamY = sensorToWorldFrameTf[7];
+
+    // 2. Calculate the "Snapped" position (the nearest grid intersection)
+    // Using floor ensures the grid lines stay at multiples of cellSize (0.0, 0.1, 0.2...)
+    float snappedCenterX = (floorf(worldCamX / cellSize) * cellSize);
+    float snappedCenterY = (floorf(worldCamY / cellSize) * cellSize);
+
+    // 3. Calculate the sub-cell offset
+    // This is how far the camera has "strayed" from the snapped grid point
+    float subCellOffsetX = worldCamX - snappedCenterX;
+    float subCellOffsetY = worldCamY - snappedCenterY;
+
+    // 4. Apply the offset to the point relative to the sensor
+    // This "stabilizes" the point against the camera's sub-pixel movement
+    float2 stableXY;
+    stableXY.x = queryPointInZUpFrame.x + subCellOffsetX;
+    stableXY.y = queryPointInZUpFrame.y + subCellOffsetY;
+
     // Get the correct cell index for the maps
     float2 xyCoords = make_float2(queryPointInZUpFrame.x, queryPointInZUpFrame.y);
-    int2 cellIndex = coordinate_to_indices(xyCoords, make_float2(0.0f, 0.0f), cellSize, centerIndex);
+    int2 cellIndex = coordinate_to_indices(stableXY, make_float2(0.0f, 0.0f), cellSize, centerIndex);
 
     // Bounds check against the local map dimensions because we are scanning the entire depth image
     if (cellIndex.x < 0 || cellIndex.x >= cellsPerAxis || cellIndex.y < 0 || cellIndex.y >= cellsPerAxis)
@@ -95,8 +116,8 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
 
     // Atomically add this pixel's contribution
     atomicAdd(sumPtr, queryPointInZUpFrame.z);
-    atomicAdd(countPtr, 1);
     atomicAdd(sumSqPtr, queryPointInZUpFrame.z * queryPointInZUpFrame.z);
+    atomicAdd(countPtr, 1);
 
     // Also calculate and add motion variance contribution
     float distance = sqrtf(queryPointInSensorFrame.x * queryPointInSensorFrame.x +
@@ -134,7 +155,7 @@ __global__ void computeLocalMap(const float* __restrict__ sumMap, size_t pitchSu
     const float* sumSqPtr = (const float*)((const char*)sumOfSquaresMap + yIndex * pitchSumSq) + xIndex;
     const float* motionVarPtr = (const float*)((const char*)motionVarianceSumMap + yIndex * pitchMotionVar) + xIndex;
 
-    float count = *countPtr;
+    int count = *countPtr;
     float mean = 0.0f;
     float variance = 0.0f;
     float motionVariance = 0.0f;
@@ -146,14 +167,23 @@ __global__ void computeLocalMap(const float* __restrict__ sumMap, size_t pitchSu
         mean = sum / count;
         motionVariance = *motionVarPtr / count;
 
+        // If the count is only 1, there is no variance, there was only one pixel in the given cell
         if (count > 1)
         {
+            // Welford's Algorithm
             float sumSq = *sumSqPtr;
             // Unbiased sample variance (one-pass), a.k.a. Bessel's Correction:
             // (Σx² - (Σx)² / N) / (N - 1)
             variance = (sumSq - (sum * sum) / static_cast<float>(count)) / (static_cast<float>(count) - 1.0f);
             variance = fmaxf(0.0f, variance); // Clamp to zero to avoid negatives from float error
         }
+    }
+
+    // This is going to depend on the cell size, as the larger the cell more pixels will fall into the cell
+    if (count < 40)
+    {
+        // If the count is too low, invalidate the mean, we don't want to record this cell as it doesn't have enough data
+        mean = 0.0f;
     }
 
     // Write final results to the output maps
@@ -169,6 +199,8 @@ __global__ void computeLocalMap(const float* __restrict__ sumMap, size_t pitchSu
 extern "C"
 __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOldHeightMapMean,
                                          float *oldHeightMapVariance, size_t pitchOldHeightMapVariance,
+                                         float *oldPreviousGlobalForICP, size_t pitchOldPreviousGlobalForICP,
+                                         float *previousGlobalForICP, size_t pitchPreviousGlobalForICP,
                                          float *newMeanMap, size_t pitchNewMean,
                                          float *newVarianceMap, size_t pitchNewVariance,
                                          int shiftX, int shiftY, float *params, float defaultValue)
@@ -188,11 +220,14 @@ __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOl
     {
         float* oldMeanRow = (float*)((char*)oldHeightMapMean + srcX * pitchOldHeightMapMean);
         float* oldVarianceRow = (float *)((char*)oldHeightMapVariance + srcX * pitchOldHeightMapVariance);
+        float* oldICPRow = (float *)((char*)oldPreviousGlobalForICP + srcX * pitchOldPreviousGlobalForICP);
 
         float* newMeanRow = (float*)((char*)newMeanMap + x * pitchNewMean);
         float* newVarianceRow = (float*)((char*)newVarianceMap + x * pitchNewVariance);
+        float* newPreviousRow = (float*)((char*)previousGlobalForICP + x * pitchPreviousGlobalForICP);
 
         newMeanRow[y] = oldMeanRow[srcY];
+        newPreviousRow[y] = oldICPRow[srcY];
 
         // Add variance due to the translation
         float increasedVariance = oldVarianceRow[srcY] + params[ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED];
@@ -203,9 +238,11 @@ __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOl
     {
         float* newMeanRow = (float*)((char*)newMeanMap + x * pitchNewMean);
         float* newVarianceRow = (float*)((char*)newVarianceMap + x * pitchNewVariance);
+        float* newPreviousRow = (float*)((char*)previousGlobalForICP + x * pitchPreviousGlobalForICP);
 
         newMeanRow[y] = defaultValue;
         newVarianceRow[y] = defaultValue;
+        newPreviousRow[y] = defaultValue;
     }
 }
 
@@ -213,10 +250,12 @@ extern "C"
 __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanMap, size_t pitchLocalMean,
                                             const float *__restrict__ localVarianceMap, size_t pitchLocalVariance,
                                             const float *__restrict__ localMotionVarianceMap, size_t pitchLocalMotionVariance,
+                                            float *__restrict__ previousGlobalMap, size_t pitchPreviousGlobal,
                                             float *__restrict__ globalMeanMap, size_t pitchGlobalMean,
                                             float *__restrict__ globalVarianceMap, size_t pitchGlobalVariance,
                                             const float globalMapCenterX,
 											const float globalMapCenterY,
+											const float correctedDriftZ,
                                             const float *__restrict__ groundToWorldTranslation,
                                             const float *__restrict__ params)
 {
@@ -233,14 +272,19 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     // Doing (y, x) allows for coalesced memory access when going to global memory
     int2 localCell = make_int2(yIndex, xIndex);
     float *localMean = (float *)((char *)localMeanMap + localCell.x * pitchLocalMean) + localCell.y;
-    // Global memory access is asychronious and takes a long time, tell the bus to go grab some memory
+    // Global memory access is asynchronous and takes a long time, tell the bus to go grab some memory
     float localMeanF = *localMean;
 
     // While the global memory is being fetched, convert the local cell into the global cell so we can register the data
     float2 localCoordinate = indices_to_coordinate(localCell, make_float2(0.0f, 0.0f), params[CELL_SIZE], params[LOCAL_CENTER_INDEX]);
     float3 pointInLocalFrame = make_float3(localCoordinate.x, localCoordinate.y, 0.0f);
     float3 pointInGlobalFrame = transformPoint3D(pointInLocalFrame, groundToWorldTranslation);
-    int2 globalCell = coordinate_to_indices(make_float2(pointInGlobalFrame.x, pointInGlobalFrame.y), make_float2(globalMapCenterX, globalMapCenterY), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
+
+    // Snap to cell grid to match how the local map was built
+    float snappedGlobalX = floorf(pointInGlobalFrame.x / params[CELL_SIZE]) * params[CELL_SIZE];
+    float snappedGlobalY = floorf(pointInGlobalFrame.y / params[CELL_SIZE]) * params[CELL_SIZE];
+
+    int2 globalCell = coordinate_to_indices(make_float2(snappedGlobalX, snappedGlobalY), make_float2(globalMapCenterX, globalMapCenterY), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
 
     if (globalCell.x < 0 || globalCell.x >= globalCellsPerAxis || globalCell.y < 0 || globalCell.y >= globalCellsPerAxis)
         return;
@@ -251,10 +295,11 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     float *localMotionVariance = (float *)((char *)localMotionVarianceMap + localCell.x * pitchLocalMotionVariance) + localCell.y;
     float *globalMean = (float *)((char *)globalMeanMap + globalCell.x * pitchGlobalMean) + globalCell.y;
     float *globalVariance = (float *)((char *)globalVarianceMap + globalCell.x * pitchGlobalVariance) + globalCell.y;
+    float *previousGlobal = (float *)((char *)previousGlobalMap + globalCell.x * pitchPreviousGlobal) + globalCell.y;
 
     // After trying to do as much work as possible in parallel to the global memory access. We ran out of stuff to do.
     // Check the result of global memory for invalid data, and return if not valid
-    if (localMeanF == 0)
+    if (localMeanF == 0.0f)
         return;
 
     // Access the rest of the global memory needed for the filtering, there is no other work to do
@@ -267,6 +312,7 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     {
         *globalMean = localMeanF;
         *globalVariance = localVarianceF;
+        *previousGlobal = localMeanF;
     }
     else
     {
@@ -274,7 +320,7 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
         float localMotionVarianceF = *localMotionVariance;
 
         // Predict step of the kalman filter
-        float predictedMean = globalMeanF;
+        float predictedMean = globalMeanF + correctedDriftZ;
         float predictedVariance = globalVarianceF + params[KALMAN_FILTER_PREDICTION_NOISE];
 
         // Update step of the kalman filter
@@ -284,6 +330,7 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
 
         *globalMean = updatedMean;
         *globalVariance = updatedVariance;
+        *previousGlobal = localMeanF;
     }
 }
 

@@ -26,7 +26,6 @@ import java.util.List;
  */
 public class GpuMappingManager
 {
-   private final ReferenceFrame heightMapCenter;
    private final HeightMapParameters heightMapParameters;
    private final HeightMapDriftOffset heightMapDriftOffset;
    private final HeightMapExtractor heightMapExtractor;
@@ -56,12 +55,10 @@ public class GpuMappingManager
                             ROS2Node ros2Node,
                             ReferenceFrame leftFootSoleFrame,
                             ReferenceFrame rightFootSoleFrame,
-                            ReferenceFrame heightMapCenter,
                             ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                             HeightMapParameters heightMapParameters,
                             TerrainMapParameters terrainMapParameters)
    {
-      this.heightMapCenter = heightMapCenter;
       this.heightMapParameters = heightMapParameters;
 
       footSoleFrames.add(leftFootSoleFrame);
@@ -114,16 +111,11 @@ public class GpuMappingManager
          }
       }
 
-      // Update the sensor origin here with the latest reference frame
-      // We are deep coping the frames here to avoid a data race condition, still possible but very small chance
-      RigidBodyTransform heightMapFrameToWorldFrame = new RigidBodyTransform(heightMapCenter.getTransformToWorldFrame());
-      Point3D heightMapCenterOrigin = new Point3D(heightMapFrameToWorldFrame.getTranslation());
-
       // -------- Update the Height Map with the latest depth image from the sensor --------------
       // We expect to have knowledge of where the camera is in relation to the world so we can accurately display the height map
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
       RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
-      RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
+      RigidBodyTransform sensorToWorldZUp = cameraZUpFrame.getTransformToWorldFrame();
 
       // Update the Z translation of the sensor to match the world transform (to handle the sensor's vertical position)
       sensorToGround.getTranslation().setZ(sensorToWorld.getTranslation().getZ());
@@ -137,29 +129,16 @@ public class GpuMappingManager
       }
 
       // Perform update, this actually creates the height map
-      heightMapExtractor.update(latestDepthImage,
-                                depthIntrinsics,
-                                sensorToWorld,
-                                sensorToGround,
-                                groundToWorld,
-                                driftOffsetInZ,
-                                heightMapCenterOrigin,
-                                computeFootHeight());
+      heightMapExtractor.update(latestDepthImage, depthIntrinsics, sensorToWorld, sensorToGround, sensorToWorldZUp, driftOffsetInZ, computeFootHeight());
 
-      terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenterPoint);
-
-      // The center of this map should be centered in the world grid
-      // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
-      double currentCellX = (int) Math.round(heightMapCenterOrigin.getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
-      double currentCellY = (int) Math.round(heightMapCenterOrigin.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
-      heightMapCenterPoint.set(currentCellX, currentCellY, 0.0);
+      Point3D heightMapCenter = heightMapExtractor.getHeightMapCenter();
+      terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenter);
+      heightMapCenterPoint.set(heightMapCenter);
    }
 
    public void publishHeightMap()
    {
       HeightMapMessageTools.toMessage(heightMapExtractor.getHeightMapData(), heightMapMessage);
-
-      //      heightMapLogger.logHeightMap(globalHeightMap, heightMapCenterPoint);
 
       heightMapMessage.setSequenceId(heightMapSequenceId++);
       heightMapMessagePublisher.publish(heightMapMessage);
@@ -170,29 +149,28 @@ public class GpuMappingManager
       HeightMapMessageTools.toMessageForController(heightMapExtractor.getHeightMapData(), heightMapMessageForController);
       heightMapMessageForController.setSequenceId(heightMapForControllerSequenceId++);
       controllerHeightMapMessagePublisher.publish(heightMapMessageForController);
-
    }
 
-    public void publishTerrainMap()
-    {
-        TerrainMapMessageTools.toMessage(terrainMapExtractor.getTerrainMapData(), terrainMapMessage);
-        terrainMapMessage.setSequenceId(terrainMapSequenceId++);
+   public void publishTerrainMap()
+   {
+      TerrainMapMessageTools.toMessage(terrainMapExtractor.getTerrainMapData(), terrainMapMessage);
+      terrainMapMessage.setSequenceId(terrainMapSequenceId++);
 
-        terrainMapMessagePublisher.publish(terrainMapMessage);
-    }
+      terrainMapMessagePublisher.publish(terrainMapMessage);
+   }
 
-    public void updateChunkedMap()
-    {
-       // Publish the height map to anyone who is subscribing
-       Mat hostGlobalHeightMap = new Mat();
-       // Don't destroy this mat as its being used in the extractor till that finish's
-       GpuMat deviceGlobalHeightMap = heightMapExtractor.getHeightMap();
-       deviceGlobalHeightMap.download(hostGlobalHeightMap);
+   public void updateChunkedMap()
+   {
+      // Publish the height map to anyone who is subscribing
+      Mat hostGlobalHeightMap = new Mat();
+      // Don't destroy this mat as its being used in the extractor till that finish's
+      GpuMat deviceGlobalHeightMap = heightMapExtractor.getHeightMap();
+      deviceGlobalHeightMap.download(hostGlobalHeightMap);
 
-       chunkedMapManager.update(hostGlobalHeightMap, heightMapCenterPoint);
+      chunkedMapManager.update(hostGlobalHeightMap, heightMapCenterPoint);
 
-       hostGlobalHeightMap.close();
-    }
+      hostGlobalHeightMap.close();
+   }
 
    public void publishChunkedMap()
    {
@@ -206,7 +184,7 @@ public class GpuMappingManager
 
    public TerrainMapData getLatestTerrainMapData()
    {
-       return terrainMapExtractor.getTerrainMapData();
+      return terrainMapExtractor.getTerrainMapData();
    }
 
    private double computeFootHeight()

@@ -13,7 +13,9 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.log.LogTools;
 import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
@@ -47,6 +49,9 @@ public class HeightMapExtractor
    private final GpuMat localVarianceMap;
    private final GpuMat localMotionVarianceMap;
 
+   private final GpuMat oldPreviousGlobalMapForICP;
+   private final GpuMat previousGlobalMapForICP;
+
    // These are the mats required to keep a global map
    private final GpuMat globalMeanMap;
    private final GpuMat globalVarianceMap;
@@ -61,14 +66,14 @@ public class HeightMapExtractor
    private final CUDAKernel planOffsetKernel;
    private final CUDAKernel emptyRegisterKernel;
 
-   private final float[] groundToWorldNoRotationTransformArray = new float[16];
-   private final float[] sensorToWorldAlignedGroundTransformArray = new float[16];
+   private final float[] sensorToWorldNoRotationAsArray = new float[16];
+   private final float[] sensorToGroundZUpAsArray = new float[16];
 
-   private final FloatPointer sensorToWorldAlignedGroundTransformHostPointer;
-   private final FloatPointer sensorToWorldAlignedGroundTransformDevicePointer;
+   private final FloatPointer sensorToGroundZUpHost;
+   private final FloatPointer sensorToGroundZUpDevice;
 
-   private final FloatPointer groundToWorldTranslationHostPointer;
-   private final FloatPointer groundToWorldTranslationDevicePointer;
+   private final FloatPointer sensorToWorldNoRotationHost;
+   private final FloatPointer sensorToWorldNoRotationDevice;
 
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
@@ -85,6 +90,13 @@ public class HeightMapExtractor
 
    private final HeightMapData heightMapData;
    private final Point3D heightMapCenterPoint = new Point3D();
+
+   private final GpuICPCalculator gpuICPCalculator;
+   private final RigidBodyTransform totalCorrectedTransform = new RigidBodyTransform();
+   private boolean performICP = true;
+
+   private double correctedCurrentCellCordX;
+   private double correctedCurrentCellCordY;
 
    public HeightMapExtractor(HeightMapParameters heightMapParameters)
    {
@@ -131,6 +143,9 @@ public class HeightMapExtractor
          localVarianceMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
          localMotionVarianceMap = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_32FC1);
 
+         oldPreviousGlobalMapForICP = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
+         previousGlobalMapForICP = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
+
          globalMeanMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
          globalVarianceMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
          previousGlobalMeanMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
@@ -138,14 +153,20 @@ public class HeightMapExtractor
          emptyGlobalHeightMap = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_32FC1);
 
          // Initialize transformation pointers
-         sensorToWorldAlignedGroundTransformHostPointer = new FloatPointer(16);
-         sensorToWorldAlignedGroundTransformDevicePointer = new FloatPointer();
+         sensorToGroundZUpHost = new FloatPointer(16);
+         sensorToGroundZUpDevice = new FloatPointer();
 
-         groundToWorldTranslationHostPointer = new FloatPointer(16);
-         groundToWorldTranslationDevicePointer = new FloatPointer();
+         sensorToWorldNoRotationHost = new FloatPointer(16);
+         sensorToWorldNoRotationDevice = new FloatPointer();
 
-         parametersHostPointer = new FloatPointer(21);
+         parametersHostPointer = new FloatPointer(22);
          parametersDevicePointer = new FloatPointer();
+
+         // Allocate the GPU memory in the constructor, doing this in the update is much slower
+         CUDATools.mallocAsync(sensorToWorldNoRotationDevice, sensorToWorldNoRotationHost.limit(), stream);
+         CUDATools.mallocAsync(sensorToGroundZUpDevice, sensorToGroundZUpHost.limit(), stream);
+         CUDATools.mallocAsync(parametersDevicePointer, parametersHostPointer.limit(), stream);
+         checkCUDAError();
       }
       catch (Exception e)
       {
@@ -153,6 +174,7 @@ public class HeightMapExtractor
       }
 
       heightMapData = new HeightMapData(heightMapParameters.getCellSize(), heightMapParameters.getGlobalWidthInMeters(), 0.0, 0.0);
+      gpuICPCalculator = new GpuICPCalculator(heightMapParameters);
    }
 
    public void reset(double footHeight)
@@ -164,7 +186,9 @@ public class HeightMapExtractor
    {
       resetOffset = (float) footHeight;
       resetOffset -= loweredValue;
+      performICP = false;
 
+      previousGlobalMapForICP.setTo(new Scalar(resetOffset));
       globalMeanMap.setTo(new Scalar(resetOffset));
    }
 
@@ -172,53 +196,91 @@ public class HeightMapExtractor
                       CameraIntrinsics cameraIntrinsics,
                       RigidBodyTransformReadOnly sensorToWorldTransform,
                       RigidBodyTransformReadOnly sensorToGroundTransform,
-                      RigidBodyTransformReadOnly groundToWorldTransform,
+                      RigidBodyTransformReadOnly sensorToWorldZUp,
                       float zDriftInMeters,
-                      Point3D heightMapCenter,
                       double footHeight)
    {
-      int error;
-
       // Populate parameter buffers with the necessary values
       float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, footHeight);
       parametersHostPointer.put(parametersArray);
-      CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
-      CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
+      CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersHostPointer.limit(), stream);
 
       // Step 1: Remove rotation from transformation
-      RigidBodyTransform groundToWorldNoRotation = new RigidBodyTransform(groundToWorldTransform);
-      groundToWorldNoRotation.getRotation().setIdentity();
+      RigidBodyTransform sensorToWorldNoRotation = new RigidBodyTransform(sensorToWorldTransform);
+      sensorToWorldNoRotation.getRotation().setIdentity();
 
       // Step 2: Invert translation-only transform
-      RigidBodyTransform worldToGroundNoRotation = new RigidBodyTransform(groundToWorldNoRotation);
-      worldToGroundNoRotation.invert();
+      RigidBodyTransform worldToSensorNoRotation = new RigidBodyTransform(sensorToWorldNoRotation);
+      worldToSensorNoRotation.invert();
 
       // Step 3: Multiply with full ground->world to keep rotation, giving aligned ground
-      RigidBodyTransform sensorToWorldAlignedGround = new RigidBodyTransform(worldToGroundNoRotation);
-      sensorToWorldAlignedGround.multiply(groundToWorldTransform);
+      RigidBodyTransform sensorToGroundZUp = new RigidBodyTransform();
+      sensorToGroundZUp.getRotation().set(sensorToWorldZUp.getRotation());
 
       // Step 4: Apply sensor->ground transform
-      sensorToWorldAlignedGround.multiply(sensorToGroundTransform);
+      sensorToGroundZUp.multiply(sensorToGroundTransform);
 
-      groundToWorldNoRotation.get(groundToWorldNoRotationTransformArray);
-      groundToWorldTranslationHostPointer.put(groundToWorldNoRotationTransformArray);
-      CUDATools.mallocAsync(groundToWorldTranslationDevicePointer, groundToWorldNoRotationTransformArray.length, stream);
-      CUDATools.memcpyAsync(groundToWorldTranslationDevicePointer, groundToWorldTranslationHostPointer, groundToWorldNoRotationTransformArray.length, stream);      checkCUDAError();
+      sensorToWorldNoRotation.get(sensorToWorldNoRotationAsArray);
+      sensorToWorldNoRotationHost.put(sensorToWorldNoRotationAsArray);
+      CUDATools.memcpyAsync(sensorToWorldNoRotationDevice, sensorToWorldNoRotationHost, sensorToWorldNoRotationAsArray.length, stream);
       checkCUDAError();
+
+      // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
+      double correctedCurrentCellCordXRaw =
+            (int) Math.round(totalCorrectedTransform.getTranslationX() + sensorToWorldZUp.getTranslationX() / heightMapParameters.getCellSize())
+            * heightMapParameters.getCellSize();
+      double correctedCurrentCellCordYRaw =
+            (int) Math.round(totalCorrectedTransform.getTranslationY() + sensorToWorldZUp.getTranslationY() / heightMapParameters.getCellSize())
+            * heightMapParameters.getCellSize();
+
+      correctedCurrentCellCordX = Math.round(correctedCurrentCellCordXRaw * 100.0) / 100.0;
+      correctedCurrentCellCordY = Math.round(correctedCurrentCellCordYRaw * 100.0) / 100.0;
+
+      // Get the raw world position from the transform matrix
+      float worldCamX = sensorToWorldNoRotation.getTranslation().getX32();
+      float worldCamY = sensorToWorldNoRotation.getTranslation().getY32();
+
+      // Calculate the "Snapped" position (the nearest grid intersection)
+      // Using floor ensures the grid lines stay at multiples of cellSize (0.0, 0.1, 0.2...)
+      float snappedCenterX = (float) (Math.floor(worldCamX / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize());
+      float snappedCenterY = (float) (Math.floor(worldCamY / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize());
+
+      // Calculate the sub-cell offset
+      // This is how far the camera has "strayed" from the snapped grid point
+      float subCellOffsetX = worldCamX - snappedCenterX;
+      float subCellOffsetY = worldCamY - snappedCenterY;
+
+      Point3D localCenterMapForICP = new Point3D(subCellOffsetX, subCellOffsetY, 0.0f);
 
       // ---------- Run the translate kernel ---------
       // This is the first thing we need to do, we are going to compare the newest local data to the global data.
       // It won't line up if we don't first translate the global map to the latest translation
       {
-         int currentCellX = (int) Math.round(heightMapCenter.getX32() / heightMapParameters.getCellSize());
-         int currentCellY = (int) Math.round(heightMapCenter.getY32() / heightMapParameters.getCellSize());
+         int currentCellX = (int) Math.round(correctedCurrentCellCordX / heightMapParameters.getCellSize());
+         int currentCellY = (int) Math.round(correctedCurrentCellCordY / heightMapParameters.getCellSize());
 
          // This means we have moved more than 2cm. So each cell should shift to one of its neighboring cells
          if (currentCellX != previousCellX || currentCellY != previousCellY)
          {
+
+            cudaMemset2DAsync(previousGlobalMeanMap.data(),
+                              previousGlobalMeanMap.step(),
+                              0,
+                              (long) previousGlobalMeanMap.cols() * Integer.BYTES,
+                              previousGlobalMeanMap.rows(),
+                              stream);
+            cudaMemset2DAsync(previousGlobalVarianceMap.data(),
+                              previousGlobalVarianceMap.step(),
+                              0,
+                              (long) previousGlobalVarianceMap.cols() * Integer.BYTES,
+                              previousGlobalVarianceMap.rows(),
+                              stream);
+
             // We will be updating the global height map with the applied translation of the data
             globalMeanMap.copyTo(previousGlobalMeanMap);
             globalVarianceMap.copyTo(previousGlobalVarianceMap);
+
+            previousGlobalMapForICP.copyTo(oldPreviousGlobalMapForICP);
 
             int translateKernelGridSizeXY = (globalCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
             dim3 translateKernelGridDim = new dim3(translateKernelGridSizeXY, translateKernelGridSizeXY, 1);
@@ -228,6 +290,8 @@ public class HeightMapExtractor
 
             translateKernel.withPointer(previousGlobalMeanMap.data()).withLong(previousGlobalMeanMap.step());
             translateKernel.withPointer(previousGlobalVarianceMap.data()).withLong(previousGlobalVarianceMap.step());
+            translateKernel.withPointer(oldPreviousGlobalMapForICP.data()).withLong(oldPreviousGlobalMapForICP.step());
+            translateKernel.withPointer(previousGlobalMapForICP.data()).withLong(previousGlobalMapForICP.step());
             translateKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
             translateKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
             translateKernel.withInt(shiftX).withInt(shiftY);
@@ -260,27 +324,76 @@ public class HeightMapExtractor
          AxisAngle axisAngle = new AxisAngle(rotation);
          float angularMotionMagnitude = (float) Math.abs(axisAngle.getAngle());
 
-         sensorToWorldAlignedGround.get(this.sensorToWorldAlignedGroundTransformArray);
-         sensorToWorldAlignedGroundTransformHostPointer.put(this.sensorToWorldAlignedGroundTransformArray);
-         CUDATools.mallocAsync(sensorToWorldAlignedGroundTransformDevicePointer, this.sensorToWorldAlignedGroundTransformArray.length, stream);
-         CUDATools.memcpyAsync(sensorToWorldAlignedGroundTransformDevicePointer,
-                               sensorToWorldAlignedGroundTransformHostPointer,
-                               this.sensorToWorldAlignedGroundTransformArray.length,
-                               stream);
+         if (heightMapParameters.getICPFilter() && performICP)
+         {
+            Point3D globalHeightMapCenterOnGrid = new Point3D(correctedCurrentCellCordX, correctedCurrentCellCordY, 0.0f);
+            gpuICPCalculator.computeICPErrorTransform(localMeanMap,
+                                                      previousGlobalMapForICP,
+                                                      localCenterMapForICP,
+                                                      globalHeightMapCenterOnGrid,
+                                                      localCenterIndex,
+                                                      globalCenterIndex,
+                                                      sensorToWorldNoRotation,
+                                                      stream);
+            //      LogTools.info(
+            //            "gpuICPCalculator correctedTransform: " + correctedTransform.getX() + " " + correctedTransform.getY() + " " + correctedTransform.getZ());
+            //      LogTools.info("Actual Transform: " + groundToWorldNoRotation.getTranslationX() + " " + groundToWorldNoRotation.getTranslationY() + " "
+            //                    + groundToWorldNoRotation.getTranslationZ());
+            //      LogTools.info("Global Center: " + globalHeightMapCenter.getX() + " " + globalHeightMapCenter.getY() + " " + globalHeightMapCenter.getZ(   ));
+
+            if (!gpuICPCalculator.isEndedWithoutEnoughValidPoints())
+            {
+               Vector3D correctedTransform = gpuICPCalculator.getLatestPointCloudErrorTransform();
+               double dx = correctedTransform.getX();
+               double dy = correctedTransform.getY();
+               double dz = correctedTransform.getZ();
+
+               // Zero out tiny corrections (<1 mm)
+               if (Math.abs(dx) < 0.001)
+                  dx = 0.0;
+               if (Math.abs(dy) < 0.001)
+                  dy = 0.0;
+               if (Math.abs(dz) < 0.001)
+                  dz = 0.0;
+
+               // --- Reject or clamp large drifts ---
+               double MAX_DRIFT = heightMapParameters.getIcpMaxDriftDistance();
+               if (Math.abs(dx) > MAX_DRIFT || Math.abs(dy) > MAX_DRIFT || Math.abs(dz) > MAX_DRIFT)
+               {
+                  LogTools.info("ICP drift too large! Ignoring correction.");
+                  dx = 0.0;
+                  dy = 0.0;
+                  dz = 0.0;
+               }
+
+               totalCorrectedTransform.appendTranslation(dx, dy, dz);
+               gpuICPCalculator.applyCorrectionToTransform(sensorToWorldNoRotationDevice, dx, dy, dz, stream);
+            }
+         }
+         else
+         {
+            performICP = true;
+         }
+
+         sensorToGroundZUp.get(sensorToGroundZUpAsArray);
+         sensorToGroundZUpHost.put(sensorToGroundZUpAsArray);
+         CUDATools.memcpyAsync(sensorToGroundZUpDevice, sensorToGroundZUpHost, sensorToGroundZUpAsArray.length, stream);
 
          // Clearing all the temp maps so they are ready for the next update call
-         cudaMemset2DAsync(tempSumMap.data(), tempSumMap.step(), 0, (long) tempSumMap.cols() * Float.BYTES, tempSumMap.rows());
-         cudaMemset2DAsync(tempCountMap.data(), tempCountMap.step(), 0, (long) tempCountMap.cols() * Integer.BYTES, tempCountMap.rows());
+         cudaMemset2DAsync(tempSumMap.data(), tempSumMap.step(), 0, (long) tempSumMap.cols() * Float.BYTES, tempSumMap.rows(), stream);
+         cudaMemset2DAsync(tempCountMap.data(), tempCountMap.step(), 0, (long) tempCountMap.cols() * Integer.BYTES, tempCountMap.rows(), stream);
          cudaMemset2DAsync(tempSumOfSquaresMap.data(),
                            tempSumOfSquaresMap.step(),
                            0,
                            (long) tempSumOfSquaresMap.cols() * Float.BYTES,
-                           tempSumOfSquaresMap.rows());
+                           tempSumOfSquaresMap.rows(),
+                           stream);
          cudaMemset2DAsync(tempMotionVarianceMap.data(),
                            tempMotionVarianceMap.step(),
                            0,
                            (long) tempMotionVarianceMap.cols() * Float.BYTES,
-                           tempMotionVarianceMap.rows());
+                           tempMotionVarianceMap.rows(),
+                           stream);
 
          int gridDimX = (latestDepthImageGPU.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          int gridDimY = (latestDepthImageGPU.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
@@ -292,7 +405,8 @@ public class HeightMapExtractor
          updateTempMapsKernel.withPointer(tempSumOfSquaresMap.data()).withLong(tempSumOfSquaresMap.step());
          updateTempMapsKernel.withPointer(tempMotionVarianceMap.data()).withLong(tempMotionVarianceMap.step());
          updateTempMapsKernel.withPointer(parametersDevicePointer);
-         updateTempMapsKernel.withPointer(sensorToWorldAlignedGroundTransformDevicePointer);
+         updateTempMapsKernel.withPointer(sensorToGroundZUpDevice);
+         updateTempMapsKernel.withPointer(sensorToWorldNoRotationDevice);
          updateTempMapsKernel.withFloat(linearMotionMagnitude);
          updateTempMapsKernel.withFloat(angularMotionMagnitude);
 
@@ -316,24 +430,32 @@ public class HeightMapExtractor
 
          updateTempMapsDim.close();
          localKernelDim.close();
-         cudaFreeAsync(sensorToWorldAlignedGroundTransformDevicePointer, stream);
          checkCUDAError();
       }
 
       // ---------- Run the registration kernel ----------
       // Ok so now we've got our local map, lets put that onto the global map
       {
+         cudaMemset2DAsync(previousGlobalMapForICP.data(),
+                           previousGlobalMapForICP.step(),
+                           0,
+                           (long) previousGlobalMapForICP.cols() * Float.BYTES,
+                           previousGlobalMapForICP.rows(),
+                           stream);
+
          int registerKernelGridSizeXY = (localCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 registerKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
 
          registerKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          registerKernel.withPointer(localVarianceMap.data()).withLong(localVarianceMap.step());
          registerKernel.withPointer(localMotionVarianceMap.data()).withLong(localMotionVarianceMap.step());
+         registerKernel.withPointer(previousGlobalMapForICP.data()).withLong(previousGlobalMapForICP.step());
          registerKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          registerKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
-         registerKernel.withFloat(heightMapCenter.getX32());
-         registerKernel.withFloat(heightMapCenter.getY32());
-         registerKernel.withPointer(groundToWorldTranslationDevicePointer);
+         registerKernel.withFloat((float) correctedCurrentCellCordX);
+         registerKernel.withFloat((float) correctedCurrentCellCordY);
+         registerKernel.withFloat(0.0f);
+         registerKernel.withPointer(sensorToWorldNoRotationDevice);
          registerKernel.withPointer(parametersDevicePointer);
 
          registerKernel.run(stream, registerKernelGridDim, blockSize, 0);
@@ -353,7 +475,7 @@ public class HeightMapExtractor
 
          emptyRegisterKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          emptyRegisterKernel.withPointer(emptyGlobalHeightMap.data()).withLong(emptyGlobalHeightMap.step());
-         emptyRegisterKernel.withPointer(groundToWorldTranslationDevicePointer);
+         emptyRegisterKernel.withPointer(sensorToWorldNoRotationDevice);
          emptyRegisterKernel.withPointer(parametersDevicePointer);
 
          emptyRegisterKernel.run(stream, registerKernelGridDim, blockSize, 0);
@@ -380,17 +502,13 @@ public class HeightMapExtractor
          checkCUDAError();
       }
 
-      // All that memory we allocated on the GPU, need to free that up now
-      cudaFreeAsync(parametersDevicePointer, stream);
-      cudaFreeAsync(groundToWorldTranslationDevicePointer, stream);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
+      // We don't need to synchronize the stream because the GpuMat.download(Mat) method is blocking when it is performed on the default stream
+      // error = cudaStreamSynchronize(stream);
+      // CUDATools.checkCUDAError(error);
 
       // The center of this map should be centered in the world grid
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
-      double currentCellX = (int) Math.round(heightMapCenter.getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
-      double currentCellY = (int) Math.round(heightMapCenter.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
-      heightMapCenterPoint.set(currentCellX, currentCellY, 0.0);
+      heightMapCenterPoint.set(correctedCurrentCellCordX, correctedCurrentCellCordY, 0.0);
 
       // Finished GPU kernels, let pack this into the height map data object
       Mat hostHeightMap = new Mat();
@@ -438,6 +556,8 @@ public class HeightMapExtractor
 
    public void destroy()
    {
+      gpuICPCalculator.close();
+
       heightMapProgram.close();
       blockSize.close();
 
@@ -449,8 +569,8 @@ public class HeightMapExtractor
       emptyRegisterKernel.close();
 
       // Clean up each resource
-      deallocateFloatPointer(sensorToWorldAlignedGroundTransformHostPointer, sensorToWorldAlignedGroundTransformDevicePointer, stream);
-      deallocateFloatPointer(groundToWorldTranslationHostPointer, groundToWorldTranslationDevicePointer, stream);
+      deallocateFloatPointer(sensorToGroundZUpHost, sensorToGroundZUpDevice, stream);
+      deallocateFloatPointer(sensorToWorldNoRotationHost, sensorToWorldNoRotationDevice, stream);
       deallocateFloatPointer(parametersHostPointer, parametersDevicePointer, stream);
 
       tempSumMap.close();
@@ -490,12 +610,17 @@ public class HeightMapExtractor
    private void deallocateFloatPointer(FloatPointer hostPointer, Pointer devicePointer, CUstream_st stream)
    {
       hostPointer.close();
-      devicePointer.close();
       cudaFreeAsync(devicePointer, stream);
+      devicePointer.close();
    }
 
    public GpuMat getHeightMap()
    {
       return globalMeanMap;
+   }
+
+   public Point3D getHeightMapCenter()
+   {
+      return new Point3D(correctedCurrentCellCordX, correctedCurrentCellCordY, 0.0f);
    }
 }

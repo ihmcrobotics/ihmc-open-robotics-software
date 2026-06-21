@@ -4,7 +4,7 @@
   "Cliff search radius" : 0.1,
   "Cliff height threshold" : 0.1,
   "Cliff height tolerance" : 0.02,
-  "Min support area fraction" : 0.88,
+  "Min support area fraction" : 1.0,
   "Min snap height threshold" : 0.04,
   "Snap height threshold at search edge" : 0.07,
   "Stepping cosine threshold" : 0.8,

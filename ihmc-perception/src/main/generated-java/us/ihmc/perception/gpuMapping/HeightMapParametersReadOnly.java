@@ -15,14 +15,14 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(driftOffsetFilter);
    }
 
+   default boolean getICPFilter()
+   {
+      return get(icpFilter);
+   }
+
    default boolean getFlyingPointsFilter()
    {
       return get(flyingPointsFilter);
-   }
-
-   default boolean getLogHeightMap()
-   {
-      return get(logHeightMap);
    }
 
    default double getMinDepthToAccept()
@@ -88,5 +88,35 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    default double getGlobalWidthInMeters()
    {
       return get(globalWidthInMeters);
+   }
+
+   default int getIcpMaxIterations()
+   {
+      return get(icpMaxIterations);
+   }
+
+   default double getIcpConvergence()
+   {
+      return get(icpConvergence);
+   }
+
+   default double getIcpMaxPointDistance()
+   {
+      return get(icpMaxPointDistance);
+   }
+
+   default double getIcpMaxDriftDistance()
+   {
+      return get(icpMaxDriftDistance);
+   }
+
+   default int getIcpValidPoints()
+   {
+      return get(icpValidPoints);
+   }
+
+   default double getIcpAlphaFilter()
+   {
+      return get(icpAlphaFilter);
    }
 }

@@ -1,71 +1,101 @@
 {
-  "title": "HeightMapParameters",
-  "Drift offset filter": true,
-  "Flying points filter": false,
-  "Log height map": false,
-  "Min Depth To Accept": {
-    "value": 0.88,
-    "lowerBound": 0.0,
-    "upperBound": 2.0
+  "title" : "HeightMapParameters",
+  "Drift offset filter" : true,
+  "ICP filter" : true,
+  "Flying points filter" : false,
+  "Min Depth To Accept" : {
+    "value" : 0.5,
+    "lowerBound" : 0.0,
+    "upperBound" : 2.0
   },
-  "Min height registration": {
-    "value": -1.5,
-    "lowerBound": -10.0,
-    "upperBound": 1.0
+  "Min height registration" : {
+    "value" : -1.5,
+    "lowerBound" : -10.0,
+    "upperBound" : 1.0
   },
-  "Max height registration": {
-    "value": 5.0,
-    "lowerBound": -1.0,
-    "upperBound": 10.0
+  "Max height registration" : {
+    "value" : 5.0,
+    "lowerBound" : -1.0,
+    "upperBound" : 10.0
   },
-  "Kalman filter prediction noise": {
-    "value": 0.001,
-    "lowerBound": 0.0,
-    "upperBound": 1.0
+  "Kalman filter prediction noise" : {
+    "value" : 0.08,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
   },
-  "Additional translational variance added": {
-    "value": 0.001,
-    "lowerBound": 0.0,
-    "upperBound": 1.0
+  "Additional translational variance added" : {
+    "value" : 0.001,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
   },
-  "Variance per meter": {
-    "value": 0.1,
-    "lowerBound": 0.0,
-    "upperBound": 1.0
+  "Variance per meter" : {
+    "value" : 0.4,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
   },
-  "Variance per translation speed": {
-    "value": 0.01,
-    "lowerBound": 0.0,
-    "upperBound": 1.0
+  "Variance per translation speed" : {
+    "value" : 0.1,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
   },
-  "Variance per rotation speed": {
-    "value": 0.01,
-    "lowerBound": 0.0,
-    "upperBound": 1.0
+  "Variance per rotation speed" : {
+    "value" : 0.1,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
   },
-  "Min Clamp Height": {
-    "value": -6.5536,
-    "lowerBound": -8.0,
-    "upperBound": 8.0
+  "Min Clamp Height" : {
+    "value" : -6.5536,
+    "lowerBound" : -8.0,
+    "upperBound" : 8.0
   },
-  "Max Clamp Height": {
-    "value": 6.5536,
-    "lowerBound": -8.0,
-    "upperBound": 8.0
+  "Max Clamp Height" : {
+    "value" : 6.5536,
+    "lowerBound" : -8.0,
+    "upperBound" : 8.0
   },
-  "Cell size": {
-    "value": 0.02,
-    "lowerBound": 0.01,
-    "upperBound": 0.06
+  "Cell size" : {
+    "value" : 0.02,
+    "lowerBound" : 0.01,
+    "upperBound" : 0.06
   },
-  "Local width in meters": {
-    "value": 4.0,
-    "lowerBound": 1.0,
-    "upperBound": 4.5
+  "Local width in meters" : {
+    "value" : 4.0,
+    "lowerBound" : 1.0,
+    "upperBound" : 4.5
   },
-  "Global width in meters": {
-    "value": 4.0,
-    "lowerBound": 1.0,
-    "upperBound": 4.5
+  "Global width in meters" : {
+    "value" : 4.0,
+    "lowerBound" : 1.0,
+    "upperBound" : 4.5
+  },
+  "Icp max iterations" : {
+    "value" : 12,
+    "lowerBound" : 1,
+    "upperBound" : 50
+  },
+  "Icp convergence" : {
+    "value" : 1.0E-4,
+    "lowerBound" : 1.0E-4,
+    "upperBound" : 1.0
+  },
+  "Icp max point distance" : {
+    "value" : 0.0036,
+    "lowerBound" : 0.01,
+    "upperBound" : 1.0
+  },
+  "Icp max drift distance" : {
+    "value" : 0.04,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
+  },
+  "Icp valid points" : {
+    "value" : 2400,
+    "lowerBound" : 10,
+    "upperBound" : 6000
+  },
+  "Icp alpha filter" : {
+    "value" : 0.75,
+    "lowerBound" : 0.01,
+    "upperBound" : 1.0
   }
 }
