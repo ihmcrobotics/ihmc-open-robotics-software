@@ -158,7 +158,9 @@ public class StepGeneratorCommandInputManager implements Updatable
    @Override
    public void update(double time)
    {
-      boolean validHighLevelControlState = currentController.equals(HighLevelControllerName.WALKING) || currentController.equals(HighLevelControllerName.RL_CONTROL);
+      boolean validHighLevelControlState = currentController.equals(HighLevelControllerName.WALKING)
+                                           || currentController.equals(HighLevelControllerName.MPC_CONTROL)
+                                           || currentController.equals(HighLevelControllerName.RL_CONTROL);
       isOpen = validHighLevelControlState && (heartbeatMonitor.isAlive() || overrideHeartbeat.getBooleanValue());
       commandInputManager.setEnabled(isOpen);
 

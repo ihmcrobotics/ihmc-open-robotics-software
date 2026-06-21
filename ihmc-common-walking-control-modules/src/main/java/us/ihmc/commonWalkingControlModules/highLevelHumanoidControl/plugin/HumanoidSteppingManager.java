@@ -180,7 +180,8 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
       for (int i = 0; i < updatables.size(); i++)
          updatables.get(i).update(time);
 
-      if (latestHighLevelControllerStatus.getValue() == HighLevelControllerName.WALKING)
+      if (latestHighLevelControllerStatus.getValue() == HighLevelControllerName.WALKING
+          || latestHighLevelControllerStatus.getValue() == HighLevelControllerName.MPC_CONTROL)
          stepGenerator.update(time);
 
       if (latestHighLevelControllerStatus.getValue() == HighLevelControllerName.RL_CONTROL)
