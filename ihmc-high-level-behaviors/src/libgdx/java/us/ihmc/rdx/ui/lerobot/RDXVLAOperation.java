@@ -18,8 +18,8 @@ import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ToolboxAPIs;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
@@ -82,7 +82,15 @@ public class RDXVLAOperation
       running = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
       controlRobot = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
 
-      statusSubscription = ROS2Tools.createNotificationSubscription(ros2Node, UI.getTopic(ROS2ActorDesignation.OPERATOR.getIncomingQualifier()));
+      var statusTopic = UI.getTopic(ROS2ActorDesignation.OPERATOR.getIncomingQualifier());
+      TypedNotification<VLAOperationMessage> typedNotification = new TypedNotification<>();
+      ros2Node.createSubscription(statusTopic, reader ->
+      {
+         var message = reader.read();
+         if (message != null)
+            typedNotification.set(message);
+      }, ControllerAPI.getQoS(statusTopic.getType()));
+      statusSubscription = typedNotification;
       commandPublisher = ros2Node.createPublisher(UI.getTopic(ROS2ActorDesignation.OPERATOR.getOutgoingQualifier()));
 
       this.syncedRobot = syncedRobot;

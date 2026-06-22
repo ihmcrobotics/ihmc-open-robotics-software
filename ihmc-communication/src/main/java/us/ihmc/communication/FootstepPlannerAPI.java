@@ -8,7 +8,7 @@ public final class FootstepPlannerAPI
    public static final String FOOTSTEP_PLANNER_NODE_NAME = "ihmc_multi_stage_footstep_planning_module";
    public static final String FOOTSTEP_PLANNER_MODULE_NAME = "toolbox/footstep_plan";
 
-   public static final HumanoidROS2Topic<?> FOOTSTEP_PLANNER = ROS2Tools.IHMC_ROOT.withModule(FOOTSTEP_PLANNER_MODULE_NAME);
+   public static final HumanoidROS2Topic<?> FOOTSTEP_PLANNER = HumanoidROS2Topic.IHMC_ROOT.withModule(FOOTSTEP_PLANNER_MODULE_NAME);
 
    /** By default, topics are made using "typed topic names" from this base topic */
    public static ROS2Topic<?> outputTopic(String robotName)

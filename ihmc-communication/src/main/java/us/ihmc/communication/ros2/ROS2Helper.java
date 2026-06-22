@@ -8,14 +8,13 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ROS2Input;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Subscription;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.Destroyable;
 import us.ihmc.tools.thread.SwapReference;
 
@@ -44,7 +43,12 @@ public class ROS2Helper
 
    public <T extends ROS2Message<T>> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
-      ros2Node.createSubscription(topic, reader -> ROS2Tools.readIfPresent(reader, callback));
+      ros2Node.createSubscription(topic, reader ->
+      {
+         T message = reader.read();
+         if (message != null)
+            callback.accept(message);
+      });
    }
 
    /**
@@ -54,19 +58,37 @@ public class ROS2Helper
     */
    public <T extends ROS2Message<T>> void subscribeViaVolatileCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
-      ROS2Tools.createVolatileCallbackSubscription(ros2Node, topic, callback);
+      ros2Node.createSubscription(topic, reader ->
+      {
+         T message = reader.read();
+         if (message != null)
+            callback.accept(message);
+      }, ControllerAPI.getQoS(topic.getType()));
    }
 
    /** Use when you only need the latest message and need allocation free. */
    public <T extends ROS2Message<T>> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Consumer<T> callback)
    {
-      return ROS2Tools.createSwapReferenceSubscription(ros2Node, topic, callback);
+      SwapReference<T> swapReference = new SwapReference<>(() -> ROS2Message.createInstance(topic.getType()));
+
+      ros2Node.createSubscription(topic, reader ->
+      {
+         T readMessage = reader.read();
+         if (readMessage != null)
+         {
+            T messageToPack = swapReference.getForThreadOne();
+            messageToPack.set(readMessage);
+            swapReference.swap();
+            callback.accept(messageToPack);
+         }
+      }, ControllerAPI.getQoS(topic.getType()));
+      return swapReference;
    }
 
    /** Use when you only need the latest message and need allocation free. */
    public <T extends ROS2Message<T>> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Notification callback)
    {
-      return ROS2Tools.createSwapReferenceSubscription(ros2Node, topic, callback);
+      return subscribeViaSwapReference(topic, message -> callback.set());
    }
 
    public static class QueuedSubscription<T extends ROS2Message<T>> implements Destroyable
@@ -94,25 +116,6 @@ public class ROS2Helper
       }
    }
 
-   /** Allocation free version with size 16 ring buffer. */
-   public <T extends ROS2Message<T>> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic)
-   {
-      return subscribeViaQueue(topic, 16, message -> { });
-   }
-
-   /** Allocation free version with size 16 ring buffer. Callback allows immediate temporary access to message. */
-   public <T extends ROS2Message<T>> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic, int queueSize, Consumer<T> callback)
-   {
-      return subscribeViaQueueWithHandle(topic, queueSize, callback).getQueue();
-   }
-
-   /** Like {@link #subscribeViaQueue}, but returns a handle that can destroy the underlying subscription. */
-   public <T extends ROS2Message<T>> QueuedSubscription<T> subscribeViaQueueWithHandle(ROS2Topic<T> topic)
-   {
-      return subscribeViaQueueWithHandle(topic, 16, message -> { });
-   }
-
-   /** Like {@link #subscribeViaQueue}, but returns a handle that can destroy the underlying subscription. */
    public <T extends ROS2Message<T>> QueuedSubscription<T> subscribeViaQueueWithHandle(ROS2Topic<T> topic, int queueSize, Consumer<T> callback)
    {
       ConcurrentRingBuffer<T> concurrentQueue = new ConcurrentRingBuffer<>(() -> ROS2Message.createInstance(topic.getType()), queueSize);
@@ -163,22 +166,15 @@ public class ROS2Helper
       return new ROS2Input<>(ros2Node, topic, ROS2Message.createInstance(topic.getType()), messageFilter);
    }
 
-   public Notification subscribeViaNotification(ROS2Topic<Empty> topic)
-   {
-      Notification notification = new Notification();
-      ros2Node.createSubscription(topic, reader -> notification.set());
-      return notification;
-   }
-
    public <T extends ROS2Message<T>> TypedNotification<T> subscribeViaTypedNotification(ROS2Topic<T> topic)
    {
-      return ROS2Tools.createNotificationSubscription(ros2Node, topic);
-   }
-
-   public TypedNotification<Boolean> subscribeViaBooleanNotification(ROS2Topic<Bool> topic)
-   {
-      TypedNotification<Boolean> typedNotification = new TypedNotification<>();
-      ros2Node.createSubscription(topic, reader -> ROS2Tools.readIfPresent(reader, message -> typedNotification.set(message.getData())));
+      TypedNotification<T> typedNotification = new TypedNotification<>();
+      ros2Node.createSubscription(topic, reader ->
+      {
+         T message = reader.read();
+         if (message != null)
+            typedNotification.set(message);
+      }, ControllerAPI.getQoS(topic.getType()));
       return typedNotification;
    }
 
@@ -198,8 +194,6 @@ public class ROS2Helper
       stringMessage.setData(message);
       ros2PublisherMap.publish(topic, stringMessage);
    }
-
-   // Pose3D publishing requires a custom ROS2Message wrapper (see jros2 examples/custom-message-class).
 
    public void publish(ROS2Topic<Empty> topic)
    {

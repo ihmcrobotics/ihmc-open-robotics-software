@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.St
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.HumanoidROS2Topic;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
@@ -71,13 +71,15 @@ public class CSGROS2CommunicationHelper
       this.ros2Node = ros2Node;
       this.robotName = robotName;
 
-      ROS2Tools.createVolatileCallbackSubscription(ros2Node,
-                                                   HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotName),
-                                                   continuousStepGeneratorStatusMessage ->
-                                                   {
-                                                      csgStatusMessage.set(continuousStepGeneratorStatusMessage);
-                                                      setCSGCommandsToCurrentValues(continuousStepGeneratorStatusMessage);
-                                                   });
+      var csgStatusTopic = HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotName);
+      ros2Node.createSubscription(csgStatusTopic, reader ->
+      {
+         var continuousStepGeneratorStatusMessage = reader.read();
+         if (continuousStepGeneratorStatusMessage == null)
+            return;
+         csgStatusMessage.set(continuousStepGeneratorStatusMessage);
+         setCSGCommandsToCurrentValues(continuousStepGeneratorStatusMessage);
+      }, ControllerAPI.getQoS(csgStatusTopic.getType()));
 
       csgInputCommandPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorInputMessage.class, robotName));
       csgParametersCommandPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorParametersMessage.class, robotName));
@@ -110,7 +112,13 @@ public class CSGROS2CommunicationHelper
 
    public void addVolatileCSGStatusCallbackSubscription(Consumer<ContinuousStepGeneratorStatusMessage> callback)
    {
-      ROS2Tools.createVolatileCallbackSubscription(ros2Node, HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotName), callback);
+      var csgStatusTopic = HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotName);
+      ros2Node.createSubscription(csgStatusTopic, reader ->
+      {
+         var message = reader.read();
+         if (message != null)
+            callback.accept(message);
+      }, ControllerAPI.getQoS(csgStatusTopic.getType()));
    }
 
    /**

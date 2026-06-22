@@ -12,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.log.LogTools;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -39,12 +38,36 @@ public class ControllerFootstepQueueMonitor
 
    public ControllerFootstepQueueMonitor(ROS2Node ros2Node, String simpleRobotName)
    {
-      ros2Node.createSubscription(getLowFrequencyTopic(FootstepQueueStatusMessage.class, simpleRobotName), reader -> ROS2Tools.readIfPresent(reader, this::footstepQueueStatusReceived));
-      ros2Node.createSubscription(getTopic(FootstepStatusMessage.class, simpleRobotName), reader -> ROS2Tools.readIfPresent(reader, this::footstepStatusReceived));
-      ros2Node.createSubscription(getLowFrequencyTopic(PlanOffsetStatus.class, simpleRobotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptPlanOffsetStatus));
-      ros2Node.createSubscription(getTopic(WalkingStatusMessage.class, simpleRobotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptWalkingStatusMessage));
-      ros2Node.createSubscription(getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), reader -> ROS2Tools.readIfPresent(reader, this::acceptWalkingControllerFailureStatusMessage));
-      ros2Node.createSubscription(getTopic(FootstepDataListMessage.class, simpleRobotName), reader -> ROS2Tools.readIfPresent(reader, this::interceptFootstepDataListMessage));
+      ros2Node.createSubscription(getLowFrequencyTopic(FootstepQueueStatusMessage.class, simpleRobotName), reader -> {
+         var message = reader.read();
+         if (message != null)
+            this.footstepQueueStatusReceived(message);
+      });
+      ros2Node.createSubscription(getTopic(FootstepStatusMessage.class, simpleRobotName), reader -> {
+         var message = reader.read();
+         if (message != null)
+            this.footstepStatusReceived(message);
+      });
+      ros2Node.createSubscription(getLowFrequencyTopic(PlanOffsetStatus.class, simpleRobotName), reader -> {
+         var message = reader.read();
+         if (message != null)
+            this.acceptPlanOffsetStatus(message);
+      });
+      ros2Node.createSubscription(getTopic(WalkingStatusMessage.class, simpleRobotName), reader -> {
+         var message = reader.read();
+         if (message != null)
+            this.acceptWalkingStatusMessage(message);
+      });
+      ros2Node.createSubscription(getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), reader -> {
+         var message = reader.read();
+         if (message != null)
+            this.acceptWalkingControllerFailureStatusMessage(message);
+      });
+      ros2Node.createSubscription(getTopic(FootstepDataListMessage.class, simpleRobotName), reader -> {
+         var message = reader.read();
+         if (message != null)
+            this.interceptFootstepDataListMessage(message);
+      });
    }
 
    private void interceptFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)

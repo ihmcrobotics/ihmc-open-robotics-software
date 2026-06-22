@@ -7,7 +7,6 @@ import imgui.flag.ImGuiCol;
 import imgui.type.ImFloat;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
 import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
 import us.ihmc.handsros2.abilityHand.AbilityHandROS2API;
@@ -58,7 +57,11 @@ public class RDXAbilityHand implements RDXHandInterface
          desiredVelocities[i] = new ImFloat(DEFAULT_VELOCITY);
       }
 
-      ros2Node.createSubscription(AbilityHandROS2API.STATE_TOPICS.get(handSide), reader -> ROS2Tools.readIfPresent(reader, stateNotification::set));
+      ros2Node.createSubscription(AbilityHandROS2API.STATE_TOPICS.get(handSide), reader -> {
+         var message = reader.read();
+         if (message != null)
+            stateNotification.set(message);
+      });
       commandPublisher = ros2Node.createPublisher(AbilityHandROS2API.COMMAND_TOPICS.get(handSide));
    }
 

@@ -10,7 +10,7 @@ import controller_msgs.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
@@ -60,12 +60,54 @@ public class ControllerStatusTracker
       finishedWalkingNotification.set();
 
       robotModel.addRobotConfigurationDataReceivedCallback(this::acceptRobotConfigurationData);
-      ROS2Tools.createSubscription(ros2Node, getTopic(HighLevelStateChangeStatusMessage.class, robotName), this::acceptHighLevelStateChangeStatusMessage);
-      ROS2Tools.createSubscription(ros2Node, getTopic(WalkingControllerFailureStatusMessage.class, robotName), this::acceptWalkingControllerFailureStatusMessage);
-      ROS2Tools.createSubscription(ros2Node, getLowFrequencyTopic(PlanOffsetStatus.class, robotName), this::acceptPlanOffsetStatus);
-      ROS2Tools.createSubscription(ros2Node, getTopic(ControllerCrashNotificationPacket.class, robotName), this::acceptControllerCrashNotificationPacket);
-      ROS2Tools.createSubscription(ros2Node, getLowFrequencyTopic(CapturabilityBasedStatus.class, robotName), this::acceptCapturabilityBasedStatus);
-      ROS2Tools.createSubscription(ros2Node, getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatusMessage);
+      var highLevelStateChangeTopic = getTopic(HighLevelStateChangeStatusMessage.class, robotName);
+      ros2Node.createSubscription(highLevelStateChangeTopic,
+                                  reader -> {
+         var message = reader.read();
+         if (message != null)
+            this.acceptHighLevelStateChangeStatusMessage(message);
+      },
+                                  ControllerAPI.getQoS(HighLevelStateChangeStatusMessage.class));
+      var walkingControllerFailureTopic = getTopic(WalkingControllerFailureStatusMessage.class, robotName);
+      ros2Node.createSubscription(walkingControllerFailureTopic,
+                                  reader -> {
+         var message = reader.read();
+         if (message != null)
+            this.acceptWalkingControllerFailureStatusMessage(message);
+      },
+                                  ControllerAPI.getQoS(WalkingControllerFailureStatusMessage.class));
+      var planOffsetStatusTopic = getLowFrequencyTopic(PlanOffsetStatus.class, robotName);
+      ros2Node.createSubscription(planOffsetStatusTopic,
+                                  reader -> {
+         var message = reader.read();
+         if (message != null)
+            this.acceptPlanOffsetStatus(message);
+      },
+                                  ControllerAPI.getQoS(PlanOffsetStatus.class));
+      var controllerCrashTopic = getTopic(ControllerCrashNotificationPacket.class, robotName);
+      ros2Node.createSubscription(controllerCrashTopic,
+                                  reader -> {
+         var message = reader.read();
+         if (message != null)
+            this.acceptControllerCrashNotificationPacket(message);
+      },
+                                  ControllerAPI.getQoS(ControllerCrashNotificationPacket.class));
+      var capturabilityBasedStatusTopic = getLowFrequencyTopic(CapturabilityBasedStatus.class, robotName);
+      ros2Node.createSubscription(capturabilityBasedStatusTopic,
+                                  reader -> {
+         var message = reader.read();
+         if (message != null)
+            this.acceptCapturabilityBasedStatus(message);
+      },
+                                  ControllerAPI.getQoS(CapturabilityBasedStatus.class));
+      var walkingStatusTopic = getTopic(WalkingStatusMessage.class, robotName);
+      ros2Node.createSubscription(walkingStatusTopic,
+                                  reader -> {
+         var message = reader.read();
+         if (message != null)
+            this.acceptWalkingStatusMessage(message);
+      },
+                                  ControllerAPI.getQoS(WalkingStatusMessage.class));
    }
 
    public void registerAbortedListener(Notification abortedListener)

@@ -6,7 +6,6 @@ import ihmc_common_msgs.MessageCollectionNotification;
 import ihmc_common_msgs.Point2DMessage;
 import ihmc_common_msgs.TextToSpeechPacket;
 import toolbox_msgs.*;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2QoSProfile;
@@ -156,7 +155,7 @@ public final class ControllerAPI
 
    public static HumanoidROS2Topic<?> getBaseTopic(String controlModuleName, String robotName)
    {
-      return ROS2Tools.IHMC_ROOT.withModule(controlModuleName).withRobot(robotName);
+      return HumanoidROS2Topic.IHMC_ROOT.withModule(controlModuleName).withRobot(robotName);
    }
 
    @SuppressWarnings("unchecked")

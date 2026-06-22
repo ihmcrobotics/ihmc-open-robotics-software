@@ -17,7 +17,7 @@ public class ROS2InputTest
       ROS2Node ros2Node = new ROS2Node("test_input");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      ROS2Topic<Empty> inputTestTopic = ROS2Tools.IHMC_ROOT.withSuffix("input_test_topic").withType(Empty.class);
+      ROS2Topic<Empty> inputTestTopic = HumanoidROS2Topic.IHMC_ROOT.withSuffix("input_test_topic").withType(Empty.class);
 
       TypedNotification<Empty> subscription = ros2Helper.subscribeViaTypedNotification(inputTestTopic);
 

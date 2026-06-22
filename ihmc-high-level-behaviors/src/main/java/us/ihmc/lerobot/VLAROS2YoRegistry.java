@@ -2,8 +2,9 @@ package us.ihmc.lerobot;
 
 import ihmc_common_msgs.YoRegistryMessage;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -15,7 +16,20 @@ public class VLAROS2YoRegistry extends VLAYoRegistry
 
    public VLAROS2YoRegistry(ROS2Node ros2Node)
    {
-      subscription = ROS2Tools.createSwapReferenceSubscription(ros2Node, VLAUpdateThread.YO, notification);
+      var yoTopic = VLAUpdateThread.YO;
+      SwapReference<YoRegistryMessage> swapReference = new SwapReference<>(() -> ROS2Message.createInstance(yoTopic.getType()));
+      ros2Node.createSubscription(yoTopic, reader ->
+      {
+         var readMessage = reader.read();
+         if (readMessage != null)
+         {
+            var messageToPack = swapReference.getForThreadOne();
+            messageToPack.set(readMessage);
+            swapReference.swap();
+            notification.set();
+         }
+      }, ControllerAPI.getQoS(yoTopic.getType()));
+      subscription = swapReference;
    }
 
    public void update()

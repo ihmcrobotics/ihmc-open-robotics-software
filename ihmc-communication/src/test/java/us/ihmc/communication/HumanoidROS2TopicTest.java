@@ -13,7 +13,7 @@ class HumanoidROS2TopicTest
    @Test
    void slotOrderDiffersFromPlainAppend()
    {
-      HumanoidROS2Topic<?> moduleBase = ROS2Tools.IHMC_ROOT.withModule("toolbox/teleop/step_teleop");
+      HumanoidROS2Topic<?> moduleBase = HumanoidROS2Topic.IHMC_ROOT.withModule("toolbox/teleop/step_teleop");
 
       assertEquals("/ihmc/toolbox/teleop/step_teleop", moduleBase.toString());
       assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", moduleBase.withRobot("atlas").withOutput().toString());
@@ -25,13 +25,13 @@ class HumanoidROS2TopicTest
    void controllerBaseTopicOrder()
    {
       assertEquals("/ihmc/atlas/controller", ControllerAPI.getBaseTopic("controller", "atlas").toString());
-      assertNotEquals("/ihmc/controller/atlas", ROS2Tools.IHMC_ROOT.appendedWith("controller").appendedWith("atlas").toString());
+      assertNotEquals("/ihmc/controller/atlas", HumanoidROS2Topic.IHMC_ROOT.appendedWith("controller").appendedWith("atlas").toString());
    }
 
    @Test
    void isAssignableToJros2Topic()
    {
-      ROS2Topic<CameraInfo> topic = ROS2Tools.IHMC_ROOT.withTypeName(CameraInfo.class);
+      ROS2Topic<CameraInfo> topic = HumanoidROS2Topic.IHMC_ROOT.withTypeName(CameraInfo.class);
       assertEquals("/ihmc/camera_info", topic.getName());
    }
 

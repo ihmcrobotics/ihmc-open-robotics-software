@@ -15,6 +15,9 @@ import java.util.Objects;
  */
 public class HumanoidROS2Topic<T extends ROS2Message<T>> extends ROS2Topic<T>
 {
+   public static final String IHMC_TOPIC_PREFIX = "ihmc";
+   public static final HumanoidROS2Topic<?> IHMC_ROOT = new HumanoidROS2Topic<>().withPrefix(IHMC_TOPIC_PREFIX);
+
    public static final String INPUT = "input";
    public static final String OUTPUT = "output";
 

@@ -1,8 +1,8 @@
 package us.ihmc.avatar.sakeGripper;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.SakeHandAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.jros2.ROS2Node;
 
@@ -31,8 +31,12 @@ public class ROS2SakeHandStatus
 
    public ROS2SakeHandStatus(ROS2Node ros2Node, String robotName, RobotSide handSide)
    {
-      ROS2Tools.createVolatileCallbackSubscription(ros2Node, SakeHandAPI.getHandSakeStatusTopic(robotName, handSide), sakeHandStatusMessage ->
+      var sakeHandStatusTopic = SakeHandAPI.getHandSakeStatusTopic(robotName, handSide);
+      ros2Node.createSubscription(sakeHandStatusTopic, reader ->
       {
+         var sakeHandStatusMessage = reader.read();
+         if (sakeHandStatusMessage == null)
+            return;
          isCalibrated = sakeHandStatusMessage.getIsCalibrated();
          needsReset = sakeHandStatusMessage.getNeedsReset();
          isCalibrating = sakeHandStatusMessage.getIsCalibrating();
@@ -56,7 +60,7 @@ public class ROS2SakeHandStatus
          currentVelocity = sakeHandStatusMessage.getCurrentVelocity();
          errorCodes = sakeHandStatusMessage.getErrorCodes();
          handRealtimeTick = sakeHandStatusMessage.getRealtimeTick();
-      });
+      }, ControllerAPI.getQoS(sakeHandStatusTopic.getType()));
    }
 
    public boolean getIsCalibrated()

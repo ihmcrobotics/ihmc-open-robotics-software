@@ -1,5 +1,7 @@
 package us.ihmc.communication.ros2log;
 
+import us.ihmc.communication.HumanoidROS2Topic;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.CaseFormat;
@@ -8,7 +10,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import toolbox_msgs.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
 
@@ -29,7 +30,7 @@ public class ROS2LogKinematicsToolboxOutputStatusTest
    @Test
    public void testKinematicsToolboxOutputStatusLogUsesJsonStringsNotBase64() throws Exception
    {
-      ROS2Topic<KinematicsToolboxOutputStatus> topic = ROS2Tools.IHMC_ROOT.withType(KinematicsToolboxOutputStatus.class);
+      ROS2Topic<KinematicsToolboxOutputStatus> topic = HumanoidROS2Topic.IHMC_ROOT.withType(KinematicsToolboxOutputStatus.class);
       ROS2Node ros2Node = new ROS2Node("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ros2_log_test"));
 
       KinematicsToolboxOutputStatus exported = createSampleStatus();
@@ -67,7 +68,7 @@ public class ROS2LogKinematicsToolboxOutputStatusTest
    @Test
    public void testLoadLegacyKinematicsToolboxLogSnippet() throws Exception
    {
-      ROS2Topic<KinematicsToolboxOutputStatus> topic = ROS2Tools.IHMC_ROOT.withType(KinematicsToolboxOutputStatus.class);
+      ROS2Topic<KinematicsToolboxOutputStatus> topic = HumanoidROS2Topic.IHMC_ROOT.withType(KinematicsToolboxOutputStatus.class);
       ROS2Node ros2Node = new ROS2Node("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ros2_log_legacy_test"));
 
       File legacyLog;

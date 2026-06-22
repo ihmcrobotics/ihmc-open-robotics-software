@@ -25,13 +25,12 @@ import us.ihmc.jros2.ROS2Topic;
  */
 public final class PerceptionAPI
 {
-   public static final HumanoidROS2Topic<?> IHMC_ROOT = ROS2Tools.IHMC_ROOT;
-   public static final HumanoidROS2Topic<?> PERCEPTION_MODULE = IHMC_ROOT.withModule("perception");
-   public static final HumanoidROS2Topic<?> HEIGHT_MAP_MODULE = IHMC_ROOT.withModule("height_map");
-   public static final HumanoidROS2Topic<?> TERRAIN_MAP_MODULE = IHMC_ROOT.withModule("terrain_map");
+   public static final HumanoidROS2Topic<?> PERCEPTION_MODULE = HumanoidROS2Topic.IHMC_ROOT.withModule("perception");
+   public static final HumanoidROS2Topic<?> HEIGHT_MAP_MODULE = HumanoidROS2Topic.IHMC_ROOT.withModule("height_map");
+   public static final HumanoidROS2Topic<?> TERRAIN_MAP_MODULE = HumanoidROS2Topic.IHMC_ROOT.withModule("terrain_map");
 
-   private static final HumanoidROS2Topic<?> BEST_EFFORT = IHMC_ROOT;
-   private static final HumanoidROS2Topic<?> RELIABLE = IHMC_ROOT;
+   private static final HumanoidROS2Topic<?> BEST_EFFORT = HumanoidROS2Topic.IHMC_ROOT;
+   private static final HumanoidROS2Topic<?> RELIABLE = HumanoidROS2Topic.IHMC_ROOT;
 
    /*
     * ZED SVO
@@ -48,13 +47,13 @@ public final class PerceptionAPI
    public static final ROS2Topic<YOLOv8AnnotationInfoList> YOLO_ANNOTATION_INFO = PERCEPTION_MODULE.withModule("yolo")
                                                                                                    .withType(YOLOv8AnnotationInfoList.class)
                                                                                                    .withSuffix("annotation_info_list");
-   public static final ROS2Topic<YOLOv8ExecutorParameters> YOLO_PARAMETERS = IHMC_ROOT.withModule("yolo")
+   public static final ROS2Topic<YOLOv8ExecutorParameters> YOLO_PARAMETERS = HumanoidROS2Topic.IHMC_ROOT.withModule("yolo")
                                                                                       .withSuffix("settings")
                                                                                       .withType(YOLOv8ExecutorParameters.class);
-   public static final ROS2Topic<Image> YOLO_VLM_ANNOTATED_IMAGE = IHMC_ROOT.withModule("yolo")
+   public static final ROS2Topic<Image> YOLO_VLM_ANNOTATED_IMAGE = HumanoidROS2Topic.IHMC_ROOT.withModule("yolo")
                                                                             .withSuffix("vlm/image")
                                                                             .withType(Image.class);
-   public static final ROS2Topic<CameraInfo> YOLO_VML_ANNOTATED_IMAGE_CAMERA_INFO = IHMC_ROOT.withModule("yolo")
+   public static final ROS2Topic<CameraInfo> YOLO_VML_ANNOTATED_IMAGE_CAMERA_INFO = HumanoidROS2Topic.IHMC_ROOT.withModule("yolo")
                                                                                              .withSuffix("vlm/camera_Info")
                                                                                              .withType(CameraInfo.class);
 
@@ -145,7 +144,7 @@ public final class PerceptionAPI
    /*
     * Planar regions
     */
-   public static final ROS2Topic<Empty> REQUEST_PLANAR_REGIONS = IHMC_ROOT.withModule("planar_regions").withSuffix("request").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_PLANAR_REGIONS = HumanoidROS2Topic.IHMC_ROOT.withModule("planar_regions").withSuffix("request").withType(Empty.class);
    public static final ROS2Topic<FramePlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS = PERCEPTION_MODULE.withOutput()
                                                                                                              .withTypeName(FramePlanarRegionsListMessage.class)
                                                                                                              .withSuffix("perspective");
@@ -183,7 +182,7 @@ public final class PerceptionAPI
    /*
     * Transform tuning
     */
-   private static final HumanoidROS2Topic<RigidBodyTransformMessage> TRANSFORM_TUNING_BASE_TOPIC = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
+   private static final HumanoidROS2Topic<RigidBodyTransformMessage> TRANSFORM_TUNING_BASE_TOPIC = HumanoidROS2Topic.IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
                                                                                                             .withModule("transform_tuning");
    public static final ROS2IOTopicPair<RigidBodyTransformMessage> STEPPING_CAMERA_TO_PARENT_TUNING = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix(
          "stepping_camera_to_parent"));

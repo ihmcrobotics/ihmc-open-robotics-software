@@ -4,7 +4,6 @@ import ihmc_hands_ros2.AbilityHandCommand;
 import ihmc_hands_ros2.AbilityHandState;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
 import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
 import us.ihmc.handsros2.HandModel;
@@ -50,7 +49,11 @@ public class AbilityHandKinematicsSimulation
 
       enabled = allJointsFound;
 
-      ros2Node.createSubscription(AbilityHandROS2API.COMMAND_TOPICS.get(side), reader -> ROS2Tools.readIfPresent(reader, commandNotification::set));
+      ros2Node.createSubscription(AbilityHandROS2API.COMMAND_TOPICS.get(side), reader -> {
+         var message = reader.read();
+         if (message != null)
+            commandNotification.set(message);
+      });
       statePublisher = ros2Node.createPublisher(AbilityHandROS2API.STATE_TOPICS.get(side));
 
       setGripGoals(AbilityHandGrip.RELAX);

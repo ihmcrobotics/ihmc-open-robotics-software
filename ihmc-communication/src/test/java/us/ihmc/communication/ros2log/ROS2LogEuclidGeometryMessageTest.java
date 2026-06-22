@@ -1,5 +1,7 @@
 package us.ihmc.communication.ros2log;
 
+import us.ihmc.communication.HumanoidROS2Topic;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.CaseFormat;
@@ -8,7 +10,6 @@ import ihmc_common_msgs.SO3TrajectoryPointMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
 
@@ -24,7 +25,7 @@ public class ROS2LogEuclidGeometryMessageTest
    @Test
    public void testCapsule3DMessageEuclidPointAndVectorRoundTrip() throws Exception
    {
-      ROS2Topic<Capsule3DMessage> topic = ROS2Tools.IHMC_ROOT.withType(Capsule3DMessage.class);
+      ROS2Topic<Capsule3DMessage> topic = HumanoidROS2Topic.IHMC_ROOT.withType(Capsule3DMessage.class);
       ROS2Node ros2Node = new ROS2Node("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ros2_log_euclid_capsule_test"));
 
       Capsule3DMessage exported = createSampleCapsule3DMessage();
@@ -61,7 +62,7 @@ public class ROS2LogEuclidGeometryMessageTest
    @Test
    public void testSO3TrajectoryPointMessageEuclidQuaternionRoundTrip() throws Exception
    {
-      ROS2Topic<SO3TrajectoryPointMessage> topic = ROS2Tools.IHMC_ROOT.withType(SO3TrajectoryPointMessage.class);
+      ROS2Topic<SO3TrajectoryPointMessage> topic = HumanoidROS2Topic.IHMC_ROOT.withType(SO3TrajectoryPointMessage.class);
       ROS2Node ros2Node = new ROS2Node("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ros2_log_euclid_quaternion_test"));
 
       SO3TrajectoryPointMessage exported = createSampleSO3TrajectoryPointMessage();

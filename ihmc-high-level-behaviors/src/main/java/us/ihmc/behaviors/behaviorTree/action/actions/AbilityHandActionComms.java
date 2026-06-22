@@ -3,7 +3,6 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 import ihmc_hands_ros2.AbilityHandCommand;
 import ihmc_hands_ros2.AbilityHandState;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.handsros2.abilityHand.AbilityHandROS2API;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.jros2.ROS2Node;
@@ -20,7 +19,11 @@ public class AbilityHandActionComms
 
    public AbilityHandActionComms(RobotSide handSide, ROS2Node ros2Node)
    {
-      ros2Node.createSubscription(AbilityHandROS2API.STATE_TOPICS.get(handSide), reader -> ROS2Tools.readIfPresent(reader, stateNotification::set));
+      ros2Node.createSubscription(AbilityHandROS2API.STATE_TOPICS.get(handSide), reader -> {
+         var message = reader.read();
+         if (message != null)
+            stateNotification.set(message);
+      });
       commandPublisher = ros2Node.createPublisher(AbilityHandROS2API.COMMAND_TOPICS.get(handSide));
    }
 

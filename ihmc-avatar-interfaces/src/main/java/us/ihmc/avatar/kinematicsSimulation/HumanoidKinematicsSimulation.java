@@ -33,7 +33,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -105,7 +105,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class HumanoidKinematicsSimulation
 {
    public static final ROS2Topic<Empty> KINEMATICS_SIMULATION_HEARTBEAT
-         = ROS2Tools.IHMC_ROOT.withModule("kinematics_simulation").withOutput().withSuffix("heartbeat").withType(Empty.class);
+         = HumanoidROS2Topic.IHMC_ROOT.withModule("kinematics_simulation").withOutput().withSuffix("heartbeat").withType(Empty.class);
    private static final double GRAVITY_Z = 9.81;
    private static final double LIDAR_SPINDLE_SPEED = 2.5;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -118,7 +118,6 @@ public class HumanoidKinematicsSimulation
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder(RobotMotionStatus.UNKNOWN);
-   private double yoVariableServerTime = 0.0;
    private final Stopwatch monotonicTimer = new Stopwatch();
    private final Stopwatch updateTimer = new Stopwatch();
    private final YoDouble yoTime;
@@ -548,14 +547,13 @@ public class HumanoidKinematicsSimulation
       integrator.setIntegrationDT(kinematicsSimulationParameters.getDt());
       integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
 
-      yoVariableServerTime += Conversions.millisecondsToSeconds(1);
       if (kinematicsSimulationParameters.getLogToFile())
       {
-         intraprocessYoVariableLogger.update(Conversions.secondsToNanoseconds(yoVariableServerTime));
+         intraprocessYoVariableLogger.update(Conversions.secondsToNanoseconds(yoTime.getValue()));
       }
       if (kinematicsSimulationParameters.getCreateYoVariableServer())
       {
-         yoVariableServer.update(Conversions.secondsToNanoseconds(yoVariableServerTime));
+         yoVariableServer.update(Conversions.secondsToNanoseconds(yoTime.getValue()));
       }
    }
 
@@ -617,7 +615,8 @@ public class HumanoidKinematicsSimulation
       LogTools.info("Shutting down...");
       if (intraprocessYoVariableLogger != null)
          intraprocessYoVariableLogger.destroy();
-      controlThread.destroy();
+      if (controlThread != null)
+         controlThread.destroy();
       heartbeat.destroy();
       ros2Node.close();
       realtimeROS2Node.close();

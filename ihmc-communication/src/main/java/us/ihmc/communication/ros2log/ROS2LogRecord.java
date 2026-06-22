@@ -1,7 +1,7 @@
 package us.ihmc.communication.ros2log;
 
 import toolbox_msgs.ROS2LogMessage;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.log.LogTools;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
@@ -127,7 +127,7 @@ public class ROS2LogRecord
 
    public static ROS2Topic<ROS2LogMessage> getROS2LogTopic()
    {
-      return ROS2Tools.IHMC_ROOT.withModule(MODULE_NAME).withTypeName(ROS2LogMessage.class);
+      return HumanoidROS2Topic.IHMC_ROOT.withModule(MODULE_NAME).withTypeName(ROS2LogMessage.class);
    }
 
    @SuppressWarnings("unchecked")

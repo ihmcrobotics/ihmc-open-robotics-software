@@ -4,7 +4,6 @@ import ihmc_common_msgs.MessageCollection;
 import ihmc_common_msgs.MessageCollectionNotification;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
@@ -204,11 +203,14 @@ public class ControllerNetworkSubscriber
          @SuppressWarnings({"unchecked", "rawtypes"})
          Class messageClassRaw = messageClass;
 
-         ROS2Tools.createSubscription(ros2Node, ControllerAPI.getTopic(inputTopic, messageClassRaw), message ->
-         {
-            if (message != null)
-               receivedMessage(message);
-         });
+         ros2Node.createSubscription(ControllerAPI.getTopic(inputTopic, messageClassRaw),
+                                     reader ->
+                                     {
+                                        var message = reader.read();
+                                        if (message != null)
+                                           receivedMessage(message);
+                                     },
+                                     ControllerAPI.getQoS(messageClassRaw));
       }
    }
 

@@ -1,9 +1,10 @@
 package us.ihmc.communication.ros2;
 
+import us.ihmc.communication.HumanoidROS2Topic;
+
 import controller_msgs.RobotConfigurationData;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2QoSProfile;
@@ -20,7 +21,7 @@ public class FrameRealtimeROS2PublisherSubscriberTest
    public FrameRealtimeROS2PublisherSubscriberTest()
    {
       realtimeROS2Node = new AsyncROS2Node("frameTest");
-      ROS2Topic<RobotConfigurationData> topic = ROS2Tools.IHMC_ROOT.withSuffix("FrameData").withType(RobotConfigurationData.class);
+      ROS2Topic<RobotConfigurationData> topic = HumanoidROS2Topic.IHMC_ROOT.withSuffix("FrameData").withType(RobotConfigurationData.class);
       LogTools.info("Publishing to {}", topic);
       publisher = realtimeROS2Node.createPublisher(topic, ROS2QoSProfile.BEST_EFFORT);
 

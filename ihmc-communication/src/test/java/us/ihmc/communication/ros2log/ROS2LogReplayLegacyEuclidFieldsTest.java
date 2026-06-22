@@ -1,12 +1,13 @@
 package us.ihmc.communication.ros2log;
 
+import us.ihmc.communication.HumanoidROS2Topic;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import toolbox_msgs.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.jros2.ROS2Topic;
 
 import java.io.File;
@@ -28,7 +29,7 @@ public class ROS2LogReplayLegacyEuclidFieldsTest
    public void testReplayParsesLegacyStringifiedEuclidFields()
    {
       File logFile = createLegacyStringifiedEuclidLog();
-      ROS2Topic<KinematicsToolboxOutputStatus> topic = ROS2Tools.IHMC_ROOT.withType(KinematicsToolboxOutputStatus.class);
+      ROS2Topic<KinematicsToolboxOutputStatus> topic = HumanoidROS2Topic.IHMC_ROOT.withType(KinematicsToolboxOutputStatus.class);
 
       AtomicLong replayClock = new AtomicLong(0L);
       List<KinematicsToolboxOutputStatus> replayedStatuses = new ArrayList<>();

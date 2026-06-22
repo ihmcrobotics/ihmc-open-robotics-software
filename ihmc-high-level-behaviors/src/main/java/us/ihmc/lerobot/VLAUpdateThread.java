@@ -20,8 +20,8 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.HumanoidROS2Topic;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ToolboxAPIs;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
@@ -109,13 +109,25 @@ public class VLAUpdateThread extends VLAYoRegistry
       running = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
       controlRobot = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
 
-      uiCommandSubscription = ROS2Tools.createNotificationSubscription(ros2Node, UI.getTopic(ROS2ActorDesignation.ROBOT.getIncomingQualifier()));
+      var uiCommandTopic = UI.getTopic(ROS2ActorDesignation.ROBOT.getIncomingQualifier());
+      TypedNotification<VLAOperationMessage> typedNotification = new TypedNotification<>();
+      ros2Node.createSubscription(uiCommandTopic, reader ->
+      {
+         var message = reader.read();
+         if (message != null)
+            typedNotification.set(message);
+      }, ControllerAPI.getQoS(uiCommandTopic.getType()));
+      uiCommandSubscription = typedNotification;
       uiStatusPublisher = ros2Node.createPublisher(UI.getTopic(ROS2ActorDesignation.ROBOT.getOutgoingQualifier()));
 
       kstFullRobotModel = robotModel.createFullRobotModel();
       kstReferenceFrames = new HumanoidReferenceFrames(kstFullRobotModel, robotModel.getSensorInformation());
       kstOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(kstFullRobotModel);
-      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()), reader -> ROS2Tools.readIfPresent(reader, kstStatusSubscription::set));
+      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()), reader -> {
+         var message = reader.read();
+         if (message != null)
+            kstStatusSubscription.set(message);
+      });
 
       kstInputPublisher = ros2Node.createPublisher(ToolboxAPIs.getIKStreamingInputTopic(robotModel.getSimpleRobotName()));
       kstStatePublisher = ros2Node.createPublisher(ToolboxAPIs.getIKStreamingStateTopic(robotModel.getSimpleRobotName()));

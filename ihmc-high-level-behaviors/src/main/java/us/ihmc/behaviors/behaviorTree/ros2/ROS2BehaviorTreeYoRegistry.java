@@ -3,12 +3,13 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 import behavior_msgs.BehaviorTreeYoDataMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.AutonomyAPI;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.yoVariables.euclid.YoPose3D;
@@ -50,7 +51,20 @@ public class ROS2BehaviorTreeYoRegistry
    {
       this.fullRobotModel = fullRobotModel;
 
-      subscription = ROS2Tools.createSwapReferenceSubscription(ros2Node, AutonomyAPI.BEHAVIOR_YO_DATA, notification);
+      var behaviorYoDataTopic = AutonomyAPI.BEHAVIOR_YO_DATA;
+      SwapReference<BehaviorTreeYoDataMessage> swapReference = new SwapReference<>(() -> ROS2Message.createInstance(behaviorYoDataTopic.getType()));
+      ros2Node.createSubscription(behaviorYoDataTopic, reader ->
+      {
+         var readMessage = reader.read();
+         if (readMessage != null)
+         {
+            var messageToPack = swapReference.getForThreadOne();
+            messageToPack.set(readMessage);
+            swapReference.swap();
+            notification.set();
+         }
+      }, ControllerAPI.getQoS(behaviorYoDataTopic.getType()));
+      subscription = swapReference;
 
       for (int i = 0; i < sceneObjectPoses.length; i++)
          sceneObjectPoses[i] = new YoPose3D("sceneObject" + i, registry);

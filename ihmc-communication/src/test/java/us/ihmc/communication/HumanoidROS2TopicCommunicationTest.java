@@ -28,23 +28,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ROS2ToolsTest
+class HumanoidROS2TopicCommunicationTest
 {
    @Test
    public void testTopicNameStuff()
    {
-      assertEquals("/ihmc/camera_info", ROS2Tools.IHMC_ROOT.withTypeName(CameraInfo.class).toString());
-      assertEquals("/ihmc/atlas/camera_info", ROS2Tools.IHMC_ROOT.withTypeName(CameraInfo.class).withRobot("atlas").toString());
+      assertEquals("/ihmc/camera_info", HumanoidROS2Topic.IHMC_ROOT.withTypeName(CameraInfo.class).toString());
+      assertEquals("/ihmc/atlas/camera_info", HumanoidROS2Topic.IHMC_ROOT.withTypeName(CameraInfo.class).withRobot("atlas").toString());
       assertEquals("/ihmc/atlas/rea/input/camera_info",
-                   ROS2Tools.IHMC_ROOT.withTypeName(CameraInfo.class).withRobot("atlas").withModule("rea").withInput().toString());
+                   HumanoidROS2Topic.IHMC_ROOT.withTypeName(CameraInfo.class).withRobot("atlas").withModule("rea").withInput().toString());
 
-      HumanoidROS2Topic<?> defaultTopicName = ROS2Tools.IHMC_ROOT;
+      HumanoidROS2Topic<?> defaultTopicName = HumanoidROS2Topic.IHMC_ROOT;
       assertEquals("/ihmc/camera_info", defaultTopicName.withTypeName(CameraInfo.class).toString());
 
-      HumanoidROS2Topic<?> defaultTopicNameWithRobot = ROS2Tools.IHMC_ROOT.withRobot("atlas");
+      HumanoidROS2Topic<?> defaultTopicNameWithRobot = HumanoidROS2Topic.IHMC_ROOT.withRobot("atlas");
       assertEquals("/ihmc/atlas/camera_info", defaultTopicNameWithRobot.withTypeName(CameraInfo.class).toString());
 
-      HumanoidROS2Topic<?> defaultTopicName3 = ROS2Tools.IHMC_ROOT.withRobot("atlas").withModule("rea").withOutput();
+      HumanoidROS2Topic<?> defaultTopicName3 = HumanoidROS2Topic.IHMC_ROOT.withRobot("atlas").withModule("rea").withOutput();
       assertEquals("/ihmc/atlas/rea/output/camera_info", defaultTopicName3.withTypeName(CameraInfo.class).toString());
 
       assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", ToolboxAPIs.STEP_TELEOP_TOOLBOX.withRobot("atlas").withOutput().toString());
@@ -59,8 +59,8 @@ class ROS2ToolsTest
 
       ROS2Helper helper = new ROS2Helper(ros2Node);
 
-      ROS2Topic<Int64> intTopic = ROS2Tools.IHMC_ROOT.withType(Int64.class);
-      ROS2Topic<Float64> doubleTopic = ROS2Tools.IHMC_ROOT.withType(Float64.class);
+      ROS2Topic<Int64> intTopic = HumanoidROS2Topic.IHMC_ROOT.withType(Int64.class);
+      ROS2Topic<Float64> doubleTopic = HumanoidROS2Topic.IHMC_ROOT.withType(Float64.class);
 
       MutableInt intCount = new MutableInt();
       MutableInt doubleCount = new MutableInt();
@@ -94,10 +94,10 @@ class ROS2ToolsTest
    {
       ROS2Node ros2Node = new ROS2Node(getClass().getSimpleName());
 
-      ROS2Publisher<Int64> intPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withType(Int64.class));
+      ROS2Publisher<Int64> intPublisher = ros2Node.createPublisher(HumanoidROS2Topic.IHMC_ROOT.withType(Int64.class));
 
       MutableInt count = new MutableInt();
-      ros2Node.createSubscription(ROS2Tools.IHMC_ROOT.withType(Int64.class), reader ->
+      ros2Node.createSubscription(HumanoidROS2Topic.IHMC_ROOT.withType(Int64.class), reader ->
       {
          Int64 message = reader.read();
          LogTools.info("Received int #{}: {}", count.getAndIncrement(), message);
@@ -120,10 +120,10 @@ class ROS2ToolsTest
    {
       ROS2Node ros2Node = new ROS2Node(getClass().getSimpleName());
 
-      ROS2Publisher<std_msgs.String_> stringPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withType(std_msgs.String_.class));
+      ROS2Publisher<std_msgs.String_> stringPublisher = ros2Node.createPublisher(HumanoidROS2Topic.IHMC_ROOT.withType(std_msgs.String_.class));
 
       MutableInt count = new MutableInt();
-      ros2Node.createSubscription(ROS2Tools.IHMC_ROOT.withType(std_msgs.String_.class), reader ->
+      ros2Node.createSubscription(HumanoidROS2Topic.IHMC_ROOT.withType(std_msgs.String_.class), reader ->
       {
          std_msgs.String_ message = reader.read();
          LogTools.info("Received int #{}: {}", count.getAndIncrement(), message);
@@ -149,10 +149,10 @@ class ROS2ToolsTest
    {
       ROS2Node ros2Node = new ROS2Node(getClass().getSimpleName());
 
-      ROS2Publisher<LongString> stringPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withType(LongString.class));
+      ROS2Publisher<LongString> stringPublisher = ros2Node.createPublisher(HumanoidROS2Topic.IHMC_ROOT.withType(LongString.class));
 
       MutableInt count = new MutableInt();
-      ros2Node.createSubscription(ROS2Tools.IHMC_ROOT.withType(LongString.class), reader ->
+      ros2Node.createSubscription(HumanoidROS2Topic.IHMC_ROOT.withType(LongString.class), reader ->
       {
          LongString message = reader.read();
          LogTools.info("Received int #{}: {}", count.getAndIncrement(), MessageTools.unpackLongStringFromByteSequence(message.getLongString()));
@@ -183,7 +183,7 @@ class ROS2ToolsTest
 
       // ROS2Node sharedMemoryNode = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.SHARED_MEMORY_ONLY).build(getClass().getSimpleName() + "SharedMemoryNode");
       ROS2Node sharedMemoryNode = new ROS2Node(getClass().getSimpleName() + "SharedMemoryNode");
-      ROS2Subscription<std_msgs.String_> sharedMemorySubscriber = sharedMemoryNode.createSubscription(ROS2Tools.IHMC_ROOT.withType(std_msgs.String_.class), reader ->
+      ROS2Subscription<std_msgs.String_> sharedMemorySubscriber = sharedMemoryNode.createSubscription(HumanoidROS2Topic.IHMC_ROOT.withType(std_msgs.String_.class), reader ->
       {
          std_msgs.String_ message = reader.read();
          messageReceived.set(true);
@@ -196,7 +196,7 @@ class ROS2ToolsTest
             failed.set(true);
       });
 
-      ROS2Publisher<std_msgs.String_> publisher = sharedMemoryNode.createPublisher(ROS2Tools.IHMC_ROOT.withType(std_msgs.String_.class));
+      ROS2Publisher<std_msgs.String_> publisher = sharedMemoryNode.createPublisher(HumanoidROS2Topic.IHMC_ROOT.withType(std_msgs.String_.class));
       std_msgs.String_ messageToSend = new std_msgs.String_();
       messageToSend.setData(stringToSend.toString());
       publisher.publish(messageToSend);
@@ -226,7 +226,7 @@ class ROS2ToolsTest
       //                                              .specialTransportMode(SpecialTransportMode.UDPV4_LOOPBACK_ADDRESS_ONLY)
       //                                              .build(getClass().getSimpleName() + "LoopbackNode");
       ROS2Node loopbackNode = new ROS2Node(getClass().getSimpleName() + "LoopbackNode", domainId);
-      ROS2Subscription<std_msgs.String_> loopbackSubscriber = loopbackNode.createSubscription(ROS2Tools.IHMC_ROOT.withType(std_msgs.String_.class), reader -> {
+      ROS2Subscription<std_msgs.String_> loopbackSubscriber = loopbackNode.createSubscription(HumanoidROS2Topic.IHMC_ROOT.withType(std_msgs.String_.class), reader -> {
          std_msgs.String_ message = reader.read();
          messageReceived.set(true);
          synchronized (messageReceived)
@@ -242,13 +242,13 @@ class ROS2ToolsTest
       LogTools.info("Outsider node on {}", outsiderAddress);
       // ROS2Node outsiderNode = new ROS2NodeBuilder().domainId(domainId).addressRestriction(outsiderAddress).build(getClass().getSimpleName());
       ROS2Node outsiderNode = new ROS2Node(getClass().getSimpleName(), domainId);
-      ROS2Subscription<std_msgs.String_> outsideSubscriber = outsiderNode.createSubscription(ROS2Tools.IHMC_ROOT.withType(std_msgs.String_.class), reader ->
+      ROS2Subscription<std_msgs.String_> outsideSubscriber = outsiderNode.createSubscription(HumanoidROS2Topic.IHMC_ROOT.withType(std_msgs.String_.class), reader ->
       {
          LogTools.error("Outsider node should NOT receive any messages");
          failed.set(true);
       });
 
-      ROS2Publisher<std_msgs.String_> stringPublisher = loopbackNode.createPublisher(ROS2Tools.IHMC_ROOT.withType(std_msgs.String_.class));
+      ROS2Publisher<std_msgs.String_> stringPublisher = loopbackNode.createPublisher(HumanoidROS2Topic.IHMC_ROOT.withType(std_msgs.String_.class));
       std_msgs.String_ messageToSend = new std_msgs.String_();
       messageToSend.setData(stringToSend.toString());
       stringPublisher.publish(messageToSend);

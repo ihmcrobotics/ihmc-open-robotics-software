@@ -5,7 +5,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.jros2.Guid;
 import us.ihmc.jros2.ROS2Node;
@@ -27,7 +27,7 @@ import java.util.concurrent.Executors;
  */
 public class ROS2PeerClockOffsetEstimator
 {
-   private static final ROS2Topic<PeerClockOffsetEstimatorPingMessage> TOPIC = ROS2Tools.IHMC_ROOT.withModule("peer_clock_offset_estimator")
+   private static final ROS2Topic<PeerClockOffsetEstimatorPingMessage> TOPIC = HumanoidROS2Topic.IHMC_ROOT.withModule("peer_clock_offset_estimator")
                                                                                                   .withType(PeerClockOffsetEstimatorPingMessage.class);
 
    private final HashMap<Guid, ROS2PeerClockOffsetEstimatorPeer> peerMap = new HashMap<>();
