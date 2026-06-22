@@ -43,7 +43,6 @@ byte EZGRIPPER_ACTION = 15
 byte ABILITY_HAND_ACTION = 16
 byte ARM_ACTION = 17
 byte HAND_WRENCH_ACTION = 18
-byte SCREW_PRIMITIVE_ACTION = 19
 byte PELVIS_ACTION = 20
 byte WAIT_ACTION = 21
 byte LEG_ACTION = 22
@@ -107,8 +106,6 @@ behavior_msgs/ArmActionStateMessage[<=120] arm_actions
 
 behavior_msgs/HandWrenchActionStateMessage[<=120] hand_wrench_actions
 
-behavior_msgs/ScrewPrimitiveActionStateMessage[<=120] screw_primitive_actions
-
 behavior_msgs/PelvisActionStateMessage[<=120] pelvis_actions
 
 behavior_msgs/WaitActionStateMessage[<=120] wait_actions
@@ -145,7 +142,6 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
    public static final byte ABILITY_HAND_ACTION = 16;
    public static final byte ARM_ACTION = 17;
    public static final byte HAND_WRENCH_ACTION = 18;
-   public static final byte SCREW_PRIMITIVE_ACTION = 19;
    public static final byte PELVIS_ACTION = 20;
    public static final byte WAIT_ACTION = 21;
    public static final byte LEG_ACTION = 22;
@@ -195,7 +191,6 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
    private final IDLObjectSequence<behavior_msgs.AbilityHandActionStateMessage> ability_hand_actions_;
    private final IDLObjectSequence<behavior_msgs.ArmActionStateMessage> arm_actions_;
    private final IDLObjectSequence<behavior_msgs.HandWrenchActionStateMessage> hand_wrench_actions_;
-   private final IDLObjectSequence<behavior_msgs.ScrewPrimitiveActionStateMessage> screw_primitive_actions_;
    private final IDLObjectSequence<behavior_msgs.PelvisActionStateMessage> pelvis_actions_;
    private final IDLObjectSequence<behavior_msgs.WaitActionStateMessage> wait_actions_;
    private final IDLObjectSequence<behavior_msgs.LegActionStateMessage> leg_actions_;
@@ -226,7 +221,6 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
       ability_hand_actions_ = new IDLObjectSequence<behavior_msgs.AbilityHandActionStateMessage>(0, 120, behavior_msgs.AbilityHandActionStateMessage.class);
       arm_actions_ = new IDLObjectSequence<behavior_msgs.ArmActionStateMessage>(0, 120, behavior_msgs.ArmActionStateMessage.class);
       hand_wrench_actions_ = new IDLObjectSequence<behavior_msgs.HandWrenchActionStateMessage>(0, 120, behavior_msgs.HandWrenchActionStateMessage.class);
-      screw_primitive_actions_ = new IDLObjectSequence<behavior_msgs.ScrewPrimitiveActionStateMessage>(0, 120, behavior_msgs.ScrewPrimitiveActionStateMessage.class);
       pelvis_actions_ = new IDLObjectSequence<behavior_msgs.PelvisActionStateMessage>(0, 120, behavior_msgs.PelvisActionStateMessage.class);
       wait_actions_ = new IDLObjectSequence<behavior_msgs.WaitActionStateMessage>(0, 120, behavior_msgs.WaitActionStateMessage.class);
       leg_actions_ = new IDLObjectSequence<behavior_msgs.LegActionStateMessage>(0, 120, behavior_msgs.LegActionStateMessage.class);
@@ -264,7 +258,6 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
       currentAlignment += ability_hand_actions_.calculateSizeBytes(currentAlignment);
       currentAlignment += arm_actions_.calculateSizeBytes(currentAlignment);
       currentAlignment += hand_wrench_actions_.calculateSizeBytes(currentAlignment);
-      currentAlignment += screw_primitive_actions_.calculateSizeBytes(currentAlignment);
       currentAlignment += pelvis_actions_.calculateSizeBytes(currentAlignment);
       currentAlignment += wait_actions_.calculateSizeBytes(currentAlignment);
       currentAlignment += leg_actions_.calculateSizeBytes(currentAlignment);
@@ -301,7 +294,6 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
       ability_hand_actions_.serialize(buffer);
       arm_actions_.serialize(buffer);
       hand_wrench_actions_.serialize(buffer);
-      screw_primitive_actions_.serialize(buffer);
       pelvis_actions_.serialize(buffer);
       wait_actions_.serialize(buffer);
       leg_actions_.serialize(buffer);
@@ -337,7 +329,6 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
       ability_hand_actions_.deserialize(buffer);
       arm_actions_.deserialize(buffer);
       hand_wrench_actions_.deserialize(buffer);
-      screw_primitive_actions_.deserialize(buffer);
       pelvis_actions_.deserialize(buffer);
       wait_actions_.deserialize(buffer);
       leg_actions_.deserialize(buffer);
@@ -373,7 +364,6 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
       ability_hand_actions_.set(from.ability_hand_actions_);
       arm_actions_.set(from.arm_actions_);
       hand_wrench_actions_.set(from.hand_wrench_actions_);
-      screw_primitive_actions_.set(from.screw_primitive_actions_);
       pelvis_actions_.set(from.pelvis_actions_);
       wait_actions_.set(from.wait_actions_);
       leg_actions_.set(from.leg_actions_);
@@ -516,11 +506,6 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
       return hand_wrench_actions_;
    }
 
-   public IDLObjectSequence<behavior_msgs.ScrewPrimitiveActionStateMessage> getScrewPrimitiveActions()
-   {
-      return screw_primitive_actions_;
-   }
-
    public IDLObjectSequence<behavior_msgs.PelvisActionStateMessage> getPelvisActions()
    {
       return pelvis_actions_;
@@ -585,8 +570,6 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
       builder.append(ARM_ACTION);
       builder.append("HAND_WRENCH_ACTION=");
       builder.append(HAND_WRENCH_ACTION);
-      builder.append("SCREW_PRIMITIVE_ACTION=");
-      builder.append(SCREW_PRIMITIVE_ACTION);
       builder.append("PELVIS_ACTION=");
       builder.append(PELVIS_ACTION);
       builder.append("WAIT_ACTION=");
@@ -645,8 +628,6 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
       builder.append(arm_actions_);
       builder.append("hand_wrench_actions_=");
       builder.append(hand_wrench_actions_);
-      builder.append("screw_primitive_actions_=");
-      builder.append(screw_primitive_actions_);
       builder.append("pelvis_actions_=");
       builder.append(pelvis_actions_);
       builder.append("wait_actions_=");

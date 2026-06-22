@@ -48,7 +48,6 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getWalkActions().clear();
       treeStateMessage.getArmActions().clear();
       treeStateMessage.getHandWrenchActions().clear();
-      treeStateMessage.getScrewPrimitiveActions().clear();
       treeStateMessage.getPelvisActions().clear();
       treeStateMessage.getAbilityHandActions().clear();
       treeStateMessage.getEzGripperActions().clear();
@@ -178,12 +177,6 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getHandWrenchActions().size());
             handWrenchActionState.toMessage(treeStateMessage.getHandWrenchActions().add());
          }
-         else if (nodeState instanceof ScrewPrimitiveActionState screwPrimitiveActionState)
-         {
-            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.SCREW_PRIMITIVE_ACTION);
-            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getScrewPrimitiveActions().size());
-            screwPrimitiveActionState.toMessage(treeStateMessage.getScrewPrimitiveActions().add());
-         }
          else if (nodeState instanceof PelvisActionState pelvisActionState)
          {
             treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.PELVIS_ACTION);
@@ -294,10 +287,6 @@ public class ROS2BehaviorTreeMessageTools
       else if (nodeState instanceof HandWrenchActionState handWrenchActionState)
       {
          handWrenchActionState.fromMessage(subscriptionNode.getHandWrenchActionStateMessage());
-      }
-      else if (nodeState instanceof ScrewPrimitiveActionState screwPrimitiveActionState)
-      {
-         screwPrimitiveActionState.fromMessage(subscriptionNode.getScrewPrimitiveActionStateMessage());
       }
       else if (nodeState instanceof PelvisActionState pelvisActionState)
       {
@@ -465,15 +454,6 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setLeafNodeStateMessage(handWrenchActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(handWrenchActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(handWrenchActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
-         }
-         case BehaviorTreeStateMessage.SCREW_PRIMITIVE_ACTION ->
-         {
-            ScrewPrimitiveActionStateMessage screwPrimitiveActionStateMessage = treeStateMessage.getScrewPrimitiveActions().get(indexInTypesList);
-            subscriptionNode.setScrewPrimitiveActionStateMessage(screwPrimitiveActionStateMessage);
-            subscriptionNode.setActionNodeStateMessage(screwPrimitiveActionStateMessage.getState());
-            subscriptionNode.setLeafNodeStateMessage(screwPrimitiveActionStateMessage.getState().getState());
-            subscriptionNode.setBehaviorTreeNodeStateMessage(screwPrimitiveActionStateMessage.getState().getState().getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(screwPrimitiveActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.PELVIS_ACTION ->
          {
