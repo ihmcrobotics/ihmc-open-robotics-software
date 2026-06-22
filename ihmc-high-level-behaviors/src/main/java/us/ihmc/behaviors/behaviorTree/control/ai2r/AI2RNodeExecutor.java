@@ -667,7 +667,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       var actionDefinition = rightArmAction.getDefinition();
       ArmJointName[] armJointNames = getArmJointNames(RobotSide.RIGHT);
       double[] randomizedJointPositions = generateRandomJointPositions(random, RobotSide.RIGHT, armJointNames, getArmJoints(RobotSide.RIGHT, armJointNames));
-      actionDefinition.setUsePredefinedJointAngles(true);
+      actionDefinition.setJointspaceOnly(true);
       actionDefinition.setPreset(null); // CUSTOM_ANGLES
       for (int i = 0; i < Math.min(actionDefinition.getJointAngles().getLength(), randomizedJointPositions.length); i++)
          actionDefinition.getJointAngles().setValue(i, randomizedJointPositions[i]);
@@ -678,7 +678,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private void restoreRightHandDefaults(ArmActionState rightArmAction)
    {
       var actionDefinition = rightArmAction.getDefinition();
-      actionDefinition.setUsePredefinedJointAngles(true);
+      actionDefinition.setJointspaceOnly(true);
       actionDefinition.setPreset(defaultRightHandPreset);
       for (int i = 0; i < defaultRightHandJointAngles.length; i++)
          actionDefinition.getJointAngles().setValue(i, defaultRightHandJointAngles[i]);
@@ -691,7 +691,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       var actionDefinition = leftArmAction.getDefinition();
       ArmJointName[] armJointNames = getArmJointNames(RobotSide.LEFT);
       double[] randomizedJointPositions = generateRandomJointPositions(random, RobotSide.LEFT, armJointNames, getArmJoints(RobotSide.LEFT, armJointNames));
-      actionDefinition.setUsePredefinedJointAngles(true);
+      actionDefinition.setJointspaceOnly(true);
       actionDefinition.setPreset(null); // CUSTOM_ANGLES
       for (int i = 0; i < Math.min(actionDefinition.getJointAngles().getLength(), randomizedJointPositions.length); i++)
          actionDefinition.getJointAngles().setValue(i, randomizedJointPositions[i]);
@@ -702,7 +702,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private void restoreLeftHandDefaults(ArmActionState leftArmAction)
    {
       var actionDefinition = leftArmAction.getDefinition();
-      actionDefinition.setUsePredefinedJointAngles(true);
+      actionDefinition.setJointspaceOnly(true);
       actionDefinition.setPreset(defaultLeftHandPreset);
       for (int i = 0; i < defaultLeftHandJointAngles.length; i++)
          actionDefinition.getJointAngles().setValue(i, defaultLeftHandJointAngles[i]);
