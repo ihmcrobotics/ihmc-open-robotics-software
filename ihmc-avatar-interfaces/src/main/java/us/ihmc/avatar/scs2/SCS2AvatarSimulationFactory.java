@@ -158,7 +158,7 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>(
          "initializeEstimatorToActual",
          true);
-   protected final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", true);
+   protected final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", false);
    protected final OptionalFactoryField<Boolean> automaticallyStartSimulation = new OptionalFactoryField<>(
          "automaticallyStartSimulation",
          false);
@@ -376,12 +376,16 @@ public class SCS2AvatarSimulationFactory
          simulationConstructionSet.addTerrainObject(terrainObjectDefinition);
       }
       robot = simulationConstructionSet.addRobot(robotDefinition);
-      robot.addThrottledController(new SCS2StateEstimatorDebugVariables(simulationConstructionSet.getInertialFrame(),
-                                                                        gravity.get(),
-                                                                        robotModel.getEstimatorDT(),
-                                                                        robot.getControllerManager()
-                                                                             .getControllerInput()),
-                                   robotModel.getEstimatorDT());
+
+      // The debug variables don't need to be updated when the GUI isn't shown as users won't have a way of debugging
+      if (showGUI.get())
+      {
+         robot.addThrottledController(new SCS2StateEstimatorDebugVariables(simulationConstructionSet.getInertialFrame(),
+                                                                           gravity.get(),
+                                                                           robotModel.getEstimatorDT(),
+                                                                           robot.getControllerManager().getControllerInput()), robotModel.getEstimatorDT());
+      }
+
       if (createRigidBodyMutators.hasValue() && createRigidBodyMutators.get())
       {
          robot.addThrottledController(new SCS2RobotRigidBodyMutator(robot,
