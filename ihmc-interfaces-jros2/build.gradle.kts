@@ -46,8 +46,3 @@ tasks.register<jros2GenTask>("generateMessages") {
       "geometry_msgs/Transform" to "us.ihmc.euclid.jros2.messages.EuclidTransformMessage"
    )
 }
-
-// Make compileJava depend on message generation
-tasks.named("compileJava") {
-   dependsOn("generateMessages")
-}
