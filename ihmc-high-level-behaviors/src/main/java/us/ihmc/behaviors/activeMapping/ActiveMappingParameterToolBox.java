@@ -6,11 +6,11 @@ import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.filters.DepthImageFilteringParameters;
-import us.ihmc.perception.gpuMapping.TerrainMapParameters;
-import us.ihmc.jros2.ROS2Node;
 import us.ihmc.perception.gpuMapping.HeightMapParameters;
+import us.ihmc.perception.gpuMapping.TerrainMapParameters;
 
 public class ActiveMappingParameterToolBox
 {

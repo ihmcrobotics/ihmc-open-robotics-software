@@ -4,13 +4,10 @@ import static us.ihmc.robotics.Assert.assertArrayEquals;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.Random;
-
+import controller_msgs.SpineDesiredAccelerationsMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.SpineDesiredAccelerationsMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
@@ -30,6 +27,8 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
+
+import java.util.Random;
 
 public abstract class EndToEndChestDesiredAccelerationsMessageTest implements MultiRobotTestInterface
 {

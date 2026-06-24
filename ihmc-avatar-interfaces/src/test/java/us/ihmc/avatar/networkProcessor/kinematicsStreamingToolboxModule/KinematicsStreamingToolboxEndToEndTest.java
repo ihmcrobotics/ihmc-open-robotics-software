@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import controller_msgs.CapturabilityBasedStatus;
 import controller_msgs.RobotConfigurationData;
 import org.junit.jupiter.api.AfterEach;
@@ -23,11 +25,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.jros2.ROS2Topic;
-import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.controller.interfaces.ControllerOutputBasics;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -44,8 +46,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.io.IOException;
 import java.io.InputStream;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("humanoid-toolbox")
 public abstract class KinematicsStreamingToolboxEndToEndTest

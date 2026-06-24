@@ -1,14 +1,14 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.List;
-import java.util.Random;
-
 import controller_msgs.JointspaceTrajectoryMessage;
 import controller_msgs.OneDoFJointTrajectoryMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
+
+import java.util.List;
+import java.util.Random;
 
 public final class JointspaceTrajectoryCommand extends QueueableCommand<JointspaceTrajectoryCommand, JointspaceTrajectoryMessage>
 {

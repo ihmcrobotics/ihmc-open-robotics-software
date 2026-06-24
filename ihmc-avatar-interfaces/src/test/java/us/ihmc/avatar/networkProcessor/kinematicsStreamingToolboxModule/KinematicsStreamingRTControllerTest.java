@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import org.junit.jupiter.api.AfterEach;
@@ -17,11 +19,11 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.controller.interfaces.ControllerOutputBasics;
@@ -36,8 +38,6 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class KinematicsStreamingRTControllerTest
 {

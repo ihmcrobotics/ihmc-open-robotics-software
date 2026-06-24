@@ -1,13 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
-import java.util.Objects;
-
 import toolbox_msgs.KinematicsToolboxInputCollectionMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+
+import java.util.Objects;
 
 public class KinematicsToolboxInputCollectionCommand implements Command<KinematicsToolboxInputCollectionCommand, KinematicsToolboxInputCollectionMessage>
 {

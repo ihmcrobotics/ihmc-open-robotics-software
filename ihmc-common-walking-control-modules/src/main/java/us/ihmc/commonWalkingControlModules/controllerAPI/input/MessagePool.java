@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.jros2.ROS2Message;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.jros2.ROS2Message;
 
 /**
  * This class provides a simple way of creating a pool of messages that is garbage free.

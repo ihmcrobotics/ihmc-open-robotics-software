@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import us.ihmc.jros2.ROS2Message;
-
 import controller_msgs.CapturabilityBasedStatus;
 import controller_msgs.MultiContactBalanceStatus;
 import controller_msgs.RobotConfigurationData;
@@ -23,9 +21,10 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxSupportRegionCommand;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
-import us.ihmc.jros2.AsyncROS2Node;
 
 import java.util.ArrayList;
 import java.util.List;

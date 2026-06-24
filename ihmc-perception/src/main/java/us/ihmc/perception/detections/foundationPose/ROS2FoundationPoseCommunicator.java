@@ -7,14 +7,14 @@ import perception_msgs.FoundationPoseRequest;
 import perception_msgs.FoundationPoseResult;
 import perception_msgs.ImageMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
-import us.ihmc.perception.RawImage;
-import us.ihmc.perception.imageMessage.CompressionType;
-import us.ihmc.perception.imageMessage.PixelFormat;
-import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.perception.RawImage;
+import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.sensors.ImageSensor;
 
 import java.util.ArrayList;

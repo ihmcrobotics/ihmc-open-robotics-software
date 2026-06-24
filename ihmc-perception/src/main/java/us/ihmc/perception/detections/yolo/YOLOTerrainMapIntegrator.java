@@ -7,14 +7,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.gpuMapping.HeightMapData;
 import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
 import us.ihmc.perception.gpuMapping.HeightMapTools;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
-import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
-import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Publisher;
 
 import java.util.List;
 

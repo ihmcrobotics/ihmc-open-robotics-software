@@ -1,9 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-
 import controller_msgs.HighLevelStateChangeStatusMessage;
 import controller_msgs.RobotDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
@@ -54,6 +50,10 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 
 public class HumanoidHighLevelControllerManager implements RobotController, SCS2YoGraphicHolder
 {

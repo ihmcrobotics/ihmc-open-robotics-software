@@ -1,13 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.converter;
 
-import java.util.List;
-
 import controller_msgs.ClearDelayQueueMessage;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.jros2.ROS2Message;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
+import us.ihmc.jros2.ROS2Message;
+
+import java.util.List;
 
 public class ClearDelayQueueConverter implements CommandConversionInterface
 {

@@ -2,9 +2,8 @@ package us.ihmc.sensorProcessing.communication.producers;
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.junit.jupiter.api.Test;
-
 import controller_msgs.RobotConfigurationData;
+import org.junit.jupiter.api.Test;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

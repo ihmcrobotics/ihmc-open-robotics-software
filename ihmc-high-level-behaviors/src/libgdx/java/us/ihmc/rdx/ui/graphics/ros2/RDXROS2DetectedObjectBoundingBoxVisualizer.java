@@ -14,8 +14,8 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import perception_msgs.DetectedObjectPacket;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -23,6 +23,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.MeshDataBuilder;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.RDXFocusBasedCamera;
 import us.ihmc.rdx.mesh.MeshDataBuilderMissingTools;
@@ -31,7 +32,6 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.jros2.ROS2Topic;
 
 import java.util.Set;
 

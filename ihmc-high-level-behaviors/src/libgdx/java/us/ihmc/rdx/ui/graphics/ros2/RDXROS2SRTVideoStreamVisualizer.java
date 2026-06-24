@@ -5,12 +5,12 @@ import imgui.flag.ImGuiCol;
 import perception_msgs.SRTStreamStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.streaming.ROS2SRTVideoSubscriber;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.jros2.ROS2Topic;
 
 public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2ImageVisualizer<SRTStreamStatus>
 {

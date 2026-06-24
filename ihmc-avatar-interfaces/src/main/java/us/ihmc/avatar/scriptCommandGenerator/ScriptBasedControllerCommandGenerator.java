@@ -1,7 +1,5 @@
 package us.ihmc.avatar.scriptCommandGenerator;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import controller_msgs.FootTrajectoryMessage;
 import controller_msgs.FootstepDataListMessage;
 import controller_msgs.HandTrajectoryMessage;
@@ -17,6 +15,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalking
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ScriptBasedControllerCommandGenerator
 {

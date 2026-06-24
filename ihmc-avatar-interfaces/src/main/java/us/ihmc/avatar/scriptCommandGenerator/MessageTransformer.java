@@ -1,18 +1,18 @@
 package us.ihmc.avatar.scriptCommandGenerator;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-
-import ihmc_common_msgs.EuclideanTrajectoryMessage;
 import controller_msgs.FootstepDataMessage;
-import ihmc_common_msgs.SE3TrajectoryMessage;
-import ihmc_common_msgs.SO3TrajectoryMessage;
 import controller_msgs.WrenchTrajectoryMessage;
 import geometry_msgs.Wrench;
+import ihmc_common_msgs.EuclideanTrajectoryMessage;
+import ihmc_common_msgs.SE3TrajectoryMessage;
+import ihmc_common_msgs.SO3TrajectoryMessage;
 import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This is an highly inefficient way of enabling the transformation of messages using a

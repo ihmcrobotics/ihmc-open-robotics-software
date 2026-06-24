@@ -3,8 +3,6 @@ package us.ihmc.zulu;
 import controller_msgs.FootstepDataListMessage;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.zulu.parameters.controller.ZuluICPControllerParameters;
-import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 import us.ihmc.avatar.AvatarFlatGroundSideSteppingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -12,6 +10,8 @@ import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPController
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.zulu.parameters.controller.ZuluICPControllerParameters;
+import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
 
 @Tag("humanoid-flat-ground-slow-2")
 public class ZuluFlatGroundSideSteppingTest extends AvatarFlatGroundSideSteppingTest

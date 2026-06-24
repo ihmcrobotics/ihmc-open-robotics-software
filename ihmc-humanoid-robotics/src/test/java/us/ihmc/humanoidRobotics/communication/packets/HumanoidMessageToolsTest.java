@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import static us.ihmc.robotics.Assert.assertEquals;
+
 import controller_msgs.FootstepDataListMessage;
 import controller_msgs.FootstepDataMessage;
 import org.junit.jupiter.api.Test;
@@ -13,8 +15,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import static us.ihmc.robotics.Assert.assertEquals;
 
 public class HumanoidMessageToolsTest
 {

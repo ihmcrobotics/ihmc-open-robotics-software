@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
+import static us.ihmc.pathPlanning.HeightMapDataSetName.*;
+
 import perception_msgs.TerrainMapMessage;
 import toolbox_msgs.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.commons.Conversions;
@@ -27,8 +29,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static us.ihmc.pathPlanning.HeightMapDataSetName.*;
 
 public class AStarBodyPathSmootherVisualizer
 {

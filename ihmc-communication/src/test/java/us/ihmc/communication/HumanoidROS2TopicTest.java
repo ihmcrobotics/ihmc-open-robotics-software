@@ -1,12 +1,12 @@
 package us.ihmc.communication;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
 import org.junit.jupiter.api.Test;
 import sensor_msgs.CameraInfo;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.jros2.ROS2Topic;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class HumanoidROS2TopicTest
 {

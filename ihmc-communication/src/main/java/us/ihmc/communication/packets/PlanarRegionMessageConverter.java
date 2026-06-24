@@ -1,11 +1,8 @@
 package us.ihmc.communication.packets;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import perception_msgs.FramePlanarRegionsListMessage;
 import perception_msgs.PlanarRegionMessage;
 import perception_msgs.PlanarRegionsListMessage;
-import perception_msgs.FramePlanarRegionsListMessage;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -20,9 +17,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlanarRegionMessageConverter
 {

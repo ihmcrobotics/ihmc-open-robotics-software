@@ -1,5 +1,7 @@
 package us.ihmc.avatar.controllerAPI;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import controller_msgs.ChestTrajectoryMessage;
 import controller_msgs.HandLoadBearingMessage;
 import controller_msgs.HandTrajectoryMessage;
@@ -37,8 +39,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInterface
 {

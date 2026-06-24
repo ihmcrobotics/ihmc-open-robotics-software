@@ -1,5 +1,7 @@
 package us.ihmc.rdx.ui.lerobot;
 
+import static us.ihmc.lerobot.VLAUpdateThread.UI;
+
 import behavior_msgs.VLAOperationMessage;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -29,6 +31,8 @@ import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.lerobot.VLAUpdateThread;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
@@ -39,11 +43,7 @@ import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.tools.Timer;
-
-import static us.ihmc.lerobot.VLAUpdateThread.UI;
 
 /**
  * UI for remotely operating {@link VLAUpdateThread}.

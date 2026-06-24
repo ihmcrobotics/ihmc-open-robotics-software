@@ -1,17 +1,16 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 
+import gnu.trove.set.hash.TLongHashSet;
+import ihmc_common_msgs.MessageCollection;
+import ihmc_common_msgs.MessageCollectionNotification;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.fastddsjava.cdr.idl.IDLIntSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.jros2.ROS2Message;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import ihmc_common_msgs.MessageCollection;
-import ihmc_common_msgs.MessageCollectionNotification;
-import gnu.trove.set.hash.TLongHashSet;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.fastddsjava.cdr.idl.IDLIntSequence;
-import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 
 /**
  * A {@code MessageCollector} can be added to a {@link ControllerNetworkSubscriber}.

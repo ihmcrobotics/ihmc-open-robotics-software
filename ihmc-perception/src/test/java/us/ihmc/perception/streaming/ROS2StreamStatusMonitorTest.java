@@ -1,5 +1,8 @@
 package us.ihmc.perception.streaming;
 
+import static java.lang.Thread.interrupted;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -13,9 +16,6 @@ import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
 
 import java.net.InetSocketAddress;
-
-import static java.lang.Thread.interrupted;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class ROS2StreamStatusMonitorTest
 {

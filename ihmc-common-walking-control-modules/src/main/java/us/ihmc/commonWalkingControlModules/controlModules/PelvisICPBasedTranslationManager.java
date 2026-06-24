@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import static us.ihmc.communication.controllerAPI.ControllerMessageConstants.INVALID_MESSAGE_ID;
+
 import controller_msgs.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
@@ -32,8 +34,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
-
-import static us.ihmc.communication.controllerAPI.ControllerMessageConstants.INVALID_MESSAGE_ID;
 
 public class PelvisICPBasedTranslationManager
 {

@@ -1,6 +1,6 @@
 package us.ihmc.avatar.scs2;
 
-import us.ihmc.jros2.ROS2Message;
+import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper.CSG_HEARTBEAT_TOPIC;
 
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
@@ -25,10 +25,11 @@ import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.state.interfaces.SixDoFJointStateBasics;
@@ -39,8 +40,6 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Objects;
-
-import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper.CSG_HEARTBEAT_TOPIC;
 
 public class SCS2AvatarSimulation
 {

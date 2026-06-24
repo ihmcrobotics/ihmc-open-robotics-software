@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.walkingPreview;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.FootstepStatusMessage;
 import controller_msgs.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -20,6 +18,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepListPreviewTask implements WalkingPreviewTask
 {

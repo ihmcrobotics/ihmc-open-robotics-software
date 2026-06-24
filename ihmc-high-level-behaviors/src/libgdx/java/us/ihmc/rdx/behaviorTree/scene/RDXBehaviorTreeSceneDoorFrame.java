@@ -1,5 +1,7 @@
 package us.ihmc.rdx.behaviorTree.scene;
 
+import static behavior_msgs.BehaviorTreeSceneObjectStateMessage.*;
+
 import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
 import behavior_msgs.BehaviorTreeSceneObjectStateMessage;
 import imgui.ImGui;
@@ -12,8 +14,6 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
-
-import static behavior_msgs.BehaviorTreeSceneObjectStateMessage.*;
 
 public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
 {

@@ -4,21 +4,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
-import java.util.Random;
-import java.util.stream.Stream;
-
-import org.apache.commons.lang3.mutable.MutableObject;
-import org.apache.commons.math3.stat.descriptive.moment.Mean;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-
 import controller_msgs.ArmTrajectoryMessage;
 import controller_msgs.FootstepDataListMessage;
 import controller_msgs.FootstepDataMessage;
 import controller_msgs.NeckTrajectoryMessage;
 import controller_msgs.RobotConfigurationData;
+import org.apache.commons.lang3.mutable.MutableObject;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import toolbox_msgs.WalkingControllerPreviewInputMessage;
 import toolbox_msgs.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -40,10 +35,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -75,6 +70,10 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.Arrays;
+import java.util.Random;
+import java.util.stream.Stream;
 
 @Tag("humanoid-toolbox")
 public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implements MultiRobotTestInterface

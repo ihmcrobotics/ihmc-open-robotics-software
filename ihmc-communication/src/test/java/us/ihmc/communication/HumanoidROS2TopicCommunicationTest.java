@@ -1,5 +1,7 @@
 package us.ihmc.communication;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -8,15 +10,15 @@ import std_msgs.Float64;
 import std_msgs.Int64;
 import test_msgs.LongString;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.log.LogTools;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Subscription;
-import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
 import java.io.IOException;
@@ -25,8 +27,6 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class HumanoidROS2TopicCommunicationTest
 {

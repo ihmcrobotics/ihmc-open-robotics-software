@@ -1,5 +1,9 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.*;
+
 import controller_msgs.CapturabilityBasedStatus;
 import controller_msgs.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -80,10 +84,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.*;
 
 public class BalanceManager implements SCS2YoGraphicHolder
 {

@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+
 import controller_msgs.FootstepDataListMessage;
 import controller_msgs.FootstepDataMessage;
 import ihmc_common_msgs.SE3TrajectoryPointMessage;
@@ -29,8 +31,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 public class SwingPlanMeshViewer extends AnimationTimer
 {

@@ -1,5 +1,7 @@
 package us.ihmc.perception.tools;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
@@ -12,8 +14,6 @@ import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 
 import java.nio.ByteBuffer;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class PerceptionMessageToolsTest
 {

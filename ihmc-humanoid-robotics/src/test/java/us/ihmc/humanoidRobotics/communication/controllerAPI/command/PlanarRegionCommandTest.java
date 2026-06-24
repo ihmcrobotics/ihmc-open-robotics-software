@@ -4,10 +4,7 @@ import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertFalse;
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.Random;
-
 import org.junit.jupiter.api.Test;
-
 import perception_msgs.PlanarRegionMessage;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -17,6 +14,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.geometry.PlanarRegion;
+
+import java.util.Random;
 
 public class PlanarRegionCommandTest
 {

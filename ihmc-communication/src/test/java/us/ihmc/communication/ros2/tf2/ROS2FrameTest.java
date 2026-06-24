@@ -1,5 +1,7 @@
 package us.ihmc.communication.ros2.tf2;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Test;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,8 +16,6 @@ import us.ihmc.jros2.ROS2Subscription;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class ROS2FrameTest
 {

@@ -1,9 +1,9 @@
 package us.ihmc.zulu.controllerAPI;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import controller_msgs.PelvisOrientationTrajectoryMessage;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.zulu.ZuluVersion;
-import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.avatar.controllerAPI.EndToEndHandLoadBearingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -13,8 +13,8 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-
-import static org.junit.jupiter.api.Assertions.*;
+import us.ihmc.zulu.ZuluRobotModel;
+import us.ihmc.zulu.ZuluVersion;
 
 public class ZuluEndToEndHandLoadBearingTest extends EndToEndHandLoadBearingTest
 {

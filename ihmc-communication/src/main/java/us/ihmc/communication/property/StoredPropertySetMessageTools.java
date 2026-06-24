@@ -1,6 +1,7 @@
 package us.ihmc.communication.property;
 
 import ihmc_common_msgs.PrimitiveDataVectorMessage;
+
 // Removed old IDL import - jros2 IDLBoolSequence returns boolean directly
 import us.ihmc.tools.property.BooleanStoredPropertyKey;
 import us.ihmc.fastddsjava.cdr.idl.IDLBoolSequence;

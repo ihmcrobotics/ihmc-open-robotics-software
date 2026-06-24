@@ -4,13 +4,13 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.BigVideoPacket;
-import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
-import us.ihmc.jros2.ROS2Topic;
-import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.tools.string.StringTools;
 
 public class RDXROS2BigDepthVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPacket>

@@ -1,10 +1,7 @@
 package us.ihmc.footstepPlanning.polygonWiggling;
 
-import java.util.List;
-import java.util.Random;
-
-import toolbox_msgs.FootstepPlannerParametersPacket;
 import javafx.scene.paint.Color;
+import toolbox_msgs.FootstepPlannerParametersPacket;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintInput;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintSolver;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
@@ -33,6 +30,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.List;
+import java.util.Random;
 
 public class GradientDescentStepConstraintSolverVisualizer
 {

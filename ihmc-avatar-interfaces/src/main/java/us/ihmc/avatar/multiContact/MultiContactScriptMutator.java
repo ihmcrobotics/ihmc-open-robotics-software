@@ -1,15 +1,15 @@
 package us.ihmc.avatar.multiContact;
 
-import toolbox_msgs.KinematicsToolboxOutputStatus;
 import gnu.trove.list.array.TIntArrayList;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.tools.io.WorkspacePathTools;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class MultiContactScriptMutator
 {

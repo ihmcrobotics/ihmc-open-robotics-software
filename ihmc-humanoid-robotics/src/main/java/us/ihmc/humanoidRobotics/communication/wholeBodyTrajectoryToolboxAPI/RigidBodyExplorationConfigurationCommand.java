@@ -1,16 +1,16 @@
 package us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import toolbox_msgs.RigidBodyExplorationConfigurationMessage;
 import gnu.trove.list.array.TDoubleArrayList;
+import toolbox_msgs.RigidBodyExplorationConfigurationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class RigidBodyExplorationConfigurationCommand implements Command<RigidBodyExplorationConfigurationCommand, RigidBodyExplorationConfigurationMessage>,
       WholeBodyTrajectoryToolboxAPI<RigidBodyExplorationConfigurationMessage>

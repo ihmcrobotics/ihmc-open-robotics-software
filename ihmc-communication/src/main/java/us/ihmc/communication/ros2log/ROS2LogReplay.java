@@ -2,10 +2,10 @@ package us.ihmc.communication.ros2log;
 
 import com.google.common.base.CaseFormat;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.log.LogTools;
 
 import java.io.File;
 import java.util.HashMap;

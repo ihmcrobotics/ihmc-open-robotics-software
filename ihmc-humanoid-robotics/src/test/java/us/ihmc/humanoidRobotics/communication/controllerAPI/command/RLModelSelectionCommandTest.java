@@ -1,11 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import controller_msgs.RLModelSelectionMessage;
+import org.junit.jupiter.api.Test;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.RLModelSelectionCommand;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class RLModelSelectionCommandTest
 {

@@ -1,9 +1,9 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
-import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
-import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
+import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 
 public abstract class RDXROS2SingleTopicVisualizer<T extends ROS2Message<T>> extends RDXVisualizer
 {

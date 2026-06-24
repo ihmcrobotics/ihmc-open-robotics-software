@@ -14,13 +14,13 @@ import us.ihmc.behaviors.behaviorTree.control.door.*;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensors.ImageSensor;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
-import us.ihmc.jros2.ROS2Node;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensors.ImageSensor;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.HashMap;
 import java.util.Map;

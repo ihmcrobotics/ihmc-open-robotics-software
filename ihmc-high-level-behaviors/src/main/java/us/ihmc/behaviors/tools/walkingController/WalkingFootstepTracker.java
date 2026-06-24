@@ -1,5 +1,9 @@
 package us.ihmc.behaviors.tools.walkingController;
 
+import static us.ihmc.communication.HumanoidControllerAPI.getLowFrequencyTopic;
+import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
+import static us.ihmc.tools.string.StringTools.format;
+
 import controller_msgs.FootstepDataListMessage;
 import controller_msgs.FootstepDataMessage;
 import controller_msgs.FootstepQueueStatusMessage;
@@ -11,17 +15,13 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.log.LogTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static us.ihmc.communication.HumanoidControllerAPI.getLowFrequencyTopic;
-import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
-import static us.ihmc.tools.string.StringTools.format;
 
 /**
  * The purpose of this class is to check on the robot progress

@@ -6,8 +6,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.messager.Messager;
 
 import java.util.concurrent.atomic.AtomicReference;

@@ -1,5 +1,10 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import static toolbox_msgs.KinematicsToolboxOutputStatus.*;
+import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint3D;
+
 import controller_msgs.RobotConfigurationData;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import toolbox_msgs.HumanoidKinematicsToolboxConfigurationMessage;
@@ -101,11 +106,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-import static toolbox_msgs.KinematicsToolboxOutputStatus.*;
-import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint3D;
 
 /**
  * {@code KinematicsToolboxController} is used as a whole-body inverse kinematics solver.

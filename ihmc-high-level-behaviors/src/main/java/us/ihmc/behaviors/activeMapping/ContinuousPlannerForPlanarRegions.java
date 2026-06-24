@@ -13,11 +13,11 @@ import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloWaypointNode;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.gpuMapping.HeightMapTools;
 
 public class ContinuousPlannerForPlanarRegions
 {

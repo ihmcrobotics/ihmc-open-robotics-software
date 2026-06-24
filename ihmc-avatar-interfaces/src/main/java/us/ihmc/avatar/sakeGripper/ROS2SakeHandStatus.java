@@ -3,8 +3,8 @@ package us.ihmc.avatar.sakeGripper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.SakeHandAPI;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.jros2.ROS2Node;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ROS2SakeHandStatus
 {

@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,8 +37,6 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class FootstepSnapAndWigglerTest
 {

@@ -2,12 +2,8 @@ package us.ihmc.avatar.pushRecovery;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.junit.jupiter.api.*;
-
 import controller_msgs.FootstepStatusMessage;
+import org.junit.jupiter.api.*;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -36,6 +32,9 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Tag("video")
 public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTestInterface

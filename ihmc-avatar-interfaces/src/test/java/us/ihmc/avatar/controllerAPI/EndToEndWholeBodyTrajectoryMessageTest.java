@@ -2,19 +2,16 @@ package us.ihmc.avatar.controllerAPI;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.Random;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import controller_msgs.ChestTrajectoryMessage;
 import controller_msgs.FootTrajectoryMessage;
 import controller_msgs.HandTrajectoryMessage;
-import ihmc_common_msgs.MessageCollectionNotification;
 import controller_msgs.PelvisTrajectoryMessage;
-import ihmc_common_msgs.SO3TrajectoryMessage;
 import controller_msgs.WholeBodyTrajectoryMessage;
+import ihmc_common_msgs.MessageCollectionNotification;
+import ihmc_common_msgs.SO3TrajectoryMessage;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
@@ -36,13 +33,14 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+
+import java.util.Random;
 
 public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRobotTestInterface
 {

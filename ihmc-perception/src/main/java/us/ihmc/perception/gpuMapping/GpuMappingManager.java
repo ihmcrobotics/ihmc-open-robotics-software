@@ -13,10 +13,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
-import us.ihmc.sensors.CameraIntrinsics;
-import us.ihmc.perception.gpuMapping.worldModel.ChunkedMapManager;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.perception.gpuMapping.worldModel.ChunkedMapManager;
+import us.ihmc.sensors.CameraIntrinsics;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,5 +1,7 @@
 package us.ihmc.avatar.rrtWalkingPathTest;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import controller_msgs.FootstepDataListMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,8 +42,6 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestInterface
 {

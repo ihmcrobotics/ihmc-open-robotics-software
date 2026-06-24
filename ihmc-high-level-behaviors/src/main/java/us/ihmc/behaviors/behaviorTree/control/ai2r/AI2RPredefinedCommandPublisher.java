@@ -7,10 +7,10 @@ import behavior_msgs.AI2RObjectMessage;
 import behavior_msgs.AI2RStatusMessage;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.log.LogTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

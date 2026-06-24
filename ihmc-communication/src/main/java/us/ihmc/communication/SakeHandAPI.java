@@ -2,8 +2,8 @@ package us.ihmc.communication;
 
 import controller_msgs.SakeHandDesiredCommandMessage;
 import controller_msgs.SakeHandStatusMessage;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public final class SakeHandAPI
 {

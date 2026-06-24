@@ -8,23 +8,23 @@ import imgui.flag.ImGuiCond;
 import imgui.type.ImBoolean;
 import std_msgs.Empty;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2MultiTopicVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2MultiTopicVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2SingleTopicVisualizer;
-import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Topic;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 
 public abstract class RDXVisualizer implements RDXRenderableProvider
 {

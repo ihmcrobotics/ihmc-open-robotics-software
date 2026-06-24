@@ -1,12 +1,12 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.Random;
-
 import controller_msgs.HeadTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+
+import java.util.Random;
 
 public class HeadTrajectoryCommand
       implements Command<HeadTrajectoryCommand, HeadTrajectoryMessage>, FrameBasedCommand<HeadTrajectoryMessage>, EpsilonComparable<HeadTrajectoryCommand>

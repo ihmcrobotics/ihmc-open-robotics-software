@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.ui;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -67,8 +69,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 /**
  * User interface for {@link us.ihmc.footstepPlanning.FootstepPlanningModule}. - Compute footstep

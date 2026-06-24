@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import controller_msgs.AbortWalkingMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
-
 public class AbortWalkingCommand implements Command<AbortWalkingCommand, AbortWalkingMessage>
 {
    private long sequenceId;

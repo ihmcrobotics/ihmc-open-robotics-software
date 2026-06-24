@@ -1,8 +1,9 @@
 package us.ihmc.perception;
 
+import static us.ihmc.communication.ros2.tf2.ROS2FrameTools.CAMERA_TO_OPTICAL_TRANSFORM;
+
 import org.apache.logging.log4j.core.util.ExecutorServices;
 import sensor_msgs.CameraInfo;
-import us.ihmc.jros2.ROS2Message;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ros2.tf2.ROS2FollowingFrame;
@@ -12,9 +13,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.log.LogTools;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.log.LogTools;
 import us.ihmc.sensors.ImageSensor;
 
 import java.util.HashMap;
@@ -24,8 +26,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
-import static us.ihmc.communication.ros2.tf2.ROS2FrameTools.CAMERA_TO_OPTICAL_TRANSFORM;
 
 public class ImageSensorPublishThread extends RepeatingTaskThread
 {

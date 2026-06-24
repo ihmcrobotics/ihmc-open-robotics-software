@@ -1,17 +1,11 @@
 package us.ihmc.manipulation.planning.manifold;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.ToDoubleFunction;
-
-import javax.vecmath.MismatchedSizeException;
-
+import gnu.trove.list.array.TDoubleArrayList;
 import toolbox_msgs.ReachingManifoldMessage;
 import toolbox_msgs.RigidBodyExplorationConfigurationMessage;
 import toolbox_msgs.WaypointBasedTrajectoryMessage;
 import toolbox_msgs.WholeBodyTrajectoryToolboxConfigurationMessage;
 import toolbox_msgs.WholeBodyTrajectoryToolboxMessage;
-import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -48,6 +42,11 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.ToDoubleFunction;
+import javax.vecmath.MismatchedSizeException;
 
 /**
  * Essential tools for manifolds.

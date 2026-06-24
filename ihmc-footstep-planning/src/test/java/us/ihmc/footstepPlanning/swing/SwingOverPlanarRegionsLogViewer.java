@@ -1,8 +1,5 @@
 package us.ihmc.footstepPlanning.swing;
 
-import java.awt.Color;
-import java.io.File;
-
 import controller_msgs.FootstepDataListMessage;
 import controller_msgs.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -29,6 +26,9 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.awt.Color;
+import java.io.File;
 
 /**
  * This class doesn't really work anymore. The swing over planar regions planner has been removed from the FootstepPlanningModule. A local instance of

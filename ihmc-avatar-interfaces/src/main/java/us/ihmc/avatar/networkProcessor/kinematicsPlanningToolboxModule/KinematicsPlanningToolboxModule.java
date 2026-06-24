@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
-import us.ihmc.jros2.ROS2Message;
-
 import controller_msgs.CapturabilityBasedStatus;
 import toolbox_msgs.KinematicsPlanningToolboxOutputStatus;
 import toolbox_msgs.KinematicsToolboxOutputStatus;
@@ -17,6 +15,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.Kinem
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
 

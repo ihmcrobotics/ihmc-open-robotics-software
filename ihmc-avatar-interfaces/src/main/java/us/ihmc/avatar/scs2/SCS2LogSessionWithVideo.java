@@ -1,8 +1,8 @@
 package us.ihmc.avatar.scs2;
 
+import logger_msgs.Camera;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import us.ihmc.log.LogTools;
-import logger_msgs.Camera;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.scs2.session.log.*;
 import us.ihmc.yoVariables.variable.YoLong;

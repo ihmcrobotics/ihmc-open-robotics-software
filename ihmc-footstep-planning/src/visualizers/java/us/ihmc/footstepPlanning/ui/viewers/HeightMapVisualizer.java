@@ -10,16 +10,16 @@ import javafx.scene.shape.MeshView;
 import javafx.util.Pair;
 import perception_msgs.TerrainMapMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.perception.gpuMapping.HeightMapTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

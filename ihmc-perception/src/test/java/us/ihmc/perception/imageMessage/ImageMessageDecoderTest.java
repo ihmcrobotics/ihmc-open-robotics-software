@@ -1,5 +1,8 @@
 package us.ihmc.perception.imageMessage;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.perception.imageMessage.PixelFormat.*;
+
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
@@ -21,9 +24,6 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.perception.imageMessage.PixelFormat.*;
 
 public class ImageMessageDecoderTest
 {

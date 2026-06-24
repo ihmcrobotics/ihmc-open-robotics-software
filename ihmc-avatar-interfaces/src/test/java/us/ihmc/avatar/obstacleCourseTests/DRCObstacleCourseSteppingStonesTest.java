@@ -1,10 +1,11 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import controller_msgs.FootstepDataListMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.FootstepDataListMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -21,8 +22,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotTestInterface
 {

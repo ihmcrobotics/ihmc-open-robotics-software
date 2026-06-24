@@ -9,9 +9,9 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.sensors.CameraIntrinsics;
-import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.tools.Timer;
 
 import java.net.InetSocketAddress;

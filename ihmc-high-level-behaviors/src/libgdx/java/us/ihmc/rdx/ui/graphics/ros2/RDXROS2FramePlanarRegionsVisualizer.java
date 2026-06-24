@@ -6,14 +6,14 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.type.ImDouble;
 import perception_msgs.FramePlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 

@@ -7,15 +7,15 @@ import perception_msgs.YOLOv8AnnotationInfoList;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.detections.yolo.YOLOv8AnnotationInfo;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2MultiTopicVisualizer;
-import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Subscription;
-import us.ihmc.jros2.ROS2Topic;
 
 import java.util.List;
 

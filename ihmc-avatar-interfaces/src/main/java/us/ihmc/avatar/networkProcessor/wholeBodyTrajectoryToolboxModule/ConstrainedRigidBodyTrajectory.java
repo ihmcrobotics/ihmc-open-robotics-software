@@ -1,10 +1,7 @@
 package us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import gnu.trove.list.array.TDoubleArrayList;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
@@ -20,6 +17,9 @@ import us.ihmc.manipulation.planning.exploringSpatial.SpatialData;
 import us.ihmc.manipulation.planning.exploringSpatial.SpatialNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConstrainedRigidBodyTrajectory
 {

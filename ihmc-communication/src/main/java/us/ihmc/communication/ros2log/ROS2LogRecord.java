@@ -2,10 +2,10 @@ package us.ihmc.communication.ros2log;
 
 import toolbox_msgs.ROS2LogMessage;
 import us.ihmc.communication.HumanoidROS2Topic;
-import us.ihmc.log.LogTools;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 import java.util.List;

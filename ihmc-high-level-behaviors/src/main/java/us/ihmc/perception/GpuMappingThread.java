@@ -13,8 +13,9 @@ import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.log.LogTools;
-import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.filters.DepthImageBodyCollisionFilter;
 import us.ihmc.perception.filters.DepthImageFlyingPointsFilter;
 import us.ihmc.perception.gpuMapping.GpuMappingManager;
@@ -27,8 +28,7 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.sensors.CameraIntrinsics;
 
 import java.util.concurrent.BlockingQueue;
 

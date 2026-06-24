@@ -11,6 +11,9 @@ import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
+import us.ihmc.handsros2.ezGripper.EZGripper.OperationMode;
+import us.ihmc.handsros2.ezGripper.EZGripperError;
+import us.ihmc.handsros2.ezGripper.EZGripperROS2HardwareCommunication;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
@@ -19,9 +22,6 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.hands.RDXHandInterface;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.handsros2.ezGripper.EZGripperError;
-import us.ihmc.handsros2.ezGripper.EZGripper.OperationMode;
-import us.ihmc.handsros2.ezGripper.EZGripperROS2HardwareCommunication;
 
 public class RDXEZGripper implements RDXHandInterface
 {

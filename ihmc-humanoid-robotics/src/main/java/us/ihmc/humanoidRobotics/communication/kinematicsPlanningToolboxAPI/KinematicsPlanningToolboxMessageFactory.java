@@ -1,15 +1,15 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import toolbox_msgs.KinematicsPlanningToolboxRigidBodyMessage;
 import gnu.trove.list.array.TDoubleArrayList;
+import toolbox_msgs.KinematicsPlanningToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class KinematicsPlanningToolboxMessageFactory
 {

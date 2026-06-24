@@ -1,8 +1,10 @@
 package us.ihmc.rdx.behaviorTree.actions;
 
+import static behavior_msgs.WalkActionDefinitionMessage.*;
+
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
@@ -29,9 +31,9 @@ import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
-import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.mesh.RDXMutableArrowModel;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -48,8 +50,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
-
-import static behavior_msgs.WalkActionDefinitionMessage.*;
 
 public class RDXWalkAction extends RDXActionNode<WalkActionState, WalkActionDefinition>
 {

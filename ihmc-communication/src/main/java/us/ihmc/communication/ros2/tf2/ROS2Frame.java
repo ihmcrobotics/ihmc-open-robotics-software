@@ -1,5 +1,7 @@
 package us.ihmc.communication.ros2.tf2;
 
+import static us.ihmc.communication.ros2.tf2.ROS2FrameTools.*;
+
 import builtin_interfaces.Time;
 import geometry_msgs.TransformStamped;
 import tf2_msgs.TFMessage;
@@ -7,8 +9,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
-
-import static us.ihmc.communication.ros2.tf2.ROS2FrameTools.*;
 
 public abstract class ROS2Frame extends ReferenceFrame
 {

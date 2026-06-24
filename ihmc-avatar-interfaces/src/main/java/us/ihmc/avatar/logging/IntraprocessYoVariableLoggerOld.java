@@ -1,12 +1,12 @@
 package us.ihmc.avatar.logging;
 
+import logger_msgs.Handshake;
+import logger_msgs.HandshakeFileType;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import logger_msgs.Handshake;
-import logger_msgs.HandshakeFileType;
 import us.ihmc.idl.serializers.extra.ROS2YAMLSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -18,7 +18,6 @@ import us.ihmc.robotDataLogger.logger.LogPropertiesWriter;
 import us.ihmc.tools.compression.SnappyUtils;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -33,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * Meant to be deleted once logger is released with the correct IntraprocessYoVariableLogger

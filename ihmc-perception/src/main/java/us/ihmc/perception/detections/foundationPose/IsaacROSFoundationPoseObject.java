@@ -1,5 +1,7 @@
 package us.ihmc.perception.detections.foundationPose;
 
+import static us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseAPI.*;
+
 import ihmc_common_msgs.Box3DMessage;
 import perception_msgs.FoundationPoseParameters;
 import sensor_msgs.CameraInfo;
@@ -8,8 +10,6 @@ import std_msgs.Empty;
 import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.jros2.ROS2Topic;
 import vision_msgs.Detection3DArray;
-
-import static us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseAPI.*;
 
 public enum IsaacROSFoundationPoseObject
 {

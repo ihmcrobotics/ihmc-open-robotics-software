@@ -1,7 +1,5 @@
 package us.ihmc.avatar;
 
-import java.util.Arrays;
-
 import controller_msgs.FootstepDataListMessage;
 import controller_msgs.FootstepDataMessage;
 import ihmc_common_msgs.SE3TrajectoryPointMessage;
@@ -24,6 +22,8 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
+
+import java.util.Arrays;
 
 public class AvatarLiftOffAndTouchDownTest
 {

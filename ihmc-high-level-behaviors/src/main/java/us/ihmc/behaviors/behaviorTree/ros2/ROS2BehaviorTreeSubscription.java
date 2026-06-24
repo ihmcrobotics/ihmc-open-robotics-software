@@ -12,8 +12,8 @@ import us.ihmc.commons.UnitConversions;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.log.LogTools;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 import java.util.HashMap;

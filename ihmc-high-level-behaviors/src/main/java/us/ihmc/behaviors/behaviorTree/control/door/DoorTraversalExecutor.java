@@ -1,5 +1,8 @@
 package us.ihmc.behaviors.behaviorTree.control.door;
 
+import static behavior_msgs.BehaviorTreeSceneObjectStateMessage.*;
+import static us.ihmc.behaviors.behaviorTree.BehaviorTreeTools.*;
+
 import controller_msgs.RobotConfigurationData;
 import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
@@ -18,15 +21,12 @@ import us.ihmc.communication.ros2log.ROS2LogSerialization;
 import us.ihmc.communication.ros2log.ROS2LogTimeSource;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 
 import java.util.List;
-
-import static behavior_msgs.BehaviorTreeSceneObjectStateMessage.*;
-import static us.ihmc.behaviors.behaviorTree.BehaviorTreeTools.*;
 
 public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversalState, DoorTraversalDefinition>
 {

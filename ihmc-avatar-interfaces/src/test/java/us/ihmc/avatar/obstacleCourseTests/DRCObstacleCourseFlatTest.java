@@ -1,14 +1,13 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
+import static org.junit.jupiter.api.Assertions.*;
 
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.FootstepDataListMessage;
-import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -54,7 +53,7 @@ import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface
 {

@@ -4,9 +4,9 @@ import ihmc_hands_ros2.AbilityHandCommand;
 import ihmc_hands_ros2.AbilityHandState;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.handsros2.abilityHand.AbilityHandROS2API;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.Timer;
 
 public class AbilityHandActionComms

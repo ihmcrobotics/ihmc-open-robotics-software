@@ -2,12 +2,12 @@ package us.ihmc.rdx.ui.graphics;
 
 import toolbox_msgs.KinematicsToolboxOutputStatus;
 import toolbox_msgs.WalkingControllerPreviewOutputMessage;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;

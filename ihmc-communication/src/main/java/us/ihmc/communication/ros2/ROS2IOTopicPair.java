@@ -1,8 +1,8 @@
 package us.ihmc.communication.ros2;
 
 import us.ihmc.communication.HumanoidROS2Topic;
-import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Topic;
 
 /**
  * A class to group a bidirectional topic. We used the terminology "command" and "status"

@@ -1,10 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.Random;
-
 import controller_msgs.NeckTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+
+import java.util.Random;
 
 public class NeckTrajectoryCommand implements Command<NeckTrajectoryCommand, NeckTrajectoryMessage>, EpsilonComparable<NeckTrajectoryCommand>
 {

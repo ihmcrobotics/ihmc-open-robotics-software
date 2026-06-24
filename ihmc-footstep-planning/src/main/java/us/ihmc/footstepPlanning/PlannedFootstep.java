@@ -1,8 +1,8 @@
 package us.ihmc.footstepPlanning;
 
 import controller_msgs.FootstepDataMessage;
-import ihmc_common_msgs.SE3TrajectoryPointMessage;
 import gnu.trove.list.array.TDoubleArrayList;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;

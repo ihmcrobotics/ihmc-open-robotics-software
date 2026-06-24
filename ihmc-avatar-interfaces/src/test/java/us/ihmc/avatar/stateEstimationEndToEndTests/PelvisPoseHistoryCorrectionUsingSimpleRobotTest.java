@@ -1,5 +1,7 @@
 package us.ihmc.avatar.stateEstimationEndToEndTests;
 
+import static us.ihmc.robotics.Assert.assertTrue;
+
 import controller_msgs.LocalizationPacket;
 import controller_msgs.PelvisPoseErrorPacket;
 import ihmc_common_msgs.StampedPosePacket;
@@ -42,8 +44,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.Random;
-
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 {

@@ -1,9 +1,5 @@
 package us.ihmc.javafx;
 
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.ToDoubleFunction;
-import java.util.zip.CRC32;
-
 import controller_msgs.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
@@ -23,6 +19,10 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
+
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.ToDoubleFunction;
+import java.util.zip.CRC32;
 
 public class JavaFXRobotVisualizer
 {

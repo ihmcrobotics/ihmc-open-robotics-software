@@ -1,9 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.stream.IntStream;
-
 import controller_msgs.*;
 import controller_msgs.RobotConfigurationData;
 import ihmc_common_msgs.*;
@@ -23,6 +19,10 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.stream.IntStream;
 
 public final class RandomHumanoidMessages
 {

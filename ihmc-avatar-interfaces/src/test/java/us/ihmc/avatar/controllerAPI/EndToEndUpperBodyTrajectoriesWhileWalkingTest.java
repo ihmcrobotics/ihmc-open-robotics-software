@@ -1,5 +1,7 @@
 package us.ihmc.avatar.controllerAPI;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import controller_msgs.ArmTrajectoryMessage;
 import controller_msgs.FootstepDataListMessage;
 import controller_msgs.HandTrajectoryMessage;
@@ -41,8 +43,6 @@ import us.ihmc.tools.MemoryTools;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class EndToEndUpperBodyTrajectoriesWhileWalkingTest implements MultiRobotTestInterface
 {

@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.walkingPreview;
 
-import us.ihmc.jros2.ROS2Message;
-
 import controller_msgs.RobotConfigurationData;
 import toolbox_msgs.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -12,9 +10,10 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.walkingPreviewToolboxAPI.WalkingControllerPreviewInputCommand;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
-import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.io.IOException;

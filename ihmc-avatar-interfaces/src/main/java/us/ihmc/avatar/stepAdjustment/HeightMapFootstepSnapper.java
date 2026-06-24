@@ -1,5 +1,7 @@
 package us.ihmc.avatar.stepAdjustment;
 
+import static us.ihmc.footstepPlanning.polygonSnapping.PolygonSnapperTools.*;
+
 import controller_msgs.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commons.MathTools;
@@ -21,8 +23,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import static us.ihmc.footstepPlanning.polygonSnapping.PolygonSnapperTools.*;
 
 public class HeightMapFootstepSnapper implements FootstepAdjustment
 {

@@ -4,10 +4,10 @@ import behavior_msgs.BehaviorTreeLogMessage;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.message.ParameterizedMessage;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.communication.crdt.CRDTStatusField;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.log.LogToolsWriteOnly;
 

@@ -1,8 +1,8 @@
 package us.ihmc.avatar.multiContact;
 
-import org.apache.commons.lang3.tuple.Pair;
 import ihmc_common_msgs.SelectionMatrix3DMessage;
 import ihmc_common_msgs.WeightMatrix3DMessage;
+import org.apache.commons.lang3.tuple.Pair;
 import toolbox_msgs.KinematicsToolboxCenterOfMassMessage;
 import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -10,12 +10,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspacePathTools;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class MultiContactScriptStatistics
 {

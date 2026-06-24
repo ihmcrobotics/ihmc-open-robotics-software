@@ -1,11 +1,8 @@
 package us.ihmc.avatar.multiContact;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.RobotConfigurationData;
 import ihmc_common_msgs.SelectionMatrix3DMessage;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.multiContact.RobotTransformOptimizer.RigidBodyPairAngularErrorCalculator;
 import us.ihmc.avatar.multiContact.RobotTransformOptimizer.RigidBodyPairLinearErrorCalculator;
 import us.ihmc.avatar.multiContact.RobotTransformOptimizer.RigidBodyPairSpatialErrorCalculator;
@@ -20,6 +17,9 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class MultiContactScriptMatcher
 {

@@ -1,9 +1,9 @@
 package us.ihmc.manipulation.planning.rrt.configurationAndTimeSpace;
 
-import java.util.ArrayList;
-
 import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.commons.PrintTools;
+
+import java.util.ArrayList;
 
 public class CTTaskNode
 {

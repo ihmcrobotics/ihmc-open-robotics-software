@@ -1,12 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.List;
-
-import controller_msgs.StepConstraintsListMessage;
-import org.apache.commons.lang3.mutable.MutableDouble;
-
 import controller_msgs.FootstepDataMessage;
+import controller_msgs.StepConstraintsListMessage;
 import ihmc_common_msgs.SE3TrajectoryPointMessage;
+import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -21,6 +18,8 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+
+import java.util.List;
 
 public class FootstepDataCommand implements Command<FootstepDataCommand, FootstepDataMessage>
 {

@@ -1,13 +1,11 @@
 package us.ihmc.avatar.controllerAPI;
 
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Random;
-
+import controller_msgs.ArmDesiredAccelerationsMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.ArmDesiredAccelerationsMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -28,7 +26,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Random;
 
 public abstract class EndToEndArmDesiredAccelerationsMessageTest implements MultiRobotTestInterface
 {

@@ -1,5 +1,8 @@
 package us.ihmc.behaviors.tools.walkingController;
 
+import static us.ihmc.communication.HumanoidControllerAPI.getLowFrequencyTopic;
+import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
+
 import controller_msgs.CapturabilityBasedStatus;
 import controller_msgs.ControllerCrashNotificationPacket;
 import controller_msgs.HighLevelStateChangeStatusMessage;
@@ -14,16 +17,13 @@ import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.log.LogToolsWriteOnly;
 import us.ihmc.jros2.ROS2Node;
+import us.ihmc.log.LogToolsWriteOnly;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static us.ihmc.communication.HumanoidControllerAPI.getLowFrequencyTopic;
-import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 
 /**
  * A class to keep track of the controller by listening to its ROS 2 status API.

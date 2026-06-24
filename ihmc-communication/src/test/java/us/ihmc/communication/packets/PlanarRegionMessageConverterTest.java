@@ -2,14 +2,7 @@ package us.ihmc.communication.packets;
 
 import static us.ihmc.robotics.Assert.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import org.junit.jupiter.api.Test;
-
 import perception_msgs.PlanarRegionMessage;
 import perception_msgs.PlanarRegionsListMessage;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -23,6 +16,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTestTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class PlanarRegionMessageConverterTest
 {

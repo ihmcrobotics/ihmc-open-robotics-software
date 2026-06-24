@@ -1,5 +1,8 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
+import static behavior_msgs.WalkActionDefinitionMessage.*;
+import static us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner.Footstep;
+
 import controller_msgs.FootstepDataListMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
@@ -35,9 +38,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import static behavior_msgs.WalkActionDefinitionMessage.*;
-import static us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner.Footstep;
 
 public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, WalkActionDefinition>
 {

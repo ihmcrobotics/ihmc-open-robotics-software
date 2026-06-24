@@ -10,10 +10,10 @@ import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.log.LogTools;
-import us.ihmc.perception.LocalizationAndMappingTask;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.LocalizationAndMappingTask;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;

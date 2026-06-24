@@ -6,12 +6,9 @@ import static us.ihmc.robotics.Assert.assertFalse;
 import static us.ihmc.robotics.Assert.assertNull;
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.Random;
-
-import org.junit.jupiter.api.Test;
-
 import controller_msgs.ArmTrajectoryMessage;
 import ihmc_common_msgs.TrajectoryPoint1DMessage;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.communication.controllerAPI.ControllerMessageConstants;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
@@ -19,6 +16,8 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.Random;
 
 public class ArmTrajectoryCommandTest
 {

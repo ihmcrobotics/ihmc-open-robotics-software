@@ -3,11 +3,11 @@ package us.ihmc.communication.ros2.sync;
 import imgui.ImGui;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.jros2.Guid;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.jros2.ROS2Node;
 
 import java.time.Instant;
 import java.time.ZoneId;

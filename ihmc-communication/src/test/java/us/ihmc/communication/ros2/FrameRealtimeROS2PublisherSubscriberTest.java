@@ -1,10 +1,9 @@
 package us.ihmc.communication.ros2;
 
-import us.ihmc.communication.HumanoidROS2Topic;
-
 import controller_msgs.RobotConfigurationData;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2QoSProfile;

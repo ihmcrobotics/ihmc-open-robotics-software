@@ -1,5 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
+import static behavior_msgs.WalkActionDefinitionMessage.*;
+
 import behavior_msgs.WalkActionDefinitionMessage;
 import behavior_msgs.WalkActionFootstepDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,8 +26,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
 
 import java.util.ArrayList;
-
-import static behavior_msgs.WalkActionDefinitionMessage.*;
 
 public class WalkActionDefinition extends ActionNodeDefinition
 {

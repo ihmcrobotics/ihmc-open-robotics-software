@@ -1,14 +1,14 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.List;
-
 import controller_msgs.FootstepDataListMessage;
 import controller_msgs.FootstepDataMessage;
 import controller_msgs.StepConstraintsListMessage;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.commons.lists.RecyclingArrayList;
+
+import java.util.List;
 
 public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCommand, FootstepDataListMessage>
 {

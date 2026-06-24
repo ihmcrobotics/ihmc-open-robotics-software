@@ -1,16 +1,16 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 
+import ihmc_common_msgs.MessageCollection;
+import ihmc_common_msgs.MessageCollectionNotification;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.jros2.ROS2Message;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import ihmc_common_msgs.MessageCollection;
-import ihmc_common_msgs.MessageCollectionNotification;
-import us.ihmc.jros2.ROS2Message;
-import us.ihmc.commons.PrintTools;
 
 /**
  * Tool for setting up and sending collections of messages that are to be processed by the

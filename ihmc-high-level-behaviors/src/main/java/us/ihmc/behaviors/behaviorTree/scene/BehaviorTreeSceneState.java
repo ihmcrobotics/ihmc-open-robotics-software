@@ -11,13 +11,13 @@ import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
+import javax.annotation.Nullable;
 
 /**
  * Instantiated in both RDX UI and on the robot.

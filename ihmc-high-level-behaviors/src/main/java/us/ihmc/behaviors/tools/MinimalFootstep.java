@@ -1,8 +1,5 @@
 package us.ihmc.behaviors.tools;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import behavior_msgs.MinimalFootstepListMessage;
 import behavior_msgs.MinimalFootstepMessage;
 import controller_msgs.FootstepDataListMessage;
@@ -25,6 +22,9 @@ import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MinimalFootstep
 {

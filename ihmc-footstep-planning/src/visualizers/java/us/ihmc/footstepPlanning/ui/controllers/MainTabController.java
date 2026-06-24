@@ -35,11 +35,6 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StopHeightMapNavigation;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.WriteHeightMapLog;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-
 import controller_msgs.FootstepDataListMessage;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -69,6 +64,11 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 public class MainTabController
 {

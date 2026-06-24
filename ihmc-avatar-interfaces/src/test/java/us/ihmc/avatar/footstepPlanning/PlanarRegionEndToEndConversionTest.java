@@ -1,5 +1,8 @@
 package us.ihmc.avatar.footstepPlanning;
 
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
+
 import org.junit.jupiter.api.Test;
 import perception_msgs.PlanarRegionsListMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -18,9 +21,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public class PlanarRegionEndToEndConversionTest
 {

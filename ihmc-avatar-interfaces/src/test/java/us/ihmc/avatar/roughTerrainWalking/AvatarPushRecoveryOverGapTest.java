@@ -1,11 +1,12 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import controller_msgs.FootstepDataListMessage;
 import controller_msgs.StepConstraintsListMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.FootstepDataListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -44,8 +45,6 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInterface
 {

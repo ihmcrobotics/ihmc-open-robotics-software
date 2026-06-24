@@ -1,15 +1,14 @@
 package us.ihmc.avatar;
 
-import java.util.Random;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import controller_msgs.ChestTrajectoryMessage;
 import controller_msgs.FootTrajectoryMessage;
 import controller_msgs.FootstepDataListMessage;
 import controller_msgs.PelvisHeightTrajectoryMessage;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.ContinuousIntegrationTools;
@@ -28,7 +27,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Random;
 
 public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterface
 {

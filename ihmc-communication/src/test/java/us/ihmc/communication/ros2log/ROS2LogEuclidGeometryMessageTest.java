@@ -1,7 +1,5 @@
 package us.ihmc.communication.ros2log;
 
-import us.ihmc.communication.HumanoidROS2Topic;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.CaseFormat;
@@ -10,6 +8,7 @@ import ihmc_common_msgs.SO3TrajectoryPointMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
 

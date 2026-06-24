@@ -6,10 +6,10 @@ import perception_msgs.YOLOv8ModelInfo;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.perception.detections.yolo.SyncedYOLOv8ExecutorParameters;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.jros2.ROS2Node;
 
 import java.util.ArrayList;
 import java.util.List;

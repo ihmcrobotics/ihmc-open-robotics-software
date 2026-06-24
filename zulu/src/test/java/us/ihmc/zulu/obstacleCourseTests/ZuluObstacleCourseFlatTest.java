@@ -3,13 +3,13 @@ package us.ihmc.zulu.obstacleCourseTests;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
-import us.ihmc.zulu.ZuluVersion;
-import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseFlatTest;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
+import us.ihmc.zulu.ZuluRobotModel;
+import us.ihmc.zulu.ZuluVersion;
 
 public class ZuluObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {

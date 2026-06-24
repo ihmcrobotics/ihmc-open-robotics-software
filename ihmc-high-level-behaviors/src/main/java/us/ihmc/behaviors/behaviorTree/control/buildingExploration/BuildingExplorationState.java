@@ -5,8 +5,8 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalState;
 
-import javax.annotation.Nullable;
 import java.util.Stack;
+import javax.annotation.Nullable;
 
 public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExplorationDefinition>
 {

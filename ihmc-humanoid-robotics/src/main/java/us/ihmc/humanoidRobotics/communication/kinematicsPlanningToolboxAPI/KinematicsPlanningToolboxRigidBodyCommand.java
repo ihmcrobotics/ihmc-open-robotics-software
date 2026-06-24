@@ -1,11 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI;
 
-import java.util.Map;
-
-import toolbox_msgs.KinematicsPlanningToolboxRigidBodyMessage;
+import gnu.trove.list.array.TDoubleArrayList;
 import ihmc_common_msgs.SelectionMatrix3DMessage;
 import ihmc_common_msgs.WeightMatrix3DMessage;
-import gnu.trove.list.array.TDoubleArrayList;
+import toolbox_msgs.KinematicsPlanningToolboxRigidBodyMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -15,6 +13,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+
+import java.util.Map;
 
 public class KinematicsPlanningToolboxRigidBodyCommand implements Command<KinematicsPlanningToolboxRigidBodyCommand, KinematicsPlanningToolboxRigidBodyMessage>,
       KinematicsPlanningToolboxAPI<KinematicsPlanningToolboxRigidBodyMessage>

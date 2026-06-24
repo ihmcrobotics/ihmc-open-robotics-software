@@ -2,6 +2,20 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import static us.ihmc.robotics.Assert.*;
 
+import org.apache.commons.lang3.NotImplementedException;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commons.lists.SupplierBuilder;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.yoVariables.variable.YoDouble;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -10,21 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.Supplier;
-
-import org.apache.commons.lang3.NotImplementedException;
-import org.junit.jupiter.api.Test;
-
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.communication.controllerAPI.command.Command;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.jros2.ROS2Message;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.commons.lists.SupplierBuilder;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CommandConsumerWithDelayBuffersTest
 {

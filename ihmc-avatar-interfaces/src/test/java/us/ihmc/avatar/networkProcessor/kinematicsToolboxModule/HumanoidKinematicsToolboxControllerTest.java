@@ -1,5 +1,8 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
+
 import controller_msgs.CapturabilityBasedStatus;
 import controller_msgs.RobotConfigurationData;
 import org.junit.jupiter.api.AfterEach;
@@ -36,10 +39,10 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -74,9 +77,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("humanoid-toolbox")
 public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRobotTestInterface

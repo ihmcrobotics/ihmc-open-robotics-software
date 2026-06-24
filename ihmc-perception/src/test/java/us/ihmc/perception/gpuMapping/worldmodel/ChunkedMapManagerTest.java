@@ -5,12 +5,12 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.perception.gpuMapping.HeightMapParameters;
 import us.ihmc.perception.gpuMapping.worldModel.Chunk;
 import us.ihmc.perception.gpuMapping.worldModel.ChunkTools;
 import us.ihmc.perception.gpuMapping.worldModel.ChunkedMapManager;
 import us.ihmc.perception.tools.PerceptionDebugTools;
-import us.ihmc.jros2.ROS2Node;
 
 import java.util.Collection;
 

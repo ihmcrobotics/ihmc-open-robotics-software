@@ -1,16 +1,16 @@
 package us.ihmc.communication;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2QoSProfile;
 import us.ihmc.jros2.ROS2Subscription;
 import us.ihmc.jros2.ROS2Topic;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * An atomic reference to the latest received message through an optional filter.

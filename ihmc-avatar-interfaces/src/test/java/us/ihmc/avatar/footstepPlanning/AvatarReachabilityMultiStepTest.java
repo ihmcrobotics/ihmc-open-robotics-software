@@ -3,17 +3,12 @@ package us.ihmc.avatar.footstepPlanning;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.FootstepDataListMessage;
-import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
@@ -42,6 +37,10 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestInterface
 {

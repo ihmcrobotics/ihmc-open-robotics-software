@@ -10,14 +10,14 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
 import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
 import us.ihmc.handsros2.abilityHand.AbilityHandROS2API;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.hands.RDXHandInterface;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.tools.Timer;
 
 public class RDXAbilityHand implements RDXHandInterface

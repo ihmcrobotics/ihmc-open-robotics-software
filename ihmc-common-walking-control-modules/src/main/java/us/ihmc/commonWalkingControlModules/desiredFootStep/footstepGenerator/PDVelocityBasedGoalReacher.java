@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicArrow3D;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint3D;
+
 import controller_msgs.ControllerWalkToGoalStatusMessage;
 import controller_msgs.ControllerWaypointStatusMessage;
 import controller_msgs.VelocityBasedWalkingInputMessage;
@@ -30,9 +33,6 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicArrow3D;
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint3D;
 
 /**
  * Class uses a clamped PD controller that aligns headings to reach a goal.

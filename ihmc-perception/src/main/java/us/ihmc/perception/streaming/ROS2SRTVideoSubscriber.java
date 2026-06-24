@@ -1,5 +1,9 @@
 package us.ihmc.perception.streaming;
 
+import static org.bytedeco.ffmpeg.global.avutil.AV_LOG_FATAL;
+import static org.bytedeco.ffmpeg.global.avutil.av_log_set_level;
+import static us.ihmc.perception.streaming.StreamingTools.CONNECTION_TIMEOUT;
+
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.SRTStreamStatus;
@@ -10,11 +14,11 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.fastddsjava.cdr.CDRBuffer;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.jros2.ROS2Topic;
 
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -22,10 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-
-import static org.bytedeco.ffmpeg.global.avutil.AV_LOG_FATAL;
-import static org.bytedeco.ffmpeg.global.avutil.av_log_set_level;
-import static us.ihmc.perception.streaming.StreamingTools.CONNECTION_TIMEOUT;
 
 public class ROS2SRTVideoSubscriber
 {

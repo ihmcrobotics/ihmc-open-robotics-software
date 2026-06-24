@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.footstepStreamingModule;
 
-import us.ihmc.jros2.ROS2Message;
-
 import controller_msgs.ControllerCrashNotificationPacket;
 import toolbox_msgs.FootstepStreamingToolboxInputMessage;
 import toolbox_msgs.FootstepStreamingToolboxOutputStatus;
@@ -13,9 +11,10 @@ import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI.FootstepStreamingToolboxInputCommand;
-import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 
 import java.util.ArrayList;
 import java.util.List;

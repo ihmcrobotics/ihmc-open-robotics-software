@@ -1,22 +1,22 @@
 package us.ihmc.perception.demo;
 
+import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
+
 import sensor_msgs.CameraInfo;
 import sensor_msgs.Image;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.ImageSensorPublishThread;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImagePublisher;
-import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
-import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
-
-import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
 
 /**
  * Demo for publishing standard ROS 2 {@link Image} messages along with {@link CameraInfo} messages.

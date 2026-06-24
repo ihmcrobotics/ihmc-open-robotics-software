@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
@@ -40,8 +42,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class HeightMapFootstepCheckerTest
 {

@@ -7,10 +7,10 @@ import perception_msgs.ChunkMessage;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.perception.gpuMapping.HeightMapParameters;
-import us.ihmc.perception.gpuMapping.HeightMapTools;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.perception.gpuMapping.HeightMapParameters;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayDeque;

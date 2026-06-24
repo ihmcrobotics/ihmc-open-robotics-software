@@ -1,5 +1,9 @@
 package us.ihmc.perception.streaming;
 
+import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
+import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_YUV444P;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -15,13 +19,13 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.perception.RawImage;
-import us.ihmc.perception.RawImageTest;
-import us.ihmc.sensors.CameraIntrinsics;
-import us.ihmc.perception.imageMessage.PixelFormat;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.perception.RawImage;
+import us.ihmc.perception.RawImageTest;
+import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.sensors.CameraIntrinsics;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -38,10 +42,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
-import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_YUV444P;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class SRTStreamerSubscriberTest
 {

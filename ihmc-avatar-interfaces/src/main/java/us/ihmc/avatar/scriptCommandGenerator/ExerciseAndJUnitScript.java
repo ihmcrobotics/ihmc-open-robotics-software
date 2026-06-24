@@ -1,5 +1,6 @@
 package us.ihmc.avatar.scriptCommandGenerator;
 
+
 public enum ExerciseAndJUnitScript
 {
    DRC_TRIALS_SLOPE_LEFT_FOOT_POSE,

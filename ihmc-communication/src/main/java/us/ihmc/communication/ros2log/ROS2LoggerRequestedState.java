@@ -1,5 +1,6 @@
 package us.ihmc.communication.ros2log;
 
+
 /**
  * Verbose way of expressing ROS 2 log state. Setup as enum in case future states are needed.
  */

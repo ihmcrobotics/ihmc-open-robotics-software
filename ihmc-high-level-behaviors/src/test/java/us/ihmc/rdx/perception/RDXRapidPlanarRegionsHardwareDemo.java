@@ -1,11 +1,11 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.commons.thread.RepeatingTaskThread;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.RawImage;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractionThread;
-import us.ihmc.sensors.ImageSensor;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -13,7 +13,7 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
-import us.ihmc.jros2.ROS2Node;
+import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.zed.global.zed;

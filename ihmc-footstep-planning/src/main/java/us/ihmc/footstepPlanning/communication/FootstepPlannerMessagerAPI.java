@@ -1,11 +1,11 @@
 package us.ihmc.footstepPlanning.communication;
 
 import controller_msgs.*;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.HeightMapMessage;
 import perception_msgs.TerrainMapMessage;
 import toolbox_msgs.FootstepPlanningTimingsMessage;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;

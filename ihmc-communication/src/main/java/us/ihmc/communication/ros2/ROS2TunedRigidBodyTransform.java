@@ -1,10 +1,10 @@
 package us.ihmc.communication.ros2;
 
 import controller_msgs.RigidBodyTransformMessage;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 
 /**
  * This class is used to hava UI that tunes a transform running remotely on the robot.

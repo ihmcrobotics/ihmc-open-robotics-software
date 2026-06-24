@@ -1,12 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.List;
-import java.util.Random;
-
-import ihmc_common_msgs.FrameInformation;
 import controller_msgs.WrenchTrajectoryMessage;
 import controller_msgs.WrenchTrajectoryPointMessage;
 import gnu.trove.list.array.TDoubleArrayList;
+import ihmc_common_msgs.FrameInformation;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,8 +14,10 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBased
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.MecanoRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+
+import java.util.List;
+import java.util.Random;
 
 public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTrajectoryControllerCommand, WrenchTrajectoryMessage>
       implements FrameBasedCommand<WrenchTrajectoryMessage>

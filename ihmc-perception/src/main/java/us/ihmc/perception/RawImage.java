@@ -12,11 +12,11 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.sensors.CameraIntrinsics;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.annotation.Nullable;
 
 /**
  * <p>

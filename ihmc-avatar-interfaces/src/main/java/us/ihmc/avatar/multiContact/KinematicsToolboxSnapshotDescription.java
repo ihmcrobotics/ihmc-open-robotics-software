@@ -1,23 +1,22 @@
 package us.ihmc.avatar.multiContact;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
+import controller_msgs.RobotConfigurationData;
 import toolbox_msgs.KinematicsToolboxOutputStatus;
 import toolbox_msgs.KinematicsToolboxPrivilegedConfigurationMessage;
-import controller_msgs.RobotConfigurationData;
 import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.jros2.ROS2Message;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class KinematicsToolboxSnapshotDescription
 {

@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
-import java.util.List;
-
 import toolbox_msgs.KinematicsToolboxSupportRegionMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -11,6 +9,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+
+import java.util.List;
 
 public class KinematicsToolboxSupportRegionCommand implements Command<KinematicsToolboxSupportRegionCommand, KinematicsToolboxSupportRegionMessage>
 {

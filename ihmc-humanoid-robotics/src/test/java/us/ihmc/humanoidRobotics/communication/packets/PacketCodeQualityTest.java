@@ -2,27 +2,16 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import static us.ihmc.robotics.Assert.*;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
+import com.google.common.base.CaseFormat;
+import controller_msgs.*;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import ihmc_common_msgs.FrameInformation;
-import toolbox_msgs.FootstepPlannerStatusMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
-
-import com.google.common.base.CaseFormat;
-
-import controller_msgs.*;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import toolbox_msgs.FootstepPlannerStatusMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose2D;
@@ -33,12 +22,12 @@ import us.ihmc.euclid.orientation.Orientation2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.fastddsjava.cdr.idl.IDLBoolSequence;
 import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
 import us.ihmc.fastddsjava.cdr.idl.IDLDoubleSequence;
@@ -50,6 +39,15 @@ import us.ihmc.fastddsjava.cdr.idl.IDLSequence;
 import us.ihmc.fastddsjava.cdr.idl.IDLShortSequence;
 import us.ihmc.fastddsjava.cdr.idl.IDLStringSequence;
 import us.ihmc.jros2.ROS2Message;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class PacketCodeQualityTest
 {

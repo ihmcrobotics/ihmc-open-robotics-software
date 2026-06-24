@@ -1,13 +1,13 @@
 package us.ihmc.communication.controllerAPI;
 
+import us.ihmc.concurrent.Builder;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.log.LogTools;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import us.ihmc.concurrent.Builder;
-import us.ihmc.jros2.ROS2Message;
-import us.ihmc.log.LogTools;
 
 /**
  * StatusMessageOutputManager is used to create an output API for a controller.

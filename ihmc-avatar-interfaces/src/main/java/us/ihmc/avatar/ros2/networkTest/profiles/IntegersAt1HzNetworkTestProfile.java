@@ -1,23 +1,23 @@
 package us.ihmc.avatar.ros2.networkTest.profiles;
 
+import static us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine.*;
+
 import org.apache.commons.lang3.mutable.MutableInt;
 import std_msgs.Int64;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestProfile;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidROS2Topic;
-import us.ihmc.log.LogTools;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine.*;
 
 public class IntegersAt1HzNetworkTestProfile extends ROS2NetworkTestProfile
 {

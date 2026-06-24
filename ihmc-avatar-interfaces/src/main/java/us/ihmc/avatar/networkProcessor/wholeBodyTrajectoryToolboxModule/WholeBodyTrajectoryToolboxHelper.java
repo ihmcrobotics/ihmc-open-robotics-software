@@ -1,13 +1,9 @@
 package us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule;
 
-import java.util.Arrays;
-import java.util.Collection;
-
+import ihmc_common_msgs.SelectionMatrix3DMessage;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.NormOps_DDRM;
-
 import toolbox_msgs.RigidBodyExplorationConfigurationMessage;
-import ihmc_common_msgs.SelectionMatrix3DMessage;
 import toolbox_msgs.WaypointBasedTrajectoryMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -17,6 +13,7 @@ import us.ihmc.euclid.rotationConversion.RotationVectorConversion;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -24,7 +21,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 public class WholeBodyTrajectoryToolboxHelper
 {

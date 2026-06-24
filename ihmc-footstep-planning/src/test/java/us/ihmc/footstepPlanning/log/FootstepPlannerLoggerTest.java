@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.log;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -9,13 +11,13 @@ import toolbox_msgs.FootstepPlanningRequestPacket;
 import toolbox_msgs.FootstepPlanningToolboxOutputStatus;
 import toolbox_msgs.SwingPlannerParametersPacket;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadResult;
-import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
@@ -24,8 +26,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class FootstepPlannerLoggerTest
 {

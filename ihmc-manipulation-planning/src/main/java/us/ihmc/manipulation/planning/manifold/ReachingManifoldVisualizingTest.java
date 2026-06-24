@@ -1,9 +1,5 @@
 package us.ihmc.manipulation.planning.manifold;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import toolbox_msgs.ReachingManifoldMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -27,6 +23,10 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * This test tests whether manifold is well constructed by visualizing.

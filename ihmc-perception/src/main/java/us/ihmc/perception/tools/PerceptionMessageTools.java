@@ -9,28 +9,28 @@ import perception_msgs.ImageMessage;
 import sensor_msgs.CameraInfo;
 import sensor_msgs.Image;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
-import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.RawImage;
-import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
-import us.ihmc.jros2.ROS2Publisher;
-import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.sensors.CameraIntrinsics;
 
-import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import java.time.Instant;
+import javax.annotation.Nullable;
 
 public class PerceptionMessageTools
 {

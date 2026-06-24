@@ -1,5 +1,7 @@
 package us.ihmc.avatar;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import controller_msgs.PelvisHeightTrajectoryMessage;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.AfterEach;
@@ -40,8 +42,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTestInterface
 {

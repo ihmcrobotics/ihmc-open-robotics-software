@@ -1,14 +1,8 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
-import us.ihmc.jros2.ROS2Message;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import controller_msgs.*;
-import org.apache.commons.lang3.mutable.MutableDouble;
-
 import ihmc_common_msgs.TextToSpeechPacket;
+import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
@@ -35,6 +29,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -55,6 +50,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class WalkingMessageHandler implements SCS2YoGraphicHolder
 {

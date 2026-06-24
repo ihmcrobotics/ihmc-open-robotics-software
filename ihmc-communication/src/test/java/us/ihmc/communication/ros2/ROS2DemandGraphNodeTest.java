@@ -1,5 +1,7 @@
 package us.ihmc.communication.ros2;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import std_msgs.Empty;
@@ -8,8 +10,6 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @Disabled
 public class ROS2DemandGraphNodeTest

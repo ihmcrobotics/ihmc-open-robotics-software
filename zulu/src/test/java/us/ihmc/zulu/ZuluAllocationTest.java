@@ -1,5 +1,7 @@
 package us.ihmc.zulu;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import controller_msgs.*;
 import gnu.trove.list.array.TIntArrayList;
 import ihmc_common_msgs.SE3TrajectoryMessage;
@@ -52,8 +54,6 @@ import us.ihmc.tools.MemoryTools;
 
 import java.util.List;
 import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class ZuluAllocationTest
 {

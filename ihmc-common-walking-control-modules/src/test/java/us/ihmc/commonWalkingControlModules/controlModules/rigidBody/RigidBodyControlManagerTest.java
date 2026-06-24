@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
+import static us.ihmc.robotics.Assert.*;
+
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import ihmc_common_msgs.SE3TrajectoryMessage;
 import org.junit.jupiter.api.Test;
@@ -51,8 +53,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-import static us.ihmc.robotics.Assert.*;
 
 public class RigidBodyControlManagerTest
 {

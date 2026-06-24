@@ -1,12 +1,12 @@
 package us.ihmc.rdx.ui.tools;
 
-import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.Statistics;
-
 import static us.ihmc.jros2.Statistics.StatisticDataType.LATEST;
 import static us.ihmc.jros2.Statistics.StatisticDataType.MAXIMUM;
 import static us.ihmc.jros2.Statistics.StatisticDataType.SAMPLE_COUNT;
 import static us.ihmc.jros2.Statistics.StatisticDataType.TOTAL;
+
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.Statistics;
 
 public abstract class PubSubCommonStats
 {

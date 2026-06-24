@@ -1,9 +1,12 @@
 package us.ihmc.rdx.simulation.scs2;
 
+import static us.ihmc.zed.global.zed.*;
+
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import logger_msgs.Camera;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
@@ -24,7 +27,6 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
-import logger_msgs.Camera;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -42,8 +44,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-
-import static us.ihmc.zed.global.zed.*;
 
 public class RDXSCS2LogSession extends RDXSCS2Session
 {

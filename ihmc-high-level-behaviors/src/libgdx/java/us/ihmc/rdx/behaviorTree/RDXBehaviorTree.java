@@ -16,6 +16,7 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueu
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.rdx.behaviorTree.actions.RDXActionProgressWidgetsManager.Type;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -23,7 +24,6 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.behaviorTree.actions.RDXActionProgressWidgetsManager.Type;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;

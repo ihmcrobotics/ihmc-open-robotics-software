@@ -2,15 +2,15 @@ package us.ihmc.rdx;
 
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.tools.RawImageTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
-import us.ihmc.jros2.ROS2Node;
+import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
-import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.zed.global.zed;
 

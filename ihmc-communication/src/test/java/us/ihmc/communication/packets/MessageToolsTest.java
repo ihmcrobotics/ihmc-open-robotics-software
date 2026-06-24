@@ -1,5 +1,7 @@
 package us.ihmc.communication.packets;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import ihmc_common_msgs.PoseListMessage;
 import ihmc_common_msgs.UUIDMessage;
 import org.junit.jupiter.api.Disabled;
@@ -13,8 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class MessageToolsTest
 {

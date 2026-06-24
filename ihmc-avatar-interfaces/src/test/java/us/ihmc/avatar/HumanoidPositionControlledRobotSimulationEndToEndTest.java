@@ -3,16 +3,11 @@ package us.ihmc.avatar;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.EnumMap;
-
+import controller_msgs.WholeBodyJointspaceTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-
 import toolbox_msgs.KinematicsToolboxOutputStatus;
-import controller_msgs.WholeBodyJointspaceTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
@@ -55,6 +50,10 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.EnumMap;
 
 public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest implements MultiRobotTestInterface
 {

@@ -1,8 +1,8 @@
 package us.ihmc.perception.streaming;
 
 import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair;
-import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.jros2.ROS2Node;
+import us.ihmc.perception.imageMessage.CompressionType;
 
 import java.util.HashSet;
 import java.util.Set;

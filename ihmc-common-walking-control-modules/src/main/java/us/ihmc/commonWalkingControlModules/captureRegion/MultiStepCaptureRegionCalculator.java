@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
-import java.awt.*;
-
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentReachabilityConstraint;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -28,6 +26,8 @@ import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.awt.*;
 
 /**
  * This class computes the N-Step capture region, but it does so using the reachability constraint. This is to address the fact that you cannot

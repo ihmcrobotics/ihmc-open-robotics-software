@@ -1,13 +1,12 @@
 package us.ihmc.communication.ros2log;
 
-import us.ihmc.communication.HumanoidROS2Topic;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import toolbox_msgs.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.jros2.ROS2Topic;
 
 import java.io.File;

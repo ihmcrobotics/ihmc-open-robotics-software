@@ -8,10 +8,10 @@ import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.jros2.ROS2Publisher;
 
 public class DoNothingState implements State
 {

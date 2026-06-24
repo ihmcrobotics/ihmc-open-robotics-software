@@ -1,12 +1,15 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
+import static us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.SLEEP;
+import static us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.STREAMING;
+
 import controller_msgs.CapturabilityBasedStatus;
 import controller_msgs.WholeBodyStreamingMessage;
 import controller_msgs.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters.ClockType;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
-import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters.ClockType;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commons.Conversions;
@@ -34,9 +37,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 import java.util.Map;
-
-import static us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.SLEEP;
-import static us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.STREAMING;
 
 /**
  * The main class for setting up the IK streaming controller.

@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
+import static us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxMessageLogger.*;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.CapturabilityBasedStatus;
@@ -13,20 +15,18 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
-import us.ihmc.jros2.AsyncROS2Node;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import static us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxMessageLogger.*;
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * Loads and replays messages from file. There are two ways to do replay:

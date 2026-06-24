@@ -1,9 +1,9 @@
 package us.ihmc.footstepPlanning;
 
+import static us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters.*;
+
 import toolbox_msgs.AStarBodyPathPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
-
-import static us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters.*;
 
 /**
  * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file

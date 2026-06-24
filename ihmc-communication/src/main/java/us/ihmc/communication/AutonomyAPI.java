@@ -4,9 +4,9 @@ import behavior_msgs.AI2RCommandMessage;
 import behavior_msgs.AI2RStatusMessage;
 import behavior_msgs.BehaviorTreeStateMessage;
 import behavior_msgs.BehaviorTreeYoDataMessage;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.jros2.ROS2Topic;
-import us.ihmc.communication.HumanoidROS2Topic;
 
 public final class AutonomyAPI
 {

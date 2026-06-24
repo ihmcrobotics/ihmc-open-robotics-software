@@ -7,6 +7,8 @@ import perception_msgs.ImageMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
@@ -14,11 +16,9 @@ import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Publisher;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
+import javax.annotation.Nullable;
 
 public class ROS2SRTVideoStreamImageMessageRelayWorker
 {

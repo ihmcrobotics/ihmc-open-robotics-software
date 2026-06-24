@@ -4,10 +4,9 @@ import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.*;
-
-import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;

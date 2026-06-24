@@ -2,7 +2,6 @@ package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
 import com.google.common.base.CaseFormat;
 import controller_msgs.CapturabilityBasedStatus;
-import controller_msgs.CapturabilityBasedStatus;
 import controller_msgs.RobotConfigurationData;
 import toolbox_msgs.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.KinematicsToolboxConfigurationMessage;
@@ -12,9 +11,9 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.log.LogTools;
-import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 
 import java.io.File;

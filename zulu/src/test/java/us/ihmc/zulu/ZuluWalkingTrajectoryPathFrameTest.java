@@ -1,5 +1,7 @@
 package us.ihmc.zulu;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import controller_msgs.*;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.junit.jupiter.api.AfterEach;
@@ -71,8 +73,6 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class ZuluWalkingTrajectoryPathFrameTest
 {

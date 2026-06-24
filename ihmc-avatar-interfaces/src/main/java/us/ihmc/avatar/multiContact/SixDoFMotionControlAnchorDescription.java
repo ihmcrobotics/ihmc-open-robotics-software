@@ -1,12 +1,9 @@
 package us.ihmc.avatar.multiContact;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -15,6 +12,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.jros2.ROS2Message;
+
+import java.io.IOException;
 
 public class SixDoFMotionControlAnchorDescription
 {

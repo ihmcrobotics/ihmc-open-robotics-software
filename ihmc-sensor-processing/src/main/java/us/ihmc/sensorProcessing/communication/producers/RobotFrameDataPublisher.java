@@ -5,9 +5,9 @@ import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
-import us.ihmc.jros2.ROS2Node;
 
 /**
  * ROS2 Publisher for {@link RobotFrameData}

@@ -1,7 +1,6 @@
 package us.ihmc.communication.controllerAPI.command;
 
 import org.apache.commons.lang3.NotImplementedException;
-
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.jros2.ROS2Message;

@@ -1,5 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
+import static behavior_msgs.BehaviorTreeSceneObjectStateMessage.*;
+
 import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
 import behavior_msgs.BehaviorTreeSceneObjectStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -15,8 +17,6 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDAShapePointCounter;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensors.zed.ZEDImageSensor;
-
-import static behavior_msgs.BehaviorTreeSceneObjectStateMessage.*;
 
 public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectExecutor
 {

@@ -7,13 +7,13 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
-import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Subscription;
-import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.sensors.realsense.RealSenseImageSensor;
 
 import java.time.Instant;

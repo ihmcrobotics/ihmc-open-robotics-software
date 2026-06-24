@@ -1,8 +1,5 @@
 package us.ihmc.sensorProcessing.communication.packets.dataobjects;
 
-import java.util.List;
-import java.util.zip.CRC32;
-
 import controller_msgs.RobotConfigurationData;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
@@ -10,6 +7,9 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+
+import java.util.List;
+import java.util.zip.CRC32;
 
 public class RobotConfigurationDataFactory
 {

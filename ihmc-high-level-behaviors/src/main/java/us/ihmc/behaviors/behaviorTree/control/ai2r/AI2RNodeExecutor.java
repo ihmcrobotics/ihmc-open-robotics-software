@@ -1,11 +1,13 @@
 package us.ihmc.behaviors.behaviorTree.control.ai2r;
 
+import static us.ihmc.communication.ros2.tf2.ROS2FrameTools.CAMERA_TO_OPTICAL_ROTATION;
+
 import behavior_msgs.AI2RActionFailureMessage;
 import behavior_msgs.AI2RObjectMessage;
 import behavior_msgs.AI2RScanMessage;
 import behavior_msgs.AI2RStatusMessage;
-import controller_msgs.RobotConfigurationData;
 import controller_msgs.AbortWalkingMessage;
+import controller_msgs.RobotConfigurationData;
 import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
@@ -14,32 +16,34 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
-import us.ihmc.behaviors.behaviorTree.action.actions.SpineActionState;
-import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.SpineActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition.ConditionNodeType;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
-import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.control.CheckpointNodeState;
+import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ros2.tf2.ROS2MutableFrame;
 import us.ihmc.communication.ros2log.ROS2LogRecord;
 import us.ihmc.communication.ros2log.ROS2LogSerialization;
 import us.ihmc.communication.ros2log.ROS2LogTimeSource;
-import us.ihmc.communication.ros2.tf2.ROS2MutableFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.fastddsjava.cdr.idl.IDLStringSequence;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.perception.RawImage;
@@ -49,16 +53,12 @@ import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.jros2.ROS2Publisher;
-import us.ihmc.jros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-import static us.ihmc.communication.ros2.tf2.ROS2FrameTools.CAMERA_TO_OPTICAL_ROTATION;
 
 /**
  * Node that enables interaction with external reasoning modules

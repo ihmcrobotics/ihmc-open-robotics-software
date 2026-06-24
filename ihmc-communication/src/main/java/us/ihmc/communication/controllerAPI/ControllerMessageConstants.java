@@ -1,5 +1,6 @@
 package us.ihmc.communication.controllerAPI;
 
+
 /**
  * Constants for controller message / command ID handling.
  * Replaces {@code Packet.INVALID_MESSAGE_ID} from the removed {@code Packet} base class.

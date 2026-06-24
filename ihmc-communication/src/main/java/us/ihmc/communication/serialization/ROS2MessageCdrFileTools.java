@@ -1,11 +1,10 @@
 package us.ihmc.communication.serialization;
 
-import us.ihmc.fastddsjava.cdr.CDRBuffer;
-import us.ihmc.jros2.ROS2Message;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.TextNode;
+import us.ihmc.fastddsjava.cdr.CDRBuffer;
+import us.ihmc.jros2.ROS2Message;
 
 import java.io.IOException;
 import java.io.InputStream;

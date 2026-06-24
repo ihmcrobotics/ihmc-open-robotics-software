@@ -2,13 +2,13 @@ package us.ihmc.perception;
 
 import std_msgs.Empty;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.jros2.ROS2Message;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2DemandGraphTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.realsense.RealSenseImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;

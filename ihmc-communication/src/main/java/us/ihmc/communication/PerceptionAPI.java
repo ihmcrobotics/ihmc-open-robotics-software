@@ -8,17 +8,17 @@ import perception_msgs.HeightMapMessage;
 import perception_msgs.ImageMessage;
 import perception_msgs.PlanarRegionsListMessage;
 import perception_msgs.TerrainMapMessage;
-import perception_msgs.YOLOv8ExecutorParameters;
 import perception_msgs.YOLOv8AnnotationInfoList;
+import perception_msgs.YOLOv8ExecutorParameters;
 import perception_msgs.ZEDSVOCurrentFileMessage;
 import sensor_msgs.CameraInfo;
 import sensor_msgs.Image;
 import std_msgs.Empty;
 import std_msgs.Int64;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.jros2.ROS2Topic;
 
 /**
  * ROS 2 topics relating to perception

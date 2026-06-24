@@ -7,12 +7,12 @@ import perception_msgs.ArUcoMarkerPoses;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
-import us.ihmc.jros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.Set;

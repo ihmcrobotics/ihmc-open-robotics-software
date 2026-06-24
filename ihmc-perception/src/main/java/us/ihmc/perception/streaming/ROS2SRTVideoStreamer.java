@@ -1,22 +1,22 @@
 package us.ihmc.perception.streaming;
 
+import static org.bytedeco.ffmpeg.global.avutil.*;
+
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.SRTStreamStatus;
 import perception_msgs.VideoFrameExtraData;
 import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.fastddsjava.cdr.CDRBuffer;
-import us.ihmc.log.LogTools;
-import us.ihmc.perception.RawImage;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.RawImage;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Map;
-
-import static org.bytedeco.ffmpeg.global.avutil.*;
 
 public class ROS2SRTVideoStreamer
 {

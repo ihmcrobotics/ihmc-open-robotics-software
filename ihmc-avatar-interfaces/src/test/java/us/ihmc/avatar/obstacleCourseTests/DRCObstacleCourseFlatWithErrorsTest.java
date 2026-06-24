@@ -1,9 +1,10 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.scriptCommandGenerator.ExerciseAndJUnitScript;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -27,8 +28,6 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisKin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotTestInterface
 {

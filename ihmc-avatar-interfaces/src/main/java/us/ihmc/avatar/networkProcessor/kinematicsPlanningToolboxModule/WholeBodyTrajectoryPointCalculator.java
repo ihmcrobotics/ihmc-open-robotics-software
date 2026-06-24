@@ -1,5 +1,15 @@
 package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import toolbox_msgs.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
+import us.ihmc.robotics.trajectories.core.Polynomial;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -7,16 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import toolbox_msgs.KinematicsPlanningToolboxOutputStatus;
-import toolbox_msgs.KinematicsToolboxOutputStatus;
-import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.trajectories.core.Polynomial;
-import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 
 /**
  * The input of this calculator are a sequence of {@link KinematicsToolboxOutputStatus} and key frame times.

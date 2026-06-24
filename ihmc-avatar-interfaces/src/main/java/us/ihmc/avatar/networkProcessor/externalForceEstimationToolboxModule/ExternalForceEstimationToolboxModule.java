@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
-import us.ihmc.jros2.ROS2Message;
-
 import controller_msgs.RobotConfigurationData;
 import controller_msgs.RobotDesiredConfigurationData;
 import toolbox_msgs.ExternalForceEstimationOutputStatus;
@@ -13,9 +11,10 @@ import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI.ExternalForceEstimationToolboxConfigurationCommand;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
-import us.ihmc.jros2.AsyncROS2Node;
 
 import java.util.ArrayList;
 import java.util.List;

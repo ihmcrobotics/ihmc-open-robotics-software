@@ -2,13 +2,10 @@ package us.ihmc.avatar.pushRecovery;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.function.Consumer;
-
+import controller_msgs.FootstepDataListMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
-
-import controller_msgs.FootstepDataListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
@@ -30,6 +27,8 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.function.Consumer;
 
 public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRobotTestInterface
 {

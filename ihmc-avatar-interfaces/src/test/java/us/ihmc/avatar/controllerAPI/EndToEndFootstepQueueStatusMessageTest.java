@@ -1,5 +1,7 @@
 package us.ihmc.avatar.controllerAPI;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import controller_msgs.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,8 +40,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class EndToEndFootstepQueueStatusMessageTest implements MultiRobotTestInterface
 {

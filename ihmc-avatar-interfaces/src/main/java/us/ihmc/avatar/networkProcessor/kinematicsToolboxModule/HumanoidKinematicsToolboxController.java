@@ -1,5 +1,10 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import static toolbox_msgs.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
+import static toolbox_msgs.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
+import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
+import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHandsIndices;
+
 import controller_msgs.CapturabilityBasedStatus;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import toolbox_msgs.HumanoidKinematicsToolboxConfigurationMessage;
@@ -20,6 +25,8 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage;
+import us.ihmc.euclid.jros2.messages.EuclidVector3DMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -36,12 +43,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage;
-import us.ihmc.euclid.jros2.messages.EuclidVector3DMessage;
-import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -72,11 +77,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static toolbox_msgs.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
-import static toolbox_msgs.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
-import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
-import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHandsIndices;
 
 public class HumanoidKinematicsToolboxController extends KinematicsToolboxController
 {

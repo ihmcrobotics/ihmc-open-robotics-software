@@ -2,14 +2,11 @@ package us.ihmc.avatar;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.ArrayList;
-
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.FootstepDataListMessage;
-import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
@@ -30,6 +27,8 @@ import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
 
 public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTestInterface
 {

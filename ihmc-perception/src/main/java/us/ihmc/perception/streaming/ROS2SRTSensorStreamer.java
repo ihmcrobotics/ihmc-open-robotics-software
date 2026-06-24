@@ -1,17 +1,17 @@
 package us.ihmc.perception.streaming;
 
-import perception_msgs.SRTStreamStatus;
-import us.ihmc.log.LogTools;
-import us.ihmc.perception.RawImage;
-import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Topic;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.bytedeco.ffmpeg.global.avutil.*;
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2BGRA;
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_RGB2RGBA;
+
+import perception_msgs.SRTStreamStatus;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.RawImage;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ROS2SRTSensorStreamer
 {

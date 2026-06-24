@@ -1,5 +1,7 @@
 package us.ihmc.rdx.perception;
 
+import static us.ihmc.zed.global.zed.*;
+
 import imgui.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
@@ -11,6 +13,9 @@ import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.detections.InstantDetection;
@@ -26,17 +31,12 @@ import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Publisher;
-import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static us.ihmc.zed.global.zed.*;
 
 /**
  * <h1>RDXFoundationPoseDemo</h1>

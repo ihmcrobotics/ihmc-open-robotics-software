@@ -1,5 +1,7 @@
 package us.ihmc.avatar.controllerAPI;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import controller_msgs.ChestTrajectoryMessage;
 import controller_msgs.FootstepDataListMessage;
 import controller_msgs.FootstepDataMessage;
@@ -59,8 +61,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInterface
 {

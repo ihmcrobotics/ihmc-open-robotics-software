@@ -3,14 +3,14 @@ package us.ihmc.rdx.ui.graphics.ros2;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jetbrains.annotations.Nullable;
 import perception_msgs.ImageMessage;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
-import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Subscription;
-import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.tools.thread.SwapReference;
 
 public class RDXROS2ImageMessageVisualizer extends RDXROS2ImageVisualizer<ImageMessage>

@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI;
 
-import toolbox_msgs.ExternalForceEstimationConfigurationMessage;
 import gnu.trove.list.array.TIntArrayList;
+import toolbox_msgs.ExternalForceEstimationConfigurationMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple3D.Point3D;

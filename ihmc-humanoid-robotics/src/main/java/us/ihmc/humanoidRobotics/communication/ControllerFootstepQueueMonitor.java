@@ -1,5 +1,8 @@
 package us.ihmc.humanoidRobotics.communication;
 
+import static us.ihmc.communication.HumanoidControllerAPI.getLowFrequencyTopic;
+import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
+
 import controller_msgs.FootstepDataListMessage;
 import controller_msgs.FootstepQueueStatusMessage;
 import controller_msgs.FootstepStatusMessage;
@@ -10,18 +13,15 @@ import controller_msgs.WalkingStatusMessage;
 import ihmc_common_msgs.QueueableMessage;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.log.LogTools;
 import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.jros2.ROS2Node;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.communication.HumanoidControllerAPI.getLowFrequencyTopic;
-import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 
 public class ControllerFootstepQueueMonitor
 {

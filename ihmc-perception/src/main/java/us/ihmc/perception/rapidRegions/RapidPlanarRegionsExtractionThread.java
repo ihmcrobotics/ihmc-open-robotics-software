@@ -6,14 +6,14 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.perception.RawImage;
-import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.comms.PerceptionComms;
-import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.perception.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
-import us.ihmc.jros2.ROS2Node;
+import us.ihmc.sensors.CameraIntrinsics;
 
 import java.util.ArrayList;
 import java.util.List;

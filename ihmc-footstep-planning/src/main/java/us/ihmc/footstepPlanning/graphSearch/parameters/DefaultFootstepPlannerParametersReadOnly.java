@@ -1,9 +1,9 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
+import static us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters.*;
+
 import toolbox_msgs.FootstepPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
-
-import static us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters.*;
 
 /**
  * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
