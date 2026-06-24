@@ -21,7 +21,6 @@ import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.ToolboxAPIs;
-import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
@@ -34,6 +33,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2QoSProfile;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -60,8 +60,11 @@ import java.util.concurrent.CompletableFuture;
 public class VLAUpdateThread extends VLAYoRegistry
 {
    public static final ROS2IOTopicPair<VLAOperationMessage> UI = new ROS2IOTopicPair<>(new HumanoidROS2Topic<>().withPrefix("vla_ui")
-                                                                                                                .withTypeName(VLAOperationMessage.class));
-   public static final ROS2Topic<YoRegistryMessage> YO = new HumanoidROS2Topic<>().withPrefix("vla_yo").withTypeName(YoRegistryMessage.class);
+                                                                                                                .withTypeName(VLAOperationMessage.class)
+                                                                                                                .withQoS(ROS2QoSProfile.BEST_EFFORT));
+   public static final ROS2Topic<YoRegistryMessage> YO = new HumanoidROS2Topic<>().withPrefix("vla_yo")
+                                                                                  .withTypeName(YoRegistryMessage.class)
+                                                                                  .withQoS(ROS2QoSProfile.BEST_EFFORT);
    private final RepeatingTaskThread thread = new RepeatingTaskThread(getClass().getSimpleName(), this::runTask).setFrequencyLimit(50.0);
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImageSensor zedSensor;
@@ -116,7 +119,7 @@ public class VLAUpdateThread extends VLAYoRegistry
          var message = reader.read();
          if (message != null)
             typedNotification.set(message);
-      }, ControllerAPI.getQoS(uiCommandTopic.getType()));
+      });
       uiCommandSubscription = typedNotification;
       uiStatusPublisher = ros2Node.createPublisher(UI.getTopic(ROS2ActorDesignation.ROBOT.getOutgoingQualifier()));
 

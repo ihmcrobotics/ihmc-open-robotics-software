@@ -8,7 +8,6 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ROS2Input;
-import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
@@ -63,7 +62,7 @@ public class ROS2Helper
          T message = reader.read();
          if (message != null)
             callback.accept(message);
-      }, ControllerAPI.getQoS(topic.getType()));
+      });
    }
 
    /** Use when you only need the latest message and need allocation free. */
@@ -81,7 +80,7 @@ public class ROS2Helper
             swapReference.swap();
             callback.accept(messageToPack);
          }
-      }, ControllerAPI.getQoS(topic.getType()));
+      });
       return swapReference;
    }
 
@@ -174,7 +173,7 @@ public class ROS2Helper
          T message = reader.read();
          if (message != null)
             typedNotification.set(message);
-      }, ControllerAPI.getQoS(topic.getType()));
+      });
       return typedNotification;
    }
 

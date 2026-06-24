@@ -1,6 +1,7 @@
 package us.ihmc.communication;
 
 import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2QoSProfile;
 import us.ihmc.jros2.ROS2Topic;
 
 import java.util.Objects;
@@ -30,7 +31,7 @@ public class HumanoidROS2Topic<T extends ROS2Message<T>> extends ROS2Topic<T>
 
    public HumanoidROS2Topic()
    {
-      this("", "", "", "", "", "", null);
+      this("", "", "", "", "", "", null, ROS2QoSProfile.DEFAULT);
    }
 
    private HumanoidROS2Topic(String prefix,
@@ -39,9 +40,10 @@ public class HumanoidROS2Topic<T extends ROS2Message<T>> extends ROS2Topic<T>
                              String ioQualifier,
                              String typeName,
                              String suffix,
-                             Class<T> messageType)
+                             Class<T> messageType,
+                             ROS2QoSProfile qosProfile)
    {
-      super(assembleName(prefix, robotName, moduleName, ioQualifier, typeName, suffix), messageType);
+      super(assembleName(prefix, robotName, moduleName, ioQualifier, typeName, suffix), messageType, qosProfile);
       this.prefix = prefix;
       this.robotName = robotName;
       this.moduleName = moduleName;
@@ -66,16 +68,17 @@ public class HumanoidROS2Topic<T extends ROS2Message<T>> extends ROS2Topic<T>
                                                String ioQualifier,
                                                String typeName,
                                                String suffix,
-                                               Class<T> messageType)
+                                               Class<T> messageType,
+                                               ROS2QoSProfile qosProfile)
    {
       if (Objects.equals(this.prefix, prefix) && Objects.equals(this.robotName, robotName) && Objects.equals(this.moduleName, moduleName)
           && Objects.equals(this.ioQualifier, ioQualifier) && Objects.equals(this.typeName, typeName) && Objects.equals(this.suffix, suffix)
-          && Objects.equals(getType(), messageType))
+          && Objects.equals(getType(), messageType) && Objects.equals(getQoS(), qosProfile))
       {
          return this;
       }
 
-      return new HumanoidROS2Topic<>(prefix, robotName, moduleName, ioQualifier, typeName, suffix, messageType);
+      return new HumanoidROS2Topic<>(prefix, robotName, moduleName, ioQualifier, typeName, suffix, messageType, qosProfile);
    }
 
    public HumanoidROS2Topic<T> withPrefix(String prefix)
@@ -86,7 +89,8 @@ public class HumanoidROS2Topic<T extends ROS2Message<T>> extends ROS2Topic<T>
                             ioQualifier,
                             typeName,
                             suffix,
-                            getType());
+                            getType(),
+                            getQoS());
    }
 
    public HumanoidROS2Topic<T> withRobot(String robotName)
@@ -97,7 +101,8 @@ public class HumanoidROS2Topic<T extends ROS2Message<T>> extends ROS2Topic<T>
                             ioQualifier,
                             typeName,
                             suffix,
-                            getType());
+                            getType(),
+                            getQoS());
    }
 
    public HumanoidROS2Topic<T> withModule(String moduleName)
@@ -108,7 +113,8 @@ public class HumanoidROS2Topic<T extends ROS2Message<T>> extends ROS2Topic<T>
                             ioQualifier,
                             typeName,
                             suffix,
-                            getType());
+                            getType(),
+                            getQoS());
    }
 
    public HumanoidROS2Topic<T> withInput()
@@ -129,7 +135,8 @@ public class HumanoidROS2Topic<T extends ROS2Message<T>> extends ROS2Topic<T>
                             HumanoidROS2TopicNameTools.processTopicNamePart(ioQualifier),
                             typeName,
                             suffix,
-                            getType());
+                            getType(),
+                            getQoS());
    }
 
    public HumanoidROS2Topic<T> withTypeName()
@@ -143,12 +150,13 @@ public class HumanoidROS2Topic<T extends ROS2Message<T>> extends ROS2Topic<T>
                             ioQualifier,
                             HumanoidROS2TopicNameTools.messageTypeToTopicNamePart(getType()),
                             suffix,
-                            getType());
+                            getType(),
+                            getQoS());
    }
 
    public HumanoidROS2Topic<T> clearTypeName()
    {
-      return copyIfNotEqual(prefix, robotName, moduleName, ioQualifier, "", suffix, getType());
+      return copyIfNotEqual(prefix, robotName, moduleName, ioQualifier, "", suffix, getType(), getQoS());
    }
 
    public HumanoidROS2Topic<T> withSuffix(String suffix)
@@ -159,7 +167,8 @@ public class HumanoidROS2Topic<T extends ROS2Message<T>> extends ROS2Topic<T>
                             ioQualifier,
                             typeName,
                             HumanoidROS2TopicNameTools.processTopicNamePart(suffix),
-                            getType());
+                            getType(),
+                            getQoS());
    }
 
    public <U extends ROS2Message<U>> HumanoidROS2Topic<U> withType(Class<U> messageType)
@@ -182,8 +191,15 @@ public class HumanoidROS2Topic<T extends ROS2Message<T>> extends ROS2Topic<T>
                                                                                ioQualifier,
                                                                                HumanoidROS2TopicNameTools.messageTypeToTopicNamePart(messageType),
                                                                                suffix,
-                                                                               (Class<T>) messageType);
+                                                                               (Class<T>) messageType,
+                                                                               getQoS());
       return typedTopic;
+   }
+
+   @Override
+   public HumanoidROS2Topic<T> withQoS(ROS2QoSProfile qosProfile)
+   {
+      return copyIfNotEqual(prefix, robotName, moduleName, ioQualifier, typeName, suffix, getType(), qosProfile);
    }
 
    /**
@@ -197,11 +213,12 @@ public class HumanoidROS2Topic<T extends ROS2Message<T>> extends ROS2Topic<T>
       String newIOQualifier = takeSecondIfFirstEmpty(ioQualifier, topic.ioQualifier);
       String newTypeName = takeSecondIfFirstEmpty(typeName, topic.typeName);
       String newSuffix = takeSecondIfFirstEmpty(suffix, topic.suffix);
+      ROS2QoSProfile newQoS = getQoS() == ROS2QoSProfile.DEFAULT ? topic.getQoS() : getQoS();
 
       if (topic.getType() != null && !topic.getType().equals(getType()))
          throw new RuntimeException("Cannot change the type of a topic with the withTopic method");
 
-      return copyIfNotEqual(newPrefix, newRobotName, newModuleName, newIOQualifier, newTypeName, newSuffix, getType());
+      return copyIfNotEqual(newPrefix, newRobotName, newModuleName, newIOQualifier, newTypeName, newSuffix, getType(), newQoS);
    }
 
    private static String takeSecondIfFirstEmpty(String first, String second)

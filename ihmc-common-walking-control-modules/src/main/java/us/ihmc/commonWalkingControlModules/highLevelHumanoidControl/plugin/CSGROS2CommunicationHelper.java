@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.St
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.HumanoidROS2Topic;
-import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
@@ -80,7 +79,7 @@ public class CSGROS2CommunicationHelper
             return;
          csgStatusMessage.set(continuousStepGeneratorStatusMessage);
          setCSGCommandsToCurrentValues(continuousStepGeneratorStatusMessage);
-      }, ControllerAPI.getQoS(csgStatusTopic.getType()));
+      });
 
       csgInputCommandPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorInputMessage.class, robotName));
       csgParametersCommandPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorParametersMessage.class, robotName));
@@ -119,7 +118,7 @@ public class CSGROS2CommunicationHelper
          var message = reader.read();
          if (message != null)
             callback.accept(message);
-      }, ControllerAPI.getQoS(csgStatusTopic.getType()));
+      });
    }
 
    /**

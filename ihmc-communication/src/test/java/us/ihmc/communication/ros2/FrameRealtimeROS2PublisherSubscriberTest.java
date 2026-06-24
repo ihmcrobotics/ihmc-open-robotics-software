@@ -20,15 +20,17 @@ public class FrameRealtimeROS2PublisherSubscriberTest
    public FrameRealtimeROS2PublisherSubscriberTest()
    {
       realtimeROS2Node = new AsyncROS2Node("frameTest");
-      ROS2Topic<RobotConfigurationData> topic = HumanoidROS2Topic.IHMC_ROOT.withSuffix("FrameData").withType(RobotConfigurationData.class);
+      ROS2Topic<RobotConfigurationData> topic = HumanoidROS2Topic.IHMC_ROOT.withSuffix("FrameData")
+                                                                               .withType(RobotConfigurationData.class)
+                                                                               .withQoS(ROS2QoSProfile.BEST_EFFORT);
       LogTools.info("Publishing to {}", topic);
-      publisher = realtimeROS2Node.createPublisher(topic, ROS2QoSProfile.BEST_EFFORT);
+      publisher = realtimeROS2Node.createPublisher(topic);
 
       ROS2Subscription<RobotConfigurationData> subscriber = realtimeROS2Node.createSubscription(topic, reader ->
       {
          RobotConfigurationData message = reader.read();
          LogTools.info("Got from callback");
-      }, ROS2QoSProfile.BEST_EFFORT);
+      });
       ThreadTools.sleepForever();
    }
 

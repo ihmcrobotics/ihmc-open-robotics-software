@@ -16,6 +16,7 @@ import sensor_msgs.Image;
 import std_msgs.Empty;
 import std_msgs.Int64;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
+import us.ihmc.jros2.ROS2QoSProfile;
 import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -29,8 +30,8 @@ public final class PerceptionAPI
    public static final HumanoidROS2Topic<?> HEIGHT_MAP_MODULE = HumanoidROS2Topic.IHMC_ROOT.withModule("height_map");
    public static final HumanoidROS2Topic<?> TERRAIN_MAP_MODULE = HumanoidROS2Topic.IHMC_ROOT.withModule("terrain_map");
 
-   private static final HumanoidROS2Topic<?> BEST_EFFORT = HumanoidROS2Topic.IHMC_ROOT;
-   private static final HumanoidROS2Topic<?> RELIABLE = HumanoidROS2Topic.IHMC_ROOT;
+   private static final HumanoidROS2Topic<?> BEST_EFFORT = HumanoidROS2Topic.IHMC_ROOT.withQoS(ROS2QoSProfile.BEST_EFFORT);
+   private static final HumanoidROS2Topic<?> RELIABLE = HumanoidROS2Topic.IHMC_ROOT.withQoS(ROS2QoSProfile.RELIABLE);
 
    /*
     * ZED SVO

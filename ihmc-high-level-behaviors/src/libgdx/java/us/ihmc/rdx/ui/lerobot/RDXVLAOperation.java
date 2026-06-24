@@ -21,7 +21,6 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ToolboxAPIs;
-import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
@@ -89,7 +88,7 @@ public class RDXVLAOperation
          var message = reader.read();
          if (message != null)
             typedNotification.set(message);
-      }, ControllerAPI.getQoS(statusTopic.getType()));
+      });
       statusSubscription = typedNotification;
       commandPublisher = ros2Node.createPublisher(UI.getTopic(ROS2ActorDesignation.OPERATOR.getOutgoingQualifier()));
 

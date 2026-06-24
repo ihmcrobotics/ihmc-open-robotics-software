@@ -25,27 +25,11 @@ public final class StateEstimatorAPI
 
    public static ROS2Topic<RobotConfigurationData> getRobotConfigurationDataTopic(ROS2Topic<?> outputTopic)
    {
-      return outputTopic.withType(RobotConfigurationData.class);
+      return us.ihmc.communication.controllerAPI.ControllerAPI.getTopic(outputTopic, RobotConfigurationData.class);
    }
 
    public static <T extends ROS2Message<T>> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
    {
-      // Input types
-      if (messageClass.equals(StampedPosePacket.class)
-       || messageClass.equals(PelvisPoseErrorPacket.class)
-       || messageClass.equals(LocalizationPacket.class))
-      {
-         return HumanoidControllerAPI.getInputTopic(robotName).withType(messageClass);
-      }
-      // Output types
-      else if (messageClass.equals(HandJointAnglePacket.class)
-            || messageClass.equals(RobotConfigurationData.class))
-      {
-         return HumanoidControllerAPI.getOutputTopic(robotName).withType(messageClass);
-      }
-      else
-      {
-         throw new RuntimeException("Message class is not part of the state estimator API: %s".formatted(messageClass.getName()));
-      }
+      return HumanoidControllerAPI.getTopic(messageClass, robotName);
    }
 }

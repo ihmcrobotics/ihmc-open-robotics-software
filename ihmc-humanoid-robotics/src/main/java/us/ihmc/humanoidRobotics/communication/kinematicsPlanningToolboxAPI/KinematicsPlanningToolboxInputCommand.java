@@ -1,13 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI;
 
+import java.util.Map;
+
 import toolbox_msgs.KinematicsPlanningToolboxInputMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
-
-import java.util.Map;
 
 public class KinematicsPlanningToolboxInputCommand implements Command<KinematicsPlanningToolboxInputCommand, KinematicsPlanningToolboxInputMessage>,
       KinematicsPlanningToolboxAPI<KinematicsPlanningToolboxInputMessage>

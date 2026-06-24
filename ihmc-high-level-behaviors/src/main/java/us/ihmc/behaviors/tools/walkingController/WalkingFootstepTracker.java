@@ -10,7 +10,6 @@ import controller_msgs.FootstepQueueStatusMessage;
 import controller_msgs.FootstepStatusMessage;
 import controller_msgs.QueuedFootstepStatusMessage;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -54,24 +53,21 @@ public class WalkingFootstepTracker
          var message = reader.read();
          if (message != null)
             this.interceptFootstepDataListMessage(message);
-      },
-                                                               ControllerAPI.getQoS(FootstepDataListMessage.class));
+      });
       var footstepStatusTopic = getTopic(FootstepStatusMessage.class, robotName);
       footstepStatusSubscriber = ros2Node.createSubscription(footstepStatusTopic,
                                                              reader -> {
          var message = reader.read();
          if (message != null)
             this.acceptFootstepStatusMessage(message);
-      },
-                                                             ControllerAPI.getQoS(FootstepStatusMessage.class));
+      });
       var footstepQueueStatusTopic = getLowFrequencyTopic(FootstepQueueStatusMessage.class, robotName);
       footstepQueueStatusSubscriber = ros2Node.createSubscription(footstepQueueStatusTopic,
                                                                   reader -> {
          var message = reader.read();
          if (message != null)
             this.acceptFootstepQueueStatusMessage(message);
-      },
-                                                                  ControllerAPI.getQoS(FootstepQueueStatusMessage.class));
+      });
    }
 
    public void registerFootstepQueuedMessageListener(TypedNotification<FootstepQueueStatusMessage> footstepQueueListener)

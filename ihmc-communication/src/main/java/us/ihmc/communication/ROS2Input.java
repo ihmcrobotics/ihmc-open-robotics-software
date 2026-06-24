@@ -47,7 +47,7 @@ public class ROS2Input<T extends ROS2Message<T>>
 
    public ROS2Input(ROS2Node ros2Node, ROS2Topic<T> topic, T initialValue, MessageFilter<T> messageFilter)
    {
-      this(ros2Node, topic, initialValue, messageFilter, ROS2QoSProfile.DEFAULT);
+      this(ros2Node, topic, initialValue, messageFilter, topic.getQoS());
    }
 
    public ROS2Input(ROS2Node ros2Node, ROS2Topic<T> topic, T initialValue, MessageFilter<T> messageFilter, ROS2QoSProfile qosProfile)

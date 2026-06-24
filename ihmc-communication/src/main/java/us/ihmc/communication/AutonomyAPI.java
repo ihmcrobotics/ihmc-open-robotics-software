@@ -6,6 +6,7 @@ import behavior_msgs.BehaviorTreeStateMessage;
 import behavior_msgs.BehaviorTreeYoDataMessage;
 import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
+import us.ihmc.jros2.ROS2QoSProfile;
 import us.ihmc.jros2.ROS2Topic;
 
 public final class AutonomyAPI
@@ -17,7 +18,8 @@ public final class AutonomyAPI
          = new ROS2IOTopicPair<>(BEHAVIOR_TREE_MODULE.withTypeName(BehaviorTreeStateMessage.class));
 
    /** Used to send data to the controller for YoVariablization. */
-   public static final ROS2Topic<BehaviorTreeYoDataMessage> BEHAVIOR_YO_DATA = BEHAVIOR_TREE_MODULE.withTypeName(BehaviorTreeYoDataMessage.class);
+   public static final ROS2Topic<BehaviorTreeYoDataMessage> BEHAVIOR_YO_DATA = BEHAVIOR_TREE_MODULE.withTypeName(BehaviorTreeYoDataMessage.class)
+                                                                                                   .withQoS(ROS2QoSProfile.BEST_EFFORT);
 
    /** rt/ihmc/behavior_tree/ai2r_status */
    public static final ROS2Topic<AI2RStatusMessage> AI2R_STATUS = BEHAVIOR_TREE_MODULE.withType(AI2RStatusMessage.class).withSuffix("ai2r_status");

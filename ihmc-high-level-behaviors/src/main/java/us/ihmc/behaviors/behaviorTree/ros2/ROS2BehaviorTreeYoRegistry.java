@@ -3,7 +3,6 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 import behavior_msgs.BehaviorTreeYoDataMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.AutonomyAPI;
-import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.jros2.ROS2Message;
@@ -63,7 +62,7 @@ public class ROS2BehaviorTreeYoRegistry
             swapReference.swap();
             notification.set();
          }
-      }, ControllerAPI.getQoS(behaviorYoDataTopic.getType()));
+      });
       subscription = swapReference;
 
       for (int i = 0; i < sceneObjectPoses.length; i++)

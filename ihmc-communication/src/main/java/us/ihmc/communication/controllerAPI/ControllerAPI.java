@@ -162,13 +162,16 @@ public final class ControllerAPI
    public static <T extends ROS2Message<T>> ROS2Topic<T> getTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
    {
       HumanoidROS2Topic<?> humanoidBase = toHumanoidTopic(baseTopic);
+      ROS2Topic<T> topic;
 
       if (inputMessageClasses.contains(messageClass))
-         return (ROS2Topic<T>) humanoidBase.withInput().withTypeName(messageClass);
+         topic = (ROS2Topic<T>) humanoidBase.withInput().withTypeName(messageClass);
       else if (outputMessageClasses.contains(messageClass))
-         return (ROS2Topic<T>) humanoidBase.withOutput().withTypeName(messageClass);
+         topic = (ROS2Topic<T>) humanoidBase.withOutput().withTypeName(messageClass);
       else
-         return (ROS2Topic<T>) humanoidBase.withTypeName(messageClass);
+         topic = (ROS2Topic<T>) humanoidBase.withTypeName(messageClass);
+
+      return topic.withQoS(qosForMessageClass(messageClass));
    }
 
    public static <T extends ROS2Message<T>> ROS2Topic<T> getLowFrequencyTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
@@ -184,7 +187,7 @@ public final class ControllerAPI
       throw new IllegalArgumentException("Expected HumanoidROS2Topic, got " + topic.getClass().getName() + " for " + topic.getName());
    }
 
-   public static ROS2QoSProfile getQoS(Class<?> messageClass)
+   static ROS2QoSProfile qosForMessageClass(Class<?> messageClass)
    {
       if (inputMessageClasses.contains(messageClass))
          return Objects.requireNonNullElse(inputMessageClassSpecificQoS.get(messageClass), ROS2QoSProfile.RELIABLE);

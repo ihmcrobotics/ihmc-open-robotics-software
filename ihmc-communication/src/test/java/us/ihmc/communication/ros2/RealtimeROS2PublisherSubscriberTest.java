@@ -21,15 +21,17 @@ public class RealtimeROS2PublisherSubscriberTest
    public RealtimeROS2PublisherSubscriberTest()
    {
       realtimeROS2Node = new AsyncROS2Node("videotest");
-      ROS2Topic<ImageMessage> topic = new ROS2Topic<ImageMessage>().prependedWith("/ihmc/image/test").withType(ImageMessage.class);
+      ROS2Topic<ImageMessage> topic = new ROS2Topic<ImageMessage>().prependedWith("/ihmc/image/test")
+                                                                     .withType(ImageMessage.class)
+                                                                     .withQoS(ROS2QoSProfile.BEST_EFFORT);
       LogTools.info("Publishing to {}", topic);
-      publisher = realtimeROS2Node.createPublisher(topic, ROS2QoSProfile.BEST_EFFORT);
+      publisher = realtimeROS2Node.createPublisher(topic);
 
       ROS2Subscription<ImageMessage> subscriber = realtimeROS2Node.createSubscription(topic, reader ->
       {
          ImageMessage message = reader.read();
          LogTools.info("Got from callback");
-      }, ROS2QoSProfile.BEST_EFFORT);
+      });
       ThreadTools.startAThread(() ->
       {
          while (true)

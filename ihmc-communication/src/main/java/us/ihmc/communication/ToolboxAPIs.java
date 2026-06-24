@@ -57,12 +57,12 @@ public final class ToolboxAPIs
 
    public static ROS2Topic<KinematicsStreamingToolboxInputMessage> getIKStreamingInputTopic(String robotName)
    {
-      return getIKStreamingInputBaseTopic(robotName).withType(KinematicsStreamingToolboxInputMessage.class);
+      return ControllerAPI.getTopic(getIKStreamingInputBaseTopic(robotName), KinematicsStreamingToolboxInputMessage.class);
    }
 
    public static ROS2Topic<ToolboxStateMessage> getIKStreamingStateTopic(String robotName)
    {
-      return getIKStreamingInputBaseTopic(robotName).withType(ToolboxStateMessage.class);
+      return ControllerAPI.getTopic(getIKStreamingInputBaseTopic(robotName), ToolboxStateMessage.class);
    }
 
    public static ROS2Topic<KinematicsToolboxConfigurationMessage> getInputToolboxConfigurationTopic(String robotName)

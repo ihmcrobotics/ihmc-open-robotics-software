@@ -1,11 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
+import java.util.Objects;
+
 import toolbox_msgs.KinematicsToolboxOneDoFJointMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.JointHashCodeResolver;
-
-import java.util.Objects;
 
 public class KinematicsToolboxOneDoFJointCommand implements Command<KinematicsToolboxOneDoFJointCommand, KinematicsToolboxOneDoFJointMessage>
 {

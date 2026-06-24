@@ -209,22 +209,20 @@ public class ControllerNetworkSubscriber
                                         var message = reader.read();
                                         if (message != null)
                                            receivedMessage(message);
-                                     },
-                                     ControllerAPI.getQoS(messageClassRaw));
+                                     });
       }
    }
 
    @SuppressWarnings({"unchecked", "rawtypes"})
    private ROS2Publisher<?> createPublisher(Class<? extends ROS2Message<?>> messageClass)
    {
-      return ros2Node.createPublisher(ControllerAPI.getTopic(outputTopic, (Class) messageClass), ControllerAPI.getQoS(messageClass));
+      return ros2Node.createPublisher(ControllerAPI.getTopic(outputTopic, (Class) messageClass));
    }
 
    @SuppressWarnings({"unchecked", "rawtypes"})
    private ThrottledROS2Publisher createLowFrequencyPublisher(Class<? extends ROS2Message<?>> messageClass)
    {
-      return new ThrottledROS2Publisher(ros2Node.createPublisher(ControllerAPI.getLowFrequencyTopic(outputTopic, (Class) messageClass),
-                                                                 ControllerAPI.getQoS(messageClass)),
+      return new ThrottledROS2Publisher(ros2Node.createPublisher(ControllerAPI.getLowFrequencyTopic(outputTopic, (Class) messageClass)),
                                        LOW_FREQUENCY_PUBLISH_RATE);
    }
 

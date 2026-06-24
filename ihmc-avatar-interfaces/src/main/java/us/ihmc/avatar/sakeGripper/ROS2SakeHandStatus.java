@@ -2,7 +2,6 @@ package us.ihmc.avatar.sakeGripper;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.SakeHandAPI;
-import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -60,7 +59,7 @@ public class ROS2SakeHandStatus
          currentVelocity = sakeHandStatusMessage.getCurrentVelocity();
          errorCodes = sakeHandStatusMessage.getErrorCodes();
          handRealtimeTick = sakeHandStatusMessage.getRealtimeTick();
-      }, ControllerAPI.getQoS(sakeHandStatusTopic.getType()));
+      });
    }
 
    public boolean getIsCalibrated()

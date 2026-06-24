@@ -2,7 +2,6 @@ package us.ihmc.lerobot;
 
 import ihmc_common_msgs.YoRegistryMessage;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
@@ -28,7 +27,7 @@ public class VLAROS2YoRegistry extends VLAYoRegistry
             swapReference.swap();
             notification.set();
          }
-      }, ControllerAPI.getQoS(yoTopic.getType()));
+      });
       subscription = swapReference;
    }
 
