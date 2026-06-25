@@ -158,7 +158,7 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>(
          "initializeEstimatorToActual",
          true);
-   protected final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", false);
+   protected final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", true);
    protected final OptionalFactoryField<Boolean> automaticallyStartSimulation = new OptionalFactoryField<>(
          "automaticallyStartSimulation",
          false);
