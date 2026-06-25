@@ -44,6 +44,8 @@ import us.ihmc.rdx.ui.hands.RDXHandInterface.HandAction;
 import us.ihmc.rdx.ui.hands.RDXHandManager;
 import us.ihmc.rdx.ui.interactable.RDXHumanoidDoFsWidgets;
 import us.ihmc.rdx.ui.interactable.RDXPelvisHeightSlider;
+import us.ihmc.rdx.ui.interactable.RDXPelvisOrientationSlider;
+import us.ihmc.robotics.geometry.YawPitchRollAxis;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -102,6 +104,7 @@ public class RDXTeleoperationManager extends RDXPanel
    private final RDXHardwareControlStateManager hardwareControlStateManager;
 
    private final RDXPelvisHeightSlider pelvisHeightSlider;
+   private final RDXPelvisOrientationSlider pelvisPitchSlider;
    private final RDXHumanoidDoFsWidgets dofsWidgets;
    private final RDXDesiredRobot desiredRobot;
    private RDXRobotCollisionModel avoidanceCollisionModel;
@@ -212,6 +215,7 @@ public class RDXTeleoperationManager extends RDXPanel
                                      wholeBodyIKManager::getEnabled);
 
       pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, ros2Helper, teleoperationParameters);
+      pelvisPitchSlider = new RDXPelvisOrientationSlider(syncedRobot, YawPitchRollAxis.PITCH, ros2Helper);
       dofsWidgets = new RDXHumanoidDoFsWidgets(syncedRobot, ros2Helper, teleoperationParameters);
 
       RDXBaseUI.getInstance().getKeyBindings().register("Delete all Interactables", "Shift + Escape");
@@ -697,6 +701,12 @@ public class RDXTeleoperationManager extends RDXPanel
          ImGui.setCursorPosX(widgetStartX);
          ImGui.setNextItemWidth(-1);
          pelvisHeightSlider.renderImGuiWidgets();
+
+         ImGui.text("Pelvis Pitch:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         ImGui.setNextItemWidth(-1);
+         pelvisPitchSlider.renderImGuiWidgets();
 
          ImGui.text("Pelvis Height Control Mode:");
          ImGui.sameLine();
