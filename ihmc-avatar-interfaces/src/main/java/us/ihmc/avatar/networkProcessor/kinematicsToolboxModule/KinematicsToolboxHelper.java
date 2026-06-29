@@ -4,6 +4,7 @@ import controller_msgs.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -172,7 +173,7 @@ public class KinematicsToolboxHelper
                                                               OneDoFJointBasics[] oneDoFJoints,
                                                               List<Integer> oneDoFJointsIndices)
    {
-      us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence newJointAngles = robotConfigurationData.getJointAngles();
+      IDLFloatSequence newJointAngles = robotConfigurationData.getJointAngles();
       if (oneDoFJointsIndices != null)
       {
          List<Float> filteredJoints = new ArrayList<>();

@@ -484,6 +484,7 @@ public class KinematicsToolboxController extends ToolboxController implements SC
       feedbackControllerDataHolder = controllerCore.getWholeBodyFeedbackControllerDataHolder();
 
       inverseKinematicsSolution = MessageTools.createKinematicsToolboxOutputStatus(desiredOneDoFJoints);
+      // jros2 messages no longer expose QueueableMessage destination; controller routing uses topics only.
 
       robotMass = MultiBodySystemMissingTools.computeSubTreeMass(rootBody);
       centerOfMassSafeMargin.set(0.04); // Same as the walking controller.

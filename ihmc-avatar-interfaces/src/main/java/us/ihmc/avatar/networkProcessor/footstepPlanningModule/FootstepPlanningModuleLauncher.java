@@ -120,6 +120,7 @@ public class FootstepPlanningModuleLauncher
                                                  FootstepPlanningModule footstepPlanningModule,
                                                  ROS2Topic<?> inputTopic)
    {
+      // inputTopic is a HumanoidROS2Topic; withType() appends the message-type suffix so parameters packets do not collide.
       ros2Node.createSubscription(inputTopic.withType(FootstepPlannerParametersPacket.class), s ->
       {
          if (!footstepPlanningModule.isPlanning())

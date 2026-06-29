@@ -50,6 +50,7 @@ public class SCS2LogSessionWithVideo extends LogSession
             LogTools.info("Found camera: %s".formatted(camera.getName()));
             try
             {
+               // logger_msgs Camera.type value (legacy us.ihmc.robotDataLogger.CameraType.CAPTURE_CARD_MAGEWELL)
                if (camera.getTypeAsString().equals("CAPTURE_CARD_MAGEWELL"))
                {
                   MagewellScrubber magewellScrubber = new MagewellScrubber(camera, logDirectory, logProperties.getVideo().getHasTimebase());

@@ -22,7 +22,6 @@ mainDependencies {
    api("us.ihmc:ihmc-video-codecs:2.1.6")
 
    api("commons-net:commons-net:3.6")
-   api("org.lz4:lz4-java:1.8.0")
    api("com.github.crykn:kryonet:2.22.7") // from jitpack
 }
 

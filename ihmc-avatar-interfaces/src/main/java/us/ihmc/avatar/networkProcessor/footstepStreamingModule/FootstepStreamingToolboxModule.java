@@ -139,6 +139,7 @@ public class FootstepStreamingToolboxModule extends ToolboxModule
 
    public static ROS2Topic<FootstepStreamingToolboxOutputStatus> getOutputStatusTopic(String robotName)
    {
+      // HumanoidROS2Topic.withType() suffixes the topic with the message type name (legacy withTypeName behavior).
       return getOutputTopic(robotName).withType(FootstepStreamingToolboxOutputStatus.class);
    }
 }

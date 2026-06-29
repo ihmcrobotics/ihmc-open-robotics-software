@@ -32,6 +32,7 @@ public class WholeBodyTrajectoryToolboxHelper
       if (enumListAsBytes == null || enumListAsBytes.size() == 0)
          return new ConfigurationSpaceName[0];
 
+      // jros2 IDLByteSequence has no array view yet; copy into a byte[] for ConfigurationSpaceName.fromBytes().
       byte[] bytes = new byte[enumListAsBytes.size()];
       for (int i = 0; i < enumListAsBytes.size(); i++)
          bytes[i] = enumListAsBytes.get(i);

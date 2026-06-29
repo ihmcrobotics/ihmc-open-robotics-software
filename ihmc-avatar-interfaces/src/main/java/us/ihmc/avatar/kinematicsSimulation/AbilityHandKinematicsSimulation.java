@@ -36,6 +36,7 @@ public class AbilityHandKinematicsSimulation
 
    public AbilityHandKinematicsSimulation(RobotSide side, ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HandModel handModel)
    {
+      // Resolve joint names from the robot hand model so this works when the URDF does not use default Ability Hand names.
       AbilityHandModel abilityHandModel = handModel instanceof AbilityHandModel model ? model : new AbilityHandModel();
       boolean allJointsFound = true;
 

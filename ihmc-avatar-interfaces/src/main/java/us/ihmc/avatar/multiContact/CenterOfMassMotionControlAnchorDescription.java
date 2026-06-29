@@ -29,6 +29,7 @@ public class CenterOfMassMotionControlAnchorDescription
    public CenterOfMassMotionControlAnchorDescription(CenterOfMassMotionControlAnchorDescription other)
    {
       isTrackingController = other.isTrackingController;
+      // jros2 messages use createInstance() so nested IDL sequences are initialized before copy/set.
       inputMessage = ROS2Message.createInstance(KinematicsToolboxCenterOfMassMessage.class);
       inputMessage.set(other.inputMessage);
    }

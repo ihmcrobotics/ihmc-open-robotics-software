@@ -763,6 +763,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController impl
 
    private void terminateToolboxController()
    {
+      // jros2 messages no longer expose PacketDestination; toolbox output is routed by topic only.
       reportMessage(toolboxSolution);
 
       //nodePlotter.closeAll();

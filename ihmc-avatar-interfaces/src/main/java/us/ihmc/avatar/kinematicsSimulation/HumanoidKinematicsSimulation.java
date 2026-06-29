@@ -547,6 +547,7 @@ public class HumanoidKinematicsSimulation
       integrator.setIntegrationDT(kinematicsSimulationParameters.getDt());
       integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
 
+      // Use simulation yoTime (not a fixed 1 ms increment) so YoVariable logger/server timestamps track robot time.
       if (kinematicsSimulationParameters.getLogToFile())
       {
          intraprocessYoVariableLogger.update(Conversions.secondsToNanoseconds(yoTime.getValue()));

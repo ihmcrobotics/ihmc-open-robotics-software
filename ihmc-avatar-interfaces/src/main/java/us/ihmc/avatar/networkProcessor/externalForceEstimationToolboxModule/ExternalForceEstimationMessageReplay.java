@@ -59,6 +59,11 @@ public class ExternalForceEstimationMessageReplay
       ExternalForceEstimationConfigurationMessage configurationMessage = new ExternalForceEstimationConfigurationMessage();
       configurationMessage.setEstimatorGain(0.75);
 
+      // Valkyrie pelvis
+      //      configurationMessage.setEndEffectorHashCode(-878626891);
+      //      configurationMessage.getContactPointPositions().setToZero();
+
+      // Valkyrie right elbow pitch
       configurationMessage.getRigidBodyHashCodes().add(601127246);
       configurationMessage.getContactPointPositions().add().getPoint().set(0.0, -0.35, -0.03);
 

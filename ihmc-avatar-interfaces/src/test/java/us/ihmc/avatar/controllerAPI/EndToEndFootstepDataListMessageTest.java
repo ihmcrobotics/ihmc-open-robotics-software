@@ -19,7 +19,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.communication.controllerAPI.ControllerMessageConstants;
+import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -125,12 +125,12 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
             stepsPackedInMessage++;
          }
          message.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
-         message.getQueueingProperties().setPreviousMessageId(ControllerMessageConstants.VALID_MESSAGE_DEFAULT_ID);
+         message.getQueueingProperties().setPreviousMessageId(QueueableCommand.VALID_MESSAGE_DEFAULT_ID);
          messages.add(message);
       }
       FootstepDataListMessage r = messages.get(0);
       r.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      r.getQueueingProperties().setPreviousMessageId(ControllerMessageConstants.VALID_MESSAGE_DEFAULT_ID);
+      r.getQueueingProperties().setPreviousMessageId(QueueableCommand.VALID_MESSAGE_DEFAULT_ID);
 
       YoVariable numberOfStepsInController = simulationTestHelper.findVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
       int expectedNumberOfSteps = 0;

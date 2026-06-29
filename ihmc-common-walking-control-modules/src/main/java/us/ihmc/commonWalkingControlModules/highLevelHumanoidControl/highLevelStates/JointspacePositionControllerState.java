@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.communication.controllerAPI.ControllerMessageConstants;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -280,7 +279,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
          statusHelper = new OneDoFJointTrajectoryStatusMessageHelper(joint);
 
          lastCommandId = new YoLong(joint.getName() + "LastCommandId", registry);
-         lastCommandId.set(ControllerMessageConstants.INVALID_MESSAGE_ID);
+         lastCommandId.set(QueueableCommand.INVALID_MESSAGE_ID);
       }
 
       public void doControl(JointDesiredOutputBasics jointDesiredOutput)
@@ -399,7 +398,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
 
       private boolean validateQueueableProperties(QueueableCommand<?, ?> queueingProperties)
       {
-         if (queueingProperties.getCommandId() == ControllerMessageConstants.INVALID_MESSAGE_ID)
+         if (queueingProperties.getCommandId() == QueueableCommand.INVALID_MESSAGE_ID)
          {
             LogTools.warn(warningPrefix + "Recieved packet with invalid ID.");
             return false;
@@ -450,7 +449,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
 
       private void resetLastCommandId()
       {
-         lastCommandId.set(ControllerMessageConstants.INVALID_MESSAGE_ID);
+         lastCommandId.set(QueueableCommand.INVALID_MESSAGE_ID);
       }
 
       public void queueInitialPointAtCurrent()

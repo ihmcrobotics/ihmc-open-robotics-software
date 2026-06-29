@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.communication.controllerAPI.ControllerMessageConstants;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -54,7 +53,7 @@ public abstract class RigidBodyControlState implements State, SCS2YoGraphicHolde
          prefix = bodyName;
 
       lastCommandId = new YoLong(prefix + "LastCommandId", registry);
-      lastCommandId.set(ControllerMessageConstants.INVALID_MESSAGE_ID);
+      lastCommandId.set(QueueableCommand.INVALID_MESSAGE_ID);
 
       trajectoryDone = new YoBoolean(prefix + "TrajectoryDone", registry);
       trajectoryStartTime = new YoDouble(prefix + "TrajectoryStartTime", registry);
@@ -68,7 +67,7 @@ public abstract class RigidBodyControlState implements State, SCS2YoGraphicHolde
       {
          QueueableCommand<?, ?> queueableCommand = (QueueableCommand<?, ?>) command;
 
-         if (queueableCommand.getCommandId() == ControllerMessageConstants.INVALID_MESSAGE_ID)
+         if (queueableCommand.getCommandId() == QueueableCommand.INVALID_MESSAGE_ID)
          {
             LogTools.warn(warningPrefix + "Recieved packet with invalid ID.");
             return false;
@@ -112,7 +111,7 @@ public abstract class RigidBodyControlState implements State, SCS2YoGraphicHolde
 
    protected void resetLastCommandId()
    {
-      lastCommandId.set(ControllerMessageConstants.INVALID_MESSAGE_ID);
+      lastCommandId.set(QueueableCommand.INVALID_MESSAGE_ID);
    }
 
    public boolean abortState()

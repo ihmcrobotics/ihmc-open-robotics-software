@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import static us.ihmc.communication.controllerAPI.ControllerMessageConstants.INVALID_MESSAGE_ID;
+import static us.ihmc.communication.controllerAPI.command.QueueableCommand.INVALID_MESSAGE_ID;
 
 import controller_msgs.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;

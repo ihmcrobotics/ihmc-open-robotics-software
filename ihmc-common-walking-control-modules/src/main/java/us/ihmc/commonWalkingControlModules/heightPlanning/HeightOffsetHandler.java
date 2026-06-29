@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.heightPlanning;
 
-import static us.ihmc.communication.controllerAPI.ControllerMessageConstants.INVALID_MESSAGE_ID;
+import static us.ihmc.communication.controllerAPI.command.QueueableCommand.INVALID_MESSAGE_ID;
 
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;

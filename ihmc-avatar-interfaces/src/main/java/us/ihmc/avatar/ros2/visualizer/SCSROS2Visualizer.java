@@ -74,6 +74,7 @@ public class SCSROS2Visualizer
       int domainID = NetworkParameters.getRTPSDomainID();
       ros2Node = new ROS2Node(getClass().getSimpleName(), domainID);
       LogTools.info("Created jros2 node for SCS ROS 2 visualizer on domain {}", domainID);
+      // JROS2_TODO: RTPS participant/endpoint discovery counting is not exposed by jros2 yet; YoVariables stay at zero.
       LogTools.warn("RTPS participant and endpoint discovery counting is not yet available in jros2");
    }
 
