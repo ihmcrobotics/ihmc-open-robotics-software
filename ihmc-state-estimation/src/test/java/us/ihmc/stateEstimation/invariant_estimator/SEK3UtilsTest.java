@@ -1,4 +1,4 @@
-package us.ihmc.stateEstimation.invariant_estimator.kGroup;
+package us.ihmc.stateEstimation.invariant_estimator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

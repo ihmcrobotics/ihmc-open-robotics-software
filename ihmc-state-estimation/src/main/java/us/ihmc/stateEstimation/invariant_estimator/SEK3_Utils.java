@@ -1,4 +1,4 @@
-package us.ihmc.stateEstimation.invariant_estimator.kGroup;
+package us.ihmc.stateEstimation.invariant_estimator;
 
 import org.ejml.data.DMatrixRMaj;
 
