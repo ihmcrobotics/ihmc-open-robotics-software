@@ -16,7 +16,6 @@ import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.jros2.AsyncROS2Node;
-import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
 
@@ -154,23 +153,23 @@ public class KinematicsStreamingToolboxMessageReplay
 
          if (childNode.has(robotConfigurationDataName))
          {
-            messageSet.robotConfigurationData = ROS2Message.createInstance(RobotConfigurationData.class);
+            messageSet.robotConfigurationData = new RobotConfigurationData();
             ROS2MessageCdrFileTools.deserializeFromJsonNode(childNode.get(robotConfigurationDataName), messageSet.robotConfigurationData);
          }
          if (childNode.has(capturabilityBasedStatusName))
          {
-            messageSet.capturabilityBasedStatus = ROS2Message.createInstance(CapturabilityBasedStatus.class);
+            messageSet.capturabilityBasedStatus = new CapturabilityBasedStatus();
             ROS2MessageCdrFileTools.deserializeFromJsonNode(childNode.get(capturabilityBasedStatusName), messageSet.capturabilityBasedStatus);
          }
          if (childNode.has(kinematicsToolboxConfigurationMessageName))
          {
-            messageSet.kinematicsToolboxConfigurationMessage = ROS2Message.createInstance(KinematicsToolboxConfigurationMessage.class);
+            messageSet.kinematicsToolboxConfigurationMessage = new KinematicsToolboxConfigurationMessage();
             ROS2MessageCdrFileTools.deserializeFromJsonNode(childNode.get(kinematicsToolboxConfigurationMessageName),
                                                             messageSet.kinematicsToolboxConfigurationMessage);
          }
          if (childNode.has(kinematicsStreamingToolboxInputMessageName))
          {
-            messageSet.kinematicsStreamingToolboxInputMessage = ROS2Message.createInstance(KinematicsStreamingToolboxInputMessage.class);
+            messageSet.kinematicsStreamingToolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
             ROS2MessageCdrFileTools.deserializeFromJsonNode(childNode.get(kinematicsStreamingToolboxInputMessageName),
                                                             messageSet.kinematicsStreamingToolboxInputMessage);
          }

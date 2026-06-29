@@ -1,13 +1,11 @@
 package us.ihmc.avatar.multiContact;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import toolbox_msgs.KinematicsToolboxCenterOfMassMessage;
 import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.jros2.ROS2Message;
 
 import java.io.IOException;
 
@@ -16,8 +14,6 @@ public class CenterOfMassMotionControlAnchorDescription
    public static final String ANCHOR_JSON = CenterOfMassMotionControlAnchorDescription.class.getSimpleName();
    public static final String IS_TRACKING_CONTROLLER_JSON = "isTrackingController";
    public static final String IK_SOLVER_MESSAGE_JSON = "ikSolverMessage";
-
-   private static final ObjectMapper objectMapper = new ObjectMapper(new JsonFactory());
 
    private boolean isTrackingController;
    private KinematicsToolboxCenterOfMassMessage inputMessage;
@@ -29,8 +25,7 @@ public class CenterOfMassMotionControlAnchorDescription
    public CenterOfMassMotionControlAnchorDescription(CenterOfMassMotionControlAnchorDescription other)
    {
       isTrackingController = other.isTrackingController;
-      // jros2 messages use createInstance() so nested IDL sequences are initialized before copy/set.
-      inputMessage = ROS2Message.createInstance(KinematicsToolboxCenterOfMassMessage.class);
+      inputMessage = new KinematicsToolboxCenterOfMassMessage();
       inputMessage.set(other.inputMessage);
    }
 
@@ -56,7 +51,7 @@ public class CenterOfMassMotionControlAnchorDescription
       {
          CenterOfMassMotionControlAnchorDescription description = new CenterOfMassMotionControlAnchorDescription();
          description.setTrackingController(anchorNode.get(IS_TRACKING_CONTROLLER_JSON).asBoolean());
-         KinematicsToolboxCenterOfMassMessage inputMessage = ROS2Message.createInstance(KinematicsToolboxCenterOfMassMessage.class);
+         KinematicsToolboxCenterOfMassMessage inputMessage = new KinematicsToolboxCenterOfMassMessage();
          ROS2MessageCdrFileTools.deserializeFromJsonNode(anchorNode.get(IK_SOLVER_MESSAGE_JSON), inputMessage);
          description.setInputMessage(inputMessage);
          return description;

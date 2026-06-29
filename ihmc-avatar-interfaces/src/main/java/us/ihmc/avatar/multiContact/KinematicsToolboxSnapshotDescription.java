@@ -1,6 +1,5 @@
 package us.ihmc.avatar.multiContact;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -10,7 +9,6 @@ import toolbox_msgs.KinematicsToolboxOutputStatus;
 import toolbox_msgs.KinematicsToolboxPrivilegedConfigurationMessage;
 import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.jros2.ROS2Message;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,8 +28,6 @@ public class KinematicsToolboxSnapshotDescription
    public static final String ONE_DOF_ANCHORS_JSON = "oneDoFAnchors";
    public static final String EXECUTION_DURATION_JSON = "executionDuration";
 
-   private static final ObjectMapper objectMapper = new ObjectMapper(new JsonFactory());
-
    public double executionDuration = Double.NaN;
    public RobotConfigurationData controllerConfiguration;
    public KinematicsToolboxOutputStatus ikSolution;
@@ -47,9 +43,9 @@ public class KinematicsToolboxSnapshotDescription
    public KinematicsToolboxSnapshotDescription(KinematicsToolboxSnapshotDescription other)
    {
       executionDuration = other.executionDuration;
-      controllerConfiguration = copyMessage(other.controllerConfiguration, RobotConfigurationData.class);
-      ikSolution = copyMessage(other.ikSolution, KinematicsToolboxOutputStatus.class);
-      ikPrivilegedConfiguration = copyMessage(other.ikPrivilegedConfiguration, KinematicsToolboxPrivilegedConfigurationMessage.class);
+      controllerConfiguration = copyRobotConfigurationData(other.controllerConfiguration);
+      ikSolution = copyIkSolution(other.ikSolution);
+      ikPrivilegedConfiguration = copyIkPrivilegedConfiguration(other.ikPrivilegedConfiguration);
       sixDoFAnchors = other.sixDoFAnchors.stream().map(SixDoFMotionControlAnchorDescription::new).collect(Collectors.toList());
       oneDoFAnchors = other.oneDoFAnchors.stream().map(OneDoFMotionControlAnchorDescription::new).collect(Collectors.toList());
 
@@ -63,9 +59,29 @@ public class KinematicsToolboxSnapshotDescription
       }
    }
 
-   private static <T extends ROS2Message<T>> T copyMessage(T source, Class<T> type)
+   private static RobotConfigurationData copyRobotConfigurationData(RobotConfigurationData source)
    {
-      T copy = ROS2Message.createInstance(type);
+      if (source == null)
+         return null;
+      RobotConfigurationData copy = new RobotConfigurationData();
+      copy.set(source);
+      return copy;
+   }
+
+   private static KinematicsToolboxOutputStatus copyIkSolution(KinematicsToolboxOutputStatus source)
+   {
+      if (source == null)
+         return null;
+      KinematicsToolboxOutputStatus copy = new KinematicsToolboxOutputStatus();
+      copy.set(source);
+      return copy;
+   }
+
+   private static KinematicsToolboxPrivilegedConfigurationMessage copyIkPrivilegedConfiguration(KinematicsToolboxPrivilegedConfigurationMessage source)
+   {
+      if (source == null)
+         return null;
+      KinematicsToolboxPrivilegedConfigurationMessage copy = new KinematicsToolboxPrivilegedConfigurationMessage();
       copy.set(source);
       return copy;
    }
@@ -77,10 +93,9 @@ public class KinematicsToolboxSnapshotDescription
       try
       {
          KinematicsToolboxSnapshotDescription description = new KinematicsToolboxSnapshotDescription();
-         description.setControllerConfiguration(deserializeMessage(configurationNode.get(CONTROLLER_CONFIGURATION_JSON), RobotConfigurationData.class));
-         description.setIkSolution(deserializeMessage(configurationNode.get(IK_SOLUTION_JSON), KinematicsToolboxOutputStatus.class));
-         description.setIkPrivilegedConfiguration(deserializeMessage(configurationNode.get(IK_PRIVILEGED_CONFIGURATION_JSON),
-                                                                    KinematicsToolboxPrivilegedConfigurationMessage.class));
+         description.setControllerConfiguration(deserializeRobotConfigurationData(configurationNode.get(CONTROLLER_CONFIGURATION_JSON)));
+         description.setIkSolution(deserializeIkSolution(configurationNode.get(IK_SOLUTION_JSON)));
+         description.setIkPrivilegedConfiguration(deserializeIkPrivilegedConfiguration(configurationNode.get(IK_PRIVILEGED_CONFIGURATION_JSON)));
 
          description.setCenterOfMassAnchor(CenterOfMassMotionControlAnchorDescription.fromJSON(configurationNode.get(COM_ANCHOR_JSON)));
 
@@ -110,11 +125,29 @@ public class KinematicsToolboxSnapshotDescription
       }
    }
 
-   private static <T extends ROS2Message<T>> T deserializeMessage(JsonNode node, Class<T> type) throws IOException
+   private static RobotConfigurationData deserializeRobotConfigurationData(JsonNode node) throws IOException
    {
       if (node == null || node.isNull())
          return null;
-      T message = ROS2Message.createInstance(type);
+      RobotConfigurationData message = new RobotConfigurationData();
+      ROS2MessageCdrFileTools.deserializeFromJsonNode(node, message);
+      return message;
+   }
+
+   private static KinematicsToolboxOutputStatus deserializeIkSolution(JsonNode node) throws IOException
+   {
+      if (node == null || node.isNull())
+         return null;
+      KinematicsToolboxOutputStatus message = new KinematicsToolboxOutputStatus();
+      ROS2MessageCdrFileTools.deserializeFromJsonNode(node, message);
+      return message;
+   }
+
+   private static KinematicsToolboxPrivilegedConfigurationMessage deserializeIkPrivilegedConfiguration(JsonNode node) throws IOException
+   {
+      if (node == null || node.isNull())
+         return null;
+      KinematicsToolboxPrivilegedConfigurationMessage message = new KinematicsToolboxPrivilegedConfigurationMessage();
       ROS2MessageCdrFileTools.deserializeFromJsonNode(node, message);
       return message;
    }

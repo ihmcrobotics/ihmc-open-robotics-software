@@ -1,6 +1,5 @@
 package us.ihmc.avatar.multiContact;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -11,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.jros2.ROS2Message;
 
 import java.io.IOException;
 
@@ -24,8 +22,6 @@ public class SixDoFMotionControlAnchorDescription
    public static final String ANCHOR_ID_JSON = "anchorId";
    public static final String CONTACT_NORMAL_JSON = "contactNormalInWorld";
    public static final String IK_SOLVER_MESSAGE_JSON = "ikSolverMessage";
-
-   private static final ObjectMapper objectMapper = new ObjectMapper(new JsonFactory());
 
    private String rigidBodyName;
    private boolean isContactState;
@@ -45,7 +41,7 @@ public class SixDoFMotionControlAnchorDescription
       isTrackingController = other.isTrackingController;
       anchorId = other.anchorId;
       contactNormal = other.contactNormal;
-      inputMessage = ROS2Message.createInstance(KinematicsToolboxRigidBodyMessage.class);
+      inputMessage = new KinematicsToolboxRigidBodyMessage();
       inputMessage.set(other.inputMessage);
    }
 
@@ -59,7 +55,7 @@ public class SixDoFMotionControlAnchorDescription
          description.setRigidBodyName(anchorNode.get(RIGID_BODY_NAME_JSON).asText());
          description.setContactState(anchorNode.get(IS_CONTACT_STATE_JSON).asBoolean());
          description.setTrackingController(anchorNode.get(IS_TRACKING_CONTROLLER_JSON).asBoolean());
-         KinematicsToolboxRigidBodyMessage inputMessage = ROS2Message.createInstance(KinematicsToolboxRigidBodyMessage.class);
+         KinematicsToolboxRigidBodyMessage inputMessage = new KinematicsToolboxRigidBodyMessage();
          ROS2MessageCdrFileTools.deserializeFromJsonNode(anchorNode.get(IK_SOLVER_MESSAGE_JSON), inputMessage);
          description.setInputMessage(inputMessage);
 
