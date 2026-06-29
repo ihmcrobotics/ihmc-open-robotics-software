@@ -195,19 +195,19 @@ public class InvariantState
    /** @return the tangent-space start index of the rotation block (0). */
    public int rotationTangentIndex()
    {
-      throw new UnsupportedOperationException("TODO: fill in from the reference.");
+      return 0;
    }
 
    /** @return the tangent-space start index of the base-velocity block. */
    public int baseVelocityTangentIndex()
    {
-      throw new UnsupportedOperationException("TODO: fill in from the reference.");
+      return 3;
    }
 
    /** @return the tangent-space start index of the base-position block. */
    public int basePositionTangentIndex()
    {
-      throw new UnsupportedOperationException("TODO: fill in from the reference.");
+      return 6;
    }
 
    /**
@@ -216,7 +216,8 @@ public class InvariantState
     */
    public int contactTangentIndex(int contactIndex)
    {
-      throw new UnsupportedOperationException("TODO: fill in from the reference.");
+      checkContactIndex(contactIndex);
+      return 9 + 3 * contactIndex;
    }
 
    /** Packs the top 3 entires of the given matrix column into a tuple. */
