@@ -65,6 +65,12 @@ public class ArmTrajectoryMessage implements ROS2Message<ArmTrajectoryMessage>
 
    }
 
+   public ArmTrajectoryMessage(ArmTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

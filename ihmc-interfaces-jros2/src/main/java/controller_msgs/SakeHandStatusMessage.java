@@ -146,6 +146,12 @@ public class SakeHandStatusMessage implements ROS2Message<SakeHandStatusMessage>
 
    }
 
+   public SakeHandStatusMessage(SakeHandStatusMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

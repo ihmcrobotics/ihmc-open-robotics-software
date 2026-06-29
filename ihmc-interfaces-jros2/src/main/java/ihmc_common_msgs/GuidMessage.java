@@ -41,6 +41,12 @@ public class GuidMessage implements ROS2Message<GuidMessage>
 
    }
 
+   public GuidMessage(GuidMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

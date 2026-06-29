@@ -64,6 +64,12 @@ public class PelvisOrientationTrajectoryMessage implements ROS2Message<PelvisOri
 
    }
 
+   public PelvisOrientationTrajectoryMessage(PelvisOrientationTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

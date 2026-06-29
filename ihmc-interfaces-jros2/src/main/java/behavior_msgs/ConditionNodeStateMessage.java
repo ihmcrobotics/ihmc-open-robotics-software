@@ -101,6 +101,12 @@ public class ConditionNodeStateMessage implements ROS2Message<ConditionNodeState
 
    }
 
+   public ConditionNodeStateMessage(ConditionNodeStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

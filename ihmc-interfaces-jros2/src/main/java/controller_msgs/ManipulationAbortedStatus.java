@@ -32,6 +32,12 @@ public class ManipulationAbortedStatus implements ROS2Message<ManipulationAborte
    {
    }
 
+   public ManipulationAbortedStatus(ManipulationAbortedStatus from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

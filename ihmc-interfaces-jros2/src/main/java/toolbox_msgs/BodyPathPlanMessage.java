@@ -68,6 +68,12 @@ public class BodyPathPlanMessage implements ROS2Message<BodyPathPlanMessage>
 
    }
 
+   public BodyPathPlanMessage(BodyPathPlanMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

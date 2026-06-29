@@ -74,6 +74,12 @@ public class SRTStreamStatus implements ROS2Message<SRTStreamStatus>
 
    }
 
+   public SRTStreamStatus(SRTStreamStatus from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

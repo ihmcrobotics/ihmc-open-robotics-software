@@ -89,6 +89,12 @@ public class StepConstraintsListMessage implements ROS2Message<StepConstraintsLi
 
    }
 
+   public StepConstraintsListMessage(StepConstraintsListMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -74,6 +74,12 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage implements ROS2Messa
 
    }
 
+   public HandHybridJointspaceTaskspaceTrajectoryMessage(HandHybridJointspaceTaskspaceTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

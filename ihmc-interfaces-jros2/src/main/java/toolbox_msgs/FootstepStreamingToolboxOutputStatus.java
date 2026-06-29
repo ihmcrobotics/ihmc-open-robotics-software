@@ -76,6 +76,12 @@ public class FootstepStreamingToolboxOutputStatus implements ROS2Message<Footste
 
    }
 
+   public FootstepStreamingToolboxOutputStatus(FootstepStreamingToolboxOutputStatus from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

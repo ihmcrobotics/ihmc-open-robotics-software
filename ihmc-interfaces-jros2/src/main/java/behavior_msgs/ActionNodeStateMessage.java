@@ -90,6 +90,12 @@ public class ActionNodeStateMessage implements ROS2Message<ActionNodeStateMessag
 
    }
 
+   public ActionNodeStateMessage(ActionNodeStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

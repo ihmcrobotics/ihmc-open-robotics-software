@@ -98,6 +98,12 @@ public class FrameInformation implements ROS2Message<FrameInformation>
 
    }
 
+   public FrameInformation(FrameInformation from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

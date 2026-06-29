@@ -59,6 +59,12 @@ public class WaypointBasedTrajectoryMessage implements ROS2Message<WaypointBased
 
    }
 
+   public WaypointBasedTrajectoryMessage(WaypointBasedTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

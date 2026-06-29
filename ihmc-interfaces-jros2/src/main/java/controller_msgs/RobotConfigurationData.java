@@ -113,6 +113,12 @@ public class RobotConfigurationData implements ROS2Message<RobotConfigurationDat
 
    }
 
+   public RobotConfigurationData(RobotConfigurationData from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

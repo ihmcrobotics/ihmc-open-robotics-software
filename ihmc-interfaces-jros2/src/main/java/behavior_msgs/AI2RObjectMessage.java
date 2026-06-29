@@ -49,6 +49,12 @@ public class AI2RObjectMessage implements ROS2Message<AI2RObjectMessage>
 
    }
 
+   public AI2RObjectMessage(AI2RObjectMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

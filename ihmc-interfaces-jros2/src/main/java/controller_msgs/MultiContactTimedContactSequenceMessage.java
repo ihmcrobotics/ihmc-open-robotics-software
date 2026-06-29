@@ -63,6 +63,12 @@ public class MultiContactTimedContactSequenceMessage implements ROS2Message<Mult
 
    }
 
+   public MultiContactTimedContactSequenceMessage(MultiContactTimedContactSequenceMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

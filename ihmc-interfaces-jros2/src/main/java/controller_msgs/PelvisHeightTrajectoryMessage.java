@@ -63,6 +63,12 @@ public class PelvisHeightTrajectoryMessage implements ROS2Message<PelvisHeightTr
 
    }
 
+   public PelvisHeightTrajectoryMessage(PelvisHeightTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

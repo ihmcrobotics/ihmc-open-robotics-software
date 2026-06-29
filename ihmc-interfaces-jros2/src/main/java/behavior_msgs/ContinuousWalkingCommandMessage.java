@@ -113,6 +113,12 @@ public class ContinuousWalkingCommandMessage implements ROS2Message<ContinuousWa
 
    }
 
+   public ContinuousWalkingCommandMessage(ContinuousWalkingCommandMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

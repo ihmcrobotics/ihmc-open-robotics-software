@@ -65,6 +65,12 @@ public class FootLoadBearingMessage implements ROS2Message<FootLoadBearingMessag
 
    }
 
+   public FootLoadBearingMessage(FootLoadBearingMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

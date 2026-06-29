@@ -155,6 +155,12 @@ public class FootstepDataListMessage implements ROS2Message<FootstepDataListMess
 
    }
 
+   public FootstepDataListMessage(FootstepDataListMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

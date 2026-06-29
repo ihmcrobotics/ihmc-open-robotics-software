@@ -44,6 +44,12 @@ public class SystemAvailableMessage implements ROS2Message<SystemAvailableMessag
 
    }
 
+   public SystemAvailableMessage(SystemAvailableMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

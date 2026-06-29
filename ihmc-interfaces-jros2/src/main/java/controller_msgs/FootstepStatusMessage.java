@@ -98,6 +98,12 @@ public class FootstepStatusMessage implements ROS2Message<FootstepStatusMessage>
 
    }
 
+   public FootstepStatusMessage(FootstepStatusMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

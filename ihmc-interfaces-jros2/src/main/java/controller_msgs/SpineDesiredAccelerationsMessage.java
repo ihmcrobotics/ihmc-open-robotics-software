@@ -43,6 +43,12 @@ public class SpineDesiredAccelerationsMessage implements ROS2Message<SpineDesire
 
    }
 
+   public SpineDesiredAccelerationsMessage(SpineDesiredAccelerationsMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -98,6 +98,12 @@ public class TaskspaceTrajectoryStatusMessage implements ROS2Message<TaskspaceTr
 
    }
 
+   public TaskspaceTrajectoryStatusMessage(TaskspaceTrajectoryStatusMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

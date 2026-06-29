@@ -55,6 +55,12 @@ public class ArmDesiredAccelerationsMessage implements ROS2Message<ArmDesiredAcc
 
    }
 
+   public ArmDesiredAccelerationsMessage(ArmDesiredAccelerationsMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

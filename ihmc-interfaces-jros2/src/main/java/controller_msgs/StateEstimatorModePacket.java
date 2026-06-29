@@ -40,6 +40,12 @@ public class StateEstimatorModePacket implements ROS2Message<StateEstimatorModeP
 
    }
 
+   public StateEstimatorModePacket(StateEstimatorModePacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

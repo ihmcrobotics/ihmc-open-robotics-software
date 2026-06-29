@@ -89,6 +89,12 @@ public class BehaviorTreeYoDataMessage implements ROS2Message<BehaviorTreeYoData
 
    }
 
+   public BehaviorTreeYoDataMessage(BehaviorTreeYoDataMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

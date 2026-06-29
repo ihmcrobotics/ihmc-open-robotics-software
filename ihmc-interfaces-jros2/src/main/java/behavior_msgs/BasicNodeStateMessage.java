@@ -37,6 +37,12 @@ public class BasicNodeStateMessage implements ROS2Message<BasicNodeStateMessage>
 
    }
 
+   public BasicNodeStateMessage(BasicNodeStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

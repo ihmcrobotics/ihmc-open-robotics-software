@@ -61,29 +61,17 @@ public class KinematicsToolboxSnapshotDescription
 
    private static RobotConfigurationData copyRobotConfigurationData(RobotConfigurationData source)
    {
-      if (source == null)
-         return null;
-      RobotConfigurationData copy = new RobotConfigurationData();
-      copy.set(source);
-      return copy;
+      return source == null ? null : new RobotConfigurationData(source);
    }
 
    private static KinematicsToolboxOutputStatus copyIkSolution(KinematicsToolboxOutputStatus source)
    {
-      if (source == null)
-         return null;
-      KinematicsToolboxOutputStatus copy = new KinematicsToolboxOutputStatus();
-      copy.set(source);
-      return copy;
+      return source == null ? null : new KinematicsToolboxOutputStatus(source);
    }
 
    private static KinematicsToolboxPrivilegedConfigurationMessage copyIkPrivilegedConfiguration(KinematicsToolboxPrivilegedConfigurationMessage source)
    {
-      if (source == null)
-         return null;
-      KinematicsToolboxPrivilegedConfigurationMessage copy = new KinematicsToolboxPrivilegedConfigurationMessage();
-      copy.set(source);
-      return copy;
+      return source == null ? null : new KinematicsToolboxPrivilegedConfigurationMessage(source);
    }
 
    public static KinematicsToolboxSnapshotDescription fromJSON(JsonNode node)

@@ -35,6 +35,12 @@ public class TimeIntervalMessage implements ROS2Message<TimeIntervalMessage>
 
    }
 
+   public TimeIntervalMessage(TimeIntervalMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

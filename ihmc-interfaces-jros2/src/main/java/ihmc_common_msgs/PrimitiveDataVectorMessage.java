@@ -54,6 +54,12 @@ public class PrimitiveDataVectorMessage implements ROS2Message<PrimitiveDataVect
 
    }
 
+   public PrimitiveDataVectorMessage(PrimitiveDataVectorMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

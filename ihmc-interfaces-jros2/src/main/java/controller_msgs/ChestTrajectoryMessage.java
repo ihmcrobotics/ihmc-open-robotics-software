@@ -45,6 +45,12 @@ public class ChestTrajectoryMessage implements ROS2Message<ChestTrajectoryMessag
 
    }
 
+   public ChestTrajectoryMessage(ChestTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

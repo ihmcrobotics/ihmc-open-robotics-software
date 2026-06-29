@@ -47,6 +47,12 @@ public class BoundingBox3D implements ROS2Message<BoundingBox3D>
 
    }
 
+   public BoundingBox3D(BoundingBox3D from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

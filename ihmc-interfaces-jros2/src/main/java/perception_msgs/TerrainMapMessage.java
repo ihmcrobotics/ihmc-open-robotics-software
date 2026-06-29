@@ -121,6 +121,12 @@ public class TerrainMapMessage implements ROS2Message<TerrainMapMessage>
 
    }
 
+   public TerrainMapMessage(TerrainMapMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -62,6 +62,12 @@ public class RigidBodyExplorationConfigurationMessage implements ROS2Message<Rig
 
    }
 
+   public RigidBodyExplorationConfigurationMessage(RigidBodyExplorationConfigurationMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

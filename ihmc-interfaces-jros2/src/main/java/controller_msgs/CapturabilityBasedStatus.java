@@ -109,6 +109,12 @@ public class CapturabilityBasedStatus implements ROS2Message<CapturabilityBasedS
 
    }
 
+   public CapturabilityBasedStatus(CapturabilityBasedStatus from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

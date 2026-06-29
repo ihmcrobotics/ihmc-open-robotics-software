@@ -67,6 +67,12 @@ public class HandTrajectoryMessage implements ROS2Message<HandTrajectoryMessage>
 
    }
 
+   public HandTrajectoryMessage(HandTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

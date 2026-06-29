@@ -51,6 +51,12 @@ public class ControllerWalkToGoalStatusMessage implements ROS2Message<Controller
 
    }
 
+   public ControllerWalkToGoalStatusMessage(ControllerWalkToGoalStatusMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

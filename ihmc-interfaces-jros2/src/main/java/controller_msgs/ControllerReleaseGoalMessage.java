@@ -30,6 +30,12 @@ public class ControllerReleaseGoalMessage implements ROS2Message<ControllerRelea
 
    }
 
+   public ControllerReleaseGoalMessage(ControllerReleaseGoalMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

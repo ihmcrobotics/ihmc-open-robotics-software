@@ -62,6 +62,12 @@ public class OneDoFJointTrajectoryMessage implements ROS2Message<OneDoFJointTraj
 
    }
 
+   public OneDoFJointTrajectoryMessage(OneDoFJointTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

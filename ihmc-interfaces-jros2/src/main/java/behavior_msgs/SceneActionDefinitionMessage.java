@@ -125,6 +125,12 @@ public class SceneActionDefinitionMessage implements ROS2Message<SceneActionDefi
 
    }
 
+   public SceneActionDefinitionMessage(SceneActionDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

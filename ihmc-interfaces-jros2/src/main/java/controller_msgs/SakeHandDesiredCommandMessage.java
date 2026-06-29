@@ -108,6 +108,12 @@ public class SakeHandDesiredCommandMessage implements ROS2Message<SakeHandDesire
 
    }
 
+   public SakeHandDesiredCommandMessage(SakeHandDesiredCommandMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -38,6 +38,12 @@ public class GotoNodeStateMessage implements ROS2Message<GotoNodeStateMessage>
 
    }
 
+   public GotoNodeStateMessage(GotoNodeStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

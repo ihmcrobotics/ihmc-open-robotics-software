@@ -30,6 +30,12 @@ public class LongString implements ROS2Message<LongString>
 
    }
 
+   public LongString(LongString from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

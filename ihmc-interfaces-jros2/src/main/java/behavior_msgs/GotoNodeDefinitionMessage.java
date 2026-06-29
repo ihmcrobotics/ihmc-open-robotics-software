@@ -50,6 +50,12 @@ public class GotoNodeDefinitionMessage implements ROS2Message<GotoNodeDefinition
 
    }
 
+   public GotoNodeDefinitionMessage(GotoNodeDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

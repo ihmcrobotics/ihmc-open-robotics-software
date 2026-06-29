@@ -68,6 +68,12 @@ public class WeightMatrix3DMessage implements ROS2Message<WeightMatrix3DMessage>
 
    }
 
+   public WeightMatrix3DMessage(WeightMatrix3DMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

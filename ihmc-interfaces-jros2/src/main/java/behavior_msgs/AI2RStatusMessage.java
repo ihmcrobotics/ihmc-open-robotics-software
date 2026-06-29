@@ -112,6 +112,12 @@ public class AI2RStatusMessage implements ROS2Message<AI2RStatusMessage>
 
    }
 
+   public AI2RStatusMessage(AI2RStatusMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

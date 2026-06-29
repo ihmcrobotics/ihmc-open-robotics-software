@@ -89,6 +89,12 @@ public class SO3TrajectoryMessage implements ROS2Message<SO3TrajectoryMessage>
 
    }
 
+   public SO3TrajectoryMessage(SO3TrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

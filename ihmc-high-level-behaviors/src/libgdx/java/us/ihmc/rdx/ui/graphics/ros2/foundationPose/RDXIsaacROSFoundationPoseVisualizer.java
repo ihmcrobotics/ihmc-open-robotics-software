@@ -141,7 +141,7 @@ public class RDXIsaacROSFoundationPoseVisualizer extends RDXROS2MultiTopicVisual
       private final ROS2Subscription<Box3DMessage> resultSubscription;
       private final Box3D latestResult;
 
-      private final ROS2Subscription<std_msgs.Byte> stateSubscription;
+      private final ROS2Subscription<std_msgs.Byte_> stateSubscription;
       private State state;
 
       private final RDXBoxVisualizer boxVisualizer;
@@ -163,7 +163,7 @@ public class RDXIsaacROSFoundationPoseVisualizer extends RDXROS2MultiTopicVisual
 
          stateSubscription = ros2Node.createSubscription(object.topics.ihmcState(), reader ->
          {
-            std_msgs.Byte stateMessage = reader.read();
+            std_msgs.Byte_ stateMessage = reader.read();
             if (stateMessage != null)
                state = State.fromByte(stateMessage.getData());
          });

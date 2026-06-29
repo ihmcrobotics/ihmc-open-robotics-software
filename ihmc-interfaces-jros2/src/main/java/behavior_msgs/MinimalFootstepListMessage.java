@@ -29,6 +29,12 @@ public class MinimalFootstepListMessage implements ROS2Message<MinimalFootstepLi
 
    }
 
+   public MinimalFootstepListMessage(MinimalFootstepListMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

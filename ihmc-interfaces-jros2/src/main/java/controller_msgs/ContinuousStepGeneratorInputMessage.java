@@ -60,6 +60,12 @@ public class ContinuousStepGeneratorInputMessage implements ROS2Message<Continuo
 
    }
 
+   public ContinuousStepGeneratorInputMessage(ContinuousStepGeneratorInputMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

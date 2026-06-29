@@ -69,6 +69,12 @@ public class LeafNodeStateMessage implements ROS2Message<LeafNodeStateMessage>
 
    }
 
+   public LeafNodeStateMessage(LeafNodeStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

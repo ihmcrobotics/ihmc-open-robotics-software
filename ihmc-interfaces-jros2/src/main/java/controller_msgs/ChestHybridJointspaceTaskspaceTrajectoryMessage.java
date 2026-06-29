@@ -52,6 +52,12 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage implements ROS2Mess
 
    }
 
+   public ChestHybridJointspaceTaskspaceTrajectoryMessage(ChestHybridJointspaceTaskspaceTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

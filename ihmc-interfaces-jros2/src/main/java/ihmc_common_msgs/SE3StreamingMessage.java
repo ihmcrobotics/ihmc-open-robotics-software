@@ -89,6 +89,12 @@ public class SE3StreamingMessage implements ROS2Message<SE3StreamingMessage>
 
    }
 
+   public SE3StreamingMessage(SE3StreamingMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

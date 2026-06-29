@@ -69,6 +69,12 @@ public class SelectionMatrix3DMessage implements ROS2Message<SelectionMatrix3DMe
 
    }
 
+   public SelectionMatrix3DMessage(SelectionMatrix3DMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

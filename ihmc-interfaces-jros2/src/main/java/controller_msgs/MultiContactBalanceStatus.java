@@ -73,6 +73,12 @@ public class MultiContactBalanceStatus implements ROS2Message<MultiContactBalanc
 
    }
 
+   public MultiContactBalanceStatus(MultiContactBalanceStatus from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

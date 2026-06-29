@@ -30,6 +30,12 @@ public class CheckpointNodeDefinitionMessage implements ROS2Message<CheckpointNo
 
    }
 
+   public CheckpointNodeDefinitionMessage(CheckpointNodeDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

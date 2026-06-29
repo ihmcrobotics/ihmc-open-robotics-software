@@ -38,6 +38,12 @@ public class NeckActionStateMessage implements ROS2Message<NeckActionStateMessag
 
    }
 
+   public NeckActionStateMessage(NeckActionStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

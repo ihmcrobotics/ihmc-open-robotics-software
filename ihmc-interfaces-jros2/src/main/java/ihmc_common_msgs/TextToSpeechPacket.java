@@ -58,6 +58,12 @@ public class TextToSpeechPacket implements ROS2Message<TextToSpeechPacket>
 
    }
 
+   public TextToSpeechPacket(TextToSpeechPacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

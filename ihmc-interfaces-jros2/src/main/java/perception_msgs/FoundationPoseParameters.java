@@ -35,6 +35,12 @@ public class FoundationPoseParameters implements ROS2Message<FoundationPoseParam
 
    }
 
+   public FoundationPoseParameters(FoundationPoseParameters from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

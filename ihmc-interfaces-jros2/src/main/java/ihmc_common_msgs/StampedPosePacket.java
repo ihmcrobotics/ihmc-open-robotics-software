@@ -45,6 +45,12 @@ public class StampedPosePacket implements ROS2Message<StampedPosePacket>
 
    }
 
+   public StampedPosePacket(StampedPosePacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

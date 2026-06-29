@@ -40,6 +40,12 @@ public class WalkActionFootstepDefinitionMessage implements ROS2Message<WalkActi
 
    }
 
+   public WalkActionFootstepDefinitionMessage(WalkActionFootstepDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -42,6 +42,12 @@ public class GroundPlaneMessage implements ROS2Message<GroundPlaneMessage>
 
    }
 
+   public GroundPlaneMessage(GroundPlaneMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

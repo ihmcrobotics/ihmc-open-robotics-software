@@ -68,6 +68,12 @@ public class LatestModificationMessage implements ROS2Message<LatestModification
 
    }
 
+   public LatestModificationMessage(LatestModificationMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

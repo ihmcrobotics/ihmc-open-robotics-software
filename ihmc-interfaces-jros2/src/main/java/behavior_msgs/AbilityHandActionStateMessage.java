@@ -54,6 +54,12 @@ public class AbilityHandActionStateMessage implements ROS2Message<AbilityHandAct
 
    }
 
+   public AbilityHandActionStateMessage(AbilityHandActionStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

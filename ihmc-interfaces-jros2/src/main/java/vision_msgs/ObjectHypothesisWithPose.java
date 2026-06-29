@@ -59,6 +59,12 @@ public class ObjectHypothesisWithPose implements ROS2Message<ObjectHypothesisWit
 
    }
 
+   public ObjectHypothesisWithPose(ObjectHypothesisWithPose from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

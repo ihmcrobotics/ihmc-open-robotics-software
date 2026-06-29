@@ -50,6 +50,12 @@ public class VisionClass implements ROS2Message<VisionClass>
 
    }
 
+   public VisionClass(VisionClass from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

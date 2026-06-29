@@ -45,6 +45,12 @@ public class BehaviorTreeLogMessage implements ROS2Message<BehaviorTreeLogMessag
 
    }
 
+   public BehaviorTreeLogMessage(BehaviorTreeLogMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

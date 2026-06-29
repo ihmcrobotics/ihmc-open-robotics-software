@@ -231,6 +231,12 @@ public class FootstepPlanningRequestPacket implements ROS2Message<FootstepPlanni
 
    }
 
+   public FootstepPlanningRequestPacket(FootstepPlanningRequestPacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

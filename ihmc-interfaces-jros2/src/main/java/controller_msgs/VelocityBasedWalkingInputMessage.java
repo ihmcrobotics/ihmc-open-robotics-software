@@ -62,6 +62,12 @@ public class VelocityBasedWalkingInputMessage implements ROS2Message<VelocityBas
 
    }
 
+   public VelocityBasedWalkingInputMessage(VelocityBasedWalkingInputMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -43,6 +43,12 @@ public class IMUPacket implements ROS2Message<IMUPacket>
 
    }
 
+   public IMUPacket(IMUPacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

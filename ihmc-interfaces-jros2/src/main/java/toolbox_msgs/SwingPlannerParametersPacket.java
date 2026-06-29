@@ -238,6 +238,12 @@ public class SwingPlannerParametersPacket implements ROS2Message<SwingPlannerPar
 
    }
 
+   public SwingPlannerParametersPacket(SwingPlannerParametersPacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

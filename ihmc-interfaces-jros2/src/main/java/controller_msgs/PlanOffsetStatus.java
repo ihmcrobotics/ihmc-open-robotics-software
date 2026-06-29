@@ -41,6 +41,12 @@ public class PlanOffsetStatus implements ROS2Message<PlanOffsetStatus>
 
    }
 
+   public PlanOffsetStatus(PlanOffsetStatus from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

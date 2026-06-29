@@ -53,6 +53,12 @@ public class ClearDelayQueueMessage implements ROS2Message<ClearDelayQueueMessag
 
    }
 
+   public ClearDelayQueueMessage(ClearDelayQueueMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -53,6 +53,12 @@ public class FoundationPoseResult implements ROS2Message<FoundationPoseResult>
 
    }
 
+   public FoundationPoseResult(FoundationPoseResult from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

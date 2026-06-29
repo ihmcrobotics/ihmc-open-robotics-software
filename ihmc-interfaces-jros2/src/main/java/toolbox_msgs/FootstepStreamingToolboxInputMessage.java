@@ -76,6 +76,12 @@ public class FootstepStreamingToolboxInputMessage implements ROS2Message<Footste
 
    }
 
+   public FootstepStreamingToolboxInputMessage(FootstepStreamingToolboxInputMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

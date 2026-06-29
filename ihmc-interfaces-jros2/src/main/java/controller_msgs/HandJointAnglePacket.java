@@ -50,6 +50,12 @@ public class HandJointAnglePacket implements ROS2Message<HandJointAnglePacket>
 
    }
 
+   public HandJointAnglePacket(HandJointAnglePacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

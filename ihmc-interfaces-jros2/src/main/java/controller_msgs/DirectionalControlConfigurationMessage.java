@@ -57,6 +57,12 @@ public class DirectionalControlConfigurationMessage implements ROS2Message<Direc
 
    }
 
+   public DirectionalControlConfigurationMessage(DirectionalControlConfigurationMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

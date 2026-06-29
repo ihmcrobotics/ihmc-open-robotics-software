@@ -43,6 +43,12 @@ public class NeckDesiredAccelerationsMessage implements ROS2Message<NeckDesiredA
 
    }
 
+   public NeckDesiredAccelerationsMessage(NeckDesiredAccelerationsMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

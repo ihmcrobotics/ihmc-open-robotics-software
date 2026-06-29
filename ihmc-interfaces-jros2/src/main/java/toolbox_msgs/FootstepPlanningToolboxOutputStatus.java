@@ -151,6 +151,12 @@ public class FootstepPlanningToolboxOutputStatus implements ROS2Message<Footstep
 
    }
 
+   public FootstepPlanningToolboxOutputStatus(FootstepPlanningToolboxOutputStatus from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

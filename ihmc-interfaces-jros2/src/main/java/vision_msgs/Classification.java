@@ -54,6 +54,12 @@ public class Classification implements ROS2Message<Classification>
 
    }
 
+   public Classification(Classification from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

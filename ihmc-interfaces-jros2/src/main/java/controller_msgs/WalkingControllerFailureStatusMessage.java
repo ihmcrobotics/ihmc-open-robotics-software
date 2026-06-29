@@ -41,6 +41,12 @@ public class WalkingControllerFailureStatusMessage implements ROS2Message<Walkin
 
    }
 
+   public WalkingControllerFailureStatusMessage(WalkingControllerFailureStatusMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

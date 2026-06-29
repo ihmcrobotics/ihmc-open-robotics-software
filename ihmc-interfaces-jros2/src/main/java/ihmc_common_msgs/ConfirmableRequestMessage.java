@@ -48,6 +48,12 @@ public class ConfirmableRequestMessage implements ROS2Message<ConfirmableRequest
 
    }
 
+   public ConfirmableRequestMessage(ConfirmableRequestMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

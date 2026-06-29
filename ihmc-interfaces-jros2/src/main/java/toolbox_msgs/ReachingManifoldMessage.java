@@ -67,6 +67,12 @@ public class ReachingManifoldMessage implements ROS2Message<ReachingManifoldMess
 
    }
 
+   public ReachingManifoldMessage(ReachingManifoldMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

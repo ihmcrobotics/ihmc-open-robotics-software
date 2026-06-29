@@ -140,6 +140,12 @@ public class WholeBodyTrajectoryMessage implements ROS2Message<WholeBodyTrajecto
 
    }
 
+   public WholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

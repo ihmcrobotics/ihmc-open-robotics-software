@@ -40,6 +40,12 @@ public class InstantMessage implements ROS2Message<InstantMessage>
    {
    }
 
+   public InstantMessage(InstantMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

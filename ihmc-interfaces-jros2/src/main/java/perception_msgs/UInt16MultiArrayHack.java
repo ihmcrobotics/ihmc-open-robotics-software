@@ -35,6 +35,12 @@ public class UInt16MultiArrayHack implements ROS2Message<UInt16MultiArrayHack>
 
    }
 
+   public UInt16MultiArrayHack(UInt16MultiArrayHack from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

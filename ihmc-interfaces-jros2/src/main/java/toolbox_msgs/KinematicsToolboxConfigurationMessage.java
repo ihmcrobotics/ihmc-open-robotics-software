@@ -150,6 +150,12 @@ public class KinematicsToolboxConfigurationMessage implements ROS2Message<Kinema
 
    }
 
+   public KinematicsToolboxConfigurationMessage(KinematicsToolboxConfigurationMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

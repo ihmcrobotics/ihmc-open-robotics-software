@@ -53,6 +53,12 @@ public class AI2RHandPoseAdaptationMessage implements ROS2Message<AI2RHandPoseAd
 
    }
 
+   public AI2RHandPoseAdaptationMessage(AI2RHandPoseAdaptationMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

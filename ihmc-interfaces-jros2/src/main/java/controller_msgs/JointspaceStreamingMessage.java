@@ -36,6 +36,12 @@ public class JointspaceStreamingMessage implements ROS2Message<JointspaceStreami
 
    }
 
+   public JointspaceStreamingMessage(JointspaceStreamingMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

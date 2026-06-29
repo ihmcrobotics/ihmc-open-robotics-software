@@ -48,6 +48,12 @@ public class MomentumTrajectoryMessage implements ROS2Message<MomentumTrajectory
 
    }
 
+   public MomentumTrajectoryMessage(MomentumTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

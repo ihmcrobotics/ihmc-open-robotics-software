@@ -41,6 +41,12 @@ public class Box3DMessage implements ROS2Message<Box3DMessage>
 
    }
 
+   public Box3DMessage(Box3DMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -56,6 +56,12 @@ public class VideoFrameExtraData implements ROS2Message<VideoFrameExtraData>
 
    }
 
+   public VideoFrameExtraData(VideoFrameExtraData from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

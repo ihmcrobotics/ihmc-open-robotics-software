@@ -58,6 +58,12 @@ public class RobotFrameData implements ROS2Message<RobotFrameData>
 
    }
 
+   public RobotFrameData(RobotFrameData from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

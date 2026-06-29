@@ -38,6 +38,12 @@ public class SceneActionStateMessage implements ROS2Message<SceneActionStateMess
 
    }
 
+   public SceneActionStateMessage(SceneActionStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

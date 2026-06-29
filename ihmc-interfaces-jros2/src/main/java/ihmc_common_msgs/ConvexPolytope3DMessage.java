@@ -32,6 +32,12 @@ public class ConvexPolytope3DMessage implements ROS2Message<ConvexPolytope3DMess
 
    }
 
+   public ConvexPolytope3DMessage(ConvexPolytope3DMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

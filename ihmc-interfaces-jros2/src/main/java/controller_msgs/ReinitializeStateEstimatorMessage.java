@@ -30,6 +30,12 @@ public class ReinitializeStateEstimatorMessage implements ROS2Message<Reinitiali
 
    }
 
+   public ReinitializeStateEstimatorMessage(ReinitializeStateEstimatorMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

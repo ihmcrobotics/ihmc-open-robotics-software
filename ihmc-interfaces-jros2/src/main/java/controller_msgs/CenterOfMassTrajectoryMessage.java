@@ -41,6 +41,12 @@ public class CenterOfMassTrajectoryMessage implements ROS2Message<CenterOfMassTr
 
    }
 
+   public CenterOfMassTrajectoryMessage(CenterOfMassTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

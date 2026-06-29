@@ -75,6 +75,12 @@ public class GoHomeMessage implements ROS2Message<GoHomeMessage>
 
    }
 
+   public GoHomeMessage(GoHomeMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

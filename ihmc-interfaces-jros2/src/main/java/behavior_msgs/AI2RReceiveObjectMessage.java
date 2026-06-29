@@ -44,6 +44,12 @@ public class AI2RReceiveObjectMessage implements ROS2Message<AI2RReceiveObjectMe
 
    }
 
+   public AI2RReceiveObjectMessage(AI2RReceiveObjectMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

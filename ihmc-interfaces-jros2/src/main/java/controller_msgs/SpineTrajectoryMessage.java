@@ -43,6 +43,12 @@ public class SpineTrajectoryMessage implements ROS2Message<SpineTrajectoryMessag
 
    }
 
+   public SpineTrajectoryMessage(SpineTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

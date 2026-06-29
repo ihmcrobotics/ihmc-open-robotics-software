@@ -43,6 +43,12 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage implements ROS2Messa
 
    }
 
+   public WholeBodyTrajectoryToolboxConfigurationMessage(WholeBodyTrajectoryToolboxConfigurationMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

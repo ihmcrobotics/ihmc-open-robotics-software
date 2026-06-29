@@ -81,6 +81,12 @@ public class ChunkMessage implements ROS2Message<ChunkMessage>
 
    }
 
+   public ChunkMessage(ChunkMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

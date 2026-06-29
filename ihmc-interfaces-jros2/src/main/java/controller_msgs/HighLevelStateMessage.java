@@ -71,6 +71,12 @@ public class HighLevelStateMessage implements ROS2Message<HighLevelStateMessage>
 
    }
 
+   public HighLevelStateMessage(HighLevelStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

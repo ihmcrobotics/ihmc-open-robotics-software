@@ -68,6 +68,12 @@ public class SO3StreamingMessage implements ROS2Message<SO3StreamingMessage>
 
    }
 
+   public SO3StreamingMessage(SO3StreamingMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

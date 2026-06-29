@@ -30,6 +30,12 @@ public class DoorTraversalDefinitionMessage implements ROS2Message<DoorTraversal
 
    }
 
+   public DoorTraversalDefinitionMessage(DoorTraversalDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

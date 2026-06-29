@@ -36,6 +36,12 @@ public class Float32MultiArrayHack implements ROS2Message<Float32MultiArrayHack>
 
    }
 
+   public Float32MultiArrayHack(Float32MultiArrayHack from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

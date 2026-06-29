@@ -285,6 +285,12 @@ public class ConditionNodeDefinitionMessage implements ROS2Message<ConditionNode
 
    }
 
+   public ConditionNodeDefinitionMessage(ConditionNodeDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -52,6 +52,12 @@ public class ToolboxStateMessage implements ROS2Message<ToolboxStateMessage>
 
    }
 
+   public ToolboxStateMessage(ToolboxStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

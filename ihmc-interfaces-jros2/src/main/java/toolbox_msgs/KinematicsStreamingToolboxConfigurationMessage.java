@@ -218,6 +218,12 @@ public class KinematicsStreamingToolboxConfigurationMessage implements ROS2Messa
 
    }
 
+   public KinematicsStreamingToolboxConfigurationMessage(KinematicsStreamingToolboxConfigurationMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

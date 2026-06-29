@@ -172,6 +172,12 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
 
    }
 
+   public KinematicsToolboxOutputStatus(KinematicsToolboxOutputStatus from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

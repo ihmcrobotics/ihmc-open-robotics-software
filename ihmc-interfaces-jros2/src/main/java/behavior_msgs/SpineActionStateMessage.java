@@ -46,6 +46,12 @@ public class SpineActionStateMessage implements ROS2Message<SpineActionStateMess
 
    }
 
+   public SpineActionStateMessage(SpineActionStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -125,6 +125,12 @@ public class KinematicsToolboxPrivilegedConfigurationMessage implements ROS2Mess
 
    }
 
+   public KinematicsToolboxPrivilegedConfigurationMessage(KinematicsToolboxPrivilegedConfigurationMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

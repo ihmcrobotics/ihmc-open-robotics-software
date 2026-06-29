@@ -41,6 +41,12 @@ public class YOLOv8ModelInfo implements ROS2Message<YOLOv8ModelInfo>
 
    }
 
+   public YOLOv8ModelInfo(YOLOv8ModelInfo from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -42,8 +42,7 @@ public class FootstepQueueAcceptanceFunction implements BiFunction<FootstepQueue
 
    private static boolean queuedFootstepsEqual(QueuedFootstepStatusMessage previous, QueuedFootstepStatusMessage current)
    {
-      QueuedFootstepStatusMessage temp = new QueuedFootstepStatusMessage();
-      temp.set(previous);
+      QueuedFootstepStatusMessage temp = new QueuedFootstepStatusMessage(previous);
       return temp.getRobotSide() == current.getRobotSide()
           && Math.abs(temp.getSwingDuration() - current.getSwingDuration()) < 1e-3
           && Math.abs(temp.getTransferDuration() - current.getTransferDuration()) < 1e-3;

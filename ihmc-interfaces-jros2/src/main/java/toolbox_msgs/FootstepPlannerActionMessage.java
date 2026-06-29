@@ -41,6 +41,12 @@ public class FootstepPlannerActionMessage implements ROS2Message<FootstepPlanner
 
    }
 
+   public FootstepPlannerActionMessage(FootstepPlannerActionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

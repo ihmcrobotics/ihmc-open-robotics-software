@@ -78,6 +78,12 @@ public class HeightMapMessageForController implements ROS2Message<HeightMapMessa
 
    }
 
+   public HeightMapMessageForController(HeightMapMessageForController from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

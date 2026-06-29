@@ -111,6 +111,12 @@ public class AbilityHandActionDefinitionMessage implements ROS2Message<AbilityHa
 
    }
 
+   public AbilityHandActionDefinitionMessage(AbilityHandActionDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

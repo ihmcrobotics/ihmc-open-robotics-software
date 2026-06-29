@@ -179,6 +179,12 @@ public class AStarBodyPathPlannerParametersPacket implements ROS2Message<AStarBo
 
    }
 
+   public AStarBodyPathPlannerParametersPacket(AStarBodyPathPlannerParametersPacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

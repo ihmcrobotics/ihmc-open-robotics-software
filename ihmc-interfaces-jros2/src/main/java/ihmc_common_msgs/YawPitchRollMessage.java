@@ -48,6 +48,12 @@ public class YawPitchRollMessage implements ROS2Message<YawPitchRollMessage>
    {
    }
 
+   public YawPitchRollMessage(YawPitchRollMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

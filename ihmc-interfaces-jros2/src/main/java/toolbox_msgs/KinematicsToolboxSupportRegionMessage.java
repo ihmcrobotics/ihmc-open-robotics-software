@@ -67,6 +67,12 @@ public class KinematicsToolboxSupportRegionMessage implements ROS2Message<Kinema
 
    }
 
+   public KinematicsToolboxSupportRegionMessage(KinematicsToolboxSupportRegionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

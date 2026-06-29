@@ -54,6 +54,12 @@ public class Cylinder3DMessage implements ROS2Message<Cylinder3DMessage>
 
    }
 
+   public Cylinder3DMessage(Cylinder3DMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

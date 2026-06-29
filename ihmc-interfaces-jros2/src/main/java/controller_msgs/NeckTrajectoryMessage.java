@@ -43,6 +43,12 @@ public class NeckTrajectoryMessage implements ROS2Message<NeckTrajectoryMessage>
 
    }
 
+   public NeckTrajectoryMessage(NeckTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

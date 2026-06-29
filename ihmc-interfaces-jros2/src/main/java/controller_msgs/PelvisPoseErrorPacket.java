@@ -39,6 +39,12 @@ public class PelvisPoseErrorPacket implements ROS2Message<PelvisPoseErrorPacket>
 
    }
 
+   public PelvisPoseErrorPacket(PelvisPoseErrorPacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

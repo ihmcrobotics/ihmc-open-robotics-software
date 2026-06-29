@@ -64,6 +64,12 @@ public class ExternalForceEstimationOutputStatus implements ROS2Message<External
 
    }
 
+   public ExternalForceEstimationOutputStatus(ExternalForceEstimationOutputStatus from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

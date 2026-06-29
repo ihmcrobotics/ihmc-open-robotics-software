@@ -92,6 +92,12 @@ public class AI2RActionFailureMessage implements ROS2Message<AI2RActionFailureMe
 
    }
 
+   public AI2RActionFailureMessage(AI2RActionFailureMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

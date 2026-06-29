@@ -37,6 +37,12 @@ public class FallbackNodeStateMessage implements ROS2Message<FallbackNodeStateMe
 
    }
 
+   public FallbackNodeStateMessage(FallbackNodeStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

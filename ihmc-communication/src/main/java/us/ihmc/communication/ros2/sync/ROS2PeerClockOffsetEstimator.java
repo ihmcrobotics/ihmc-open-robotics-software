@@ -76,8 +76,7 @@ public class ROS2PeerClockOffsetEstimator
 
             addPeerIfAbsent(receivedReplyTarget);
 
-            PeerClockOffsetEstimatorPingMessage replyMessage = new PeerClockOffsetEstimatorPingMessage();
-            replyMessage.set(receivedMessage);
+            PeerClockOffsetEstimatorPingMessage replyMessage = new PeerClockOffsetEstimatorPingMessage(receivedMessage);
             replyMessage.setIsRequest(false);
             MessageTools.toMessage(Instant.now(), replyMessage.getReplySendTime());
 

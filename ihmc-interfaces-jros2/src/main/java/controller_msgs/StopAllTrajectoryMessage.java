@@ -33,6 +33,12 @@ public class StopAllTrajectoryMessage implements ROS2Message<StopAllTrajectoryMe
    {
    }
 
+   public StopAllTrajectoryMessage(StopAllTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

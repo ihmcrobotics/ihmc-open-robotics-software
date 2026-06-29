@@ -42,8 +42,7 @@ public class FootstepDataListCorruptor
    
    public FootstepDataMessage corruptFootstepData(FootstepDataMessage footstepData)
    {
-      FootstepDataMessage ret = new FootstepDataMessage();
-      ret.set(footstepData);
+      FootstepDataMessage ret = new FootstepDataMessage(footstepData);
       
       Point3D location = new Point3D(ret.getLocation().getPoint());
       Quaternion orientation = new Quaternion(ret.getOrientation().getQuaternion());

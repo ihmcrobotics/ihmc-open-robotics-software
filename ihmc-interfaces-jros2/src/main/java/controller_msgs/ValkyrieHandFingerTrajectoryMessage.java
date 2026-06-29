@@ -74,6 +74,12 @@ public class ValkyrieHandFingerTrajectoryMessage implements ROS2Message<Valkyrie
 
    }
 
+   public ValkyrieHandFingerTrajectoryMessage(ValkyrieHandFingerTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

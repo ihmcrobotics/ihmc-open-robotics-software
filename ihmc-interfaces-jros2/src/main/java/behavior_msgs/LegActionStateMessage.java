@@ -37,6 +37,12 @@ public class LegActionStateMessage implements ROS2Message<LegActionStateMessage>
 
    }
 
+   public LegActionStateMessage(LegActionStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -78,6 +78,12 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
 
    }
 
+   public ControllerWaypointGoalMessage(ControllerWaypointGoalMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

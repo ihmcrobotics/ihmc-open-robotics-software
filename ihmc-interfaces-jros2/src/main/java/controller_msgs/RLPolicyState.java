@@ -41,6 +41,12 @@ public class RLPolicyState implements ROS2Message<RLPolicyState>
 
    }
 
+   public RLPolicyState(RLPolicyState from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

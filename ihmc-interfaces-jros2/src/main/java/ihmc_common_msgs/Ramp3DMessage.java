@@ -41,6 +41,12 @@ public class Ramp3DMessage implements ROS2Message<Ramp3DMessage>
 
    }
 
+   public Ramp3DMessage(Ramp3DMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

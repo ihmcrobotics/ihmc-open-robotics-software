@@ -38,6 +38,12 @@ public class LocalizationPacket implements ROS2Message<LocalizationPacket>
 
    }
 
+   public LocalizationPacket(LocalizationPacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

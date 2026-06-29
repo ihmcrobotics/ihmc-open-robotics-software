@@ -54,6 +54,12 @@ public class Capsule3DMessage implements ROS2Message<Capsule3DMessage>
 
    }
 
+   public Capsule3DMessage(Capsule3DMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

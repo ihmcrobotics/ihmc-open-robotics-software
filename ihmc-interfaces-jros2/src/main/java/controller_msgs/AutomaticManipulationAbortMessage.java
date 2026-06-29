@@ -39,6 +39,12 @@ public class AutomaticManipulationAbortMessage implements ROS2Message<AutomaticM
 
    }
 
+   public AutomaticManipulationAbortMessage(AutomaticManipulationAbortMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

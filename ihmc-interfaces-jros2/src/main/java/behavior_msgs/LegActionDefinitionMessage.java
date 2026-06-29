@@ -61,6 +61,12 @@ public class LegActionDefinitionMessage implements ROS2Message<LegActionDefiniti
 
    }
 
+   public LegActionDefinitionMessage(LegActionDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

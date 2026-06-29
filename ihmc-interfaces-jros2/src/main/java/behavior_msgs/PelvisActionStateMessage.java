@@ -38,6 +38,12 @@ public class PelvisActionStateMessage implements ROS2Message<PelvisActionStateMe
 
    }
 
+   public PelvisActionStateMessage(PelvisActionStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

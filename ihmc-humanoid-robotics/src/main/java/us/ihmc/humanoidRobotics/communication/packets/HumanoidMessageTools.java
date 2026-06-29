@@ -137,8 +137,7 @@ public class HumanoidMessageTools
    public static ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide robotSide, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
       ArmTrajectoryMessage message = new ArmTrajectoryMessage();
-      JointspaceTrajectoryMessage copy = new JointspaceTrajectoryMessage();
-      copy.set(jointspaceTrajectoryMessage);
+      JointspaceTrajectoryMessage copy = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
       message.getJointspaceTrajectory().set(copy);
       message.setRobotSide(robotSide.toByte());
       return message;
@@ -1953,8 +1952,7 @@ public class HumanoidMessageTools
    public static LegTrajectoryMessage createLegTrajectoryMessage(RobotSide robotSide, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
       LegTrajectoryMessage message = new LegTrajectoryMessage();
-      JointspaceTrajectoryMessage copy = new JointspaceTrajectoryMessage();
-      copy.set(jointspaceTrajectoryMessage);
+      JointspaceTrajectoryMessage copy = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
       message.getJointspaceTrajectory().set(copy);
       message.setRobotSide(robotSide.toByte());
       return message;

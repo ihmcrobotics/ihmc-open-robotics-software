@@ -49,6 +49,12 @@ public class KinematicsStreamingToolboxContactConfigurationMessage implements RO
 
    }
 
+   public KinematicsStreamingToolboxContactConfigurationMessage(KinematicsStreamingToolboxContactConfigurationMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

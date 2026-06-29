@@ -67,6 +67,12 @@ public class PeerClockOffsetEstimatorPingMessage implements ROS2Message<PeerCloc
 
    }
 
+   public PeerClockOffsetEstimatorPingMessage(PeerClockOffsetEstimatorPingMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

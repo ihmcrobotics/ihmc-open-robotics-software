@@ -49,6 +49,12 @@ public class AI2RCommandMessage implements ROS2Message<AI2RCommandMessage>
 
    }
 
+   public AI2RCommandMessage(AI2RCommandMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

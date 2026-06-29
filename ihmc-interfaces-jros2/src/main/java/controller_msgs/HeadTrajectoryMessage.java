@@ -45,6 +45,12 @@ public class HeadTrajectoryMessage implements ROS2Message<HeadTrajectoryMessage>
 
    }
 
+   public HeadTrajectoryMessage(HeadTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

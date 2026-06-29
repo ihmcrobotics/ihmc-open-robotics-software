@@ -60,6 +60,12 @@ public class SwingPlanningRequestPacket implements ROS2Message<SwingPlanningRequ
 
    }
 
+   public SwingPlanningRequestPacket(SwingPlanningRequestPacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

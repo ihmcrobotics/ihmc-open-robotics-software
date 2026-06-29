@@ -65,6 +65,12 @@ public class FootstepPlanningTimingsMessage implements ROS2Message<FootstepPlann
    {
    }
 
+   public FootstepPlanningTimingsMessage(FootstepPlanningTimingsMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

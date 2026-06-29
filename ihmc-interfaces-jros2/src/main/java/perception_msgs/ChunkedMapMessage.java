@@ -29,6 +29,12 @@ public class ChunkedMapMessage implements ROS2Message<ChunkedMapMessage>
 
    }
 
+   public ChunkedMapMessage(ChunkedMapMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

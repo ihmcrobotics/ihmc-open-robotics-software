@@ -79,6 +79,12 @@ public class QueuedFootstepStatusMessage implements ROS2Message<QueuedFootstepSt
 
    }
 
+   public QueuedFootstepStatusMessage(QueuedFootstepStatusMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -64,6 +64,12 @@ public class ControllerWaypointStatusMessage implements ROS2Message<ControllerWa
 
    }
 
+   public ControllerWaypointStatusMessage(ControllerWaypointStatusMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

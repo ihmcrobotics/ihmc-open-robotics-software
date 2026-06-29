@@ -40,6 +40,12 @@ public class AI2RNodeDefinitionMessage implements ROS2Message<AI2RNodeDefinition
 
    }
 
+   public AI2RNodeDefinitionMessage(AI2RNodeDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

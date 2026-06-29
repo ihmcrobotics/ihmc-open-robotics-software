@@ -45,6 +45,12 @@ public class BehaviorTreeNodeStateMessage implements ROS2Message<BehaviorTreeNod
 
    }
 
+   public BehaviorTreeNodeStateMessage(BehaviorTreeNodeStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

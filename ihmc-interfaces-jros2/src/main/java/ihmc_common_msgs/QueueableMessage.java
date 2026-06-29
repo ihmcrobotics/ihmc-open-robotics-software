@@ -121,6 +121,12 @@ public class QueueableMessage implements ROS2Message<QueueableMessage>
 
    }
 
+   public QueueableMessage(QueueableMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

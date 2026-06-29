@@ -54,6 +54,12 @@ public class IntrinsicParametersMessage implements ROS2Message<IntrinsicParamete
 
    }
 
+   public IntrinsicParametersMessage(IntrinsicParametersMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -35,6 +35,12 @@ public class RequestWristForceSensorCalibrationPacket implements ROS2Message<Req
    {
    }
 
+   public RequestWristForceSensorCalibrationPacket(RequestWristForceSensorCalibrationPacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -41,6 +41,12 @@ public class Point2DMessage implements ROS2Message<Point2DMessage>
    {
    }
 
+   public Point2DMessage(Point2DMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

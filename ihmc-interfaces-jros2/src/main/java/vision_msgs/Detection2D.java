@@ -70,6 +70,12 @@ public class Detection2D implements ROS2Message<Detection2D>
 
    }
 
+   public Detection2D(Detection2D from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

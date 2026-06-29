@@ -50,6 +50,12 @@ public class ObjectHypothesis implements ROS2Message<ObjectHypothesis>
 
    }
 
+   public ObjectHypothesis(ObjectHypothesis from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

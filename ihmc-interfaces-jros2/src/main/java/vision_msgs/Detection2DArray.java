@@ -39,6 +39,12 @@ public class Detection2DArray implements ROS2Message<Detection2DArray>
 
    }
 
+   public Detection2DArray(Detection2DArray from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -57,6 +57,12 @@ public class FootTrajectoryMessage implements ROS2Message<FootTrajectoryMessage>
 
    }
 
+   public FootTrajectoryMessage(FootTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

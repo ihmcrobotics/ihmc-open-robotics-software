@@ -43,6 +43,12 @@ public class BipedalSupportPlanarRegionParametersMessage implements ROS2Message<
 
    }
 
+   public BipedalSupportPlanarRegionParametersMessage(BipedalSupportPlanarRegionParametersMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

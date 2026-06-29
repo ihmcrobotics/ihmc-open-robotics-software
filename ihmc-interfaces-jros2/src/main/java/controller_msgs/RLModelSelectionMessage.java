@@ -34,6 +34,12 @@ public class RLModelSelectionMessage implements ROS2Message<RLModelSelectionMess
 
    }
 
+   public RLModelSelectionMessage(RLModelSelectionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

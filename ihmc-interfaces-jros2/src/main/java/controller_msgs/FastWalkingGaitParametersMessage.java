@@ -30,6 +30,12 @@ public class FastWalkingGaitParametersMessage implements ROS2Message<FastWalking
    {
    }
 
+   public FastWalkingGaitParametersMessage(FastWalkingGaitParametersMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -57,6 +57,12 @@ public class ControllerCrashNotificationPacket implements ROS2Message<Controller
 
    }
 
+   public ControllerCrashNotificationPacket(ControllerCrashNotificationPacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -65,6 +65,12 @@ public class PlanarRegionMessage implements ROS2Message<PlanarRegionMessage>
 
    }
 
+   public PlanarRegionMessage(PlanarRegionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

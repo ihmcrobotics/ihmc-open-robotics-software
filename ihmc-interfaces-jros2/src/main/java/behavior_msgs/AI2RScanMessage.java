@@ -25,6 +25,12 @@ public class AI2RScanMessage implements ROS2Message<AI2RScanMessage>
 
    }
 
+   public AI2RScanMessage(AI2RScanMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -50,6 +50,12 @@ public class KinematicsStreamingToolboxInitialConfigurationMessage implements RO
 
    }
 
+   public KinematicsStreamingToolboxInitialConfigurationMessage(KinematicsStreamingToolboxInitialConfigurationMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

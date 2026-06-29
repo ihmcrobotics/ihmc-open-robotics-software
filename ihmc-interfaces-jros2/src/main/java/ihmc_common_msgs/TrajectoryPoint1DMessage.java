@@ -59,6 +59,12 @@ public class TrajectoryPoint1DMessage implements ROS2Message<TrajectoryPoint1DMe
    {
    }
 
+   public TrajectoryPoint1DMessage(TrajectoryPoint1DMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

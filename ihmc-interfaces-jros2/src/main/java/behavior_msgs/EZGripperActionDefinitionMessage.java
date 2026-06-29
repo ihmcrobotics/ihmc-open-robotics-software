@@ -65,6 +65,12 @@ public class EZGripperActionDefinitionMessage implements ROS2Message<EZGripperAc
 
    }
 
+   public EZGripperActionDefinitionMessage(EZGripperActionDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

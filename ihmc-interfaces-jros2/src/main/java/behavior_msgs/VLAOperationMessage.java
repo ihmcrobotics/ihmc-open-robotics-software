@@ -86,6 +86,12 @@ public class VLAOperationMessage implements ROS2Message<VLAOperationMessage>
 
    }
 
+   public VLAOperationMessage(VLAOperationMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

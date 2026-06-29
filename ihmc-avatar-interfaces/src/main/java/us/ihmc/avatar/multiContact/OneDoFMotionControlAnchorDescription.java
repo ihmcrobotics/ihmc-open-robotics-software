@@ -30,8 +30,7 @@ public class OneDoFMotionControlAnchorDescription
    {
       jointName = other.jointName;
       isTrackingController = other.isTrackingController;
-      inputMessage = new KinematicsToolboxOneDoFJointMessage();
-      inputMessage.set(other.inputMessage);
+      inputMessage = new KinematicsToolboxOneDoFJointMessage(other.inputMessage);
    }
 
    public static OneDoFMotionControlAnchorDescription fromJSON(JsonNode node)

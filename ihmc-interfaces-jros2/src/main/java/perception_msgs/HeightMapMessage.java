@@ -77,6 +77,12 @@ public class HeightMapMessage implements ROS2Message<HeightMapMessage>
 
    }
 
+   public HeightMapMessage(HeightMapMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -38,6 +38,12 @@ public class MimicActionStateMessage implements ROS2Message<MimicActionStateMess
 
    }
 
+   public MimicActionStateMessage(MimicActionStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

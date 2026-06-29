@@ -144,6 +144,12 @@ public class ContinuousHikingCommandMessage implements ROS2Message<ContinuousHik
 
    }
 
+   public ContinuousHikingCommandMessage(ContinuousHikingCommandMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

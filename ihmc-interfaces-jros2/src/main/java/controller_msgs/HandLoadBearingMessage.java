@@ -80,6 +80,12 @@ public class HandLoadBearingMessage implements ROS2Message<HandLoadBearingMessag
 
    }
 
+   public HandLoadBearingMessage(HandLoadBearingMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

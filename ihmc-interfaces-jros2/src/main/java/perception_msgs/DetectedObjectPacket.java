@@ -107,6 +107,12 @@ public class DetectedObjectPacket implements ROS2Message<DetectedObjectPacket>
 
    }
 
+   public DetectedObjectPacket(DetectedObjectPacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

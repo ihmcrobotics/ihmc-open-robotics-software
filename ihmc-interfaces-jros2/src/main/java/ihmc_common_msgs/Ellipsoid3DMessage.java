@@ -40,6 +40,12 @@ public class Ellipsoid3DMessage implements ROS2Message<Ellipsoid3DMessage>
 
    }
 
+   public Ellipsoid3DMessage(Ellipsoid3DMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

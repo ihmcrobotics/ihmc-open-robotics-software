@@ -40,6 +40,12 @@ public class SystemServiceActionMessage implements ROS2Message<SystemServiceActi
 
    }
 
+   public SystemServiceActionMessage(SystemServiceActionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -198,6 +198,12 @@ public class KinematicsToolboxRigidBodyMessage implements ROS2Message<Kinematics
 
    }
 
+   public KinematicsToolboxRigidBodyMessage(KinematicsToolboxRigidBodyMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

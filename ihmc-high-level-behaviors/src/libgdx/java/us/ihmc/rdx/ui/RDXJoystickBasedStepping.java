@@ -360,8 +360,7 @@ public class RDXJoystickBasedStepping
       }
 
       footstepPlanGraphic.generateMeshesAsync(minimalFootsteps);
-      FootstepDataListMessage footstepsToSend = new FootstepDataListMessage();
-      footstepsToSend.set(footstepDataListMessage);
+      FootstepDataListMessage footstepsToSend = new FootstepDataListMessage(footstepDataListMessage);
       footstepsToSendReference.set(footstepsToSend);
    }
 

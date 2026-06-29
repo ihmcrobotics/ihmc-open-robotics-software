@@ -53,6 +53,12 @@ public class YOLOv8ExecutorParameters implements ROS2Message<YOLOv8ExecutorParam
 
    }
 
+   public YOLOv8ExecutorParameters(YOLOv8ExecutorParameters from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

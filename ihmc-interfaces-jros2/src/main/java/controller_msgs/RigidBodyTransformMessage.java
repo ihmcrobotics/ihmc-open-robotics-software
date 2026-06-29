@@ -106,6 +106,12 @@ public class RigidBodyTransformMessage implements ROS2Message<RigidBodyTransform
    {
    }
 
+   public RigidBodyTransformMessage(RigidBodyTransformMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

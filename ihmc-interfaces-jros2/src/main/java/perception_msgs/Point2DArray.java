@@ -30,6 +30,12 @@ public class Point2DArray implements ROS2Message<Point2DArray>
 
    }
 
+   public Point2DArray(Point2DArray from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

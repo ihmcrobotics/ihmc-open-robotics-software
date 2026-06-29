@@ -79,6 +79,12 @@ public class KinematicsPlanningToolboxCenterOfMassMessage implements ROS2Message
 
    }
 
+   public KinematicsPlanningToolboxCenterOfMassMessage(KinematicsPlanningToolboxCenterOfMassMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

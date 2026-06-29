@@ -55,6 +55,12 @@ public class PrepareForLocomotionMessage implements ROS2Message<PrepareForLocomo
 
    }
 
+   public PrepareForLocomotionMessage(PrepareForLocomotionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

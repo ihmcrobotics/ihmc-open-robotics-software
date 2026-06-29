@@ -29,6 +29,12 @@ public class BoundingBox2DArray implements ROS2Message<BoundingBox2DArray>
 
    }
 
+   public BoundingBox2DArray(BoundingBox2DArray from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -86,6 +86,12 @@ public class PersistentDetectionStatusMessage implements ROS2Message<PersistentD
 
    }
 
+   public PersistentDetectionStatusMessage(PersistentDetectionStatusMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

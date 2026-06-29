@@ -36,6 +36,12 @@ public class ArUcoMarkerPoses implements ROS2Message<ArUcoMarkerPoses>
 
    }
 
+   public ArUcoMarkerPoses(ArUcoMarkerPoses from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

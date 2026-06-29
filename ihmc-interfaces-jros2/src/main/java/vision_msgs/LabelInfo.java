@@ -78,6 +78,12 @@ public class LabelInfo implements ROS2Message<LabelInfo>
 
    }
 
+   public LabelInfo(LabelInfo from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -38,6 +38,12 @@ public class InvalidPacketNotificationPacket implements ROS2Message<InvalidPacke
 
    }
 
+   public InvalidPacketNotificationPacket(InvalidPacketNotificationPacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

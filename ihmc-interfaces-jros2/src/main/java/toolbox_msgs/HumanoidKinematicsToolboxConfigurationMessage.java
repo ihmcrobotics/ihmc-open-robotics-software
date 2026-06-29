@@ -93,6 +93,12 @@ public class HumanoidKinematicsToolboxConfigurationMessage implements ROS2Messag
 
    }
 
+   public HumanoidKinematicsToolboxConfigurationMessage(HumanoidKinematicsToolboxConfigurationMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

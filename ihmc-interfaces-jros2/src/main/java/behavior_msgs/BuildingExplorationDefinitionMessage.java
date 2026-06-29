@@ -30,6 +30,12 @@ public class BuildingExplorationDefinitionMessage implements ROS2Message<Buildin
 
    }
 
+   public BuildingExplorationDefinitionMessage(BuildingExplorationDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

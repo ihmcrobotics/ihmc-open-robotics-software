@@ -82,8 +82,7 @@ public class ROS2TFTree
          TransformStamped recordedTransform = transforms.get(receivedMessage.getChildFrameId());
          if (recordedTransform == null)
          {
-            recordedTransform = new TransformStamped();
-            recordedTransform.set(receivedMessage);
+            recordedTransform = new TransformStamped(receivedMessage);
             transforms.put(recordedTransform.getChildFrameId(), recordedTransform);
          }
          else if (MessageTools.compareTime(recordedTransform.getHeader().getStamp(), receivedMessage.getHeader().getStamp()) < 0)

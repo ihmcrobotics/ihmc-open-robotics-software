@@ -51,6 +51,12 @@ public class PauseWalkingMessage implements ROS2Message<PauseWalkingMessage>
 
    }
 
+   public PauseWalkingMessage(PauseWalkingMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -104,6 +104,12 @@ public class PlanarRegionsListMessage implements ROS2Message<PlanarRegionsListMe
 
    }
 
+   public PlanarRegionsListMessage(PlanarRegionsListMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

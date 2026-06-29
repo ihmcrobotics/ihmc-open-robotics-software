@@ -41,6 +41,12 @@ public class YOLOv8AnnotationInfoList implements ROS2Message<YOLOv8AnnotationInf
 
    }
 
+   public YOLOv8AnnotationInfoList(YOLOv8AnnotationInfoList from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

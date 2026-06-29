@@ -47,6 +47,12 @@ public class WalkingControllerPreviewOutputMessage implements ROS2Message<Walkin
 
    }
 
+   public WalkingControllerPreviewOutputMessage(WalkingControllerPreviewOutputMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

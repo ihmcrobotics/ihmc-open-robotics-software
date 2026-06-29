@@ -30,6 +30,12 @@ public class SystemServiceLogRefreshMessage implements ROS2Message<SystemService
 
    }
 
+   public SystemServiceLogRefreshMessage(SystemServiceLogRefreshMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

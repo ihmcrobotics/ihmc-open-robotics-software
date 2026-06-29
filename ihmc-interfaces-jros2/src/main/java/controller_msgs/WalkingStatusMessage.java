@@ -72,6 +72,12 @@ public class WalkingStatusMessage implements ROS2Message<WalkingStatusMessage>
 
    }
 
+   public WalkingStatusMessage(WalkingStatusMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

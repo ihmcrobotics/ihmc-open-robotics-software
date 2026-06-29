@@ -37,6 +37,12 @@ public class BigVideoPacket implements ROS2Message<BigVideoPacket>
 
    }
 
+   public BigVideoPacket(BigVideoPacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

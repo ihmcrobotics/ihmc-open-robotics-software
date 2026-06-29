@@ -79,6 +79,12 @@ public class ContinuousStepGeneratorParametersMessage implements ROS2Message<Con
 
    }
 
+   public ContinuousStepGeneratorParametersMessage(ContinuousStepGeneratorParametersMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

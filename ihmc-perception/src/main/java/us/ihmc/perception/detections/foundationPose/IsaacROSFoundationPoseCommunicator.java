@@ -5,7 +5,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import sensor_msgs.CameraInfo;
 import sensor_msgs.Image;
-import std_msgs.Byte;
+import std_msgs.Byte_;
 import std_msgs.Empty;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -47,7 +47,7 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
    private final RawImagePublisher imagePublisher;
    private final ROS2Publisher<Empty> resetRequestPublisher;
    private final ROS2Publisher<Box3DMessage> resultRelayPublisher;
-   private final ROS2Publisher<Byte> statePublisher;
+   private final ROS2Publisher<Byte_> statePublisher;
    private final ROS2Subscription<Detection3DArray> poseEstimationResultSubscription;
    private final ROS2Subscription<Detection3DArray> trackingResultSubscription;
    private final ROS2Subscription<Empty> resetRequestSubscription;
@@ -155,7 +155,7 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       previousState = state;
       state = newState;
 
-      Byte stateMessage = new Byte();
+      Byte_ stateMessage = new Byte_();
       stateMessage.setData(state.toByte());
       statePublisher.publish(stateMessage);
    }

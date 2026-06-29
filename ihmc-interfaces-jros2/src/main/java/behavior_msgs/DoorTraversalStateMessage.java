@@ -38,6 +38,12 @@ public class DoorTraversalStateMessage implements ROS2Message<DoorTraversalState
 
    }
 
+   public DoorTraversalStateMessage(DoorTraversalStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -46,6 +46,12 @@ public class MessageCollection implements ROS2Message<MessageCollection>
 
    }
 
+   public MessageCollection(MessageCollection from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

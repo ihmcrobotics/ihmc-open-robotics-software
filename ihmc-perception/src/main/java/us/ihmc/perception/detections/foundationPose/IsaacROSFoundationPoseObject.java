@@ -42,7 +42,7 @@ public enum IsaacROSFoundationPoseObject
                                       ROS2Topic<Detection3DArray> poseEstimationOutput, ROS2Topic<Image> trackingDepthImage, ROS2Topic<Image> trackingRGBImage,
                                       ROS2Topic<CameraInfo> trackingCameraInfo, ROS2Topic<Detection3DArray> trackingOutput, ROS2Topic<Image> depthImage,
                                       ROS2Topic<Image> rgbImage, ROS2Topic<Image> segmentation, ROS2Topic<CameraInfo> cameraInfo, ROS2Topic<Empty> reset,
-                                      ROS2Topic<Box3DMessage> ihmcResult, ROS2Topic<std_msgs.Byte> ihmcState,
+                                      ROS2Topic<Box3DMessage> ihmcResult, ROS2Topic<std_msgs.Byte_> ihmcState,
                                       ROS2Topic<FoundationPoseParameters> ihmcParameters)
    {
       public FoundationPoseTopics(String object)

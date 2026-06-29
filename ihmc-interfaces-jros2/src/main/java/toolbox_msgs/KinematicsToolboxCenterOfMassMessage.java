@@ -101,6 +101,12 @@ public class KinematicsToolboxCenterOfMassMessage implements ROS2Message<Kinemat
 
    }
 
+   public KinematicsToolboxCenterOfMassMessage(KinematicsToolboxCenterOfMassMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

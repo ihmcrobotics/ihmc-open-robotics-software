@@ -127,6 +127,12 @@ public class EStopMasterGainCommandMessage implements ROS2Message<EStopMasterGai
 
    }
 
+   public EStopMasterGainCommandMessage(EStopMasterGainCommandMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

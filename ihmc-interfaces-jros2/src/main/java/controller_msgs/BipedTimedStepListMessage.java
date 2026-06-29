@@ -35,6 +35,12 @@ public class BipedTimedStepListMessage implements ROS2Message<BipedTimedStepList
 
    }
 
+   public BipedTimedStepListMessage(BipedTimedStepListMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

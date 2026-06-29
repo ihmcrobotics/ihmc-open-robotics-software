@@ -791,6 +791,12 @@ public class FootstepPlannerParametersPacket implements ROS2Message<FootstepPlan
 
    }
 
+   public FootstepPlannerParametersPacket(FootstepPlannerParametersPacket from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

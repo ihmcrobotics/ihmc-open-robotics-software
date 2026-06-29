@@ -129,6 +129,12 @@ public class KinematicsStreamingToolboxInputMessage implements ROS2Message<Kinem
 
    }
 
+   public KinematicsStreamingToolboxInputMessage(KinematicsStreamingToolboxInputMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

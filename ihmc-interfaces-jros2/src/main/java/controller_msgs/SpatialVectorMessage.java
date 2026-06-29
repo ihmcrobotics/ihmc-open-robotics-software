@@ -38,6 +38,12 @@ public class SpatialVectorMessage implements ROS2Message<SpatialVectorMessage>
 
    }
 
+   public SpatialVectorMessage(SpatialVectorMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

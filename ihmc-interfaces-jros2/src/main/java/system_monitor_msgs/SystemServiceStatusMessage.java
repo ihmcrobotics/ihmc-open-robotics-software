@@ -58,6 +58,12 @@ public class SystemServiceStatusMessage implements ROS2Message<SystemServiceStat
 
    }
 
+   public SystemServiceStatusMessage(SystemServiceStatusMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -76,6 +76,12 @@ public class SpineActionDefinitionMessage implements ROS2Message<SpineActionDefi
 
    }
 
+   public SpineActionDefinitionMessage(SpineActionDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

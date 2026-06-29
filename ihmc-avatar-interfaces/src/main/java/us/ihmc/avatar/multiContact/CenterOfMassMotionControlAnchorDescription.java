@@ -25,8 +25,7 @@ public class CenterOfMassMotionControlAnchorDescription
    public CenterOfMassMotionControlAnchorDescription(CenterOfMassMotionControlAnchorDescription other)
    {
       isTrackingController = other.isTrackingController;
-      inputMessage = new KinematicsToolboxCenterOfMassMessage();
-      inputMessage.set(other.inputMessage);
+      inputMessage = new KinematicsToolboxCenterOfMassMessage(other.inputMessage);
    }
 
    public static CenterOfMassMotionControlAnchorDescription fromJSON(JsonNode node)

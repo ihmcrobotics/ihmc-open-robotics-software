@@ -103,6 +103,12 @@ public class SE3TrajectoryMessage implements ROS2Message<SE3TrajectoryMessage>
 
    }
 
+   public SE3TrajectoryMessage(SE3TrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

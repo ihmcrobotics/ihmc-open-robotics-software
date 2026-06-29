@@ -28,6 +28,12 @@ public class StampedAlphabet implements ROS2Message<StampedAlphabet>
 
    }
 
+   public StampedAlphabet(StampedAlphabet from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

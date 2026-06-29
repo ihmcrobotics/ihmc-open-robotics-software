@@ -29,6 +29,12 @@ public class PoseListMessage implements ROS2Message<PoseListMessage>
 
    }
 
+   public PoseListMessage(PoseListMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

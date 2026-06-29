@@ -88,6 +88,12 @@ public class EuclideanTrajectoryMessage implements ROS2Message<EuclideanTrajecto
 
    }
 
+   public EuclideanTrajectoryMessage(EuclideanTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

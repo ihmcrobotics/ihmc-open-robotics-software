@@ -109,6 +109,12 @@ public class VisionInfo implements ROS2Message<VisionInfo>
 
    }
 
+   public VisionInfo(VisionInfo from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

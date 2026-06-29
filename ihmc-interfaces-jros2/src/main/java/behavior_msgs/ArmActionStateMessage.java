@@ -77,6 +77,12 @@ public class ArmActionStateMessage implements ROS2Message<ArmActionStateMessage>
 
    }
 
+   public ArmActionStateMessage(ArmActionStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

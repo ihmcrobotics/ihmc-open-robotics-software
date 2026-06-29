@@ -69,6 +69,12 @@ public class EuclideanStreamingMessage implements ROS2Message<EuclideanStreaming
 
    }
 
+   public EuclideanStreamingMessage(EuclideanStreamingMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

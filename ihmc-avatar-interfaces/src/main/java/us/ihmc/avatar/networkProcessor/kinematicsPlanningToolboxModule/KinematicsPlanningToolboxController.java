@@ -307,13 +307,11 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
          }
 
          // re-create ik rigid body messages with the interpolated way points.
-         KinematicsToolboxRigidBodyMessage rigidBodyMessageBuffer = new KinematicsToolboxRigidBodyMessage();
-         rigidBodyMessageBuffer.set(ikRigidBodyMessages.get(0));
+         KinematicsToolboxRigidBodyMessage rigidBodyMessageBuffer = new KinematicsToolboxRigidBodyMessage(ikRigidBodyMessages.get(0));
          ikRigidBodyMessages.clear();
          for (int j = 0; j < ikRigidBodyPoses.size(); j++)
          {
-            KinematicsToolboxRigidBodyMessage messageToAdd = new KinematicsToolboxRigidBodyMessage();
-            messageToAdd.set(rigidBodyMessageBuffer);
+            KinematicsToolboxRigidBodyMessage messageToAdd = new KinematicsToolboxRigidBodyMessage(rigidBodyMessageBuffer);
             messageToAdd.getDesiredPositionInWorld().set(ikRigidBodyPoses.get(j).getPosition());
             messageToAdd.getDesiredOrientationInWorld().set(ikRigidBodyPoses.get(j).getOrientation());
             ikRigidBodyMessages.add(messageToAdd);
@@ -340,13 +338,11 @@ public class KinematicsPlanningToolboxController extends ToolboxController imple
       }
 
       // re-create ik rigid body messages with the interpolated way points.
-      KinematicsToolboxCenterOfMassMessage comMessageBuffer = new KinematicsToolboxCenterOfMassMessage();
-      comMessageBuffer.set(ikCenterOfMassMessages.get(0));
+      KinematicsToolboxCenterOfMassMessage comMessageBuffer = new KinematicsToolboxCenterOfMassMessage(ikCenterOfMassMessages.get(0));
       ikCenterOfMassMessages.clear();
       for (int j = 0; j < comPoints.size(); j++)
       {
-         KinematicsToolboxCenterOfMassMessage messageToAdd = new KinematicsToolboxCenterOfMassMessage();
-         messageToAdd.set(comMessageBuffer);
+         KinematicsToolboxCenterOfMassMessage messageToAdd = new KinematicsToolboxCenterOfMassMessage(comMessageBuffer);
          messageToAdd.getDesiredPositionInWorld().getPoint().set(comPoints.get(j));
          ikCenterOfMassMessages.add(messageToAdd);
       }

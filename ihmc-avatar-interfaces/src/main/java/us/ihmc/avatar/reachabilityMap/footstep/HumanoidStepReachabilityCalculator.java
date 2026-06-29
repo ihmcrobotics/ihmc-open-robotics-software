@@ -702,8 +702,7 @@ public abstract class HumanoidStepReachabilityCalculator
    {
       SixDoFMotionControlAnchorDescription anchorDescription = new SixDoFMotionControlAnchorDescription();
       anchorDescription.setRigidBodyName(rigidBody.getName());
-      KinematicsToolboxRigidBodyMessage copiedMessage = new KinematicsToolboxRigidBodyMessage();
-      copiedMessage.set(rigidBodyMessage);
+      KinematicsToolboxRigidBodyMessage copiedMessage = new KinematicsToolboxRigidBodyMessage(rigidBodyMessage);
       anchorDescription.setInputMessage(copiedMessage);
       return anchorDescription;
    }
@@ -712,8 +711,7 @@ public abstract class HumanoidStepReachabilityCalculator
    {
       OneDoFMotionControlAnchorDescription jointDescription = new OneDoFMotionControlAnchorDescription();
       jointDescription.setJointName(jointName);
-      KinematicsToolboxOneDoFJointMessage copiedJointMessage = new KinematicsToolboxOneDoFJointMessage();
-      copiedJointMessage.set(jointMessage);
+      KinematicsToolboxOneDoFJointMessage copiedJointMessage = new KinematicsToolboxOneDoFJointMessage(jointMessage);
       jointDescription.setInputMessage(copiedJointMessage);
       return jointDescription;
    }

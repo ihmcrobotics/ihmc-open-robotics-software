@@ -36,6 +36,12 @@ public class BoundingBox3DMessage implements ROS2Message<BoundingBox3DMessage>
 
    }
 
+   public BoundingBox3DMessage(BoundingBox3DMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

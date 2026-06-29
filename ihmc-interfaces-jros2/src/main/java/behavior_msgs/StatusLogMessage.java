@@ -36,6 +36,12 @@ public class StatusLogMessage implements ROS2Message<StatusLogMessage>
 
    }
 
+   public StatusLogMessage(StatusLogMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -32,6 +32,12 @@ public class AbortWalkingMessage implements ROS2Message<AbortWalkingMessage>
    {
    }
 
+   public AbortWalkingMessage(AbortWalkingMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

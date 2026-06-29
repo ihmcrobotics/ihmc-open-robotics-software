@@ -179,6 +179,12 @@ public class WholeBodyStreamingMessage implements ROS2Message<WholeBodyStreaming
 
    }
 
+   public WholeBodyStreamingMessage(WholeBodyStreamingMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

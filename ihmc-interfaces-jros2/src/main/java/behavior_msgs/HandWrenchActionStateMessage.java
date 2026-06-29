@@ -38,6 +38,12 @@ public class HandWrenchActionStateMessage implements ROS2Message<HandWrenchActio
 
    }
 
+   public HandWrenchActionStateMessage(HandWrenchActionStateMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

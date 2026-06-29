@@ -59,6 +59,12 @@ public class MimicActionDefinitionMessage implements ROS2Message<MimicActionDefi
 
    }
 
+   public MimicActionDefinitionMessage(MimicActionDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

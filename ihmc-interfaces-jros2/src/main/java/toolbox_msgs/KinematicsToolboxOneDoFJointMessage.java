@@ -57,6 +57,12 @@ public class KinematicsToolboxOneDoFJointMessage implements ROS2Message<Kinemati
    {
    }
 
+   public KinematicsToolboxOneDoFJointMessage(KinematicsToolboxOneDoFJointMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

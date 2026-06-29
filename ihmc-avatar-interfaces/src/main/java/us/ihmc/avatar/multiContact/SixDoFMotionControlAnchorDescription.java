@@ -41,8 +41,7 @@ public class SixDoFMotionControlAnchorDescription
       isTrackingController = other.isTrackingController;
       anchorId = other.anchorId;
       contactNormal = other.contactNormal;
-      inputMessage = new KinematicsToolboxRigidBodyMessage();
-      inputMessage.set(other.inputMessage);
+      inputMessage = new KinematicsToolboxRigidBodyMessage(other.inputMessage);
    }
 
    public static SixDoFMotionControlAnchorDescription fromJSON(JsonNode node)

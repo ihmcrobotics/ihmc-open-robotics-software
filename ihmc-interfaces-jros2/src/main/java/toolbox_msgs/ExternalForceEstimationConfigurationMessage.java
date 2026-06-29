@@ -83,6 +83,12 @@ public class ExternalForceEstimationConfigurationMessage implements ROS2Message<
 
    }
 
+   public ExternalForceEstimationConfigurationMessage(ExternalForceEstimationConfigurationMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

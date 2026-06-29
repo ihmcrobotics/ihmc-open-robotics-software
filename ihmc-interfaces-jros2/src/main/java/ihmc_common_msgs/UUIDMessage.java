@@ -29,6 +29,12 @@ public class UUIDMessage implements ROS2Message<UUIDMessage>
    {
    }
 
+   public UUIDMessage(UUIDMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

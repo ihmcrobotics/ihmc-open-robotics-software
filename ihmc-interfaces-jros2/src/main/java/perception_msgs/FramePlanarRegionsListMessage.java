@@ -62,6 +62,12 @@ public class FramePlanarRegionsListMessage implements ROS2Message<FramePlanarReg
 
    }
 
+   public FramePlanarRegionsListMessage(FramePlanarRegionsListMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -36,6 +36,12 @@ public class WaitActionDefinitionMessage implements ROS2Message<WaitActionDefini
 
    }
 
+   public WaitActionDefinitionMessage(WaitActionDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -122,6 +122,12 @@ public class JointDesiredOutputMessage implements ROS2Message<JointDesiredOutput
 
    }
 
+   public JointDesiredOutputMessage(JointDesiredOutputMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

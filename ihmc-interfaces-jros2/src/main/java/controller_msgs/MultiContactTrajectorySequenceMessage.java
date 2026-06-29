@@ -39,6 +39,12 @@ public class MultiContactTrajectorySequenceMessage implements ROS2Message<MultiC
 
    }
 
+   public MultiContactTrajectorySequenceMessage(MultiContactTrajectorySequenceMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

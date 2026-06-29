@@ -52,6 +52,12 @@ public class PelvisActionDefinitionMessage implements ROS2Message<PelvisActionDe
 
    }
 
+   public PelvisActionDefinitionMessage(PelvisActionDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

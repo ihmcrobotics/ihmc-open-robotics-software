@@ -55,6 +55,12 @@ public class LegTrajectoryMessage implements ROS2Message<LegTrajectoryMessage>
 
    }
 
+   public LegTrajectoryMessage(LegTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

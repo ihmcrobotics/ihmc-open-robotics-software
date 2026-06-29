@@ -115,6 +115,12 @@ public class ArmActionDefinitionMessage implements ROS2Message<ArmActionDefiniti
 
    }
 
+   public ArmActionDefinitionMessage(ArmActionDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

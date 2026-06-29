@@ -31,6 +31,12 @@ public class ActionSequenceDefinitionMessage implements ROS2Message<ActionSequen
 
    }
 
+   public ActionSequenceDefinitionMessage(ActionSequenceDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

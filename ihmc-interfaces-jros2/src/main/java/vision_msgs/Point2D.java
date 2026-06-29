@@ -31,6 +31,12 @@ public class Point2D implements ROS2Message<Point2D>
    {
    }
 
+   public Point2D(Point2D from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

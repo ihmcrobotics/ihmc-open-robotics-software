@@ -126,6 +126,12 @@ public class SystemResourceUsageMessage implements ROS2Message<SystemResourceUsa
 
    }
 
+   public SystemResourceUsageMessage(SystemResourceUsageMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

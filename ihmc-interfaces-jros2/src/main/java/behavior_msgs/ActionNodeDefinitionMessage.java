@@ -30,6 +30,12 @@ public class ActionNodeDefinitionMessage implements ROS2Message<ActionNodeDefini
 
    }
 
+   public ActionNodeDefinitionMessage(ActionNodeDefinitionMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

@@ -47,6 +47,12 @@ public class ZEDSVOCurrentFileMessage implements ROS2Message<ZEDSVOCurrentFileMe
 
    }
 
+   public ZEDSVOCurrentFileMessage(ZEDSVOCurrentFileMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

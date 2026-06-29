@@ -73,6 +73,12 @@ public class AI2RNavigationMessage implements ROS2Message<AI2RNavigationMessage>
 
    }
 
+   public AI2RNavigationMessage(AI2RNavigationMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {

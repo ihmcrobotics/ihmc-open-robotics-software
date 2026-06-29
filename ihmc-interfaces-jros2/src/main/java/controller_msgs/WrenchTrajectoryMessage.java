@@ -73,6 +73,12 @@ public class WrenchTrajectoryMessage implements ROS2Message<WrenchTrajectoryMess
 
    }
 
+   public WrenchTrajectoryMessage(WrenchTrajectoryMessage from)
+   {
+      this();
+      set(from);
+   }
+
    @Override
    public int calculateSizeBytes(int currentAlignment)
    {
