@@ -14,6 +14,24 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Arrays;
 
+/**
+ * Hardcoded jros2 controller messages for exercise and JUnit scripts. Values were extracted from the
+ * XStream XML scripts that lived on {@code develop} at
+ * {@code ihmc-avatar-interfaces/src/main/resources/scripts/ExerciseAndJUnitScripts/}:
+ * <ul>
+ *    <li>{@link ExerciseAndJUnitScript#DRC_TRIALS_SLOPE_LEFT_FOOT_POSE} — {@code DRCTrialsSlopeLeftFootPose.xml}</li>
+ *    <li>{@link ExerciseAndJUnitScript#DRC_TRIALS_ZIGZAG_HURDLES_LEFT_FOOT_POSE} — {@code DRCTrialsZigzagHurdlesLeftFootPose.xml}</li>
+ *    <li>{@link ExerciseAndJUnitScript#LONG_SIDE_STEPS_LEFT} — {@code LongSideStepsLeft.xml}</li>
+ *    <li>{@link ExerciseAndJUnitScript#LONG_STEPS_MAX_HEIGHT_PAUSE_AND_RESTART_LEFT_FOOT_TEST} — {@code LongStepsMaxHeightPauseAndRestart_LeftFootTest.xml}</li>
+ *    <li>{@link ExerciseAndJUnitScript#SIMPLE_FLAT_GROUND_SCRIPT} — {@code SimpleFlatGroundScript.xml}</li>
+ *    <li>{@link ExerciseAndJUnitScript#SIMPLE_SINGLE_FOOT_TRAJECTORY_SCRIPT} — {@code SimpleSingleFootTrajectoryScript.xml}</li>
+ *    <li>{@link ExerciseAndJUnitScript#SIMPLE_SINGLE_HAND_TRAJECTORY_SCRIPT} — {@code SimpleSingleHandTrajectoryScript.xml}</li>
+ *    <li>{@link ExerciseAndJUnitScript#SIMPLE_SINGLE_PELVIS_HEIGHT_SCRIPT} — {@code SimpleSinglePelvisHeightScript.xml}</li>
+ *    <li>{@link ExerciseAndJUnitScript#SIMPLE_SINGLE_STEP_SCRIPT} — {@code SimpleSingleStepScript.xml}</li>
+ *    <li>{@link ExerciseAndJUnitScript#TWO_CINDER_BLOCKS_STEP_ON_LEFT_FOOT_TEST} — {@code TwoCinderBlocksStepOn_LeftFootTest.xml}</li>
+ *    <li>{@link ExerciseAndJUnitScript#TWO_CINDER_BLOCKS_STEP_ON_LEFT_FOOT_TEST_SLOW} — {@code TwoCinderBlocksStepOn_LeftFootTest_slow.xml}</li>
+ * </ul>
+ */
 public final class ExerciseAndJUnitScriptCommands
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

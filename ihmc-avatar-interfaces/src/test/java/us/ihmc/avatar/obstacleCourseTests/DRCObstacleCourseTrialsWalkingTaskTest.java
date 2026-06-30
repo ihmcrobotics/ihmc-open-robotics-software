@@ -188,15 +188,16 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
-      setupCameraForWalkingOverCinderBlocks();
-
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
-      simulationTestHelper.simulateNow(0.25);
+      simulationTestHelper.simulateNow(0.01);
+
       FramePoint3D pelvisHeight = new FramePoint3D(fullRobotModel.getRootJoint().getFrameAfterJoint());
       pelvisHeight.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisHeight.getZ() + 0.1);
       simulationTestHelper.publishToController(message);
       simulationTestHelper.runExerciseScript(ExerciseAndJUnitScript.TWO_CINDER_BLOCKS_STEP_ON_LEFT_FOOT_TEST_SLOW, fullRobotModel.getSoleFrame(RobotSide.LEFT));
+
+      setupCameraForWalkingOverCinderBlocks();
 
       assertTrue(simulationTestHelper.simulateNow(6.0));
 

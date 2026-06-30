@@ -1,6 +1,11 @@
 package us.ihmc.avatar.scriptCommandGenerator;
 
 
+/**
+ * Exercise and JUnit scripts originally loaded from XStream XML under
+ * {@code src/main/resources/scripts/ExerciseAndJUnitScripts/} on {@code develop}.
+ * Each enum constant corresponds to one XML file; see {@link ExerciseAndJUnitScriptCommands}.
+ */
 public enum ExerciseAndJUnitScript
 {
    DRC_TRIALS_SLOPE_LEFT_FOOT_POSE,
