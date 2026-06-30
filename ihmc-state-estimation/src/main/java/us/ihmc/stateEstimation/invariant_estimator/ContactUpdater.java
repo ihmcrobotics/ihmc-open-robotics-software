@@ -8,7 +8,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 /**
  * Contact forward-kinematics measurement subpiece for the right-invariant EKF.
@@ -103,7 +103,7 @@ public class ContactUpdater
     */
    public void assemble(InvariantState state,
                         int contactIndex,
-                        Vector3DReadOnly bodyMeasurement,
+                        Tuple3DReadOnly bodyMeasurement,
                         Matrix3DReadOnly bodyMeasurementCovariance,
                         boolean includeLearnedModule)
    {
@@ -140,7 +140,7 @@ public class ContactUpdater
     * @param bodyMeasurement the body-frame measurement y = h_Cᵢ(q). Not modified.
     * @param residualToPack  the 3×1 residual to fill; reshaped. Modified.
     */
-   public void computeResidual(InvariantState state, int contactIndex, Vector3DReadOnly bodyMeasurement, DMatrixRMaj residualToPack)
+   public void computeResidual(InvariantState state, int contactIndex, Tuple3DReadOnly bodyMeasurement, DMatrixRMaj residualToPack)
    {
       state.getRotation(rotation);
       state.getBasePosition(basePosition);

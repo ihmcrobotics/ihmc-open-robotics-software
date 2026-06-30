@@ -4,7 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 /**
  * Generic right-invariant EKF correction (measurement update) core.
@@ -86,7 +86,7 @@ public class InvariantUpdater
     */
    public void update(InvariantState state,
                       int contactIndex,
-                      Vector3DReadOnly bodyMeasurement,
+                      Tuple3DReadOnly bodyMeasurement,
                       Matrix3DReadOnly bodyMeasurementCovariance,
                       boolean includeLearnedModule)
    {
@@ -153,7 +153,7 @@ public class InvariantUpdater
    /**
     * Assembles the contact forward-kinematics measurement through the owned {@link ContactUpdater}
     * subpiece, leaving (H, residual, R_world) available on it. Does <em>not</em> apply the correction —
-    * the orchestrating {@link #update(InvariantState, int, Vector3DReadOnly, Matrix3DReadOnly, boolean)}
+    * the orchestrating {@link #update(InvariantState, int, Tuple3DReadOnly, Matrix3DReadOnly, boolean)}
     * runs the core correction afterwards.
     *
     * @param state                     the estimate state (read). Not modified.
@@ -166,7 +166,7 @@ public class InvariantUpdater
     */
    private void updateContact(InvariantState state,
                               int contactIndex,
-                              Vector3DReadOnly bodyMeasurement,
+                              Tuple3DReadOnly bodyMeasurement,
                               Matrix3DReadOnly bodyMeasurementCovariance,
                               boolean includeLearnedModule)
    {

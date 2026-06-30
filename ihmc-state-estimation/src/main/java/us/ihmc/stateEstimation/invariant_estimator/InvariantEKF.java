@@ -117,7 +117,7 @@ public class InvariantEKF
     * @param bodyMeasurement           the body-frame forward-kinematics measurement y = h_Cᵢ(q). Not modified.
     * @param bodyMeasurementCovariance the body-frame measurement covariance Nᵢ = J_Cᵢ·Σ_q·J_Cᵢᵀ (3×3). Not modified.
     */
-   public void update(int contactIndex, Vector3DReadOnly bodyMeasurement, Matrix3DReadOnly bodyMeasurementCovariance)
+   public void update(int contactIndex, Tuple3DReadOnly bodyMeasurement, Matrix3DReadOnly bodyMeasurementCovariance)
    {
       updater.update(state, contactIndex, bodyMeasurement, bodyMeasurementCovariance, false); // learned module not wired yet
    }
