@@ -3,6 +3,9 @@ package us.ihmc.stateEstimation.invariant_estimator;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+
 /**
  * Generic right-invariant EKF correction (measurement update) core.
  *
@@ -40,6 +43,9 @@ public class InvariantUpdater
    private final DMatrixRMaj expDelta = new DMatrixRMaj(1, 1);                // exp_G(−c) (n×n)
    private final DMatrixRMaj newGroupElement = new DMatrixRMaj(1, 1);         // (n×n)
 
+   /** Optional contact measurement subpiece, owned and called by this updater (see {@link #updateContact}). */
+   private ContactUpdater contactUpdater = null;
+
    /**
     * @param tangentSize the tangent/covariance dimension m (= 9 + 3N).
     */
@@ -49,6 +55,44 @@ public class InvariantUpdater
       gainTimesH = new DMatrixRMaj(tangentSize, tangentSize);
       identityMinusKH = new DMatrixRMaj(tangentSize, tangentSize);
       covarianceWork = new DMatrixRMaj(tangentSize, tangentSize);
+   }
+
+   /**
+    * Integrates (or clears, with {@code null}) the contact measurement subpiece used by {@link #updateContact}.
+    *
+    * @param contactUpdater the contact measurement assembler, or {@code null} to disable contact updates.
+    *                       Stored by reference; its contact count must match this updater's tangent size.
+    */
+   public void setContactUpdater(ContactUpdater contactUpdater)
+   {
+      this.contactUpdater = contactUpdater;
+   }
+
+   /**
+    * Main contact correction entry point: assembles the contact forward-kinematics measurement through
+    * the owned {@link ContactUpdater} subpiece (via {@link #updateContact}) and then applies the generic
+    * right-invariant correction to the state in place.
+    *
+    * <p>This is the orchestrator — it calls {@link #updateContact} to build (H, residual, R_world) and
+    * then the core {@link #update(InvariantState, DMatrixRMaj, DMatrixRMaj, DMatrixRMaj)} to correct.</p>
+    *
+    * @param state                     the state whose X and P are updated in place. Modified.
+    * @param contactIndex              the contact index i in [0, N).
+    * @param bodyMeasurement           the body-frame forward-kinematics measurement y = h_Cᵢ(q). Not modified.
+    * @param bodyMeasurementCovariance the body-frame measurement covariance Nᵢ = J_Cᵢ·Σ_q·J_Cᵢᵀ (3×3). Not modified.
+    * @param includeLearnedModule      forwarded to the subpiece: if {@code true} and a learned correction
+    *                                  is installed there, it augments the assembled measurement.
+    * @throws IllegalStateException if no {@link ContactUpdater} has been installed.
+    */
+   public void update(InvariantState state,
+                      int contactIndex,
+                      Vector3DReadOnly bodyMeasurement,
+                      Matrix3DReadOnly bodyMeasurementCovariance,
+                      boolean includeLearnedModule)
+   {
+      updateContact(state, contactIndex, bodyMeasurement, bodyMeasurementCovariance, includeLearnedModule);
+
+      update(state, contactUpdater.getMeasurementJacobian(), contactUpdater.getResidual(), contactUpdater.getMeasurementCovariance());
    }
 
    /**
@@ -104,5 +148,31 @@ public class InvariantUpdater
       CommonOps_DDRM.mult(gain, measurementCovariance, gainTimesNoise); // K * R
       CommonOps_DDRM.multAddTransB(gainTimesNoise, gain, covariance); // P += KRK^T
 
+   }
+
+   /**
+    * Assembles the contact forward-kinematics measurement through the owned {@link ContactUpdater}
+    * subpiece, leaving (H, residual, R_world) available on it. Does <em>not</em> apply the correction —
+    * the orchestrating {@link #update(InvariantState, int, Vector3DReadOnly, Matrix3DReadOnly, boolean)}
+    * runs the core correction afterwards.
+    *
+    * @param state                     the estimate state (read). Not modified.
+    * @param contactIndex              the contact index i in [0, N).
+    * @param bodyMeasurement           the body-frame forward-kinematics measurement y = h_Cᵢ(q). Not modified.
+    * @param bodyMeasurementCovariance the body-frame measurement covariance Nᵢ = J_Cᵢ·Σ_q·J_Cᵢᵀ (3×3). Not modified.
+    * @param includeLearnedModule      forwarded to the subpiece: if {@code true} and a learned correction
+    *                                  is installed there, it augments the assembled measurement.
+    * @throws IllegalStateException if no {@link ContactUpdater} has been installed.
+    */
+   private void updateContact(InvariantState state,
+                              int contactIndex,
+                              Vector3DReadOnly bodyMeasurement,
+                              Matrix3DReadOnly bodyMeasurementCovariance,
+                              boolean includeLearnedModule)
+   {
+      if (contactUpdater == null)
+         throw new IllegalStateException("No ContactUpdater added; call setContactUpdater(...) first.");
+
+      contactUpdater.assemble(state, contactIndex, bodyMeasurement, bodyMeasurementCovariance, includeLearnedModule);
    }
 }
