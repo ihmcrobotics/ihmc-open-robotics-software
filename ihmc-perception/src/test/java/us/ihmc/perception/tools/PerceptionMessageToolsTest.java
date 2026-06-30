@@ -123,10 +123,6 @@ public class PerceptionMessageToolsTest
 
    private static byte[] getDataBytes(ImageMessage message)
    {
-      ByteBuffer dataBuffer = message.getData().getBuffer();
-      byte[] bytes = new byte[message.getData().size()];
-      dataBuffer.position(0);
-      dataBuffer.get(bytes, 0, bytes.length);
-      return bytes;
+      return message.getData().toByteArray();
    }
 }

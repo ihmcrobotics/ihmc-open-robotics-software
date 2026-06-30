@@ -5,6 +5,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.BigVideoPacket;
+import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
 import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.imageMessage.PixelFormat;
@@ -62,7 +63,8 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPa
             synchronized (syncObject)
             {
                int numberOfBytes = videoPacket.getData().size();
-               messageEncodedBytePointer.put(videoPacket.getData().getBuffer().array(), 0, numberOfBytes);
+               IDLByteSequence data = videoPacket.getData();
+               messageEncodedBytePointer.put(data.getBuffer().array(), data.getBuffer().arrayOffset(), data.size());
                messageEncodedBytePointer.limit(numberOfBytes);
 
                inputJPEGMat.cols(numberOfBytes);

@@ -31,7 +31,7 @@ public class HeightMapMessageTools
                                                       heightMapMessage.getGridCenterY());
 
       // Decode the PNG compressed height map data
-      Mat compressedMat = new Mat(heightMapMessage.getHeights().getBuffer().array());
+      Mat compressedMat = new Mat(heightMapMessage.getHeights().toByteArray());
       Mat heightMapMat = new Mat(heightMapMessage.getCellsPerAxis(), 2 * heightMapMessage.getCellsPerAxis(), opencv_core.CV_16UC1);
       opencv_imgcodecs.imdecode(compressedMat, opencv_imgcodecs.IMREAD_UNCHANGED, heightMapMat);
 

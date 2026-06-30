@@ -1,7 +1,6 @@
 package us.ihmc.perception.gpuMapping;
 
 import perception_msgs.TerrainMapMessage;
-import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
 import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 
 public class TerrainMapMessageTools
@@ -50,19 +49,19 @@ public class TerrainMapMessageTools
       if (traversabilityScoreMap.length > 0)
          terrainMapData.setTraversabilityScoreMap(traversabilityScoreMap);
 
-      byte[] traversabilityClassMap = copyByteSequenceToArray(message.getTraversabilityClass());
+      byte[] traversabilityClassMap = message.getTraversabilityClass().toByteArray();
       if (traversabilityClassMap.length > 0)
          terrainMapData.setTraversabilityClassMap(traversabilityClassMap);
 
-      byte[] snappedNormalXMap = copyByteSequenceToArray(message.getSnappedNormalXData());
+      byte[] snappedNormalXMap = message.getSnappedNormalXData().toByteArray();
       if (snappedNormalXMap.length > 0)
          terrainMapData.setSnapNormalXMap(snappedNormalXMap);
 
-      byte[] snappedNormalYMap = copyByteSequenceToArray(message.getSnappedNormalYData());
+      byte[] snappedNormalYMap = message.getSnappedNormalYData().toByteArray();
       if (snappedNormalYMap.length > 0)
          terrainMapData.setSnapNormalYMap(snappedNormalYMap);
 
-      byte[] snappedNormalZMap = copyByteSequenceToArray(message.getSnappedNormalZData());
+      byte[] snappedNormalZMap = message.getSnappedNormalZData().toByteArray();
       if (snappedNormalZMap.length > 0)
          terrainMapData.setSnapNormalZMap(snappedNormalZMap);
 
@@ -72,14 +71,6 @@ public class TerrainMapMessageTools
    private static float[] copyFloatSequenceToArray(IDLFloatSequence sequence)
    {
       float[] array = new float[sequence.size()];
-      for (int i = 0; i < array.length; i++)
-         array[i] = sequence.get(i);
-      return array;
-   }
-
-   private static byte[] copyByteSequenceToArray(IDLByteSequence sequence)
-   {
-      byte[] array = new byte[sequence.size()];
       for (int i = 0; i < array.length; i++)
          array[i] = sequence.get(i);
       return array;

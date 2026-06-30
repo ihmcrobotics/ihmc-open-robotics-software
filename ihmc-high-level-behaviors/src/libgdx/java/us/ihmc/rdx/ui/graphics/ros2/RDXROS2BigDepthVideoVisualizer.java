@@ -70,7 +70,7 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2ImageVisualizer<BigVi
                }
 
                messageBytePointer.position(0);
-               messageBytePointer.put(imageTByteArrayList.getBuffer().array(), 0, imageTByteArrayList.size());
+               messageBytePointer.put(imageTByteArrayList.getBuffer().array(), imageTByteArrayList.getBuffer().arrayOffset(), imageTByteArrayList.size());
                messageBytePointer.limit(imageTByteArrayList.size());
 
                if (inputDepthMat == null)

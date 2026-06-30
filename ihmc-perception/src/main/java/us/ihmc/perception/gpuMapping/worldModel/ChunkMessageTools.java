@@ -13,7 +13,7 @@ public class ChunkMessageTools
    public static void unpackMessageToChunk(ChunkMessage chunkMessage, Chunk chunkToPack)
    {
       // Decode the PNG compressed height map data
-      Mat compressedMat = new Mat(chunkMessage.getHeights().getBuffer().array());
+      Mat compressedMat = new Mat(chunkMessage.getHeights().toByteArray());
       Mat chunkMap = new Mat(chunkMessage.getCellsPerAxis(), 2 * chunkMessage.getCellsPerAxis(), opencv_core.CV_16UC1);
       opencv_imgcodecs.imdecode(compressedMat, opencv_imgcodecs.IMREAD_UNCHANGED, chunkMap);
 
