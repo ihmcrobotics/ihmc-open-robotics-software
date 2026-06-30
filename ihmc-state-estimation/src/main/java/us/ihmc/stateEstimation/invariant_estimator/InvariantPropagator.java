@@ -38,8 +38,11 @@ public class InvariantPropagator
    private final int numberOfContacts;
    private final Vector3D gravity = new Vector3D(0.0, 0.0, GRAVITY_Z);
 
-   /** Continuous process-noise covariance Q_c (m×m), built once from the supplied variances. */
+   /** Continuous process-noise covariance Q_c (m×m); the contact-slip blocks may be retuned per tick. */
    private final DMatrixRMaj processNoise;
+
+   /** Tangent-space start index of contact i's 3×3 block in Q_c (and P): 9 + 3i. */
+   private static final int FIRST_CONTACT_TANGENT_INDEX = 9;
 
    // Pre-allocated work matrices (m×m) to keep predict() allocation-free.
    private final DMatrixRMaj Phi;
@@ -84,6 +87,26 @@ public class InvariantPropagator
       tempB = new DMatrixRMaj(m, m);
 
       buildProcessNoise(gyroVariance, accelVariance, contactVariance);
+   }
+
+   /**
+    * Retunes contact i's continuous slip-noise variance σ_{c,i}² in Q_c, in place. The soft contact
+    * handling calls this each tick to inflate a swing foot's anchor noise (so it re-anchors softly on
+    * touchdown) and restore it in stance. Isotropic: writes {@code variance·I} on contact i's 3×3 block.
+    *
+    * @param contactIndex the contact index i in [0, N).
+    * @param variance     the continuous slip variance σ_{c,i}² (m²/s), ≥ 0.
+    */
+   public void setContactSlipVariance(int contactIndex, double variance)
+   {
+      if (contactIndex < 0 || contactIndex >= numberOfContacts)
+         throw new IndexOutOfBoundsException("contactIndex must be in [0, " + numberOfContacts + "), was " + contactIndex);
+      if (variance < 0.0)
+         throw new IllegalArgumentException("variance must be >= 0, was " + variance);
+
+      int block = FIRST_CONTACT_TANGENT_INDEX + 3 * contactIndex;
+      for (int j = 0; j < 3; j++)
+         processNoise.set(block + j, block + j, variance);
    }
 
    /**

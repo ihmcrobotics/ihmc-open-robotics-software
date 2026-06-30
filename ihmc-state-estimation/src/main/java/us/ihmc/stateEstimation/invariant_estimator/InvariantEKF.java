@@ -111,6 +111,19 @@ public class InvariantEKF
    }
 
    /**
+    * Retunes contact i's continuous slip-noise variance σ_{c,i}² used by the propagation step. Soft
+    * contact handling calls this each tick to inflate a swing foot's anchor noise and restore it in
+    * stance; see {@link InvariantPropagator#setContactSlipVariance}.
+    *
+    * @param contactIndex the contact index i in [0, N).
+    * @param variance     the continuous slip variance σ_{c,i}² (m²/s), ≥ 0.
+    */
+   public void setContactSlipVariance(int contactIndex, double variance)
+   {
+      propagator.setContactSlipVariance(contactIndex, variance);
+   }
+
+   /**
     * Correction step: applies one contact forward-kinematics measurement.
     *
     * @param contactIndex              the contact index i in [0, N).

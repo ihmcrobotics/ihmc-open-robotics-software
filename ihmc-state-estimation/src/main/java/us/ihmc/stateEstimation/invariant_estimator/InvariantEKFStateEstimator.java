@@ -1,5 +1,7 @@
 package us.ihmc.stateEstimation.invariant_estimator;
 
+import java.util.Objects;
+
 import gnu.trove.map.TObjectDoubleMap;
 
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -15,6 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -75,18 +78,45 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final RotationMatrix tempRotation = new RotationMatrix();
    private final Vector3D tempVector = new Vector3D();
    private final FramePose3D mainEstimatePelvisPose = new FramePose3D();
+   private final FrameVector3D mainLinearVelocity = new FrameVector3D();           // DRC root linear velocity → world
+   private final Vector3D invariantLinearVelocityWorld = new Vector3D();           // invariant base velocity (world)
+   private final Vector3D mainAngularVelocityBody = new Vector3D();                // DRC root angular velocity (body)
+   private final Vector3D invariantAngularVelocityBody = new Vector3D();           // gyro the filter integrates (body)
+   private final Vector3D velocityErrorTemp = new Vector3D();
+
+   // Soft contact handling: a per-foot contact probability p ∈ [0,1] drives two covariance knobs each tick.
+   // The default provider is forward-kinematics only (runs on hardware); ContactNet replaces it later.
+   private ContactProbabilityProvider contactProbabilityProvider;
+   private final double baseContactVariance;                  // σ_c² at full contact (p = 1)
+   private double swingMeasurementInflation = 1.0e6;          // R_i  ×= inflation^(1−p): muted swing foot at p → 0
+   private double swingSlipInflation = 1.0e6;                 // σ_{c,i}² ×= inflation^(1−p): forgetful anchor at p → 0
+   private final Matrix3D inflatedContactCovariance = new Matrix3D();
+   private final SideDependentList<YoDouble> yoContactProbability;
 
    // Estimate outputs for logging/comparison.
    private final YoFramePoint3D yoBasePosition = new YoFramePoint3D("invariantFilterPelvisBasePosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoQuaternion yoBaseOrientation = new YoQuaternion("invariantFilterPelvisBaseOrientation", registry);
    private final YoFrameVector3D yoBaseVelocity = new YoFrameVector3D("invariantFilterPelvisBaseVelocity", ReferenceFrame.getWorldFrame(), registry);
 
-   // Main (DRC) estimator's pelvis pose, read from the shared model, and the invariant-vs-main difference.
+   // Main (DRC) estimator's pelvis pose, kept only for the 3D marker (position is unobservable so it drifts).
    private final YoFramePoint3D yoMainBasePosition = new YoFramePoint3D("mainFilterPelvisBasePosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoQuaternion yoMainBaseOrientation = new YoQuaternion("mainFilterPelvisBaseOrientation", registry);
-   private final YoFrameVector3D yoBasePositionError = new YoFrameVector3D("invariantMinusMainPositionError", ReferenceFrame.getWorldFrame(), registry);
-   private final YoDouble yoBasePositionErrorMagnitude = new YoDouble("invariantMinusMainPositionErrorMagnitude", registry);
+
+   // Observable comparisons against the DRC estimator: orientation, and root-joint linear/angular velocity.
    private final YoDouble yoBaseOrientationErrorAngle = new YoDouble("invariantMinusMainOrientationErrorAngle", registry);
+
+   private final YoFrameVector3D yoMainRootLinearVelocity = new YoFrameVector3D("mainRootLinearVelocityWorld", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D yoInvariantRootLinearVelocity = new YoFrameVector3D("invariantRootLinearVelocityWorld",
+                                                                                     ReferenceFrame.getWorldFrame(),
+                                                                                     registry);
+   private final YoDouble yoLinearVelocityErrorMagnitude = new YoDouble("invariantMinusMainLinearVelocityErrorMagnitude", registry);
+
+   // Body-frame numbers stored in world-frame-labelled vars (set raw); names carry the frame.
+   private final YoFrameVector3D yoMainRootAngularVelocity = new YoFrameVector3D("mainRootAngularVelocityBody", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D yoInvariantRootAngularVelocity = new YoFrameVector3D("invariantRootAngularVelocityBody",
+                                                                                      ReferenceFrame.getWorldFrame(),
+                                                                                      registry);
+   private final YoDouble yoAngularVelocityErrorMagnitude = new YoDouble("invariantMinusMainAngularVelocityErrorMagnitude", registry);
 
    /**
     * @param fullRobotModel             the (shared) estimator robot model used for forward kinematics.
@@ -124,6 +154,13 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       contactBodyCovariance.setM00(contactMeasurementVariance);
       contactBodyCovariance.setM11(contactMeasurementVariance);
       contactBodyCovariance.setM22(contactMeasurementVariance);
+
+      this.baseContactVariance = contactVariance;
+      yoContactProbability = new SideDependentList<>(new YoDouble("invariantContactProbabilityLeft", registry),
+                                                     new YoDouble("invariantContactProbabilityRight", registry));
+      // Default fallback: forward-kinematics-only contact detection on the estimator's own sole frames
+      // (already refreshed each tick in doControl, so no frame-updater hook is needed here).
+      contactProbabilityProvider = new KinematicContactDetector(soleFrames, null, dt);
    }
 
    @Override
@@ -140,7 +177,6 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          contactInWorld.setToZero(soleFrames.get(side));
          contactInWorld.changeFrame(ReferenceFrame.getWorldFrame());
          contactPositions[CONTACT_INDICES.get(side)] = new Point3D(contactInWorld);
-
       }
 
       ekf.initialize(tempRotation, new Vector3D(), basePosition, contactPositions, scaledIdentity(initialCovariance));
@@ -152,24 +188,38 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    {
       referenceFrames.updateFrames();
 
+      // Refresh per-foot contact probabilities, then apply knob 2 (contact-position process noise) before
+      // the prediction's covariance step consumes Q_c: a swing foot's anchor is given large slip noise so
+      // it re-anchors softly on touchdown instead of kicking the base.
+      contactProbabilityProvider.update();
+      for (RobotSide side : RobotSide.values)
+      {
+         double contactProbability = clamp(contactProbabilityProvider.getContactProbability(side));
+         yoContactProbability.get(side).set(contactProbability);
+         ekf.setContactSlipVariance(CONTACT_INDICES.get(side), contactSlipVariance(contactProbability));
+      }
+
       // IMU omega and a expressed in pelvis frame
       angularVelocity.setIncludingFrame(imuSensor.getMeasurementFrame(), imuSensor.getAngularVelocityMeasurement());
       angularVelocity.changeFrame(pelvisFrame);
       linearAcceleration.setIncludingFrame(imuSensor.getMeasurementFrame(), imuSensor.getLinearAccelerationMeasurement());
       linearAcceleration.changeFrame(pelvisFrame);
 
-
       ekf.predict(angularVelocity, linearAcceleration, dt);
 
+      // Knob 1 (measurement covariance): inflate a swing foot's contact FK noise so it stops dragging the
+      // base velocity, while a stance foot keeps constraining it.
       for (RobotSide side : RobotSide.values)
       {
+         double contactProbability = yoContactProbability.get(side).getDoubleValue();
          contactInBody.setToZero(soleFrames.get(side));
          contactInBody.changeFrame(pelvisFrame);
-         ekf.update(CONTACT_INDICES.get(side), contactInBody, contactBodyCovariance);
+         inflatedContactCovariance.set(contactBodyCovariance);
+         inflatedContactCovariance.scale(measurementInflation(contactProbability));
+         ekf.update(CONTACT_INDICES.get(side), contactInBody, inflatedContactCovariance);
       }
 
       updateYoVariables();
-
    }
 
    private void updateYoVariables()
@@ -180,19 +230,82 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       ekf.getRotation(tempRotation);
       yoBaseOrientation.set(tempRotation);
 
-      ekf.getBaseVelocity(tempVector);
-      yoBaseVelocity.set(tempVector);
+      ekf.getBaseVelocity(invariantLinearVelocityWorld);
+      yoBaseVelocity.set(invariantLinearVelocityWorld);
 
       // Main estimator's pelvis pose = the shared model's pelvis frame (the main estimator ticks first).
+      // Position is unobservable here, so it is kept only for the 3D marker; orientation is observable.
       mainEstimatePelvisPose.setToZero(pelvisFrame);
       mainEstimatePelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
       yoMainBasePosition.set(mainEstimatePelvisPose.getPosition());
       yoMainBaseOrientation.set(mainEstimatePelvisPose.getOrientation());
-
-      // Invariant − main differences (should hover near zero if the filters agree).
-      yoBasePositionError.sub(yoBasePosition, yoMainBasePosition);
-      yoBasePositionErrorMagnitude.set(yoBasePositionError.norm());
       yoBaseOrientationErrorAngle.set(yoBaseOrientation.distance(mainEstimatePelvisPose.getOrientation()));
+
+      // DRC estimator's estimated root-joint twist = the shared model's pelvis-frame twist.
+      TwistReadOnly pelvisTwist = pelvisFrame.getTwistOfFrame();
+
+      // Linear velocity (observable), compared in the world frame.
+      mainLinearVelocity.setIncludingFrame(pelvisTwist.getLinearPart());
+      mainLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+      yoMainRootLinearVelocity.set(mainLinearVelocity);
+      yoInvariantRootLinearVelocity.set(invariantLinearVelocityWorld);
+      velocityErrorTemp.sub(invariantLinearVelocityWorld, mainLinearVelocity);
+      yoLinearVelocityErrorMagnitude.set(velocityErrorTemp.norm());
+
+      // Angular velocity, compared in the pelvis (body) frame: the invariant filter's angular rate is the
+      // gyro it integrates; the DRC value is the twist's angular part (both already in the pelvis frame).
+      mainAngularVelocityBody.set(pelvisTwist.getAngularPart());
+      invariantAngularVelocityBody.set(angularVelocity);
+      yoMainRootAngularVelocity.set(mainAngularVelocityBody);
+      yoInvariantRootAngularVelocity.set(invariantAngularVelocityBody);
+      velocityErrorTemp.sub(invariantAngularVelocityBody, mainAngularVelocityBody);
+      yoAngularVelocityErrorMagnitude.set(velocityErrorTemp.norm());
+   }
+
+   /**
+    * Installs the contact-probability source (e.g. the controller-contact oracle, or a learned ContactNet
+    * head). Replaces the default forward-kinematics detector.
+    *
+    * @param provider the new provider. Not null.
+    */
+   public void setContactProbabilityProvider(ContactProbabilityProvider provider)
+   {
+      this.contactProbabilityProvider = Objects.requireNonNull(provider, "contactProbabilityProvider");
+   }
+
+   /** @return the installed contact-probability source. */
+   public ContactProbabilityProvider getContactProbabilityProvider()
+   {
+      return contactProbabilityProvider;
+   }
+
+   /** Sets the measurement-covariance inflation a fully-swing foot (p = 0) receives; 1 disables knob 1. */
+   public void setSwingMeasurementInflation(double swingMeasurementInflation)
+   {
+      this.swingMeasurementInflation = swingMeasurementInflation;
+   }
+
+   /** Sets the contact-slip-variance inflation a fully-swing foot (p = 0) receives; 1 disables knob 2. */
+   public void setSwingSlipInflation(double swingSlipInflation)
+   {
+      this.swingSlipInflation = swingSlipInflation;
+   }
+
+   /** Knob 1: contact FK measurement covariance scale, inflation^(1−p) — 1 at p = 1, swing inflation at p = 0. */
+   private double measurementInflation(double contactProbability)
+   {
+      return Math.pow(swingMeasurementInflation, 1.0 - contactProbability);
+   }
+
+   /** Knob 2: contact-position slip variance σ_{c,i}², base × inflation^(1−p). */
+   private double contactSlipVariance(double contactProbability)
+   {
+      return baseContactVariance * Math.pow(swingSlipInflation, 1.0 - contactProbability);
+   }
+
+   private static double clamp(double value)
+   {
+      return value < 0.0 ? 0.0 : (value > 1.0 ? 1.0 : value);
    }
 
    private static org.ejml.data.DMatrixRMaj scaledIdentity(double scale)
@@ -241,5 +354,16 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    public InvariantEKF getInvariantEKF()
    {
       return ekf;
+   }
+
+   /**
+    * Packs the body-frame angular velocity the filter integrates (the bias-free IMU gyro in the pelvis
+    * frame). Exposed so external comparators can compare it against a reference angular velocity.
+    *
+    * @param angularVelocityToPack the body-frame angular velocity. Modified.
+    */
+   public void getMeasuredAngularVelocityInBody(us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics angularVelocityToPack)
+   {
+      angularVelocityToPack.set(angularVelocity);
    }
 }
