@@ -5,6 +5,7 @@ import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -27,6 +28,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.euclid.YoQuaternion;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Adapter that runs the {@link InvariantEKF} as an IHMC {@link StateEstimatorController}.
@@ -72,11 +74,19 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final FramePoint3D contactInWorld = new FramePoint3D();
    private final RotationMatrix tempRotation = new RotationMatrix();
    private final Vector3D tempVector = new Vector3D();
+   private final FramePose3D mainEstimatePelvisPose = new FramePose3D();
 
    // Estimate outputs for logging/comparison.
    private final YoFramePoint3D yoBasePosition = new YoFramePoint3D("invariantFilterPelvisBasePosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoQuaternion yoBaseOrientation = new YoQuaternion("invariantFilterPelvisBaseOrientation", registry);
    private final YoFrameVector3D yoBaseVelocity = new YoFrameVector3D("invariantFilterPelvisBaseVelocity", ReferenceFrame.getWorldFrame(), registry);
+
+   // Main (DRC) estimator's pelvis pose, read from the shared model, and the invariant-vs-main difference.
+   private final YoFramePoint3D yoMainBasePosition = new YoFramePoint3D("mainFilterPelvisBasePosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoQuaternion yoMainBaseOrientation = new YoQuaternion("mainFilterPelvisBaseOrientation", registry);
+   private final YoFrameVector3D yoBasePositionError = new YoFrameVector3D("invariantMinusMainPositionError", ReferenceFrame.getWorldFrame(), registry);
+   private final YoDouble yoBasePositionErrorMagnitude = new YoDouble("invariantMinusMainPositionErrorMagnitude", registry);
+   private final YoDouble yoBaseOrientationErrorAngle = new YoDouble("invariantMinusMainOrientationErrorAngle", registry);
 
    /**
     * @param fullRobotModel             the (shared) estimator robot model used for forward kinematics.
@@ -172,6 +182,17 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
 
       ekf.getBaseVelocity(tempVector);
       yoBaseVelocity.set(tempVector);
+
+      // Main estimator's pelvis pose = the shared model's pelvis frame (the main estimator ticks first).
+      mainEstimatePelvisPose.setToZero(pelvisFrame);
+      mainEstimatePelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
+      yoMainBasePosition.set(mainEstimatePelvisPose.getPosition());
+      yoMainBaseOrientation.set(mainEstimatePelvisPose.getOrientation());
+
+      // Invariant − main differences (should hover near zero if the filters agree).
+      yoBasePositionError.sub(yoBasePosition, yoMainBasePosition);
+      yoBasePositionErrorMagnitude.set(yoBasePositionError.norm());
+      yoBaseOrientationErrorAngle.set(yoBaseOrientation.distance(mainEstimatePelvisPose.getOrientation()));
    }
 
    private static org.ejml.data.DMatrixRMaj scaledIdentity(double scale)
@@ -212,6 +233,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(name);
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("invariantPelvisEstimate", yoBasePosition, 0.05, ColorDefinitions.Red()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("mainPelvisEstimate", yoMainBasePosition, 0.05, ColorDefinitions.Green()));
       return group;
    }
 
