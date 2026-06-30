@@ -391,7 +391,8 @@ public class OneDoFJointFeedbackControlCommand implements FeedbackControlCommand
    @Override
    public String toString()
    {
-      return getClass().getSimpleName() + ": joint: " + joint.getName() + ", control mode: " + controlMode + ", q: " + referencePosition + ", qd: " + referenceVelocity + ", qdd: "
-            + referenceAcceleration + ", tau: " + referenceEffort;
+      return getClass().getSimpleName() + ": joint = " + joint.getName() + ", control mode = " + controlMode + ", q = " + referencePosition
+            + ", qd = " + referenceVelocity + ", qdd = " + referenceAcceleration + ", tau = " + referenceEffort
+            + ", weight = " + weightForSolver + ", kp = " + gains.getKp() + ", kd = " + gains.getKd();
    }
 }

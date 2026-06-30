@@ -150,10 +150,6 @@ public class RDXBehaviorTreeNodeCreationMenu
          for (RobotSide side : RobotSide.values)
             renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), ArmActionDefinition.class, side);
          ImGui.text("Arm");
-         ImGui.setCursorPosX(align);
-         for (RobotSide side : RobotSide.values)
-            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), ScrewPrimitiveActionDefinition.class, side);
-         ImGui.text("Screw Primitive");
          ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
          handIcon.render(RobotSide.LEFT, ImGui.getTextLineHeight(), false);
          ImGui.sameLine();

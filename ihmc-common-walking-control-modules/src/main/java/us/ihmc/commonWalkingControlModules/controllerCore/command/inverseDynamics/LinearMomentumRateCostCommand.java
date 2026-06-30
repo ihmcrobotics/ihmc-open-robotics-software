@@ -176,4 +176,11 @@ public class LinearMomentumRateCostCommand implements InverseDynamicsCommand<Lin
       }
    }
 
+   @Override
+   public String toString()
+   {
+      return getClass().getSimpleName() + ": weight = " + weight + ", selection = " + selectionMatrix
+            + ", hessian dims = " + momentumRateHessian.getNumRows() + "x" + momentumRateHessian.getNumCols()
+            + ", gradient dims = " + momentumRateGradient.getNumRows() + "x" + momentumRateGradient.getNumCols();
+   }
 }

@@ -11,6 +11,7 @@ import us.ihmc.pubsub.TopicDataType;
        * FoundationPose:
        * Door Frame
        * Composite Reference Frame:
+       * Approach table
        */
 public class BehaviorTreeSceneObjectDefinitionMessage extends Packet<BehaviorTreeSceneObjectDefinitionMessage> implements Settable<BehaviorTreeSceneObjectDefinitionMessage>, EpsilonComparable<BehaviorTreeSceneObjectDefinitionMessage>
 {
@@ -63,6 +64,14 @@ public class BehaviorTreeSceneObjectDefinitionMessage extends Packet<BehaviorTre
             * Distance from frame B
             */
    public float composite_distance_;
+   /**
+            * Consider the table edge when there are this many points in the capsule
+            */
+   public int min_capsule_points_;
+   /**
+            * Initial capsule distance to start from robot, tunable to avoid detecting self as the table
+            */
+   public float search_start_x_;
 
    public BehaviorTreeSceneObjectDefinitionMessage()
    {
@@ -107,6 +116,10 @@ public class BehaviorTreeSceneObjectDefinitionMessage extends Packet<BehaviorTre
       composite_frame_type_ = other.composite_frame_type_;
 
       composite_distance_ = other.composite_distance_;
+
+      min_capsule_points_ = other.min_capsule_points_;
+
+      search_start_x_ = other.search_start_x_;
 
    }
 
@@ -320,6 +333,36 @@ public class BehaviorTreeSceneObjectDefinitionMessage extends Packet<BehaviorTre
       return composite_distance_;
    }
 
+   /**
+            * Consider the table edge when there are this many points in the capsule
+            */
+   public void setMinCapsulePoints(int min_capsule_points)
+   {
+      min_capsule_points_ = min_capsule_points;
+   }
+   /**
+            * Consider the table edge when there are this many points in the capsule
+            */
+   public int getMinCapsulePoints()
+   {
+      return min_capsule_points_;
+   }
+
+   /**
+            * Initial capsule distance to start from robot, tunable to avoid detecting self as the table
+            */
+   public void setSearchStartX(float search_start_x)
+   {
+      search_start_x_ = search_start_x;
+   }
+   /**
+            * Initial capsule distance to start from robot, tunable to avoid detecting self as the table
+            */
+   public float getSearchStartX()
+   {
+      return search_start_x_;
+   }
+
 
    public static Supplier<BehaviorTreeSceneObjectDefinitionMessagePubSubType> getPubSubType()
    {
@@ -360,6 +403,10 @@ public class BehaviorTreeSceneObjectDefinitionMessage extends Packet<BehaviorTre
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.composite_distance_, other.composite_distance_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_capsule_points_, other.min_capsule_points_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.search_start_x_, other.search_start_x_, epsilon)) return false;
+
 
       return true;
    }
@@ -395,6 +442,10 @@ public class BehaviorTreeSceneObjectDefinitionMessage extends Packet<BehaviorTre
 
       if(this.composite_distance_ != otherMyClass.composite_distance_) return false;
 
+      if(this.min_capsule_points_ != otherMyClass.min_capsule_points_) return false;
+
+      if(this.search_start_x_ != otherMyClass.search_start_x_) return false;
+
 
       return true;
    }
@@ -426,7 +477,11 @@ public class BehaviorTreeSceneObjectDefinitionMessage extends Packet<BehaviorTre
       builder.append("composite_frame_type=");
       builder.append(this.composite_frame_type_);      builder.append(", ");
       builder.append("composite_distance=");
-      builder.append(this.composite_distance_);
+      builder.append(this.composite_distance_);      builder.append(", ");
+      builder.append("min_capsule_points=");
+      builder.append(this.min_capsule_points_);      builder.append(", ");
+      builder.append("search_start_x=");
+      builder.append(this.search_start_x_);
       builder.append("}");
       return builder.toString();
    }

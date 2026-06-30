@@ -231,4 +231,15 @@ public class JointspaceFeedbackControlCommand extends FeedbackControlCommandList
          return false;
       }
    }
+
+   @Override
+   public String toString()
+   {
+      String ret = getClass().getSimpleName() + ": ";
+      for (int i = 0; i < jointCommands.size(); i++)
+      {
+         ret += "\n  " + jointCommands.get(i);
+      }
+      return ret;
+   }
 }

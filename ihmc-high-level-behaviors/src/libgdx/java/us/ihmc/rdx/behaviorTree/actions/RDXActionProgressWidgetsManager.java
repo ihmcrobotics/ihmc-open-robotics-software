@@ -56,7 +56,7 @@ public class RDXActionProgressWidgetsManager
 
          if (action instanceof RDXWalkAction)
             containsFootsteps = true;
-         if (action instanceof RDXArmAction || action instanceof RDXScrewPrimitiveAction)
+         if (action instanceof RDXArmAction)
             containsHandMovements = true;
          if (action instanceof RDXEZGripperAction)
             containsEzGripperConfiguration = true;

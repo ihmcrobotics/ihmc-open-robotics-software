@@ -997,6 +997,6 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    public String toString()
    {
       return getClass().getSimpleName() + ": base = " + base + ", endEffector = " + endEffector + ", linear = " + desiredLinearAcceleration + ", angular = "
-            + desiredAngularAcceleration;
+            + desiredAngularAcceleration + ", weight = " + weightMatrix + ", selection = " + selectionMatrix;
    }
 }
