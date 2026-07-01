@@ -47,12 +47,19 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    {
       if (communicationThrottler.run())
       {
-         // Must publish first to get newly modified data published
-         // This is because data gets modified after the update in the
-         // ImGui rendering thread.
-         ros2BehaviorTree.updatePublication();
-         publishFrequencyText.ping();
+         // Merge robot/operator state first. ImGui edits from the previous frame are detected below.
          ros2BehaviorTree.updateSubscription();
+         subscriptionFrequencyText.ping();
+
+         // Publish only when this panel edited the tree. Continuous publishing of an unchanged local
+         // tree overwrites voice/CLI-authored nodes on the ROBOT executor (two OPERATOR peers).
+         getDataModification().checkModified();
+         getRootReferenceModification().checkModified();
+         if (getDataModification().isModified() || getRootReferenceModification().isModified())
+         {
+            ros2BehaviorTree.updatePublication();
+            publishFrequencyText.ping();
+         }
       }
 
       super.update();

@@ -77,61 +77,70 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
 
    public void update()
    {
+      if (!behaviorTreeStateMessageQueue.poll())
+         return;
+
+      BehaviorTreeStateMessage behaviorTreeStateMessage = behaviorTreeStateMessageQueue.read();
+      // Only apply the newest snapshot — processing every queued message duplicates tree merges and blows up heap.
       while (behaviorTreeStateMessageQueue.poll())
       {
-         BehaviorTreeStateMessage behaviorTreeStateMessage = behaviorTreeStateMessageQueue.read();
-
-         sequenceId = behaviorTreeStateMessage.getSequenceId();
-         numberOfOnRobotNodes = behaviorTreeStateMessage.getBehaviorTreeIndices().size();
-
-         subscriptionRootNode.clear();
-         subscriptionNodeDepthFirstIndex.setValue(0);
-         idToSubscriptionNodesMap.clear();
-         boolean subscriptionRootIsNull = behaviorTreeStateMessage.getBehaviorTreeTypes().isEmpty();
-         if (!subscriptionRootIsNull)
-            buildSubscriptionTree(behaviorTreeStateMessage, subscriptionRootNode);
-
-         behaviorTree.fromMessage(behaviorTreeStateMessage);
-
-         // The algorithm to support added, removed, and moved nodes:
-         // 1. Map the nodes by ID
-         // 2. As we traverse the tree, remove the IDs from the map
-         //    2a. If children modified, traverse the message's children
-         //    2b. Else, traverse our local children list
-         // 3. Any nodes remaining in the map afterwards get destroyed
-         idToLocalNodesMap.clear();
-         if (behaviorTree.getRootNode() != null)
-            BehaviorTreeTools.runForSubtreeNodes((T) behaviorTree.getRootNode(),
-                                                 node -> idToLocalNodesMap.put(node.getState().getID(), node));
-
-         behaviorTree.modifyTreeTopology(topologyOperationQueue ->
-         {
-            BehaviorTreeRootNode<T> rootNode = behaviorTree.getRootNode();
-
-            boolean rootReferenceModificationIncoming = behaviorTree.getRootReferenceModification().isModificationIncoming();
-            if (rootReferenceModificationIncoming)
-            {
-               rootNode = subscriptionRootIsNull ? null :
-                                (BehaviorTreeRootNode<T>) retrieveOrReplicateLocalNode(subscriptionRootNode, rootReferenceModificationIncoming, null);
-               topologyOperationQueue.queueSetRootNode(rootNode);
-            }
-
-            if (rootNode != null)
-               idToLocalNodesMap.remove(rootNode.getState().getID());
-
-            // We need to traverse the tree even if there are no remote nodes to match,
-            // because we might have the most up to date version
-            if (rootNode != null)
-               retrieveOrReplicateSubreeFromSubscription(subscriptionRootNode, (T) rootNode, rootNode, topologyOperationQueue);
-
-            // These nodes were removed from the tree
-            for (T value : idToLocalNodesMap.values())
-               value.destroy();
-            idToLocalNodesMap.clear();
-         });
-
          behaviorTreeStateMessageQueue.flush();
+         behaviorTreeStateMessage = behaviorTreeStateMessageQueue.read();
       }
+
+      applyIncomingState(behaviorTreeStateMessage);
+      behaviorTreeStateMessageQueue.flush();
+   }
+
+   private void applyIncomingState(BehaviorTreeStateMessage behaviorTreeStateMessage)
+   {
+      sequenceId = behaviorTreeStateMessage.getSequenceId();
+      numberOfOnRobotNodes = behaviorTreeStateMessage.getBehaviorTreeIndices().size();
+
+      subscriptionRootNode.clear();
+      subscriptionNodeDepthFirstIndex.setValue(0);
+      idToSubscriptionNodesMap.clear();
+      boolean subscriptionRootIsNull = behaviorTreeStateMessage.getBehaviorTreeTypes().isEmpty();
+      if (!subscriptionRootIsNull)
+         buildSubscriptionTree(behaviorTreeStateMessage, subscriptionRootNode);
+
+      behaviorTree.fromMessage(behaviorTreeStateMessage);
+
+      // The algorithm to support added, removed, and moved nodes:
+      // 1. Map the nodes by ID
+      // 2. As we traverse the tree, remove the IDs from the map
+      //    2a. If children modified, traverse the message's children
+      //    2b. Else, traverse our local children list
+      // 3. Any nodes remaining in the map afterwards get destroyed
+      idToLocalNodesMap.clear();
+      if (behaviorTree.getRootNode() != null)
+         BehaviorTreeTools.runForSubtreeNodes((T) behaviorTree.getRootNode(), node -> idToLocalNodesMap.put(node.getState().getID(), node));
+
+      behaviorTree.modifyTreeTopology(topologyOperationQueue ->
+      {
+         BehaviorTreeRootNode<T> rootNode = behaviorTree.getRootNode();
+
+         boolean rootReferenceModificationIncoming = behaviorTree.getRootReferenceModification().isModificationIncoming();
+         if (rootReferenceModificationIncoming)
+         {
+            rootNode = subscriptionRootIsNull ? null :
+                             (BehaviorTreeRootNode<T>) retrieveOrReplicateLocalNode(subscriptionRootNode, rootReferenceModificationIncoming, null);
+            topologyOperationQueue.queueSetRootNode(rootNode);
+         }
+
+         if (rootNode != null)
+            idToLocalNodesMap.remove(rootNode.getState().getID());
+
+         // We need to traverse the tree even if there are no remote nodes to match,
+         // because we might have the most up to date version
+         if (rootNode != null)
+            retrieveOrReplicateSubreeFromSubscription(subscriptionRootNode, (T) rootNode, rootNode, topologyOperationQueue);
+
+         // These nodes were removed from the tree
+         for (T value : idToLocalNodesMap.values())
+            value.destroy();
+         idToLocalNodesMap.clear();
+      });
    }
 
    private void retrieveOrReplicateSubreeFromSubscription(ROS2BehaviorTreeSubscriptionNode subscriptionNode,

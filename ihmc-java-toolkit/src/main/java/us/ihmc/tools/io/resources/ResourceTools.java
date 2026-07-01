@@ -45,7 +45,7 @@ public class ResourceTools
     */
    public static InputStream openStreamAbsolute(Class<?> clazz, Path path)
    {
-      return clazz.getClassLoader().getResourceAsStream(path.toString());
+      return clazz.getClassLoader().getResourceAsStream(toResourceAccessStringWithCorrectSeparators(path));
    }
    
    /**
@@ -53,7 +53,7 @@ public class ResourceTools
     */
    public static InputStream openStreamRelative(Class<?> clazz, Path path)
    {
-      return clazz.getResourceAsStream(path.toString());
+      return clazz.getResourceAsStream(toResourceAccessStringWithCorrectSeparators(path));
    }
    
    /**
@@ -61,7 +61,7 @@ public class ResourceTools
     */
    public static InputStream openStreamSystem(Path path)
    {
-      return ClassLoader.getSystemResourceAsStream(path.toString());
+      return ClassLoader.getSystemResourceAsStream(toResourceAccessStringWithCorrectSeparators(path));
    }
    
    /**
@@ -69,7 +69,7 @@ public class ResourceTools
     */
    public static URL getResourceAbsolute(Class<?> clazz, Path path)
    {
-      return clazz.getClassLoader().getResource(path.toString());
+      return clazz.getClassLoader().getResource(toResourceAccessStringWithCorrectSeparators(path));
    }
    
    /**
@@ -77,7 +77,7 @@ public class ResourceTools
     */
    public static URL getResourceRelative(Class<?> clazz, Path path)
    {
-      return clazz.getResource(path.toString());
+      return clazz.getResource(toResourceAccessStringWithCorrectSeparators(path));
    }
    
    /**
@@ -85,7 +85,7 @@ public class ResourceTools
     */
    public static URL getResourceSystem(Path path)
    {
-      return ClassLoader.getSystemResource(path.toString());
+      return ClassLoader.getSystemResource(toResourceAccessStringWithCorrectSeparators(path));
    }
 
    public static String readResourceToString(InputStream inputStream)
@@ -106,12 +106,13 @@ public class ResourceTools
 
    public static byte[] readResourceToByteArray(String resourceAbsolutePath)
    {
-      return ExceptionTools.handle(() -> IOUtils.resourceToByteArray(resourceAbsolutePath), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      return ExceptionTools.handle(() -> IOUtils.resourceToByteArray(toResourceAccessStringWithCorrectSeparators(Paths.get(resourceAbsolutePath))),
+                                    DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
    public static void readResourceToByteBuffer(String resourceAbsolutePath, ByteBuffer byteBuffer)
    {
-      try (InputStream inputStream = Object.class.getClassLoader().getResourceAsStream(resourceAbsolutePath))
+      try (InputStream inputStream = Object.class.getClassLoader().getResourceAsStream(toResourceAccessStringWithCorrectSeparators(Paths.get(resourceAbsolutePath))))
       {
          int zeroTo255;
          while ((zeroTo255 = inputStream.read()) > -1)

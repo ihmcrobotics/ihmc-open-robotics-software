@@ -50,8 +50,8 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
       ROS2BehaviorTreeMessageTools.packYoData((BehaviorTreeExecutor) ros2BehaviorTree.getBehaviorTree(), yoDataMessage);
       yoDataPublisher.publish(yoDataMessage);
 
-      ros2BehaviorTree.updatePublication();
       ros2BehaviorTree.updateSubscription();
+      ros2BehaviorTree.updatePublication();
 
       // TODO: Consider updating this at a higher rate than the comms
       super.update();
