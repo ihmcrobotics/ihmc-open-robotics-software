@@ -15,6 +15,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -40,10 +41,14 @@ import us.ihmc.yoVariables.registry.YoRegistry;
  *       updaters write {@code rootJoint} (orientation/position setters, angular twist in body, linear twist
  *       via {@code setMatchingFrame} from world). The published context then carries the InEKF base to the
  *       controller.</li>
+ *   <li><b>Center of mass</b> — runs an {@link InvariantCenterOfMassUpdater} (the {@code MomentumStateUpdater}
+ *       seam) <em>after</em> the root-joint write, so CoM position/velocity are derived purely from the InEKF
+ *       base and published to the controller via the shared {@link CenterOfMassDataHolder}. Velocity is
+ *       kinematic (no GRF/centroidal fusion yet); see that class for the caveat and the upgrade seam.</li>
  * </ol>
- * CoM and force-sensor data holders are intentionally <em>not</em> updated here: the sensor reader fills
- * the force-sensor holder the controller reads, and the controller derives CoM from the published model —
- * the same division of labour the EKF main estimator ({@code HumanoidRobotEKFWithSimpleJoints}) relies on.</p>
+ * The force-sensor data holder is intentionally <em>not</em> updated here: the sensor reader fills the
+ * force-sensor holder the controller reads, mirroring the division of labour the EKF main estimator
+ * ({@code HumanoidRobotEKFWithSimpleJoints}) relies on.</p>
  */
 public class InvariantMainStateEstimator implements StateEstimatorController
 {
@@ -59,6 +64,7 @@ public class InvariantMainStateEstimator implements StateEstimatorController
 
    private final InvariantEKFStateEstimator invariantEstimator;
    private final FootReferencedYawCorrector yawCorrector; // null when yaw seeding is disabled
+   private final InvariantCenterOfMassUpdater centerOfMassUpdater;
 
    // Root-joint write temporaries.
    private final RotationMatrix rootOrientation = new RotationMatrix();
@@ -70,6 +76,10 @@ public class InvariantMainStateEstimator implements StateEstimatorController
    /**
     * @param fullRobotModel             the estimator's full robot model (joints set here, root written here).
     * @param processedSensorOutput      processed sensor outputs (IMU + joints).
+    * @param primaryImuName             sensor name of the pelvis (base) IMU to use, e.g.
+    *                                   {@code sensorInformation.getPrimaryBodyImu()}.
+    * @param centerOfMassDataHolder     shared CoM holder, written each tick from the InEKF base estimate and
+    *                                   published to the controller; may be {@code null} to skip CoM output.
     * @param dt                         estimator timestep Δt (s).
     * @param gyroVariance               continuous gyro noise variance σ_ω².
     * @param accelVariance              continuous accel noise variance σ_a².
@@ -80,6 +90,8 @@ public class InvariantMainStateEstimator implements StateEstimatorController
     */
    public InvariantMainStateEstimator(FullHumanoidRobotModel fullRobotModel,
                                       SensorOutputMapReadOnly processedSensorOutput,
+                                      String primaryImuName,
+                                      CenterOfMassDataHolder centerOfMassDataHolder,
                                       double dt,
                                       double gyroVariance,
                                       double accelVariance,
@@ -97,6 +109,7 @@ public class InvariantMainStateEstimator implements StateEstimatorController
 
       invariantEstimator = new InvariantEKFStateEstimator(fullRobotModel,
                                                           processedSensorOutput,
+                                                          primaryImuName,
                                                           dt,
                                                           gyroVariance,
                                                           accelVariance,
@@ -121,6 +134,9 @@ public class InvariantMainStateEstimator implements StateEstimatorController
       {
          yawCorrector = null;
       }
+
+      centerOfMassUpdater = new InvariantCenterOfMassUpdater(rootJoint, centerOfMassDataHolder);
+      registry.addChild(centerOfMassUpdater.getRegistry());
    }
 
    @Override
@@ -135,6 +151,9 @@ public class InvariantMainStateEstimator implements StateEstimatorController
          yawCorrector.correct();
 
       writeRootJoint();
+
+      // CoM position/velocity for the controller, derived from the InEKF base just written to the root joint.
+      centerOfMassUpdater.update();
    }
 
    /** Sets q/q̇/τ for every one-DoF joint from the processed sensor output and refreshes the model frames. */
@@ -179,6 +198,7 @@ public class InvariantMainStateEstimator implements StateEstimatorController
       updateJoints();
       referenceFrames.updateFrames();
       invariantEstimator.initialize();
+      centerOfMassUpdater.initialize();
    }
 
    @Override
@@ -194,6 +214,8 @@ public class InvariantMainStateEstimator implements StateEstimatorController
 
       if (yawCorrector != null)
          yawCorrector.reset();
+
+      centerOfMassUpdater.initialize();
    }
 
    @Override

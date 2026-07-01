@@ -14,6 +14,7 @@ import us.ihmc.stateEstimation.humanoid.StateEstimatorControllerFactory;
  */
 public class InvariantEKFStateEstimatorFactory implements StateEstimatorControllerFactory
 {
+   private final String primaryImuName;
    private final double estimatorDT;
    private final double gyroVariance;
    private final double accelVariance;
@@ -25,17 +26,21 @@ public class InvariantEKFStateEstimatorFactory implements StateEstimatorControll
    private InvariantEKFStateEstimator estimator;
 
    /**
-    * Uses reasonable defaults for the noise terms; only the timestep is required.
+    * Uses reasonable defaults for the noise terms; only the timestep and primary IMU name are required.
     *
-    * @param estimatorDT the estimator timestep Δt (s), e.g. {@code stateEstimatorParameters.getEstimatorDT()}.
+    * @param estimatorDT    the estimator timestep Δt (s), e.g. {@code stateEstimatorParameters.getEstimatorDT()}.
+    * @param primaryImuName sensor name of the pelvis (base) IMU to use, e.g.
+    *                       {@code sensorInformation.getPrimaryBodyImu()}.
     */
-   public InvariantEKFStateEstimatorFactory(double estimatorDT)
+   public InvariantEKFStateEstimatorFactory(double estimatorDT, String primaryImuName)
    {
-      this(estimatorDT, 1.0e-4, 1.0e-3, 1.0e-6, 1.0e-4, 1.0);
+      this(estimatorDT, primaryImuName, 1.0e-4, 1.0e-3, 1.0e-6, 1.0e-4, 1.0);
    }
 
    /**
     * @param estimatorDT                the estimator timestep Δt (s).
+    * @param primaryImuName             sensor name of the pelvis (base) IMU to use, e.g.
+    *                                   {@code sensorInformation.getPrimaryBodyImu()}.
     * @param gyroVariance               continuous gyro noise variance σ_ω².
     * @param accelVariance              continuous accel noise variance σ_a².
     * @param contactVariance            continuous contact-slip noise variance σ_c².
@@ -43,6 +48,7 @@ public class InvariantEKFStateEstimatorFactory implements StateEstimatorControll
     * @param initialCovariance          scalar for the initial P = initialCovariance · I.
     */
    public InvariantEKFStateEstimatorFactory(double estimatorDT,
+                                            String primaryImuName,
                                             double gyroVariance,
                                             double accelVariance,
                                             double contactVariance,
@@ -50,6 +56,7 @@ public class InvariantEKFStateEstimatorFactory implements StateEstimatorControll
                                             double initialCovariance)
    {
       this.estimatorDT = estimatorDT;
+      this.primaryImuName = primaryImuName;
       this.gyroVariance = gyroVariance;
       this.accelVariance = accelVariance;
       this.contactVariance = contactVariance;
@@ -62,6 +69,7 @@ public class InvariantEKFStateEstimatorFactory implements StateEstimatorControll
    {
      estimator = new InvariantEKFStateEstimator(fullRobotModel,
                                                 sensorReader.getProcessedSensorOutputMap(),
+                                                primaryImuName,
                                                 estimatorDT,
                                                 gyroVariance,
                                                 accelVariance,

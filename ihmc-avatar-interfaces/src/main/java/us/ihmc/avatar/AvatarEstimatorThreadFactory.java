@@ -514,8 +514,9 @@ public class AvatarEstimatorThreadFactory
 
    /**
     * Creates the contact-aided right-invariant InEKF as a main {@link StateEstimatorController}: joints from
-    * the processed sensor output (good-enough FK), InEKF floating base, optional yaw seeding, and the
-    * root-joint write. Uses the same noise defaults as {@code InvariantEKFStateEstimatorFactory}.
+    * the processed sensor output (good-enough FK), InEKF floating base, optional yaw seeding, the root-joint
+    * write, and CoM position/velocity published to the shared center-of-mass holder. Uses the same noise
+    * defaults as {@code InvariantEKFStateEstimatorFactory}.
     */
    public StateEstimatorController createInvariantStateEstimator()
    {
@@ -523,8 +524,11 @@ public class AvatarEstimatorThreadFactory
          return null;
 
       double estimatorDT = getStateEstimatorParameters().getEstimatorDT();
+      String primaryImuName = getSensorInformation().getPrimaryBodyImu();
       return new InvariantMainStateEstimator(getEstimatorFullRobotModel(),
                                              getProcessedSensorOutputMap(),
+                                             primaryImuName,
+                                             getCenterOfMassDataHolder(), // same holder published to the controller context
                                              estimatorDT,
                                              1.0e-4, // gyroVariance
                                              1.0e-3, // accelVariance

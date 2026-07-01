@@ -121,6 +121,9 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    /**
     * @param fullRobotModel             the (shared) estimator robot model used for forward kinematics.
     * @param sensorOutputMap            processed sensor outputs (IMU + joints).
+    * @param primaryImuName             sensor name of the pelvis (base) IMU to use, e.g.
+    *                                   {@code sensorInformation.getPrimaryBodyImu()}. Matched against
+    *                                   {@link IMUSensorReadOnly#getSensorName()} in {@code sensorOutputMap}.
     * @param dt                         estimator timestep Δt (s).
     * @param gyroVariance               continuous gyro noise variance σ_ω² for the propagator.
     * @param accelVariance              continuous accel noise variance σ_a² for the propagator.
@@ -130,6 +133,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     */
    public InvariantEKFStateEstimator(FullHumanoidRobotModel fullRobotModel,
                                      SensorOutputMapReadOnly sensorOutputMap,
+                                     String primaryImuName,
                                      double dt,
                                      double gyroVariance,
                                      double accelVariance,
@@ -148,7 +152,17 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       for (RobotSide side : RobotSide.values)
          soleFrames.put(side, referenceFrames.getSoleFrame(side));
 
-      imuSensor = sensorOutputMap.getIMUOutputs().get(0); // primary IMU (check this)
+      Objects.requireNonNull(primaryImuName, "primaryImuName must not be null");
+      imuSensor = sensorOutputMap.getIMUOutputs()
+                                 .stream()
+                                 .filter(imu -> imu.getSensorName().equals(primaryImuName))
+                                 .findFirst()
+                                 .orElseThrow(() -> new IllegalArgumentException("No IMU named '" + primaryImuName
+                                                                                 + "' found in sensor output map. Available: "
+                                                                                 + sensorOutputMap.getIMUOutputs()
+                                                                                                   .stream()
+                                                                                                   .map(IMUSensorReadOnly::getSensorName)
+                                                                                                   .toList()));
 
       contactBodyCovariance.setToZero();
       contactBodyCovariance.setM00(contactMeasurementVariance);
