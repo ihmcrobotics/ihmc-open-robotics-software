@@ -1,0 +1,41 @@
+#ifndef __perception_msgs__msg__RobotPose__idl__
+#define __perception_msgs__msg__RobotPose__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Isaac Sim robot ground-truth root pose + joint angles.
+       * Published by the Isaac Sim bridge control process (alex_isaac_sim_dds.py) at the
+       * control rate so RDX can pin the robot mesh to Isaac ground truth (the estimator
+       * pose in RobotConfigurationData drifts from Isaac truth). Visualization only.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::RobotPose_")
+      struct RobotPose
+      {
+        /**
+         * Sequence number for detecting out-of-order / dropped messages
+         */
+        unsigned long long sequence_number;
+        /**
+         * Root (pelvis) world pose
+         */
+        geometry_msgs::msg::dds::Point position;
+        geometry_msgs::msg::dds::Quaternion orientation;
+        /**
+         * Joint angles by name (parallel arrays; applied by name, order-independent)
+         */
+        sequence<string> joint_names;
+        sequence<float> joint_positions;
+      };
+    };
+  };
+};
+
+#endif

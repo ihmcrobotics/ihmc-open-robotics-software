@@ -7,6 +7,7 @@ import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.RobotPose;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import perception_msgs.msg.dds.YOLOv8ExecutorParameters;
 import perception_msgs.msg.dds.YOLOv8AnnotationInfoList;
@@ -159,6 +160,8 @@ public final class PerceptionAPI
    public static final ROS2Topic<ImageMessage> ISAAC_SIM_FOLLOW_DEPTH   = ISAAC_SIM.withSuffix("follow/depth").withType(ImageMessage.class);
    public static final ROS2Topic<ImageMessage> ISAAC_SIM_HEAD_COLOR     = ISAAC_SIM.withSuffix("head/color").withType(ImageMessage.class);
    public static final ROS2Topic<ImageMessage> ISAAC_SIM_HEAD_DEPTH     = ISAAC_SIM.withSuffix("head/depth").withType(ImageMessage.class);
+   // Ground-truth robot root pose + joint angles (control rate) for RDX to pin the mesh to Isaac truth.
+   public static final ROS2Topic<RobotPose> ISAAC_SIM_ROBOT_POSE        = ISAAC_SIM.withSuffix("robot_pose").withType(RobotPose.class);
 
    /*
     * Planar regions
