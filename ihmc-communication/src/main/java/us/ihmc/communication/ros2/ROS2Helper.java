@@ -20,9 +20,16 @@ import us.ihmc.tools.thread.SwapReference;
 import java.util.function.Consumer;
 
 /**
+ * Convenience wrapper around {@link ROS2Node} for common publish/subscribe patterns.
+ * <p>
+ * Prefer using {@link ROS2Node} directly for new code. This class exists for legacy call sites and
+ * will likely be removed once those are migrated.
+ * <p>
  * Supports:
- * - Publishing on the fly without having to first create publishers
- * - Disabling and enabling all the publishers and subscribers created here
+ * <ul>
+ *    <li>Publishing on the fly without having to first create publishers</li>
+ *    <li>Disabling and enabling all the publishers and subscribers created here</li>
+ * </ul>
  */
 public class ROS2Helper
 {
