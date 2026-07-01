@@ -100,7 +100,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                  HighLevelHumanoidControllerFactory controllerFactory,
                                  HumanoidRobotContextDataFactory contextDataFactory,
                                  DRCOutputProcessor outputProcessor,
-                                 AsyncROS2Node realtimeROS2Node,
+                                 AsyncROS2Node asyncROS2Node,
                                  double gravity,
                                  boolean kinematicsSimulation)
    {
@@ -127,9 +127,9 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
       currentRobotMotionStatus.set(robotMotionStatusHolder.getCurrentRobotMotionStatus());
 
-      if (realtimeROS2Node != null)
+      if (asyncROS2Node != null)
       {
-         crashNotificationPublisher = realtimeROS2Node.createPublisher(HumanoidControllerAPI.getTopic(ControllerCrashNotificationPacket.class, robotName));
+         crashNotificationPublisher = asyncROS2Node.createPublisher(HumanoidControllerAPI.getTopic(ControllerCrashNotificationPacket.class, robotName));
       }
       else
       {

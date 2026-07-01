@@ -112,7 +112,7 @@ public class HumanoidKinematicsSimulation
    private final HumanoidKinematicsSimulationParameters kinematicsSimulationParameters;
    private final PausablePeriodicThread controlThread;
    private final ROS2Node ros2Node;
-   private final AsyncROS2Node realtimeROS2Node;
+   private final AsyncROS2Node asyncROS2Node;
    private final ROS2Heartbeat heartbeat;
    private final RobotConfigurationDataPublisher robotConfigurationDataPublisher;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -265,14 +265,14 @@ public class HumanoidKinematicsSimulation
       walkingParentRegistry.addChild(walkingController.getYoVariableRegistry());
 
       // create controller network subscriber here!!
-      realtimeROS2Node = new AsyncROS2Node(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
+      asyncROS2Node = new AsyncROS2Node(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
       ROS2Topic inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
       ROS2Topic outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
                                                                                                 walkingInputManager,
                                                                                                 outputTopic,
                                                                                                 walkingOutputManager,
-                                                                                                realtimeROS2Node);
+                                                                                                asyncROS2Node);
       controllerNetworkSubscriber.addMessageFilter(message ->
       {
          if (message instanceof FootstepDataListMessage)
@@ -431,7 +431,7 @@ public class HumanoidKinematicsSimulation
       rcdPublisherFactory.setPublishPeriod(0L);
       rcdPublisherFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
       
-      rcdPublisherFactory.setROS2Info(realtimeROS2Node, HumanoidControllerAPI.getOutputTopic(robotName));
+      rcdPublisherFactory.setROS2Info(asyncROS2Node, HumanoidControllerAPI.getOutputTopic(robotName));
 
       return rcdPublisherFactory.createRobotConfigurationDataPublisher();
    }
@@ -620,7 +620,7 @@ public class HumanoidKinematicsSimulation
          controlThread.destroy();
       heartbeat.destroy();
       ros2Node.close();
-      realtimeROS2Node.close();
+      asyncROS2Node.close();
       if (yoVariableServer != null)
          yoVariableServer.close();
    }

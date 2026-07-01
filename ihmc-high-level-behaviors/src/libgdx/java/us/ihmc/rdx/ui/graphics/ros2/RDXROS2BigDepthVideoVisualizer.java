@@ -17,7 +17,7 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2ImageVisualizer<BigVi
 {
    private final String titleBeforeAdditions;
    private final ROS2Topic<BigVideoPacket> topic;
-   private AsyncROS2Node realtimeROS2Node = null;
+   private AsyncROS2Node asyncROS2Node = null;
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private final Object syncObject = new Object();
    private BytePointer messageBytePointer;
@@ -34,11 +34,11 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2ImageVisualizer<BigVi
 
       addActivenessChangeCallback(isActive ->
       {
-         if (isActive && realtimeROS2Node == null)
+         if (isActive && asyncROS2Node == null)
          {
             subscribe();
          }
-         else if (!isActive && realtimeROS2Node != null)
+         else if (!isActive && asyncROS2Node != null)
          {
             unsubscribe();
          }
@@ -47,9 +47,9 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2ImageVisualizer<BigVi
 
    private void subscribe()
    {
-      this.realtimeROS2Node = new AsyncROS2Node(StringTools.titleToSnakeCase(titleBeforeAdditions));
+      this.asyncROS2Node = new AsyncROS2Node(StringTools.titleToSnakeCase(titleBeforeAdditions));
       // synchronize with the update method
-      realtimeROS2Node.createSubscription(topic, subscriber ->
+      asyncROS2Node.createSubscription(topic, subscriber ->
       {
          synchronized (syncObject)
          {
@@ -119,10 +119,10 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2ImageVisualizer<BigVi
 
    private void unsubscribe()
    {
-      if (realtimeROS2Node != null)
+      if (asyncROS2Node != null)
       {
-         realtimeROS2Node.close();
-         realtimeROS2Node = null;
+         asyncROS2Node.close();
+         asyncROS2Node = null;
       }
    }
 

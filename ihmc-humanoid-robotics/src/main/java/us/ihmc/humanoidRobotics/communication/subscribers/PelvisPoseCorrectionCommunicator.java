@@ -15,12 +15,12 @@ public class PelvisPoseCorrectionCommunicator implements PelvisPoseCorrectionCom
    private final ROS2Publisher<PelvisPoseErrorPacket> poseErrorPublisher;
    private final ROS2Publisher<LocalizationPacket> localizationPublisher;
 
-   public PelvisPoseCorrectionCommunicator(ROS2Node realtimeROS2Node, String robotName)
+   public PelvisPoseCorrectionCommunicator(ROS2Node asyncROS2Node, String robotName)
    {
-      if (realtimeROS2Node != null && robotName != null)
+      if (asyncROS2Node != null && robotName != null)
       {
-         poseErrorPublisher = realtimeROS2Node.createPublisher(StateEstimatorAPI.getTopic(PelvisPoseErrorPacket.class, robotName));
-         localizationPublisher = realtimeROS2Node.createPublisher(StateEstimatorAPI.getTopic(LocalizationPacket.class, robotName));
+         poseErrorPublisher = asyncROS2Node.createPublisher(StateEstimatorAPI.getTopic(PelvisPoseErrorPacket.class, robotName));
+         localizationPublisher = asyncROS2Node.createPublisher(StateEstimatorAPI.getTopic(LocalizationPacket.class, robotName));
       }
       else
       {

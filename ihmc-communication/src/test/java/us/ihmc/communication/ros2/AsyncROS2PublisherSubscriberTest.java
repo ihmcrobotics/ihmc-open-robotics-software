@@ -13,21 +13,21 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 @Disabled("Manual interactive test — blocks with sleepForever()")
-public class RealtimeROS2PublisherSubscriberTest
+public class AsyncROS2PublisherSubscriberTest
 {
-   private AsyncROS2Node realtimeROS2Node;
+   private AsyncROS2Node asyncROS2Node;
    private ROS2Publisher<ImageMessage> publisher;
 
-   public RealtimeROS2PublisherSubscriberTest()
+   public AsyncROS2PublisherSubscriberTest()
    {
-      realtimeROS2Node = new AsyncROS2Node("videotest");
+      asyncROS2Node = new AsyncROS2Node("videotest");
       ROS2Topic<ImageMessage> topic = new ROS2Topic<ImageMessage>().prependedWith("/ihmc/image/test")
                                                                      .withType(ImageMessage.class)
                                                                      .withQoS(ROS2QoSProfile.BEST_EFFORT);
       LogTools.info("Publishing to {}", topic);
-      publisher = realtimeROS2Node.createPublisher(topic);
+      publisher = asyncROS2Node.createPublisher(topic);
 
-      ROS2Subscription<ImageMessage> subscriber = realtimeROS2Node.createSubscription(topic, reader ->
+      ROS2Subscription<ImageMessage> subscriber = asyncROS2Node.createSubscription(topic, reader ->
       {
          ImageMessage message = reader.read();
          LogTools.info("Got from callback");
@@ -52,6 +52,6 @@ public class RealtimeROS2PublisherSubscriberTest
 
    public static void main(String[] args)
    {
-      new RealtimeROS2PublisherSubscriberTest();
+      new AsyncROS2PublisherSubscriberTest();
    }
 }

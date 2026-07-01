@@ -39,7 +39,7 @@ public class AvatarEstimatorProcessFactory
 
    // ROS stuff
    public final String IHMC_ROS_STATE_ESTIMATOR_NODE_NAME;
-   private final AsyncROS2Node estimatorRealtimeROS2Node;
+   private final AsyncROS2Node estimatorAsyncROS2Node;
 
    // The thread factories
    private final AvatarEstimatorThreadFactory estimatorThreadFactory;
@@ -93,7 +93,7 @@ public class AvatarEstimatorProcessFactory
       else
          ros2ThreadFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
 
-      estimatorRealtimeROS2Node = new AsyncROS2Node(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME);
+      estimatorAsyncROS2Node = new AsyncROS2Node(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME);
 
       // Set up low-level output processor
       lowLevelOutputProcessor = new AvatarLowLevelOutputProcessor(robotModel.getSimpleRobotName().toLowerCase(), fullRobotModel.getControllableOneDoFJoints(), estimatorThreadDt, registry);
@@ -125,7 +125,7 @@ public class AvatarEstimatorProcessFactory
       this.stop();
       System.out.println("Calling destroy in the estimator-threading factory");
 
-      estimatorRealtimeROS2Node.close();
+      estimatorAsyncROS2Node.close();
       System.out.println("Estimator node has been destroyed");
 
       hardwareCommunicationInterface.destroy();
@@ -172,7 +172,7 @@ public class AvatarEstimatorProcessFactory
       HumanoidRobotContextDataFactory estimatorContextDataFactory = new HumanoidRobotContextDataFactory();
 
       AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
-      avatarEstimatorThreadFactory.setROS2Info(estimatorRealtimeROS2Node, robotModel.getSimpleRobotName());
+      avatarEstimatorThreadFactory.setROS2Info(estimatorAsyncROS2Node, robotModel.getSimpleRobotName());
 
       avatarEstimatorThreadFactory.configureWithWholeBodyControllerParameters(robotModel);
       avatarEstimatorThreadFactory.setEstimatorFullRobotModel(fullRobotModel);

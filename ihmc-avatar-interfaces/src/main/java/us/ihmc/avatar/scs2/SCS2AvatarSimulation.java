@@ -64,7 +64,7 @@ public class SCS2AvatarSimulation
    private DRCRobotModel robotModel;
    private boolean showGUI;
    private boolean automaticallyStartSimulation;
-   private AsyncROS2Node realtimeROS2Node;
+   private AsyncROS2Node asyncROS2Node;
    private ROS2Heartbeat heartbeat;
 
    private boolean systemExitOnDestroy = true;
@@ -144,10 +144,10 @@ public class SCS2AvatarSimulation
          heartbeat = null;
       }
 
-      if (realtimeROS2Node != null && !realtimeROS2Node.isClosed())
+      if (asyncROS2Node != null && !asyncROS2Node.isClosed())
       {
-         realtimeROS2Node.close();
-         realtimeROS2Node = null;
+         asyncROS2Node.close();
+         asyncROS2Node = null;
       }
 
       if (simulationConstructionSet != null)
@@ -628,18 +628,18 @@ public class SCS2AvatarSimulation
       this.automaticallyStartSimulation = automaticallyStartSimulation;
    }
 
-   public void setRealTimeROS2Node(AsyncROS2Node realtimeROS2Node)
+   public void setAsyncROS2Node(AsyncROS2Node asyncROS2Node)
    {
-      this.realtimeROS2Node = realtimeROS2Node;
+      this.asyncROS2Node = asyncROS2Node;
    }
 
    public void startStepGeneratorHeartbeat()
    {
-      if (realtimeROS2Node == null)
+      if (asyncROS2Node == null)
          return;
 
       if (heartbeat == null)
-         heartbeat = new ROS2Heartbeat(realtimeROS2Node, CSG_HEARTBEAT_TOPIC);
+         heartbeat = new ROS2Heartbeat(asyncROS2Node, CSG_HEARTBEAT_TOPIC);
       heartbeat.setAlive(true);
    }
 

@@ -36,9 +36,9 @@ public class KinematicsToolboxModule extends ToolboxModule
    private final HumanoidKinematicsToolboxController kinematicsToolBoxController;
    private final RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
 
-   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, AsyncROS2Node realtimeROS2Node)
+   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, AsyncROS2Node asyncROS2Node)
    {
-      this(robotModel, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS, DEFAULT_SETUP_INITIAL_CONFIGURATION, realtimeROS2Node);
+      this(robotModel, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS, DEFAULT_SETUP_INITIAL_CONFIGURATION, asyncROS2Node);
    }
 
    public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer)
@@ -65,14 +65,14 @@ public class KinematicsToolboxModule extends ToolboxModule
                                    boolean startYoVariableServer,
                                    int updatePeriodMilliseconds,
                                    boolean setupInitialConfiguration,
-                                   AsyncROS2Node realtimeROS2Node)
+                                   AsyncROS2Node asyncROS2Node)
    {
       super(robotModel.getSimpleRobotName(),
             robotModel.createFullRobotModel(),
             robotModel.getLogModelProvider(),
             startYoVariableServer,
             updatePeriodMilliseconds,
-            realtimeROS2Node);
+            asyncROS2Node);
       kinematicsToolBoxController = new HumanoidKinematicsToolboxController(commandInputManager,
                                                                             statusOutputManager,
                                                                             fullRobotModel,

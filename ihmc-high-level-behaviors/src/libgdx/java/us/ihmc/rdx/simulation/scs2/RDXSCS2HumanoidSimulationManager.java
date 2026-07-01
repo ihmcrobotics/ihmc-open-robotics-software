@@ -71,11 +71,11 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
 
    public SimulationSession buildSession()
    {
-      AsyncROS2Node realtimeROS2Node = new AsyncROS2Node("humanoid_simulation");
+      AsyncROS2Node asyncROS2Node = new AsyncROS2Node("humanoid_simulation");
 
       SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(robotModel);
-      avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
+      avatarSimulationFactory.setAsyncROS2Node(asyncROS2Node);
       avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
       for (TerrainObjectDefinition terrainObjectDefinition : terrainObjectDefinitions)
       {

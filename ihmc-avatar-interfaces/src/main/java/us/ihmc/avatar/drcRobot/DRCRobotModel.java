@@ -130,7 +130,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return 10.0 * getFastestControllerDT();
    }
 
-   public default AvatarSimulatedHandControlThread createSimulatedHandController(AsyncROS2Node realtimeROS2Node, boolean kinematicsSimulation)
+   public default AvatarSimulatedHandControlThread createSimulatedHandController(AsyncROS2Node asyncROS2Node, boolean kinematicsSimulation)
    {
       return null;
    }

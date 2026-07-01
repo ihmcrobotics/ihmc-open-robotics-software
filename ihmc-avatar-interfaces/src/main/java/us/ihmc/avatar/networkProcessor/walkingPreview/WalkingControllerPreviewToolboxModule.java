@@ -30,11 +30,11 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
       this(robotModel, startYoVariableServer, null);
    }
 
-   public WalkingControllerPreviewToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, AsyncROS2Node realtimeROS2Node)
+   public WalkingControllerPreviewToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, AsyncROS2Node asyncROS2Node)
          throws IOException
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
-            DEFAULT_UPDATE_PERIOD_MILLISECONDS, realtimeROS2Node);
+            DEFAULT_UPDATE_PERIOD_MILLISECONDS, asyncROS2Node);
       setTimeWithoutInputsBeforeGoingToSleep(60.0);
 
       controller = new WalkingControllerPreviewToolboxController(robotModel, 0.02, commandInputManager, statusOutputManager, registry);

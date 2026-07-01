@@ -362,7 +362,7 @@ public class ZuluRobotModel implements DRCRobotModel
    }
 
    @Override
-   public AvatarSimulatedHandControlThread createSimulatedHandController(AsyncROS2Node realtimeROS2Node, boolean kinematicsSimulation)
+   public AvatarSimulatedHandControlThread createSimulatedHandController(AsyncROS2Node asyncROS2Node, boolean kinematicsSimulation)
    {
       return null;
    }

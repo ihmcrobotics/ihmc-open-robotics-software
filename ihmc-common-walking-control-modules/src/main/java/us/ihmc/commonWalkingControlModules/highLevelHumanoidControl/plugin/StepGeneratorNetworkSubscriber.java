@@ -39,19 +39,19 @@ public class StepGeneratorNetworkSubscriber
 
    private final Map<Class<? extends ROS2Message<?>>, ROS2Publisher<?>> statusMessagePublisherMap = new HashMap<>();
 
-   private final AsyncROS2Node realtimeROS2Node;
+   private final AsyncROS2Node asyncROS2Node;
 
    private final ROS2Topic<?> baseTopic;
 
    public StepGeneratorNetworkSubscriber(ROS2Topic<?> baseTopic,
                                          CommandInputManager csgCommandInputManager,
                                          StatusMessageOutputManager csgStatusMessageOutputManager,
-                                         AsyncROS2Node realtimeROS2Node)
+                                         AsyncROS2Node asyncROS2Node)
    {
       this.baseTopic = baseTopic;
       this.commandInputManager = csgCommandInputManager;
       this.statusMessageOutputManager = csgStatusMessageOutputManager;
-      this.realtimeROS2Node = realtimeROS2Node;
+      this.asyncROS2Node = asyncROS2Node;
 
       listOfSupportedControlMessages = csgCommandInputManager.getListOfSupportedMessages();
       listOfSupportedStatusMessages = csgStatusMessageOutputManager.getListOfSupportedMessages();
@@ -59,7 +59,7 @@ public class StepGeneratorNetworkSubscriber
       messageFilter = new AtomicReference<>(message -> true);
       messageValidator = new AtomicReference<>(message -> null);
 
-      if (realtimeROS2Node == null)
+      if (asyncROS2Node == null)
          LogTools.error("No ROS2 node, {} cannot be created.", getClass().getSimpleName());
 
       createSubscribersForSupportedMessages();
@@ -94,7 +94,7 @@ public class StepGeneratorNetworkSubscriber
 
       if (qosProfile != null)
       {
-         realtimeROS2Node.createSubscription(topic, reader ->
+         asyncROS2Node.createSubscription(topic, reader ->
          {
             reader.read(localInstance);
             unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, localInstance);
@@ -102,7 +102,7 @@ public class StepGeneratorNetworkSubscriber
       }
       else
       {
-         realtimeROS2Node.createSubscription(topic, reader ->
+         asyncROS2Node.createSubscription(topic, reader ->
          {
             reader.read(localInstance);
             unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, localInstance);
@@ -165,7 +165,7 @@ public class StepGeneratorNetworkSubscriber
          @SuppressWarnings({"unchecked", "rawtypes"})
          Class messageClassRaw = messageClass;
 
-         realtimeROS2Node.createSubscription(ControllerAPI.getTopic(baseTopic, messageClassRaw), reader ->
+         asyncROS2Node.createSubscription(ControllerAPI.getTopic(baseTopic, messageClassRaw), reader ->
          {
             ROS2Message<?> message = reader.read();
             if (message != null)
@@ -196,7 +196,7 @@ public class StepGeneratorNetworkSubscriber
    @SuppressWarnings({"unchecked", "rawtypes"})
    private ROS2Publisher<?> createPublisher(Class<? extends ROS2Message<?>> messageClass)
    {
-      return realtimeROS2Node.createPublisher(ControllerAPI.getTopic(baseTopic, (Class) messageClass));
+      return asyncROS2Node.createPublisher(ControllerAPI.getTopic(baseTopic, (Class) messageClass));
    }
 
    @SuppressWarnings("unchecked")

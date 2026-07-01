@@ -123,8 +123,8 @@ public class SCS2AvatarSimulationFactory
          "highLevelHumanoidControllerFactory");
    protected final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
 
-   protected final OptionalFactoryField<AsyncROS2Node> realtimeROS2Node = new OptionalFactoryField<>(
-         "realtimeROS2Node");
+   protected final OptionalFactoryField<AsyncROS2Node> asyncROS2Node = new OptionalFactoryField<>(
+         "asyncROS2Node");
    protected final OptionalFactoryField<Double> simulationDT = new OptionalFactoryField<>("simulationDT");
    protected final OptionalFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>(
          "robotInitialSetup");
@@ -277,9 +277,9 @@ public class SCS2AvatarSimulationFactory
       avatarSimulation.setShowGUI(showGUI.get());
       avatarSimulation.setAutomaticallyStartSimulation(automaticallyStartSimulation.get());
 
-      if (realtimeROS2Node.hasBeenSet())
+      if (asyncROS2Node.hasBeenSet())
       {
-         avatarSimulation.setRealTimeROS2Node(realtimeROS2Node.get());
+         avatarSimulation.setAsyncROS2Node(asyncROS2Node.get());
       }
 
       FactoryTools.disposeFactory(this);
@@ -495,10 +495,10 @@ public class SCS2AvatarSimulationFactory
       }
       else
       {
-         if (realtimeROS2Node.hasBeenSet())
+         if (asyncROS2Node.hasBeenSet())
          {
-            pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeROS2Node.get(), robotName);
-            realtimeROS2Node.get()
+            pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(asyncROS2Node.get(), robotName);
+            asyncROS2Node.get()
                             .createSubscription(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName),
                                                 s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.read()));
          }
@@ -507,9 +507,9 @@ public class SCS2AvatarSimulationFactory
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
       AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
 
-      if (realtimeROS2Node.hasBeenSet())
+      if (asyncROS2Node.hasBeenSet())
       {
-         avatarEstimatorThreadFactory.setROS2Info(realtimeROS2Node.get(), robotName);
+         avatarEstimatorThreadFactory.setROS2Info(asyncROS2Node.get(), robotName);
       }
       avatarEstimatorThreadFactory.configureWithDRCRobotModel(robotModel.get(), robotInitialSetup.get());
       avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
@@ -529,9 +529,9 @@ public class SCS2AvatarSimulationFactory
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
 
       AsyncROS2Node ros2Node = null;
-      if (realtimeROS2Node.hasBeenSet())
+      if (asyncROS2Node.hasBeenSet())
       {
-         ros2Node = realtimeROS2Node.get();
+         ros2Node = asyncROS2Node.get();
       }
 
       controllerThread = new AvatarControllerThread(robotName,
@@ -565,8 +565,8 @@ public class SCS2AvatarSimulationFactory
       }
 
       AsyncROS2Node ros2Node = null;
-      if (realtimeROS2Node.hasBeenSet())
-         ros2Node = realtimeROS2Node.get();
+      if (asyncROS2Node.hasBeenSet())
+         ros2Node = asyncROS2Node.get();
       stepGeneratorThread = new AvatarStepGeneratorThread(contextDataFactory,
                                                           highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
                                                           highLevelHumanoidControllerFactory.get().getCommandInputManager(),
@@ -596,7 +596,7 @@ public class SCS2AvatarSimulationFactory
 
       ikStreamingRealTimePluginFactory = new IKStreamingRTPluginFactory();
       ikStreamingRTThread = ikStreamingRealTimePluginFactory.createRTThread(robotModel.get().getSimpleRobotName(),
-                                                                            realtimeROS2Node.get(),
+                                                                            asyncROS2Node.get(),
                                                                             highLevelHumanoidControllerFactory.get()
                                                                                                               .getCommandInputManager(),
                                                                             highLevelHumanoidControllerFactory.get()
@@ -643,9 +643,9 @@ public class SCS2AvatarSimulationFactory
       SimulatedHandControlTask handControlTask = null;
       AvatarSimulatedHandControlThread handControlThread = null;
 
-      if (realtimeROS2Node.hasBeenSet())
+      if (asyncROS2Node.hasBeenSet())
       {
-         handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get(),
+         handControlThread = robotModel.createSimulatedHandController(asyncROS2Node.get(),
                                                                       kinematicsSimulation.get());
 
          if (handControlThread != null)
@@ -973,9 +973,9 @@ public class SCS2AvatarSimulationFactory
       else
          controllerFactory.setInitialState(initialState.get());
 
-      if (realtimeROS2Node.hasBeenSet())
+      if (asyncROS2Node.hasBeenSet())
       {
-         controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node.get());
+         controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), asyncROS2Node.get());
       }
 
       setHighLevelHumanoidControllerFactory(controllerFactory);
@@ -1109,9 +1109,9 @@ public class SCS2AvatarSimulationFactory
       this.showGUI.set(showGUI);
    }
 
-   public void setRealtimeROS2Node(AsyncROS2Node realtimeROS2Node)
+   public void setAsyncROS2Node(AsyncROS2Node asyncROS2Node)
    {
-      this.realtimeROS2Node.set(realtimeROS2Node);
+      this.asyncROS2Node.set(asyncROS2Node);
    }
 
    public void setCreateYoVariableServer(boolean createYoVariableServer)

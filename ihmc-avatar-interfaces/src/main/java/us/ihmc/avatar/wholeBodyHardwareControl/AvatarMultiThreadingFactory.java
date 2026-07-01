@@ -105,8 +105,8 @@ public class AvatarMultiThreadingFactory
    public final String IHMC_ROS_STATE_ESTIMATOR_NODE_NAME;
    public final String IHMC_ROS_CONTROLLER_NODE_NAME;
    public final String IHMC_ROS_IKSTREAMING_NODE_NAME;
-   private final AsyncROS2Node estimatorRealtimeROS2Node;
-   private final AsyncROS2Node controllerRealtimeROS2Node;
+   private final AsyncROS2Node estimatorAsyncROS2Node;
+   private final AsyncROS2Node controllerAsyncROS2Node;
    private final PeriodicThreadSchedulerFactory ros2ThreadFactory;
 
    // Estimator
@@ -193,15 +193,15 @@ public class AvatarMultiThreadingFactory
       else
          ros2ThreadFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
 
-      estimatorRealtimeROS2Node = new AsyncROS2Node(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME);
-      controllerRealtimeROS2Node = new AsyncROS2Node(IHMC_ROS_CONTROLLER_NODE_NAME);
+      estimatorAsyncROS2Node = new AsyncROS2Node(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME);
+      controllerAsyncROS2Node = new AsyncROS2Node(IHMC_ROS_CONTROLLER_NODE_NAME);
 
       // Create estimator and estimator thread
       avatarEstimator = createAndAddEstimatorThread(robotModel, sensorReaderFactory);
 
       // Create high-level controller factory
       avatarControllerFactory = createHighLevelControllerFactory(robotModel,
-                                                                 controllerRealtimeROS2Node,
+                                                                 controllerAsyncROS2Node,
                                                                  lowLevelOutputProcessor,
                                                                  standPrepStateFactory,
                                                                  freezeStateFactory);
@@ -259,7 +259,7 @@ public class AvatarMultiThreadingFactory
       HumanoidRobotContextDataFactory estimatorContextDataFactory = new HumanoidRobotContextDataFactory();
 
       AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
-      avatarEstimatorThreadFactory.setROS2Info(estimatorRealtimeROS2Node, robotModel.getSimpleRobotName());
+      avatarEstimatorThreadFactory.setROS2Info(estimatorAsyncROS2Node, robotModel.getSimpleRobotName());
 
       avatarEstimatorThreadFactory.configureWithWholeBodyControllerParameters(robotModel);
       avatarEstimatorThreadFactory.configureWithDRCRobotModel(robotModel);
@@ -307,7 +307,7 @@ public class AvatarMultiThreadingFactory
                                                                                  avatarControllerFactory,
                                                                                  controllerContextFactory,
                                                                                  null,
-                                                                                 controllerRealtimeROS2Node,
+                                                                                 controllerAsyncROS2Node,
                                                                                  GRAVITY,
                                                                                  false);
 
@@ -330,7 +330,7 @@ public class AvatarMultiThreadingFactory
                                                                               avatarControllerFactory.getCommandInputManager(),
                                                                               masterRobotModel,
                                                                               null,
-                                                                              controllerRealtimeROS2Node);
+                                                                              controllerAsyncROS2Node);
 
       avatarStepGenerator.set(stepGenerator);
 
@@ -349,7 +349,7 @@ public class AvatarMultiThreadingFactory
    public IKStreamingRTPluginFactory.IKStreamingRTThread createAndAddIKStreamingThread(KinematicsStreamingToolboxParameters ikStreamingParameters)
    {
       avatarIKStreaming.set(new IKStreamingRTPluginFactory().createRTThread(masterRobotModel.getSimpleRobotName(),
-                                                                            estimatorRealtimeROS2Node,
+                                                                            estimatorAsyncROS2Node,
                                                                             avatarControllerFactory.getCommandInputManager(),
                                                                             avatarControllerFactory.getStatusOutputManager(), masterRobotModel,
                                                                             controllerContextFactory,
@@ -423,8 +423,8 @@ public class AvatarMultiThreadingFactory
       // Add estimator cleanup callback to destroy node
       estimatorTask.addRunnableOnCleanup(() ->
                                          {
-                                            if (!estimatorRealtimeROS2Node.isClosed())
-                                               estimatorRealtimeROS2Node.close();
+                                            if (!estimatorAsyncROS2Node.isClosed())
+                                               estimatorAsyncROS2Node.close();
                                             LogTools.info("Estimator node has been destroyed");
                                          });
 
@@ -476,8 +476,8 @@ public class AvatarMultiThreadingFactory
       // Add controller cleanup callback to destroy node
       controllerTask.addRunnableOnCleanup(() ->
                                           {
-                                             if (!controllerRealtimeROS2Node.isClosed())
-                                                controllerRealtimeROS2Node.close();
+                                             if (!controllerAsyncROS2Node.isClosed())
+                                                controllerAsyncROS2Node.close();
                                              LogTools.info("Controller node has been destroyed");
                                           });
 
@@ -1093,7 +1093,7 @@ public class AvatarMultiThreadingFactory
 
    public AsyncROS2Node getEstimatorROS2Node()
    {
-      return estimatorRealtimeROS2Node;
+      return estimatorAsyncROS2Node;
    }
 
    public FullHumanoidRobotModel getEstimatorFullRobotModel()

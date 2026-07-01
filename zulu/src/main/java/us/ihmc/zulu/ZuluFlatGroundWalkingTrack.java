@@ -17,7 +17,7 @@ public class ZuluFlatGroundWalkingTrack
    private static final boolean createYoVariableServer = Boolean.parseBoolean(System.getProperty("create.yovariable.server", "true"));
    private static final boolean kinematicsSimulation = Boolean.parseBoolean(System.getProperty("kinematics.simulation", "false"));
 
-   private final AsyncROS2Node realtimeROS2Node = new AsyncROS2Node("flat_ground_walking_track_simulation");
+   private final AsyncROS2Node asyncROS2Node = new AsyncROS2Node("flat_ground_walking_track_simulation");
 
    public ZuluFlatGroundWalkingTrack()
    {
@@ -34,7 +34,7 @@ public class ZuluFlatGroundWalkingTrack
 
       SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(robotModel);
-      avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
+      avatarSimulationFactory.setAsyncROS2Node(asyncROS2Node);
       avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
       avatarSimulationFactory.setCommonAvatarEnvrionmentInterface(environment);
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);

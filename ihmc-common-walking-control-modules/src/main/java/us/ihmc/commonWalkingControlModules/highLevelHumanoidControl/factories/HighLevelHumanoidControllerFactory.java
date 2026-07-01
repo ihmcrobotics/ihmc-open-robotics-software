@@ -683,7 +683,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerToolbox.attachRobotMotionStatusChangedListener(listener);
    }
 
-   public void createControllerNetworkSubscriber(String robotName, AsyncROS2Node realtimeROS2Node)
+   public void createControllerNetworkSubscriber(String robotName, AsyncROS2Node asyncROS2Node)
    {
       ROS2Topic<?> inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
       ROS2Topic<?> outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
@@ -691,7 +691,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                                 commandInputManager,
                                                                                                 outputTopic,
                                                                                                 statusMessageOutputManager,
-                                                                                                realtimeROS2Node);
+                                                                                                asyncROS2Node);
 
       controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class,
                                                                        9,

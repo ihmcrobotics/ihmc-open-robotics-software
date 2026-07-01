@@ -16,7 +16,7 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPa
 {
    private final String titleBeforeAdditions;
    private final ROS2Topic<BigVideoPacket> topic;
-   private AsyncROS2Node realtimeROS2Node = null;
+   private AsyncROS2Node asyncROS2Node = null;
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private final Object syncObject = new Object();
    private final BytePointer messageEncodedBytePointer = new BytePointer(25000000);
@@ -33,11 +33,11 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPa
 
       addActivenessChangeCallback(isAlive ->
       {
-         if (isAlive && realtimeROS2Node == null)
+         if (isAlive && asyncROS2Node == null)
          {
             subscribe();
          }
-         else if (!isAlive && realtimeROS2Node != null)
+         else if (!isAlive && asyncROS2Node != null)
          {
             unsubscribe();
          }
@@ -46,11 +46,11 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPa
 
    private void subscribe()
    {
-      realtimeROS2Node = new AsyncROS2Node(StringTools.titleToSnakeCase(titleBeforeAdditions));
+      asyncROS2Node = new AsyncROS2Node(StringTools.titleToSnakeCase(titleBeforeAdditions));
       // imdecode takes the longest by far out of all this stuff
       // synchronize with the update method
       // YUV I420 has 1.5 times the height of the image
-      realtimeROS2Node.createSubscription(topic, subscriber ->
+      asyncROS2Node.createSubscription(topic, subscriber ->
       {
          synchronized (syncObject)
          {
@@ -105,10 +105,10 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPa
 
    private void unsubscribe()
    {
-      if (realtimeROS2Node != null)
+      if (asyncROS2Node != null)
       {
-         realtimeROS2Node.close();
-         realtimeROS2Node = null;
+         asyncROS2Node.close();
+         asyncROS2Node = null;
       }
    }
 

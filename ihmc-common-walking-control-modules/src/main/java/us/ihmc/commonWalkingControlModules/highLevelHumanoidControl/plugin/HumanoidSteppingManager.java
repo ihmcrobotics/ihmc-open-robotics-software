@@ -136,13 +136,13 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
       this.updatables.add(updatable);
    }
 
-   public void createStepGeneratorNetworkSubscriber(String robotName, AsyncROS2Node realtimeROS2Node)
+   public void createStepGeneratorNetworkSubscriber(String robotName, AsyncROS2Node asyncROS2Node)
    {
       ROS2Topic<?> baseTopic = ControllerAPI.getBaseTopic(HumanoidControllerAPI.HUMANOID_CONTROL_MODULE_NAME, robotName);
       StepGeneratorNetworkSubscriber stepGeneratorNetworkSubscriber = new StepGeneratorNetworkSubscriber(baseTopic,
                                                                                                          commandInputManager.getCommandInputManager(),
                                                                                                          statusMessageOutputManager,
-                                                                                                         realtimeROS2Node);
+                                                                                                         asyncROS2Node);
 
       stepGeneratorNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
    }
