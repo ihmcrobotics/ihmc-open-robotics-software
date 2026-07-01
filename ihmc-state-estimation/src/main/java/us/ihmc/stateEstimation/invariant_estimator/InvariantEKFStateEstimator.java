@@ -381,6 +381,18 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    }
 
    /**
+    * @return the shared estimator robot model's pelvis frame, i.e. the <em>main</em> (DRC) estimator's
+    *         pelvis pose/twist. This is the same frame used above to compute
+    *         {@code invariantMinusMainOrientationErrorAngle} and the main-side velocity comparisons.
+    *         Exposed so external comparators (e.g. against simulation ground truth) can read it directly
+    *         instead of re-deriving it from the robot model.
+    */
+   public MovingReferenceFrame getMainPelvisFrame()
+   {
+      return pelvisFrame;
+   }
+
+   /**
     * Packs the body-frame angular velocity the filter integrates (the bias-free IMU gyro in the pelvis
     * frame). Exposed so external comparators can compare it against a reference angular velocity.
     *
