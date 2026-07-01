@@ -28,6 +28,12 @@ behavior_msgs/PersistentDetectionStatusMessage persistent_detection
 # Transform of the object frame to world frame
 controller_msgs/RigidBodyTransformMessage transform_to_world
 
+# Whether the object is valid
+bool valid
+
+# Whether the object is frozen
+bool frozen
+
 # Used only for door panel
 behavior_msgs/PersistentDetectionStatusMessage door_panel_detection
 
@@ -50,8 +56,15 @@ byte door_type
 # Hinge side from the view of the robot
 byte hinge_side
 
-# Whether the object is frozen
-bool frozen
+# Table approach
+
+uint32 left_table_points
+
+uint32 right_table_points
+
+geometry_msgs/Point left_capsule_center
+
+geometry_msgs/Point right_capsule_center
 }</pre>
 */
 public class BehaviorTreeSceneObjectStateMessage implements ROS2Message<BehaviorTreeSceneObjectStateMessage>
@@ -75,6 +88,14 @@ public class BehaviorTreeSceneObjectStateMessage implements ROS2Message<Behavior
       Transform of the object frame to world frame
    */
    private final controller_msgs.RigidBodyTransformMessage transform_to_world_;
+   /**
+      Whether the object is valid
+   */
+   private boolean valid_;
+   /**
+      Whether the object is frozen
+   */
+   private boolean frozen_;
    /**
       Used only for door panel
    */
@@ -102,10 +123,10 @@ public class BehaviorTreeSceneObjectStateMessage implements ROS2Message<Behavior
       Hinge side from the view of the robot
    */
    private byte hinge_side_;
-   /**
-      Whether the object is frozen
-   */
-   private boolean frozen_;
+   private int left_table_points_;
+   private int right_table_points_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage left_capsule_center_;
+   private final us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage right_capsule_center_;
 
    public BehaviorTreeSceneObjectStateMessage()
    {
@@ -113,8 +134,11 @@ public class BehaviorTreeSceneObjectStateMessage implements ROS2Message<Behavior
       definition_ = new behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage();
       persistent_detection_ = new behavior_msgs.PersistentDetectionStatusMessage();
       transform_to_world_ = new controller_msgs.RigidBodyTransformMessage();
-      door_panel_detection_ = new behavior_msgs.PersistentDetectionStatusMessage();
+      valid_ = (boolean) false;
       frozen_ = (boolean) false;
+      door_panel_detection_ = new behavior_msgs.PersistentDetectionStatusMessage();
+      left_capsule_center_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
+      right_capsule_center_ = new us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage();
 
    }
 
@@ -134,13 +158,18 @@ public class BehaviorTreeSceneObjectStateMessage implements ROS2Message<Behavior
       currentAlignment += definition_.calculateSizeBytes(currentAlignment);
       currentAlignment += persistent_detection_.calculateSizeBytes(currentAlignment);
       currentAlignment += transform_to_world_.calculateSizeBytes(currentAlignment);
+      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // valid_
+      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // frozen_
       currentAlignment += door_panel_detection_.calculateSizeBytes(currentAlignment);
       currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // latch_post_points_
       currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // hinge_recess_points_
       currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // door_open_angle_
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // door_type_
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // hinge_side_
-      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // frozen_
+      currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // left_table_points_
+      currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // right_table_points_
+      currentAlignment += left_capsule_center_.calculateSizeBytes(currentAlignment);
+      currentAlignment += right_capsule_center_.calculateSizeBytes(currentAlignment);
 
       return currentAlignment - initialAlignment;
    }
@@ -153,13 +182,18 @@ public class BehaviorTreeSceneObjectStateMessage implements ROS2Message<Behavior
       definition_.serialize(buffer);
       persistent_detection_.serialize(buffer);
       transform_to_world_.serialize(buffer);
+      buffer.writeBoolean(valid_);
+      buffer.writeBoolean(frozen_);
       door_panel_detection_.serialize(buffer);
       buffer.writeInt(latch_post_points_);
       buffer.writeInt(hinge_recess_points_);
       buffer.writeFloat(door_open_angle_);
       buffer.writeByte(door_type_);
       buffer.writeByte(hinge_side_);
-      buffer.writeBoolean(frozen_);
+      buffer.writeInt(left_table_points_);
+      buffer.writeInt(right_table_points_);
+      left_capsule_center_.serialize(buffer);
+      right_capsule_center_.serialize(buffer);
 
    }
 
@@ -171,13 +205,18 @@ public class BehaviorTreeSceneObjectStateMessage implements ROS2Message<Behavior
       definition_.deserialize(buffer);
       persistent_detection_.deserialize(buffer);
       transform_to_world_.deserialize(buffer);
+      valid_ = buffer.readBoolean();
+      frozen_ = buffer.readBoolean();
       door_panel_detection_.deserialize(buffer);
       latch_post_points_ = buffer.readInt();
       hinge_recess_points_ = buffer.readInt();
       door_open_angle_ = buffer.readFloat();
       door_type_ = buffer.readByte();
       hinge_side_ = buffer.readByte();
-      frozen_ = buffer.readBoolean();
+      left_table_points_ = buffer.readInt();
+      right_table_points_ = buffer.readInt();
+      left_capsule_center_.deserialize(buffer);
+      right_capsule_center_.deserialize(buffer);
 
    }
 
@@ -189,13 +228,18 @@ public class BehaviorTreeSceneObjectStateMessage implements ROS2Message<Behavior
       definition_.set(from.definition_);
       persistent_detection_.set(from.persistent_detection_);
       transform_to_world_.set(from.transform_to_world_);
+      valid_ = from.valid_;
+      frozen_ = from.frozen_;
       door_panel_detection_.set(from.door_panel_detection_);
       latch_post_points_ = from.latch_post_points_;
       hinge_recess_points_ = from.hinge_recess_points_;
       door_open_angle_ = from.door_open_angle_;
       door_type_ = from.door_type_;
       hinge_side_ = from.hinge_side_;
-      frozen_ = from.frozen_;
+      left_table_points_ = from.left_table_points_;
+      right_table_points_ = from.right_table_points_;
+      left_capsule_center_.set(from.left_capsule_center_);
+      right_capsule_center_.set(from.right_capsule_center_);
 
    }
 
@@ -227,6 +271,26 @@ public class BehaviorTreeSceneObjectStateMessage implements ROS2Message<Behavior
    public controller_msgs.RigidBodyTransformMessage getTransformToWorld()
    {
       return transform_to_world_;
+   }
+
+   public boolean getValid()
+   {
+      return valid_;
+   }
+
+   public void setValid(boolean valid_)
+   {
+      this.valid_ = valid_;
+   }
+
+   public boolean getFrozen()
+   {
+      return frozen_;
+   }
+
+   public void setFrozen(boolean frozen_)
+   {
+      this.frozen_ = frozen_;
    }
 
    public behavior_msgs.PersistentDetectionStatusMessage getDoorPanelDetection()
@@ -284,14 +348,34 @@ public class BehaviorTreeSceneObjectStateMessage implements ROS2Message<Behavior
       this.hinge_side_ = hinge_side_;
    }
 
-   public boolean getFrozen()
+   public int getLeftTablePoints()
    {
-      return frozen_;
+      return left_table_points_;
    }
 
-   public void setFrozen(boolean frozen_)
+   public void setLeftTablePoints(int left_table_points_)
    {
-      this.frozen_ = frozen_;
+      this.left_table_points_ = left_table_points_;
+   }
+
+   public int getRightTablePoints()
+   {
+      return right_table_points_;
+   }
+
+   public void setRightTablePoints(int right_table_points_)
+   {
+      this.right_table_points_ = right_table_points_;
+   }
+
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getLeftCapsuleCenter()
+   {
+      return left_capsule_center_;
+   }
+
+   public us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage getRightCapsuleCenter()
+   {
+      return right_capsule_center_;
    }
 
 
@@ -310,6 +394,10 @@ public class BehaviorTreeSceneObjectStateMessage implements ROS2Message<Behavior
       builder.append(persistent_detection_);
       builder.append("transform_to_world_=");
       builder.append(transform_to_world_);
+      builder.append("valid_=");
+      builder.append(valid_);
+      builder.append("frozen_=");
+      builder.append(frozen_);
       builder.append("door_panel_detection_=");
       builder.append(door_panel_detection_);
       builder.append("latch_post_points_=");
@@ -328,8 +416,14 @@ public class BehaviorTreeSceneObjectStateMessage implements ROS2Message<Behavior
       builder.append(door_type_);
       builder.append("hinge_side_=");
       builder.append(hinge_side_);
-      builder.append("frozen_=");
-      builder.append(frozen_);
+      builder.append("left_table_points_=");
+      builder.append(left_table_points_);
+      builder.append("right_table_points_=");
+      builder.append(right_table_points_);
+      builder.append("left_capsule_center_=");
+      builder.append(left_capsule_center_);
+      builder.append("right_capsule_center_=");
+      builder.append(right_capsule_center_);
 
       builder.append("}");
       return builder.toString();

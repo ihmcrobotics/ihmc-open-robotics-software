@@ -17,17 +17,14 @@ behavior_msgs/ActionNodeDefinitionMessage definition
 # Specifies the side of the robot that this message refers to.
 byte robot_side 255
 
-# Name of the frame the this action is expressed in
-string parent_frame_name
+# Whether the action is defined in jointspace (true) or taskspace (false)
+bool defined_in_jointspace
 
-# Transform that expresses the hand pose in the parent frame
-controller_msgs/RigidBodyTransformMessage transform_to_parent
+# Taskspace trajectory mode: 0 = single pose, 1 = screw primitive
+byte taskspace_trajectory_mode 0
 
-# Whether the rigid body is controlled in jointspace (true) or taskspace (false)
-bool joint_space_control
-
-# Whether to use predefined joint angles
-bool use_predefined_joint_angles
+# The trajectory duration
+float64 trajectory_duration
 
 # Preset arm configuration
 byte preset
@@ -35,11 +32,28 @@ byte preset
 # Joint angles
 float64[7] joint_angles
 
-# The trajectory duration
-float64 trajectory_duration
+# Name of the frame the this action is expressed in
+string parent_frame_name
+
+# Transform that expresses the hand pose in the parent frame
+controller_msgs/RigidBodyTransformMessage transform_to_parent
+
+# Whether the rigid body is controlled in jointspace (true) or hybrid (false) during single-point taskspace execution
+bool joint_space_control
 
 # Whether maintaining the rigid body controlled in world after the action is complete
 bool hold_pose_in_world
+
+# Screw primitive fields
+controller_msgs/RigidBodyTransformMessage screw_axis_pose
+
+float64 translation
+
+float64 rotation
+
+float64 max_linear_velocity
+
+float64 max_angular_velocity
 
 float64 linear_position_weight
 
@@ -65,21 +79,17 @@ public class ArmActionDefinitionMessage implements ROS2Message<ArmActionDefiniti
    */
    private byte robot_side_;
    /**
-      Name of the frame the this action is expressed in
+      Whether the action is defined in jointspace (true) or taskspace (false)
    */
-   private final StringBuilder parent_frame_name_;
+   private boolean defined_in_jointspace_;
    /**
-      Transform that expresses the hand pose in the parent frame
+      Taskspace trajectory mode: 0 = single pose, 1 = screw primitive
    */
-   private final controller_msgs.RigidBodyTransformMessage transform_to_parent_;
+   private byte taskspace_trajectory_mode_;
    /**
-      Whether the rigid body is controlled in jointspace (true) or taskspace (false)
+      The trajectory duration
    */
-   private boolean joint_space_control_;
-   /**
-      Whether to use predefined joint angles
-   */
-   private boolean use_predefined_joint_angles_;
+   private double trajectory_duration_;
    /**
       Preset arm configuration
    */
@@ -89,13 +99,29 @@ public class ArmActionDefinitionMessage implements ROS2Message<ArmActionDefiniti
    */
    private final double[] joint_angles_;
    /**
-      The trajectory duration
+      Name of the frame the this action is expressed in
    */
-   private double trajectory_duration_;
+   private final StringBuilder parent_frame_name_;
+   /**
+      Transform that expresses the hand pose in the parent frame
+   */
+   private final controller_msgs.RigidBodyTransformMessage transform_to_parent_;
+   /**
+      Whether the rigid body is controlled in jointspace (true) or hybrid (false) during single-point taskspace execution
+   */
+   private boolean joint_space_control_;
    /**
       Whether maintaining the rigid body controlled in world after the action is complete
    */
    private boolean hold_pose_in_world_;
+   /**
+      Screw primitive fields
+   */
+   private final controller_msgs.RigidBodyTransformMessage screw_axis_pose_;
+   private double translation_;
+   private double rotation_;
+   private double max_linear_velocity_;
+   private double max_angular_velocity_;
    private double linear_position_weight_;
    private double angular_position_weight_;
    private double jointspace_weight_;
@@ -106,12 +132,14 @@ public class ArmActionDefinitionMessage implements ROS2Message<ArmActionDefiniti
    {
       definition_ = new behavior_msgs.ActionNodeDefinitionMessage();
       robot_side_ = (byte) 255;
+      defined_in_jointspace_ = (boolean) false;
+      taskspace_trajectory_mode_ = (byte) 0;
+      joint_angles_ = new double[7];
       parent_frame_name_ = new StringBuilder();
       transform_to_parent_ = new controller_msgs.RigidBodyTransformMessage();
       joint_space_control_ = (boolean) false;
-      use_predefined_joint_angles_ = (boolean) false;
-      joint_angles_ = new double[7];
       hold_pose_in_world_ = (boolean) false;
+      screw_axis_pose_ = new controller_msgs.RigidBodyTransformMessage();
 
    }
 
@@ -128,14 +156,20 @@ public class ArmActionDefinitionMessage implements ROS2Message<ArmActionDefiniti
 
       currentAlignment += definition_.calculateSizeBytes(currentAlignment);
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // robot_side_
+      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // defined_in_jointspace_
+      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // taskspace_trajectory_mode_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // trajectory_duration_
+      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // preset_
+      currentAlignment += (7 * 8) + CDRBuffer.alignment(currentAlignment, (7 * 8)); // joint_angles_
       currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4) + (1 * parent_frame_name_.length()) + 1; // parent_frame_name_
       currentAlignment += transform_to_parent_.calculateSizeBytes(currentAlignment);
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // joint_space_control_
-      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // use_predefined_joint_angles_
-      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // preset_
-      currentAlignment += (7 * 8) + CDRBuffer.alignment(currentAlignment, (7 * 8)); // joint_angles_
-      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // trajectory_duration_
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // hold_pose_in_world_
+      currentAlignment += screw_axis_pose_.calculateSizeBytes(currentAlignment);
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // translation_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // rotation_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // max_linear_velocity_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // max_angular_velocity_
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // linear_position_weight_
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // angular_position_weight_
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // jointspace_weight_
@@ -150,17 +184,23 @@ public class ArmActionDefinitionMessage implements ROS2Message<ArmActionDefiniti
    {
       definition_.serialize(buffer);
       buffer.writeByte(robot_side_);
-      buffer.writeString(parent_frame_name_);
-      transform_to_parent_.serialize(buffer);
-      buffer.writeBoolean(joint_space_control_);
-      buffer.writeBoolean(use_predefined_joint_angles_);
+      buffer.writeBoolean(defined_in_jointspace_);
+      buffer.writeByte(taskspace_trajectory_mode_);
+      buffer.writeDouble(trajectory_duration_);
       buffer.writeByte(preset_);
       for (int i = 0; i < joint_angles_.length; ++i)
       {
          buffer.writeDouble(joint_angles_[i]);
       }
-      buffer.writeDouble(trajectory_duration_);
+      buffer.writeString(parent_frame_name_);
+      transform_to_parent_.serialize(buffer);
+      buffer.writeBoolean(joint_space_control_);
       buffer.writeBoolean(hold_pose_in_world_);
+      screw_axis_pose_.serialize(buffer);
+      buffer.writeDouble(translation_);
+      buffer.writeDouble(rotation_);
+      buffer.writeDouble(max_linear_velocity_);
+      buffer.writeDouble(max_angular_velocity_);
       buffer.writeDouble(linear_position_weight_);
       buffer.writeDouble(angular_position_weight_);
       buffer.writeDouble(jointspace_weight_);
@@ -174,17 +214,23 @@ public class ArmActionDefinitionMessage implements ROS2Message<ArmActionDefiniti
    {
       definition_.deserialize(buffer);
       robot_side_ = buffer.readByte();
-      buffer.readString(parent_frame_name_);
-      transform_to_parent_.deserialize(buffer);
-      joint_space_control_ = buffer.readBoolean();
-      use_predefined_joint_angles_ = buffer.readBoolean();
+      defined_in_jointspace_ = buffer.readBoolean();
+      taskspace_trajectory_mode_ = buffer.readByte();
+      trajectory_duration_ = buffer.readDouble();
       preset_ = buffer.readByte();
       for (int i = 0; i < joint_angles_.length; ++i)
       {
          joint_angles_[i] = buffer.readDouble();
       }
-      trajectory_duration_ = buffer.readDouble();
+      buffer.readString(parent_frame_name_);
+      transform_to_parent_.deserialize(buffer);
+      joint_space_control_ = buffer.readBoolean();
       hold_pose_in_world_ = buffer.readBoolean();
+      screw_axis_pose_.deserialize(buffer);
+      translation_ = buffer.readDouble();
+      rotation_ = buffer.readDouble();
+      max_linear_velocity_ = buffer.readDouble();
+      max_angular_velocity_ = buffer.readDouble();
       linear_position_weight_ = buffer.readDouble();
       angular_position_weight_ = buffer.readDouble();
       jointspace_weight_ = buffer.readDouble();
@@ -198,18 +244,24 @@ public class ArmActionDefinitionMessage implements ROS2Message<ArmActionDefiniti
    {
       definition_.set(from.definition_);
       robot_side_ = from.robot_side_;
-      parent_frame_name_.delete(0, parent_frame_name_.length());
-      parent_frame_name_.insert(0, from.parent_frame_name_);
-      transform_to_parent_.set(from.transform_to_parent_);
-      joint_space_control_ = from.joint_space_control_;
-      use_predefined_joint_angles_ = from.use_predefined_joint_angles_;
+      defined_in_jointspace_ = from.defined_in_jointspace_;
+      taskspace_trajectory_mode_ = from.taskspace_trajectory_mode_;
+      trajectory_duration_ = from.trajectory_duration_;
       preset_ = from.preset_;
       for (int i = 0; i < joint_angles_.length; ++i)
       {
          joint_angles_[i] = from.joint_angles_[i];
       }
-      trajectory_duration_ = from.trajectory_duration_;
+      parent_frame_name_.delete(0, parent_frame_name_.length());
+      parent_frame_name_.insert(0, from.parent_frame_name_);
+      transform_to_parent_.set(from.transform_to_parent_);
+      joint_space_control_ = from.joint_space_control_;
       hold_pose_in_world_ = from.hold_pose_in_world_;
+      screw_axis_pose_.set(from.screw_axis_pose_);
+      translation_ = from.translation_;
+      rotation_ = from.rotation_;
+      max_linear_velocity_ = from.max_linear_velocity_;
+      max_angular_velocity_ = from.max_angular_velocity_;
       linear_position_weight_ = from.linear_position_weight_;
       angular_position_weight_ = from.angular_position_weight_;
       jointspace_weight_ = from.jointspace_weight_;
@@ -231,6 +283,51 @@ public class ArmActionDefinitionMessage implements ROS2Message<ArmActionDefiniti
    public void setRobotSide(byte robot_side_)
    {
       this.robot_side_ = robot_side_;
+   }
+
+   public boolean getDefinedInJointspace()
+   {
+      return defined_in_jointspace_;
+   }
+
+   public void setDefinedInJointspace(boolean defined_in_jointspace_)
+   {
+      this.defined_in_jointspace_ = defined_in_jointspace_;
+   }
+
+   public byte getTaskspaceTrajectoryMode()
+   {
+      return taskspace_trajectory_mode_;
+   }
+
+   public void setTaskspaceTrajectoryMode(byte taskspace_trajectory_mode_)
+   {
+      this.taskspace_trajectory_mode_ = taskspace_trajectory_mode_;
+   }
+
+   public double getTrajectoryDuration()
+   {
+      return trajectory_duration_;
+   }
+
+   public void setTrajectoryDuration(double trajectory_duration_)
+   {
+      this.trajectory_duration_ = trajectory_duration_;
+   }
+
+   public byte getPreset()
+   {
+      return preset_;
+   }
+
+   public void setPreset(byte preset_)
+   {
+      this.preset_ = preset_;
+   }
+
+   public double[] getJointAngles()
+   {
+      return joint_angles_;
    }
 
    public StringBuilder getParentFrameName()
@@ -263,41 +360,6 @@ public class ArmActionDefinitionMessage implements ROS2Message<ArmActionDefiniti
       this.joint_space_control_ = joint_space_control_;
    }
 
-   public boolean getUsePredefinedJointAngles()
-   {
-      return use_predefined_joint_angles_;
-   }
-
-   public void setUsePredefinedJointAngles(boolean use_predefined_joint_angles_)
-   {
-      this.use_predefined_joint_angles_ = use_predefined_joint_angles_;
-   }
-
-   public byte getPreset()
-   {
-      return preset_;
-   }
-
-   public void setPreset(byte preset_)
-   {
-      this.preset_ = preset_;
-   }
-
-   public double[] getJointAngles()
-   {
-      return joint_angles_;
-   }
-
-   public double getTrajectoryDuration()
-   {
-      return trajectory_duration_;
-   }
-
-   public void setTrajectoryDuration(double trajectory_duration_)
-   {
-      this.trajectory_duration_ = trajectory_duration_;
-   }
-
    public boolean getHoldPoseInWorld()
    {
       return hold_pose_in_world_;
@@ -306,6 +368,51 @@ public class ArmActionDefinitionMessage implements ROS2Message<ArmActionDefiniti
    public void setHoldPoseInWorld(boolean hold_pose_in_world_)
    {
       this.hold_pose_in_world_ = hold_pose_in_world_;
+   }
+
+   public controller_msgs.RigidBodyTransformMessage getScrewAxisPose()
+   {
+      return screw_axis_pose_;
+   }
+
+   public double getTranslation()
+   {
+      return translation_;
+   }
+
+   public void setTranslation(double translation_)
+   {
+      this.translation_ = translation_;
+   }
+
+   public double getRotation()
+   {
+      return rotation_;
+   }
+
+   public void setRotation(double rotation_)
+   {
+      this.rotation_ = rotation_;
+   }
+
+   public double getMaxLinearVelocity()
+   {
+      return max_linear_velocity_;
+   }
+
+   public void setMaxLinearVelocity(double max_linear_velocity_)
+   {
+      this.max_linear_velocity_ = max_linear_velocity_;
+   }
+
+   public double getMaxAngularVelocity()
+   {
+      return max_angular_velocity_;
+   }
+
+   public void setMaxAngularVelocity(double max_angular_velocity_)
+   {
+      this.max_angular_velocity_ = max_angular_velocity_;
    }
 
    public double getLinearPositionWeight()
@@ -368,22 +475,34 @@ public class ArmActionDefinitionMessage implements ROS2Message<ArmActionDefiniti
       builder.append(definition_);
       builder.append("robot_side_=");
       builder.append(robot_side_);
+      builder.append("defined_in_jointspace_=");
+      builder.append(defined_in_jointspace_);
+      builder.append("taskspace_trajectory_mode_=");
+      builder.append(taskspace_trajectory_mode_);
+      builder.append("trajectory_duration_=");
+      builder.append(trajectory_duration_);
+      builder.append("preset_=");
+      builder.append(preset_);
+      builder.append("joint_angles_=");
+      builder.append(java.util.Arrays.toString(joint_angles_));
       builder.append("parent_frame_name_=");
       builder.append(parent_frame_name_.toString());
       builder.append("transform_to_parent_=");
       builder.append(transform_to_parent_);
       builder.append("joint_space_control_=");
       builder.append(joint_space_control_);
-      builder.append("use_predefined_joint_angles_=");
-      builder.append(use_predefined_joint_angles_);
-      builder.append("preset_=");
-      builder.append(preset_);
-      builder.append("joint_angles_=");
-      builder.append(java.util.Arrays.toString(joint_angles_));
-      builder.append("trajectory_duration_=");
-      builder.append(trajectory_duration_);
       builder.append("hold_pose_in_world_=");
       builder.append(hold_pose_in_world_);
+      builder.append("screw_axis_pose_=");
+      builder.append(screw_axis_pose_);
+      builder.append("translation_=");
+      builder.append(translation_);
+      builder.append("rotation_=");
+      builder.append(rotation_);
+      builder.append("max_linear_velocity_=");
+      builder.append(max_linear_velocity_);
+      builder.append("max_angular_velocity_=");
+      builder.append(max_angular_velocity_);
       builder.append("linear_position_weight_=");
       builder.append(linear_position_weight_);
       builder.append("angular_position_weight_=");

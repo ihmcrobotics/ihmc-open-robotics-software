@@ -55,6 +55,14 @@ byte composite_frame_type
 
 # Distance from frame B
 float32 composite_distance
+
+# Approach table
+
+# Consider the table edge when there are this many points in the capsule
+uint16 min_capsule_points
+
+# Initial capsule distance to start from robot, tunable to avoid detecting self as the table
+float32 search_start_x
 }</pre>
 */
 public class BehaviorTreeSceneObjectDefinitionMessage implements ROS2Message<BehaviorTreeSceneObjectDefinitionMessage>
@@ -110,6 +118,14 @@ public class BehaviorTreeSceneObjectDefinitionMessage implements ROS2Message<Beh
       Distance from frame B
    */
    private float composite_distance_;
+   /**
+      Consider the table edge when there are this many points in the capsule
+   */
+   private int min_capsule_points_;
+   /**
+      Initial capsule distance to start from robot, tunable to avoid detecting self as the table
+   */
+   private float search_start_x_;
 
    public BehaviorTreeSceneObjectDefinitionMessage()
    {
@@ -143,6 +159,8 @@ public class BehaviorTreeSceneObjectDefinitionMessage implements ROS2Message<Beh
       currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4) + (1 * composite_frame_b_.length()) + 1; // composite_frame_b_
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // composite_frame_type_
       currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // composite_distance_
+      currentAlignment += 2 + CDRBuffer.alignment(currentAlignment, 2); // min_capsule_points_
+      currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // search_start_x_
 
       return currentAlignment - initialAlignment;
    }
@@ -161,6 +179,8 @@ public class BehaviorTreeSceneObjectDefinitionMessage implements ROS2Message<Beh
       buffer.writeString(composite_frame_b_);
       buffer.writeByte(composite_frame_type_);
       buffer.writeFloat(composite_distance_);
+      buffer.writeUInt16(min_capsule_points_);
+      buffer.writeFloat(search_start_x_);
 
    }
 
@@ -178,6 +198,8 @@ public class BehaviorTreeSceneObjectDefinitionMessage implements ROS2Message<Beh
       buffer.readString(composite_frame_b_);
       composite_frame_type_ = buffer.readByte();
       composite_distance_ = buffer.readFloat();
+      min_capsule_points_ = buffer.readUInt16();
+      search_start_x_ = buffer.readFloat();
 
    }
 
@@ -200,6 +222,8 @@ public class BehaviorTreeSceneObjectDefinitionMessage implements ROS2Message<Beh
       composite_frame_b_.insert(0, from.composite_frame_b_);
       composite_frame_type_ = from.composite_frame_type_;
       composite_distance_ = from.composite_distance_;
+      min_capsule_points_ = from.min_capsule_points_;
+      search_start_x_ = from.search_start_x_;
 
    }
 
@@ -338,6 +362,26 @@ public class BehaviorTreeSceneObjectDefinitionMessage implements ROS2Message<Beh
       this.composite_distance_ = composite_distance_;
    }
 
+   public int getMinCapsulePoints()
+   {
+      return min_capsule_points_;
+   }
+
+   public void setMinCapsulePoints(int min_capsule_points_)
+   {
+      this.min_capsule_points_ = min_capsule_points_;
+   }
+
+   public float getSearchStartX()
+   {
+      return search_start_x_;
+   }
+
+   public void setSearchStartX(float search_start_x_)
+   {
+      this.search_start_x_ = search_start_x_;
+   }
+
 
    @Override
    public java.lang.String toString()
@@ -370,6 +414,10 @@ public class BehaviorTreeSceneObjectDefinitionMessage implements ROS2Message<Beh
       builder.append(composite_frame_type_);
       builder.append("composite_distance_=");
       builder.append(composite_distance_);
+      builder.append("min_capsule_points_=");
+      builder.append(min_capsule_points_);
+      builder.append("search_start_x_=");
+      builder.append(search_start_x_);
 
       builder.append("}");
       return builder.toString();
