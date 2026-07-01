@@ -22,6 +22,7 @@ module behavior_msgs
        * FoundationPose:
        * Door Frame
        * Composite Reference Frame:
+       * Approach table
        */
       @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeSceneObjectDefinitionMessage_")
       struct BehaviorTreeSceneObjectDefinitionMessage
@@ -70,6 +71,14 @@ module behavior_msgs
          * Distance from frame B
          */
         float composite_distance;
+        /**
+         * Consider the table edge when there are this many points in the capsule
+         */
+        unsigned short min_capsule_points;
+        /**
+         * Initial capsule distance to start from robot, tunable to avoid detecting self as the table
+         */
+        float search_start_x;
       };
     };
   };

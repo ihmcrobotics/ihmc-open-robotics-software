@@ -1,56 +1,58 @@
-package us.ihmc.behaviors.behaviorTree;
+package us.ihmc.rdx.behaviorTree.svg;
 
 import org.apache.commons.text.WordUtils;
 import org.jfree.svg.SVGGraphics2D;
-import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalDefinition;
-import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
-import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.SpineActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.SpineActionState;
-import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.EZGripperActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.EZGripperActionState;
-import us.ihmc.behaviors.behaviorTree.action.actions.ScrewPrimitiveActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.ScrewPrimitiveActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionTaskspaceTrajectoryMode;
+import us.ihmc.behaviors.behaviorTree.action.actions.SpineActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.WaitActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionDefinition;
+import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
+import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalDefinition;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeNode;
+import us.ihmc.rdx.behaviorTree.RDXLeafNode;
+import us.ihmc.rdx.behaviorTree.actions.RDXArmAction;
+import us.ihmc.rdx.behaviorTree.actions.RDXEZGripperAction;
+import us.ihmc.rdx.behaviorTree.actions.RDXArmAction;
+import us.ihmc.rdx.behaviorTree.actions.RDXSpineAction;
+import us.ihmc.rdx.behaviorTree.actions.RDXWaitAction;
+import us.ihmc.rdx.behaviorTree.actions.RDXWalkAction;
 
 import java.awt.*;
+import java.util.Map;
 import java.util.Random;
 
 /**
  * Helps draw the tree node to an SVG format for formal presentation such
  * as in scientific publications.
  */
-public class BehaviorTreeSVGNode
+public class RDXBehaviorTreeSVGNode
 {
    private static final Random random = new Random(0L);
 
    private final SVGGraphics2D svgGraphics2D;
-   private final BehaviorTreeNodeState<?> node;
+   private final RDXBehaviorTreeNode<?, ?> node;
    private final Color color;
    private int treeViewX;
    private int treeViewY;
    private int timeViewX;
    private int timeViewY;
 
-   public BehaviorTreeSVGNode(SVGGraphics2D svgGraphics2D,
-                              BehaviorTreeNodeState<?> node,
-                              BehaviorTreeSVGNode nodeToExecuteAfter,
-                              int index,
-                              int originX,
-                              int originY)
+   public RDXBehaviorTreeSVGNode(SVGGraphics2D svgGraphics2D, RDXBehaviorTreeNode<?, ?> node, int index, Map<RDXBehaviorTreeNode<?, ?>, RDXBehaviorTreeSVGNode> map)
    {
       this.svgGraphics2D = svgGraphics2D;
       this.node = node;
 
       color = new Color((int) (random.nextDouble() * 256), (int) (random.nextDouble() * 256), (int) (random.nextDouble() * 256), 100);
 
-      int nodeDepth = BehaviorTreeTools.getNodeDepth(node);
-      int childIndex = BehaviorTreeTools.getChildIndex(node);
+      int nodeDepth = BehaviorTreeTools.getNodeDepth(node.getState());
+      int childIndex = BehaviorTreeTools.getChildIndex(node.getState());
+      int originX = 100;
+      int originY = 100;
       treeViewX = originX + 20 * nodeDepth;
       treeViewY = originY + 30 * index;
 
@@ -58,11 +60,12 @@ public class BehaviorTreeSVGNode
       timeViewX = treeViewX;
       timeViewY = originY + timeBarHeight * index + 1100;
 
-      if (node instanceof ActionNodeState)
-      {
-         timeViewX = nodeToExecuteAfter.getTimeViewX();
-      }
 
+      RDXBehaviorTreeNode<?, ?> nodeToExecuteAfter = null;
+      if (node instanceof RDXLeafNode<?, ?> leafNode)
+         nodeToExecuteAfter = leafNode.getExecuteAfterLeaf();
+      if (nodeToExecuteAfter != null)
+         timeViewX = map.get(nodeToExecuteAfter).getTimeViewX();
 
       svgGraphics2D.setColor(color);
       svgGraphics2D.setStroke(new BasicStroke(0.5f));
@@ -105,32 +108,29 @@ public class BehaviorTreeSVGNode
 
       double secondsToPixels = 15.0;
       double duration = 0.0f;
-      if (node instanceof WaitActionState action)
+      if (node instanceof RDXWaitAction action)
       {
          duration = action.getDefinition().getWaitDuration();
       }
-      else if (node instanceof ArmActionState action)
+      else if (node instanceof RDXArmAction action)
+      {
+         if (action.getDefinition().getTaskspaceTrajectoryMode() == ArmActionTaskspaceTrajectoryMode.SCREW_PRIMITIVE)
+            duration = action.getState().getPreviewTrajectoryDuration().getValue();
+         else
+            duration = action.getDefinition().getTrajectoryDuration();
+      }
+      else if (node instanceof RDXSpineAction action)
       {
          duration = action.getDefinition().getTrajectoryDuration();
       }
-      else if (node instanceof SpineActionState action)
-      {
-         duration = action.getDefinition().getTrajectoryDuration();
-      }
-      else if (node instanceof WalkActionState action)
+      else if (node instanceof RDXWalkAction action)
       {
          duration = 10.0; // TODO
       }
-      else if (node instanceof EZGripperActionState action)
+      else if (node instanceof RDXEZGripperAction action)
       {
          duration = 0.5; // TODO
       }
-      else if (node instanceof ScrewPrimitiveActionState action)
-      {
-         duration = 2.0; // TODO
-      }
-
-
       timeViewX += (int) Math.round(duration * secondsToPixels);
 
 //      svgGraphics2D.setColor(color);
@@ -161,11 +161,6 @@ public class BehaviorTreeSVGNode
       return treeViewY;
    }
 
-   public BehaviorTreeNodeState<?> getNode()
-   {
-      return node;
-   }
-
    private void drawRect(int x, int y, int width, int height)
    {
       // The supplied drawRect is broken for strokes < 1.0f
@@ -175,7 +170,7 @@ public class BehaviorTreeSVGNode
       svgGraphics2D.drawLine(x + width, y, x + width, y + height);
    }
 
-   private String filterName(BehaviorTreeNodeState<?> node)
+   private String filterName(RDXBehaviorTreeNode<?, ?> node)
    {
       String name = node.getDefinition().getName();
 
@@ -209,16 +204,15 @@ public class BehaviorTreeSVGNode
          return "Action Sequence";
       if (node instanceof WaitActionDefinition)
          return "Wait Action";
-      if (node instanceof ArmActionDefinition)
-         return "Arm Action";
+      if (node instanceof ArmActionDefinition armActionDefinition)
+         return armActionDefinition.getTaskspaceTrajectoryMode() == ArmActionTaskspaceTrajectoryMode.SCREW_PRIMITIVE
+                ? "Screw Trajectory Action" : "Arm Action";
       if (node instanceof WalkActionDefinition)
          return "Walk Action";
       if (node instanceof SpineActionDefinition)
          return "Spine Action";
       if (node instanceof EZGripperActionDefinition)
          return "Finger Trajectory Action";
-      if (node instanceof ScrewPrimitiveActionDefinition)
-         return "Screw Trajectory Action";
       return "";
    }
 }
