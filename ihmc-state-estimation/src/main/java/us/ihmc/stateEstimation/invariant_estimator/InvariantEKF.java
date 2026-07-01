@@ -168,6 +168,18 @@ public class InvariantEKF
    }
 
    /**
+    * Overwrites the base orientation R of the state mean. Used by an external yaw-seeding correction (the
+    * yaw direction is unobservable in the right-invariant contact filter); a mean-only complementary
+    * nudge that intentionally leaves the covariance untouched.
+    *
+    * @param rotation the new base orientation R. Not modified.
+    */
+   public void setRotation(RotationMatrixReadOnly rotation)
+   {
+      state.setRotation(rotation);
+   }
+
+   /**
     * Packs the current base position p.
     *
     * @param positionToPack the vector to pack the result into. Modified.

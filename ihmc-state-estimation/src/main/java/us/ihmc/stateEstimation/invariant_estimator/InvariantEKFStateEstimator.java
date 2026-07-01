@@ -291,6 +291,16 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       this.swingSlipInflation = swingSlipInflation;
    }
 
+   /**
+    * @param side the foot to query.
+    * @return the most recent contact probability p ∈ [0,1] for {@code side} (set each {@code doControl}).
+    *         Exposed for the yaw-seeding corrector when this filter drives the base as the main estimator.
+    */
+   public double getContactProbability(RobotSide side)
+   {
+      return yoContactProbability.get(side).getDoubleValue();
+   }
+
    /** Knob 1: contact FK measurement covariance scale, inflation^(1−p) — 1 at p = 1, swing inflation at p = 0. */
    private double measurementInflation(double contactProbability)
    {

@@ -53,6 +53,7 @@ import us.ihmc.stateEstimation.ekf.LeggedRobotEKF;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorControllerFactory;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
+import us.ihmc.stateEstimation.invariant_estimator.InvariantMainStateEstimator;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
 import us.ihmc.tools.factories.FactoryTools;
@@ -89,6 +90,9 @@ public class AvatarEstimatorThreadFactory
    // Optional fields -----------------------------------------------
    private final OptionalFactoryField<YoGraphicsListRegistry> yoGraphicsListRegistryField = new OptionalFactoryField<>("yoGraphicsListRegistry");
    private final OptionalFactoryField<StateEstimatorController> mainStateEstimatorField = new OptionalFactoryField<>("mainEstimatorController");
+   /** When set, {@link #getMainStateEstimator()} builds the invariant InEKF main estimator instead of the DRC one. */
+   private boolean useInvariantStateEstimator = false;
+   private boolean invariantEstimatorYawSeeding = true;
    private final OptionalFactoryField<PairList<BooleanSupplier, StateEstimatorController>> secondaryStateEstimatorsField = new OptionalFactoryField<>("secondaryEstimatorControllers");
    private final OptionalFactoryField<List<StateEstimatorControllerFactory>> secondaryStateEstimatorFactoriesField = new OptionalFactoryField<>("secondaryEstimatorControllerFactories");
 
@@ -170,7 +174,6 @@ public class AvatarEstimatorThreadFactory
     * </ul>
     *
     * @param robotModel        the robot model used to configure this factory.
-    * @param robotInitialSetup
     */
    public void configureWithDRCRobotModel(DRCRobotModel robotModel)
    {
@@ -497,6 +500,40 @@ public class AvatarEstimatorThreadFactory
       return stateEstimator;
    }
 
+   /** Selects the invariant InEKF as the main estimator (built by {@link #createInvariantStateEstimator()}). */
+   public void setUseInvariantStateEstimator(boolean useInvariantStateEstimator)
+   {
+      this.useInvariantStateEstimator = useInvariantStateEstimator;
+   }
+
+   /** Enables/disables foot-referenced yaw seeding on the invariant main estimator (default true). */
+   public void setInvariantEstimatorYawSeeding(boolean invariantEstimatorYawSeeding)
+   {
+      this.invariantEstimatorYawSeeding = invariantEstimatorYawSeeding;
+   }
+
+   /**
+    * Creates the contact-aided right-invariant InEKF as a main {@link StateEstimatorController}: joints from
+    * the processed sensor output (good-enough FK), InEKF floating base, optional yaw seeding, and the
+    * root-joint write. Uses the same noise defaults as {@code InvariantEKFStateEstimatorFactory}.
+    */
+   public StateEstimatorController createInvariantStateEstimator()
+   {
+      if (!useStateEstimator())
+         return null;
+
+      double estimatorDT = getStateEstimatorParameters().getEstimatorDT();
+      return new InvariantMainStateEstimator(getEstimatorFullRobotModel(),
+                                             getProcessedSensorOutputMap(),
+                                             estimatorDT,
+                                             1.0e-4, // gyroVariance
+                                             1.0e-3, // accelVariance
+                                             1.0e-6, // contactVariance
+                                             1.0e-4, // contactMeasurementVariance
+                                             1.0,    // initialCovariance
+                                             invariantEstimatorYawSeeding);
+   }
+
    public StateEstimatorController createEKFStateEstimator()
    {
       if (!useStateEstimator())
@@ -768,7 +805,12 @@ public class AvatarEstimatorThreadFactory
    public StateEstimatorController getMainStateEstimator()
    {
       if (!mainStateEstimatorField.hasValue())
-         mainStateEstimatorField.set(createDRCKinematicsStateEstimator());
+      {
+         if (useInvariantStateEstimator)
+            mainStateEstimatorField.set(createInvariantStateEstimator());
+         else
+            mainStateEstimatorField.set(createDRCKinematicsStateEstimator());
+      }
       return mainStateEstimatorField.get();
    }
 

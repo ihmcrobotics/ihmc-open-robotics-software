@@ -193,6 +193,9 @@ public class SCS2AvatarSimulationFactory
          "headingAndVelocityEvaluationScriptParameters");
    private final OptionalFactoryField<StateEstimatorControllerFactory> secondaryStateEstimatorFactory = new OptionalFactoryField<>(
          "SecondaryStateEstimatorFactory");
+   /** When true, the invariant InEKF replaces the DRC estimator as the main floating-base estimator. */
+   private boolean useInvariantMainStateEstimator = false;
+   private boolean invariantMainEstimatorYawSeeding = true;
    private final OptionalFactoryField<Boolean> createIKStreamingRealTimeController = new OptionalFactoryField<>(
          "createIKStreamingRealTimeController",
          false);
@@ -498,6 +501,11 @@ public class SCS2AvatarSimulationFactory
       avatarEstimatorThreadFactory.setGravity(gravity.get());
       if (secondaryStateEstimatorFactory.hasBeenSet())
          avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryStateEstimatorFactory.get());
+      if (useInvariantMainStateEstimator)
+      {
+         avatarEstimatorThreadFactory.setUseInvariantStateEstimator(true);
+         avatarEstimatorThreadFactory.setInvariantEstimatorYawSeeding(invariantMainEstimatorYawSeeding);
+      }
       estimatorThread = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
    }
 
@@ -1160,6 +1168,21 @@ public class SCS2AvatarSimulationFactory
    public void setSecondaryStateEstimatorFactory(StateEstimatorControllerFactory secondaryStateEstimatorFactory)
    {
       this.secondaryStateEstimatorFactory.set(secondaryStateEstimatorFactory);
+   }
+
+   /**
+    * Replaces the DRC main state estimator with the contact-aided right-invariant InEKF. Joints are still
+    * read from the processed sensor output (good-enough FK); the InEKF drives the floating base.
+    */
+   public void setUseInvariantMainStateEstimator(boolean useInvariantMainStateEstimator)
+   {
+      this.useInvariantMainStateEstimator = useInvariantMainStateEstimator;
+   }
+
+   /** Enables/disables foot-referenced yaw seeding when the invariant InEKF is the main estimator (default true). */
+   public void setInvariantMainEstimatorYawSeeding(boolean invariantMainEstimatorYawSeeding)
+   {
+      this.invariantMainEstimatorYawSeeding = invariantMainEstimatorYawSeeding;
    }
 
    public void setComponentFootstepGeneratorParameters(boolean useHeadingAndVelocityScript,
