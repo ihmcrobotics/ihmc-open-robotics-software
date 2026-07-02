@@ -55,7 +55,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
       ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
-      //ros2Helper.subscribeViaCallback(PerceptionAPI.OUSTER_DEPTH_IMAGE, this::onOusterDepthReceived);
+      //ros2Node.createSubscriptionSampler(PerceptionAPI.OUSTER_DEPTH_IMAGE, this::onOusterDepthReceived);
 
       ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, robotModel.getSimpleRobotName()), this::walkingStatusReceived);
 

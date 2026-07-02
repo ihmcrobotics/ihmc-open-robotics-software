@@ -27,9 +27,8 @@ public class AsyncROS2PublisherSubscriberTest
       LogTools.info("Publishing to {}", topic);
       publisher = asyncROS2Node.createPublisher(topic);
 
-      ROS2Subscription<ImageMessage> subscriber = asyncROS2Node.createSubscription(topic, reader ->
+      ROS2Subscription<ImageMessage> subscriber = asyncROS2Node.createSubscriptionSampler(topic, message ->
       {
-         ImageMessage message = reader.read();
          LogTools.info("Got from callback");
       });
       ThreadTools.startAThread(() ->
