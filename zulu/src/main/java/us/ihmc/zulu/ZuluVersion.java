@@ -3,7 +3,6 @@ package us.ihmc.zulu;
 import us.ihmc.avatar.drcRobot.RobotVersion;
 import us.ihmc.handsros2.HandType;
 import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
-import us.ihmc.zulu.parameters.model.ZuluPhysicalPropertiesV0;
 import us.ihmc.zulu.parameters.model.ZULUURDFParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -200,7 +199,7 @@ public enum ZuluVersion implements RobotVersion
       switch (this)
       {
          case V1_FULL_ROBOT:
-            physicalProperties = new ZuluPhysicalPropertiesV0();
+            physicalProperties = new ZuluPhysicalProperties();
             break;
          default:
             break;

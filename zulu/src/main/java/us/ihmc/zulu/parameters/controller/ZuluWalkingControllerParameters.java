@@ -3,7 +3,6 @@ package us.ihmc.zulu.parameters.controller;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.zulu.ZuluJointMap;
 import us.ihmc.zulu.ZuluVersion;
-import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
@@ -33,6 +32,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 
 import java.util.ArrayList;
 import java.util.Arrays;

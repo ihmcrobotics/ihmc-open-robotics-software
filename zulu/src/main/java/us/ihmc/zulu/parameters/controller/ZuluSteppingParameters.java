@@ -1,7 +1,7 @@
 package us.ihmc.zulu.parameters.controller;
 
-import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 
 public class ZuluSteppingParameters implements SteppingParameters
 {

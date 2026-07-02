@@ -26,7 +26,6 @@ import us.ihmc.zulu.parameters.controller.ZuluICPSplitFractionCalculatorParamete
 import us.ihmc.zulu.parameters.controller.ZuluHighLevelControllerParameters;
 import us.ihmc.zulu.parameters.controller.ZuluStateEstimatorParameters;
 import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
-import us.ihmc.zulu.parameters.diagnostic.ZuluDiagnosticParameters;
 import us.ihmc.zulu.parameters.model.ZuluKSTKinematicsCollisionModel;
 import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 import us.ihmc.zulu.parameters.model.ZuluSimulationCollisionModel;
@@ -35,7 +34,6 @@ import us.ihmc.zulu.parameters.planning.ZuluFootstepPlannerParameters;
 import us.ihmc.zulu.parameters.planning.ZuluLocomotionParameters;
 import us.ihmc.zulu.parameters.planning.ZuluSwingPlannerParameters;
 import us.ihmc.zulu.parameters.simulation.ZuluInitialSetup;
-import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
@@ -54,7 +52,6 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 
 import java.io.InputStream;
 import java.util.List;
@@ -63,7 +60,7 @@ public class ZuluRobotModel implements DRCRobotModel
 {
    static final boolean ENFORCE_UNIQUE_REFERENCE_FRAMES = false;
 
-   private static final double DEFAULT_SIMULATE_DT = 0.0002;
+   private static final double DEFAULT_SIMULATE_DT = 0.0001;
    private static final double DEFAULT_ESTIMATE_DT = 0.001;
    public static final double DEFAULT_CONTROL_DT = 0.003;
    private static final double DEFAULT_FEEDBACK_CONTROLLER_DT = 0.002;

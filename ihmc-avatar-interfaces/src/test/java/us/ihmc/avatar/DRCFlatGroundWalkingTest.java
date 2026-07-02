@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Hea
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotDataLogger.RobotVisualizer;
+import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParameters;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.MeshTerrainEnvironment;
@@ -138,6 +139,16 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
                                                                                                                                              flatGround,
                                                                                                                                              simulationTestingParameters);
+
+      simulationTestHelperFactory.setUseMujocoPhysicsEngine(true);
+
+      MujocoSimulationParameters mujocoParams = new MujocoSimulationParameters();
+      mujocoParams.setContactSolrefTimeconst(0.01);
+      mujocoParams.setJointArmature(0.01);
+
+      simulationTestHelperFactory.setMujocoSimulationParameters(mujocoParams);
+
+
       simulationTestHelperFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, getWalkingScriptParameters());
       if (useBulletPhysicsEngine)
       {
@@ -173,6 +184,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
                                                                                                                                              new FlatGroundEnvironment(),
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, getWalkingScriptParameters());
+      simulationTestHelperFactory.setUseMujocoPhysicsEngine(true);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
 

@@ -2,7 +2,7 @@ package us.ihmc.zulu;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.zulu.parameters.model.ZuluPhysicalPropertiesV0;
+import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 import us.ihmc.avatar.AvatarLiftOffAndTouchDownTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ZuluLiftOffAndTouchDownTest
 {
-   private final double footLength = new ZuluPhysicalPropertiesV0().getFootLengthForControl();
+   private final double footLength = new ZuluPhysicalProperties().getFootLengthForControl();
 
    @Tag("humanoid-flat-ground")
    @Test
