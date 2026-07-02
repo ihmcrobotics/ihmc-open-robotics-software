@@ -45,12 +45,12 @@ public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinit
    public void fromMessage(BehaviorTreeSceneObjectStateMessage message)
    {
       // Needs to be done first to detect incoming modification
-      fromMessage(message.getLatestModificationToData());
+      super.fromMessage(message.getLatestModificationToData());
 
       if (id != message.getId())
          LogTools.error("IDs should match! {} != {}", id, message.getId());
 
-      fromMessage(message.getDefinition());
+      super.fromMessage(message.getDefinition());
 
       transform.fromMessage(message.getTransformToWorld());
       referenceFrame.update();

@@ -208,8 +208,8 @@ public class ArmActionExecutor extends ActionNodeExecutor<ArmActionState, ArmAct
          se3TrajectoryPointMessage.setTime(definition.getTrajectoryDuration());
          se3TrajectoryPointMessage.getPosition().set(desiredControlFramePose.getPosition());
          se3TrajectoryPointMessage.getOrientation().set(desiredControlFramePose.getOrientation());
-         se3TrajectoryPointMessage.getLinearVelocity().setToZero();
-         se3TrajectoryPointMessage.getAngularVelocity().setToZero();
+         se3TrajectoryPointMessage.getLinearVelocity().getVector().setToZero();
+         se3TrajectoryPointMessage.getAngularVelocity().getVector().setToZero();
 
          HandHybridJointspaceTaskspaceTrajectoryMessage handHybridJointspaceTaskspaceTrajectoryMessage
                = new HandHybridJointspaceTaskspaceTrajectoryMessage();
