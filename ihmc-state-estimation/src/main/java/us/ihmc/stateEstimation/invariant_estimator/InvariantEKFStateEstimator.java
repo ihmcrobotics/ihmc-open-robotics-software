@@ -91,6 +91,10 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     * are set to NaN instead so they cannot be misread as a DRC comparison.
     */
    private boolean runningAsMain = false;
+   private StateEstimatorMode operatingMode = StateEstimatorMode.NORMAL;
+   private boolean heldLastTick = false;
+   private static final double CONTACT_HOLD_THRESHOLD = 0.5; // both feet below -> base translation will be unobservable
+   private final Vector3D zeroVelocity = new Vector3D(); // final, stays zero
 
    // Soft contact handling: a per-foot contact probability p ∈ [0,1] drives two covariance knobs each tick.
    // The default provider is forward-kinematics only (runs on hardware); ContactNet replaces it later.
@@ -205,6 +209,32 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       updateYoVariables();
    }
 
+   /**
+    * Re-seed the flter when resuming from a held state: base pose from the current (gyro-tracked) pelvis frame,
+    * contact anchors from current sole FK, zero velocity, covariance reset to P = initialCovariance * I.
+    * Runs only on the hold->active transition, so the allication here is not when the estimator is actively running yet.
+    */
+   public void reAnchor()
+   {
+      referenceFrames.updateFrames();
+
+      mainEstimatePelvisPose.setToZero(pelvisFrame);
+      mainEstimatePelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
+      tempRotation.set(mainEstimatePelvisPose.getOrientation());
+      Point3D basePosition = new Point3D(mainEstimatePelvisPose.getPosition());
+
+      Tuple3DReadOnly[] contactPositions = new Tuple3DReadOnly[NUMBER_OF_CONTACTS];
+      for (RobotSide side: RobotSide.values)
+      {
+         contactInWorld.setToZero(soleFrames.get(side));
+         contactInWorld.changeFrame(ReferenceFrame.getWorldFrame());
+         contactPositions[CONTACT_INDICES.get(side)] = new Point3D(contactInWorld);
+      }
+
+      ekf.initialize(tempRotation, new Vector3D(), basePosition, contactPositions, scaledIdentity(initialCovariance));
+      updateYoVariables();
+   }
+
    @Override
    public void doControl()
    {
@@ -226,6 +256,28 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       angularVelocity.changeFrame(pelvisFrame);
       linearAcceleration.setIncludingFrame(imuSensor.getMeasurementFrame(), imuSensor.getLinearAccelerationMeasurement());
       linearAcceleration.changeFrame(pelvisFrame);
+
+      boolean noContact = getContactProbability(RobotSide.LEFT) < CONTACT_HOLD_THRESHOLD && getContactProbability(RobotSide.RIGHT) < CONTACT_HOLD_THRESHOLD;
+
+      if (operatingMode == StateEstimatorMode.FROZEN || noContact)
+      {
+         // Base translation is unobservable (frozen/hanging). Integrate
+         // gyro as usual, but hold translation: zero the base velocity so the accel/gravity residual can't ramp
+         // it (the -2 m/s drift in Z while hanging). Contact updates skipped by returning
+         ekf.predict(angularVelocity, linearAcceleration, dt);
+         ekf.getState().setBaseVelocity(zeroVelocity);
+         heldLastTick = true;
+         updateYoVariables();
+         return;
+      }
+
+      if (heldLastTick)
+      {
+         // First observable tick after a hold, feet have moved, so the contact anchors are stale
+         // Need to re-ssed anchors form current FK before using contact update appropriately
+         reAnchor();
+         heldLastTick = false;
+      }
 
       ekf.predict(angularVelocity, linearAcceleration, dt);
 
@@ -386,7 +438,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    @Override
    public void requestStateEstimatorMode(StateEstimatorMode operatingMode)
    {
-      // Evaluation estimator: nothing to switch.
+      this.operatingMode = operatingMode; // used in doControl(); FROZEN->hold
    }
 
    @Override
