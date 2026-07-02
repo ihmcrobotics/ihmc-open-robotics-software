@@ -34,7 +34,13 @@ public class ZuluSteppingParameters implements SteppingParameters
    @Override
    public double getMaxStepLength()
    {
-      return 0.7;
+      return 0.50;
+   }
+
+   @Override
+   public double getMaxBackwardStepLength()
+   {
+      return 0.3;
    }
 
    @Override
@@ -46,7 +52,7 @@ public class ZuluSteppingParameters implements SteppingParameters
    @Override
    public double getMaxStepWidth()
    {
-      return 0.8;
+      return 0.47;
    }
 
    @Override

@@ -113,16 +113,16 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
       kneePrivilegedConfigurationParameters.setPrivilegedConfigurationOption(PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_MID_RANGE);
 
       kneeJointLimitParameters = new JointLimitParameters();
-      kneeJointLimitParameters.setMaxAbsJointVelocity(4.0);
-      kneeJointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toRadians(30.0));
+      kneeJointLimitParameters.setMaxAbsJointVelocity(2.0);
+      kneeJointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toRadians(15.0));
       kneeJointLimitParameters.setJointLimitFilterBreakFrequency(15.0);
-      kneeJointLimitParameters.setVelocityControlGain(600.0);
+      kneeJointLimitParameters.setVelocityControlGain(300.0);
       kneeJointLimitParameters.setVelocityDeadbandSize(0.3);
 
       // TODO Needs tune up
       minimumHeightAboveGround = 0.6 * jointMap.getModelScale();
-      nominalHeightAboveGround = 0.88 * jointMap.getModelScale();
-      maximumHeightAboveGround = 0.91 * jointMap.getModelScale();
+      nominalHeightAboveGround = 0.90 * jointMap.getModelScale();
+      maximumHeightAboveGround = 0.95 * jointMap.getModelScale();
    }
 
    @Override
@@ -146,7 +146,7 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    @Override
    public double getOmega0()
    {
-      return 3.0;
+      return 3.3;
    }
 
    @Override
@@ -183,7 +183,7 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    @Override
    public double getICPErrorThresholdToSpeedUpSwing()
    {
-      return 0.05 * jointMap.getModelScale();
+      return 0.03 * jointMap.getModelScale();
    }
 
    @Override
@@ -626,10 +626,10 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
       double zetaXYOrientation = 0.7;
       double zetaZOrientation = 0.7;
 
-      double maxPositionAcceleration = Double.POSITIVE_INFINITY;
-      double maxPositionJerk = Double.POSITIVE_INFINITY;
-      double maxOrientationAcceleration = Double.POSITIVE_INFINITY;
-      double maxOrientationJerk = Double.POSITIVE_INFINITY;
+      double maxPositionAcceleration = 20.0;
+      double maxPositionJerk = 300.0;
+      double maxOrientationAcceleration = 100.0;
+      double maxOrientationJerk = 1500.0;
 
       DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
@@ -702,13 +702,13 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    @Override
    public double getDefaultTransferTime()
    {
-      return 0.25;
+      return 0.5;
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      return 0.60;
+      return 0.8;
    }
 
    @Override
@@ -773,15 +773,14 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    @Override
    public double getHighCoPDampingDurationToPreventFootShakies()
    {
-      return -1.0;
+      return 0.05;
    }
 
    @Override
    public double getCoPErrorThresholdForHighCoPDamping()
    {
-      return Double.POSITIVE_INFINITY;
+      return 0.1;
    }
-
 
    @Override
    public ToeOffParameters getToeOffParameters()
@@ -804,7 +803,7 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    @Override
    public double getMinSwingTrajectoryClearanceFromStanceFoot()
    {
-      return 0.15 * jointMap.getModelScale();
+      return 0.17 * jointMap.getModelScale();
    }
 
    @Override

@@ -247,7 +247,7 @@
     <!-- LINKS -->
     <link name="PELVIS_LINK">
         <inertial>
-            <mass value="9.50083635"/>
+            <mass value="7.161"/>
             <origin rpy="0 0 0" xyz="-0.08354287 0.00005291 -0.03484828"/>
             <inertia ixx="0.03428688" ixy="0.00001151" ixz="0.00015935" iyy="0.05178848" iyz="0.00004514" izz="0.06001929"/>
         </inertial>
@@ -307,7 +307,7 @@
     <!-- LEFT LEG LINKS -->
     <link name="LEFT_HIP_X_LINK">
         <inertial>
-            <mass value="2.32977961"/>
+            <mass value="2.33165613"/>
             <origin rpy="0 0 0" xyz="0.04350911	0.08708606 -0.03525761"/>
             <inertia ixx="0.00467452" ixy="-0.00058626" ixz="0.00013124" iyy="0.00516613" iyz="0.00048141" izz="0.00553124"/>
         </inertial>
@@ -364,7 +364,7 @@
 
     <link name="LEFT_HIP_Z_LINK">
         <inertial>
-            <mass value="0.77281362"/>
+            <mass value="0.761264535"/>
             <origin rpy="0 0 0" xyz="0.04549595	-0.00525571	-0.00937454"/>
             <inertia ixx="0.00317639" ixy="0.00005807" ixz="0.00080598" iyy="0.00345182" iyz="0.00047441" izz="0.00313245"/>
         </inertial>
@@ -377,7 +377,7 @@
     </link>
     <link name="LEFT_THIGH">
         <inertial>
-            <mass value="7.75"/><!-- CAD Mass 6.31087157 (Hacked April 1 2025 to match IRL Scale of whole robot) -->
+            <mass value="8.281087115"/><!-- CAD Mass 6.31087157 (Hacked April 1 2025 to match IRL Scale of whole robot); updated to match Alex V2 -->
             <origin rpy="0 0 0" xyz="0.01417302	0.03268781	-0.10548314"/>
             <inertia ixx="0.09264028" ixy="0.00038532" ixz="0.00916409" iyy="0.09733033" iyz="-0.0043516" izz="0.02803877"/>
         </inertial>
@@ -396,7 +396,7 @@
     </link>
     <link name="LEFT_SHIN">
         <inertial>
-            <mass value="6.31087157"/><!-- CAD Mass 6.31087157 (Hacked April 1 2025 to match IRL Scale of whole robot) -->
+            <mass value="6.33845554"/><!-- CAD Mass 6.31087157 (Hacked April 1 2025 to match IRL Scale of whole robot); updated to match Alex V2 -->
             <origin rpy="0 0 0" xyz="0.03807965	-0.00108105	-0.12410027"/>
             <inertia ixx="0.08823148" ixy="-0.00054706" ixz="-0.00634132" iyy="0.09163264" iyz="0.00002714" izz="0.01569601"/>
         </inertial>
@@ -503,7 +503,7 @@
     </link>
     <link name="LEFT_FOOT">
         <inertial>
-            <mass value="1.28288609"/>
+            <mass value="0.810"/>
             <origin rpy="0 0 0" xyz="0.03793372	-0.00000219	-0.0443663"/>
             <inertia ixx="0.00131328" ixy="0.00001057" ixz="0.00036242" iyy="0.00385286" iyz="-0.0000069" izz="0.00406301"/>
         </inertial>
@@ -561,7 +561,7 @@
     <!-- RIGHT LEG LINKS -->
     <link name="RIGHT_HIP_X_LINK">
         <inertial>
-            <mass value="2.32977248"/>
+            <mass value="2.33165613"/>
             <origin rpy="0 0 0" xyz="0.04351957	-0.08688935	-0.03525357"/>
             <inertia ixx="0.00467576" ixy="0.00061004" ixz="0.00013038" iyy="0.00516385" iyz="-0.00047381" izz="0.00552901"/>
         </inertial>
@@ -618,7 +618,7 @@
 
     <link name="RIGHT_HIP_Z_LINK">
         <inertial>
-            <mass value="0.77281055"/>
+            <mass value="0.761264535"/>
             <origin rpy="0 0 0" xyz="0.04549274	0.00525784	-0.00937505"/>
             <inertia ixx="0.00317639" ixy="-0.00005765" ixz="0.00080587" iyy="0.00345166" iyz="-0.00047466" izz="0.00313223"/>
         </inertial>
@@ -631,7 +631,7 @@
     </link>
     <link name="RIGHT_THIGH">
         <inertial>
-            <mass value="7.75"/><!-- CAD Mass 6.31087157 (Hacked April 1 2025 to match IRL Scale of whole robot) -->
+            <mass value="8.281087115"/><!-- CAD Mass 6.31087157 (Hacked April 1 2025 to match IRL Scale of whole robot); updated to match Alex V2 -->
             <origin rpy="0 0 0" xyz="0.01411846	-0.03282392	-0.10542795"/>
             <inertia ixx="0.09273162" ixy="-0.00026689" ixz="0.00921343" iyy="0.09738701" iyz="0.00422485" izz="0.02802165"/>
         </inertial>
@@ -688,7 +688,7 @@
 
     <link name="RIGHT_SHIN">
         <inertial>
-            <mass value="6.31087157"/><!-- CAD Mass 6.31087157 (Hacked April 1 2025 to match IRL Scale of whole robot) -->
+            <mass value="6.33845554"/><!-- CAD Mass 6.31087157 (Hacked April 1 2025 to match IRL Scale of whole robot); updated to match Alex V2 -->
             <origin rpy="0 0 0" xyz="0.03807648	0.00113375	-0.12408765"/>
             <inertia ixx="0.08705693" ixy="0.00057277" ixz="-0.00674654" iyy="0.090231" iyz="0.00028332" izz="0.01554032"/>
         </inertial>
@@ -758,7 +758,7 @@
     </link>
     <link name="RIGHT_FOOT">
         <inertial>
-            <mass value="1.28288609"/>
+            <mass value="0.810"/>
             <origin rpy="0 0 0" xyz="0.03793372	-0.00000219	-0.0443663"/>
             <inertia ixx="0.00131328" ixy="0.00001057" ixz="0.00036242" iyy="0.00385286" iyz="-0.0000069" izz="0.00406301"/>
         </inertial>
