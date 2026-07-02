@@ -80,7 +80,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    @Test
    public void testFlatGroundWalking()
    {
-      runFlatGroundWalking(false);
+      runFlatGroundWalking(false, false);
    }
 
    @Disabled
@@ -94,7 +94,14 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    @Test
    public void testFlatGroundWalkingBullet()
    {
-      runFlatGroundWalking(true);
+      runFlatGroundWalking(true, false);
+   }
+
+   @Tag("humanoid-flat-ground-mujoco")
+   @Test
+   public void testFlatGroundWalkingMujoco()
+   {
+      runFlatGroundWalking(false, true);
    }
 
    public void runMeshTerrainWalking(boolean useBulletPhysicsEngine)
@@ -128,7 +135,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 
    }
-   public void runFlatGroundWalking(boolean useBulletPhysicsEngine)
+   public void runFlatGroundWalking(boolean useBulletPhysicsEngine, boolean useMujocoPhysicsEngine)
    {
       boolean doPelvisWarmup = doPelvisWarmup();
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -140,14 +147,18 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
                                                                                                                                              flatGround,
                                                                                                                                              simulationTestingParameters);
 
-      simulationTestHelperFactory.setUseMujocoPhysicsEngine(true);
+      simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(false);
 
-      MujocoSimulationParameters mujocoParams = new MujocoSimulationParameters();
-      mujocoParams.setContactSolrefTimeconst(0.01);
-      mujocoParams.setJointArmature(0.01);
+      if (useMujocoPhysicsEngine)
+      {
+         simulationTestHelperFactory.setUseMujocoPhysicsEngine(true);
 
-      simulationTestHelperFactory.setMujocoSimulationParameters(mujocoParams);
+         MujocoSimulationParameters mujocoParams = new MujocoSimulationParameters();
+         mujocoParams.setContactSolrefTimeconst(0.01);
+         mujocoParams.setJointArmature(0.01);
 
+         simulationTestHelperFactory.setMujocoSimulationParameters(mujocoParams);
+      }
 
       simulationTestHelperFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, getWalkingScriptParameters());
       if (useBulletPhysicsEngine)
@@ -155,7 +166,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
          robotModel.getHumanoidRobotKinematicsCollisionModel();
          simulationTestHelperFactory.setUseBulletPhysicsEngine(useBulletPhysicsEngine);
       }
-      physicsEngineName = useBulletPhysicsEngine ? "Bullet Physics Engine: " : "SCS2 Physics Engine: ";
+      physicsEngineName = useBulletPhysicsEngine ? "Bullet Physics Engine: " : useMujocoPhysicsEngine ? "Mujoco Physics Engine: " : "SCS2 Physics Engine: ";
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.setKeepSCSUp(false);
 

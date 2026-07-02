@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Hea
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -45,7 +46,13 @@ public class ZuluFlatGroundWalkingTrack
       avatarSimulationFactory.setInitializeEstimatorToActual(true);
       avatarSimulationFactory.setUseImpulseBasedPhysicsEngine(false);
       avatarSimulationFactory.setUseBulletPhysicsEngine(false);
-      avatarSimulationFactory.setUsePerfectSensors(true);
+      MujocoSimulationParameters mujocoParams = new MujocoSimulationParameters();
+      mujocoParams.setContactSolrefTimeconst(0.01);
+      mujocoParams.setJointArmature(0.01);
+
+      avatarSimulationFactory.setUseMujocoPhysicsEngine(true);
+      avatarSimulationFactory.setMujocoSimulationParameters(mujocoParams);
+      avatarSimulationFactory.setUsePerfectSensors(false);
       if (kinematicsSimulation)
       {
          avatarSimulationFactory.setKinematicsSimulation(true);
@@ -58,7 +65,7 @@ public class ZuluFlatGroundWalkingTrack
 
       SimulationConstructionSet2 scs = avatarSimulation.getSimulationConstructionSet();
       ((YoDouble) scs.findVariable("transferTimeCSG")).set(0.4);
-      ((YoDouble) scs.findVariable("swingTimeCSG")).set(0.8);
+      ((YoDouble) scs.findVariable("swingTimeCSG")).set(1.0);
       //      ((YoDouble) scs.findVariable("swingHeight")).set(0.1);
       ((YoDouble) scs.findVariable("maxStepWidthCSG")).set(0.6);
       ((YoDouble) scs.findVariable("maxStepLengthForwardsCSG")).set(0.5);

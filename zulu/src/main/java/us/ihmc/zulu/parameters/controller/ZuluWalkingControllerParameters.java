@@ -2,6 +2,7 @@ package us.ihmc.zulu.parameters.controller;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.zulu.ZuluJointMap;
+import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
@@ -19,7 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.JointTorqueBasedFootSwitchFactory;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
@@ -677,10 +678,10 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
       double kpXYOrientation = 200.0;
       double kpZOrientation = 200.0;
       double zetaOrientation = 0.4;
-      double maxLinearAcceleration = Double.POSITIVE_INFINITY;
-      double maxLinearJerk = Double.POSITIVE_INFINITY;
-      double maxAngularAcceleration = Double.POSITIVE_INFINITY;
-      double maxAngularJerk = Double.POSITIVE_INFINITY;
+      double maxLinearAcceleration = 6.0;
+      double maxLinearJerk = 150.0;
+      double maxAngularAcceleration = 100.0;
+      double maxAngularJerk = 1500.0;
 
       DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
@@ -809,10 +810,15 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    @Override
    public FootSwitchFactory getFootSwitchFactory()
    {
-      WrenchBasedFootSwitchFactory factory = new WrenchBasedFootSwitchFactory();
-      factory.setDefaultContactThresholdForce(50.0);
-      factory.setDefaultCoPThresholdDistance(4.0e-3);
-      factory.setDefaultSecondContactThresholdForceIgnoringCoP(75.0);
+      JointTorqueBasedFootSwitchFactory factory = new JointTorqueBasedFootSwitchFactory("ANKLE_Y");
+      factory.setDefaultContactThresholdForceLow(75.0);
+      factory.setDefaultContactThresholdForceHigh(190.0);
+      factory.setDefaultVerticalVelocityThreshold(0.08);
+      factory.setDefaultHorizontalVelocityThreshold(0.5);
+      // Set this to zero. The foot polygon being used is already shrunken, and the actual measurement here could be wrong.
+      factory.setDefaultCoPThresholdDistance(0.002);
+      factory.setDefaultContactWindowDuration(10 * ZuluRobotModel.DEFAULT_CONTROL_DT); // preserves previous WBCC-specific behavior of dt = 0.003s, windowSize = 10
+      factory.setDefaultUseJacobianTranspose(true);
       return factory;
    }
 

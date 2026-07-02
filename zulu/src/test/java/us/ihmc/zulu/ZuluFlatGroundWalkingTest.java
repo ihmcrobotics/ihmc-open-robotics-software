@@ -51,6 +51,16 @@ public class ZuluFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    @Tag("fast")
    @Override
    @Test
+   public void testFlatGroundWalkingMujoco()
+   {
+      robotModel = new ZuluRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
+      setDoPelvisWarmup(true);
+      super.testFlatGroundWalkingMujoco();
+   }
+
+   @Tag("fast")
+   @Override
+   @Test
    public void testReset()
    {
       robotModel = new ZuluRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
