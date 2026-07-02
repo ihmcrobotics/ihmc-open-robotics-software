@@ -116,6 +116,7 @@ public class InvariantMainStateEstimator implements StateEstimatorController
                                                           contactVariance,
                                                           contactMeasurementVariance,
                                                           initialCovariance);
+      invariantEstimator.setRunningAsMain(true); // disables the invariantMinusMain* self-comparisons
       registry.addChild(invariantEstimator.getYoRegistry());
 
       if (enableYawSeeding)

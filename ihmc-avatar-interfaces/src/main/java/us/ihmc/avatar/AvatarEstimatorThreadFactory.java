@@ -52,7 +52,14 @@ import us.ihmc.stateEstimation.ekf.HumanoidRobotEKFWithSimpleJoints;
 import us.ihmc.stateEstimation.ekf.LeggedRobotEKF;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorControllerFactory;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
+import us.ihmc.stateEstimation.invariant_estimator.FootSwitchContactProbabilityProvider;
+import us.ihmc.stateEstimation.invariant_estimator.InvariantEKFStateEstimator;
 import us.ihmc.stateEstimation.invariant_estimator.InvariantMainStateEstimator;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
@@ -70,6 +77,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
@@ -93,6 +101,14 @@ public class AvatarEstimatorThreadFactory
    /** When set, {@link #getMainStateEstimator()} builds the invariant InEKF main estimator instead of the DRC one. */
    private boolean useInvariantStateEstimator = false;
    private boolean invariantEstimatorYawSeeding = true;
+   /**
+    * When true (default), the invariant main estimator's contact probabilities come from the robot's
+    * production foot switches ({@link StateEstimatorParameters#getFootSwitchFactories()} — joint-torque
+    * based on Alex) instead of the estimator's built-in kinematic height detector. The kinematic
+    * detector reads sole heights through the estimator's own base estimate, which is circular when the
+    * invariant filter is the main estimator; the foot switches are independent of the base estimate.
+    */
+   private boolean invariantEstimatorUseFootSwitches = true;
    private final OptionalFactoryField<PairList<BooleanSupplier, StateEstimatorController>> secondaryStateEstimatorsField = new OptionalFactoryField<>("secondaryEstimatorControllers");
    private final OptionalFactoryField<List<StateEstimatorControllerFactory>> secondaryStateEstimatorFactoriesField = new OptionalFactoryField<>("secondaryEstimatorControllerFactories");
 
@@ -525,17 +541,75 @@ public class AvatarEstimatorThreadFactory
 
       double estimatorDT = getStateEstimatorParameters().getEstimatorDT();
       String primaryImuName = getSensorInformation().getPrimaryBodyImu();
-      return new InvariantMainStateEstimator(getEstimatorFullRobotModel(),
-                                             getProcessedSensorOutputMap(),
-                                             primaryImuName,
-                                             getCenterOfMassDataHolder(), // same holder published to the controller context
-                                             estimatorDT,
-                                             1.0e-4, // gyroVariance
-                                             1.0e-3, // accelVariance
-                                             1.0e-6, // contactVariance
-                                             1.0e-4, // contactMeasurementVariance
-                                             1.0,    // initialCovariance
-                                             invariantEstimatorYawSeeding);
+      InvariantMainStateEstimator mainStateEstimator = new InvariantMainStateEstimator(getEstimatorFullRobotModel(),
+                                                                                       getProcessedSensorOutputMap(),
+                                                                                       primaryImuName,
+                                                                                       getCenterOfMassDataHolder(), // same holder published to the controller context
+                                                                                       estimatorDT,
+                                                                                       1.0e-4, // gyroVariance
+                                                                                       1.0e-3, // accelVariance
+                                                                                       1.0e-6, // contactVariance
+                                                                                       1.0e-4, // contactMeasurementVariance
+                                                                                       1.0,    // initialCovariance
+                                                                                       invariantEstimatorYawSeeding);
+
+      if (invariantEstimatorUseFootSwitches)
+         mainStateEstimator.getInvariantEKFStateEstimator().setContactProbabilityProvider(createInvariantFootSwitchProvider(mainStateEstimator));
+
+      return mainStateEstimator;
+   }
+
+   /**
+    * Builds the robot's production foot switches (same factory, feet, and thresholds as the DRC
+    * estimator path in {@link KinematicsBasedStateEstimatorFactory}) on the estimator robot model and
+    * wraps them as the invariant estimator's {@link FootSwitchContactProbabilityProvider}. The
+    * contactable feet are built on the invariant estimator's own reference frames, which it refreshes
+    * each tick before polling the provider.
+    */
+   private FootSwitchContactProbabilityProvider createInvariantFootSwitchProvider(InvariantMainStateEstimator mainStateEstimator)
+   {
+      FullHumanoidRobotModel fullRobotModel = getEstimatorFullRobotModel();
+      InvariantEKFStateEstimator invariantEstimator = mainStateEstimator.getInvariantEKFStateEstimator();
+
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = getContactableBodiesFactory();
+      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
+      contactableBodiesFactory.setReferenceFrames(invariantEstimator.getReferenceFrames());
+      SideDependentList<ContactableFoot> bipedFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
+
+      double totalRobotWeight = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator()) * Math.abs(getGravity());
+      SideDependentList<FootSwitchFactory> footSwitchFactories = getStateEstimatorParameters().getFootSwitchFactories();
+      SideDependentList<String> feetForceSensorNames = getSensorInformation().getFeetForceSensorNames();
+
+      SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String namePrefix = bipedFeet.get(robotSide).getName() + "InvariantEstimator";
+         String footForceSensorName = feetForceSensorNames == null ? null : feetForceSensorNames.get(robotSide);
+         ForceSensorDataReadOnly footForceSensor = footForceSensorName == null ? null : getForceSensorDataHolder().getData(footForceSensorName);
+
+         FootSwitchInterface footSwitch = footSwitchFactories.get(robotSide)
+                                                             .newFootSwitch(namePrefix,
+                                                                            bipedFeet.get(robotSide),
+                                                                            Collections.singleton(bipedFeet.get(robotSide.getOppositeSide())),
+                                                                            fullRobotModel.getRootBody(),
+                                                                            footForceSensor,
+                                                                            totalRobotWeight,
+                                                                            getStateEstimatorParameters()::getEstimatorDT,
+                                                                            getEstimatorRegistry());
+         footSwitches.put(robotSide, footSwitch);
+      }
+
+      return new FootSwitchContactProbabilityProvider(footSwitches);
+   }
+
+   /**
+    * Selects the contact-probability source for the invariant main estimator: the robot's production
+    * foot switches when true (default), the built-in kinematic height detector when false. See
+    * {@link #invariantEstimatorUseFootSwitches}.
+    */
+   public void setInvariantEstimatorUseFootSwitches(boolean invariantEstimatorUseFootSwitches)
+   {
+      this.invariantEstimatorUseFootSwitches = invariantEstimatorUseFootSwitches;
    }
 
    public StateEstimatorController createEKFStateEstimator()

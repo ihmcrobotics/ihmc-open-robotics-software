@@ -196,6 +196,8 @@ public class SCS2AvatarSimulationFactory
    /** When true, the invariant InEKF replaces the DRC estimator as the main floating-base estimator. */
    private boolean useInvariantMainStateEstimator = false;
    private boolean invariantMainEstimatorYawSeeding = true;
+   /** Contact source for the invariant main estimator: production foot switches (true, default) or the built-in kinematic height detector (false). */
+   private boolean invariantMainEstimatorUseFootSwitches = true;
    private final OptionalFactoryField<Boolean> createIKStreamingRealTimeController = new OptionalFactoryField<>(
          "createIKStreamingRealTimeController",
          false);
@@ -505,6 +507,7 @@ public class SCS2AvatarSimulationFactory
       {
          avatarEstimatorThreadFactory.setUseInvariantStateEstimator(true);
          avatarEstimatorThreadFactory.setInvariantEstimatorYawSeeding(invariantMainEstimatorYawSeeding);
+         avatarEstimatorThreadFactory.setInvariantEstimatorUseFootSwitches(invariantMainEstimatorUseFootSwitches);
       }
       estimatorThread = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
    }
@@ -1183,6 +1186,17 @@ public class SCS2AvatarSimulationFactory
    public void setInvariantMainEstimatorYawSeeding(boolean invariantMainEstimatorYawSeeding)
    {
       this.invariantMainEstimatorYawSeeding = invariantMainEstimatorYawSeeding;
+   }
+
+   /**
+    * Selects the invariant main estimator's contact-probability source: the robot's production foot
+    * switches when true (default; joint-torque based on Alex, independent of the filter's own base
+    * estimate) or the built-in kinematic height detector when false (reads sole heights through the
+    * filter's own estimate — circular when the filter is main; keep for A/B comparison only).
+    */
+   public void setInvariantMainEstimatorUseFootSwitches(boolean invariantMainEstimatorUseFootSwitches)
+   {
+      this.invariantMainEstimatorUseFootSwitches = invariantMainEstimatorUseFootSwitches;
    }
 
    public void setComponentFootstepGeneratorParameters(boolean useHeadingAndVelocityScript,

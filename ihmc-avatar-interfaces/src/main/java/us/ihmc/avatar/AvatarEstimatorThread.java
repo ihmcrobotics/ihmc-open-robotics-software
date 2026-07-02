@@ -186,6 +186,17 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
       return estimatorFullRobotModel;
    }
 
+   /**
+    * @return the main state estimator controller driving the root joint (e.g. the DRC estimator, or
+    *         {@code InvariantMainStateEstimator} when the invariant InEKF has been promoted to main).
+    *         Exposed so external comparators (e.g. against simulation ground truth) can reach the
+    *         estimator regardless of which implementation owns the root. May be {@code null}.
+    */
+   public StateEstimatorController getMainStateEstimator()
+   {
+      return mainStateEstimator;
+   }
+
    @Override
    public YoRegistry getYoRegistry()
    {

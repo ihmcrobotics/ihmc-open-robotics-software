@@ -84,6 +84,14 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final Vector3D invariantAngularVelocityBody = new Vector3D();           // gyro the filter integrates (body)
    private final Vector3D velocityErrorTemp = new Vector3D();
 
+   /**
+    * True when this filter has been promoted to main and drives the shared robot model's root joint (see
+    * {@link InvariantMainStateEstimator}). In that mode the shared pelvis frame is this filter's own
+    * previous-tick output, so the "invariantMinusMain*" comparisons would be stale self-comparisons; they
+    * are set to NaN instead so they cannot be misread as a DRC comparison.
+    */
+   private boolean runningAsMain = false;
+
    // Soft contact handling: a per-foot contact probability p ∈ [0,1] drives two covariance knobs each tick.
    // The default provider is forward-kinematics only (runs on hardware); ContactNet replaces it later.
    private ContactProbabilityProvider contactProbabilityProvider;
@@ -253,6 +261,24 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       mainEstimatePelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
       yoMainBasePosition.set(mainEstimatePelvisPose.getPosition());
       yoMainBaseOrientation.set(mainEstimatePelvisPose.getOrientation());
+
+      if (runningAsMain)
+      {
+         // The shared pelvis frame is this filter's own previous-tick output (the root joint is written
+         // after this update), so a "main" comparison here is a one-tick-stale self-comparison. NaN the
+         // comparison variables; ground-truth comparisons live in the sim-side comparator instead.
+         yoBaseOrientationErrorAngle.set(Double.NaN);
+         yoMainRootLinearVelocity.setToNaN();
+         yoLinearVelocityErrorMagnitude.set(Double.NaN);
+         yoMainRootAngularVelocity.setToNaN();
+         yoAngularVelocityErrorMagnitude.set(Double.NaN);
+
+         yoInvariantRootLinearVelocity.set(invariantLinearVelocityWorld);
+         invariantAngularVelocityBody.set(angularVelocity);
+         yoInvariantRootAngularVelocity.set(invariantAngularVelocityBody);
+         return;
+      }
+
       yoBaseOrientationErrorAngle.set(yoBaseOrientation.distance(mainEstimatePelvisPose.getOrientation()));
 
       // DRC estimator's estimated root-joint twist = the shared model's pelvis-frame twist.
@@ -291,6 +317,22 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    public ContactProbabilityProvider getContactProbabilityProvider()
    {
       return contactProbabilityProvider;
+   }
+
+   /**
+    * Marks this filter as the main estimator (it drives the shared robot model's root joint). Disables the
+    * {@code invariantMinusMain*} comparisons, which would otherwise be stale self-comparisons — see
+    * {@link #runningAsMain}. Called by {@link InvariantMainStateEstimator}.
+    */
+   public void setRunningAsMain(boolean runningAsMain)
+   {
+      this.runningAsMain = runningAsMain;
+   }
+
+   /** @return whether this filter drives the shared robot model's root joint as the main estimator. */
+   public boolean isRunningAsMain()
+   {
+      return runningAsMain;
    }
 
    /** Sets the measurement-covariance inflation a fully-swing foot (p = 0) receives; 1 disables knob 1. */
@@ -378,6 +420,18 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    public InvariantEKF getInvariantEKF()
    {
       return ekf;
+   }
+
+   /**
+    * @return the reference frames this estimator maintains on the shared robot model, refreshed at the
+    *         top of every {@link #doControl()} <em>before</em> the contact-probability provider runs.
+    *         Exposed so contactable feet / foot switches handed to
+    *         {@link #setContactProbabilityProvider} can be built on frames that are guaranteed current
+    *         when the provider is polled.
+    */
+   public HumanoidReferenceFrames getReferenceFrames()
+   {
+      return referenceFrames;
    }
 
    /**
