@@ -16,6 +16,7 @@ import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class FallingControllerState extends HighLevelControllerState
 {
@@ -26,6 +27,10 @@ public class FallingControllerState extends HighLevelControllerState
    private final YoPolynomial trajectory = new YoPolynomial("fallingTrajectory", 4, registry);
    private final YoBoolean enableFallingDampingMode = new YoBoolean("enableFallingDampingMode", registry);
    private final YoBoolean fallingDampingModeActive = new YoBoolean("fallingDampingModeActive", registry);
+   private final YoEnum<FallingTrialConfiguration> fallingTrialConfiguration = new YoEnum<>("fallingTrialConfiguration",
+                                                                                           registry,
+                                                                                           FallingTrialConfiguration.class,
+                                                                                           false);
 
    private final double[] initialJointPositions;
    private final double[] capturedJointPositions;
@@ -66,6 +71,7 @@ public class FallingControllerState extends HighLevelControllerState
       capturedJointPositions = new double[controlledJoints.length];
       capturedJointVelocities = new double[controlledJoints.length];
       this.fallingSetpoints = fallingSetpoints;
+      fallingTrialConfiguration.set(FallingTrialConfiguration.DEFAULT);
    }
 
    @Override
@@ -107,6 +113,7 @@ public class FallingControllerState extends HighLevelControllerState
    {
       trajectory.setCubic(0.0, fallTransitionDuration.getDoubleValue(), 0.0, 0.0, 1.0, 0.0);
       fallingDampingModeActive.set(false);
+      FallingTrialConfiguration selectedFallingTrialConfiguration = fallingTrialConfiguration.getEnumValue();
 
       for (int i = 0; i < controlledJoints.length; i++)
       {
@@ -114,7 +121,11 @@ public class FallingControllerState extends HighLevelControllerState
 
          if (fallingSetpoints != null)
          {
-            capturedJointPositions[i] = fallingSetpoints.getSetpoint(controlledJoints[i].getName());
+            String jointName = controlledJoints[i].getName();
+            if (fallingSetpoints instanceof FallingSetpointParameters)
+               capturedJointPositions[i] = ((FallingSetpointParameters) fallingSetpoints).getSetpoint(jointName, selectedFallingTrialConfiguration);
+            else
+               capturedJointPositions[i] = fallingSetpoints.getSetpoint(jointName);
             capturedJointVelocities[i] = 0.0;
          }
          else
