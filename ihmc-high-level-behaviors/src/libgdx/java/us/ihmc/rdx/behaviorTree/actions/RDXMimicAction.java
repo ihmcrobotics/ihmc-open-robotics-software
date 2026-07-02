@@ -22,6 +22,7 @@ import us.ihmc.ros2.ROS2Input;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.tools.IHMCCommonPaths;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -31,7 +32,8 @@ import java.util.Arrays;
 
 public class RDXMimicAction extends RDXActionNode<MimicActionState, MimicActionDefinition>
 {
-   private static final String DEFAULT_ROS2_LOG_DIRECTORY = System.getProperty("user.home") + "/.ihmc/logs/ros2/";
+   private static final String DEFAULT_ROS2_LOG_DIRECTORY = IHMCCommonPaths.LOGS_DIRECTORY.resolve("ros2").toString();
+   private static final String ROS2_LOG_DIRECTORY_MARKER = "/.ihmc/logs/ros2/";
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper waitTimeExitPolicyWidget;
@@ -138,7 +140,7 @@ public class RDXMimicAction extends RDXActionNode<MimicActionState, MimicActionD
          if (ImGui.inputText(labels.get("Log Directory"), logDirectory, ImGuiInputTextFlags.EnterReturnsTrue))
             refreshAvailableLogFiles();
          if (ImGui.inputText(labels.get("Log File Name"), logFileName, ImGuiInputTextFlags.EnterReturnsTrue))
-            definition.setMimicFileName(logFileName.get());
+            definition.setMimicFileName(toPortableMimicPath(logFileName.get(), logDirectory.get()));
 
          if (availableLogFiles.length > 0)
          {
@@ -155,7 +157,7 @@ public class RDXMimicAction extends RDXActionNode<MimicActionState, MimicActionD
             if (ImGui.combo(labels.get("Replay File"), replayFileIndex, availableLogFiles))
             {
                logFileName.set(availableLogFiles[replayFileIndex.get()]);
-               definition.setMimicFileName(logFileName.get());
+               definition.setMimicFileName(toPortableMimicPath(logFileName.get(), logDirectory.get()));
             }
          }
          else
@@ -198,5 +200,29 @@ public class RDXMimicAction extends RDXActionNode<MimicActionState, MimicActionD
       availableLogFiles = new String[files.length];
       for (int i = 0; i < files.length; i++)
          availableLogFiles[i] = files[i].getName();
+   }
+
+   private static String toPortableMimicPath(String rawPath, String directoryContext)
+   {
+      if (rawPath == null || rawPath.isBlank())
+         return rawPath;
+
+      File file = new File(rawPath);
+      if (!file.isAbsolute())
+         return rawPath;
+
+      String normalized = rawPath.replace('\\', '/');
+      int markerIndex = normalized.indexOf(ROS2_LOG_DIRECTORY_MARKER);
+      if (markerIndex >= 0)
+         return normalized.substring(markerIndex + ROS2_LOG_DIRECTORY_MARKER.length());
+
+      File contextDirectory = new File(directoryContext);
+      String contextAbsolute = contextDirectory.getAbsolutePath().replace('\\', '/');
+      if (!contextAbsolute.endsWith("/"))
+         contextAbsolute += "/";
+      if (normalized.startsWith(contextAbsolute))
+         return normalized.substring(contextAbsolute.length());
+
+      return file.getName();
    }
 }

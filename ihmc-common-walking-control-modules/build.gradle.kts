@@ -16,7 +16,7 @@ mainDependencies {
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-parameter-estimation:source")
    api("us.ihmc:ihmc-robotics-tools:0.15.7")
-   api("us.ihmc:scs2-simulation:17-0.32.1")
+   api("us.ihmc:scs2-simulation:17-0.32.2")
    api("us.ihmc:mecano-yovariables-filters:17-0.19.3")
 }
 
