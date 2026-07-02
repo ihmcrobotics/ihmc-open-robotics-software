@@ -168,6 +168,12 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
 
       if (rootNode.getState().getPreviewModeEnabled())
       {
+         if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.COMPOSITE_FRAME)
+         {
+            setupCompositeFrameDetection();
+            return;
+         }
+
          state.getLogger().info("Preview mode enabled. Adding nominal object pose for: {}", definition.getSceneObjectDefinition().getName());
 
          BehaviorTreeSceneObjectState target = null;

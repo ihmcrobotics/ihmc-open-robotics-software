@@ -141,9 +141,11 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
    {
       super.update();
 
-      nominalObjectPoseGizmo.getPoseGizmo().setParentFrame(scene.findFrameByName("Walking"));
-
-      RDXCRDTTools.syncGizmoWithBidirectionalField(nominalObjectPoseGizmo.getPoseGizmo(), definition.getNominalObjectPose(), definition);
+      if (definition.usesNominalObjectPose())
+      {
+         nominalObjectPoseGizmo.getPoseGizmo().setParentFrame(scene.findFrameByName("Walking"));
+         RDXCRDTTools.syncGizmoWithBidirectionalField(nominalObjectPoseGizmo.getPoseGizmo(), definition.getNominalObjectPose(), definition);
+      }
 
       for (RDXROS2YOLOv8ModelSettings settings : yoloModelSettings)
          settings.update(definition);
@@ -255,7 +257,8 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
             ImGui.pushItemWidth(100.0f);
             timeoutWidget.renderImGuiWidget();
             minHistorySizeWidget.renderImGuiWidget();
-            ImGui.checkbox(labels.get("Adjust Nominal Object Pose"), nominalObjectPoseGizmo.getSelected());
+            if (definition.usesNominalObjectPose())
+               ImGui.checkbox(labels.get("Adjust Nominal Object Pose"), nominalObjectPoseGizmo.getSelected());
             ImGui.popItemWidth();
 
          }
@@ -346,24 +349,22 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (getSelected())
+      if (getSelected() && definition.usesNominalObjectPose())
          nominalObjectPoseGizmo.calculate3DViewPick(input);
    }
 
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (getSelected())
+      if (getSelected() && definition.usesNominalObjectPose())
          nominalObjectPoseGizmo.process3DViewInput(input);
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (getSelected())
-      {
+      if (getSelected() && definition.usesNominalObjectPose())
          nominalObjectPoseGizmo.getVirtualRenderables(renderables, pool);
-      }
    }
 
    @Override

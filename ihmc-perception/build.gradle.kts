@@ -42,7 +42,7 @@ mainDependencies {
 
    api("us.ihmc:joctomap:1.12.7")
    api("us.ihmc:ihmc-graphics-javafx:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.37.3")
+   api("us.ihmc:ihmc-robot-data-logger:0.38.0")
 
    // Previously used for HeightMapAutoencoder and FootstepPredictor
    // This is a very large dependency, only uncomment for testing purposes
