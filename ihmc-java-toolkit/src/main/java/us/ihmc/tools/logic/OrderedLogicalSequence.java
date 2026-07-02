@@ -16,7 +16,7 @@ import java.util.ArrayList;
 public class OrderedLogicalSequence
 {
    private final ArrayList<Runnable> logicalElements = new ArrayList<>();
-   private final ArrayList<BooleanProvider> preRequisiteConditions = new ArrayList<>();
+   private final ArrayList<BooleanProvider> prerequisiteConditions = new ArrayList<>();
    private final ArrayList<BooleanProvider> completionConditions = new ArrayList<>();
    private final ArrayList<Boolean> allowRepetitiveExecution = new ArrayList<>();
 
@@ -43,14 +43,16 @@ public class OrderedLogicalSequence
    /**
     * Adds a logical element to this ordered logical sequence
     * @param runnable                  The main logic to run
-    * @param preRequisiteCondition     Prerequisite logic that must be true before running main logic
+    * @param prerequisiteCondition     Prerequisite logic that must be true before running main logic
     * @param completionCondition       Completion logic that must be true before moving to the next element
     * @param allowRepetitiveExecution  If true, main logic will run every update tick until completion condition is met
     */
-   public void addLogicalElement(Runnable runnable, BooleanProvider preRequisiteCondition, BooleanProvider completionCondition, boolean allowRepetitiveExecution)
+   public void addLogicalElement(Runnable runnable, BooleanProvider prerequisiteCondition, BooleanProvider completionCondition, boolean allowRepetitiveExecution)
    {
+      if (allowRepetitiveExecution && completionCondition == null)
+         throw new IllegalArgumentException("Cannot add a logical element with repetitive execution and no completion condition");
       logicalElements.add(runnable);
-      preRequisiteConditions.add(preRequisiteCondition);
+      prerequisiteConditions.add(prerequisiteCondition);
       completionConditions.add(completionCondition);
       this.allowRepetitiveExecution.add(allowRepetitiveExecution);
    }
@@ -83,20 +85,58 @@ public class OrderedLogicalSequence
       if (!started || finished)
          return;
 
-      // If the prerequisite condition has been met for this element, run the runnable logic of this element
-      if ((preRequisiteConditions.get(currentLogicalElement) == null || preRequisiteConditions.get(currentLogicalElement).getValue()) &&
-          (allowRepetitiveExecution.get(currentLogicalElement) || currentLogicalElement != lastLogicalElementRun))
+      // If the completion condition has been met for this element, increment to the next element
+      // This gets checked first to avoid unnecessary run of logical element if completion is already met
+      if (checkCompletionCondition())
       {
-         logicalElements.get(currentLogicalElement).run();
-         lastLogicalElementRun = currentLogicalElement;
+         incrementLogicalElement();
+         return;
       }
 
-      // If the completion condition has been met for this element, increment to the next element
-      if ((lastLogicalElementRun == currentLogicalElement) &&
-          (completionConditions.get(currentLogicalElement) == null || completionConditions.get(currentLogicalElement).getValue()))
-         currentLogicalElement++;
+      // If the prerequisite condition has been met for this element, run the runnable logic of this element
+      if (checkPrerequisiteCondition())
+      {
+         if (allowRepetitiveExecution.get(currentLogicalElement))
+         {
+            logicalElements.get(currentLogicalElement).run();
+            lastLogicalElementRun = currentLogicalElement;
+            if (checkCompletionCondition())
+               incrementLogicalElement();
+         }
+         else if (currentLogicalElement != lastLogicalElementRun)
+         {
+            logicalElements.get(currentLogicalElement).run();
+            lastLogicalElementRun = currentLogicalElement;
+            if (completionConditions.get(currentLogicalElement) == null || checkCompletionCondition())
+               incrementLogicalElement();
+         }
+      }
+   }
 
-      // If we have incremented to the end of the list of elements, we are finished
+   /**
+    * Checks prerequisite condition for current logical element
+    * @return true if prerequisite condition is met, false otherwise
+    */
+   private boolean checkPrerequisiteCondition()
+   {
+      return prerequisiteConditions.get(currentLogicalElement) == null || prerequisiteConditions.get(currentLogicalElement).getValue();
+   }
+
+   /**
+    * Checks completion condition for current logical element
+    * @return true if completion condition is met, false otherwise
+    */
+   private boolean checkCompletionCondition()
+   {
+      return completionConditions.get(currentLogicalElement) != null && completionConditions.get(currentLogicalElement).getValue();
+   }
+
+   /**
+    * Increments logical element and checks if sequence is finished
+    */
+   private void incrementLogicalElement()
+   {
+      currentLogicalElement++;
       if (currentLogicalElement >= logicalElements.size())
          finished = true;
    }

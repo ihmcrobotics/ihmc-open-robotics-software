@@ -52,6 +52,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.ArrayList;
@@ -76,6 +77,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
    private final YoLong timestamp = new YoLong("TimestampController", registry);
    private final YoBoolean firstTick = new YoBoolean("FirstTick", registry);
    private final YoBoolean runController = new YoBoolean("RunController", registry);
+   private final YoEnum<RobotMotionStatus> currentRobotMotionStatus = new YoEnum<>("CurrentRobotMotionStatus", registry, RobotMotionStatus.class, true);
 
    private final FullHumanoidRobotModel controllerFullRobotModel;
    private final FullRobotModelCorruptor fullRobotModelCorruptor;
@@ -124,6 +126,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
+      currentRobotMotionStatus.set(robotMotionStatusHolder.getCurrentRobotMotionStatus());
 
       if (realtimeROS2Node != null)
       {
@@ -214,6 +217,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
          public void robotMotionStatusHasChanged(RobotMotionStatus newStatus, double time)
          {
             controllerRobotMotionStatusHolder.setCurrentRobotMotionStatus(newStatus);
+            currentRobotMotionStatus.set(newStatus);
          }
       };
 

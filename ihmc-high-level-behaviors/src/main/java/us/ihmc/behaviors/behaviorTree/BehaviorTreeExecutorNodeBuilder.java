@@ -47,7 +47,6 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       REGISTRY.put(WalkActionDefinition.class, WalkActionExecutor::new);
       REGISTRY.put(ArmActionDefinition.class, ArmActionExecutor::new);
       REGISTRY.put(HandWrenchActionDefinition.class, HandWrenchActionExecutor::new);
-      REGISTRY.put(ScrewPrimitiveActionDefinition.class, ScrewPrimitiveActionExecutor::new);
       REGISTRY.put(PelvisActionDefinition.class, PelvisActionExecutor::new);
       REGISTRY.put(AbilityHandActionDefinition.class, AbilityHandActionExecutor::new);
       REGISTRY.put(EZGripperActionDefinition.class, EZGripperActionExecutor::new);

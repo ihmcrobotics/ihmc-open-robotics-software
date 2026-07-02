@@ -20,6 +20,7 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImagePublisher;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
+import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.tools.RawImageTools;
 import us.ihmc.ros2.ROS2Node;
@@ -230,7 +231,9 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       depthImage.getGpuImageMat().convertTo(depth32Mat, opencv_core.CV_32FC1, depthImage.getDepthDiscretization());
       RawImage depth32FImage = depthImage.replaceImage(depth32Mat, PixelFormat.GRAY_F32);
 
-      RawImage resizedSegmentation = RawImageTools.resize(segmentation, depth32FImage.getWidth(), depth32FImage.getHeight());
+      GpuMat resizedSegmentationMat = new GpuMat();
+      YOLOv8Tools.resizeWithCrop(segmentation.getGpuImageMat(), resizedSegmentationMat, depth32Mat.size());
+      RawImage resizedSegmentation = depthImage.replaceImage(resizedSegmentationMat, PixelFormat.GRAY8);
 
       // Update the sensor frame (publishes TFMessage so FoundationPose gets the frame)
       synchronized (sensorFrame)

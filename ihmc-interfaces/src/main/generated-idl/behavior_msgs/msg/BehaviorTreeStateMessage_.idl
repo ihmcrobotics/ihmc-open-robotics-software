@@ -20,7 +20,6 @@
 #include "behavior_msgs/msg/./NeckActionStateMessage_.idl"
 #include "behavior_msgs/msg/./PelvisActionStateMessage_.idl"
 #include "behavior_msgs/msg/./SceneActionStateMessage_.idl"
-#include "behavior_msgs/msg/./ScrewPrimitiveActionStateMessage_.idl"
 #include "behavior_msgs/msg/./SpineActionStateMessage_.idl"
 #include "behavior_msgs/msg/./WaitActionStateMessage_.idl"
 #include "behavior_msgs/msg/./WalkActionStateMessage_.idl"
@@ -92,9 +91,6 @@ module behavior_msgs
       const octet HAND_WRENCH_ACTION =
       18;
 
-      const octet SCREW_PRIMITIVE_ACTION =
-      19;
-
       const octet PELVIS_ACTION =
       20;
 
@@ -162,7 +158,6 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::AbilityHandActionStateMessage, 120> ability_hand_actions;
         sequence<behavior_msgs::msg::dds::ArmActionStateMessage, 120> arm_actions;
         sequence<behavior_msgs::msg::dds::HandWrenchActionStateMessage, 120> hand_wrench_actions;
-        sequence<behavior_msgs::msg::dds::ScrewPrimitiveActionStateMessage, 120> screw_primitive_actions;
         sequence<behavior_msgs::msg::dds::PelvisActionStateMessage, 120> pelvis_actions;
         sequence<behavior_msgs::msg::dds::WaitActionStateMessage, 120> wait_actions;
         sequence<behavior_msgs::msg::dds::LegActionStateMessage, 120> leg_actions;

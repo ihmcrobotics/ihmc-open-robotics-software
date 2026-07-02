@@ -4,6 +4,7 @@ import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.ControllerFailedTransition;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
@@ -39,8 +40,11 @@ public class ControllerFailedTransitionFactory implements ControllerStateTransit
       if (stateTransition != null)
          return stateTransition;
 
-      StateTransitionCondition stateTransitionCondition = new ControllerFailedTransition(
-            controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControllerFailedBoolean());
+      StateTransitionCondition stateTransitionCondition = new ControllerFailedTransition(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox()
+                                                                                                                .getControllerFailedBoolean(),
+                                                                                         () -> controllerFactoryHelper.getHighLevelControllerParameters()
+                                                                                                                      .getIsRobotOffSupport(),
+                                                                                         nextStateEnum);
       stateTransition = new StateTransition<>(nextStateEnum, stateTransitionCondition);
 
       return stateTransition;

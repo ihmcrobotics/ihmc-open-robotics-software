@@ -49,6 +49,7 @@ public class PushRobotControllerSCS2 implements Controller
    private final LinkedList<DelayedPush> delayedPushs = new LinkedList<>();
 
    private final String jointNameToApplyForce;
+   private final String namePrefix;
 
    private final double visualScale;
    private final AtomicReference<Runnable> scheduledPushAction = new AtomicReference<>(null);
@@ -65,22 +66,28 @@ public class PushRobotControllerSCS2 implements Controller
 
    public PushRobotControllerSCS2(DoubleProvider time, Robot pushableRobot, String jointNameToApplyForce, Vector3DReadOnly forcePointOffset, double visualScale)
    {
+      this(time, pushableRobot, jointNameToApplyForce, jointNameToApplyForce, forcePointOffset, visualScale);
+   }
+
+   public PushRobotControllerSCS2(DoubleProvider time, Robot pushableRobot, String jointNameToApplyForce, String name, Vector3DReadOnly forcePointOffset, double visualScale)
+   {
       yoTime = time;
       this.jointNameToApplyForce = jointNameToApplyForce;
+      this.namePrefix = name;
       this.visualScale = visualScale;
-      registry = new YoRegistry(jointNameToApplyForce + "_" + getClass().getSimpleName());
+      registry = new YoRegistry(name + "_" + getClass().getSimpleName());
       forcePoint = pushableRobot.getJoint(jointNameToApplyForce)
                                 .getAuxiliaryData()
-                                .addExternalWrenchPoint(new ExternalWrenchPointDefinition(jointNameToApplyForce + "_externalForcePoint", forcePointOffset));
+                                .addExternalWrenchPoint(new ExternalWrenchPointDefinition(name + "_externalForcePoint", forcePointOffset));
 
-      pushDuration = new YoDouble(jointNameToApplyForce + "_pushDuration", registry);
-      pushForceMagnitude = new YoDouble(jointNameToApplyForce + "_pushMagnitude", registry);
-      pushDirection = new YoFrameVector3D(jointNameToApplyForce + "_pushDirection", worldFrame, registry);
-      pushForce = new YoFrameVector3D(jointNameToApplyForce + "_pushForce", worldFrame, registry);
-      pushTimeSwitch = new YoDouble(jointNameToApplyForce + "_pushTimeSwitch", registry);
-      pushNumber = new YoInteger(jointNameToApplyForce + "_pushNumber", registry);
-      isBeingPushed = new YoBoolean(jointNameToApplyForce + "_isBeingPushed", registry);
-      pushDelay = new YoDouble(jointNameToApplyForce + "_pushDelay", registry);
+      pushDuration = new YoDouble(name + "_pushDuration", registry);
+      pushForceMagnitude = new YoDouble(name + "_pushMagnitude", registry);
+      pushDirection = new YoFrameVector3D(name + "_pushDirection", worldFrame, registry);
+      pushForce = new YoFrameVector3D(name + "_pushForce", worldFrame, registry);
+      pushTimeSwitch = new YoDouble(name + "_pushTimeSwitch", registry);
+      pushNumber = new YoInteger(name + "_pushNumber", registry);
+      isBeingPushed = new YoBoolean(name + "_isBeingPushed", registry);
+      pushDelay = new YoDouble(name + "_pushDelay", registry);
 
       pushableRobot.getControllerManager().addController(this);
 
@@ -91,7 +98,7 @@ public class PushRobotControllerSCS2 implements Controller
    public YoGraphicDefinition getForceVizDefinition()
    {
       YoGraphicArrow3DDefinition definition = new YoGraphicArrow3DDefinition();
-      definition.setName(jointNameToApplyForce + "_pushForce");
+      definition.setName(namePrefix + "_pushForce");
       YoFramePoint3D position = forcePoint.getPose().getPosition();
       definition.setOrigin(new YoTuple3DDefinition(position.getYoX().getFullNameString(),
                                                    position.getYoY().getFullNameString(),
@@ -151,7 +158,6 @@ public class PushRobotControllerSCS2 implements Controller
                   applyForce();
                });
             });
-
             scs.addCustomGUIControl(button);
          });
 

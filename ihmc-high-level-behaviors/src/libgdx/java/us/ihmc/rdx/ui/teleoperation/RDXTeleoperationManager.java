@@ -3,12 +3,10 @@ package us.ihmc.rdx.ui.teleoperation;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.GoHomeMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -19,9 +17,9 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -57,7 +55,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.tools.gui.YoAppearanceTools;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -307,7 +304,12 @@ public class RDXTeleoperationManager extends RDXPanel
                   if (interactableHead == null)
                   {
                      interactableHead = new RDXInteractableRobotLink();
-                     interactableHead.create(robotCollidable, syncedRobot.getReferenceFrames().getHeadFrame(), modelFileName, baseUI.getPrimary3DPanel());
+                     interactableHead.create(robotCollidable,
+                                             syncedRobot.getReferenceFrames().getHeadFrame(),
+                                             RDXInteractableTools.getModelGraphicToBodyTransform(robotDefinition.getRigidBodyDefinition(robotCollidable.getRigidBodyName())),
+                                             new RigidBodyTransform(),
+                                             modelFileName,
+                                             baseUI.getPrimary3DPanel());
                      interactableHead.setActionExecutor(() ->
                                                         {
                                                            if (!wholeBodyIKManager.getEnabled())

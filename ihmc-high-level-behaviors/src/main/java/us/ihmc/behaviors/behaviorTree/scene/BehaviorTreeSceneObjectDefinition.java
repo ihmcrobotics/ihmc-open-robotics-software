@@ -27,6 +27,8 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
    private final CRDTBidirectionalEnumField<IsaacROSFoundationPoseObject> foundationPoseObjectType;
    private final CRDTBidirectionalInteger minPostPoints;
    private final CRDTBidirectionalInteger minRecessPoints;
+   private final CRDTBidirectionalInteger minCapsulePoints;
+   private final CRDTBidirectionalFloat searchStartX;
    private final CRDTBidirectionalString compositeFrameName;
    private final CRDTBidirectionalString compositeFrameA;
    private final CRDTBidirectionalString compositeFrameB;
@@ -39,6 +41,8 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
    private IsaacROSFoundationPoseObject onDiskFoundationPoseObjectType;
    private int onDiskMinPostPoints;
    private int onDiskMinRecessPoints;
+   private int onDiskMinCapsulePoints;
+   private float onDiskSearchStartX;
    private String onDiskCompositeFrameName;
    private String onDiskCompositeFrameA;
    private String onDiskCompositeFrameB;
@@ -56,6 +60,8 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       foundationPoseObjectType = new CRDTBidirectionalEnumField<>(this, IsaacROSFoundationPoseObject.values[definition.getFoundationPoseObjectType()]);
       minPostPoints = new CRDTBidirectionalInteger(this, definition.getMinPostPoints());
       minRecessPoints = new CRDTBidirectionalInteger(this, definition.getMinRecessPoints());
+      minCapsulePoints = new CRDTBidirectionalInteger(this, definition.getMinCapsulePoints());
+      searchStartX = new CRDTBidirectionalFloat(this, definition.getSearchStartX());
       compositeFrameName = new CRDTBidirectionalString(this, definition.getCompositeFrameNameAsString());
       compositeFrameA = new CRDTBidirectionalString(this, definition.getCompositeFrameAAsString());
       compositeFrameB = new CRDTBidirectionalString(this, definition.getCompositeFrameBAsString());
@@ -75,6 +81,8 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       foundationPoseObjectType = new CRDTBidirectionalEnumField<>(latestTimestampModifiable, IsaacROSFoundationPoseObject.MUSTARD);
       minPostPoints = new CRDTBidirectionalInteger(latestTimestampModifiable, 1000);
       minRecessPoints = new CRDTBidirectionalInteger(latestTimestampModifiable, 3000);
+      minCapsulePoints = new CRDTBidirectionalInteger(latestTimestampModifiable, 300);
+      searchStartX = new CRDTBidirectionalFloat(latestTimestampModifiable, 0.05f);
       compositeFrameName = new CRDTBidirectionalString(latestTimestampModifiable, "");
       compositeFrameA = new CRDTBidirectionalString(latestTimestampModifiable, "");
       compositeFrameB = new CRDTBidirectionalString(latestTimestampModifiable, "");
@@ -96,11 +104,6 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
                jsonNode.put("yoloClassName", yoloClassName.getValue());
          }
          case FOUNDATION_POSE -> jsonNode.put("foundationPoseObjectType", foundationPoseObjectType.getValue().name());
-         case DOOR_FRAME ->
-         {
-            jsonNode.put("minPostPoints", minPostPoints.getValue());
-            jsonNode.put("minRecessPoints", minRecessPoints.getValue());
-         }
          case COMPOSITE_FRAME ->
          {
             jsonNode.put("compositeFrameName", compositeFrameName.getValue());
@@ -109,6 +112,19 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
             jsonNode.put("compositeFrameType", compositeFrameType.getValue().name());
             if (compositeFrameType.getValue() == CompositeFrameType.APPROACH)
                jsonNode.put("compositeDistance", compositeDistance.getValue());
+         }
+         case DOOR_PANEL ->
+         {
+         }
+         case DOOR_FRAME ->
+         {
+            jsonNode.put("minPostPoints", minPostPoints.getValue());
+            jsonNode.put("minRecessPoints", minRecessPoints.getValue());
+         }
+         case APPROACH_TABLE ->
+         {
+            jsonNode.put("minCapsulePoints", minCapsulePoints.getValue());
+            jsonNode.put("searchStartX", searchStartX.getValue());
          }
       }
    }
@@ -126,11 +142,6 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
                yoloClassName.setValue(jsonNode.get("yoloClassName").asText());
          }
          case FOUNDATION_POSE -> foundationPoseObjectType.setValue(IsaacROSFoundationPoseObject.valueOf(jsonNode.get("foundationPoseObjectType").asText()));
-         case DOOR_FRAME ->
-         {
-            minPostPoints.setValue(jsonNode.has("minPostPoints") ? jsonNode.get("minPostPoints").asInt() : 400);
-            minRecessPoints.setValue(jsonNode.has("minRecessPoints") ? jsonNode.get("minRecessPoints").asInt() : 3000);
-         }
          case COMPOSITE_FRAME ->
          {
             compositeFrameName.setValue(jsonNode.has("compositeFrameName") ? jsonNode.get("compositeFrameName").asText() : "");
@@ -140,6 +151,19 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
                compositeFrameType.setValue(CompositeFrameType.valueOf(jsonNode.get("compositeFrameType").asText()));
             if (compositeFrameType.getValue() == CompositeFrameType.APPROACH)
                compositeDistance.setValue(jsonNode.has("compositeDistance") ? (float) jsonNode.get("compositeDistance").asDouble() : 0.0f);
+         }
+         case DOOR_PANEL ->
+         {
+         }
+         case DOOR_FRAME ->
+         {
+            minPostPoints.setValue(jsonNode.has("minPostPoints") ? jsonNode.get("minPostPoints").asInt() : 400);
+            minRecessPoints.setValue(jsonNode.has("minRecessPoints") ? jsonNode.get("minRecessPoints").asInt() : 3000);
+         }
+         case APPROACH_TABLE ->
+         {
+            minCapsulePoints.setValue(jsonNode.has("minCapsulePoints") ? jsonNode.get("minCapsulePoints").asInt() : 300);
+            searchStartX.setValue(jsonNode.has("searchStartX") ? (float) jsonNode.get("searchStartX").asDouble() : 0.05f);
          }
       }
    }
@@ -152,6 +176,8 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       onDiskFoundationPoseObjectType = foundationPoseObjectType.getValue();
       onDiskMinPostPoints = minPostPoints.getValue();
       onDiskMinRecessPoints = minRecessPoints.getValue();
+      onDiskMinCapsulePoints = minCapsulePoints.getValue();
+      onDiskSearchStartX = searchStartX.getValue();
       onDiskCompositeFrameName = compositeFrameName.getValue();
       onDiskCompositeFrameA = compositeFrameA.getValue();
       onDiskCompositeFrameB = compositeFrameB.getValue();
@@ -169,6 +195,8 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
          foundationPoseObjectType.setValue(onDiskFoundationPoseObjectType);
          minPostPoints.setValue(onDiskMinPostPoints);
          minRecessPoints.setValue(onDiskMinRecessPoints);
+         minCapsulePoints.setValue(onDiskMinCapsulePoints);
+         searchStartX.setValue(onDiskSearchStartX);
          compositeFrameName.setValue(onDiskCompositeFrameName);
          compositeFrameA.setValue(onDiskCompositeFrameA);
          compositeFrameB.setValue(onDiskCompositeFrameB);
@@ -187,6 +215,8 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       unchanged &= foundationPoseObjectType.getValue() == onDiskFoundationPoseObjectType;
       unchanged &= minPostPoints.getValue() == onDiskMinPostPoints;
       unchanged &= minRecessPoints.getValue() == onDiskMinRecessPoints;
+      unchanged &= minCapsulePoints.getValue() == onDiskMinCapsulePoints;
+      unchanged &= searchStartX.getValue() == onDiskSearchStartX;
       unchanged &= compositeFrameName.getValue().equals(onDiskCompositeFrameName);
       unchanged &= compositeFrameA.getValue().equals(onDiskCompositeFrameA);
       unchanged &= compositeFrameB.getValue().equals(onDiskCompositeFrameB);
@@ -204,6 +234,8 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       message.setFoundationPoseObjectType(foundationPoseObjectType.toMessageOrdinal());
       message.setMinPostPoints(minPostPoints.toMessage());
       message.setMinRecessPoints(minRecessPoints.toMessage());
+      message.setMinCapsulePoints(minCapsulePoints.toMessage());
+      message.setSearchStartX(searchStartX.toMessage());
       message.setCompositeFrameName(compositeFrameName.toMessage());
       message.setCompositeFrameA(compositeFrameA.toMessage());
       message.setCompositeFrameB(compositeFrameB.toMessage());
@@ -219,6 +251,8 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       foundationPoseObjectType.fromMessageOrdinal(message.getFoundationPoseObjectType(), IsaacROSFoundationPoseObject.values);
       minPostPoints.fromMessage(message.getMinPostPoints());
       minRecessPoints.fromMessage(message.getMinRecessPoints());
+      minCapsulePoints.fromMessage(message.getMinCapsulePoints());
+      searchStartX.fromMessage(message.getSearchStartX());
       compositeFrameName.fromMessage(message.getCompositeFrameNameAsString());
       compositeFrameA.fromMessage(message.getCompositeFrameAAsString());
       compositeFrameB.fromMessage(message.getCompositeFrameBAsString());
@@ -231,10 +265,11 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       return switch (objectType.getValue())
       {
          case YOLO_ONLY -> yoloClassName.getValue();
-         case COMPOSITE_FRAME -> compositeFrameName.getValue();
          case FOUNDATION_POSE -> foundationPoseObjectType.getValue().titleCaseName;
+         case COMPOSITE_FRAME -> compositeFrameName.getValue();
          case DOOR_PANEL -> "Door Panel";
          case DOOR_FRAME -> "Door Frame";
+         case APPROACH_TABLE -> "Approach Table";
       };
    }
 
@@ -296,6 +331,26 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
    public void setMinRecessPoints(int minRecessPoints)
    {
       this.minRecessPoints.setValue(minRecessPoints);
+   }
+
+   public int getMinCapsulePoints()
+   {
+      return minCapsulePoints.getValue();
+   }
+
+   public void setMinCapsulePoints(int minCapsulePoints)
+   {
+      this.minCapsulePoints.setValue(minCapsulePoints);
+   }
+
+   public float getSearchStartX()
+   {
+      return searchStartX.getValue();
+   }
+
+   public void setSearchStartX(float searchStartX)
+   {
+      this.searchStartX.setValue(searchStartX);
    }
 
    public String getCompositeFrameName()

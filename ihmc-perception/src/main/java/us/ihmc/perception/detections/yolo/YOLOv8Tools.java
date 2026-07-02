@@ -1,9 +1,12 @@
 package us.ihmc.perception.detections.yolo;
 
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_cudawarping;
 import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Point;
@@ -164,14 +167,38 @@ public class YOLOv8Tools
       resizedMat.close();
    }
 
-   public static int[][] getMaskAsPolygons(Mat mask, float precision)
+   public static void resizeWithCrop(GpuMat inputImage, GpuMat outputImage, Size desiredSize)
    {
+      GpuMat resizedMat = new GpuMat();
+
+      int desiredWidth = desiredSize.width();
+      int desiredHeight = desiredSize.height();
+      double scaleFactor = Math.max((double) desiredWidth / inputImage.cols(), (double) desiredHeight / inputImage.rows());
+
+      // Use explicit target dimensions so the resized image always fully covers desiredSize
+      int resizedWidth = (int) Math.ceil(inputImage.cols() * scaleFactor);
+      int resizedHeight = (int) Math.ceil(inputImage.rows() * scaleFactor);
+      opencv_cudawarping.resize(inputImage, resizedMat, new Size(resizedWidth, resizedHeight), 0.0, 0.0, opencv_imgproc.INTER_LINEAR, null);
+
+      int horizontalCrop = Math.max(resizedWidth - desiredWidth, 0) / 2;
+      int verticalCrop = Math.max(resizedHeight - desiredHeight, 0) / 2;
+
+      Rect roi = new Rect(horizontalCrop, verticalCrop, desiredWidth, desiredHeight);
+      resizedMat.apply(roi).copyTo(outputImage);
+      resizedMat.close();
+   }
+
+   public static float[][] getMaskAsPolygons(Mat mask, float precision)
+   {
+      float xNormalizer = 1.0f / mask.cols();
+      float yNormalizer = 1.0f / mask.rows();
+
       MatVector contours = new MatVector();
       Mat hierarchy = new Mat();
       opencv_imgproc.findContours(mask, contours, hierarchy, opencv_imgproc.RETR_TREE, opencv_imgproc.CHAIN_APPROX_SIMPLE);
 
       // Get lower resolution maskPolygons for each contour
-      int[][] polygons = new int[(int) contours.size()][];
+      float[][] polygons = new float[(int) contours.size()][];
       for (int i = 0; i < contours.size(); ++i)
       {
          Mat contour = contours.get(i);
@@ -181,9 +208,25 @@ public class YOLOv8Tools
          Mat polygonApproximation = new Mat();
          opencv_imgproc.approxPolyDP(contour, polygonApproximation, precision * contourPerimeter, true);
 
-         polygons[i] = new int[2 * polygonApproximation.rows()];
-         new IntPointer(polygonApproximation.data()).get(polygons[i]);
+         MatVector polygonChannels = new MatVector();
+         opencv_core.split(polygonApproximation, polygonChannels);
 
+         Mat xValues = polygonChannels.get(0);
+         Mat yValues = polygonChannels.get(1);
+
+         xValues.convertTo(xValues, opencv_core.CV_32F, xNormalizer, 0.0);
+         yValues.convertTo(yValues, opencv_core.CV_32F, yNormalizer, 0.0);
+
+         Mat normalizedPolygonApproximation = new Mat();
+         opencv_core.merge(polygonChannels, normalizedPolygonApproximation);
+
+         polygons[i] = new float[2 * normalizedPolygonApproximation.rows()];
+         new FloatPointer(normalizedPolygonApproximation.data()).get(polygons[i]);
+
+         normalizedPolygonApproximation.close();
+         xValues.close();
+         yValues.close();
+         polygonChannels.close();
          polygonApproximation.close();
          contour.close();
       }
