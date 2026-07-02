@@ -115,6 +115,8 @@ public class AvatarMultiThreadingFactory
    private final OptionalFactoryField<Map<HighLevelControllerName, StateEstimatorMode>> estimatorModeMapReference = new OptionalFactoryField<>("estimatorModeMapReference");
    private final List<Runnable> preEstimatorRunnables = new ArrayList<>();
    private final List<Runnable> postEstimatorRunnables = new ArrayList<>();
+   private final boolean useInvariantMainEstimator;
+   private final boolean invariantEstimatorUseFootSwitches;
 
    // Controller
    private final HighLevelHumanoidControllerFactory avatarControllerFactory;
@@ -166,7 +168,9 @@ public class AvatarMultiThreadingFactory
                                       double masterThreadDt,
                                       TimestampProvider monotonicTimeProvider,
                                       YoRegistry registry,
-                                      YoVariableServer yoVariableServer)
+                                      YoVariableServer yoVariableServer,
+                                      boolean useInvariantMainEstimator,
+                                      boolean invariantEstimatorUseFootSwitches)
    {
       this.masterRobotModel = robotModel;
       this.masterFullRobotModel = fullRobotModel;
@@ -181,6 +185,8 @@ public class AvatarMultiThreadingFactory
       this.useLocalLogging = useLocalLogging;
       this.rootRegistry = registry;
       this.yoVariableServer = yoVariableServer;
+      this.useInvariantMainEstimator = useInvariantMainEstimator;
+      this.invariantEstimatorUseFootSwitches = invariantEstimatorUseFootSwitches;
 
       masterContext = new HumanoidRobotContextData(masterFullRobotModel);
 
@@ -267,6 +273,8 @@ public class AvatarMultiThreadingFactory
       avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(estimatorContextDataFactory);
       avatarEstimatorThreadFactory.setGravity(GRAVITY);
+      avatarEstimatorThreadFactory.setUseInvariantStateEstimator(useInvariantMainEstimator);
+      avatarEstimatorThreadFactory.setInvariantEstimatorUseFootSwitches(invariantEstimatorUseFootSwitches);
       //      if (secondaryEstimatorFactory != null)
       //         avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryEstimatorFactory);
       StateEstimatorController stateEstimator = avatarEstimatorThreadFactory.getMainStateEstimator();
