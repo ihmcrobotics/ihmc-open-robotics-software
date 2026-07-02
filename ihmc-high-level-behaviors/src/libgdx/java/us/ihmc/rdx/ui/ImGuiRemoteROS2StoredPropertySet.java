@@ -6,7 +6,6 @@ import imgui.ImGui;
 import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.communication.property.StoredPropertySetROS2Input;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.rdx.imgui.ImGuiTools;

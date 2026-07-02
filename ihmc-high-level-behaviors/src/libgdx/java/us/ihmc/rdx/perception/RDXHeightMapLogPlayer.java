@@ -5,7 +5,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.HeightMapMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -58,19 +57,18 @@ public class RDXHeightMapLogPlayer
    public RDXHeightMapLogPlayer()
    {
       ros2Node = new ROS2Node(getClass().getSimpleName());
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       baseUI = new RDXBaseUI();
 
-      zedPlaybackSensor = new ROS2ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_X_MINI, zed.SL_DEPTH_MODE_NEURAL_LIGHT, SVO_FILE);
+      zedPlaybackSensor = new ROS2ZEDSVOPlaybackSensor(ros2Node, 0, ZEDModelData.ZED_X_MINI, zed.SL_DEPTH_MODE_NEURAL_LIGHT, SVO_FILE);
       zedPlaybackSensor.setTrackedPoseOffset(new Pose3D(0.0, 0.0, 1.0, 0.0, 0.0, 0.0));
       zedPlaybackSensor.useTrackedPose(true);
       BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
       zedPlaybackSensor.registerImageQueue(rawImageCollection, ZEDImageSensor.DEPTH_IMAGE_KEY);
-      zedSVOPanel = new RDXZEDSVORecorderPanel(ros2Helper);
+      zedSVOPanel = new RDXZEDSVORecorderPanel(ros2Node);
 
       heightMapVisualizer = new RDXROS2HeightMapVisualizer("Height Map Visualizer");
-      heightMapVisualizer.setupForImageMessage(ros2Helper);
-      heightMapVisualizer.setupForChunkMessage(ros2Helper);
+      heightMapVisualizer.setupForImageMessage(ros2Node);
+      heightMapVisualizer.setupForChunkMessage(ros2Node);
 
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       chunkedMapManager = new ChunkedMapManager(ros2Node, heightMapParameters);

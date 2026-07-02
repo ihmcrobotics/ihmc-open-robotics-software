@@ -49,12 +49,11 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2ImageVisualizer<BigVi
    {
       this.asyncROS2Node = new AsyncROS2Node(StringTools.titleToSnakeCase(titleBeforeAdditions));
       // synchronize with the update method
-      asyncROS2Node.createSubscription(topic, subscriber ->
+      asyncROS2Node.createSubscriptionSampler(topic, sample ->
       {
          synchronized (syncObject)
          {
-            if (!subscriber.read(videoPacket))
-               return;
+            videoPacket.set(sample);
 //            delayPlot.addValue(TimeTools.calculateDelay(videoPacket.getAcquisitionTimeSecondsSinceEpoch(), videoPacket.getAcquisitionTimeAdditionalNanos()));
          }
          submitImageUpdate(imageVisualizer ->

@@ -14,7 +14,6 @@ import perception_msgs.SRTStreamStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -46,7 +45,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SRTStreamerSubscriberTest
 {
    private static final ROS2Node ROS2_NODE = new ROS2Node("srt_streaming_test");
-   private static final ROS2Helper ROS2_HELPER = new ROS2Helper(ROS2_NODE);
    private static final double FPS = 30.0;
    private static final double TEST_TIMEOUT = 5.0;
    private static final double CALL_TIMEOUT = 0.5 * TEST_TIMEOUT;
@@ -285,7 +283,7 @@ public class SRTStreamerSubscriberTest
       streamer.initializeForColor(rawImage, AV_PIX_FMT_BGR24);
 
       // Create the subscriber
-      ROS2SRTVideoSubscriber subscriber = new ROS2SRTVideoSubscriber(ROS2_HELPER, requestTopic, PixelFormat.BGR8);
+      ROS2SRTVideoSubscriber subscriber = new ROS2SRTVideoSubscriber(ROS2_NODE, requestTopic, PixelFormat.BGR8);
       AtomicBoolean subscriberHasReceivedFrame = new AtomicBoolean(false);
       subscriber.addNewFrameConsumer(receivedImage ->
       {

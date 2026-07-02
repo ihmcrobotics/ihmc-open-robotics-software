@@ -4,7 +4,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
@@ -50,8 +49,7 @@ public class ContinuousHikingProcess
       activeMappingParameterToolBox = new ActiveMappingParameterToolBox(ros2Node, robotModel, "ForContinuousWalking");
 
       // This allows the sensor to be tuned via the user interface, and the effect shows on hardware, needed for calibrating the sensor
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-      ROS2TunedRigidBodyTransform realsenseTunableTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
+      ROS2TunedRigidBodyTransform realsenseTunableTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Node,
                                                                                                     PerceptionAPI.STEPPING_CAMERA_TO_PARENT_TUNING,
                                                                                                     ros2SyncedRobot.getRobotModel()
                                                                                                                    .getSensorInformation()

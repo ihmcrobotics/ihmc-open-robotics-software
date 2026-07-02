@@ -5,8 +5,9 @@ import org.junit.jupiter.api.Test;
 import std_msgs.Empty;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
 
 public class ROS2InputTest
@@ -15,20 +16,32 @@ public class ROS2InputTest
    public void test()
    {
       ROS2Node ros2Node = new ROS2Node("test_input");
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       ROS2Topic<Empty> inputTestTopic = HumanoidROS2Topic.IHMC_ROOT.withSuffix("input_test_topic").withType(Empty.class);
 
-      TypedNotification<Empty> subscription = ros2Helper.subscribeViaTypedNotification(inputTestTopic);
+      TypedNotification<Empty> subscription = new TypedNotification<>();
+      ros2Node.createSubscription(inputTestTopic, reader ->
+      {
+         Empty message = reader.read();
+         if (message != null)
+            subscription.set(message);
+      });
 
       // Testing that the subscription doesn't return a notification immediately
       Assertions.assertFalse(subscription.poll());
 
       // Publish to the topic
-      ros2Helper.publish(inputTestTopic, new Empty());
+      ROS2Publisher<Empty> publisher = ros2Node.createPublisher(inputTestTopic);
+      publisher.publish(new Empty());
 
       // Create a subscriber immediately after publishing
-      TypedNotification<Empty> subscription3 = ros2Helper.subscribeViaTypedNotification(inputTestTopic);
+      TypedNotification<Empty> subscription3 = new TypedNotification<>();
+      ros2Node.createSubscription(inputTestTopic, reader ->
+      {
+         Empty message = reader.read();
+         if (message != null)
+            subscription3.set(message);
+      });
       Assertions.assertFalse(subscription3.poll());
 
       // Wait for the original subscriber to get it
@@ -45,7 +58,13 @@ public class ROS2InputTest
       Assertions.assertFalse(subscription3.poll());
 
       // Create a subscriber later and make sure it doesn't get a notification
-      TypedNotification<Empty> subscription2 = ros2Helper.subscribeViaTypedNotification(inputTestTopic);
+      TypedNotification<Empty> subscription2 = new TypedNotification<>();
+      ros2Node.createSubscription(inputTestTopic, reader ->
+      {
+         Empty message = reader.read();
+         if (message != null)
+            subscription2.set(message);
+      });
       Assertions.assertFalse(subscription2.poll());
 
       ros2Node.close();

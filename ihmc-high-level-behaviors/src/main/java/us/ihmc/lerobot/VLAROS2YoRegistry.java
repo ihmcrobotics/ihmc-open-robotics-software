@@ -17,16 +17,12 @@ public class VLAROS2YoRegistry extends VLAYoRegistry
    {
       var yoTopic = VLAUpdateThread.YO;
       SwapReference<YoRegistryMessage> swapReference = new SwapReference<>(() -> ROS2Message.createInstance(yoTopic.getType()));
-      ros2Node.createSubscription(yoTopic, reader ->
+      ros2Node.createSubscriptionSampler(yoTopic, sample ->
       {
-         var readMessage = reader.read();
-         if (readMessage != null)
-         {
-            var messageToPack = swapReference.getForThreadOne();
-            messageToPack.set(readMessage);
-            swapReference.swap();
-            notification.set();
-         }
+         var messageToPack = swapReference.getForThreadOne();
+         messageToPack.set(sample);
+         swapReference.swap();
+         notification.set();
       });
       subscription = swapReference;
    }

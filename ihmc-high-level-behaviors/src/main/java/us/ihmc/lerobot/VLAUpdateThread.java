@@ -84,6 +84,8 @@ public class VLAUpdateThread extends VLAYoRegistry
    private final CRDTBidirectionalBoolean running;
    private final CRDTBidirectionalBoolean controlRobot;
    private final TypedNotification<VLAOperationMessage> uiCommandSubscription;
+   private final VLAOperationMessage uiCommandCopy = new VLAOperationMessage();
+   private final KinematicsToolboxOutputStatus kstStatusCopy = new KinematicsToolboxOutputStatus();
    private final ROS2Publisher<VLAOperationMessage> uiStatusPublisher;
 
    private final FullHumanoidRobotModel kstFullRobotModel;
@@ -114,11 +116,10 @@ public class VLAUpdateThread extends VLAYoRegistry
 
       var uiCommandTopic = UI.getTopic(ROS2ActorDesignation.ROBOT.getIncomingQualifier());
       TypedNotification<VLAOperationMessage> typedNotification = new TypedNotification<>();
-      ros2Node.createSubscription(uiCommandTopic, reader ->
+      ros2Node.createSubscriptionSampler(uiCommandTopic, sample ->
       {
-         var message = reader.read();
-         if (message != null)
-            typedNotification.set(message);
+         uiCommandCopy.set(sample);
+         typedNotification.set(uiCommandCopy);
       });
       uiCommandSubscription = typedNotification;
       uiStatusPublisher = ros2Node.createPublisher(UI.getTopic(ROS2ActorDesignation.ROBOT.getOutgoingQualifier()));
@@ -126,10 +127,10 @@ public class VLAUpdateThread extends VLAYoRegistry
       kstFullRobotModel = robotModel.createFullRobotModel();
       kstReferenceFrames = new HumanoidReferenceFrames(kstFullRobotModel, robotModel.getSensorInformation());
       kstOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(kstFullRobotModel);
-      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()), reader -> {
-         var message = reader.read();
-         if (message != null)
-            kstStatusSubscription.set(message);
+      ros2Node.createSubscriptionSampler(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()), sample ->
+      {
+         kstStatusCopy.set(sample);
+         kstStatusSubscription.set(kstStatusCopy);
       });
 
       kstInputPublisher = ros2Node.createPublisher(ToolboxAPIs.getIKStreamingInputTopic(robotModel.getSimpleRobotName()));

@@ -288,12 +288,10 @@ public class IKStreamingRTPluginFactory
             if (robotMotionStatusHolder.getCurrentRobotMotionStatus() != RobotMotionStatus.STANDING)
                newToolboxStateRequestedRef.set(ToolboxState.WAKE_UP);
          });
-         ToolboxStateMessage message = new ToolboxStateMessage();
-         ros2Node.createSubscription(inputTopic.withType(ToolboxStateMessage.class), reader ->
+         ros2Node.createSubscriptionSampler(inputTopic.withType(ToolboxStateMessage.class), sample ->
          {
-            reader.read(message);
             if (robotMotionStatusHolder.getCurrentRobotMotionStatus() != RobotMotionStatus.STANDING)
-               newToolboxStateRequestedRef.set(ToolboxState.fromByte(message.getRequestedToolboxState()));
+               newToolboxStateRequestedRef.set(ToolboxState.fromByte(sample.getRequestedToolboxState()));
          });
 
          toolboxState.set(ToolboxState.SLEEP);

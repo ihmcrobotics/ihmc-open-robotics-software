@@ -27,6 +27,7 @@ public class ControllerFootstepQueueMonitor
 {
    private int controllerQueueSize = 0;
    private IDLObjectSequence<QueuedFootstepStatusMessage> controllerQueue;
+   private final FootstepQueueStatusMessage footstepQueueStatusBuffer = new FootstepQueueStatusMessage();
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
    private final AtomicReference<PlanOffsetStatus> planOffsetMessage = new AtomicReference<>(new PlanOffsetStatus());
 
@@ -38,36 +39,13 @@ public class ControllerFootstepQueueMonitor
 
    public ControllerFootstepQueueMonitor(ROS2Node ros2Node, String simpleRobotName)
    {
-      ros2Node.createSubscription(getLowFrequencyTopic(FootstepQueueStatusMessage.class, simpleRobotName), reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.footstepQueueStatusReceived(message);
-      });
-      ros2Node.createSubscription(getTopic(FootstepStatusMessage.class, simpleRobotName), reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.footstepStatusReceived(message);
-      });
-      ros2Node.createSubscription(getLowFrequencyTopic(PlanOffsetStatus.class, simpleRobotName), reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.acceptPlanOffsetStatus(message);
-      });
-      ros2Node.createSubscription(getTopic(WalkingStatusMessage.class, simpleRobotName), reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.acceptWalkingStatusMessage(message);
-      });
-      ros2Node.createSubscription(getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.acceptWalkingControllerFailureStatusMessage(message);
-      });
-      ros2Node.createSubscription(getTopic(FootstepDataListMessage.class, simpleRobotName), reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.interceptFootstepDataListMessage(message);
-      });
+      ros2Node.createSubscriptionSampler(getLowFrequencyTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
+      ros2Node.createSubscriptionSampler(getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
+      ros2Node.createSubscriptionSampler(getLowFrequencyTopic(PlanOffsetStatus.class, simpleRobotName), this::acceptPlanOffsetStatus);
+      ros2Node.createSubscriptionSampler(getTopic(WalkingStatusMessage.class, simpleRobotName), this::acceptWalkingStatusMessage);
+      ros2Node.createSubscriptionSampler(getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName),
+                                           this::acceptWalkingControllerFailureStatusMessage);
+      ros2Node.createSubscriptionSampler(getTopic(FootstepDataListMessage.class, simpleRobotName), this::interceptFootstepDataListMessage);
    }
 
    private void interceptFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)
@@ -83,22 +61,23 @@ public class ControllerFootstepQueueMonitor
 
    private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)
    {
-      controllerQueue = footstepQueueStatusMessage.getQueuedFootstepList();
-      if (controllerQueueSize != footstepQueueStatusMessage.getQueuedFootstepList().size())
+      footstepQueueStatusBuffer.set(footstepQueueStatusMessage);
+      controllerQueue = footstepQueueStatusBuffer.getQueuedFootstepList();
+      if (controllerQueueSize != footstepQueueStatusBuffer.getQueuedFootstepList().size())
       {
-         String message = String.format("Latest Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size());
+         String message = String.format("Latest Controller Queue Footstep Size: " + footstepQueueStatusBuffer.getQueuedFootstepList().size());
          LogTools.info(message);
       }
 
       // For the statistics set the that controller queue size before getting the new one
-      controllerQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
+      controllerQueueSize = footstepQueueStatusBuffer.getQueuedFootstepList().size();
    }
 
    private void footstepStatusReceived(FootstepStatusMessage footstepStatusMessage)
    {
       footstepStarted = footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED;
 
-      this.footstepStatusMessage.set(footstepStatusMessage);
+      this.footstepStatusMessage.get().set(footstepStatusMessage);
    }
 
    private void acceptWalkingStatusMessage(WalkingStatusMessage message)
@@ -122,9 +101,15 @@ public class ControllerFootstepQueueMonitor
       }
    }
 
-   private void acceptPlanOffsetStatus(PlanOffsetStatus planOffsetMessage)
+   private void acceptPlanOffsetStatus(PlanOffsetStatus sample)
    {
-      this.planOffsetMessage.set(planOffsetMessage);
+      PlanOffsetStatus buffer = planOffsetMessage.get();
+      if (buffer == null)
+      {
+         buffer = new PlanOffsetStatus();
+         planOffsetMessage.set(buffer);
+      }
+      buffer.set(sample);
    }
 
    public IDLObjectSequence<QueuedFootstepStatusMessage> getControllerFootstepQueue()

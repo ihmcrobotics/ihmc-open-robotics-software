@@ -16,7 +16,7 @@ import perception_msgs.TerrainMapMessage;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.gpuMapping.HeightMapData;
@@ -52,7 +52,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
    private final ImBoolean colorBasedOnTraversability = new ImBoolean(false);
    private final Stopwatch stopwatch = new Stopwatch();
-   private ROS2Helper ros2;
+   private ROS2Node ros2Node;
+   private ROS2PublisherMap publisherMap;
    private ROS2Heartbeat chunkMapRequestHeartbeat;
    private ROS2Heartbeat heightMapRequestHeartbeat;
    private ROS2Heartbeat terrainMapRequestHeartbeat;
@@ -89,17 +90,19 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       return List.of(heightMapTopic);
    }
 
-   public void setupForImageMessage(ROS2Helper ros2)
+   public void setupForImageMessage(ROS2Node ros2Node)
    {
-      this.ros2 = ros2;
-      ros2.subscribeViaCallback(heightMapTopic, this::acceptHeightMapMessage);
-      ros2.subscribeViaCallback(terrainMapTopic, this::acceptTerrainMapMessage);
+      this.ros2Node = ros2Node;
+      this.publisherMap = new ROS2PublisherMap(ros2Node);
+      ros2Node.createSubscriptionSampler(heightMapTopic, this::acceptHeightMapMessage);
+      ros2Node.createSubscriptionSampler(terrainMapTopic, this::acceptTerrainMapMessage);
    }
 
-   public void setupForChunkMessage(ROS2Helper ros2)
+   public void setupForChunkMessage(ROS2Node ros2Node)
    {
-      this.ros2 = ros2;
-      ros2.subscribeViaCallback(PerceptionAPI.CHUNK, this::acceptChunkMessage);
+      this.ros2Node = ros2Node;
+      this.publisherMap = new ROS2PublisherMap(ros2Node);
+      ros2Node.createSubscriptionSampler(PerceptionAPI.CHUNK, sample -> acceptChunkMessage(sample));
    }
 
    public void acceptChunkMessage(ChunkMessage chunkMessage)
@@ -117,11 +120,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (!isActive())
          return;
 
-      executorService.clearQueueAndExecute(() ->
-                                           {
-                                              HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
-                                              processHeightMapData(heightMapData);
-                                           });
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+      executorService.clearQueueAndExecute(() -> processHeightMapData(heightMapData));
 
       getFrequency(PerceptionAPI.HEIGHT_MAP_MESSAGE).ping();
    }
@@ -156,7 +156,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
       if (colorBasedOnTraversability.get())
       {
-         executorService.clearQueueAndExecute(() -> processTerrainMapData(terrainMapMessage));
+         TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);
+         executorService.clearQueueAndExecute(() -> processTerrainMapData(terrainMapData));
       }
 
       getFrequency(PerceptionAPI.HEIGHT_MAP_MESSAGE).ping();
@@ -177,9 +178,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
          updateHeightMapImage();
    }
 
-   private void processTerrainMapData(TerrainMapMessage terrainMapMessage)
+   private void processTerrainMapData(TerrainMapData terrainMapData)
    {
-      latestTerrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);
+      latestTerrainMapData = terrainMapData;
 
       if (traversabilityScore == null)
       {
@@ -205,11 +206,11 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    public void renderImGuiWidgets()
    {
       ImGui.indent();
-      if (ros2 != null && ImGui.button(labels.get("Reset Ground to Feet")))
-         ros2.publish(PerceptionAPI.RESET_HEIGHT_MAP);
+      if (ros2Node != null && ImGui.button(labels.get("Reset Ground to Feet")))
+         publisherMap.publish(PerceptionAPI.RESET_HEIGHT_MAP);
 
-      if (ros2 != null && ImGui.button(labels.get("Lower Height Map Backdrop")))
-         ros2.publish(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP);
+      if (ros2Node != null && ImGui.button(labels.get("Lower Height Map Backdrop")))
+         publisherMap.publish(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP);
 
       if (heightMapRequestHeartbeat != null && ImGui.checkbox(labels.get("Request Height Map"), requestHeightMap))
          heightMapRequestHeartbeat.setAlive(requestHeightMap.get());

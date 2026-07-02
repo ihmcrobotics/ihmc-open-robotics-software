@@ -499,8 +499,8 @@ public class SCS2AvatarSimulationFactory
          {
             pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(asyncROS2Node.get(), robotName);
             asyncROS2Node.get()
-                            .createSubscription(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName),
-                                                s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.read()));
+                            .createSubscriptionSampler(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName),
+                                                       sample -> pelvisPoseCorrectionCommunicator.receivedPacket(sample));
          }
       }
 

@@ -44,15 +44,15 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2Node ros2Node)
    {
-      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), s ->
+      ros2Node.createSubscriptionSampler(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), sample ->
       {
          if (kinematicsPlanningToolboxController != null)
-            kinematicsPlanningToolboxController.updateRobotConfigurationData(s.read());
+            kinematicsPlanningToolboxController.updateRobotConfigurationData(sample);
       });
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName), s ->
+      ros2Node.createSubscriptionSampler(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName), sample ->
       {
          if (kinematicsPlanningToolboxController != null)
-            kinematicsPlanningToolboxController.updateCapturabilityBasedStatus(s.read());
+            kinematicsPlanningToolboxController.updateCapturabilityBasedStatus(sample);
       });
    }
 

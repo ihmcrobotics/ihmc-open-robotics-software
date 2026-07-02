@@ -38,7 +38,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       super(treeFilesDirectory, syncedRobot, peerClockEstimator, selectionCollisionModel, baseUI, panel3D);
 
       ros2ControllerHelper = ros2;
-      ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2);
+      ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2.getROS2Node());
 
       ros2BehaviorTree.getBehaviorTreeSubscription().registerMessageReceivedCallback(subscriptionFrequencyText::ping);
    }

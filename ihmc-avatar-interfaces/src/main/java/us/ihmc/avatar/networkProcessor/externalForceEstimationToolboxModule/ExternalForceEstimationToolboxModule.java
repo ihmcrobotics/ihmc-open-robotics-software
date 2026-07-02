@@ -47,16 +47,16 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
    {
       ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 
-      ros2Node.createSubscription(controllerOutputTopic.withType(RobotConfigurationData.class), s ->
+      ros2Node.createSubscriptionSampler(controllerOutputTopic.withType(RobotConfigurationData.class), sample ->
       {
-         if(forceEstimationToolboxController != null)
-            forceEstimationToolboxController.updateRobotConfigurationData(s.read());
+         if (forceEstimationToolboxController != null)
+            forceEstimationToolboxController.updateRobotConfigurationData(sample);
       });
 
-      ros2Node.createSubscription(controllerOutputTopic.withType(RobotDesiredConfigurationData.class), s ->
+      ros2Node.createSubscriptionSampler(controllerOutputTopic.withType(RobotDesiredConfigurationData.class), sample ->
       {
-         if(forceEstimationToolboxController != null)
-            forceEstimationToolboxController.updateRobotDesiredConfigurationData(s.read());
+         if (forceEstimationToolboxController != null)
+            forceEstimationToolboxController.updateRobotDesiredConfigurationData(sample);
       });
    }
 

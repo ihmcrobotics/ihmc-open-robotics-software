@@ -31,34 +31,33 @@ public class ROS2SakeHandStatus
    public ROS2SakeHandStatus(ROS2Node ros2Node, String robotName, RobotSide handSide)
    {
       var sakeHandStatusTopic = SakeHandAPI.getHandSakeStatusTopic(robotName, handSide);
-      ros2Node.createSubscription(sakeHandStatusTopic, reader ->
+      ros2Node.createSubscriptionSampler(sakeHandStatusTopic, sample ->
       {
-         var sakeHandStatusMessage = reader.read();
-         if (sakeHandStatusMessage == null)
+         if (sample == null)
             return;
-         isCalibrated = sakeHandStatusMessage.getIsCalibrated();
-         needsReset = sakeHandStatusMessage.getNeedsReset();
-         isCalibrating = sakeHandStatusMessage.getIsCalibrating();
-         isCoolingDown = sakeHandStatusMessage.getIsCoolingDown();
-         automaticCooldownEnabled = sakeHandStatusMessage.getAutomaticCooldownEnabled();
+         isCalibrated = sample.getIsCalibrated();
+         needsReset = sample.getNeedsReset();
+         isCalibrating = sample.getIsCalibrating();
+         isCoolingDown = sample.getIsCoolingDown();
+         automaticCooldownEnabled = sample.getAutomaticCooldownEnabled();
 
-         positionUpperLimit = sakeHandStatusMessage.getPositionUpperLimit();
-         positionLowerLimit = sakeHandStatusMessage.getPositionLowerLimit();
+         positionUpperLimit = sample.getPositionUpperLimit();
+         positionLowerLimit = sample.getPositionLowerLimit();
 
-         isTorqueOn = sakeHandStatusMessage.getTorqueOnStatus();
-         currentTemperature = sakeHandStatusMessage.getTemperature();
-         currentHandOpenAngle = SakeHandParameters.handPositionToOpenAngle(sakeHandStatusMessage.getCurrentPosition(),
+         isTorqueOn = sample.getTorqueOnStatus();
+         currentTemperature = sample.getTemperature();
+         currentHandOpenAngle = SakeHandParameters.handPositionToOpenAngle(sample.getCurrentPosition(),
                                                                            positionLowerLimit,
                                                                            positionUpperLimit);
-         commandedHandOpenAngle = SakeHandParameters.handPositionToOpenAngle(sakeHandStatusMessage.getDesiredPositionStatus(),
+         commandedHandOpenAngle = SakeHandParameters.handPositionToOpenAngle(sample.getDesiredPositionStatus(),
                                                                              positionLowerLimit,
                                                                              positionUpperLimit);
          commandedHandOpenAngle = MathTools.clamp(commandedHandOpenAngle, 0.0, SakeHandParameters.MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES);
-         currentFingertipGripForce = sakeHandStatusMessage.getRawCurrentTorque() * SakeHandParameters.RAW_SAKE_TORQUE_TO_GRIP_FORCE;
-         commandedFingertipGripForceLimit = sakeHandStatusMessage.getRawTorqueLimitStatus() * SakeHandParameters.RAW_SAKE_TORQUE_TO_GRIP_FORCE;
-         currentVelocity = sakeHandStatusMessage.getCurrentVelocity();
-         errorCodes = sakeHandStatusMessage.getErrorCodes();
-         handRealtimeTick = sakeHandStatusMessage.getRealtimeTick();
+         currentFingertipGripForce = sample.getRawCurrentTorque() * SakeHandParameters.RAW_SAKE_TORQUE_TO_GRIP_FORCE;
+         commandedFingertipGripForceLimit = sample.getRawTorqueLimitStatus() * SakeHandParameters.RAW_SAKE_TORQUE_TO_GRIP_FORCE;
+         currentVelocity = sample.getCurrentVelocity();
+         errorCodes = sample.getErrorCodes();
+         handRealtimeTick = sample.getRealtimeTick();
       });
    }
 

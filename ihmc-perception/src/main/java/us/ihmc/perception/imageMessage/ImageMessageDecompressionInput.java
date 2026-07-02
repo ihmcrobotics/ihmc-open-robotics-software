@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.ImageMessage;
+import us.ihmc.communication.packets.MessageTools;
 
 import java.nio.ByteBuffer;
 
@@ -45,7 +46,7 @@ public class ImageMessageDecompressionInput
             copyBuffer = new byte[messageDataSize];
 
          decompressionInputBytePointer.position(0);
-         imageMessage.getData().copyTo(copyBuffer, 0);
+         MessageTools.copyTo(imageMessage.getData(), copyBuffer, 0);
          decompressionInputBytePointer.put(copyBuffer, 0, messageDataSize);
       }
 

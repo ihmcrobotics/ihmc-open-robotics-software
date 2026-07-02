@@ -294,7 +294,7 @@ public class RDXBehaviorTestFacilitator
             baseUI.getPrimary3DPanel().getCamera3D().setCameraFocusPoint(new Point3D(0.7, 0.0, 0.4));
             baseUI.getPrimary3DPanel().getCamera3D().changeCameraPosition(-3.0, -4.0, 4.0);
 
-            robotVisualizer = new RDXROS2RobotVisualizer(ros2, syncedRobot);
+            robotVisualizer = new RDXROS2RobotVisualizer(ros2Node, syncedRobot);
             robotVisualizer.createAndSetupStandalone(baseUI);
 
             baseUI.getImGuiPanelManager().addPanel(new RDXROS2StatsPanel());

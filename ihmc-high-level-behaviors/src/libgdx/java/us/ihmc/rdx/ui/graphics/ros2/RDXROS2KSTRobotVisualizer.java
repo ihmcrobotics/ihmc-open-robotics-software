@@ -34,6 +34,7 @@ public class RDXROS2KSTRobotVisualizer extends RDXROS2SingleTopicVisualizer<Kine
    private final OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private final ROS2Topic<KinematicsToolboxOutputStatus> topic;
    private final TypedNotification<KinematicsToolboxOutputStatus> statusSubscription = new TypedNotification<>();
+   private final KinematicsToolboxOutputStatus statusCopy = new KinematicsToolboxOutputStatus();
    private ROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private RDXMultiBodyGraphic multiBodyGraphic;
    private String text;
@@ -64,12 +65,11 @@ public class RDXROS2KSTRobotVisualizer extends RDXROS2SingleTopicVisualizer<Kine
       multiBodyGraphic.setActive(true);
       multiBodyGraphic.create();
 
-      ros2Node.createSubscription(topic, reader ->
+      ros2Node.createSubscriptionSampler(topic, sample ->
       {
          getFrequency().ping();
-         KinematicsToolboxOutputStatus status = reader.read();
-         if (status != null)
-            statusSubscription.set(status);
+         statusCopy.set(sample);
+         statusSubscription.set(statusCopy);
       });
 
       toolboxStatePublisher = ros2Node.createPublisher(ToolboxAPIs.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotModel.getSimpleRobotName())

@@ -13,7 +13,6 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Size;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -58,9 +57,7 @@ public class RDXYOLOv8PipelineDemo
    private static final String SAVE_DIRECTORY = System.getProperty("user.home") + File.separator + "Documents" + File.separator;
 
    private final ROS2Node ros2Node = new ROS2Node(RDXYOLOv8PipelineDemo.class.getSimpleName());
-   private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-
-   private final ROS2ZEDSVOPlaybackSensor zedPlaybackSensor = new ROS2ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, zed.SL_DEPTH_MODE_NEURAL, SVO_FILE);
+   private final ROS2ZEDSVOPlaybackSensor zedPlaybackSensor = new ROS2ZEDSVOPlaybackSensor(ros2Node, 0, ZEDModelData.ZED_2, zed.SL_DEPTH_MODE_NEURAL, SVO_FILE);
    private RawImage colorImage;
    private final RDXImageVisualizer colorImageVisualizer = new RDXImageVisualizer("ZED Color", "ZED Color", false);
    private RawImage depthImage;

@@ -143,24 +143,12 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                                                                monteCarloPlannerParameters,
                                                                robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
 
-      ros2Node.createSubscription(getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
-                                  (s) -> terrainPlanningDebugger.reset());
+      ros2Node.createSubscriptionSampler(getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
+                                           sample -> terrainPlanningDebugger.reset());
 
-      ros2Node.createSubscription(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS, reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.onStartAndGoalPosesReceived(message);
-      });
-      ros2Node.createSubscription(ContinuousHikingAPI.PLANNED_FOOTSTEPS, reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.onPlannedFootstepsReceived(message);
-      });
-      ros2Node.createSubscription(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.onMonteCarloPlanReceived(message);
-      });
+      ros2Node.createSubscriptionSampler(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
+      ros2Node.createSubscriptionSampler(ContinuousHikingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
+      ros2Node.createSubscriptionSampler(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
 
       commandPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND);
       squareUpPublisher = ros2Node.createPublisher(ContinuousHikingAPI.SQUARE_UP_STEP);

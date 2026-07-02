@@ -72,15 +72,12 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
 
       this.monteCarloFootstepPlannerParameters = monteCarloFootstepPlannerParameters;
 
-      ros2Node.createSubscription(ContinuousHikingAPI.MONTE_CARLO_TREE_NODES, reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.onMonteCarloTreeNodesReceived(message);
-      });
-      ros2Node.createSubscription(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.onMonteCarloPlanReceived(message);
+      ros2Node.createSubscriptionSampler(ContinuousHikingAPI.MONTE_CARLO_TREE_NODES, this::onMonteCarloTreeNodesReceived);
+      ros2Node.createSubscriptionSampler(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, sample ->
+      {
+         FootstepDataListMessage copy = new FootstepDataListMessage();
+         copy.set(sample);
+         this.onMonteCarloPlanReceived(copy);
       });
 
       goalFootstepGraphics = new SideDependentList<>(new RDXFootstepGraphic(contactPoints, RobotSide.LEFT),

@@ -90,26 +90,16 @@ public class KinematicsToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2Node ros2Node)
    {
-      RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
-
-      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), reader ->
+      ros2Node.createSubscriptionSampler(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), sample ->
       {
          if (kinematicsToolBoxController != null)
-         {
-            reader.read(robotConfigurationData);
-            robotStateUpdater.setRobotConfigurationData(robotConfigurationData);
-         }
+            robotStateUpdater.setRobotConfigurationData(sample);
       });
 
-      CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
-
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName), reader ->
+      ros2Node.createSubscriptionSampler(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName), sample ->
       {
          if (kinematicsToolBoxController != null)
-         {
-            reader.read(capturabilityBasedStatus);
-            kinematicsToolBoxController.updateCapturabilityBasedStatus(capturabilityBasedStatus);
-         }
+            kinematicsToolBoxController.updateCapturabilityBasedStatus(sample);
       });
    }
 

@@ -139,12 +139,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
       controllerNetworkSubscriber.addMessageFilter(createMessageFilter());
 
-      ros2Node.createSubscription(getInputTopic().withType(ToolboxStateMessage.class), reader ->
-      {
-         ToolboxStateMessage message = reader.read();
-         if (message != null)
-            receivedPacket(message);
-      });
+      ros2Node.createSubscriptionSampler(getInputTopic().withType(ToolboxStateMessage.class), sample -> receivedPacket(sample));
       registerExtraPuSubs(ros2Node);
    }
 

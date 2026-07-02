@@ -1442,7 +1442,10 @@ public class MessageTools
    public static void extractIDLSequence(IDLByteSequence sourceIDLSequence, ByteBuffer byteBufferToPack)
    {
       byteBufferToPack.clear();
-      sourceIDLSequence.copyTo(byteBufferToPack);
+      ByteBuffer readView = sourceIDLSequence.getBuffer().duplicate();
+      readView.limit(readView.position());
+      readView.rewind();
+      byteBufferToPack.put(readView);
       byteBufferToPack.flip();
    }
 
@@ -1523,7 +1526,25 @@ public class MessageTools
 
    public static String unpackLongStringFromByteSequence(IDLByteSequence byteSequence)
    {
-      return new String(byteSequence.toByteArray(), StandardCharsets.US_ASCII);
+      return new String(toByteArray(byteSequence), StandardCharsets.US_ASCII);
+   }
+
+   public static byte[] toByteArray(IDLByteSequence byteSequence)
+   {
+      ByteBuffer readView = byteSequence.getBuffer().duplicate();
+      readView.limit(readView.position());
+      readView.rewind();
+      byte[] bytes = new byte[readView.remaining()];
+      readView.get(bytes);
+      return bytes;
+   }
+
+   public static void copyTo(IDLByteSequence byteSequence, byte[] destination, int destinationOffset)
+   {
+      ByteBuffer readView = byteSequence.getBuffer().duplicate();
+      readView.limit(readView.position());
+      readView.rewind();
+      readView.get(destination, destinationOffset, readView.remaining());
    }
 
    public static int toMessage(Level level)

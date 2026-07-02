@@ -77,11 +77,7 @@ public class AI2RPredefinedCommandPublisher
       ros2Node = new ROS2Node("ai2r_predefined_behavior_coordinator");
       commandPublisher = ros2Node.createPublisher(AutonomyAPI.AI2R_COMMAND);
 
-      ros2Node.createSubscription(AutonomyAPI.AI2R_STATUS, reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.onStatus(message);
-      });
+      ros2Node.createSubscriptionSampler(AutonomyAPI.AI2R_STATUS, this::onStatus);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getSimpleName() + "Shutdown"));
 

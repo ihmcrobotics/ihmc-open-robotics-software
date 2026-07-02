@@ -5,7 +5,6 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.ImageMessage;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
@@ -58,7 +57,7 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
 
       // Create publisher and subscriber using two separate nodes as publisher should ideally only publish on loopback.
       publisher = loopbackPublisherNode.createPublisher(streamTopicPair.imageMessageTopic());
-      subscriber = new ROS2SRTVideoSubscriber(new ROS2Helper(subscriberNode), streamTopicPair.streamStatusTopic(), outputPixelFormat);
+      subscriber = new ROS2SRTVideoSubscriber(subscriberNode, streamTopicPair.streamStatusTopic(), outputPixelFormat);
       subscriber.addNewFrameConsumer(this::republishFrameAsImageMessage);
       subscriber.subscribe();
 

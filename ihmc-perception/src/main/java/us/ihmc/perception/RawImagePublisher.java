@@ -9,7 +9,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import perception_msgs.ImageMessage;
 import sensor_msgs.CameraInfo;
 import sensor_msgs.Image;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
@@ -26,7 +26,7 @@ import us.ihmc.sensors.CameraIntrinsics;
 
 public class RawImagePublisher implements AutoCloseable
 {
-   private final ROS2Helper ros2Helper;
+   private final ROS2PublisherMap publisherMap;
    private ImageMessage imageMessage;
    private final Image ros2Image;
 
@@ -37,7 +37,7 @@ public class RawImagePublisher implements AutoCloseable
 
    public RawImagePublisher(ROS2Node ros2Node)
    {
-      ros2Helper = new ROS2Helper(ros2Node);
+      publisherMap = new ROS2PublisherMap(ros2Node);
       ros2Image = new Image();
 
       if (CUDATools.hasNVJPEG())
@@ -163,7 +163,7 @@ public class RawImagePublisher implements AutoCloseable
       // Pack the message and send it off
       ImageMessage messageToPublish = getOrCreateImageMessage();
       PerceptionMessageTools.packImageMessage(imageToCompress, compressedImage, compressionType, messageToPublish);
-      ros2Helper.publish(imageTopic, messageToPublish);
+      publisherMap.publish(imageTopic, messageToPublish);
 
       // Close stuff
       compressedImage.close();
@@ -191,7 +191,7 @@ public class RawImagePublisher implements AutoCloseable
       PerceptionMessageTools.packImageMessage(imageToPublish, sensorFrame.getName(), ros2Image);
 
       // Publish the image
-      ros2Helper.publish(imageTopic, ros2Image);
+      publisherMap.publish(imageTopic, ros2Image);
 
       // Close stuff
       if (scaledImage != null)
@@ -213,7 +213,7 @@ public class RawImagePublisher implements AutoCloseable
       PerceptionMessageTools.packCameraInfo(image.getAcquisitionTime(), intrinsics, image.getTransformToWorld(), sensorFrame.getName(), cameraInfo);
 
       // Publish the message
-      ros2Helper.publish(cameraInfoTopic, cameraInfo);
+      publisherMap.publish(cameraInfoTopic, cameraInfo);
    }
 
    private ImageMessage getOrCreateImageMessage()

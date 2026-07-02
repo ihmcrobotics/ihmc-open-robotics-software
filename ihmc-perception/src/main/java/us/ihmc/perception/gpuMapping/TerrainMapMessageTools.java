@@ -1,6 +1,7 @@
 package us.ihmc.perception.gpuMapping;
 
 import perception_msgs.TerrainMapMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 
 public class TerrainMapMessageTools
@@ -49,19 +50,19 @@ public class TerrainMapMessageTools
       if (traversabilityScoreMap.length > 0)
          terrainMapData.setTraversabilityScoreMap(traversabilityScoreMap);
 
-      byte[] traversabilityClassMap = message.getTraversabilityClass().toByteArray();
+      byte[] traversabilityClassMap = MessageTools.toByteArray(message.getTraversabilityClass());
       if (traversabilityClassMap.length > 0)
          terrainMapData.setTraversabilityClassMap(traversabilityClassMap);
 
-      byte[] snappedNormalXMap = message.getSnappedNormalXData().toByteArray();
+      byte[] snappedNormalXMap = MessageTools.toByteArray(message.getSnappedNormalXData());
       if (snappedNormalXMap.length > 0)
          terrainMapData.setSnapNormalXMap(snappedNormalXMap);
 
-      byte[] snappedNormalYMap = message.getSnappedNormalYData().toByteArray();
+      byte[] snappedNormalYMap = MessageTools.toByteArray(message.getSnappedNormalYData());
       if (snappedNormalYMap.length > 0)
          terrainMapData.setSnapNormalYMap(snappedNormalYMap);
 
-      byte[] snappedNormalZMap = message.getSnappedNormalZData().toByteArray();
+      byte[] snappedNormalZMap = MessageTools.toByteArray(message.getSnappedNormalZData());
       if (snappedNormalZMap.length > 0)
          terrainMapData.setSnapNormalZMap(snappedNormalZMap);
 

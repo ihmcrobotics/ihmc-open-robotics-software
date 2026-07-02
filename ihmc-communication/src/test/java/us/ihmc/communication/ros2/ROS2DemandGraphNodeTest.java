@@ -20,7 +20,6 @@ public class ROS2DemandGraphNodeTest
    public void testIsDemanded()
    {
       ROS2Node ros2Node = new ROS2Node("demand_graph_test_is_demanded");
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       HumanoidROS2Topic<Empty> testTopic = HumanoidROS2Topic.IHMC_ROOT.withSuffix("demand_graph_test_is_demanded").withType(Empty.class);
 
       ROS2DemandGraphNode testNode = new ROS2DemandGraphNode(ros2Node, testTopic);
@@ -45,7 +44,6 @@ public class ROS2DemandGraphNodeTest
    public void testDependantDemand()
    {
       ROS2Node ros2Node = new ROS2Node("demand_graph_test_dependant");
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       HumanoidROS2Topic<Empty> testTopic = HumanoidROS2Topic.IHMC_ROOT.withSuffix("demand_graph_test_dependant").withType(Empty.class);
       HumanoidROS2Topic<Empty> dependantTopic = testTopic.withPrefix("dependant");
 
@@ -89,7 +87,6 @@ public class ROS2DemandGraphNodeTest
    public void testDemandChangedCallback()
    {
       ROS2Node ros2Node = new ROS2Node("demand_graph_test_dependant");
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       HumanoidROS2Topic<Empty> testTopic = HumanoidROS2Topic.IHMC_ROOT.withSuffix("demand_graph_test_dependant").withType(Empty.class);
       HumanoidROS2Topic<Empty> dependantTopic = testTopic.withPrefix("dependant");
 

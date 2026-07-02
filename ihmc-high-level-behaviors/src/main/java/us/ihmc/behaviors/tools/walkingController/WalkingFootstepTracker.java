@@ -48,26 +48,11 @@ public class WalkingFootstepTracker
    {
       this.ros2Node = ros2Node;
       var footstepDataListTopic = getTopic(FootstepDataListMessage.class, robotName);
-      footstepDataListSubscriber = ros2Node.createSubscription(footstepDataListTopic,
-                                                               reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.interceptFootstepDataListMessage(message);
-      });
+      footstepDataListSubscriber = ros2Node.createSubscriptionSampler(footstepDataListTopic, this::interceptFootstepDataListMessage);
       var footstepStatusTopic = getTopic(FootstepStatusMessage.class, robotName);
-      footstepStatusSubscriber = ros2Node.createSubscription(footstepStatusTopic,
-                                                             reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.acceptFootstepStatusMessage(message);
-      });
+      footstepStatusSubscriber = ros2Node.createSubscriptionSampler(footstepStatusTopic, this::acceptFootstepStatusMessage);
       var footstepQueueStatusTopic = getLowFrequencyTopic(FootstepQueueStatusMessage.class, robotName);
-      footstepQueueStatusSubscriber = ros2Node.createSubscription(footstepQueueStatusTopic,
-                                                                  reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.acceptFootstepQueueStatusMessage(message);
-      });
+      footstepQueueStatusSubscriber = ros2Node.createSubscriptionSampler(footstepQueueStatusTopic, this::acceptFootstepQueueStatusMessage);
    }
 
    public void registerFootstepQueuedMessageListener(TypedNotification<FootstepQueueStatusMessage> footstepQueueListener)
@@ -75,11 +60,16 @@ public class WalkingFootstepTracker
       footstepQueueListeners.add(footstepQueueListener);
    }
 
-   private void acceptFootstepQueueStatusMessage(FootstepQueueStatusMessage footstepQueueStatusMessage)
+   private void acceptFootstepQueueStatusMessage(FootstepQueueStatusMessage sample)
    {
+      FootstepQueueStatusMessage footstepQueueStatusMessage = new FootstepQueueStatusMessage();
+      footstepQueueStatusMessage.set(sample);
+
       for (TypedNotification<FootstepQueueStatusMessage> footstepQueueListener : footstepQueueListeners)
       {
-         footstepQueueListener.set(footstepQueueStatusMessage);
+         FootstepQueueStatusMessage copy = new FootstepQueueStatusMessage();
+         copy.set(footstepQueueStatusMessage);
+         footstepQueueListener.set(copy);
       }
 
       totalIncompleteFootsteps = footstepQueueStatusMessage.getQueuedFootstepList().size();

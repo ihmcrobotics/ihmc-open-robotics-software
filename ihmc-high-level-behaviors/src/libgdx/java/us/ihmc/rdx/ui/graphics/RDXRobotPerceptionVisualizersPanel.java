@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.graphics;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -18,7 +17,7 @@ import us.ihmc.sensors.zed.ZEDModelData;
 public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVisualizersPanel
 {
    protected final ROS2SyncedRobotModel syncedRobot;
-   protected final ROS2Helper ros2Helper;
+   protected final ROS2Node ros2Node;
    protected final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator;
 
    // Common — always present
@@ -44,16 +43,16 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    {
       this.syncedRobot = syncedRobot;
       this.peerClockOffsetEstimator = peerClockOffsetEstimator;
-      this.ros2Helper = new ROS2Helper(ros2Node);
+      this.ros2Node = ros2Node;
 
       // Common robot visualizer
-      robotVisualizer = new RDXROS2RobotVisualizer(ros2Helper, syncedRobot);
+      robotVisualizer = new RDXROS2RobotVisualizer(ros2Node, syncedRobot);
       robotVisualizer.setPinned(true);
       robotVisualizer.setActive(true);
       addVisualizer(robotVisualizer);
 
       // Kinematics streaming solution visualizer
-      kinematicsStreamingSolutionVisualizer = new RDXROS2KSTRobotVisualizer(ros2Helper.getROS2Node(), syncedRobot.getRobotModel());
+      kinematicsStreamingSolutionVisualizer = new RDXROS2KSTRobotVisualizer(ros2Node, syncedRobot.getRobotModel());
       addVisualizer(kinematicsStreamingSolutionVisualizer);
 
       // Additional visualizers instantiated in robot specific class

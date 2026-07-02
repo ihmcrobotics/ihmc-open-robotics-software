@@ -11,10 +11,10 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImString;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -79,9 +79,9 @@ public class RDXInteractableFrameModel
       panel3D.addImGuiOverlayAddition(this, this::renderTooltipsAndContextMenu);
    }
 
-   public void addRemoteTuning(ROS2Helper ros2, ROS2IOTopicPair<RigidBodyTransformMessage> topicPair, RigidBodyTransform rigidBodyTransformToSync)
+   public void addRemoteTuning(ROS2Node ros2Node, ROS2IOTopicPair<RigidBodyTransformMessage> topicPair, RigidBodyTransform rigidBodyTransformToSync)
    {
-      syncedTransformForTuning = ROS2TunedRigidBodyTransform.remoteTuner(ros2, topicPair, rigidBodyTransformToSync);
+      syncedTransformForTuning = ROS2TunedRigidBodyTransform.remoteTuner(ros2Node, topicPair, rigidBodyTransformToSync);
    }
 
    public void update()

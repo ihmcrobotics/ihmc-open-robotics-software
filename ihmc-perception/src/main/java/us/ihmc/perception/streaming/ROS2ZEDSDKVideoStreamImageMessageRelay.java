@@ -5,7 +5,7 @@ import perception_msgs.ImageMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.RawImage;
@@ -28,7 +28,7 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends ZEDImageSensor
 {
    private static int lastCameraId = 0;
 
-   private final ROS2Helper ros2Helper;
+   private final ROS2PublisherMap publisherMap;
    private final RepeatingTaskThread publishThread;
    private final ExecutorService publisherExecutor;
 
@@ -49,7 +49,7 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends ZEDImageSensor
    {
       super(lastCameraId++, zedModel, slDepthMode, remoteStreamingAddress, remoteStreamingPort);
 
-      ros2Helper = new ROS2Helper(ros2Node);
+      publisherMap = new ROS2PublisherMap(ros2Node);
       publishThread = new RepeatingTaskThread(getClass().getSimpleName() + "-PublishThread", this::publish);
       publisherExecutor = new ScheduledThreadPoolExecutor(3 * 10);
 
@@ -74,7 +74,7 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends ZEDImageSensor
          if (depthImage != null)
          {
             packImageMessage(depthImage, lastDepthImageMessage);
-            publisherExecutor.submit(() -> ros2Helper.publish(depthTopic, lastDepthImageMessage));
+            publisherExecutor.submit(() -> publisherMap.publish(depthTopic, lastDepthImageMessage));
             depthImage.release();
          }
 
@@ -82,7 +82,7 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends ZEDImageSensor
          if (leftColorImage != null)
          {
             packImageMessage(leftColorImage, lastLeftColorImageMessage);
-            publisherExecutor.submit(() -> ros2Helper.publish(colorTopics.get(RobotSide.LEFT), lastLeftColorImageMessage));
+            publisherExecutor.submit(() -> publisherMap.publish(colorTopics.get(RobotSide.LEFT), lastLeftColorImageMessage));
             leftColorImage.release();
          }
 
@@ -90,7 +90,7 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends ZEDImageSensor
          if (rightColorImage != null)
          {
             packImageMessage(rightColorImage, lastRightColorImageMessage);
-            publisherExecutor.submit(() -> ros2Helper.publish(colorTopics.get(RobotSide.RIGHT), lastRightColorImageMessage));
+            publisherExecutor.submit(() -> publisherMap.publish(colorTopics.get(RobotSide.RIGHT), lastRightColorImageMessage));
             rightColorImage.release();
          }
       }

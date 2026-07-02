@@ -54,10 +54,26 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
       continuousPlanner = new ContinuousPlannerForPlanarRegions(referenceFrames);
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
-      ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
-      //ros2Node.createSubscriptionSampler(PerceptionAPI.OUSTER_DEPTH_IMAGE, this::onOusterDepthReceived);
+      ros2Node.createSubscriptionSampler(terrainRegionsTopic, sample ->
+      {
+         FramePlanarRegionsListMessage copy = new FramePlanarRegionsListMessage();
+         copy.set(sample);
+         onPlanarRegionsReceived(copy);
+      });
+      // PerceptionAPI.OUSTER_DEPTH_IMAGE is not defined; enable when the topic is added.
+      //ros2Node.createSubscriptionSampler(PerceptionAPI.OUSTER_DEPTH_IMAGE, sample ->
+      //{
+      //   ImageMessage copy = new ImageMessage();
+      //   copy.set(sample);
+      //   onOusterDepthReceived(copy);
+      //});
 
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, robotModel.getSimpleRobotName()), this::walkingStatusReceived);
+      ros2Node.createSubscriptionSampler(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, robotModel.getSimpleRobotName()), sample ->
+      {
+         WalkingStatusMessage copy = new WalkingStatusMessage();
+         copy.set(sample);
+         walkingStatusReceived(copy);
+      });
 
       executorService.scheduleAtFixedRate(this::updateActiveMappingPlan, 0, PLANNING_PERIOD_MS, TimeUnit.MILLISECONDS);
       executorService.scheduleAtFixedRate(this::generalUpdate, 0, UPDATE_PERIOD_MS, TimeUnit.MILLISECONDS);

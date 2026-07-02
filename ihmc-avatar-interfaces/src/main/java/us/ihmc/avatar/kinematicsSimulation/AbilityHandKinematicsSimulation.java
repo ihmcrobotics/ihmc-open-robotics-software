@@ -50,10 +50,10 @@ public class AbilityHandKinematicsSimulation
 
       enabled = allJointsFound;
 
-      ros2Node.createSubscription(AbilityHandROS2API.COMMAND_TOPICS.get(side), reader -> {
-         var message = reader.read();
-         if (message != null)
-            commandNotification.set(message);
+      ros2Node.createSubscriptionSampler(AbilityHandROS2API.COMMAND_TOPICS.get(side), sample -> {
+         AbilityHandCommand message = new AbilityHandCommand();
+         message.set(sample);
+         commandNotification.set(message);
       });
       statePublisher = ros2Node.createPublisher(AbilityHandROS2API.STATE_TOPICS.get(side));
 

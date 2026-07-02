@@ -51,6 +51,7 @@ public class ROS2FoundationPoseCommunicator
    private final RepeatingTaskThread sensorPublishThread;
 
    private final List<Consumer<FoundationPoseResult>> resultCallbacks;
+   private final FoundationPoseResult resultBuffer = new FoundationPoseResult();
 
    public ROS2FoundationPoseCommunicator(ROS2Node ros2Node, ImageSensor imageSensor, int colorKey, int depthKey)
    {
@@ -66,12 +67,7 @@ public class ROS2FoundationPoseCommunicator
       colorMessage = new ImageMessage();
       depthMessage = new ImageMessage();
 
-      ros2Node.createSubscription(RESULT_TOPIC, reader ->
-      {
-         FoundationPoseResult result = reader.read();
-         if (result != null)
-            this.onResultReceived(result);
-      });
+      ros2Node.createSubscriptionSampler(RESULT_TOPIC, this::onResultReceived);
 
       this.imageSensor = imageSensor;
       this.colorKey = colorKey;
@@ -151,10 +147,11 @@ public class ROS2FoundationPoseCommunicator
       ros2Node.destroyPublisher(depthPublisher);
    }
 
-   private void onResultReceived(FoundationPoseResult result)
+   private void onResultReceived(FoundationPoseResult sample)
    {
+      resultBuffer.set(sample);
       for (Consumer<FoundationPoseResult> resultCallback : resultCallbacks)
-         resultCallback.accept(result);
+         resultCallback.accept(resultBuffer);
    }
 
    private void publishSensor()

@@ -23,7 +23,12 @@ public class RDXMultiContactRegionHelper
    public RDXMultiContactRegionHelper(FullHumanoidRobotModel ghostFullRobotModel, ROS2Node ros2Node)
    {
       this.ghostFullRobotModel = ghostFullRobotModel;
-      ros2Node.createSubscription(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, s -> latestPlanarRegionsMessage.set(s.read()));
+      ros2Node.createSubscriptionSampler(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, sample ->
+      {
+         FramePlanarRegionsListMessage copy = new FramePlanarRegionsListMessage();
+         copy.set(sample);
+         latestPlanarRegionsMessage.set(copy);
+      });
    }
 
    public Vector3D getNormalOfClosestRegion(RobotSide robotSide)

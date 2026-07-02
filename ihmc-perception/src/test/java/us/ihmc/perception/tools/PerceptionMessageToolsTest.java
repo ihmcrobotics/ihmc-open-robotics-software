@@ -8,6 +8,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Test;
 import perception_msgs.ImageMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.fastddsjava.cdr.CDRBuffer;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
@@ -123,6 +124,6 @@ public class PerceptionMessageToolsTest
 
    private static byte[] getDataBytes(ImageMessage message)
    {
-      return message.getData().toByteArray();
+      return MessageTools.toByteArray(message.getData());
    }
 }

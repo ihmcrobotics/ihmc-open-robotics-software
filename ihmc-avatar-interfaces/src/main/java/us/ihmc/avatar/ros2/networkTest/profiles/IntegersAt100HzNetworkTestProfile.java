@@ -85,12 +85,8 @@ public class IntegersAt100HzNetworkTestProfile extends ROS2NetworkTestProfile
    {
       if (getLocalMachine() == OCU)
       {
-         ros2Node.createSubscription(TO_OCU, reader ->
+         ros2Node.createSubscriptionSampler(TO_OCU, message ->
          {
-            Int64 message = reader.read();
-            if (message == null)
-               return;
-
             long messageNumber = message.getData();
             if (messageNumber - 1 != lastReceived)
                messagesReceivedOutOfOrder.add(1);

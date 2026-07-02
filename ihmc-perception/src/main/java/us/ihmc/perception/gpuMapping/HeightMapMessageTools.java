@@ -7,6 +7,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.HeightMapMessage;
 import perception_msgs.HeightMapMessageForController;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 
@@ -31,7 +32,7 @@ public class HeightMapMessageTools
                                                       heightMapMessage.getGridCenterY());
 
       // Decode the PNG compressed height map data
-      Mat compressedMat = new Mat(heightMapMessage.getHeights().toByteArray());
+      Mat compressedMat = new Mat(MessageTools.toByteArray(heightMapMessage.getHeights()));
       Mat heightMapMat = new Mat(heightMapMessage.getCellsPerAxis(), 2 * heightMapMessage.getCellsPerAxis(), opencv_core.CV_16UC1);
       opencv_imgcodecs.imdecode(compressedMat, opencv_imgcodecs.IMREAD_UNCHANGED, heightMapMat);
 

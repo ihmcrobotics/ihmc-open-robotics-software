@@ -57,21 +57,20 @@ public class ROS2Input<T extends ROS2Message<T>>
       atomicReference = new AtomicReference<>(initialValue);
       this.messageFilter = messageFilter;
 
-      subscription = ros2Node.createSubscription(topic, reader ->
+      subscription = ros2Node.createSubscriptionSampler(topic, sample ->
       {
-         T incoming = reader.read();
-         if (incoming == null || !messageFilter.accept(incoming))
+         if (!messageFilter.accept(sample))
             return;
 
          if (reuseBuffer)
          {
-            initialValue.set(incoming);
+            initialValue.set(sample);
             messageReceivedCallback(initialValue);
          }
          else
          {
-            atomicReference.set(incoming);
-            messageReceivedCallback(incoming);
+            atomicReference.set(sample);
+            messageReceivedCallback(sample);
          }
       }, qosProfile);
    }

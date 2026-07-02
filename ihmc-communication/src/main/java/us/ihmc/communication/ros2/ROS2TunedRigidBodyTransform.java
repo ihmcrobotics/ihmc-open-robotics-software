@@ -5,6 +5,7 @@ import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.jros2.ROS2Node;
 
 /**
  * This class is used to hava UI that tunes a transform running remotely on the robot.
@@ -14,44 +15,50 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
  */
 public class ROS2TunedRigidBodyTransform
 {
-   private final ROS2Helper ros2;
+   private final ROS2PublisherMap publisherMap;
    private final ROS2IOTopicPair<RigidBodyTransformMessage> topicPair;
    private final RigidBodyTransform rigidBodyTransformToSync;
    private final TypedNotification<RigidBodyTransformMessage> frameUpdateSubscription;
    private final Throttler statusThrottler;
    private final RigidBodyTransformMessage statusMessage = new RigidBodyTransformMessage();
+   private final RigidBodyTransformMessage frameUpdateMessage = new RigidBodyTransformMessage();
    private final boolean isRemoteTuner;
    private boolean acceptingUpdates = true;
    private boolean publishingStatus = true;
 
-   public static ROS2TunedRigidBodyTransform toBeTuned(ROS2Helper ros2,
+   public static ROS2TunedRigidBodyTransform toBeTuned(ROS2Node ros2Node,
                                                        ROS2IOTopicPair<RigidBodyTransformMessage> topicPair,
                                                        RigidBodyTransform rigidBodyTransformToSync)
    {
-      return new ROS2TunedRigidBodyTransform(ros2, topicPair, rigidBodyTransformToSync, false);
+      return new ROS2TunedRigidBodyTransform(ros2Node, topicPair, rigidBodyTransformToSync, false);
    }
 
-   public static ROS2TunedRigidBodyTransform remoteTuner(ROS2Helper ros2,
+   public static ROS2TunedRigidBodyTransform remoteTuner(ROS2Node ros2Node,
                                                          ROS2IOTopicPair<RigidBodyTransformMessage> topicPair,
                                                          RigidBodyTransform rigidBodyTransformToSync)
    {
-      return new ROS2TunedRigidBodyTransform(ros2, topicPair, rigidBodyTransformToSync, true);
+      return new ROS2TunedRigidBodyTransform(ros2Node, topicPair, rigidBodyTransformToSync, true);
    }
 
 
-   private ROS2TunedRigidBodyTransform(ROS2Helper ros2,
+   private ROS2TunedRigidBodyTransform(ROS2Node ros2Node,
                                        ROS2IOTopicPair<RigidBodyTransformMessage> topicPair,
                                        RigidBodyTransform rigidBodyTransformToSync,
                                        boolean isRemoteTuner)
    {
-      this.ros2 = ros2;
+      this.publisherMap = new ROS2PublisherMap(ros2Node);
       this.topicPair = topicPair;
       this.rigidBodyTransformToSync = rigidBodyTransformToSync;
       this.isRemoteTuner = isRemoteTuner;
       // The tuning part is higher frequency to see the updates smoother as you tune. (5 Hz)
       // The status is just and update of the current transform where an observer is not actively tuning. (2.5 Hz)
       statusThrottler = new Throttler().setFrequency(isRemoteTuner ? 5.0 : ROS2Heartbeat.STATUS_FREQUENCY);
-      frameUpdateSubscription = ros2.subscribeViaTypedNotification(isRemoteTuner ? topicPair.getStatusTopic() : topicPair.getCommandTopic());
+      frameUpdateSubscription = new TypedNotification<>();
+      ros2Node.createSubscriptionSampler(isRemoteTuner ? topicPair.getStatusTopic() : topicPair.getCommandTopic(), sample ->
+      {
+         frameUpdateMessage.set(sample);
+         frameUpdateSubscription.set(frameUpdateMessage);
+      });
    }
 
    public void update()
@@ -64,7 +71,7 @@ public class ROS2TunedRigidBodyTransform
       if (publishingStatus && statusThrottler.run())
       {
          MessageTools.toMessage(rigidBodyTransformToSync, statusMessage);
-         ros2.publish(isRemoteTuner ? topicPair.getCommandTopic() : topicPair.getStatusTopic(), statusMessage);
+         publisherMap.publish(isRemoteTuner ? topicPair.getCommandTopic() : topicPair.getStatusTopic(), statusMessage);
       }
    }
 

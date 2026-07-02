@@ -4,9 +4,8 @@ import behavior_msgs.ContinuousHikingCommandMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.*;
-import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -52,12 +51,15 @@ public class ContinuousPlanningStateMachine
    {
       String simpleRobotName = robotModel.getSimpleRobotName();
 
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-
-      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.RESET_STATE_MACHINE, this::resetStateMachine);
+      ros2Node.createSubscriptionSampler(ContinuousHikingAPI.RESET_STATE_MACHINE, sample -> resetStateMachine());
 
       AtomicReference<ContinuousHikingCommandMessage> commandMessage = new AtomicReference<>(new ContinuousHikingCommandMessage());
-      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND, commandMessage::set);
+      ros2Node.createSubscriptionSampler(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND, sample ->
+      {
+         ContinuousHikingCommandMessage copy = new ContinuousHikingCommandMessage();
+         copy.set(sample);
+         commandMessage.set(copy);
+      });
 
       ContinuousHikingLogger continuousHikingLogger = new ContinuousHikingLogger();
       TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, activeMappingParameterObject.getMonteCarloPlannerParameters());
@@ -75,8 +77,8 @@ public class ContinuousPlanningStateMachine
       stateMachineFactory.setRegistry(registry);
 
       // Create the different states
-      State notStartedState = new DoNothingState(ros2Helper, syncedRobotModel, simpleRobotName, continuousPlanner, debugger);
-      State readyToPlanState = new ReadyToPlanState(ros2Helper,
+      State notStartedState = new DoNothingState(ros2Node, syncedRobotModel, simpleRobotName, continuousPlanner, debugger);
+      State readyToPlanState = new ReadyToPlanState(ros2Node,
                                                     referenceFrames,
                                                     commandMessage,
                                                     continuousPlanner,
@@ -85,14 +87,14 @@ public class ContinuousPlanningStateMachine
                                                     this::getEnvironmentHandler,
                                                     debugger,
                                                     continuousHikingLogger);
-      State waitingtoLandState = new WaitingToLandState(ros2Helper,
+      State waitingtoLandState = new WaitingToLandState(ros2Node,
                                                         simpleRobotName,
                                                         continuousPlanner,
                                                         controllerFootstepQueueMonitor,
                                                         activeMappingParameterObject.getContinuousHikingParameters(),
                                                         continuousHikingLogger);
       State justWaitState = new JustWaitState(robotModel,
-                                              ros2Helper,
+                                              ros2Node,
                                               syncedRobotModel,
                                               commandMessage,
                                               controllerFootstepQueueMonitor,

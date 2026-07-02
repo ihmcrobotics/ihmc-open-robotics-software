@@ -52,16 +52,12 @@ public class ROS2BehaviorTreeYoRegistry
 
       var behaviorYoDataTopic = AutonomyAPI.BEHAVIOR_YO_DATA;
       SwapReference<BehaviorTreeYoDataMessage> swapReference = new SwapReference<>(() -> ROS2Message.createInstance(behaviorYoDataTopic.getType()));
-      ros2Node.createSubscription(behaviorYoDataTopic, reader ->
+      ros2Node.createSubscriptionSampler(behaviorYoDataTopic, sample ->
       {
-         var readMessage = reader.read();
-         if (readMessage != null)
-         {
-            var messageToPack = swapReference.getForThreadOne();
-            messageToPack.set(readMessage);
-            swapReference.swap();
-            notification.set();
-         }
+         var messageToPack = swapReference.getForThreadOne();
+         messageToPack.set(sample);
+         swapReference.swap();
+         notification.set();
       });
       subscription = swapReference;
 

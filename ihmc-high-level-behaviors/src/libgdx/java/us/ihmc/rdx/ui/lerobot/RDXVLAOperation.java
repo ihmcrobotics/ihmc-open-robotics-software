@@ -57,6 +57,7 @@ public class RDXVLAOperation
    private final ROS2Publisher<ArmTrajectoryMessage> armTrajectoryPublisher;
    private String statusMessage = "Not yet connected to robot";
    private final TypedNotification<VLAOperationMessage> statusSubscription;
+   private final VLAOperationMessage statusCopy = new VLAOperationMessage();
    private final ROS2Publisher<VLAOperationMessage> commandPublisher;
    private final ImGuiAveragedFrequencyText commsFrequencyText = new ImGuiAveragedFrequencyText();
    private final SideDependentList<RDXReferenceFrameGraphic> actionHandPoseGraphics = new SideDependentList<>();
@@ -83,11 +84,10 @@ public class RDXVLAOperation
 
       var statusTopic = UI.getTopic(ROS2ActorDesignation.OPERATOR.getIncomingQualifier());
       TypedNotification<VLAOperationMessage> typedNotification = new TypedNotification<>();
-      ros2Node.createSubscription(statusTopic, reader ->
+      ros2Node.createSubscriptionSampler(statusTopic, sample ->
       {
-         var message = reader.read();
-         if (message != null)
-            typedNotification.set(message);
+         statusCopy.set(sample);
+         typedNotification.set(statusCopy);
       });
       statusSubscription = typedNotification;
       commandPublisher = ros2Node.createPublisher(UI.getTopic(ROS2ActorDesignation.OPERATOR.getOutgoingQualifier()));

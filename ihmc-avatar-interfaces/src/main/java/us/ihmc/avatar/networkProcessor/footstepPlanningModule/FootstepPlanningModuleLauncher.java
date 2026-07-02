@@ -121,15 +121,15 @@ public class FootstepPlanningModuleLauncher
                                                  ROS2Topic<?> inputTopic)
    {
       // inputTopic is a HumanoidROS2Topic; withType() appends the message-type suffix so parameters packets do not collide.
-      ros2Node.createSubscription(inputTopic.withType(FootstepPlannerParametersPacket.class), s ->
+      ros2Node.createSubscriptionSampler(inputTopic.withType(FootstepPlannerParametersPacket.class), sample ->
       {
          if (!footstepPlanningModule.isPlanning())
-            footstepPlanningModule.getFootstepPlannerParameters().set(s.read());
+            footstepPlanningModule.getFootstepPlannerParameters().set(sample);
       });
-      ros2Node.createSubscription(inputTopic.withType(SwingPlannerParametersPacket.class), s ->
+      ros2Node.createSubscriptionSampler(inputTopic.withType(SwingPlannerParametersPacket.class), sample ->
       {
          if (!footstepPlanningModule.isPlanning())
-            footstepPlanningModule.getSwingPlannerParameters().set(s.read());
+            footstepPlanningModule.getSwingPlannerParameters().set(sample);
       });
    }
 
@@ -139,18 +139,17 @@ public class FootstepPlanningModuleLauncher
                                              ROS2Topic<?> inputTopic,
                                              AtomicBoolean generateLog)
    {
-      ros2Node.createSubscription(inputTopic.withType(FootstepPlanningRequestPacket.class), s ->
+      ros2Node.createSubscriptionSampler(inputTopic.withType(FootstepPlanningRequestPacket.class), sample ->
       {
          FootstepPlannerRequest request = new FootstepPlannerRequest();
-         FootstepPlanningRequestPacket requestPacket = s.read();
-         request.setFromPacket(requestPacket);
-         generateLog.set(requestPacket.getGenerateLog());
+         request.setFromPacket(sample);
+         generateLog.set(sample.getGenerateLog());
          new Thread(() -> footstepPlanningModule.handleRequest(request), "FootstepPlanningRequestHandler").start();
       });
 
-      ros2Node.createSubscription(inputTopic.withType(SwingPlanningRequestPacket.class), s ->
+      ros2Node.createSubscriptionSampler(inputTopic.withType(SwingPlanningRequestPacket.class), sample ->
       {
-         SwingPlannerType swingPlannerType = SwingPlannerType.fromByte(s.read().getRequestedSwingPlanner());
+         SwingPlannerType swingPlannerType = SwingPlannerType.fromByte(sample.getRequestedSwingPlanner());
          if (swingPlannerType == SwingPlannerType.NONE)
          {
             LogTools.info("Received swing replanning request with type NONE, ignoring message");
@@ -199,27 +198,25 @@ public class FootstepPlanningModuleLauncher
    {
       ROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher = ros2Node.createPublisher(outputTopic.withType(FootstepPlannerParametersPacket.class));
 
-      FootstepPlannerActionMessage footstepPlannerActionMessage = new FootstepPlannerActionMessage();
       FootstepPlannerParametersPacket footstepPlannerParametersPacket = new FootstepPlannerParametersPacket();
 
-      Runnable callback = () ->
+      ros2Node.createSubscriptionSampler(((ROS2Topic<?>) inputTopic).withType(FootstepPlannerActionMessage.class), sample ->
       {
-         FootstepPlannerRequestedAction requestedAction = FootstepPlannerRequestedAction.fromByte(footstepPlannerActionMessage.getRequestedAction());
-         if (requestedAction == FootstepPlannerRequestedAction.HALT)
+         FootstepPlannerActionMessage message = new FootstepPlannerActionMessage();
+         message.set(sample);
+         new Thread(() ->
          {
-            footstepPlanningModule.halt();
-         }
-         else if (requestedAction == FootstepPlannerRequestedAction.PUBLISH_PARAMETERS)
-         {
-            FootstepPlannerMessageTools.copyParametersToPacket(footstepPlannerParametersPacket, footstepPlanningModule.getFootstepPlannerParameters());
-            parametersPublisher.publish(footstepPlannerParametersPacket);
-         }
-      };
-
-      ros2Node.createSubscription(((ROS2Topic<?>) inputTopic).withType(FootstepPlannerActionMessage.class), reader ->
-      {
-         reader.read(footstepPlannerActionMessage);
-         new Thread(callback, "FootstepPlannerActionCallback").start();
+            FootstepPlannerRequestedAction requestedAction = FootstepPlannerRequestedAction.fromByte(message.getRequestedAction());
+            if (requestedAction == FootstepPlannerRequestedAction.HALT)
+            {
+               footstepPlanningModule.halt();
+            }
+            else if (requestedAction == FootstepPlannerRequestedAction.PUBLISH_PARAMETERS)
+            {
+               FootstepPlannerMessageTools.copyParametersToPacket(footstepPlannerParametersPacket, footstepPlanningModule.getFootstepPlannerParameters());
+               parametersPublisher.publish(footstepPlannerParametersPacket);
+            }
+         }, "FootstepPlannerActionCallback").start();
       });
    }
 

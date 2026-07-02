@@ -120,9 +120,10 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    {
       ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 
-      ros2Node.createSubscription(controllerOutputTopic.withType(RobotConfigurationData.class), s -> {
+      ros2Node.createSubscriptionSampler(controllerOutputTopic.withType(RobotConfigurationData.class), sample ->
+      {
          if (wholeBodyTrajectoryToolboxController != null)
-            wholeBodyTrajectoryToolboxController.updateRobotConfigurationData(s.read());
+            wholeBodyTrajectoryToolboxController.updateRobotConfigurationData(sample);
       });
    }
 }

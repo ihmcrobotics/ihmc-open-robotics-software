@@ -72,11 +72,8 @@ public class CSGROS2CommunicationHelper
       this.robotName = robotName;
 
       var csgStatusTopic = HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotName);
-      ros2Node.createSubscription(csgStatusTopic, reader ->
+      ros2Node.createSubscriptionSampler(csgStatusTopic, continuousStepGeneratorStatusMessage ->
       {
-         var continuousStepGeneratorStatusMessage = reader.read();
-         if (continuousStepGeneratorStatusMessage == null)
-            return;
          csgStatusMessage.set(continuousStepGeneratorStatusMessage);
          setCSGCommandsToCurrentValues(continuousStepGeneratorStatusMessage);
       });
@@ -113,12 +110,7 @@ public class CSGROS2CommunicationHelper
    public void addVolatileCSGStatusCallbackSubscription(Consumer<ContinuousStepGeneratorStatusMessage> callback)
    {
       var csgStatusTopic = HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotName);
-      ros2Node.createSubscription(csgStatusTopic, reader ->
-      {
-         var message = reader.read();
-         if (message != null)
-            callback.accept(message);
-      });
+      ros2Node.createSubscriptionSampler(csgStatusTopic, callback::accept);
    }
 
    /**

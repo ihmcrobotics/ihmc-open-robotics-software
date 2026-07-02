@@ -141,26 +141,16 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       trajectoryMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(WholeBodyTrajectoryMessage.class, robotName));
       streamingMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(WholeBodyStreamingMessage.class, robotName));
 
-      RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
-
-      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), reader ->
+      ros2Node.createSubscriptionSampler(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), sample ->
       {
-         reader.read(robotConfigurationData);
-
          if (robotStateUpdater != null) // In some apps this can get called before robotStateUpdater is created
-            robotStateUpdater.setRobotConfigurationData(robotConfigurationData);
+            robotStateUpdater.setRobotConfigurationData(sample);
       });
 
-      CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
-
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName), reader ->
+      ros2Node.createSubscriptionSampler(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName), sample ->
       {
          if (controller != null)
-         {
-            reader.read(capturabilityBasedStatus);
-
-            controller.updateCapturabilityBasedStatus(capturabilityBasedStatus);
-         }
+            controller.updateCapturabilityBasedStatus(sample);
       });
    }
 

@@ -19,10 +19,11 @@ public class AbilityHandActionComms
 
    public AbilityHandActionComms(RobotSide handSide, ROS2Node ros2Node)
    {
-      ros2Node.createSubscription(AbilityHandROS2API.STATE_TOPICS.get(handSide), reader -> {
-         var message = reader.read();
-         if (message != null)
-            stateNotification.set(message);
+      ros2Node.createSubscriptionSampler(AbilityHandROS2API.STATE_TOPICS.get(handSide), sample ->
+      {
+         AbilityHandState state = new AbilityHandState();
+         state.set(sample);
+         stateNotification.set(state);
       });
       commandPublisher = ros2Node.createPublisher(AbilityHandROS2API.COMMAND_TOPICS.get(handSide));
    }

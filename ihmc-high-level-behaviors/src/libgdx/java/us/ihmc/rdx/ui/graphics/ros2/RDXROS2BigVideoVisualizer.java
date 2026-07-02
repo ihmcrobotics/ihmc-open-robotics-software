@@ -50,12 +50,11 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPa
       // imdecode takes the longest by far out of all this stuff
       // synchronize with the update method
       // YUV I420 has 1.5 times the height of the image
-      asyncROS2Node.createSubscription(topic, subscriber ->
+      asyncROS2Node.createSubscriptionSampler(topic, sample ->
       {
          synchronized (syncObject)
          {
-            if (!subscriber.read(videoPacket))
-               return;
+            videoPacket.set(sample);
             //            delayPlot.addValue(TimeTools.calculateDelay(videoPacket.getAcquisitionTimeSecondsSinceEpoch(), videoPacket.getAcquisitionTimeAdditionalNanos()));
          }
          submitImageUpdate(imageVisualizer ->

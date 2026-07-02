@@ -10,7 +10,7 @@ import sensor_msgs.CameraInfo;
 import sensor_msgs.Image;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -61,7 +61,7 @@ public class PerceptionMessageTools
    public static void publishJPGCompressedColorImage(BytePointer compressedColorPointer,
                                                      ROS2Topic<ImageMessage> topic,
                                                      ImageMessage colorImageMessage,
-                                                     ROS2Helper helper,
+                                                     ROS2PublisherMap publisherMap,
                                                      Pose3DReadOnly cameraPose,
                                                      Instant acquisitionTime,
                                                      long sequenceNumber,
@@ -70,14 +70,14 @@ public class PerceptionMessageTools
                                                      float depthToMetersRatio)
    {
       packJPGCompressedColorImage(compressedColorPointer, colorImageMessage, cameraPose, acquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
-      helper.publish(topic, colorImageMessage);
+      publisherMap.publish(topic, colorImageMessage);
    }
 
    public static void publishFramePlanarRegionsList(FramePlanarRegionsList framePlanarRegionsList,
                                                     ROS2Topic<FramePlanarRegionsListMessage> topic,
-                                                    ROS2Helper ros2)
+                                                    ROS2PublisherMap publisherMap)
    {
-      ros2.publish(topic, PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
+      publisherMap.publish(topic, PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
    }
 
    public static void packImageMessageData(ImageMessage imageMessage, ByteBuffer dataBuffer)

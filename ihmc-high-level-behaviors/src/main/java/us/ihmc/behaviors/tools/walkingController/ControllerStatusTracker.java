@@ -60,47 +60,17 @@ public class ControllerStatusTracker
 
       robotModel.addRobotConfigurationDataReceivedCallback(this::acceptRobotConfigurationData);
       var highLevelStateChangeTopic = getTopic(HighLevelStateChangeStatusMessage.class, robotName);
-      ros2Node.createSubscription(highLevelStateChangeTopic,
-                                  reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.acceptHighLevelStateChangeStatusMessage(message);
-      });
+      ros2Node.createSubscriptionSampler(highLevelStateChangeTopic, this::acceptHighLevelStateChangeStatusMessage);
       var walkingControllerFailureTopic = getTopic(WalkingControllerFailureStatusMessage.class, robotName);
-      ros2Node.createSubscription(walkingControllerFailureTopic,
-                                  reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.acceptWalkingControllerFailureStatusMessage(message);
-      });
+      ros2Node.createSubscriptionSampler(walkingControllerFailureTopic, this::acceptWalkingControllerFailureStatusMessage);
       var planOffsetStatusTopic = getLowFrequencyTopic(PlanOffsetStatus.class, robotName);
-      ros2Node.createSubscription(planOffsetStatusTopic,
-                                  reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.acceptPlanOffsetStatus(message);
-      });
+      ros2Node.createSubscriptionSampler(planOffsetStatusTopic, this::acceptPlanOffsetStatus);
       var controllerCrashTopic = getTopic(ControllerCrashNotificationPacket.class, robotName);
-      ros2Node.createSubscription(controllerCrashTopic,
-                                  reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.acceptControllerCrashNotificationPacket(message);
-      });
+      ros2Node.createSubscriptionSampler(controllerCrashTopic, this::acceptControllerCrashNotificationPacket);
       var capturabilityBasedStatusTopic = getLowFrequencyTopic(CapturabilityBasedStatus.class, robotName);
-      ros2Node.createSubscription(capturabilityBasedStatusTopic,
-                                  reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.acceptCapturabilityBasedStatus(message);
-      });
+      ros2Node.createSubscriptionSampler(capturabilityBasedStatusTopic, this::acceptCapturabilityBasedStatus);
       var walkingStatusTopic = getTopic(WalkingStatusMessage.class, robotName);
-      ros2Node.createSubscription(walkingStatusTopic,
-                                  reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.acceptWalkingStatusMessage(message);
-      });
+      ros2Node.createSubscriptionSampler(walkingStatusTopic, this::acceptWalkingStatusMessage);
    }
 
    public void registerAbortedListener(Notification abortedListener)
@@ -168,9 +138,11 @@ public class ControllerStatusTracker
       footstepTracker.reset();
    }
 
-   private void acceptCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)
+   private void acceptCapturabilityBasedStatus(CapturabilityBasedStatus sample)
    {
-      this.latestCapturabilityBasedStatus = capturabilityBasedStatus;
+      if (latestCapturabilityBasedStatus == null)
+         latestCapturabilityBasedStatus = new CapturabilityBasedStatus();
+      latestCapturabilityBasedStatus.set(sample);
       capturabilityBasedStatusTimer.reset();
    }
 

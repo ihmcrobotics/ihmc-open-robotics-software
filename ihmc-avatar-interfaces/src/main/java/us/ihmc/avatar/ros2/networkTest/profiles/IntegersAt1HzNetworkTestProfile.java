@@ -63,10 +63,7 @@ public class IntegersAt1HzNetworkTestProfile extends ROS2NetworkTestProfile
       publisher = ros2Node.createPublisher(publisherTopic);
       if (subscriberTopic != null)
       {
-         ros2Node.createSubscription(subscriberTopic, reader ->
-         {
-            messagesReceived.add(1);
-         });
+         ros2Node.createSubscriptionSampler(subscriberTopic, message -> messagesReceived.add(1));
       }
    }
 

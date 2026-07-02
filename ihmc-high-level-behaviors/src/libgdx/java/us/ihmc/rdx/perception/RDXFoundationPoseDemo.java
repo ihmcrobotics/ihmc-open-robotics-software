@@ -133,11 +133,7 @@ public class RDXFoundationPoseDemo
       removePublisher = ros2Node.createPublisher(REMOVE_TOPIC);
       removeMessage = new std_msgs.String_();
 
-      ros2Node.createSubscription(RESULT_TOPIC, reader -> {
-         var message = reader.read();
-         if (message != null)
-            this.receivePose(message);
-      });
+      ros2Node.createSubscriptionSampler(RESULT_TOPIC, this::receivePose);
 
       boolean enableNeuralMode = CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getDeviceName(0), "RTX 3080");
       zed = new ZEDImageSensor(0, ZEDModelData.ZED_2, SL_INPUT_TYPE_USB);

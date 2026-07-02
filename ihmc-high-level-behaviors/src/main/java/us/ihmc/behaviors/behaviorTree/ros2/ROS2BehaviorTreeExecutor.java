@@ -39,7 +39,7 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
    {
       super(syncedRobot, peerClockEstimator, ros2ControllerHelper, kinematicsSimulationBuilder, imageSensor, yolo, foundationPose, terrainMapData);
 
-      ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2ControllerHelper);
+      ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2ControllerHelper.getROS2Node());
 
       yoDataPublisher = ros2ControllerHelper.getROS2Node().createPublisher(AutonomyAPI.BEHAVIOR_YO_DATA);
    }

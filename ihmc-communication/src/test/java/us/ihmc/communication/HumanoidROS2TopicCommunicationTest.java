@@ -13,7 +13,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Subscription;
@@ -57,23 +57,29 @@ class HumanoidROS2TopicCommunicationTest
    {
       ROS2Node ros2Node = new ROS2Node(getClass().getSimpleName());
 
-      ROS2Helper helper = new ROS2Helper(ros2Node);
+      ROS2PublisherMap publisherMap = new ROS2PublisherMap(ros2Node);
 
       ROS2Topic<Int64> intTopic = HumanoidROS2Topic.IHMC_ROOT.withType(Int64.class);
       ROS2Topic<Float64> doubleTopic = HumanoidROS2Topic.IHMC_ROOT.withType(Float64.class);
 
       MutableInt intCount = new MutableInt();
       MutableInt doubleCount = new MutableInt();
-      helper.subscribeViaCallback(intTopic, number ->
+      ros2Node.createSubscription(intTopic, reader ->
       {
+         Int64 number = reader.read();
+         if (number == null)
+            return;
          LogTools.info("Received int #{}: {}", intCount.getAndIncrement(), number);
          Float64 num = new Float64();
          num.setData(System.nanoTime() / 2.0);
          LogTools.info("Publishing: {}", num.getData());
-         helper.publish(doubleTopic, num);
+         publisherMap.publish(doubleTopic, num);
       });
-      helper.subscribeViaCallback(doubleTopic, number ->
+      ros2Node.createSubscription(doubleTopic, reader ->
       {
+         Float64 number = reader.read();
+         if (number == null)
+            return;
          LogTools.info("Received double #{}: {}", doubleCount.getAndIncrement(), number);
       });
 
@@ -82,7 +88,7 @@ class HumanoidROS2TopicCommunicationTest
                                                                                    Int64 num = new Int64();
                                                                                    num.setData(System.nanoTime());
                                                                                    LogTools.info("Publishing: {}", num.getData());
-                                                                                   helper.publish(intTopic, num);
+                                                                                   publisherMap.publish(intTopic, num);
                                                                                 }, 1.0);
 
       ThreadTools.sleepForever();

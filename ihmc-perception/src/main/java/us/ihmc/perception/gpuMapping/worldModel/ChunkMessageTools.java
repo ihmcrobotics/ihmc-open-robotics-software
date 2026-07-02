@@ -6,6 +6,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.ChunkMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 
 public class ChunkMessageTools
@@ -13,7 +14,7 @@ public class ChunkMessageTools
    public static void unpackMessageToChunk(ChunkMessage chunkMessage, Chunk chunkToPack)
    {
       // Decode the PNG compressed height map data
-      Mat compressedMat = new Mat(chunkMessage.getHeights().toByteArray());
+      Mat compressedMat = new Mat(MessageTools.toByteArray(chunkMessage.getHeights()));
       Mat chunkMap = new Mat(chunkMessage.getCellsPerAxis(), 2 * chunkMessage.getCellsPerAxis(), opencv_core.CV_16UC1);
       opencv_imgcodecs.imdecode(compressedMat, opencv_imgcodecs.IMREAD_UNCHANGED, chunkMap);
 

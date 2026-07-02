@@ -8,7 +8,8 @@ import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.sensors.CameraIntrinsics;
@@ -36,7 +37,7 @@ public class ROS2StreamStatusMonitor
 
    private boolean running = true;
 
-   public ROS2StreamStatusMonitor(ROS2Helper ros2, ROS2Topic<SRTStreamStatus> streamTopic)
+   public ROS2StreamStatusMonitor(ROS2Node ros2Node, ROS2Topic<SRTStreamStatus> streamTopic)
    {
       isStreaming = new AtomicBoolean(false);
       cameraIntrinsics = new CameraIntrinsics();
@@ -45,7 +46,7 @@ public class ROS2StreamStatusMonitor
       messageTimer = new Timer();
       messageMonitor = ThreadTools.startAsDaemon(this::monitorMessageFrequency, "StreamStatusMonitor-" + streamTopic.getName());
 
-      ros2.subscribeViaCallback(streamTopic, this::receiveMessage);
+      ros2Node.createSubscriptionSampler(streamTopic, this::receiveMessage);
    }
 
    public InetSocketAddress getStreamerAddress()

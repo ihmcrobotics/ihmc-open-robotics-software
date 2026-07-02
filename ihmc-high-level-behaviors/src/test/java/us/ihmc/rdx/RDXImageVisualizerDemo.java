@@ -1,7 +1,6 @@
 package us.ihmc.rdx;
 
 import us.ihmc.commons.thread.RepeatingTaskThread;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.PixelFormat;
@@ -39,7 +38,7 @@ public class RDXImageVisualizerDemo
 
       ros2Node = new ROS2Node(getClass().getSimpleName().toLowerCase());
 
-      zedSensor = new ROS2ZEDSVOPlaybackSensor(new ROS2Helper(ros2Node), 0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
+      zedSensor = new ROS2ZEDSVOPlaybackSensor(ros2Node, 0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
       zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
 
       RDXBaseUI baseUI = new RDXBaseUI();

@@ -50,11 +50,11 @@ public class SyncedYOLOv8ExecutorParameters extends LatestTimestampModifiable
 
       message = new YOLOv8ExecutorParameters();
       newMessageNotification = new TypedNotification<>();
-      subscription = ros2Node.createSubscription(PerceptionAPI.YOLO_PARAMETERS, reader ->
+      subscription = ros2Node.createSubscriptionSampler(PerceptionAPI.YOLO_PARAMETERS, sample ->
       {
-         YOLOv8ExecutorParameters message = reader.read();
-         if (message != null)
-            newMessageNotification.set(message);
+         YOLOv8ExecutorParameters copy = new YOLOv8ExecutorParameters();
+         copy.set(sample);
+         newMessageNotification.set(copy);
       });
       publisher = ros2Node.createPublisher(PerceptionAPI.YOLO_PARAMETERS);
 

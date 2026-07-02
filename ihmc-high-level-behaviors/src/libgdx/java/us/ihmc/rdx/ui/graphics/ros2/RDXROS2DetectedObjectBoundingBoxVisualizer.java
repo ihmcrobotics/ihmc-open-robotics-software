@@ -13,7 +13,6 @@ import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import perception_msgs.DetectedObjectPacket;
 import us.ihmc.communication.ROS2Input;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -23,6 +22,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.MeshDataBuilder;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.RDXFocusBasedCamera;
@@ -54,7 +54,7 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXROS2SingleTop
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public RDXROS2DetectedObjectBoundingBoxVisualizer(String title,
-                                                     ROS2Helper ros2Helper,
+                                                     ROS2Node ros2Node,
                                                      ReferenceFrame sensorFrame,
                                                      ROS2Topic<DetectedObjectPacket> topic,
                                                      RDXFocusBasedCamera camera)
@@ -62,7 +62,7 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXROS2SingleTop
       super(title);
       this.sensorFrame = sensorFrame;
       this.topic = topic;
-      this.subscription = ros2Helper.subscribe(topic);
+      this.subscription = new ROS2Input<>(ros2Node, topic);
       this.text = new RDX3DSituatedText("", 0.05f);
       this.markerCoordinateFrameInstance = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(0.2, Color.LIGHT_GRAY));
       this.sensorCoordinateFrameInstance = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(0.4));

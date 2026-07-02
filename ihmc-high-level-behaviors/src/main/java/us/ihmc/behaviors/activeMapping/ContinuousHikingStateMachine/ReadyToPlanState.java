@@ -12,7 +12,6 @@ import us.ihmc.behaviors.activeMapping.TerrainPlanningDebugger;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -22,6 +21,7 @@ import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -61,7 +61,7 @@ public class ReadyToPlanState implements State
     * for a percentage of the swing, and if we don't get a good plan by then, we will have to try again when the current step is completed, and we get back to
     * this state.
     */
-   public ReadyToPlanState(ROS2Helper ros2Helper,
+   public ReadyToPlanState(ROS2Node ros2Node,
                            HumanoidReferenceFrames referenceFrames,
                            AtomicReference<ContinuousHikingCommandMessage> commandMessage,
                            ContinuousPlanner continuousPlanner,
@@ -80,8 +80,8 @@ public class ReadyToPlanState implements State
       this.debugger = debugger;
       this.continuousHikingLogger = continuousHikingLogger;
 
-      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.PLACED_GOAL_FOOTSTEPS, this::addWayPointPoseToList);
-      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.CLEAR_GOAL_FOOTSTEPS, this::clearWayPointList);
+      ros2Node.createSubscriptionSampler(ContinuousHikingAPI.PLACED_GOAL_FOOTSTEPS, this::addWayPointPoseToList);
+      ros2Node.createSubscriptionSampler(ContinuousHikingAPI.CLEAR_GOAL_FOOTSTEPS, sample -> clearWayPointList());
    }
 
    @Override
