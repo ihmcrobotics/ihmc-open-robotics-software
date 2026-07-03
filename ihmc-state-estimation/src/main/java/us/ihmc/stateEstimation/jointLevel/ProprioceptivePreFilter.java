@@ -5,7 +5,7 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBiasPr
 
 import java.util.List;
 
-public interface ProprioceptiveFilter extends OneDoFJointStateSource, IMUBiasProvider
+public interface ProprioceptivePreFilter extends OneDoFJointStateSource, IMUBiasProvider
 {
    void initialize();
 
