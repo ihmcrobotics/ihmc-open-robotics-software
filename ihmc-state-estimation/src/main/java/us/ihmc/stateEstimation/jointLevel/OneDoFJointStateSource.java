@@ -15,8 +15,11 @@ public interface OneDoFJointStateSource
    double getEstimatedJointVelocity(OneDoFJointBasics joint);
 
    boolean hasCovariance();
-   /** m×m in the caller's joint ordering. Joints this source doesn't own get
-    *  fallbackVariance on the diagonal and zero cross terms. Only call when hasCovariance(). */
+   /**
+    * Packs the m-by-m covariance for the given joints, in the caller's ordering.
+    * Joints this source does not own get fallbackVariance on the diagonal and
+    * zero cross terms. Only call when hasCovariance() returns true.
+    */
    void packPositionCovariance(OneDoFJointBasics[] joints, double fallbackVariance, DMatrixRMaj toPack);
    void packVelocityCovariance(OneDoFJointBasics[] joints, double fallbackVariance, DMatrixRMaj toPack);
 }
