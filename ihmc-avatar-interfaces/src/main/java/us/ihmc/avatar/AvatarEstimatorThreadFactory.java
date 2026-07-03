@@ -559,12 +559,15 @@ public class AvatarEstimatorThreadFactory
       }
       List<RigidBodyBasics> feet = List.of(fullRobotModel.getFoot(RobotSide.LEFT), fullRobotModel.getFoot(RobotSide.RIGHT));
       YoRegistry preFilterRegistry = new YoRegistry("ProprioceptivePreFilter");
+      // Captured eagerly: factory fields are disposed after construction, so the provider must hold
+      // the VALUE, not a deferred call to getStateEstimatorParameters() (FactoryDisposedException).
+      boolean cancelGravityFromAccelerationMeasurement = getStateEstimatorParameters().cancelGravityFromAccelerationMeasurement();
       ProprioceptivePreFilter preFilter = ProprioceptivePreFilterFactory.create(getProcessedSensorOutputMap(),
                                                                                 getStateEstimatorParameters(),
                                                                                 imuProcessedOutputs,
                                                                                 feet,
                                                                                 getGravity(),
-                                                                                () -> getStateEstimatorParameters().cancelGravityFromAccelerationMeasurement(),
+                                                                                () -> cancelGravityFromAccelerationMeasurement,
                                                                                 estimatorDT,
                                                                                 preFilterRegistry);
 
