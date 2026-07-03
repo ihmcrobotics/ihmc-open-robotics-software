@@ -27,6 +27,8 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBiasProvider;
+import us.ihmc.stateEstimation.jointLevel.ZeroIMUBiasProvider;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.euclid.YoQuaternion;
@@ -67,8 +69,9 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
 
    private final SensorOutputMapReadOnly sensorOutputMap;
    private final IMUSensorReadOnly imuSensor;
+   private final IMUBiasProvider imuBiasProvider;
 
-   private final Matrix3D contactBodyCovariance = new Matrix3D();
+   private ContactMeasurementNoiseProvider contactMeasurementNoiseProvider;
 
    // Per-tick temporaries.
    private final FrameVector3D angularVelocity = new FrameVector3D();
@@ -153,9 +156,39 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
                                      double contactMeasurementVariance,
                                      double initialCovariance)
    {
+      this(fullRobotModel,
+           sensorOutputMap,
+           primaryImuName,
+           new ZeroIMUBiasProvider(), // no upstream bias estimation: subtracting an exact zero changes no arithmetic
+           dt,
+           gyroVariance,
+           accelVariance,
+           contactVariance,
+           contactMeasurementVariance,
+           initialCovariance);
+   }
+
+   /**
+    * @param imuBiasProvider upstream bias estimates for the primary IMU (e.g. the joint-level
+    *                        pre-filter, or {@link ZeroIMUBiasProvider} for none). Biases are
+    *                        subtracted from the raw measurements in the IMU measurement frame,
+    *                        before the pelvis-frame transform.
+    */
+   public InvariantEKFStateEstimator(FullHumanoidRobotModel fullRobotModel,
+                                     SensorOutputMapReadOnly sensorOutputMap,
+                                     String primaryImuName,
+                                     IMUBiasProvider imuBiasProvider,
+                                     double dt,
+                                     double gyroVariance,
+                                     double accelVariance,
+                                     double contactVariance,
+                                     double contactMeasurementVariance,
+                                     double initialCovariance)
+   {
       this.dt = dt;
       this.initialCovariance = initialCovariance;
       this.sensorOutputMap = sensorOutputMap;
+      this.imuBiasProvider = Objects.requireNonNull(imuBiasProvider, "imuBiasProvider must not be null (use ZeroIMUBiasProvider)");
 
       ekf = new InvariantEKF(NUMBER_OF_CONTACTS, gyroVariance, accelVariance, contactVariance);
 
@@ -176,10 +209,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
                                                                                                    .map(IMUSensorReadOnly::getSensorName)
                                                                                                    .toList()));
 
-      contactBodyCovariance.setToZero();
-      contactBodyCovariance.setM00(contactMeasurementVariance);
-      contactBodyCovariance.setM11(contactMeasurementVariance);
-      contactBodyCovariance.setM22(contactMeasurementVariance);
+      contactMeasurementNoiseProvider = new ConstantContactMeasurementNoiseProvider(contactMeasurementVariance);
 
       this.baseContactVariance = contactVariance;
       yoContactProbability = new SideDependentList<>(new YoDouble("invariantContactProbabilityLeft", registry),
@@ -214,6 +244,16 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     * contact anchors from current sole FK, zero velocity, covariance reset to P = initialCovariance * I.
     * Runs only on the hold->active transition, so the allication here is not when the estimator is actively running yet.
     */
+   /**
+    * Replaces the contact FK measurement noise source (default: the constant isotropic diagonal).
+    * This is the step-8 injection point for a covariance-routing provider (J Sigma_q J^T from a
+    * joint-level pre-filter with {@code hasCovariance()}).
+    */
+   public void setContactMeasurementNoiseProvider(ContactMeasurementNoiseProvider contactMeasurementNoiseProvider)
+   {
+      this.contactMeasurementNoiseProvider = Objects.requireNonNull(contactMeasurementNoiseProvider);
+   }
+
    public void reAnchor()
    {
       referenceFrames.updateFrames();
@@ -251,10 +291,13 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          ekf.setContactSlipVariance(CONTACT_INDICES.get(side), contactSlipVariance(contactProbability));
       }
 
-      // IMU omega and a expressed in pelvis frame
+      // IMU omega and a: bias-corrected in the measurement frame (where the bias is estimated),
+      // THEN expressed in the pelvis frame. Frame-checked sub() throws on a wrong-frame provider.
       angularVelocity.setIncludingFrame(imuSensor.getMeasurementFrame(), imuSensor.getAngularVelocityMeasurement());
+      angularVelocity.sub(imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuSensor));
       angularVelocity.changeFrame(pelvisFrame);
       linearAcceleration.setIncludingFrame(imuSensor.getMeasurementFrame(), imuSensor.getLinearAccelerationMeasurement());
+      linearAcceleration.sub(imuBiasProvider.getLinearAccelerationBiasInIMUFrame(imuSensor));
       linearAcceleration.changeFrame(pelvisFrame);
 
       boolean noContact = getContactProbability(RobotSide.LEFT) < CONTACT_HOLD_THRESHOLD && getContactProbability(RobotSide.RIGHT) < CONTACT_HOLD_THRESHOLD;
@@ -288,7 +331,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          double contactProbability = yoContactProbability.get(side).getDoubleValue();
          contactInBody.setToZero(soleFrames.get(side));
          contactInBody.changeFrame(pelvisFrame);
-         inflatedContactCovariance.set(contactBodyCovariance);
+         contactMeasurementNoiseProvider.packContactCovariance(side, inflatedContactCovariance);
          inflatedContactCovariance.scale(measurementInflation(contactProbability));
          ekf.update(CONTACT_INDICES.get(side), contactInBody, inflatedContactCovariance);
       }

@@ -12,6 +12,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -20,7 +21,12 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.stateEstimation.jointLevel.ProprioceptivePreFilter;
+import us.ihmc.stateEstimation.jointLevel.ZeroIMUBiasProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Runs the contact-aided right-invariant InEKF as the <em>main</em> floating-base estimator.
@@ -66,6 +72,12 @@ public class InvariantMainStateEstimator implements StateEstimatorController
    private final FootReferencedYawCorrector yawCorrector; // null when yaw seeding is disabled
    private final InvariantCenterOfMassUpdater centerOfMassUpdater;
 
+   private final ProprioceptivePreFilter preFilter; // may be null: raw sensor pass-through
+   /** p(contact) above which a foot is handed to the pre-filter's phase 2 as trusted. */
+   private static final double TRUSTED_FOOT_CONTACT_PROBABILITY_THRESHOLD = 0.5;
+   private final List<RigidBodyBasics> trustedFeetForBiasUpdate = new ArrayList<>(2); // reused, no per-tick allocation
+   private final SideDependentList<RigidBodyBasics> feet = new SideDependentList<>();
+
    // Root-joint write temporaries.
    private final RotationMatrix rootOrientation = new RotationMatrix();
    private final Vector3D rootPosition = new Vector3D();
@@ -87,6 +99,10 @@ public class InvariantMainStateEstimator implements StateEstimatorController
     * @param contactMeasurementVariance per-axis body-frame contact FK measurement variance (m²).
     * @param initialCovariance          scalar for the initial P = initialCovariance · I.
     * @param enableYawSeeding           if true, install the foot-referenced yaw corrector.
+    * @param preFilter                  joint-level pre-filter: joint estimates overlay the raw sensor
+    *                                   values in {@link #updateJoints()} and its bias estimates feed
+    *                                   the InEKF propagation; may be {@code null} for the raw
+    *                                   pass-through (pre-seam behavior).
     */
    public InvariantMainStateEstimator(FullHumanoidRobotModel fullRobotModel,
                                       SensorOutputMapReadOnly processedSensorOutput,
@@ -98,18 +114,24 @@ public class InvariantMainStateEstimator implements StateEstimatorController
                                       double contactVariance,
                                       double contactMeasurementVariance,
                                       double initialCovariance,
-                                      boolean enableYawSeeding)
+                                      boolean enableYawSeeding,
+                                      ProprioceptivePreFilter preFilter)
    {
       this.fullRobotModel = fullRobotModel;
       this.processedSensorOutput = processedSensorOutput;
       this.oneDoFJoints = fullRobotModel.getOneDoFJoints();
       this.rootJoint = fullRobotModel.getRootJoint();
+      this.preFilter = preFilter;
 
       this.referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+
+      for (RobotSide side : RobotSide.values)
+         feet.put(side, fullRobotModel.getFoot(side));
 
       invariantEstimator = new InvariantEKFStateEstimator(fullRobotModel,
                                                           processedSensorOutput,
                                                           primaryImuName,
+                                                          preFilter != null ? preFilter : new ZeroIMUBiasProvider(),
                                                           dt,
                                                           gyroVariance,
                                                           accelVariance,
@@ -143,6 +165,9 @@ public class InvariantMainStateEstimator implements StateEstimatorController
    @Override
    public void doControl()
    {
+      if (preFilter != null)
+         preFilter.computeJointState(); // phase 1: before joint outputs are consumed
+
       updateJoints();
       referenceFrames.updateFrames();
 
@@ -155,17 +180,51 @@ public class InvariantMainStateEstimator implements StateEstimatorController
 
       // CoM position/velocity for the controller, derived from the InEKF base just written to the root joint.
       centerOfMassUpdater.update();
+
+      // Phase 2: after the trust decision. On this pipeline the trust currency is the contact
+      // probability just refreshed by invariantEstimator.doControl(). Corrections computed here are
+      // consumed at the top of the NEXT tick — one tick of latency, mirroring the DRC estimator;
+      // do not "fix" this into a same-tick circular dependency on the trust decision.
+      if (preFilter != null)
+      {
+         trustedFeetForBiasUpdate.clear();
+         for (RobotSide side : RobotSide.values)
+         {
+            if (invariantEstimator.getContactProbability(side) > TRUSTED_FOOT_CONTACT_PROBABILITY_THRESHOLD)
+               trustedFeetForBiasUpdate.add(feet.get(side));
+         }
+         preFilter.computeImuBiases(trustedFeetForBiasUpdate);
+      }
    }
 
-   /** Sets q/q̇/τ for every one-DoF joint from the processed sensor output and refreshes the model frames. */
+   /**
+    * Sets q/q̇/τ for every one-DoF joint from the processed sensor output — overlaid with the
+    * pre-filter's estimates where available (NaN falls back to the raw value, same contract as
+    * {@code JointStateUpdater}) — and refreshes the model frames.
+    */
    private void updateJoints()
    {
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJointBasics joint = oneDoFJoints[i];
          OneDoFJointStateReadOnly jointOutput = processedSensorOutput.getOneDoFJointOutput(joint);
-         joint.setQ(jointOutput.getPosition());
-         joint.setQd(jointOutput.getVelocity());
+
+         double position = jointOutput.getPosition();
+         double velocity = jointOutput.getVelocity();
+
+         if (preFilter != null && preFilter.containsJoint(joint))
+         {
+            double estimatedPosition = preFilter.getEstimatedJointPosition(joint);
+            if (!Double.isNaN(estimatedPosition))
+               position = estimatedPosition;
+
+            double estimatedVelocity = preFilter.getEstimatedJointVelocity(joint);
+            if (!Double.isNaN(estimatedVelocity))
+               velocity = estimatedVelocity;
+         }
+
+         joint.setQ(position);
+         joint.setQd(velocity);
          joint.setTau(jointOutput.getEffort());
       }
       fullRobotModel.getElevator().updateFramesRecursively();
@@ -196,6 +255,11 @@ public class InvariantMainStateEstimator implements StateEstimatorController
    @Override
    public void initialize()
    {
+      if (preFilter != null)
+      {
+         preFilter.initialize();
+         preFilter.computeJointState(); // phase 1 before every updateJoints()
+      }
       updateJoints();
       referenceFrames.updateFrames();
       invariantEstimator.initialize();
@@ -205,6 +269,8 @@ public class InvariantMainStateEstimator implements StateEstimatorController
    @Override
    public void initializeEstimator(RigidBodyTransformReadOnly rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
+      if (preFilter != null)
+         preFilter.computeJointState(); // phase 1 before every updateJoints()
       updateJoints();
       rootJoint.setJointOrientation(rootJointTransform.getRotation());
       rootJoint.setJointPosition(rootJointTransform.getTranslation());

@@ -10,27 +10,40 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.Collection;
 import java.util.List;
 
-public class ProprioceptivePreFilterFactory
+/**
+ * Construction-time dispatch for the joint-level pre-filter: consults
+ * {@link StateEstimatorParameters#getJointLevelEstimatorType()} once and builds the corresponding
+ * {@link ProprioceptivePreFilter}. This is the only class that knows all implementations; consumers
+ * know only the interface, and each implementation owns its own assembly (its static factory).
+ */
+public final class ProprioceptivePreFilterFactory
 {
    private ProprioceptivePreFilterFactory()
    {
-
    }
 
-   //TODO: fix void return
-   public static void create(SensorOutputMapReadOnly sensorOutputMap,
+   public static ProprioceptivePreFilter create(SensorOutputMapReadOnly sensorOutputMap,
                                                 StateEstimatorParameters stateEstimatorParameters,
                                                 List<? extends IMUSensorReadOnly> imuProcessedOutputs,
-                                                Collection<? extends RigidBodyBasics> feet,
+                                                Collection<RigidBodyBasics> feet,
                                                 double gravitationalAcceleration,
                                                 BooleanProvider cancelGravityFromAccelerationMeasurement,
                                                 double estimatorDT,
                                                 YoRegistry parentRegistry)
    {
-//      return switch (stateEstimatorParameters.getJointLevelEstimatorType())
-//      {
-//         case ALPHA_COMPLEMENTARY -> AlphaComplementaryPreFilter.createForKinematicsEstimator();
-//         case JOINT_KF -> throw new UnsupportedOperationException("JointLevelKFPreFilter not yet added.");
-//      };
+      // Switch expression, deliberately without a default arm: adding a new enum value makes this a
+      // compile error here instead of a silent fallthrough.
+      return switch (stateEstimatorParameters.getJointLevelEstimatorType())
+      {
+         case ALPHA_COMPLEMENTARY -> AlphaComplementaryPreFilter.createForKinematicsEstimator(sensorOutputMap,
+                                                                                              stateEstimatorParameters,
+                                                                                              imuProcessedOutputs,
+                                                                                              feet,
+                                                                                              gravitationalAcceleration,
+                                                                                              cancelGravityFromAccelerationMeasurement,
+                                                                                              estimatorDT,
+                                                                                              parentRegistry);
+         case JOINT_KF -> new JointLevelKFPreFilter();
+      };
    }
 }

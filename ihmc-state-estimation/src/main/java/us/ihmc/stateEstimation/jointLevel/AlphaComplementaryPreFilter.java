@@ -5,8 +5,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.sensorProcessing.imu.IMUSensor;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUBasedJointStateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -19,10 +17,19 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
+/**
+ * {@link ProprioceptivePreFilter} adapter around the alpha-era machinery: a list of
+ * {@link IMUBasedJointStateEstimator}s (complementary encoder/IMU joint fusion) for the joint role
+ * and an {@link IMUBiasStateEstimator} (alpha-filtered bias rejection) for the bias role. Contains
+ * no new behavior: every method delegates or reproduces what {@code JointStateUpdater} and
+ * {@code DRCKinematicsBasedStateEstimator} wired directly before this seam existed.
+ *
+ * <p><b>Do not share an instance between pipelines.</b> The wrapped estimators hold internal state
+ * (backlash windows, integrated IMU position channels); a shared instance ticked by two consumers
+ * double-updates. One pre-filter per estimator pipeline.</p>
+ */
 public class AlphaComplementaryPreFilter implements ProprioceptivePreFilter
 {
    private final List<IMUBasedJointStateEstimator> jointEstimators;
@@ -50,19 +57,23 @@ public class AlphaComplementaryPreFilter implements ProprioceptivePreFilter
          imuBiasStateEstimator.compute(trustedFeet);
    }
 
+   /**
+    * Assembles the alpha pre-filter the way the DRC estimator historically did: the IMU-pair lookup
+    * moved verbatim from {@code JointStateUpdater.createIMUBasedJointVelocityEstimators}, then the
+    * {@link IMUBiasStateEstimator} construction moved from {@code DRCKinematicsBasedStateEstimator}.
+    * Runs once at construction time; allocation here is fine (the allocation-free rule governs the
+    * per-tick path only).
+    */
    public static AlphaComplementaryPreFilter createForKinematicsEstimator(
          SensorOutputMapReadOnly sensorOutputMapReadOnly,
          StateEstimatorParameters stateEstimatorParameters,
          List<? extends IMUSensorReadOnly> imuProcessedOutputs,
-         Map<RigidBodyBasics, ?extends ContactablePlaneBody> feet,
+         Collection<RigidBodyBasics> feet,
          double gravitationalAcceleration,
          BooleanProvider cancelGravityFromAccelerationMeasurement,
          double estimatorDT,
          YoRegistry parentRegistry)
    {
-      // Same thing from `JointStateUpdater`
-//      if (stateEstimatorParameters == null)
-//         return Collections.emptyList();
       if (stateEstimatorParameters == null)
          throw new UnsupportedOperationException("default estimator parameters for this type of estimator not added yet.");
 
@@ -106,7 +117,7 @@ public class AlphaComplementaryPreFilter implements ProprioceptivePreFilter
       }
 
       IMUBiasStateEstimator biasEstimator = new IMUBiasStateEstimator(imuProcessedOutputs,
-                                                                      feet.keySet(),
+                                                                      feet,
                                                                       gravitationalAcceleration,
                                                                       cancelGravityFromAccelerationMeasurement,
                                                                       estimatorDT,

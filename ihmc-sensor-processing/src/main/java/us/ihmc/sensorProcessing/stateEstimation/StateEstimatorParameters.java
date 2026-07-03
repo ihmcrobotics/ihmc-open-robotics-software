@@ -26,6 +26,22 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       return Collections.emptyList();
    }
 
+   /**
+    * Which joint-level pre-filter implementation the estimator should construct.
+    * {@code ALPHA_COMPLEMENTARY} is the historical behavior (per-IMU-pair complementary joint fusion
+    * plus alpha-filtered IMU bias rejection); {@code JOINT_KF} selects the joint-level Kalman filter.
+    */
+   public enum JointLevelEstimatorType
+   {
+      ALPHA_COMPLEMENTARY, JOINT_KF
+   }
+
+   /** Selected once at construction time; the default preserves the historical behavior for all robots. */
+   public JointLevelEstimatorType getJointLevelEstimatorType()
+   {
+      return JointLevelEstimatorType.ALPHA_COMPLEMENTARY;
+   }
+
    public boolean requestWristForceSensorCalibrationAtStart()
    {
       return false;

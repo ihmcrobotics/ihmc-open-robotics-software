@@ -46,6 +46,8 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.stateEstimation.ekf.HumanoidRobotEKFWithSimpleJoints;
@@ -61,6 +63,8 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinema
 import us.ihmc.stateEstimation.invariant_estimator.FootSwitchContactProbabilityProvider;
 import us.ihmc.stateEstimation.invariant_estimator.InvariantEKFStateEstimator;
 import us.ihmc.stateEstimation.invariant_estimator.InvariantMainStateEstimator;
+import us.ihmc.stateEstimation.jointLevel.ProprioceptivePreFilter;
+import us.ihmc.stateEstimation.jointLevel.ProprioceptivePreFilterFactory;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
 import us.ihmc.tools.factories.FactoryTools;
@@ -541,7 +545,30 @@ public class AvatarEstimatorThreadFactory
 
       double estimatorDT = getStateEstimatorParameters().getEstimatorDT();
       String primaryImuName = getSensorInformation().getPrimaryBodyImu();
-      InvariantMainStateEstimator mainStateEstimator = new InvariantMainStateEstimator(getEstimatorFullRobotModel(),
+      FullHumanoidRobotModel fullRobotModel = getEstimatorFullRobotModel();
+
+      // Joint-level pre-filter, built through the same dispatch factory as the DRC estimator: IMU
+      // list filtered the same way, feet as rigid bodies, gravity as handed to the DRC factory. Its
+      // registry is attached to the main estimator's registry right after construction.
+      List<IMUSensorReadOnly> imuProcessedOutputs = new ArrayList<>();
+      Collection<String> imuSensorsToUse = Arrays.asList(getSensorInformation().getIMUSensorsToUseInStateEstimator());
+      for (IMUSensorReadOnly imu : getProcessedSensorOutputMap().getIMUOutputs())
+      {
+         if (imuSensorsToUse.contains(imu.getSensorName()))
+            imuProcessedOutputs.add(imu);
+      }
+      List<RigidBodyBasics> feet = List.of(fullRobotModel.getFoot(RobotSide.LEFT), fullRobotModel.getFoot(RobotSide.RIGHT));
+      YoRegistry preFilterRegistry = new YoRegistry("ProprioceptivePreFilter");
+      ProprioceptivePreFilter preFilter = ProprioceptivePreFilterFactory.create(getProcessedSensorOutputMap(),
+                                                                                getStateEstimatorParameters(),
+                                                                                imuProcessedOutputs,
+                                                                                feet,
+                                                                                getGravity(),
+                                                                                () -> getStateEstimatorParameters().cancelGravityFromAccelerationMeasurement(),
+                                                                                estimatorDT,
+                                                                                preFilterRegistry);
+
+      InvariantMainStateEstimator mainStateEstimator = new InvariantMainStateEstimator(fullRobotModel,
                                                                                        getProcessedSensorOutputMap(),
                                                                                        primaryImuName,
                                                                                        getCenterOfMassDataHolder(), // same holder published to the controller context
@@ -551,7 +578,9 @@ public class AvatarEstimatorThreadFactory
                                                                                        1.0e-6, // contactVariance
                                                                                        1.0e-4, // contactMeasurementVariance
                                                                                        1.0,    // initialCovariance
-                                                                                       invariantEstimatorYawSeeding);
+                                                                                       invariantEstimatorYawSeeding,
+                                                                                       preFilter);
+      mainStateEstimator.getYoRegistry().addChild(preFilterRegistry);
 
       if (invariantEstimatorUseFootSwitches)
          mainStateEstimator.getInvariantEKFStateEstimator().setContactProbabilityProvider(createInvariantFootSwitchProvider(mainStateEstimator));
