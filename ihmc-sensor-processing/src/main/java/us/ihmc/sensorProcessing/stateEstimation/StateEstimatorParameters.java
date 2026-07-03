@@ -29,11 +29,15 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    /**
     * Which joint-level pre-filter implementation the estimator should construct.
     * {@code ALPHA_COMPLEMENTARY} is the historical behavior (per-IMU-pair complementary joint fusion
-    * plus alpha-filtered IMU bias rejection); {@code JOINT_KF} selects the joint-level Kalman filter.
+    * plus alpha-filtered IMU bias rejection); {@code JOINT_KF} selects the joint-level Kalman filter;
+    * {@code NONE} is an explicit pass-through (raw sensor values, zero biases) — the pre-seam
+    * behavior of the invariant pipeline, useful as a control condition. Note that on the DRC
+    * (kinematics-based) pipeline, {@code NONE} disables IMU-pair joint fusion AND IMU bias
+    * compensation, which is NOT that pipeline's historical behavior.
     */
    public enum JointLevelEstimatorType
    {
-      ALPHA_COMPLEMENTARY, JOINT_KF
+      NONE, ALPHA_COMPLEMENTARY, JOINT_KF
    }
 
    /** Selected once at construction time; the default preserves the historical behavior for all robots. */

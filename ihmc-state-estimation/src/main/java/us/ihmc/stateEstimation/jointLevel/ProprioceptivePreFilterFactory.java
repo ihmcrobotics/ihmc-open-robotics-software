@@ -35,6 +35,7 @@ public final class ProprioceptivePreFilterFactory
       // compile error here instead of a silent fallthrough.
       return switch (stateEstimatorParameters.getJointLevelEstimatorType())
       {
+         case NONE -> new PassThroughPreFilter();
          case ALPHA_COMPLEMENTARY -> AlphaComplementaryPreFilter.createForKinematicsEstimator(sensorOutputMap,
                                                                                               stateEstimatorParameters,
                                                                                               imuProcessedOutputs,
