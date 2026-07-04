@@ -4,6 +4,7 @@ package us.ihmc.rdx.behaviorTree;
 import com.badlogic.gdx.Gdx;
 import controller_msgs.msg.dds.GoHomeMessage;
 import imgui.ImGui;
+import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.function.TriFunction;
@@ -50,6 +51,7 @@ import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.foundationPose.RDXIsaacROSFoundationPoseVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
 import us.ihmc.rdx.ui.tools.RDXROS2StatsPanel;
+import us.ihmc.rdx.ui.widgets.ImGuiPlayPauseButtonRenderer;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -66,6 +68,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.zed.global.zed;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
+import java.awt.Desktop;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -319,6 +322,7 @@ public class RDXBehaviorTestFacilitator
             ImBoolean play = new ImBoolean(false);
             ImInt requestedPosition = new ImInt();
             ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+            ImGuiPlayPauseButtonRenderer playPauseButton = new ImGuiPlayPauseButtonRenderer();
             baseUI.getImGuiPanelManager().addPanel("Facilitator", () ->
             {
                ImGui.beginDisabled(kinematicsSimulation == null);
@@ -331,12 +335,19 @@ public class RDXBehaviorTestFacilitator
                if (zedSensor != null)
                {
                   ImGui.sameLine();
-                  if (ImGui.checkbox(labels.get("ZED Playback"), play) && zedSensor != null)
+                  if (playPauseButton.render(play.get()))
                   {
+                     play.set(!play.get());
                      if (play.get())
                         zedSensor.play();
                      else
                         zedSensor.pause();
+                  }
+                  ImGui.sameLine();
+                  if (ImGuiTools.textWithUnderlineOnHover(Paths.get(svoFile).getFileName().toString()) && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+                  {
+                     ExceptionTools.handle(() -> Desktop.getDesktop().open(Paths.get(svoFile).getParent().toFile()),
+                                           DefaultExceptionHandler.PRINT_MESSAGE);
                   }
                   ImGui.beginDisabled(play.get());
                   int currentPosition = zedSensor.getCurrentPosition();
