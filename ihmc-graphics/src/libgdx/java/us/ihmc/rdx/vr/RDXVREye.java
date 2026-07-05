@@ -32,6 +32,7 @@ public class RDXVREye extends Camera
    private final org.lwjgl.openvr.Texture openVRTexture;
 
    private final RobotSide side;
+   private final RDXVRHeadset headset;
    private final HmdMatrix44 projectionHmdMatrix44 = HmdMatrix44.create();
    private final HmdMatrix34 eyeToHeadHmdMatrix34 = HmdMatrix34.create();
    private final Vector3 target = new Vector3();
@@ -49,9 +50,12 @@ public class RDXVREye extends Camera
    public RDXVREye(RobotSide side, RDXVRHeadset headset, int width, int height)
    {
       this.side = side;
+      this.headset = headset;
 
+      // Parent the eye to the headset's camera POV offset frame (identity by default) rather than the raw device frame,
+      // so a teleop app can pitch/raise the rendered viewpoint without moving the controllers.
       eyeXRightZBackFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(side.getLowerCaseName() + "EyeXRightZBackFrame",
-                                                                                            headset.getDeviceYUpZBackFrame(),
+                                                                                            headset.getCameraPovOffsetFrame(),
                                                                                             openVREyeToHeadTransform);
       eyeXForwardZUpFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(side.getLowerCaseName() + "EyeXForwardZUpFrame",
                                                                                               eyeXRightZBackFrame,
@@ -81,6 +85,9 @@ public class RDXVREye extends Camera
    {
       VRSystem.VRSystem_GetEyeToHeadTransform(side == RobotSide.LEFT ? VR.EVREye_Eye_Left : VR.EVREye_Eye_Right, eyeToHeadHmdMatrix34);
       LibGDXTools.toEuclid(eyeToHeadHmdMatrix34, openVREyeToHeadTransform);
+      // Refresh the camera POV offset frame (its parent, the tracked device frame, moved this frame; the app may also
+      // have changed the offset). Must happen before the eye frame update below so the offset is reflected.
+      headset.getCameraPovOffsetFrame().update();
       eyeXRightZBackFrame.update();
 
       eyeFramePose.setToZero(eyeXForwardZUpFrame);
