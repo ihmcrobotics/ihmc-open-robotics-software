@@ -129,6 +129,28 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          modelHandler.putRobotModel(task, clonedRobotModel);
       }
 
+      // Attachment-point prior: override the ESTIMATE-model reference CoM of selected bodies (e.g. shift a
+      // loaded forearm's CoM to a known cuff/hand attachment point) BEFORE the baseline and filter capture the
+      // nominal, so the estimator deposits estimated payload mass there rather than at the nominal link CoM.
+      for (RigidBodyBasics estimateBody : modelHandler.getBodyArray(RobotModelTask.ESTIMATE))
+      {
+         if (estimateBody == null || estimateBody.getInertia() == null)
+            continue;
+         us.ihmc.euclid.tuple3D.Vector3D referenceCoMOverride = inertialEstimationParameters.getReferenceCenterOfMassOffsetOverride(estimateBody.getName());
+         if (referenceCoMOverride != null)
+         {
+            // Move the reference CoM to the attachment point AND rebuild a physically-consistent (PD) moment of
+            // inertia there -- moving the CoM alone would make the pseudo-inertia non-positive-definite and break
+            // the log-Cholesky reference. Mass is unchanged.
+            double referenceMass = estimateBody.getInertia().getMass();
+            estimateBody.getInertia().getCenterOfMassOffset().set(referenceCoMOverride);
+            us.ihmc.euclid.matrix.Matrix3D referenceMomentOfInertia = new us.ihmc.euclid.matrix.Matrix3D();
+            InertialEstimationParameters.packAttachmentReferenceMomentOfInertia(referenceMass, referenceCoMOverride, referenceMomentOfInertia);
+            estimateBody.getInertia().getMomentOfInertia().set(referenceMomentOfInertia);
+            LogTools.info("InertialParameterManager: attachment-point reference for '" + estimateBody.getName() + "' -> CoM " + referenceCoMOverride);
+         }
+      }
+
       covarianceHelper = new HumanoidModelCovarianceHelper(controllerRobotModel, inertialEstimationParameters, registry);
       baselineCalculator = new InertialBaselineCalculator(modelHandler.getRobotModel(RobotModelTask.ESTIMATE), inertialEstimationParameters, 1.0, registry);
 
