@@ -25,7 +25,6 @@ public enum HighLevelControllerName
    RL_CONTROL,
    EXIT_RL,
    RL_TRANSITION_STATE,
-   @RosEnumValueDocumentation(documentation = "Ground prep state.")
    GROUND_PREP_STATE;
 
    public static final HighLevelControllerName[] values = values();
