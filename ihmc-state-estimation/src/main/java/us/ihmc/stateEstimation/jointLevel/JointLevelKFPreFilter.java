@@ -1,21 +1,30 @@
 package us.ihmc.stateEstimation.jointLevel;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import rcl_interfaces.msg.dds.Log;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.sensorProcessing.imu.IMUSensor;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUBasedJointStateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBasedJointStateEstimator;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBiasProvider;
+import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,8 +53,6 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private final SensorOutputMapReadOnly sensorMap;
    private final double dt;
 
-   private final ZeroIMUBiasProvider zeroBias = new ZeroIMUBiasProvider();
-
    private final LinkedHashMap<OneDoFJointBasics, Integer> jointToIndex = new LinkedHashMap<>();
    private final LinkedHashMap<IMUSensorReadOnly, Integer> imuToOrdinal = new LinkedHashMap<>();
    private final List<Pair> pairs = new ArrayList<>();
@@ -56,6 +63,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private int n; // number of distinct joints
    private int m; // number of IMUs
    private int dim; // 2n + 3m
+   private boolean initialized = false;
 
    // State and constant model
    private final DMatrixRMaj x = new DMatrixRMaj(0,1); // reshaped to dimx1 later when constructed
@@ -80,8 +88,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private final DMatrixRMaj R3 = new DMatrixRMaj(3,3);
    private final DMatrixRMaj Rimu = new DMatrixRMaj(3,3);
    private final DMatrixRMaj rot3 = new DMatrixRMaj(3,3);
-   private final DMatrixRMaj temp3a = new DMatrixRMaj(3,3);
-   private final DMatrixRMaj temp3b = new DMatrixRMaj(3,3);
+   private final DMatrixRMaj tmp3a = new DMatrixRMaj(3,3);
+   private final DMatrixRMaj tmp3b = new DMatrixRMaj(3,3);
    private final DMatrixRMaj anchorR = new DMatrixRMaj(3,3);
    private final RigidBodyTransform tmpTransform = new RigidBodyTransform();
    private final FrameVector3D fvA = new FrameVector3D();
@@ -142,6 +150,9 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       baseIMU = pairs.isEmpty() ? null : pairs.get(0).parent;
       baseBiasCol = baseIMU == null ? -1 : 2 * n + 3 * imuToOrdinal.get(baseIMU);
       //TODO: Log what the base IMU is
+      if (baseIMU == null)
+         throw new RuntimeException("Base IMU is null, check the kinematic tree.");
+      LogTools.info("Base IMU initialized as " + baseIMU.getSensorName());
 
       // 4) Precompute base->foot chains for the phase 2 stance anchoring measurement update
       if (baseIMU != null && feet != null)
@@ -175,6 +186,27 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       allocate();
    }
 
+   // Mirrors AlphaComplimentaryFilter.createForKinematicsEstiamtor, works for the factory implementation
+   public static JointLevelKFPreFilter createForKinematicsEstimator(SensorOutputMapReadOnly sensorOutputMap,
+                                                                    StateEstimatorParameters stateEstimatorParameters,
+                                                                    List<? extends IMUSensorReadOnly> imuProcessedOutputs,
+                                                                    Collection<RigidBodyBasics> feet,
+                                                                    double gravitationalAcceleration,
+                                                                    BooleanProvider cancelGravityFromAccelerationMeasurement,
+                                                                    double estimatorDT,
+                                                                    YoRegistry parentRegistry)
+   {
+      //TODO: this function should be removed and the factory should handle this part.
+      // What about the registry? Why isn't it added here?
+      if (stateEstimatorParameters == null)
+         throw new UnsupportedOperationException("default estimator parameters for this type of estimator are not added yet.");
+      // gravity / cancelGravity are unused for the gyro based stance anchor, but kept for signature parity.
+      return new JointLevelKFPreFilter(sensorOutputMap,
+                                       stateEstimatorParameters.getIMUBasedJointStateEstimatorParameters(),
+                                       feet,
+                                       estimatorDT);
+   }
+
    private void allocate()
    {
       int maxMeas = Math.max(n,3); // encoder update is the widest measurement
@@ -202,6 +234,47 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       buildEncoderModel();
    }
 
+   private void buildConstantTransition()
+   {
+      CommonOps_DDRM.setIdentity(F);
+      for (int i = 0; i < n; i++)
+         F.set(i, n + i, dt); // q_{k+1} = q_k + dt * qd_k ; qd and bias are constant with noise
+   }
+
+   private void buildProcessNoise()
+   {
+      Q.zero();
+      double sa2 = SIGMA_ACCEL * SIGMA_ACCEL;
+      double dt2 = dt * dt;
+      double dt3 = dt2 * dt;
+
+      for (int i = 0; i < n; i++)
+      {
+         Q.set(i, i, sa2 * dt3/3.0); // CT white noise accel block, per joint
+         Q.set(i, n + i, sa2 * dt2 / 2.0); // q - qd cross term
+         Q.set(n + i, i, sa2 * dt2 / 2.0);
+         Q.set(n + i, n + i, sa2 * dt);
+      }
+      for (var e : imuToOrdinal.entrySet()) // bias random walk, per-IMU process noise
+      {
+         e.getKey().getAngularVelocityBiasProcessNoiseCovariance(Rimu);
+         int col = 2 * n + 3 * e.getValue();
+         for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+               Q.set(col + i, col + j, Q.get(col + i, col + j) + dt * Rimu.get(i,j));
+      }
+   }
+
+   private void buildEncoderModel()
+   {
+      Henc.zero();
+      for (int i = 0; i < n; i++)
+         Henc.set(i, i, 1.0);
+      Renc.zero();
+      for (int i = 0; i < n; i++)
+         Renc.set(i, i, ENCODER_VAR);
+   }
+
    @Override
    public void initialize()
    {
@@ -212,18 +285,186 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       for (int i = 0; i < n; i++) P.set(i, i, INIT_POS_VAR);
       for (int i = n; i < 2 * n; i++) P.set(i, i, INIT_VEL_VAR);
       for (int i = 2 * n; i < dim; i++) P.set(i, i, INIT_BIAS_VAR);
+      initialized = true;
    }
+
+   // ================================ Phase 1 ================================
 
    @Override
    public void computeJointState()
    {
       // Phase 1: joint predict + encoder/pair-gyro measurement updates go here.
+      if (!initialized) initialize();
+
+      // prediction state
+      CommonOps_DDRM.mult(F, x, xtmp);
+      x.set(xtmp);
+      CommonOps_DDRM.mult(F, P, Ptmp);
+      CommonOps_DDRM.multTransB(Ptmp, F, P); // FPF^T term
+      CommonOps_DDRM.addEquals(P, Q);
+      // update encoder states
+      int row = 0;
+      for (OneDoFJointBasics j : jointToIndex.keySet())
+         zEnc.set(row++, 0, sensorMap.getOneDoFJointOutput(j).getPosition());
+      josephUpdate(Henc, zEnc, Renc);
+
+      for (int i = 0; i < pairs.size(); i++)
+         pairGyroUpdate(pairs.get(i));
    }
+
+   private void pairGyroUpdate(Pair p)
+   {
+      for (OneDoFJointBasics j : p.chainJoints) j.updateFrame();
+      p.jac.reset();
+      CommonOps_DDRM.extract(p.jac.getJacobianMatrix(), 0, 3, 0, p.qdCols.length, p.Jang, 0, 0); //angular part
+
+      // z = omega_child - omega_parent, expressed in the Jacobian frame (same construction as the alpha estimator)
+      fvA.setToZero(p.child.getMeasurementFrame());
+      fvA.set(p.child.getAngularVelocityMeasurement());
+      fvA.changeFrame(p.jac.getJacobianFrame());
+
+      fvB.setToZero(p.parent.getMeasurementFrame());
+      fvB.set(p.parent.getAngularVelocityMeasurement());
+      fvB.changeFrame(p.jac.getJacobianFrame());
+      fvA.sub(fvB);
+      fvA.get(zMeas);
+
+      // H (3 x dim) ; velocity block = scattered J columns, bias blocks = +R_child, -R_parent; q block = 0
+      H.reshape(3, dim);
+      H.zero();
+      for (int c = 0; c < p.qdCols.length; c++)
+         for (int r = 0; r < 3; r++)
+            H.set(r, p.qdCols[c], p.Jang.get(r,c));
+      packRotationToJacFrame(p.child, p.jac.getJacobianFrame(), rot3);
+      insertScaledInto(rot3, +1.0, H, 0, p.childBias);
+      packRotationToJacFrame(p.parent, p.jac.getJacobianFrame(), rot3);
+      insertScaledInto(rot3, -1.0, H, 0, p.parentBias);
+      // q columns left 0: dJ/dq * qd neglected (encoder has pinned q)
+      // R = R_child Sigma_child R_child^T + R_parent Sigma_parent R_parent^T (L Sigma L^T)
+      R3.zero();
+      packRotationToJacFrame(p.child, p.jac.getJacobianFrame(), rot3);
+      p.child.getAngularVelocityBiasProcessNoiseCovariance(Rimu);
+      congruenceAdd(rot3, Rimu, R3);
+      packRotationToJacFrame(p.parent, p.jac.getJacobianFrame(), rot3);
+      p.parent.getAngularVelocityBiasProcessNoiseCovariance(Rimu);
+      congruenceAdd(rot3, Rimu, R3);
+
+      josephUpdate(H, zMeas, R3);
+   }
+
+   // ================================ Phase 2 ================================
 
    @Override
    public void computeImuBiases(List<RigidBodyBasics> trustedFeet)
    {
-      // Phase 2: the absolute-bias gauge anchor (stance-FK / gravity direction) goes here.
+      if (!initialized || trustedFeet.isEmpty())
+         return; // no absolute reference at the current tick; common mode bias gauge stays free
+      for (int i = 0; i < footAnchors.size(); i++)
+      {
+         FootAnchor fa = footAnchors.get(i);
+         if (fa.usable && trustedFeet.contains(fa.foot))
+            stanceAnchorUpdate(fa);
+      }
+   }
+
+   private void stanceAnchorUpdate(FootAnchor fa)
+   {
+      for (OneDoFJointBasics j : fa.legJoints)
+         j.updateFrame();
+      CommonOps_DDRM.extract(fa.jac.getJacobianMatrix(), 0, 3, 0, fa.qdCols.length, fa.Jang, 0, 0);
+
+      // Measurement: base IMU gyro, already in measurement frame
+      Vector3DReadOnly w = baseIMU.getAngularVelocityMeasurement();
+      zAnchor.set(0, 0, w.getX());
+      zAnchor.set(1,0, w.getY());
+      zAnchor.set(2,0, w.getZ());
+
+      // Model with no contact twist: (omega_foot = 0) => z = -J_ang * qd_leg + b_base
+      // Verify with convention before trusting, sign of J_ang and the
+      // assumption that the stance foot is non-rotating is what makes this work.
+      H.reshape(3,dim);
+      H.zero();
+      for (int c = 0; c < fa.qdCols.length; c++)
+         for (int r = 0; r < 3; r++)
+            H.set(r, fa.qdCols[c], -fa.Jang.get(r,c));
+      H.set(0, baseBiasCol, 1.0);
+      H.set(1, baseBiasCol + 1, 1.0);
+      H.set(2, baseBiasCol + 2, 1.0);
+
+      josephUpdate(H, zAnchor, anchorR);
+   }
+
+   // ================================ KF core ================================
+   // Sequential Joseph form measurement update for any matrix of dimension k
+   private void josephUpdate(DMatrixRMaj Hm, DMatrixRMaj zm, DMatrixRMaj Rm)
+   {
+      int k = Hm.getNumRows();
+      PHt.reshape(dim, k);
+      S.reshape(k, k);
+      Sinv.reshape(k,k);
+      nu.reshape(k,1);
+
+      CommonOps_DDRM.multTransB(P, Hm, PHt);
+      CommonOps_DDRM.mult(Hm, PHt, S);
+      if (!CommonOps_DDRM.invert(S, Sinv))
+      {
+         LogTools.warn("Singular innovation covariance! Skipping update.");
+         return;
+      }
+      K.reshape(dim, k);
+      CommonOps_DDRM.mult(PHt, Sinv, K);
+      CommonOps_DDRM.mult(Hm, x, nu);
+      CommonOps_DDRM.changeSign(nu);
+      CommonOps_DDRM.addEquals(nu, zm);
+      CommonOps_DDRM.multAdd(K, nu, x);
+
+      // Full Joseph form update
+      CommonOps_DDRM.setIdentity(IKH);
+      CommonOps_DDRM.multAdd(-1.0, K, Hm, IKH); // I - KH
+      CommonOps_DDRM.mult(IKH, P, Ptmp);
+      CommonOps_DDRM.multTransB(Ptmp, IKH, P);
+      KR.reshape(dim, k);
+      CommonOps_DDRM.mult(K, Rm, KR);
+      CommonOps_DDRM.multAddTransB(KR, K, P); // + K R K^T
+   }
+
+
+   private void packRotationToJacFrame(IMUSensorReadOnly imu, ReferenceFrame jacFrame, DMatrixRMaj out)
+   {
+      imu.getMeasurementFrame().getTransformToDesiredFrame(tmpTransform, jacFrame);
+      RotationMatrixReadOnly r = tmpTransform.getRotation();
+      out.reshape(3,3);
+
+      set_matrix(out, r);
+   }
+
+   private static void set_matrix(DMatrixRMaj out, RotationMatrixReadOnly r)
+   {
+      out.set(0, 0, r.getM00());
+      out.set(0, 1, r.getM01());
+      out.set(0, 2, r.getM02());
+
+      out.set(1, 0, r.getM10());
+      out.set(1, 1, r.getM11());
+      out.set(1, 2, r.getM12());
+
+      out.set(2, 0, r.getM20());
+      out.set(2, 1, r.getM21());
+      out.set(2, 2, r.getM22());
+   }
+
+   private void congruenceAdd(DMatrixRMaj L, DMatrixRMaj Sigma, DMatrixRMaj accum)
+   {
+      CommonOps_DDRM.mult(L, Sigma, tmp3a);
+      CommonOps_DDRM.multTransB(tmp3a, L, tmp3b);
+      CommonOps_DDRM.addEquals(accum, tmp3b);
+   }
+
+   private static void insertScaledInto(DMatrixRMaj src, double scale, DMatrixRMaj dst, int row0, int col0)
+   {
+      for (int i = 0; i < src.getNumRows(); i++)
+         for (int j = 0; j < src.getNumCols(); j++)
+            dst.set(row0 + i, col0 + j, scale * src.get(i,j));
    }
 
    private static IMUSensorReadOnly findIMU(SensorOutputMapReadOnly map, String name)
@@ -239,61 +480,96 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    @Override
    public boolean containsJoint(OneDoFJointBasics joint)
    {
-      return false; // stub: consumers fall back to the raw sensor map for every joint
+      return jointToIndex.containsKey(joint);
    }
 
    @Override
    public double getEstimatedJointPosition(OneDoFJointBasics joint)
    {
-      return Double.NaN;
+      Integer idx = jointToIndex.get(joint);
+      return (idx == null || !initialized) ? Double.NaN : x.get(idx);
    }
 
    @Override
    public double getEstimatedJointVelocity(OneDoFJointBasics joint)
    {
-      return Double.NaN;
+      Integer idx = jointToIndex.get(joint);
+      return (idx == null || !initialized) ? Double.NaN : x.get(n + idx);
    }
 
    @Override
    public boolean hasCovariance()
    {
-      return false; // flips to true when the filter publishes Sigma_q / Sigma_qd
+      return initialized;
    }
 
    @Override
    public void packPositionCovariance(OneDoFJointBasics[] joints, double fallbackVariance, DMatrixRMaj toPack)
    {
-      throw new UnsupportedOperationException("Check hasCovariance() before calling.");
+      packCov(joints, 0, fallbackVariance, toPack);
    }
 
    @Override
    public void packVelocityCovariance(OneDoFJointBasics[] joints, double fallbackVariance, DMatrixRMaj toPack)
    {
-      throw new UnsupportedOperationException("Check hasCovariance() before calling.");
+      packCov(joints, n, fallbackVariance, toPack);
+   }
+
+   private void packCov(OneDoFJointBasics[] joints, int blockOffset, double fallbackVariance, DMatrixRMaj toPack)
+   {
+      int mm = joints.length;
+      toPack.reshape(mm, mm);
+      toPack.zero();
+      for (int a = 0; a < mm; a++)
+      {
+         Integer ia = jointToIndex.get(joints[a]);
+         if (ia == null)
+         {
+            toPack.set(a, a, fallbackVariance);
+            continue;
+         }
+         for (int b = 0; b < mm; b++)
+         {
+            Integer ib = jointToIndex.get(joints[b]);
+            if (ib != null)
+               toPack.set(a, b, P.get(blockOffset + ia, blockOffset + ib)); // adding the off diagonals for the cross-covariances
+         }
+      }
    }
 
    @Override
    public FrameVector3DReadOnly getAngularVelocityBiasInIMUFrame(IMUSensorReadOnly imu)
    {
-      return zeroBias.getAngularVelocityBiasInIMUFrame(imu);
+      Integer ord = imuToOrdinal.get(imu);
+      if (ord == null || !initialized)
+      {
+         biasOut.setToZero(imu.getMeasurementFrame());
+      }
+      int col = 2 * n + 3 * ord;
+      biasOut.setIncludingFrame(imu.getMeasurementFrame(), x.get(col), x.get(col + 1), x.get(col + 2));
+      return biasOut;
    }
 
    @Override
    public FrameVector3DReadOnly getAngularVelocityBiasInWorldFrame(IMUSensorReadOnly imu)
    {
-      return zeroBias.getAngularVelocityBiasInWorldFrame(imu);
+      getAngularVelocityBiasInIMUFrame(imu);
+      biasOut.changeFrame(ReferenceFrame.getWorldFrame());
+      return biasOut;
    }
 
    @Override
    public FrameVector3DReadOnly getLinearAccelerationBiasInIMUFrame(IMUSensorReadOnly imu)
    {
-      return zeroBias.getLinearAccelerationBiasInIMUFrame(imu);
+      biasOut.setToZero(imu.getMeasurementFrame());
+      return biasOut;
    }
 
    @Override
    public FrameVector3DReadOnly getLinearAccelerationBiasInWorldFrame(IMUSensorReadOnly imu)
    {
-      return zeroBias.getLinearAccelerationBiasInWorldFrame(imu);
+      biasOut.setToZero(ReferenceFrame.getWorldFrame());
+      return biasOut;
    }
 
    // ================================ Structure holders ================================

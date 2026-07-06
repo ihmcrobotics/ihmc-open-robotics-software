@@ -44,7 +44,9 @@ public class FootSwitchContactProbabilityProvider implements ContactProbabilityP
    private final SideDependentList<? extends FootSwitchInterface> footSwitches;
    private final double smoothingAlpha;
 
-   private final SideDependentList<Double> probability = new SideDependentList<>(1.0, 1.0);
+   // Indexed by RobotSide.ordinal() (LEFT=0, RIGHT=1). A primitive array so the per-tick smoother
+   // writes cause no Double autoboxing on the estimator hot path. Starts at 1 (feet planted at init).
+   private final double[] probability = {1.0, 1.0};
 
    /** Builds the provider with default smoothing; probabilities start at 1 (feet planted at init). */
    public FootSwitchContactProbabilityProvider(SideDependentList<? extends FootSwitchInterface> footSwitches)
@@ -78,15 +80,15 @@ public class FootSwitchContactProbabilityProvider implements ContactProbabilityP
          else
             pRaw = 0.0;
 
-         double smoothed = smoothingAlpha * probability.get(side) + (1.0 - smoothingAlpha) * pRaw;
-         probability.put(side, clamp(smoothed));
+         double smoothed = smoothingAlpha * probability[side.ordinal()] + (1.0 - smoothingAlpha) * pRaw;
+         probability[side.ordinal()] = clamp(smoothed);
       }
    }
 
    @Override
    public double getContactProbability(RobotSide side)
    {
-      return probability.get(side);
+      return probability[side.ordinal()];
    }
 
    private static double clamp(double value)

@@ -45,7 +45,14 @@ public final class ProprioceptivePreFilterFactory
                                                                                               cancelGravityFromAccelerationMeasurement,
                                                                                               estimatorDT,
                                                                                               parentRegistry);
-         case JOINT_KF -> throw new NotImplementedException("JOINT_KF not ready yet!");
+         case JOINT_KF -> JointLevelKFPreFilter.createForKinematicsEstimator(sensorOutputMap,
+                                                                             stateEstimatorParameters,
+                                                                             imuProcessedOutputs,
+                                                                             feet,
+                                                                             gravitationalAcceleration,
+                                                                             cancelGravityFromAccelerationMeasurement,
+                                                                             estimatorDT,
+                                                                             parentRegistry);
       };
    }
 }
