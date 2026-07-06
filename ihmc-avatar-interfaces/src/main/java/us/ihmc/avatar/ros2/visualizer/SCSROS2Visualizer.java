@@ -5,7 +5,6 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.jMonkeyEngineToolkit.NullGraphics3DAdapter;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.log.LogTools;
@@ -71,9 +70,8 @@ public class SCSROS2Visualizer
 
    private void setupROS2Debugger()
    {
-      int domainID = NetworkParameters.getRTPSDomainID();
-      ros2Node = new ROS2Node(getClass().getSimpleName(), domainID);
-      LogTools.info("Created jros2 node for SCS ROS 2 visualizer on domain {}", domainID);
+      ros2Node = new ROS2Node(getClass().getSimpleName());
+      LogTools.info("Created jros2 node for SCS ROS 2 visualizer on domain {}", ros2Node.getDomainId());
       // JROS2_TODO: RTPS participant/endpoint discovery counting is not exposed by jros2 yet; YoVariables stay at zero.
       LogTools.warn("RTPS participant and endpoint discovery counting is not yet available in jros2");
    }
