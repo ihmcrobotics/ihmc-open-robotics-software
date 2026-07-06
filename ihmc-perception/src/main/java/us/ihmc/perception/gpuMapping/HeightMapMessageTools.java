@@ -9,6 +9,7 @@ import perception_msgs.HeightMapMessage;
 import perception_msgs.HeightMapMessageForController;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
 import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 
 public class HeightMapMessageTools
@@ -77,8 +78,11 @@ public class HeightMapMessageTools
 
       // Pack the compressed data into the message
       int compressedDataSize = (int) compressedData.limit();
-      compressedData.get(messageToPack.getHeights().getBuffer().array(), 0, compressedDataSize);
-      messageToPack.getHeights().getBuffer().position(compressedDataSize);
+      byte[] compressedBytes = new byte[compressedDataSize];
+      compressedData.get(compressedBytes);
+      IDLByteSequence heights = messageToPack.getHeights();
+      heights.clear();
+      heights.addAll(compressedBytes);
 
       // Close pointers
       dataPointer.close();
