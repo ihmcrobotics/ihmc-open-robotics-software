@@ -67,6 +67,13 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
    private final DMatrixRMaj priorThetaFull;        // gathered theta of all bodies (the EKF covariance is theta-space)
    private final DMatrixRMaj priorStateContainer;
    private final DMatrixRMaj priorCovarianceContainer;
+   // CoM-load coupling: per-body payload attachment point cp (inertia frame) or null; the prior's first-moment
+   // target becomes cp*(1-exp(-2*alpha)) instead of zero, tying the CoM to the observable mass. See
+   // InertialEstimationParameters.getCoMLoadCouplingPoint.
+   private final double[][] comCouplingPoints;
+   private boolean hasCoMCoupling = false;
+   private final DMatrixRMaj priorTargetTheta;      // prior pseudo-measurement target (zero, except coupled first moments)
+   private final DMatrixRMaj priorDeltaContainer;   // theta - target
 
    private final DMatrixRMaj torqueFromNominal;
    private final DMatrixRMaj torqueFromBias;
@@ -121,6 +128,7 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
          contactWrenches.put(side, new DMatrixRMaj(Wrench.SIZE, 1));
       }
 
+      java.util.List<double[]> comCouplingList = new java.util.ArrayList<>();
       nBodies = 0;
       RigidBodyReadOnly[] modelBodies = model.getRootBody().subtreeArray();
       for (int i = 0; i < modelBodies.length; ++i)
@@ -140,11 +148,19 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
             if (parameters.useGeneralizedPhysicalConsistency())
                bodyParameters.enableGeneralizedParameterization();
             inertialParameters.add(bodyParameters);
+            comCouplingList.add(parameters.getCoMLoadCouplingPoint(modelBodies[i].getName()));
             inertialParametersPiBasisWatchers.add(new YoMatrix("pi_" + modelBodies[i].getName() + "_", 10, 1, RigidBodyInertialParametersTools.getNamesForPiBasis(), null, registry));
             inertialParametersThetaBasisWatchers.add(new YoMatrix("theta_" + modelBodies[i].getName() + "_", 10, 1, RigidBodyInertialParametersTools.getNamesForThetaBasis(), null, registry));
             nBodies++;
          }
       }
+
+      comCouplingPoints = comCouplingList.toArray(new double[0][]);
+      for (double[] cp : comCouplingPoints)
+         if (cp != null)
+            hasCoMCoupling = true;
+      if (hasCoMCoupling)
+         LogTools.info("InertialPhysicallyConsistentKalmanFilter: CoM-load coupling ON (first-moment prior tracks cp*(1-e^-2a)).");
 
       // Tikhonov soft-constraint prior toward nominal (theta=0). Only meaningful with the generalized
       // parameterization. The enable flag + four per-parameter variances are YoVariables so they can be tuned
@@ -187,6 +203,8 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
       priorThetaFull = new DMatrixRMaj(stateSize, 1);
       priorStateContainer = new DMatrixRMaj(stateSize, 1);
       priorCovarianceContainer = new DMatrixRMaj(stateSize, stateSize);
+      priorTargetTheta = new DMatrixRMaj(stateSize, 1);
+      priorDeltaContainer = new DMatrixRMaj(stateSize, 1);
 
       measurementJacobianBlock = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
                                                  RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
@@ -380,8 +398,30 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
          return; // singular -- skip this tick rather than corrupt the estimate
       CommonOps_DDRM.mult(covariance, priorInnovationCovarianceInv, priorGain);
 
-      // theta <- theta - K theta
-      CommonOps_DDRM.mult(priorGain, priorThetaFull, priorStateContainer);
+      // Prior target: 0 everywhere, EXCEPT the first-moment (t) channels of coupled bodies, which track
+      // cp*(1 - exp(-2*alpha)) -- the combined CoM of "nominal link + point payload at cp" as the observable
+      // mass channel alpha grows. This ties the degenerate CoM to the mass, so the observed first moment
+      // m*c resolves to a unique (m, c). With no coupling the target is zero and this reduces to theta -= K*theta.
+      priorTargetTheta.zero();
+      if (hasCoMCoupling)
+      {
+         for (int b = 0; b < nBodies; ++b)
+         {
+            double[] cp = comCouplingPoints[b];
+            if (cp == null)
+               continue;
+            int base = b * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY;
+            double alpha = priorThetaFull.get(base, 0);
+            double factor = Math.max(0.0, 1.0 - Math.exp(-2.0 * alpha));
+            priorTargetTheta.set(base + 7, 0, cp[0] * factor);
+            priorTargetTheta.set(base + 8, 0, cp[1] * factor);
+            priorTargetTheta.set(base + 9, 0, cp[2] * factor);
+         }
+      }
+
+      // theta <- theta - K (theta - target)
+      CommonOps_DDRM.subtract(priorThetaFull, priorTargetTheta, priorDeltaContainer);
+      CommonOps_DDRM.mult(priorGain, priorDeltaContainer, priorStateContainer);
       CommonOps_DDRM.subtractEquals(priorThetaFull, priorStateContainer);
 
       // P <- P - K P   (reads covariance before it is overwritten)

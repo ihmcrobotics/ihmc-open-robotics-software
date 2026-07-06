@@ -148,15 +148,21 @@ public class RigidBodyInertialParametersTools
       // Mass
       double mass = inertia.getMass();
       double massDelta = parameterDelta.get(0, 0);
-      resultToPack.setMass(mass + massDelta);
+      double newMass = mass + massDelta;
+      resultToPack.setMass(newMass);
 
-      // First moment of mass -- only need to update the center of mass offset here
-      double firstMomentOfMassDeltaX = parameterDelta.get(1, 0);
-      double firstMomentOfMassDeltaY = parameterDelta.get(2, 0);
-      double firstMomentOfMassDeltaZ = parameterDelta.get(3, 0);
-      resultToPack.setCenterOfMassOffset(inertia.getCenterOfMassOffset().getX() + firstMomentOfMassDeltaX / massDelta,
-                                         inertia.getCenterOfMassOffset().getY() + firstMomentOfMassDeltaY / massDelta,
-                                         inertia.getCenterOfMassOffset().getZ() + firstMomentOfMassDeltaZ / massDelta);
+      // Center of mass. The delta (from calculateParameterDelta) is a FIRST-MOMENT delta d(m*c) = m*c - m_ref*c_ref,
+      // so the correct inverse recombines first moments and divides by the NEW total mass:
+      //   c_new = (m*c + d(m*c)) / (m + dm).
+      // (The previous code did c_new = c + d(m*c)/dm, dividing a first moment by the MASS delta -- dimensionally
+      //  wrong: it dropped/mangled the CoM en route to the controller model and blew up as dm -> 0.)
+      double newFirstMomentX = mass * inertia.getCenterOfMassOffset().getX() + parameterDelta.get(1, 0);
+      double newFirstMomentY = mass * inertia.getCenterOfMassOffset().getY() + parameterDelta.get(2, 0);
+      double newFirstMomentZ = mass * inertia.getCenterOfMassOffset().getZ() + parameterDelta.get(3, 0);
+      if (newMass > 1.0e-9)
+         resultToPack.setCenterOfMassOffset(newFirstMomentX / newMass, newFirstMomentY / newMass, newFirstMomentZ / newMass);
+      else
+         resultToPack.setCenterOfMassOffset(inertia.getCenterOfMassOffset());
 
       // Unique elements of the moment of inertia
       resultToPack.setMomentOfInertia(inertia.getMomentOfInertia().getM00() + parameterDelta.get(4, 0),  // Ixx

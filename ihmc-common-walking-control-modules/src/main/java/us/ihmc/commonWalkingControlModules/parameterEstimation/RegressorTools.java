@@ -3,13 +3,14 @@ package us.ihmc.commonWalkingControlModules.parameterEstimation;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.robotics.MatrixMissingTools;
 
 import java.util.Set;
 
 import static us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.SpatialInertiaBasisOption;
 
-public class RegressorTools
+public class   RegressorTools
 {
    private static final int PARAMETERS_PER_RIGID_BODY = 10;
 
@@ -250,21 +251,33 @@ public class RegressorTools
       int vectorIndex = 0;
       for (int i = 0; i < basisSets.length; ++i)
       {
+         // Mass (option M, ordinal 0) is written first, so it is available to convert the estimated first
+         // moment (MCOM = m*c) back to a CoM offset. Matches the pi convention read by
+         // RigidBodyInertialParametersTools.calculateParameterDelta (mass, m*c, and inertia about the CoM),
+         // so pack -> calculateParameterDelta is a round-trip.
+         double bodyMass = bodies[i].getInertia().getMass();
          for (SpatialInertiaBasisOption option : SpatialInertiaBasisOption.values)
          {
-            if (basisSets[i].contains(option))
+            if (!basisSets[i].contains(option))
+               continue;
+
+            double value = vector.get(vectorIndex, 0);
+            SpatialInertiaBasics inertia = bodies[i].getInertia();
+            switch (option)
             {
-               switch(option)
-               {
-                  case M:
-                     bodies[i].getInertia().setMass(vector.get(vectorIndex, 0));
-                     break;
-                  default:
-                     // TODO: pass through other inertial parameters
-                     break;
-               }
-               vectorIndex += 1;
+               case M:      bodyMass = value; inertia.setMass(value); break;
+               case MCOM_X: if (bodyMass > 1.0e-9) inertia.getCenterOfMassOffset().setX(value / bodyMass); break;
+               case MCOM_Y: if (bodyMass > 1.0e-9) inertia.getCenterOfMassOffset().setY(value / bodyMass); break;
+               case MCOM_Z: if (bodyMass > 1.0e-9) inertia.getCenterOfMassOffset().setZ(value / bodyMass); break;
+               case I_XX:   inertia.getMomentOfInertia().setM00(value); break;
+               case I_XY:   inertia.getMomentOfInertia().setM01(value); inertia.getMomentOfInertia().setM10(value); break;
+               case I_XZ:   inertia.getMomentOfInertia().setM02(value); inertia.getMomentOfInertia().setM20(value); break;
+               case I_YY:   inertia.getMomentOfInertia().setM11(value); break;
+               case I_YZ:   inertia.getMomentOfInertia().setM12(value); inertia.getMomentOfInertia().setM21(value); break;
+               case I_ZZ:   inertia.getMomentOfInertia().setM22(value); break;
+               default:     break;
             }
+            vectorIndex += 1;
          }
       }
    }

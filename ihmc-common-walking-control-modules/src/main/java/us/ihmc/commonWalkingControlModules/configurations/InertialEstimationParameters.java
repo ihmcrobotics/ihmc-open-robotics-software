@@ -130,6 +130,21 @@ public interface InertialEstimationParameters
 
    double getFloatingBaseMeasurementCovariance();
 
+   /**
+    * CoM-load coupling (degeneracy breaker): the point (in the body's inertia frame) that the body's CoM shifts
+    * TOWARD as mass is added -- i.e. the payload attachment point. When non-null, the generalized-PCEKF Tikhonov
+    * prior for this body targets the first-moment channels at {@code cp * (1 - exp(-2*alpha))} instead of zero:
+    * at nominal mass the CoM sits at nominal, and as the (observable) mass channel alpha grows the CoM slides
+    * along the nominal->cp line, reaching cp in the heavy-load limit -- exactly the combined CoM of "nominal
+    * link + point payload at cp". This ties the weakly/degenerate CoM channel to the strongly-observed mass, so
+    * a given observed first moment m*c resolves to a UNIQUE (m, c) rather than the mass-inflated-at-nominal
+    * degenerate solution. Return {@code null} (default) for no coupling (prior targets zero, as before). Length 3.
+    */
+   default double[] getCoMLoadCouplingPoint(String bodyName)
+   {
+      return null;
+   }
+
    double getLegMeasurementCovariance();
 
    double getArmMeasurementCovariance();
