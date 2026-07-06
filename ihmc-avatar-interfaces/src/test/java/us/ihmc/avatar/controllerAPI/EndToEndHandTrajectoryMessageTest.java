@@ -122,6 +122,21 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       return -0.45;
    }
 
+   public double getQueuedMessagesSettleTime()
+   {
+      return 0.5;
+   }
+
+   public double getQueuedMessagesMaxRotationError()
+   {
+      return Math.toRadians(15.0);
+   }
+
+   public double getQueuedMessagesMaxPositionError()
+   {
+      return 0.05;
+   }
+
    protected double getStreamingRangeOfMotion()
    {
       return 0.5;
@@ -875,7 +890,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             break;
       }
 
-      success = simulationTestHelper.simulateNow(0.5);
+      success = simulationTestHelper.simulateNow(getQueuedMessagesSettleTime());
       assertTrue(success);
 
       // check internal tracking is decent:
@@ -887,8 +902,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       String varnamePosition = handName + "ErrorPosition";
       Vector3D positionError = EndToEndTestTools.findVector3D(namespacePosition, varnamePosition, simulationTestHelper);
 
-      assertTrue(rotationError.norm() < Math.toRadians(15.0));
-      assertTrue(positionError.norm() < 0.05);
+      assertTrue(rotationError.norm() < getQueuedMessagesMaxRotationError(), () -> "rotationError=" + Math.toDegrees(rotationError.norm()) + " deg");
+      assertTrue(positionError.norm() < getQueuedMessagesMaxPositionError(), () -> "positionError=" + positionError.norm() + " m");
 
       // check internal desired matches last trajectory point:
       String namespacePositionDesired = FeedbackControllerToolbox.class.getSimpleName();

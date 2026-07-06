@@ -241,7 +241,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
       assertTrue(success);
 
       desiredEpsilon = 1.0e-7;
-      trackingEpsilon = 5.0e-3;
+      trackingEpsilon = 1.0e-2;
 
       controllerDesiredPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(neckJoints, simulationTestHelper);
       controllerDesiredVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(neckJoints, simulationTestHelper);

@@ -546,11 +546,14 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       List<FramePose3D> pelvisPosesAtTime = new ArrayList<>();
       simulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, message ->
                                                           {
-                                                             statusMessages.add(message);
-                                                             humanoidReferenceFrames.updateFrames();
-                                                             FramePose3D pose = new FramePose3D(pelvisZUpFrame);
-                                                             pose.changeFrame(ReferenceFrame.getWorldFrame());
-                                                             pelvisPosesAtTime.add(pose);
+                                                             synchronized (statusMessages)
+                                                             {
+                                                                humanoidReferenceFrames.updateFrames();
+                                                                FramePose3D pose = new FramePose3D(pelvisZUpFrame);
+                                                                pose.changeFrame(ReferenceFrame.getWorldFrame());
+                                                                pelvisPosesAtTime.add(pose);
+                                                                statusMessages.add(message);
+                                                             }
                                                           });
       double controllerDT = simulationTestHelper.getCurrentControlDT();
 
@@ -620,14 +623,17 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       // Give a little time for the message to make it through.
       ThreadTools.sleep(10);
 
-      assertEquals(1, statusMessages.size());
-      EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(),
-                                                        TrajectoryExecutionStatus.STARTED,
-                                                        0.0,
-                                                        chest.getName(),
-                                                        statusMessages.remove(0),
-                                                        controllerDT);
-      pelvisPosesAtTime.remove(0);
+      synchronized (statusMessages)
+      {
+         assertEquals(1, statusMessages.size());
+         EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(),
+                                                           TrajectoryExecutionStatus.STARTED,
+                                                           0.0,
+                                                           chest.getName(),
+                                                           statusMessages.remove(0),
+                                                           controllerDT);
+         pelvisPosesAtTime.remove(0);
+      }
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
@@ -660,24 +666,27 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertTrue(success);
       assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2, getRobotModel().getJointMap().getSpineJointNames());
 
-      assertEquals(1, statusMessages.size());
-      humanoidReferenceFrames.updateFrames();
+      synchronized (statusMessages)
+      {
+         assertEquals(1, statusMessages.size());
+         humanoidReferenceFrames.updateFrames();
 
-      // We have to do this transformation to account for the fact that the pelvis pose at the tiem the status message was broadcast was not necessarily
-      // aligned with world. The desired trajectory sent down was in the pelivs pose, but the status message is broadcast in world frame.
-      PoseReferenceFrame pelvisPoseFrame = new PoseReferenceFrame("PelvisPoseFrame", ReferenceFrame.getWorldFrame());
-      pelvisPoseFrame.setPoseAndUpdate(pelvisPosesAtTime.get(0));
+         // We have to do this transformation to account for the fact that the pelvis pose at the tiem the status message was broadcast was not necessarily
+         // aligned with world. The desired trajectory sent down was in the pelivs pose, but the status message is broadcast in world frame.
+         PoseReferenceFrame pelvisPoseFrame = new PoseReferenceFrame("PelvisPoseFrame", ReferenceFrame.getWorldFrame());
+         pelvisPoseFrame.setPoseAndUpdate(pelvisPosesAtTime.get(0));
 
-      EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(),
-                                                        TrajectoryExecutionStatus.COMPLETED,
-                                                        trajectoryTime,
-                                                        null,
-                                                        desiredChestOrientations[desiredChestOrientations.length - 1],
-                                                        chest.getName(),
-                                                        statusMessages.remove(0),
-                                                        pelvisPoseFrame,
-                                                        1.0e-3,
-                                                        controllerDT);
+         EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(),
+                                                           TrajectoryExecutionStatus.COMPLETED,
+                                                           trajectoryTime,
+                                                           null,
+                                                           desiredChestOrientations[desiredChestOrientations.length - 1],
+                                                           chest.getName(),
+                                                           statusMessages.remove(0),
+                                                           pelvisPoseFrame,
+                                                           1.0e-3,
+                                                           controllerDT);
+      }
    }
 
    public void testMessageWithALotOfTrajectoryPoints() throws Exception
