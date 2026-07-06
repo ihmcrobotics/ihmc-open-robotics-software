@@ -109,7 +109,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       for (IMUBasedJointStateEstimatorParameters pp : pairParameters)
       {
          IMUSensorReadOnly parent = findIMU(sensorMap, pp.getParentIMUName());
-         IMUSensorReadOnly child = findIMU(sensorMap, pp.getParentIMUName());
+         IMUSensorReadOnly child = findIMU(sensorMap, pp.getChildIMUName());
          if (parent == null || child == null)
          {
             LogTools.warn("Skipping pair, IMU not found: parent = " + pp.getParentIMUName() + " child = " + pp.getChildIMUName());
@@ -543,7 +543,11 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       Integer ord = imuToOrdinal.get(imu);
       if (ord == null || !initialized)
       {
+         // IMU not in the filter's state (e.g. the primary pelvis IMU when it isn't a pair member),
+         // or the filter hasn't initialized yet: report zero bias. MUST return here — falling through
+         // would unbox a null ord in "3 * ord" and NPE every tick on the estimator thread.
          biasOut.setToZero(imu.getMeasurementFrame());
+         return biasOut;
       }
       int col = 2 * n + 3 * ord;
       biasOut.setIncludingFrame(imu.getMeasurementFrame(), x.get(col), x.get(col + 1), x.get(col + 2));
