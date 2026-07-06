@@ -52,6 +52,7 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.stateEstimation.invariant_estimator.InvariantContactSource;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -116,7 +117,7 @@ public class AvatarMultiThreadingFactory
    private final List<Runnable> preEstimatorRunnables = new ArrayList<>();
    private final List<Runnable> postEstimatorRunnables = new ArrayList<>();
    private final boolean useInvariantMainEstimator;
-   private final boolean invariantEstimatorUseFootSwitches;
+   private final InvariantContactSource invariantContactSource;
 
    // Controller
    private final HighLevelHumanoidControllerFactory avatarControllerFactory;
@@ -170,7 +171,7 @@ public class AvatarMultiThreadingFactory
                                       YoRegistry registry,
                                       YoVariableServer yoVariableServer,
                                       boolean useInvariantMainEstimator,
-                                      boolean invariantEstimatorUseFootSwitches)
+                                      InvariantContactSource invariantContactSource)
    {
       this.masterRobotModel = robotModel;
       this.masterFullRobotModel = fullRobotModel;
@@ -186,7 +187,7 @@ public class AvatarMultiThreadingFactory
       this.rootRegistry = registry;
       this.yoVariableServer = yoVariableServer;
       this.useInvariantMainEstimator = useInvariantMainEstimator;
-      this.invariantEstimatorUseFootSwitches = invariantEstimatorUseFootSwitches;
+      this.invariantContactSource = invariantContactSource;
 
       masterContext = new HumanoidRobotContextData(masterFullRobotModel);
 
@@ -274,7 +275,7 @@ public class AvatarMultiThreadingFactory
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(estimatorContextDataFactory);
       avatarEstimatorThreadFactory.setGravity(GRAVITY);
       avatarEstimatorThreadFactory.setUseInvariantStateEstimator(useInvariantMainEstimator);
-      avatarEstimatorThreadFactory.setInvariantEstimatorUseFootSwitches(invariantEstimatorUseFootSwitches);
+      avatarEstimatorThreadFactory.setInvariantContactSource(invariantContactSource);
       //      if (secondaryEstimatorFactory != null)
       //         avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryEstimatorFactory);
       StateEstimatorController stateEstimator = avatarEstimatorThreadFactory.getMainStateEstimator();

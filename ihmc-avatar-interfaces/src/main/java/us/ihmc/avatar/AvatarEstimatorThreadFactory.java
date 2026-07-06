@@ -61,6 +61,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.stateEstimation.invariant_estimator.FootSwitchContactProbabilityProvider;
+import us.ihmc.stateEstimation.invariant_estimator.InvariantContactSource;
 import us.ihmc.stateEstimation.invariant_estimator.InvariantEKFStateEstimator;
 import us.ihmc.stateEstimation.invariant_estimator.InvariantMainStateEstimator;
 import us.ihmc.stateEstimation.jointLevel.ProprioceptivePreFilter;
@@ -106,13 +107,16 @@ public class AvatarEstimatorThreadFactory
    private boolean useInvariantStateEstimator = false;
    private boolean invariantEstimatorYawSeeding = true;
    /**
-    * When true (default), the invariant main estimator's contact probabilities come from the robot's
-    * production foot switches ({@link StateEstimatorParameters#getFootSwitchFactories()} — joint-torque
-    * based on Alex) instead of the estimator's built-in kinematic height detector. The kinematic
-    * detector reads sole heights through the estimator's own base estimate, which is circular when the
-    * invariant filter is the main estimator; the foot switches are independent of the base estimate.
+    * Source for the invariant main estimator's per-foot contact probability. Default
+    * {@link InvariantContactSource#FOOT_SWITCHES}: the robot's production foot switches
+    * ({@link StateEstimatorParameters#getFootSwitchFactories()} — joint-torque based on Alex), built here on
+    * the estimator's own model and sensor stream exactly as the DRC estimator builds them, so the mechanism
+    * is identical in simulation and on hardware. {@link InvariantContactSource#KINEMATIC_DETECTOR} uses the
+    * estimator's built-in kinematic height detector, which reads sole heights through the estimator's own
+    * base estimate — circular when the invariant filter is the main estimator; the foot switches are
+    * independent of the base estimate.
     */
-   private boolean invariantEstimatorUseFootSwitches = true;
+   private InvariantContactSource invariantContactSource = InvariantContactSource.FOOT_SWITCHES;
    private final OptionalFactoryField<PairList<BooleanSupplier, StateEstimatorController>> secondaryStateEstimatorsField = new OptionalFactoryField<>("secondaryEstimatorControllers");
    private final OptionalFactoryField<List<StateEstimatorControllerFactory>> secondaryStateEstimatorFactoriesField = new OptionalFactoryField<>("secondaryEstimatorControllerFactories");
 
@@ -585,8 +589,15 @@ public class AvatarEstimatorThreadFactory
                                                                                        preFilter);
       mainStateEstimator.getYoRegistry().addChild(preFilterRegistry);
 
-      if (invariantEstimatorUseFootSwitches)
-         mainStateEstimator.getInvariantEKFStateEstimator().setContactProbabilityProvider(createInvariantFootSwitchProvider(mainStateEstimator));
+      switch (invariantContactSource)
+      {
+         case FOOT_SWITCHES:
+            mainStateEstimator.getInvariantEKFStateEstimator().setContactProbabilityProvider(createInvariantFootSwitchProvider(mainStateEstimator));
+            break;
+         case KINEMATIC_DETECTOR:
+            // Leave the estimator's built-in KinematicContactDetector (installed in its constructor).
+            break;
+      }
 
       return mainStateEstimator;
    }
@@ -635,13 +646,13 @@ public class AvatarEstimatorThreadFactory
    }
 
    /**
-    * Selects the contact-probability source for the invariant main estimator: the robot's production
-    * foot switches when true (default), the built-in kinematic height detector when false. See
-    * {@link #invariantEstimatorUseFootSwitches}.
+    * Selects the contact-probability source for the invariant main estimator (foot switches by default,
+    * built-in kinematic detector otherwise). See {@link #invariantContactSource}. Set the same value on the
+    * sim and hardware avatar factories to run an identical contact source in both.
     */
-   public void setInvariantEstimatorUseFootSwitches(boolean invariantEstimatorUseFootSwitches)
+   public void setInvariantContactSource(InvariantContactSource invariantContactSource)
    {
-      this.invariantEstimatorUseFootSwitches = invariantEstimatorUseFootSwitches;
+      this.invariantContactSource = invariantContactSource;
    }
 
    public StateEstimatorController createEKFStateEstimator()

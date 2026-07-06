@@ -99,6 +99,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvi
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorControllerFactory;
+import us.ihmc.stateEstimation.invariant_estimator.InvariantContactSource;
 import us.ihmc.tools.factories.FactoryFieldNotSetException;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
@@ -204,8 +205,8 @@ public class SCS2AvatarSimulationFactory
    /** When true, the invariant InEKF replaces the DRC estimator as the main floating-base estimator. */
    private boolean useInvariantMainStateEstimator = false;
    private boolean invariantMainEstimatorYawSeeding = true;
-   /** Contact source for the invariant main estimator: production foot switches (true, default) or the built-in kinematic height detector (false). */
-   private boolean invariantMainEstimatorUseFootSwitches = true;
+   /** Contact source for the invariant main estimator; forwarded to the estimator thread factory (shared by sim and hardware). */
+   private InvariantContactSource invariantMainEstimatorContactSource = InvariantContactSource.FOOT_SWITCHES;
    private final OptionalFactoryField<Boolean> createIKStreamingRealTimeController = new OptionalFactoryField<>(
          "createIKStreamingRealTimeController",
          false);
@@ -529,7 +530,7 @@ public class SCS2AvatarSimulationFactory
       {
          avatarEstimatorThreadFactory.setUseInvariantStateEstimator(true);
          avatarEstimatorThreadFactory.setInvariantEstimatorYawSeeding(invariantMainEstimatorYawSeeding);
-         avatarEstimatorThreadFactory.setInvariantEstimatorUseFootSwitches(invariantMainEstimatorUseFootSwitches);
+         avatarEstimatorThreadFactory.setInvariantContactSource(invariantMainEstimatorContactSource);
       }
       estimatorThread = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
    }
@@ -1221,14 +1222,15 @@ public class SCS2AvatarSimulationFactory
    }
 
    /**
-    * Selects the invariant main estimator's contact-probability source: the robot's production foot
-    * switches when true (default; joint-torque based on Alex, independent of the filter's own base
-    * estimate) or the built-in kinematic height detector when false (reads sole heights through the
-    * filter's own estimate — circular when the filter is main; keep for A/B comparison only).
+    * Selects the invariant main estimator's contact-probability source: production foot switches
+    * ({@link InvariantContactSource#FOOT_SWITCHES}, default; joint-torque based on Alex, independent of the
+    * filter's own base estimate) or the built-in kinematic height detector
+    * ({@link InvariantContactSource#KINEMATIC_DETECTOR}, circular when the filter is main; A/B only). This is
+    * forwarded to the shared estimator thread factory, so the same source runs in sim and on hardware.
     */
-   public void setInvariantMainEstimatorUseFootSwitches(boolean invariantMainEstimatorUseFootSwitches)
+   public void setInvariantMainEstimatorContactSource(InvariantContactSource invariantMainEstimatorContactSource)
    {
-      this.invariantMainEstimatorUseFootSwitches = invariantMainEstimatorUseFootSwitches;
+      this.invariantMainEstimatorContactSource = invariantMainEstimatorContactSource;
    }
 
    public void setComponentFootstepGeneratorParameters(boolean useHeadingAndVelocityScript,
