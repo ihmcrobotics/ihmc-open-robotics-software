@@ -133,6 +133,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
                                                                                       registry);
    private final YoDouble yoAngularVelocityErrorMagnitude = new YoDouble("invariantMinusMainAngularVelocityErrorMagnitude", registry);
 
+   //TODO: add YoVariable of body-frame RPY for comparison to controller convention
+
    /**
     * @param fullRobotModel             the (shared) estimator robot model used for forward kinematics.
     * @param sensorOutputMap            processed sensor outputs (IMU + joints).

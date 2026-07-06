@@ -1,5 +1,6 @@
 package us.ihmc.stateEstimation.jointLevel;
 
+import org.apache.commons.lang3.NotImplementedException;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -44,7 +45,7 @@ public final class ProprioceptivePreFilterFactory
                                                                                               cancelGravityFromAccelerationMeasurement,
                                                                                               estimatorDT,
                                                                                               parentRegistry);
-         case JOINT_KF -> new JointLevelKFPreFilter();
+         case JOINT_KF -> throw new NotImplementedException("JOINT_KF not ready yet!");
       };
    }
 }
