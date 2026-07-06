@@ -438,7 +438,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       set_matrix(out, r);
    }
 
-   private static void set_matrix(DMatrixRMaj out, RotationMatrixReadOnly r)
+   public static void set_matrix(DMatrixRMaj out, RotationMatrixReadOnly r)
    {
       out.set(0, 0, r.getM00());
       out.set(0, 1, r.getM01());

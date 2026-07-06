@@ -47,8 +47,10 @@ public class KinematicContactDetector implements ContactProbabilityProvider
    private final double smoothingAlpha;    // exponential smoother in [0, 1); 0 = no smoothing
 
    private final SideDependentList<FramePoint3D> soleInWorld = new SideDependentList<>();
-   private final SideDependentList<Double> previousHeight = new SideDependentList<>(Double.NaN, Double.NaN);
-   private final SideDependentList<Double> probability = new SideDependentList<>(0.0, 0.0);
+   // Indexed by RobotSide.ordinal() (LEFT=0, RIGHT=1). Primitive arrays so the per-tick finite-difference
+   // and smoother writes cause no Double autoboxing on the estimator hot path.
+   private final double[] previousHeight = {Double.NaN, Double.NaN};
+   private final double[] probability = {0.0, 0.0};
 
    /** Builds a detector with reasonable flat-ground defaults; only the sole frames and Δt are required. */
    public KinematicContactDetector(SideDependentList<MovingReferenceFrame> soleFrames, Runnable frameUpdater, double dt)
@@ -103,23 +105,23 @@ public class KinematicContactDetector implements ContactProbabilityProvider
       {
          double height = soleHeightAboveGround(side);
 
-         double previous = previousHeight.get(side);
+         double previous = previousHeight[side.ordinal()];
          double verticalSpeed = Double.isNaN(previous) ? 0.0 : (height - previous) / dt;
-         previousHeight.put(side, height);
+         previousHeight[side.ordinal()] = height;
 
          double pHeight = logistic((heightThreshold - height) / heightWidth);
          double pSpeed = logistic((speedThreshold - Math.abs(verticalSpeed)) / speedWidth);
          double pRaw = pHeight * pSpeed;
 
-         double pSmoothed = smoothingAlpha * probability.get(side) + (1.0 - smoothingAlpha) * pRaw;
-         probability.put(side, clamp(pSmoothed));
+         double pSmoothed = smoothingAlpha * probability[side.ordinal()] + (1.0 - smoothingAlpha) * pRaw;
+         probability[side.ordinal()] = clamp(pSmoothed);
       }
    }
 
    @Override
    public double getContactProbability(RobotSide side)
    {
-      return probability.get(side);
+      return probability[side.ordinal()];
    }
 
    /** @return the sole-origin height above the support plane (m), in world. */

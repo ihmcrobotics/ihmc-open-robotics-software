@@ -30,8 +30,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
  * {@code X} is {@code (3+k)×(3+k)}.</p>
  *
  * <p>All methods are static; {@code ToPack} parameters are the outputs — inputs are never
- * modified. Small temporaries are allocated, so these are not suitable for hard real-time
- * loops without pre-allocation wrappers.</p>
+ * modified. Each of {@link #exp}, {@link #log} and {@link #adjoint} has two forms: a convenience
+ * form that allocates its own scratch (fine for tests and other non-real-time callers) and an
+ * allocation-free overload that takes caller-owned {@link Vector3D}/{@link RotationMatrix}/{@link Matrix3D}
+ * scratch. Use the latter on hard real-time loops — the estimator's per-tick predict/update path does.</p>
  */
 public class SEK3_Utils
 {
@@ -50,34 +52,46 @@ public class SEK3_Utils
     */
    public static void exp(double[] xi, DMatrixRMaj XToPack)
    {
+      exp(xi, XToPack, new Vector3D(), new RotationMatrix(), new Matrix3D());
+   }
 
+   /**
+    * Allocation-free {@link #exp(double[], DMatrixRMaj)}: identical result, but the caller supplies the
+    * three scratch objects so nothing is allocated on the per-tick estimator path.
+    *
+    * @param xi              the algebra element [φ; v₁; …; v_k]; length must be 3 + 3k with k ≥ 1. Not modified.
+    * @param XToPack         the group element to pack the result into; reshaped to (3+k)×(3+k). Modified.
+    * @param phiScratch      caller-owned scratch for φ. Overwritten.
+    * @param rotationScratch caller-owned scratch for R = exp(φ). Overwritten.
+    * @param jacobianScratch caller-owned scratch for the left Jacobian J_l(φ). Overwritten.
+    */
+   public static void exp(double[] xi, DMatrixRMaj XToPack, Vector3D phiScratch, RotationMatrix rotationScratch, Matrix3D jacobianScratch)
+   {
       int k = numColumns(xi.length);
       int n = 3 + k;
 
       // Rotational part: R = exp(φ).
-      Vector3D phi = new Vector3D(xi[0], xi[1], xi[2]);
-      RotationMatrix R = new RotationMatrix();
-      SO3LieGroupTools.exp(phi, R); // feeds matrix exponential of phi into R object
+      phiScratch.set(xi[0], xi[1], xi[2]);
+      SO3LieGroupTools.exp(phiScratch, rotationScratch); // feeds matrix exponential of phi into R object
 
       // Shared left Jacobian J_l(φ) for every translation column.
-      Matrix3D Jl = new Matrix3D();
-      SO3LieGroupTools.leftJacobian(phi, Jl); // passes left Jacobian (essentially \Gamma_1) into Jl as function of phi
+      SO3LieGroupTools.leftJacobian(phiScratch, jacobianScratch); // left Jacobian (essentially \Gamma_1) as a function of phi
 
       XToPack.reshape(n,n);
       XToPack.zero();
 
       // Top-left 3×3 block = R.
-      XToPack.set(0,0, R.getM00());
-      XToPack.set(0,1, R.getM01());
-      XToPack.set(0,2, R.getM02());
+      XToPack.set(0,0, rotationScratch.getM00());
+      XToPack.set(0,1, rotationScratch.getM01());
+      XToPack.set(0,2, rotationScratch.getM02());
 
-      XToPack.set(1,0, R.getM10());
-      XToPack.set(1,1, R.getM11());
-      XToPack.set(1,2, R.getM12());
+      XToPack.set(1,0, rotationScratch.getM10());
+      XToPack.set(1,1, rotationScratch.getM11());
+      XToPack.set(1,2, rotationScratch.getM12());
 
-      XToPack.set(2,0, R.getM20());
-      XToPack.set(2,1, R.getM21());
-      XToPack.set(2,2, R.getM22());
+      XToPack.set(2,0, rotationScratch.getM20());
+      XToPack.set(2,1, rotationScratch.getM21());
+      XToPack.set(2,2, rotationScratch.getM22());
 
       // Bottom-right k×k block = identity.
       for (int i = 0; i < k; i++)
@@ -90,15 +104,14 @@ public class SEK3_Utils
          double vy = xi[3 + 3 * i + 1];
          double vz = xi[3 + 3 * i + 2];
 
-         double px = Jl.getM00() * vx + Jl.getM01() * vy + Jl.getM02() * vz;
-         double py = Jl.getM10() * vx + Jl.getM11() * vy + Jl.getM12() * vz;
-         double pz = Jl.getM20() * vx + Jl.getM21() * vy + Jl.getM22() * vz;
+         double px = jacobianScratch.getM00() * vx + jacobianScratch.getM01() * vy + jacobianScratch.getM02() * vz;
+         double py = jacobianScratch.getM10() * vx + jacobianScratch.getM11() * vy + jacobianScratch.getM12() * vz;
+         double pz = jacobianScratch.getM20() * vx + jacobianScratch.getM21() * vy + jacobianScratch.getM22() * vz;
 
          XToPack.set(0, 3 + i, px);
          XToPack.set(1, 3 + i, py);
          XToPack.set(2, 3 + i, pz);
       }
-
    }
 
    /**
@@ -111,6 +124,21 @@ public class SEK3_Utils
     */
    public static void log(DMatrixRMaj X, double[] xiToPack)
    {
+      log(X, xiToPack, new RotationMatrix(), new Vector3D(), new Matrix3D());
+   }
+
+   /**
+    * Allocation-free {@link #log(DMatrixRMaj, double[])}: identical result, but the caller supplies the
+    * three scratch objects so nothing is allocated on the per-tick estimator path.
+    *
+    * @param X               the group element, an (3+k)×(3+k) matrix with k ≥ 1. Not modified.
+    * @param xiToPack        the array to pack [φ; v₁; …; v_k] into; length must be 3 + 3k. Modified.
+    * @param rotationScratch caller-owned scratch for R (read from X). Overwritten.
+    * @param phiScratch      caller-owned scratch for φ = log(R). Overwritten.
+    * @param jacobianScratch caller-owned scratch for the inverse left Jacobian J_l⁻¹(φ). Overwritten.
+    */
+   public static void log(DMatrixRMaj X, double[] xiToPack, RotationMatrix rotationScratch, Vector3D phiScratch, Matrix3D jacobianScratch)
+   {
       int n =X.getNumRows();
       int k = n-3;
       if (X.getNumCols() != n || k < 1)
@@ -119,21 +147,18 @@ public class SEK3_Utils
          throw new IllegalArgumentException("xiToPack length must be" + (3  + 3 * k) + " for a " + n + "x" + n + " element, was " + xiToPack.length);
 
       // Rotational part: φ = log(R), reading R from the top-left 3×3 block.
-      RotationMatrix R = new RotationMatrix();
       //NOTE: if having errors here, use `setUnsafe` method if slightly non-orthonormal basis
-      R.set(X.get(0,0), X.get(0,1), X.get(0,2),
-            X.get(1,0), X.get(1,1), X.get(1,2),
-            X.get(2,0), X.get(2,1), X.get(2,2));
+      rotationScratch.set(X.get(0,0), X.get(0,1), X.get(0,2),
+                          X.get(1,0), X.get(1,1), X.get(1,2),
+                          X.get(2,0), X.get(2,1), X.get(2,2));
 
-      Vector3D phi = new Vector3D();
-      SO3LieGroupTools.log(R,phi);
+      SO3LieGroupTools.log(rotationScratch, phiScratch);
 
-      Matrix3D JlInv = new Matrix3D();
-      SO3LieGroupTools.leftJacobianInverse(phi, JlInv);
+      SO3LieGroupTools.leftJacobianInverse(phiScratch, jacobianScratch);
 
-      xiToPack[0] = phi.getX();
-      xiToPack[1] = phi.getY();
-      xiToPack[2] = phi.getZ();
+      xiToPack[0] = phiScratch.getX();
+      xiToPack[1] = phiScratch.getY();
+      xiToPack[2] = phiScratch.getZ();
 
       // Each translation column: vᵢ = J_l⁻¹(φ)·pᵢ, reading pᵢ from matrix column (3 + i).
       for (int i = 0; i < k; i++)
@@ -142,9 +167,9 @@ public class SEK3_Utils
          double py = X.get(1, 3 + i);
          double pz = X.get(2, 3 + i);
 
-         xiToPack[3 + 3 * i] = JlInv.getM00() * px + JlInv.getM01() * py + JlInv.getM02() * pz;
-         xiToPack[3 + 3 * i + 1] = JlInv.getM10() * px + JlInv.getM11() * py + JlInv.getM12() * pz;
-         xiToPack[3 + 3 * i + 2] = JlInv.getM20() * px + JlInv.getM21() * py + JlInv.getM22() * pz;
+         xiToPack[3 + 3 * i] = jacobianScratch.getM00() * px + jacobianScratch.getM01() * py + jacobianScratch.getM02() * pz;
+         xiToPack[3 + 3 * i + 1] = jacobianScratch.getM10() * px + jacobianScratch.getM11() * py + jacobianScratch.getM12() * pz;
+         xiToPack[3 + 3 * i + 2] = jacobianScratch.getM20() * px + jacobianScratch.getM21() * py + jacobianScratch.getM22() * pz;
       }
    }
 
@@ -161,6 +186,21 @@ public class SEK3_Utils
     */
    public static void adjoint(DMatrixRMaj X, DMatrixRMaj adjointToPack)
    {
+      adjoint(X, adjointToPack, new RotationMatrix(), new Vector3D(), new Matrix3D());
+   }
+
+   /**
+    * Allocation-free {@link #adjoint(DMatrixRMaj, DMatrixRMaj)}: identical result, but the caller supplies
+    * the three scratch objects so nothing is allocated on the per-tick estimator path.
+    *
+    * @param X               the group element, an (3+k)×(3+k) matrix with k ≥ 1. Not modified.
+    * @param adjointToPack   the (3+3k)×(3+3k) matrix to pack Ad_X into; reshaped. Modified.
+    * @param rotationScratch caller-owned scratch for R (read from X). Overwritten.
+    * @param columnScratch   caller-owned scratch for the translation columns pᵢ. Overwritten.
+    * @param hatScratch      caller-owned scratch for hat(pᵢ)·R. Overwritten.
+    */
+   public static void adjoint(DMatrixRMaj X, DMatrixRMaj adjointToPack, RotationMatrix rotationScratch, Vector3D columnScratch, Matrix3D hatScratch)
+   {
       int n = X.getNumRows();
       int k = n - 3;
       if (X.getNumCols() != n || k < 1)
@@ -170,30 +210,25 @@ public class SEK3_Utils
       adjointToPack.reshape(m,m);
       adjointToPack.zero();
 
-      RotationMatrix R = new RotationMatrix();
-      R.set(X.get(0,0), X.get(0,1), X.get(0,2),
-            X.get(1,0), X.get(1,1), X.get(1,2),
-            X.get(2,0), X.get(2,1), X.get(2,2));
+      rotationScratch.set(X.get(0,0), X.get(0,1), X.get(0,2),
+                          X.get(1,0), X.get(1,1), X.get(1,2),
+                          X.get(2,0), X.get(2,1), X.get(2,2));
 
-      insert3x3(adjointToPack, 0, 0, R);
+      insert3x3(adjointToPack, 0, 0, rotationScratch);
 
-      Vector3D pi = new Vector3D(); // pᵢ, the i-th translation column of X
-      Matrix3D hatPiR = new Matrix3D();
       for (int i = 0; i < k; i++)
       {
          // p_i is the ith translation column, stored in X as column (i+3)
-         pi.set(X.get(0, 3 + i), X.get(1, 3 + i), X.get(2, 3 + i));
+         columnScratch.set(X.get(0, 3 + i), X.get(1, 3 + i), X.get(2, 3 + i));
 
          // vᵢ' = hat(pᵢ)·R·φ + R·vᵢ  →  block (i,0) = hat(pᵢ)·R, block (i,i) = R.
-         SO3LieGroupTools.hat(pi, hatPiR);
-         hatPiR.multiply(R);
+         SO3LieGroupTools.hat(columnScratch, hatScratch);
+         hatScratch.multiply(rotationScratch);
 
          int rowBlock = 3 + 3 * i;
-         insert3x3(adjointToPack, rowBlock, 0, hatPiR);
-         insert3x3(adjointToPack, rowBlock, rowBlock, R);
-
+         insert3x3(adjointToPack, rowBlock, 0, hatScratch);
+         insert3x3(adjointToPack, rowBlock, rowBlock, rotationScratch);
       }
-
    }
 
    /**

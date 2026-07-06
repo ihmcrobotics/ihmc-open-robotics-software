@@ -64,6 +64,11 @@ public class InvariantPropagator
    private final Matrix3D gammaMatrix = new Matrix3D();
    private final Matrix3D hatGravity = new Matrix3D();
 
+   // Pre-allocated scratch for the allocation-free SEK3_Utils.adjoint call in predictCovariance().
+   private final RotationMatrix adjointRotation = new RotationMatrix();
+   private final Vector3D adjointColumn = new Vector3D();
+   private final Matrix3D adjointHat = new Matrix3D();
+
    /**
     * @param numberOfContacts the number of contact columns N (≥ 0).
     * @param gyroVariance     continuous angular-velocity noise variance σ_ω² (rad²/s).
@@ -166,7 +171,7 @@ public class InvariantPropagator
    private void predictCovariance(InvariantState state, double dt)
    {
       buildStateTransition(dt);
-      SEK3_Utils.adjoint(state.getGroupElement(), adjoint);
+      SEK3_Utils.adjoint(state.getGroupElement(), adjoint, adjointRotation, adjointColumn, adjointHat);
 
       // Q_d = Φ · Ad · Q_c · Adᵀ · Φᵀ · Δt
       CommonOps_DDRM.mult(adjoint, processNoise, tempA);           // Ad·Q_c

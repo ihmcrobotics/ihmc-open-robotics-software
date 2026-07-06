@@ -7,6 +7,7 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter;
 
 /**
  * State for an SE_k(3) invariant filter: a group element X together with its covariance P.
@@ -117,15 +118,7 @@ public class InvariantState
     */
    public void setRotation(RotationMatrixReadOnly rotation)
    {
-      groupElement.set(0, 0, rotation.getM00());
-      groupElement.set(0, 1, rotation.getM01());
-      groupElement.set(0, 2, rotation.getM02());
-      groupElement.set(1, 0, rotation.getM10());
-      groupElement.set(1, 1, rotation.getM11());
-      groupElement.set(1, 2, rotation.getM12());
-      groupElement.set(2, 0, rotation.getM20());
-      groupElement.set(2, 1, rotation.getM21());
-      groupElement.set(2, 2, rotation.getM22());
+      JointLevelKFPreFilter.set_matrix(groupElement, rotation);
    }
 
    /**

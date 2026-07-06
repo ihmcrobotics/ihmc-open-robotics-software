@@ -3,7 +3,10 @@ package us.ihmc.stateEstimation.invariant_estimator;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 /**
@@ -42,6 +45,11 @@ public class InvariantUpdater
    private final DMatrixRMaj covarianceWork;                                  // (m×m)
    private final DMatrixRMaj expDelta = new DMatrixRMaj(1, 1);                // exp_G(−c) (n×n)
    private final DMatrixRMaj newGroupElement = new DMatrixRMaj(1, 1);         // (n×n)
+
+   // Pre-allocated scratch for the allocation-free SEK3_Utils.exp call in update().
+   private final Vector3D expPhi = new Vector3D();
+   private final RotationMatrix expRotation = new RotationMatrix();
+   private final Matrix3D expJacobian = new Matrix3D();
 
    /** Optional contact measurement subpiece, owned and called by this updater (see {@link #updateContact}). */
    private ContactUpdater contactUpdater = null;
@@ -130,7 +138,7 @@ public class InvariantUpdater
       for (int i = 0; i < m; i++)
          correctionArray[i] = -correctionColumn.get(i, 0); // negative: error convention X̂ = exp(ξ)·X
 
-      SEK3_Utils.exp(correctionArray, expDelta);
+      SEK3_Utils.exp(correctionArray, expDelta, expPhi, expRotation, expJacobian);
       newGroupElement.reshape(expDelta.getNumRows(), expDelta.getNumCols());
       CommonOps_DDRM.mult(expDelta, state.getGroupElement(), newGroupElement);
       state.getGroupElement().set(newGroupElement);
