@@ -1,53 +1,202 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-  SCS2 chart-group layout for the JointLevelKFPreFilter per-joint YoVariables.
+  SCS2 chart-group layout for the JointLevelKFPreFilter per-joint YoVariables (robot: Alex).
 
-  Load it in the SCS2 visualizer: on a chart-panel tab, right-click (or use the chart
-  toolbar menu) -> "Load chart group..." and select this file.
+  Load it in the SCS2 visualizer: on a chart-panel tab, use the chart menu -> "Load chart
+  group..." and select this file.
 
-  TEMPLATE: the per-joint YoVariables are named after the ROBOT's joints, which are not
-  known here, so the two rows below use placeholder joint names (LEFT_KNEE_PITCH,
-  RIGHT_KNEE_PITCH). Replace them with your robot's joint names, and copy a row per joint
-  you want to see. The variable naming pattern (all plain YoDoubles) is:
+  Joints: Alex lower body + spine/neck (AlexJointMap.Joints). Left column = filtered
+  position q with its 1-sigma covariance envelope; right column = filtered velocity q_dot
+  with its envelope. One row per joint.
 
-     JointLevelKFPreFilter.jointKF_q_<joint>              filtered position q
-     JointLevelKFPreFilter.jointKF_q_<joint>_upperBound   q + 1 sigma
-     JointLevelKFPreFilter.jointKF_q_<joint>_lowerBound   q - 1 sigma
-     JointLevelKFPreFilter.jointKF_qd_<joint>             filtered velocity q_dot
-     JointLevelKFPreFilter.jointKF_qd_<joint>_upperBound  q_dot + 1 sigma
-     JointLevelKFPreFilter.jointKF_qd_<joint>_lowerBound  q_dot - 1 sigma
+  Names are partial ("<registrySimpleName>.<variableName>"); SCS2 resolves the registry
+  segment as a namespace ending, so the full root.main.<thread>... prefix is not needed.
+  NOTE: a joint only produces these variables when its IMU pair is enabled at runtime
+  (imuSensorsToUse); rows for a disabled pair simply stay empty.
 
-  Left column = position (q) with its covariance envelope; right column = velocity (q_dot)
-  with its covariance envelope. Grid: 2 columns x 2 rows (one row per joint here).
-
-  Tip: to fill this in for every filtered joint automatically, send me the joint list (or
-  your existing layout) and I'll regenerate the file with one row per joint.
+  Grid: 2 columns (q | q_dot) x 15 rows (one per joint).
 -->
 <YoChartGroupConfiguration name="JointLevelKF">
     <chartConfigurations>
         <identifier column="0" row="0"/>
-        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_KNEE_PITCH</yoVariables>
-        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_KNEE_PITCH_upperBound</yoVariables>
-        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_KNEE_PITCH_lowerBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_HIP_Z</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_HIP_Z_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_HIP_Z_lowerBound</yoVariables>
     </chartConfigurations>
     <chartConfigurations>
         <identifier column="1" row="0"/>
-        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_KNEE_PITCH</yoVariables>
-        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_KNEE_PITCH_upperBound</yoVariables>
-        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_KNEE_PITCH_lowerBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_Z</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_Z_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_Z_lowerBound</yoVariables>
     </chartConfigurations>
     <chartConfigurations>
         <identifier column="0" row="1"/>
-        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_KNEE_PITCH</yoVariables>
-        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_KNEE_PITCH_upperBound</yoVariables>
-        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_KNEE_PITCH_lowerBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_HIP_X</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_HIP_X_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_HIP_X_lowerBound</yoVariables>
     </chartConfigurations>
     <chartConfigurations>
         <identifier column="1" row="1"/>
-        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_KNEE_PITCH</yoVariables>
-        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_KNEE_PITCH_upperBound</yoVariables>
-        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_KNEE_PITCH_lowerBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_X</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_X_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_X_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="0" row="2"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_HIP_Y</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_HIP_Y_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_HIP_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="2"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_Y</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_Y_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="0" row="3"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_KNEE_Y</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_KNEE_Y_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_KNEE_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="3"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_KNEE_Y</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_KNEE_Y_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_KNEE_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="0" row="4"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_ANKLE_Y</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_ANKLE_Y_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_ANKLE_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="4"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_ANKLE_Y</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_ANKLE_Y_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_ANKLE_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="0" row="5"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_ANKLE_X</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_ANKLE_X_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_ANKLE_X_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="5"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_ANKLE_X</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_ANKLE_X_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_ANKLE_X_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="0" row="6"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_Z</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_Z_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_Z_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="6"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_Z</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_Z_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_Z_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="0" row="7"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_X</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_X_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_X_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="7"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_X</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_X_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_X_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="0" row="8"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_Y</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_Y_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="8"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_Y</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_Y_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="0" row="9"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_KNEE_Y</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_KNEE_Y_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_KNEE_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="9"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_KNEE_Y</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_KNEE_Y_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_KNEE_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="0" row="10"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_ANKLE_Y</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_ANKLE_Y_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_ANKLE_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="10"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_ANKLE_Y</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_ANKLE_Y_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_ANKLE_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="0" row="11"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_ANKLE_X</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_ANKLE_X_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_ANKLE_X_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="11"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_ANKLE_X</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_ANKLE_X_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_ANKLE_X_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="0" row="12"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_SPINE_Z</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_SPINE_Z_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_SPINE_Z_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="12"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_SPINE_Z</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_SPINE_Z_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_SPINE_Z_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="0" row="13"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_NECK_Z</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_NECK_Z_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_NECK_Z_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="13"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_NECK_Z</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_NECK_Z_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_NECK_Z_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="0" row="14"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_NECK_Y</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_NECK_Y_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_NECK_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="14"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_NECK_Y</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_NECK_Y_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_NECK_Y_lowerBound</yoVariables>
     </chartConfigurations>
     <numberOfColumns>2</numberOfColumns>
-    <numberOfRows>2</numberOfRows>
+    <numberOfRows>15</numberOfRows>
 </YoChartGroupConfiguration>
