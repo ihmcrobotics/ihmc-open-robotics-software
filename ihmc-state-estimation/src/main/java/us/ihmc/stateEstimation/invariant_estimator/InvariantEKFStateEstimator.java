@@ -3,6 +3,7 @@ package us.ihmc.stateEstimation.invariant_estimator;
 import java.util.Objects;
 
 import gnu.trove.map.TObjectDoubleMap;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -31,6 +32,7 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBiasPr
 import us.ihmc.stateEstimation.jointLevel.ZeroIMUBiasProvider;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.euclid.YoQuaternion;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -112,6 +114,41 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final YoFramePoint3D yoBasePosition = new YoFramePoint3D("invariantFilterPelvisBasePosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoQuaternion yoBaseOrientation = new YoQuaternion("invariantFilterPelvisBaseOrientation", registry);
    private final YoFrameVector3D yoBaseVelocity = new YoFrameVector3D("invariantFilterPelvisBaseVelocity", ReferenceFrame.getWorldFrame(), registry);
+
+   // Body-frame (pelvis-frame) views of the estimate. RPY is the estimated base orientation as
+   // yaw-pitch-roll (world->body), addressing the earlier TODO for a controller-convention comparison; the
+   // body velocity is the world base velocity rotated into the estimated pelvis frame (Rᵀ v). These are set
+   // raw from the filter's own rotation, so the YoFrameVector3D is world-frame-labelled but holds body-frame
+   // numbers (the name carries the frame), matching the existing "...Body" comparison variables.
+   private final YoFrameYawPitchRoll yoBaseOrientationRPY = new YoFrameYawPitchRoll("invariantFilterPelvisOrientation",
+                                                                                    ReferenceFrame.getWorldFrame(),
+                                                                                    registry);
+   private final YoFrameVector3D yoBaseVelocityBody = new YoFrameVector3D("invariantFilterPelvisBaseVelocityBody",
+                                                                          ReferenceFrame.getWorldFrame(),
+                                                                          registry);
+
+   // 1-sigma covariance envelope around the base estimate: upper/lower = estimate +/- sqrt(diag(P)), read
+   // from the filter's tangent-ordered covariance [δφ; δv; δp; …]. Position and velocity get a full
+   // upper/lower envelope in the world frame; orientation exposes its per-axis tangent standard deviation
+   // (rad) directly, since a +/- band on a rotation is not a meaningful world-frame vector.
+   private final YoFramePoint3D yoBasePositionUpperBound = new YoFramePoint3D("invariantFilterPelvisBasePositionUpperBound",
+                                                                              ReferenceFrame.getWorldFrame(),
+                                                                              registry);
+   private final YoFramePoint3D yoBasePositionLowerBound = new YoFramePoint3D("invariantFilterPelvisBasePositionLowerBound",
+                                                                              ReferenceFrame.getWorldFrame(),
+                                                                              registry);
+   private final YoFrameVector3D yoBaseVelocityUpperBound = new YoFrameVector3D("invariantFilterPelvisBaseVelocityUpperBound",
+                                                                                ReferenceFrame.getWorldFrame(),
+                                                                                registry);
+   private final YoFrameVector3D yoBaseVelocityLowerBound = new YoFrameVector3D("invariantFilterPelvisBaseVelocityLowerBound",
+                                                                                ReferenceFrame.getWorldFrame(),
+                                                                                registry);
+   private final YoFrameVector3D yoBaseOrientationStandardDeviation = new YoFrameVector3D("invariantFilterPelvisOrientationStdDev",
+                                                                                          ReferenceFrame.getWorldFrame(),
+                                                                                          registry);
+
+   // Per-tick temporary for the body-frame base velocity (Rᵀ v); pre-allocated to keep doControl allocation-free.
+   private final Vector3D invariantLinearVelocityBody = new Vector3D();
 
    // Main (DRC) estimator's pelvis pose, kept only for the 3D marker (position is unobservable so it drifts).
    private final YoFramePoint3D yoMainBasePosition = new YoFramePoint3D("mainFilterPelvisBasePosition", ReferenceFrame.getWorldFrame(), registry);
@@ -352,6 +389,11 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       ekf.getBaseVelocity(invariantLinearVelocityWorld);
       yoBaseVelocity.set(invariantLinearVelocityWorld);
 
+      // Body-frame views + covariance envelope. Valid regardless of runningAsMain (they are the filter's own
+      // estimate, not a cross-estimator comparison), so they are set here before the runningAsMain branch.
+      updateBodyFrameYoVariables();
+      updateCovarianceBoundYoVariables();
+
       // Main estimator's pelvis pose = the shared model's pelvis frame (the main estimator ticks first).
       // Position is unobservable here, so it is kept only for the 3D marker; orientation is observable.
       mainEstimatePelvisPose.setToZero(pelvisFrame);
@@ -397,6 +439,64 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoInvariantRootAngularVelocity.set(invariantAngularVelocityBody);
       velocityErrorTemp.sub(invariantAngularVelocityBody, mainAngularVelocityBody);
       yoAngularVelocityErrorMagnitude.set(velocityErrorTemp.norm());
+   }
+
+   /**
+    * Publishes the body-frame (pelvis-frame) views of the estimate: the base orientation as yaw-pitch-roll,
+    * and the base velocity rotated from world into the estimated pelvis frame (v_body = Rᵀ v_world). Reads
+    * {@code tempRotation} and {@code invariantLinearVelocityWorld}, both set at the top of
+    * {@link #updateYoVariables()}. Allocation-free.
+    */
+   private void updateBodyFrameYoVariables()
+   {
+      yoBaseOrientationRPY.set(tempRotation);
+      tempRotation.inverseTransform(invariantLinearVelocityWorld, invariantLinearVelocityBody);
+      yoBaseVelocityBody.set(invariantLinearVelocityBody);
+   }
+
+   /**
+    * Publishes the 1-sigma covariance envelope around the base estimate: position and velocity as
+    * upper/lower = estimate +/- sqrt(diag(P)) in the world frame, and orientation as its per-axis tangent
+    * standard deviation. Reads the tangent-ordered covariance and the base position/velocity set at the top
+    * of {@link #updateYoVariables()}. Allocation-free.
+    */
+   private void updateCovarianceBoundYoVariables()
+   {
+      InvariantState state = ekf.getState();
+      DMatrixRMaj covariance = state.getCovariance();
+      int orientationIndex = state.rotationTangentIndex();
+      int velocityIndex = state.baseVelocityTangentIndex();
+      int positionIndex = state.basePositionTangentIndex();
+
+      double sigmaPositionX = standardDeviation(covariance, positionIndex);
+      double sigmaPositionY = standardDeviation(covariance, positionIndex + 1);
+      double sigmaPositionZ = standardDeviation(covariance, positionIndex + 2);
+      yoBasePositionUpperBound.set(tempVector.getX() + sigmaPositionX,
+                                   tempVector.getY() + sigmaPositionY,
+                                   tempVector.getZ() + sigmaPositionZ);
+      yoBasePositionLowerBound.set(tempVector.getX() - sigmaPositionX,
+                                   tempVector.getY() - sigmaPositionY,
+                                   tempVector.getZ() - sigmaPositionZ);
+
+      double sigmaVelocityX = standardDeviation(covariance, velocityIndex);
+      double sigmaVelocityY = standardDeviation(covariance, velocityIndex + 1);
+      double sigmaVelocityZ = standardDeviation(covariance, velocityIndex + 2);
+      yoBaseVelocityUpperBound.set(invariantLinearVelocityWorld.getX() + sigmaVelocityX,
+                                   invariantLinearVelocityWorld.getY() + sigmaVelocityY,
+                                   invariantLinearVelocityWorld.getZ() + sigmaVelocityZ);
+      yoBaseVelocityLowerBound.set(invariantLinearVelocityWorld.getX() - sigmaVelocityX,
+                                   invariantLinearVelocityWorld.getY() - sigmaVelocityY,
+                                   invariantLinearVelocityWorld.getZ() - sigmaVelocityZ);
+
+      yoBaseOrientationStandardDeviation.set(standardDeviation(covariance, orientationIndex),
+                                             standardDeviation(covariance, orientationIndex + 1),
+                                             standardDeviation(covariance, orientationIndex + 2));
+   }
+
+   /** Diagonal standard deviation sqrt(P[index, index]), clamped at 0 to stay finite through numerical negatives. */
+   private static double standardDeviation(DMatrixRMaj covariance, int index)
+   {
+      return Math.sqrt(Math.max(0.0, covariance.get(index, index)));
    }
 
    /**

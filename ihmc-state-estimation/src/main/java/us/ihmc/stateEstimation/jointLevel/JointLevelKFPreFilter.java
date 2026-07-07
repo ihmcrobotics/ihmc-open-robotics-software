@@ -22,6 +22,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
@@ -71,6 +72,18 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private final YoInteger yoStateDimension = new YoInteger("jointKFStateDimension", registry);
    private final YoInteger yoNumberOfFilteredJoints = new YoInteger("jointKFNumberOfFilteredJoints", registry);
    private final YoInteger yoNumberOfIMUs = new YoInteger("jointKFNumberOfIMUs", registry);
+
+   // Per-joint filtered state (q, qd) and the 1-sigma covariance envelope around each. All indexed by the
+   // joint's state index (the same index used into x and P). Allocated once in the constructor after n is
+   // known, then only .set() on the estimator thread (allocation-free). The upper/lower "bounds" are the
+   // estimate +/- one standard deviation, i.e. q +/- sqrt(P_qq) and qd +/- sqrt(P_qdqd), for plotting the
+   // filter's confidence envelope alongside the estimate in SCS.
+   private YoDouble[] yoJointPosition;
+   private YoDouble[] yoJointVelocity;
+   private YoDouble[] yoJointPositionUpperBound;
+   private YoDouble[] yoJointPositionLowerBound;
+   private YoDouble[] yoJointVelocityUpperBound;
+   private YoDouble[] yoJointVelocityLowerBound;
 
    // State and constant model
    private final DMatrixRMaj x = new DMatrixRMaj(0,1); // reshaped to dimx1 later when constructed
@@ -203,6 +216,56 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       yoStateDimension.set(dim);
       yoNumberOfFilteredJoints.set(n);
       yoNumberOfIMUs.set(m);
+
+      createJointYoVariables();
+   }
+
+   /**
+    * Allocates the per-joint state / covariance-envelope YoVariables, one set per filtered joint, indexed by
+    * the joint's state index so the per-tick update is a straight array write. Called once from the
+    * constructor after the state layout (n) is fixed.
+    */
+   private void createJointYoVariables()
+   {
+      yoJointPosition = new YoDouble[n];
+      yoJointVelocity = new YoDouble[n];
+      yoJointPositionUpperBound = new YoDouble[n];
+      yoJointPositionLowerBound = new YoDouble[n];
+      yoJointVelocityUpperBound = new YoDouble[n];
+      yoJointVelocityLowerBound = new YoDouble[n];
+      for (var e : jointToIndex.entrySet())
+      {
+         int idx = e.getValue();
+         String jointName = e.getKey().getName();
+         yoJointPosition[idx] = new YoDouble("jointKF_q_" + jointName, registry);
+         yoJointVelocity[idx] = new YoDouble("jointKF_qd_" + jointName, registry);
+         yoJointPositionUpperBound[idx] = new YoDouble("jointKF_q_" + jointName + "_upperBound", registry);
+         yoJointPositionLowerBound[idx] = new YoDouble("jointKF_q_" + jointName + "_lowerBound", registry);
+         yoJointVelocityUpperBound[idx] = new YoDouble("jointKF_qd_" + jointName + "_upperBound", registry);
+         yoJointVelocityLowerBound[idx] = new YoDouble("jointKF_qd_" + jointName + "_lowerBound", registry);
+      }
+   }
+
+   /**
+    * Publishes the per-joint estimate (q, qd) and its 1-sigma covariance envelope to the YoVariables. Reads
+    * straight from x and P; allocation-free (only primitive .set()). The variance diagonal is clamped at 0
+    * before the sqrt to stay finite through the numerical negatives a covariance can momentarily take.
+    */
+   private void updateJointYoVariables()
+   {
+      for (int i = 0; i < n; i++)
+      {
+         double q = x.get(i);
+         double qd = x.get(n + i);
+         double sigmaQ = Math.sqrt(Math.max(0.0, P.get(i, i)));
+         double sigmaQd = Math.sqrt(Math.max(0.0, P.get(n + i, n + i)));
+         yoJointPosition[i].set(q);
+         yoJointVelocity[i].set(qd);
+         yoJointPositionUpperBound[i].set(q + sigmaQ);
+         yoJointPositionLowerBound[i].set(q - sigmaQ);
+         yoJointVelocityUpperBound[i].set(qd + sigmaQd);
+         yoJointVelocityLowerBound[i].set(qd - sigmaQd);
+      }
    }
 
    // Mirrors AlphaComplimentaryFilter.createForKinematicsEstiamtor, works for the factory implementation
@@ -371,6 +434,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 
       for (int i = 0; i < pairs.size(); i++)
          pairGyroUpdate(pairs.get(i));
+
+      updateJointYoVariables();
    }
 
    /** EKF time update in isolation: x <- F x, P <- F P F^T + Q. Package-private so tests can drive it alone. */

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  SCS2 chart-group layout for the InvariantEKFStateEstimator YoVariables.
+
+  Load it in the SCS2 visualizer: on a chart-panel tab, right-click (or use the chart
+  toolbar menu) -> "Load chart group..." and select this file. It also loads as part of a
+  full SCS2 GUI configuration.
+
+  Variable names are given as "<registrySimpleName>.<variableName>"; SCS2 resolves the
+  registry segment as a namespace ending, so the full path prefix is not required. Vector
+  and yaw-pitch-roll YoVariables are charted through their scalar components (suffixes
+  X/Y/Z and Yaw/Pitch/Roll). Position/velocity charts overlay the estimate with its
+  1-sigma covariance envelope (…UpperBound / …LowerBound).
+
+  Grid: 4 columns x 3 rows.
+-->
+<YoChartGroupConfiguration name="InvariantFilterEstimator">
+    <chartConfigurations>
+        <identifier column="0" row="0"/>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBasePositionX</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBasePositionUpperBoundX</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBasePositionLowerBoundX</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="0"/>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBasePositionY</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBasePositionUpperBoundY</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBasePositionLowerBoundY</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="2" row="0"/>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBasePositionZ</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBasePositionUpperBoundZ</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBasePositionLowerBoundZ</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="3" row="0"/>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisOrientationYaw</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisOrientationPitch</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisOrientationRoll</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="0" row="1"/>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBaseVelocityX</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBaseVelocityUpperBoundX</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBaseVelocityLowerBoundX</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="1"/>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBaseVelocityY</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBaseVelocityUpperBoundY</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBaseVelocityLowerBoundY</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="2" row="1"/>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBaseVelocityZ</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBaseVelocityUpperBoundZ</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBaseVelocityLowerBoundZ</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="3" row="1"/>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisOrientationStdDevX</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisOrientationStdDevY</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisOrientationStdDevZ</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="0" row="2"/>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBaseVelocityBodyX</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBaseVelocityBodyY</yoVariables>
+        <yoVariables>InvariantEKFStateEstimator.invariantFilterPelvisBaseVelocityBodyZ</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="2"/>
+        <yoVariables>InvariantEKFStateEstimator.invariantMinusMainOrientationErrorAngle</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="2" row="2"/>
+        <yoVariables>InvariantEKFStateEstimator.invariantMinusMainLinearVelocityErrorMagnitude</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="3" row="2"/>
+        <yoVariables>InvariantEKFStateEstimator.invariantMinusMainAngularVelocityErrorMagnitude</yoVariables>
+    </chartConfigurations>
+    <numberOfColumns>4</numberOfColumns>
+    <numberOfRows>3</numberOfRows>
+</YoChartGroupConfiguration>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  SCS2 chart-group layout for the JointLevelKFPreFilter per-joint YoVariables.
+
+  Load it in the SCS2 visualizer: on a chart-panel tab, right-click (or use the chart
+  toolbar menu) -> "Load chart group..." and select this file.
+
+  TEMPLATE: the per-joint YoVariables are named after the ROBOT's joints, which are not
+  known here, so the two rows below use placeholder joint names (LEFT_KNEE_PITCH,
+  RIGHT_KNEE_PITCH). Replace them with your robot's joint names, and copy a row per joint
+  you want to see. The variable naming pattern (all plain YoDoubles) is:
+
+     JointLevelKFPreFilter.jointKF_q_<joint>              filtered position q
+     JointLevelKFPreFilter.jointKF_q_<joint>_upperBound   q + 1 sigma
+     JointLevelKFPreFilter.jointKF_q_<joint>_lowerBound   q - 1 sigma
+     JointLevelKFPreFilter.jointKF_qd_<joint>             filtered velocity q_dot
+     JointLevelKFPreFilter.jointKF_qd_<joint>_upperBound  q_dot + 1 sigma
+     JointLevelKFPreFilter.jointKF_qd_<joint>_lowerBound  q_dot - 1 sigma
+
+  Left column = position (q) with its covariance envelope; right column = velocity (q_dot)
+  with its covariance envelope. Grid: 2 columns x 2 rows (one row per joint here).
+
+  Tip: to fill this in for every filtered joint automatically, send me the joint list (or
+  your existing layout) and I'll regenerate the file with one row per joint.
+-->
+<YoChartGroupConfiguration name="JointLevelKF">
+    <chartConfigurations>
+        <identifier column="0" row="0"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_KNEE_PITCH</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_KNEE_PITCH_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_LEFT_KNEE_PITCH_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="0"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_KNEE_PITCH</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_KNEE_PITCH_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_LEFT_KNEE_PITCH_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="0" row="1"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_KNEE_PITCH</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_KNEE_PITCH_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_q_RIGHT_KNEE_PITCH_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <identifier column="1" row="1"/>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_KNEE_PITCH</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_KNEE_PITCH_upperBound</yoVariables>
+        <yoVariables>JointLevelKFPreFilter.jointKF_qd_RIGHT_KNEE_PITCH_lowerBound</yoVariables>
+    </chartConfigurations>
+    <numberOfColumns>2</numberOfColumns>
+    <numberOfRows>2</numberOfRows>
+</YoChartGroupConfiguration>
