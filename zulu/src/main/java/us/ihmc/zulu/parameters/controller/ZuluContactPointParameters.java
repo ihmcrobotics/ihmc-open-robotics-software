@@ -1,7 +1,6 @@
 package us.ihmc.zulu.parameters.controller;
 
 import us.ihmc.zulu.*;
-import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -16,6 +15,7 @@ import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 
 public class ZuluContactPointParameters extends RobotContactPointParameters<RobotSide>
 {

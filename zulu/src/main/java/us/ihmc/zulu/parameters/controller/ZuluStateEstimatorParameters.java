@@ -3,7 +3,7 @@ package us.ihmc.zulu.parameters.controller;
 import us.ihmc.zulu.ZuluJointMap;
 import us.ihmc.zulu.ZuluSensorInformation;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.JointTorqueBasedFootSwitchFactory;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -218,7 +218,7 @@ public class ZuluStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public double getCoPFilterFreqInHertz()
    {
-      return Double.POSITIVE_INFINITY;
+      return 40.0;
    }
 
    @Override
@@ -328,12 +328,23 @@ public class ZuluStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
+   public SideDependentList<FootSwitchFactory> getFootSwitchFactories()
+   {
+      FootSwitchFactory jointTorqueFactory = getFootSwitchFactory();
+      return new SideDependentList<>(jointTorqueFactory, jointTorqueFactory);
+   }
+
+   @Override
    public FootSwitchFactory getFootSwitchFactory()
    {
-      WrenchBasedFootSwitchFactory factory = new WrenchBasedFootSwitchFactory();
-      factory.setDefaultContactThresholdForce(50.0);
-      factory.setDefaultCoPThresholdDistance(4.0e-3);
-      factory.setDefaultSecondContactThresholdForceIgnoringCoP(75.0);
+      JointTorqueBasedFootSwitchFactory factory = new JointTorqueBasedFootSwitchFactory("ANKLE_Y");
+      factory.setDefaultContactThresholdForceLow(60.0);
+      factory.setDefaultContactThresholdForceHigh(150.0);
+      factory.setDefaultCoPThresholdDistance(5.0e-3);
+      factory.setDefaultVerticalVelocityThreshold(0.08);
+
+      factory.setDefaultContactWindowDuration(25 * estimatorDT); // preserves previous behavior of dt = 1ms, windowSize = 25
+      factory.setDefaultUseJacobianTranspose(true);
       return factory;
    }
 

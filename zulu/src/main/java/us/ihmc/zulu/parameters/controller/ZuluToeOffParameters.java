@@ -1,7 +1,7 @@
 package us.ihmc.zulu.parameters.controller;
 
-import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
+import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 
 public class ZuluToeOffParameters extends ToeOffParameters
 {

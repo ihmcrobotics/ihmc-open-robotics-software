@@ -8,12 +8,12 @@ import us.ihmc.zulu.ZuluJointMap;
 import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.zulu.parameters.controller.ZuluWalkingControllerParameters;
-import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.icpPlannerTests.AvatarICPPlannerFlatGroundTest;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
+import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 
 @Tag("humanoid-flat-ground")
 public class ZuluICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTest
@@ -87,7 +87,7 @@ public class ZuluICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTest
    {
       public TestWalkingParameters(ZuluVersion version, RobotTarget target, ZuluJointMap jointMap, ZuluPhysicalProperties physicalProperties)
       {
-         super(version, target, jointMap,physicalProperties);
+         super(version, target, jointMap, physicalProperties);
       }
 
       @Override

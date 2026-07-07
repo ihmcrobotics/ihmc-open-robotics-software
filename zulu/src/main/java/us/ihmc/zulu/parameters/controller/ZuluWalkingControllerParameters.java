@@ -2,8 +2,8 @@ package us.ihmc.zulu.parameters.controller;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.zulu.ZuluJointMap;
+import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.zulu.ZuluVersion;
-import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
@@ -20,7 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.JointTorqueBasedFootSwitchFactory;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
@@ -33,6 +33,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -113,16 +114,16 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
       kneePrivilegedConfigurationParameters.setPrivilegedConfigurationOption(PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_MID_RANGE);
 
       kneeJointLimitParameters = new JointLimitParameters();
-      kneeJointLimitParameters.setMaxAbsJointVelocity(4.0);
-      kneeJointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toRadians(30.0));
+      kneeJointLimitParameters.setMaxAbsJointVelocity(2.0);
+      kneeJointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toRadians(15.0));
       kneeJointLimitParameters.setJointLimitFilterBreakFrequency(15.0);
-      kneeJointLimitParameters.setVelocityControlGain(600.0);
+      kneeJointLimitParameters.setVelocityControlGain(300.0);
       kneeJointLimitParameters.setVelocityDeadbandSize(0.3);
 
       // TODO Needs tune up
       minimumHeightAboveGround = 0.6 * jointMap.getModelScale();
-      nominalHeightAboveGround = 0.88 * jointMap.getModelScale();
-      maximumHeightAboveGround = 0.91 * jointMap.getModelScale();
+      nominalHeightAboveGround = 0.90 * jointMap.getModelScale();
+      maximumHeightAboveGround = 0.95 * jointMap.getModelScale();
    }
 
    @Override
@@ -146,7 +147,7 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    @Override
    public double getOmega0()
    {
-      return 3.0;
+      return 3.3;
    }
 
    @Override
@@ -183,7 +184,7 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    @Override
    public double getICPErrorThresholdToSpeedUpSwing()
    {
-      return 0.05 * jointMap.getModelScale();
+      return 0.03 * jointMap.getModelScale();
    }
 
    @Override
@@ -626,10 +627,10 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
       double zetaXYOrientation = 0.7;
       double zetaZOrientation = 0.7;
 
-      double maxPositionAcceleration = Double.POSITIVE_INFINITY;
-      double maxPositionJerk = Double.POSITIVE_INFINITY;
-      double maxOrientationAcceleration = Double.POSITIVE_INFINITY;
-      double maxOrientationJerk = Double.POSITIVE_INFINITY;
+      double maxPositionAcceleration = 20.0;
+      double maxPositionJerk = 300.0;
+      double maxOrientationAcceleration = 100.0;
+      double maxOrientationJerk = 1500.0;
 
       DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
@@ -677,10 +678,10 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
       double kpXYOrientation = 200.0;
       double kpZOrientation = 200.0;
       double zetaOrientation = 0.4;
-      double maxLinearAcceleration = Double.POSITIVE_INFINITY;
-      double maxLinearJerk = Double.POSITIVE_INFINITY;
-      double maxAngularAcceleration = Double.POSITIVE_INFINITY;
-      double maxAngularJerk = Double.POSITIVE_INFINITY;
+      double maxLinearAcceleration = 6.0;
+      double maxLinearJerk = 150.0;
+      double maxAngularAcceleration = 100.0;
+      double maxAngularJerk = 1500.0;
 
       DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
@@ -702,13 +703,13 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    @Override
    public double getDefaultTransferTime()
    {
-      return 0.25;
+      return 0.5;
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      return 0.60;
+      return 0.8;
    }
 
    @Override
@@ -773,15 +774,14 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    @Override
    public double getHighCoPDampingDurationToPreventFootShakies()
    {
-      return -1.0;
+      return 0.05;
    }
 
    @Override
    public double getCoPErrorThresholdForHighCoPDamping()
    {
-      return Double.POSITIVE_INFINITY;
+      return 0.1;
    }
-
 
    @Override
    public ToeOffParameters getToeOffParameters()
@@ -804,16 +804,21 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
    @Override
    public double getMinSwingTrajectoryClearanceFromStanceFoot()
    {
-      return 0.15 * jointMap.getModelScale();
+      return 0.17 * jointMap.getModelScale();
    }
 
    @Override
    public FootSwitchFactory getFootSwitchFactory()
    {
-      WrenchBasedFootSwitchFactory factory = new WrenchBasedFootSwitchFactory();
-      factory.setDefaultContactThresholdForce(50.0);
-      factory.setDefaultCoPThresholdDistance(4.0e-3);
-      factory.setDefaultSecondContactThresholdForceIgnoringCoP(75.0);
+      JointTorqueBasedFootSwitchFactory factory = new JointTorqueBasedFootSwitchFactory("ANKLE_Y");
+      factory.setDefaultContactThresholdForceLow(75.0);
+      factory.setDefaultContactThresholdForceHigh(190.0);
+      factory.setDefaultVerticalVelocityThreshold(0.08);
+      factory.setDefaultHorizontalVelocityThreshold(0.5);
+      // Set this to zero. The foot polygon being used is already shrunken, and the actual measurement here could be wrong.
+      factory.setDefaultCoPThresholdDistance(0.002);
+      factory.setDefaultContactWindowDuration(10 * ZuluRobotModel.DEFAULT_CONTROL_DT); // preserves previous WBCC-specific behavior of dt = 0.003s, windowSize = 10
+      factory.setDefaultUseJacobianTranspose(true);
       return factory;
    }
 

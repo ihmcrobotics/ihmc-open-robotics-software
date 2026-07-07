@@ -71,7 +71,7 @@ public class ZuluSwingTrajectoryParameters extends SwingTrajectoryParameters
    public double getDesiredTouchdownVelocity()
    {
       // TODO Needs tune up
-      return -0.15;
+      return -0.1;
    }
 
    @Override

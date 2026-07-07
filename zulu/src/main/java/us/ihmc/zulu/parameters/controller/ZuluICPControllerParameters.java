@@ -10,6 +10,17 @@ public class ZuluICPControllerParameters extends ICPControllerParameters
    private FeedForwardAlphaCalculator feedForwardAlphaCalculator = null;
 
    @Override
+   public ICPControlGainsReadOnly getHighlyDampedICPFeedbackGains()
+   {
+      ICPControlGains gains = new ICPControlGains();
+      gains.setKpOrthogonalToMotion(2.0);
+      gains.setFeedbackPartMaxRate(4.0);
+      gains.setKpParallelToMotion(2.5);
+      gains.setKi(2.0);
+      return gains;
+   }
+
+   @Override
    public double getFeedbackForwardWeight()
    {
       // TODO Needs tune up.
