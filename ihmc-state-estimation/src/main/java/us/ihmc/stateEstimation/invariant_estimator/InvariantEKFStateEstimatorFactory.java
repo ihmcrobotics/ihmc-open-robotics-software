@@ -22,6 +22,13 @@ public class InvariantEKFStateEstimatorFactory implements StateEstimatorControll
    private final double contactMeasurementVariance;
    private final double initialCovariance;
 
+   private static final double GYRO_VARIANCE = 1.0e-4;
+   private static final double ACCEL_VARIANCE = 1.0e-3;
+   private static final double CONTACT_VARIANCE = 1.0e-6;
+   private static final double CONTACT_MEASUREMENT_VARIANCE = 1.0e-4;
+   private static final double INITIAL_COVARIANCE = 1.0;
+
+
    /** The most recently created estimator, exposed so callers can add its YoGraphics to the SCS. */
    private InvariantEKFStateEstimator estimator;
 
@@ -34,7 +41,15 @@ public class InvariantEKFStateEstimatorFactory implements StateEstimatorControll
     */
    public InvariantEKFStateEstimatorFactory(double estimatorDT, String primaryImuName)
    {
-      this(estimatorDT, primaryImuName, 1.0e-4, 1.0e-3, 1.0e-6, 1.0e-4, 1.0);
+      this(
+            estimatorDT,
+            primaryImuName,
+            GYRO_VARIANCE,
+            ACCEL_VARIANCE,
+            CONTACT_VARIANCE,
+            CONTACT_MEASUREMENT_VARIANCE,
+            INITIAL_COVARIANCE
+      );
    }
 
    /**
