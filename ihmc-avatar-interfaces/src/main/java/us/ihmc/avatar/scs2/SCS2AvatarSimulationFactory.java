@@ -923,6 +923,18 @@ public class SCS2AvatarSimulationFactory
          contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i),
                                                             additionalContactNames.get(i),
                                                             additionalContactTransforms.get(i));
+      if (contactPointParameters.getSecondaryFootContactBodyNames() != null)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            String secondaryFootContactBodyName = contactPointParameters.getSecondaryFootContactBodyNames().get(robotSide);
+            if (secondaryFootContactBodyName != null)
+               contactableBodiesFactory.setSecondaryFootContactPoint(robotSide,
+                                                                     secondaryFootContactBodyName,
+                                                                     contactPointParameters.getSecondaryFootContactTransforms().get(robotSide),
+                                                                     contactPointParameters.getSecondaryFootContactPointsInSoleFrame().get(robotSide));
+         }
+      }
 
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(
             contactableBodiesFactory,

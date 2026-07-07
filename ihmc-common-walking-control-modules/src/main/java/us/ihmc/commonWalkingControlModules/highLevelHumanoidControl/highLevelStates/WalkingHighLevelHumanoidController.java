@@ -1045,6 +1045,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          contactState.getPlaneContactStateCommand(planeContactStateCommand);
          planeContactStateCommand.setUseHighCoPDamping(isHighCoPDampingNeeded);
          controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommand);
+
+         // Optional secondary foot contact (e.g. split-foot second plate): its own contact state on its own rigid body,
+         // so the QP maps its contact force through that body's kinematic chain.
+         YoPlaneContactState secondaryContactState = controllerToolbox.getSecondaryFootContactState(robotSide);
+         if (secondaryContactState != null)
+         {
+            PlaneContactStateCommand secondaryContactStateCommand = planeContactStateCommandPool.add();
+            secondaryContactState.getPlaneContactStateCommand(secondaryContactStateCommand);
+            secondaryContactStateCommand.setUseHighCoPDamping(isHighCoPDampingNeeded);
+            controllerCoreCommand.addInverseDynamicsCommand(secondaryContactStateCommand);
+         }
       }
 
       // Body managers:

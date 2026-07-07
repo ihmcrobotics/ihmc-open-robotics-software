@@ -95,6 +95,18 @@ public class BipedSupportPolygons implements SCS2YoGraphicHolder
 
    public void updateUsingContactStates(SideDependentList<? extends PlaneContactState> contactStates)
    {
+      updateUsingContactStates(contactStates, null);
+   }
+
+   /**
+    * Same as {@link #updateUsingContactStates(SideDependentList)}, but each foot polygon additionally includes the
+    * contact points of an optional secondary contact state for that side (e.g. a split-foot second plate attached to a
+    * different rigid body). A missing side or {@code null} list means no secondary contact for that side. Support-state
+    * bookkeeping (double support, support side) is driven by the primary contact states only.
+    */
+   public void updateUsingContactStates(SideDependentList<? extends PlaneContactState> contactStates,
+                                        SideDependentList<? extends PlaneContactState> secondaryContactStates)
+   {
       boolean inDoubleSupport = true;
       boolean neitherFootIsSupportingFoot = true;
       RobotSide supportSide = null;
@@ -118,17 +130,11 @@ public class BipedSupportPolygons implements SCS2YoGraphicHolder
             supportSide = robotSide;
             neitherFootIsSupportingFoot = false;
 
-            for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
-            {
-               ContactPointBasics contactPoint = contactState.getContactPoints().get(i);
-               if (!contactPoint.isInContact())
-                  continue;
+            addContactPointsToFootPolygons(contactState, robotSide);
 
-               footPolygonInWorldFrame.addVertexMatchingFrame(contactPoint);
-               footPolygonInSoleFrame.addVertexMatchingFrame(contactPoint);
-               footPolygonInSoleZUpFrame.addVertexMatchingFrame(contactPoint);
-               footPolygonInMidFeetZUp.addVertexMatchingFrame(contactPoint);
-            }
+            PlaneContactState secondaryContactState = secondaryContactStates == null ? null : secondaryContactStates.get(robotSide);
+            if (secondaryContactState != null && secondaryContactState.inContact())
+               addContactPointsToFootPolygons(secondaryContactState, robotSide);
 
             footPolygonInWorldFrame.update();
             footPolygonInSoleFrame.update();
@@ -145,6 +151,21 @@ public class BipedSupportPolygons implements SCS2YoGraphicHolder
 
       if (VISUALIZE)
          visualize();
+   }
+
+   private void addContactPointsToFootPolygons(PlaneContactState contactState, RobotSide robotSide)
+   {
+      for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
+      {
+         ContactPointBasics contactPoint = contactState.getContactPoints().get(i);
+         if (!contactPoint.isInContact())
+            continue;
+
+         footPolygonsInWorldFrame.get(robotSide).addVertexMatchingFrame(contactPoint);
+         footPolygonsInSoleFrame.get(robotSide).addVertexMatchingFrame(contactPoint);
+         footPolygonsInSoleZUpFrame.get(robotSide).addVertexMatchingFrame(contactPoint);
+         footPolygonsInMidFeetZUp.get(robotSide).addVertexMatchingFrame(contactPoint);
+      }
    }
 
    public void updateUsingContactStateCommand(SideDependentList<PlaneContactStateCommand> contactStateCommands)

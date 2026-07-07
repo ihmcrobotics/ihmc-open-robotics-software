@@ -722,6 +722,23 @@ public class AvatarEstimatorThreadFactory
          SegmentDependentList<RobotSide, Point2D> toeContactPoints = contactPointParameters.getControllerToeContactPoints();
          SegmentDependentList<RobotSide, LineSegment2D> toeContactLines = contactPointParameters.getControllerToeContactLines();
 
+         // The estimator uses the foot polygon geometrically (e.g. CoP sanity projection), so it should see the
+         // whole-foot support region: augment with any secondary foot contact points (e.g. split-foot second plate)
+         // that are kept out of the main controller contact state.
+         if (contactPointParameters.getSecondaryFootContactPointsInSoleFrame() != null)
+         {
+            SegmentDependentList<RobotSide, ArrayList<Point2D>> augmentedFootContactPoints = new SegmentDependentList<>(RobotSide.class);
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               ArrayList<Point2D> points = new ArrayList<>(footContactPoints.get(robotSide));
+               Point2D secondaryPoint = contactPointParameters.getSecondaryFootContactPointsInSoleFrame().get(robotSide);
+               if (secondaryPoint != null)
+                  points.add(secondaryPoint);
+               augmentedFootContactPoints.put(robotSide, points);
+            }
+            footContactPoints = augmentedFootContactPoints;
+         }
+
          ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
          contactableBodiesFactory.setFootContactPoints(footContactPoints);
          contactableBodiesFactory.setToeContactParameters(toeContactPoints, toeContactLines);

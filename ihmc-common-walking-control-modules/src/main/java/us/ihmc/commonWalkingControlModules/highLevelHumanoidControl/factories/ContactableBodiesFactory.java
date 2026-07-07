@@ -35,6 +35,10 @@ public class ContactableBodiesFactory<E extends Enum<E> & RobotSegment<E>>
    private final OptionalFactoryField<ArrayList<String>> additionalContactNames = new OptionalFactoryField<>("additionalContactNames");
    private final OptionalFactoryField<ArrayList<RigidBodyTransform>> additionalContactTransforms = new OptionalFactoryField<>("additionalContactTransforms");
 
+   private final OptionalFactoryField<SegmentDependentList<E, String>> secondaryFootContactBodyNames = new OptionalFactoryField<>("secondaryFootContactBodyNames");
+   private final OptionalFactoryField<SegmentDependentList<E, RigidBodyTransform>> secondaryFootContactTransforms = new OptionalFactoryField<>("secondaryFootContactTransforms");
+   private final OptionalFactoryField<SegmentDependentList<E, Point2D>> secondaryFootContactPointsInSoleFrame = new OptionalFactoryField<>("secondaryFootContactPointsInSoleFrame");
+
    public void setFootContactPoints(SegmentDependentList<E, ? extends List<Point2D>> feetContactPoints)
    {
       this.feetContactPoints.set(feetContactPoints);
@@ -132,6 +136,68 @@ public class ContactableBodiesFactory<E extends Enum<E> & RobotSegment<E>>
       toeContactLines.dispose();
 
       return footContactableBodies;
+   }
+
+   /**
+    * Declares an optional secondary foot contact for the given segment: a single contact point on a rigid body distinct
+    * from the main foot (e.g. the second plate of a split foot). {@code transformFromParentJointToContact} is the pose
+    * of the contact frame in the body's parent-joint frame; {@code contactPointInSoleFrame} is the same point expressed
+    * in the (primary) sole frame, used by whole-foot geometric consumers (default foot polygon, CoP planning).
+    */
+   public void setSecondaryFootContactPoint(E segment, String bodyName, RigidBodyTransform transformFromParentJointToContact,
+                                            Point2D contactPointInSoleFrame)
+   {
+      if (!secondaryFootContactBodyNames.hasValue())
+      {
+         Class<E> clazz = segment.getClassType();
+         secondaryFootContactBodyNames.set(new SegmentDependentList<>(clazz));
+         secondaryFootContactTransforms.set(new SegmentDependentList<>(clazz));
+         secondaryFootContactPointsInSoleFrame.set(new SegmentDependentList<>(clazz));
+      }
+
+      secondaryFootContactBodyNames.get().put(segment, bodyName);
+      secondaryFootContactTransforms.get().put(segment, transformFromParentJointToContact);
+      secondaryFootContactPointsInSoleFrame.get().put(segment, contactPointInSoleFrame);
+   }
+
+   /** Sole-frame points of the declared secondary foot contacts, or {@code null} when none were declared. */
+   public SegmentDependentList<E, Point2D> getSecondaryFootContactPointsInSoleFrame()
+   {
+      return secondaryFootContactPointsInSoleFrame.hasValue() ? secondaryFootContactPointsInSoleFrame.get() : null;
+   }
+
+   /**
+    * Creates the secondary foot contactable bodies declared via
+    * {@link #setSecondaryFootContactPoint(Enum, String, RigidBodyTransform)}. Returns {@code null} when none were
+    * declared; sides without a secondary contact are simply absent from the returned list.
+    */
+   public SegmentDependentList<E, ContactablePlaneBody> createSecondaryFootContacts()
+   {
+      if (!secondaryFootContactBodyNames.hasValue())
+         return null;
+
+      FullLeggedRobotModel<E> fullRobotModel = this.fullRobotModel.get();
+      RigidBodyBasics[] bodies = fullRobotModel.getElevator().subtreeArray();
+      E[] robotSegments = fullRobotModel.getRobotSegments();
+
+      SegmentDependentList<E, ContactablePlaneBody> secondaryFootContacts = new SegmentDependentList<>(robotSegments[0].getClassType());
+
+      for (E segment : robotSegments)
+      {
+         String bodyName = secondaryFootContactBodyNames.get().get(segment);
+         if (bodyName == null)
+            continue;
+
+         RigidBodyBasics[] rigidBodies = ScrewTools.findRigidBodiesWithNames(bodies, bodyName);
+         if (rigidBodies.length != 1)
+            throw new RuntimeException("Expected exactly one body with name " + bodyName + ", found " + rigidBodies.length);
+
+         String contactName = segment.toString().toLowerCase() + "SecondaryFootContact";
+         secondaryFootContacts.put(segment,
+                                   new SimpleContactPointPlaneBody(contactName, rigidBodies[0], secondaryFootContactTransforms.get().get(segment)));
+      }
+
+      return secondaryFootContacts;
    }
 
    public List<ContactablePlaneBody> createAdditionalContactPoints()

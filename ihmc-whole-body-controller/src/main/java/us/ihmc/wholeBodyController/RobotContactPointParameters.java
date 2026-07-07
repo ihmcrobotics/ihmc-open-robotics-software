@@ -36,6 +36,12 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
    protected final ArrayList<String> additionalContactNames = new ArrayList<>();
    protected final ArrayList<RigidBodyTransform> additionalContactTransforms = new ArrayList<>();
 
+   /** Optional secondary foot contact (e.g. split-foot second plate): body name and contact pose in the body's parent-joint frame. Null when unused. */
+   protected SegmentDependentList<E, String> secondaryFootContactBodyNames = null;
+   protected SegmentDependentList<E, RigidBodyTransform> secondaryFootContactTransforms = null;
+   /** The same secondary contact point expressed in the (primary) sole frame, for whole-foot geometric consumers (support region, CoP planning, estimator). */
+   protected SegmentDependentList<E, Point2D> secondaryFootContactPointsInSoleFrame = null;
+
    protected GroundContactModelParameters groundContactModelParameters = null;
 
    protected boolean useSoftGroundContactParameters;
@@ -174,6 +180,52 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
    public SegmentDependentList<E, Point2D> getControllerToeContactPoints()
    {
       return controllerToeContactPoints;
+   }
+
+   protected final void setSecondaryFootContactPoint(E segment, String bodyName, RigidBodyTransform transformFromParentJointToContact,
+                                                     Point2D contactPointInSoleFrame)
+   {
+      if (secondaryFootContactBodyNames == null)
+      {
+         Class<E> clazz = robotSegments[0].getClassType();
+         secondaryFootContactBodyNames = new SegmentDependentList<>(clazz);
+         secondaryFootContactTransforms = new SegmentDependentList<>(clazz);
+         secondaryFootContactPointsInSoleFrame = new SegmentDependentList<>(clazz);
+      }
+
+      secondaryFootContactBodyNames.put(segment, bodyName);
+      secondaryFootContactTransforms.put(segment, transformFromParentJointToContact);
+      secondaryFootContactPointsInSoleFrame.put(segment, contactPointInSoleFrame);
+   }
+
+   public SegmentDependentList<E, String> getSecondaryFootContactBodyNames()
+   {
+      return secondaryFootContactBodyNames;
+   }
+
+   public SegmentDependentList<E, Point2D> getSecondaryFootContactPointsInSoleFrame()
+   {
+      return secondaryFootContactPointsInSoleFrame;
+   }
+
+   /** Number of declared secondary foot contacts (0 when unused). Each is its own contactable body in the controller core. */
+   public int getNumberOfSecondaryFootContacts()
+   {
+      if (secondaryFootContactBodyNames == null)
+         return 0;
+
+      int count = 0;
+      for (E segment : robotSegments)
+      {
+         if (secondaryFootContactBodyNames.get(segment) != null)
+            count++;
+      }
+      return count;
+   }
+
+   public SegmentDependentList<E, RigidBodyTransform> getSecondaryFootContactTransforms()
+   {
+      return secondaryFootContactTransforms;
    }
 
    public ArrayList<String> getAdditionalContactRigidBodyNames()

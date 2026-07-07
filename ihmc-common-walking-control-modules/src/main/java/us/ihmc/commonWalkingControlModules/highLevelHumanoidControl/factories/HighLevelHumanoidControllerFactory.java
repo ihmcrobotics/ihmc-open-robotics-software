@@ -51,7 +51,9 @@ import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
@@ -435,12 +437,22 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       contactableBodiesFactory.setReferenceFrames(referenceFrames);
       SideDependentList<ContactableFoot> feet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
       List<ContactablePlaneBody> additionalContacts = contactableBodiesFactory.createAdditionalContactPoints();
+      SegmentDependentList<RobotSide, ContactablePlaneBody> secondaryFootContacts = contactableBodiesFactory.createSecondaryFootContacts();
+      SegmentDependentList<RobotSide, Point2D> secondaryFootContactPointsInSoleFrame = contactableBodiesFactory.getSecondaryFootContactPointsInSoleFrame();
       contactableBodiesFactory.disposeFactory();
 
       List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
          contactablePlaneBodies.add(feet.get(robotSide));
       contactablePlaneBodies.addAll(additionalContacts);
+      if (secondaryFootContacts != null)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (secondaryFootContacts.get(robotSide) != null)
+               contactablePlaneBodies.add(secondaryFootContacts.get(robotSide));
+         }
+      }
 
       double gravityZ = Math.abs(gravity);
       double totalMass = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator());
@@ -472,6 +484,16 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                  updatables,
                                                                  contactablePlaneBodies,
                                                                  jointsToIgnore);
+      if (secondaryFootContacts != null)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (secondaryFootContacts.get(robotSide) != null)
+               controllerToolbox.registerSecondaryFootContact(robotSide,
+                                                              secondaryFootContacts.get(robotSide),
+                                                              secondaryFootContactPointsInSoleFrame.get(robotSide));
+         }
+      }
       controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createQueuedControllerCommandGenerator)

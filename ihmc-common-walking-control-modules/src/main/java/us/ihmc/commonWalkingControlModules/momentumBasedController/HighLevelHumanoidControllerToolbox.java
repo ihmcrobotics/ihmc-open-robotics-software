@@ -29,6 +29,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
@@ -99,6 +100,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    protected final SideDependentList<ContactableFoot> feet;
    protected final List<ContactablePlaneBody> contactableBodies;
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
+   /** Optional per-side secondary foot contact state (e.g. split-foot second plate on its own rigid body). Empty by default. */
+   private final SideDependentList<YoPlaneContactState> secondaryFootContactStates = new SideDependentList<>();
    private final SideDependentList<FrameConvexPolygon2D> defaultFootPolygons = new SideDependentList<>();
 
    private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
@@ -452,7 +455,62 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    public void updateBipedSupportPolygons()
    {
-      bipedSupportPolygons.updateUsingContactStates(footContactStates);
+      updateSecondaryFootContactStates();
+      bipedSupportPolygons.updateUsingContactStates(footContactStates, secondaryFootContactStates);
+   }
+
+   /**
+    * Registers an optional secondary contact for a foot, attached to a different rigid body than the main foot (e.g.
+    * the second plate of a split foot). The secondary contact state mirrors the main foot contact state's in-contact
+    * status (support/swing together), contributes its contact points to this side's support polygon, and is expected to
+    * be sent to the controller core alongside the main foot contact state so contact forces map through the secondary
+    * body's own kinematic chain. The contactable body must also be part of the contactable-plane-bodies list given to
+    * the controller core.
+    *
+    * <p>{@code contactPointInSoleFrame} is the secondary contact point expressed in this side's sole frame; it is added
+    * to the default foot polygon so whole-foot geometric consumers (e.g. CoP trajectory planning) see the full foot
+    * support region even though the main contact state only carries the main plate's points.</p>
+    */
+   public void registerSecondaryFootContact(RobotSide robotSide, ContactablePlaneBody contactableBody, Point2DReadOnly contactPointInSoleFrame)
+   {
+      YoPlaneContactState contactState = new YoPlaneContactState(contactableBody.getContactFrame().getName(),
+                                                                 contactableBody.getRigidBody(),
+                                                                 contactableBody.getContactFrame(),
+                                                                 contactableBody.getContactPoints2D(),
+                                                                 footContactStates.get(robotSide).getCoefficientOfFriction(),
+                                                                 registry);
+      secondaryFootContactStates.put(robotSide, contactState);
+
+      if (contactPointInSoleFrame != null)
+      {
+         FrameConvexPolygon2D defaultFootPolygon = defaultFootPolygons.get(robotSide);
+         defaultFootPolygon.addVertex(contactPointInSoleFrame);
+         defaultFootPolygon.update();
+      }
+   }
+
+   private void updateSecondaryFootContactStates()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         YoPlaneContactState secondaryContactState = secondaryFootContactStates.get(robotSide);
+         if (secondaryContactState == null)
+            continue;
+
+         boolean shouldBeInContact = footContactStates.get(robotSide).inContact();
+         if (shouldBeInContact != secondaryContactState.inContact())
+         {
+            if (shouldBeInContact)
+               secondaryContactState.setFullyConstrained();
+            else
+               secondaryContactState.clear();
+         }
+      }
+   }
+
+   public YoPlaneContactState getSecondaryFootContactState(RobotSide robotSide)
+   {
+      return secondaryFootContactStates.get(robotSide);
    }
 
    private final FramePoint2DBasics capturePoint2d = new FramePoint2D(worldFrame);
