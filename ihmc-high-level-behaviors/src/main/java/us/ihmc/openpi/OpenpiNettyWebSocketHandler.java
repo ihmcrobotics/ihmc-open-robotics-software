@@ -25,7 +25,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-class OpenpiNettyWebSocketHandler extends SimpleChannelInboundHandler<Object>
+/**
+ * Generic Netty WebSocket client handler for the msgpack request/response protocol shared by
+ * {@link us.ihmc.openpi.OpenpiClient} and {@link us.ihmc.gr00t.Gr00tClient}: a single binary
+ * server-metadata frame on connect, then one binary response per binary request (FIFO), with
+ * text frames treated as server-side errors.
+ */
+public class OpenpiNettyWebSocketHandler extends SimpleChannelInboundHandler<Object>
 {
    private final URI uri;
    private final WebSocketClientHandshaker handshaker;
