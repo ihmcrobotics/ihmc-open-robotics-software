@@ -1,0 +1,464 @@
+package us.ihmc.stateEstimation.jointLevel;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import org.ejml.data.Complex_F64;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
+
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
+import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
+import us.ihmc.sensorProcessing.stateEstimation.IMUBasedJointStateEstimatorParameters;
+import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.yoVariables.registry.YoRegistry;
+
+/**
+ * Shared harness for the {@link JointLevelKFPreFilter} unit tests, ported from the JAX reference in
+ * {@code invariant-estimation/jointKF}. It stands up a real (but synthetic) IMU-pair setup so the tests can
+ * exercise the actual filter math — a random floating revolute chain, hand-built {@link IMUSensorReadOnly}s
+ * with controllable measurements + positive-definite covariances, and a mutable sensor map for encoders.
+ *
+ * <p>Note the state layout the reference calls {@code x = [q ; q_dot ; b_omega] ∈ R^{2n+3m}} carries over,
+ * but here {@code m = number of distinct IMUs} (the bias is per-IMU), not the reference's per-pair bias, and
+ * the filter always has at least one pair (the "encoder-only" {@code m = 0} case cannot be constructed).</p>
+ */
+final class JointLevelKFTestFixture
+{
+   static final double DT = 1.0e-3;
+   static final double IMU_BIAS_PROCESS_VAR = 1.0e-4;
+
+   final JointLevelKFPreFilter filter;
+   final List<RevoluteJoint> joints;
+   final List<OneDoFJointBasics> filteredJoints; // in filter state order
+   final List<TestIMU> imus;
+   final TestSensorMap sensorMap;
+   final List<RigidBodyBasics> feet;
+   final int n;
+   final int m;
+   final int dim;
+
+   private JointLevelKFTestFixture(JointLevelKFPreFilter filter,
+                                   List<RevoluteJoint> joints,
+                                   List<TestIMU> imus,
+                                   TestSensorMap sensorMap,
+                                   List<RigidBodyBasics> feet)
+   {
+      this.filter = filter;
+      this.joints = joints;
+      this.imus = imus;
+      this.sensorMap = sensorMap;
+      this.feet = feet;
+      this.filteredJoints = filter.getFilteredJointsInStateOrder();
+      this.n = filter.getNumberOfFilteredJoints();
+      this.m = filter.getNumberOfIMUs();
+      this.dim = filter.getStateDimension();
+   }
+
+   /**
+    * A spread of pair configurations, the Java analogue of the reference's {@code SHAPES} parametrization.
+    * Each yields a different (n, m): three single-pair spans plus one two-pair (3-IMU) layout. The reference's
+    * encoder-only {@code m = 0} case is intentionally absent — this filter requires at least one IMU pair.
+    */
+   static List<JointLevelKFTestFixture> shapes(long baseSeed)
+   {
+      List<JointLevelKFTestFixture> list = new ArrayList<>();
+      list.add(singlePair(baseSeed + 1, 10, 1, 9)); // n = 8, m = 2, 1 pair
+      list.add(singlePair(baseSeed + 2, 6, 1, 5));  // n = 4, m = 2, 1 pair
+      list.add(singlePair(baseSeed + 3, 4, 0, 3));  // n = 3, m = 2, 1 pair
+      list.add(twoPairs(baseSeed + 4, 10, 1, 5, 9)); // n = 8, m = 3, 2 pairs
+      return list;
+   }
+
+   String describe()
+   {
+      return "[n=" + n + ", m=" + m + ", pairs=" + filter.getNumberOfPairs() + "]";
+   }
+
+   /** One IMU pair: parent IMU on body after {@code parentJointIndex}, child on body after {@code childJointIndex}. */
+   static JointLevelKFTestFixture singlePair(long seed, int numJoints, int parentJointIndex, int childJointIndex)
+   {
+      return build(seed,
+                   numJoints,
+                   new int[] {parentJointIndex, childJointIndex},
+                   new String[] {"imuA", "imuB"},
+                   new int[][] {{0, 1}},
+                   1); // foot = child link
+   }
+
+   /** Two pairs sharing a middle IMU: (a,b) and (b,c) → 3 IMUs, foot on the far (c) link. */
+   static JointLevelKFTestFixture twoPairs(long seed, int numJoints, int aIndex, int bIndex, int cIndex)
+   {
+      return build(seed,
+                   numJoints,
+                   new int[] {aIndex, bIndex, cIndex},
+                   new String[] {"imuA", "imuB", "imuC"},
+                   new int[][] {{0, 1}, {1, 2}},
+                   2); // foot = c link
+   }
+
+   private static JointLevelKFTestFixture build(long seed,
+                                                int numJoints,
+                                                int[] imuBodyJointIndex,
+                                                String[] imuNames,
+                                                int[][] pairParentChild,
+                                                int footImuIndex)
+   {
+      Random random = new Random(seed);
+      Vector3D[] axes = new Vector3D[numJoints];
+      for (int i = 0; i < numJoints; i++)
+         axes[i] = new Vector3D(i % 3 == 0 ? 1 : 0, i % 3 == 1 ? 1 : 0, i % 3 == 2 ? 1 : 0);
+
+      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, axes);
+      chain.nextState(random, JointStateType.CONFIGURATION, JointStateType.VELOCITY);
+      chain.getElevator().updateFramesRecursively();
+      List<RevoluteJoint> joints = chain.getRevoluteJoints();
+
+      List<TestIMU> imus = new ArrayList<>();
+      List<IMUSensorReadOnly> imuReadOnly = new ArrayList<>();
+      for (int k = 0; k < imuNames.length; k++)
+      {
+         TestIMU imu = new TestIMU(imuNames[k], joints.get(imuBodyJointIndex[k]).getSuccessor());
+         imus.add(imu);
+         imuReadOnly.add(imu);
+      }
+      TestSensorMap sensorMap = new TestSensorMap(imuReadOnly, joints);
+
+      List<IMUBasedJointStateEstimatorParameters> pairParameters = new ArrayList<>();
+      for (int[] pc : pairParentChild)
+         pairParameters.add(new IMUBasedJointStateEstimatorParameters("pair", true, imuNames[pc[0]], imuNames[pc[1]], 0.0, 0.0));
+
+      List<RigidBodyBasics> feet = new ArrayList<>();
+      feet.add(joints.get(imuBodyJointIndex[footImuIndex]).getSuccessor());
+
+      JointLevelKFPreFilter filter = new JointLevelKFPreFilter(sensorMap, pairParameters, feet, DT, new YoRegistry("test"));
+      return new JointLevelKFTestFixture(filter, joints, imus, sensorMap, feet);
+   }
+
+   void setEncoder(OneDoFJointBasics joint, double q)
+   {
+      sensorMap.setPosition(joint, q);
+   }
+
+   // ---------------------------------------------------------------------------------------------------------
+   // Matrix assertion helpers (the JAX tests lean on jnp.allclose / eigvalsh; these are the EJML equivalents).
+   // ---------------------------------------------------------------------------------------------------------
+
+   static void assertAllClose(DMatrixRMaj actual, DMatrixRMaj expected, double tol, String message)
+   {
+      assertTrue(actual.numRows == expected.numRows && actual.numCols == expected.numCols,
+                 message + " — shape mismatch: " + actual.numRows + "x" + actual.numCols + " vs " + expected.numRows + "x" + expected.numCols);
+      for (int r = 0; r < actual.numRows; r++)
+         for (int c = 0; c < actual.numCols; c++)
+            assertTrue(Math.abs(actual.get(r, c) - expected.get(r, c)) <= tol,
+                       message + String.format(" — mismatch at (%d,%d): %.6g vs %.6g", r, c, actual.get(r, c), expected.get(r, c)));
+   }
+
+   static void assertSymmetric(DMatrixRMaj a, double tol, String message)
+   {
+      assertTrue(a.numRows == a.numCols, message + " — not square");
+      for (int r = 0; r < a.numRows; r++)
+         for (int c = r + 1; c < a.numCols; c++)
+            assertTrue(Math.abs(a.get(r, c) - a.get(c, r)) <= tol, message + " — asymmetric at (" + r + "," + c + ")");
+   }
+
+   static void assertPositiveSemiDefinite(DMatrixRMaj a, String message)
+   {
+      double[] eig = symmetricEigenvalues(a);
+      double max = 0.0;
+      double min = Double.POSITIVE_INFINITY;
+      for (double e : eig)
+      {
+         max = Math.max(max, e);
+         min = Math.min(min, e);
+      }
+      assertTrue(min >= -1.0e-6 * Math.max(max, 1.0), message + " — min eigenvalue " + min + " (max " + max + ")");
+   }
+
+   static double[] symmetricEigenvalues(DMatrixRMaj a)
+   {
+      EigenDecomposition_F64<DMatrixRMaj> eig = DecompositionFactory_DDRM.eig(a.numRows, false, true);
+      assertTrue(eig.decompose(a.copy()), "eigenvalue decomposition failed");
+      double[] values = new double[eig.getNumberOfEigenvalues()];
+      for (int i = 0; i < values.length; i++)
+      {
+         Complex_F64 v = eig.getEigenvalue(i);
+         values[i] = v.getReal();
+      }
+      return values;
+   }
+
+   static DMatrixRMaj block(DMatrixRMaj a, int row0, int col0, int rows, int cols)
+   {
+      DMatrixRMaj out = new DMatrixRMaj(rows, cols);
+      for (int r = 0; r < rows; r++)
+         for (int c = 0; c < cols; c++)
+            out.set(r, c, a.get(row0 + r, col0 + c));
+      return out;
+   }
+
+   /** A deterministic symmetric positive-definite (size, size) matrix, mirroring the reference's {@code _spd}. */
+   static DMatrixRMaj spd(int size, long seed)
+   {
+      DMatrixRMaj m = new DMatrixRMaj(size, size);
+      for (int i = 0; i < size * size; i++)
+         m.data[i] = Math.sin(i + 1.0 + seed);
+      DMatrixRMaj a = new DMatrixRMaj(size, size);
+      CommonOps_DDRM.multTransB(m, m, a); // m mᵀ (PSD)
+      for (int i = 0; i < size; i++)
+         a.add(i, i, size); // + size·I → PD
+      return a;
+   }
+
+   static DMatrixRMaj identity(int size)
+   {
+      DMatrixRMaj i = new DMatrixRMaj(size, size);
+      for (int k = 0; k < size; k++)
+         i.set(k, k, 1.0);
+      return i;
+   }
+
+   static DMatrixRMaj scaledIdentity(int size, double value)
+   {
+      DMatrixRMaj i = new DMatrixRMaj(size, size);
+      for (int k = 0; k < size; k++)
+         i.set(k, k, value);
+      return i;
+   }
+
+   static double trace(DMatrixRMaj a)
+   {
+      double t = 0.0;
+      for (int i = 0; i < Math.min(a.numRows, a.numCols); i++)
+         t += a.get(i, i);
+      return t;
+   }
+
+   // ---------------------------------------------------------------------------------------------------------
+   // Minimal live sensor implementations.
+   // ---------------------------------------------------------------------------------------------------------
+
+   /** IMU with a body-fixed measurement frame, a settable angular-velocity reading, and PD covariances. */
+   static final class TestIMU implements IMUSensorReadOnly
+   {
+      final String name;
+      final RigidBodyBasics measurementLink;
+      final ReferenceFrame measurementFrame;
+      final Vector3D angularVelocity = new Vector3D();
+      final Vector3D linearAcceleration = new Vector3D(0.0, 0.0, 9.81);
+      final Quaternion orientation = new Quaternion();
+      final DMatrixRMaj biasProcessNoiseCovariance = scaledIdentity(3, IMU_BIAS_PROCESS_VAR);
+      final DMatrixRMaj genericCovariance = scaledIdentity(3, 1.0e-4);
+
+      TestIMU(String name, RigidBodyBasics measurementLink)
+      {
+         this.name = name;
+         this.measurementLink = measurementLink;
+         this.measurementFrame = measurementLink.getBodyFixedFrame();
+      }
+
+      void setAngularVelocity(double x, double y, double z)
+      {
+         angularVelocity.set(x, y, z);
+      }
+
+      @Override
+      public String getSensorName()
+      {
+         return name;
+      }
+
+      @Override
+      public ReferenceFrame getMeasurementFrame()
+      {
+         return measurementFrame;
+      }
+
+      @Override
+      public RigidBodyBasics getMeasurementLink()
+      {
+         return measurementLink;
+      }
+
+      @Override
+      public QuaternionReadOnly getOrientationMeasurement()
+      {
+         return orientation;
+      }
+
+      @Override
+      public Vector3DReadOnly getAngularVelocityMeasurement()
+      {
+         return angularVelocity;
+      }
+
+      @Override
+      public Vector3DReadOnly getLinearAccelerationMeasurement()
+      {
+         return linearAcceleration;
+      }
+
+      @Override
+      public void getOrientationNoiseCovariance(DMatrixRMaj noiseCovarianceToPack)
+      {
+         noiseCovarianceToPack.set(genericCovariance);
+      }
+
+      @Override
+      public void getAngularVelocityNoiseCovariance(DMatrixRMaj noiseCovarianceToPack)
+      {
+         noiseCovarianceToPack.set(genericCovariance);
+      }
+
+      @Override
+      public void getAngularVelocityBiasProcessNoiseCovariance(DMatrixRMaj biasProcessNoiseCovarianceToPack)
+      {
+         biasProcessNoiseCovarianceToPack.set(biasProcessNoiseCovariance);
+      }
+
+      @Override
+      public void getLinearAccelerationNoiseCovariance(DMatrixRMaj noiseCovarianceToPack)
+      {
+         noiseCovarianceToPack.set(genericCovariance);
+      }
+
+      @Override
+      public void getLinearAccelerationBiasProcessNoiseCovariance(DMatrixRMaj biasProcessNoiseCovarianceToPack)
+      {
+         biasProcessNoiseCovarianceToPack.set(genericCovariance);
+      }
+   }
+
+   /** Sensor map returning the fixture IMUs and a settable per-joint encoder state. */
+   static final class TestSensorMap implements SensorOutputMapReadOnly
+   {
+      private final List<IMUSensorReadOnly> imus;
+      private final Map<OneDoFJointBasics, SettableJointState> states = new LinkedHashMap<>();
+      private final List<OneDoFJointStateReadOnly> stateList = new ArrayList<>();
+
+      TestSensorMap(List<IMUSensorReadOnly> imus, List<? extends OneDoFJointBasics> joints)
+      {
+         this.imus = imus;
+         for (OneDoFJointBasics joint : joints)
+         {
+            SettableJointState state = new SettableJointState(joint.getName());
+            states.put(joint, state);
+            stateList.add(state);
+         }
+      }
+
+      void setPosition(OneDoFJointBasics joint, double q)
+      {
+         states.get(joint).position = q;
+      }
+
+      @Override
+      public OneDoFJointStateReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
+      {
+         return states.get(oneDoFJoint);
+      }
+
+      @Override
+      public List<? extends OneDoFJointStateReadOnly> getOneDoFJointOutputs()
+      {
+         return stateList;
+      }
+
+      @Override
+      public List<? extends IMUSensorReadOnly> getIMUOutputs()
+      {
+         return imus;
+      }
+
+      @Override
+      public ForceSensorDataHolderReadOnly getForceSensorOutputs()
+      {
+         return null;
+      }
+
+      @Override
+      public long getWallTime()
+      {
+         return 0L;
+      }
+
+      @Override
+      public long getMonotonicTime()
+      {
+         return 0L;
+      }
+
+      @Override
+      public long getSyncTimestamp()
+      {
+         return 0L;
+      }
+   }
+
+   static final class SettableJointState implements OneDoFJointStateReadOnly
+   {
+      private final String name;
+      double position;
+      double velocity;
+      double effort;
+
+      SettableJointState(String name)
+      {
+         this.name = name;
+      }
+
+      @Override
+      public String getJointName()
+      {
+         return name;
+      }
+
+      @Override
+      public double getPosition()
+      {
+         return position;
+      }
+
+      @Override
+      public double getVelocity()
+      {
+         return velocity;
+      }
+
+      @Override
+      public double getAcceleration()
+      {
+         return 0.0;
+      }
+
+      @Override
+      public double getEffort()
+      {
+         return effort;
+      }
+
+      @Override
+      public boolean isJointEnabled()
+      {
+         return true;
+      }
+   }
+}

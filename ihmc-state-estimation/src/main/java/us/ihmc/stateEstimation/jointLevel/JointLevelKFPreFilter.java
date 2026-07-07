@@ -2,6 +2,8 @@ package us.ihmc.stateEstimation.jointLevel;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 import rcl_interfaces.msg.dds.Log;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
@@ -25,6 +27,8 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBasedJ
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBiasProvider;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -65,6 +69,14 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private int dim; // 2n + 3m
    private boolean initialized = false;
 
+   // Observability: the constructor was previously handed a parentRegistry that it dropped on the floor
+   // (so the filter published nothing on hardware). These are wired to the parent registry now.
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoBoolean yoInitialized = new YoBoolean("jointKFInitialized", registry);
+   private final YoInteger yoStateDimension = new YoInteger("jointKFStateDimension", registry);
+   private final YoInteger yoNumberOfFilteredJoints = new YoInteger("jointKFNumberOfFilteredJoints", registry);
+   private final YoInteger yoNumberOfIMUs = new YoInteger("jointKFNumberOfIMUs", registry);
+
    // State and constant model
    private final DMatrixRMaj x = new DMatrixRMaj(0,1); // reshaped to dimx1 later when constructed
    private final DMatrixRMaj xtmp = new DMatrixRMaj(0,1);
@@ -91,19 +103,28 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private final DMatrixRMaj tmp3a = new DMatrixRMaj(3,3);
    private final DMatrixRMaj tmp3b = new DMatrixRMaj(3,3);
    private final DMatrixRMaj anchorR = new DMatrixRMaj(3,3);
+   // Reused LU solver for the innovation-covariance inverse, pre-sized in allocate(). This replaces the
+   // per-tick CommonOps_DDRM.invert(S, Sinv), which allocates a fresh LU decomposition + solver on every
+   // call once S is larger than 5x5 (i.e. the n-joint encoder update) — garbage on the estimator thread.
+   private LinearSolverDense<DMatrixRMaj> innovationSolver;
    private final RigidBodyTransform tmpTransform = new RigidBodyTransform();
    private final FrameVector3D fvA = new FrameVector3D();
    private final FrameVector3D fvB = new FrameVector3D();
    private final FrameVector3D biasOut = new FrameVector3D();
 
 
-   private JointLevelKFPreFilter(SensorOutputMapReadOnly sensorMap,
-                                 List<IMUBasedJointStateEstimatorParameters> pairParameters,
-                                 Collection<RigidBodyBasics> feet,
-                                 double estimatorDT)
+   // Package-private (not private) so the allocation/behavior tests in this package can build it directly
+   // from a synthetic IMU-pair setup without standing up a full StateEstimatorParameters.
+   JointLevelKFPreFilter(SensorOutputMapReadOnly sensorMap,
+                         List<IMUBasedJointStateEstimatorParameters> pairParameters,
+                         Collection<RigidBodyBasics> feet,
+                         double estimatorDT,
+                         YoRegistry parentRegistry)
    {
       this.sensorMap = sensorMap;
       this.dt = estimatorDT;
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
 
       // 1)  Resolve all pairs of IMUs, collect distinct joints and IMUs into the state layout
       for (IMUBasedJointStateEstimatorParameters pp : pairParameters)
@@ -184,6 +205,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          }
       }
       allocate();
+
+      yoStateDimension.set(dim);
+      yoNumberOfFilteredJoints.set(n);
+      yoNumberOfIMUs.set(m);
    }
 
    // Mirrors AlphaComplimentaryFilter.createForKinematicsEstiamtor, works for the factory implementation
@@ -197,14 +222,17 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                                                                     YoRegistry parentRegistry)
    {
       //TODO: this function should be removed and the factory should handle this part.
-      // What about the registry? Why isn't it added here?
       if (stateEstimatorParameters == null)
          throw new UnsupportedOperationException("default estimator parameters for this type of estimator are not added yet.");
-      // gravity / cancelGravity are unused for the gyro based stance anchor, but kept for signature parity.
+      // imuProcessedOutputs / gravity / cancelGravity are unused: this filter resolves its IMUs from the
+      // sensor map by the pair parameters' names (the same live IMU objects the alpha filter uses) and its
+      // stance anchor is gyro-based. They are kept for signature parity with the alpha factory. The
+      // registry, however, is now threaded through so the filter actually publishes on hardware.
       return new JointLevelKFPreFilter(sensorOutputMap,
                                        stateEstimatorParameters.getIMUBasedJointStateEstimatorParameters(),
                                        feet,
-                                       estimatorDT);
+                                       estimatorDT,
+                                       parentRegistry);
    }
 
    private void allocate()
@@ -225,6 +253,20 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       Henc = new DMatrixRMaj(n,dim);
       Renc = new DMatrixRMaj(n,n);
       zEnc = new DMatrixRMaj(n,1);
+
+      // Pre-size the Joseph-form scratch. IKH in particular MUST start at dim x dim: the first josephUpdate
+      // does setIdentity(IKH) *before* multAdd reshapes it, so on a 0x0 IKH the identity is silently dropped
+      // and the first covariance update becomes -KH instead of I-KH. Sizing both here also keeps their first
+      // use from reallocating on the estimator thread.
+      Ptmp.reshape(dim, dim);
+      IKH.reshape(dim, dim);
+
+      // Reused LU solver for the innovation-covariance inverse, warmed at the widest measurement (maxMeas).
+      // The warm-up forces every internal buffer to its largest size now, so per-tick setA()/invert() reuse
+      // them and never allocate — unlike CommonOps_DDRM.invert, which news up a decomposition every call for
+      // any matrix wider than 5 (the n-joint encoder update).
+      innovationSolver = LinearSolverFactory_DDRM.lu(maxMeas);
+      innovationSolver.setA(CommonOps_DDRM.identity(maxMeas));
 
       for (int i = 0; i < 3; i++)
          anchorR.set(i, i, ANCHOR_VAR);
@@ -286,6 +328,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       for (int i = n; i < 2 * n; i++) P.set(i, i, INIT_VEL_VAR);
       for (int i = 2 * n; i < dim; i++) P.set(i, i, INIT_BIAS_VAR);
       initialized = true;
+      yoInitialized.set(true);
    }
 
    // ================================ Phase 1 ================================
@@ -296,12 +339,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       // Phase 1: joint predict + encoder/pair-gyro measurement updates go here.
       if (!initialized) initialize();
 
-      // prediction state
-      CommonOps_DDRM.mult(F, x, xtmp);
-      x.set(xtmp);
-      CommonOps_DDRM.mult(F, P, Ptmp);
-      CommonOps_DDRM.multTransB(Ptmp, F, P); // FPF^T term
-      CommonOps_DDRM.addEquals(P, Q);
+      predict();
+
       // update encoder states
       int row = 0;
       for (OneDoFJointBasics j : jointToIndex.keySet())
@@ -312,9 +351,33 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          pairGyroUpdate(pairs.get(i));
    }
 
+   /** EKF time update in isolation: x <- F x, P <- F P F^T + Q. Package-private so tests can drive it alone. */
+   void predict()
+   {
+      CommonOps_DDRM.mult(F, x, xtmp);
+      x.set(xtmp);
+      CommonOps_DDRM.mult(F, P, Ptmp);
+      CommonOps_DDRM.multTransB(Ptmp, F, P); // FPF^T term
+      CommonOps_DDRM.addEquals(P, Q);
+   }
+
    private void pairGyroUpdate(Pair p)
    {
-      for (OneDoFJointBasics j : p.chainJoints) j.updateFrame();
+      buildPairMeasurement(p);
+      josephUpdate(H, zMeas, R3);
+   }
+
+   /**
+    * Fills the pair-gyro measurement model (H, zMeas, R3) for one IMU pair, without applying the update.
+    * Split out of {@link #pairGyroUpdate} so tests can inspect the measurement model (mirrors the reference
+    * implementation's build_measurement / build_H seam).
+    */
+   private void buildPairMeasurement(Pair p)
+   {
+      // Frames are already current: the estimator calls rootBody.updateFramesRecursively() every tick (this
+      // filter runs inside that tick and reads the same joints the alpha estimator does). Re-updating them
+      // per joint here is redundant AND allocates ~64 B/joint inside MovingReferenceFrame.update() — garbage
+      // on the estimator thread that the alpha filter never generated.
       p.jac.reset();
       CommonOps_DDRM.extract(p.jac.getJacobianMatrix(), 0, 3, 0, p.qdCols.length, p.Jang, 0, 0); //angular part
 
@@ -348,8 +411,6 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       packRotationToJacFrame(p.parent, p.jac.getJacobianFrame(), rot3);
       p.parent.getAngularVelocityBiasProcessNoiseCovariance(Rimu);
       congruenceAdd(rot3, Rimu, R3);
-
-      josephUpdate(H, zMeas, R3);
    }
 
    // ================================ Phase 2 ================================
@@ -369,8 +430,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 
    private void stanceAnchorUpdate(FootAnchor fa)
    {
-      for (OneDoFJointBasics j : fa.legJoints)
-         j.updateFrame();
+      // Frames already current (see pairGyroUpdate); do not re-update per joint (redundant + allocates).
       CommonOps_DDRM.extract(fa.jac.getJacobianMatrix(), 0, 3, 0, fa.qdCols.length, fa.Jang, 0, 0);
 
       // Measurement: base IMU gyro, already in measurement frame
@@ -395,8 +455,9 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    }
 
    // ================================ KF core ================================
-   // Sequential Joseph form measurement update for any matrix of dimension k
-   private void josephUpdate(DMatrixRMaj Hm, DMatrixRMaj zm, DMatrixRMaj Rm)
+   // Sequential Joseph form measurement update for any matrix of dimension k.
+   // Package-private so tests can drive a single measurement update against a reference KF.
+   void josephUpdate(DMatrixRMaj Hm, DMatrixRMaj zm, DMatrixRMaj Rm)
    {
       int k = Hm.getNumRows();
       PHt.reshape(dim, k);
@@ -406,11 +467,16 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 
       CommonOps_DDRM.multTransB(P, Hm, PHt);
       CommonOps_DDRM.mult(Hm, PHt, S);
-      if (!CommonOps_DDRM.invert(S, Sinv))
+      CommonOps_DDRM.addEquals(S, Rm); // innovation covariance S = H P H^T + R (the +R was previously missing,
+                                       // which made the gain over-confident and could grow the covariance)
+      // Allocation-free inverse via the pre-warmed solver (see allocate()). setA decomposes S in place;
+      // invert writes S^-1 into Sinv. Neither allocates because S is never wider than the warm-up size.
+      if (!innovationSolver.setA(S))
       {
          LogTools.warn("Singular innovation covariance! Skipping update.");
          return;
       }
+      innovationSolver.invert(Sinv);
       K.reshape(dim, k);
       CommonOps_DDRM.mult(PHt, Sinv, K);
       CommonOps_DDRM.mult(Hm, x, nu);
@@ -575,6 +641,44 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       biasOut.setToZero(ReferenceFrame.getWorldFrame());
       return biasOut;
    }
+
+   // ================================ Test surface ================================
+   // Package-private read/seed hooks used only by the unit tests in this package (mirroring the reference
+   // implementation's pure-function seams). Not part of the public API and never called on the estimator
+   // thread. Getters return fresh copies so a test cannot mutate filter internals.
+
+   int getStateDimension()          { return dim; }
+   int getNumberOfFilteredJoints()  { return n; }
+   int getNumberOfIMUs()            { return m; }
+   int getNumberOfPairs()           { return pairs.size(); }
+
+   /** State index of the given joint's position entry (its velocity entry is this + n); -1 if not filtered. */
+   int getJointStateIndex(OneDoFJointBasics joint) { Integer i = jointToIndex.get(joint); return i == null ? -1 : i; }
+   List<OneDoFJointBasics> getFilteredJointsInStateOrder() { return new ArrayList<>(jointToIndex.keySet()); }
+
+   DMatrixRMaj getStateVector()      { return x.copy(); }     // x = [q ; q_dot ; b_omega]
+   DMatrixRMaj getCovariance()       { return P.copy(); }
+   DMatrixRMaj getTransitionMatrix() { return F.copy(); }
+   DMatrixRMaj getProcessNoise()     { return Q.copy(); }
+   DMatrixRMaj getEncoderJacobian()  { return Henc.copy(); }
+   DMatrixRMaj getEncoderNoise()     { return Renc.copy(); }
+
+   /** Overwrites the mean and covariance (and marks initialized) so tests can drive predict()/josephUpdate() from a known prior. */
+   void setStateForTest(DMatrixRMaj xPrior, DMatrixRMaj pPrior)
+   {
+      x.set(xPrior);
+      P.set(pPrior);
+      initialized = true;
+   }
+
+   /** Builds the pair-gyro measurement (H, z, R) for the given pair without applying the update, for inspection. */
+   void buildPairMeasurementForTest(int pairIndex) { buildPairMeasurement(pairs.get(pairIndex)); }
+   DMatrixRMaj getMeasurementJacobian() { return H.copy(); }     // last H built (3 x dim)
+   DMatrixRMaj getMeasurementResidual() { return zMeas.copy(); } // last z built (3 x 1)
+   DMatrixRMaj getMeasurementNoise()    { return R3.copy(); }    // last R built (3 x 3)
+   int[] getPairVelocityColumns(int pairIndex) { return pairs.get(pairIndex).qdCols.clone(); }
+   int getPairParentBiasColumn(int pairIndex)  { return pairs.get(pairIndex).parentBias; }
+   int getPairChildBiasColumn(int pairIndex)   { return pairs.get(pairIndex).childBias; }
 
    // ================================ Structure holders ================================
    private static final class Pair
