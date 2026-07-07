@@ -62,6 +62,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private int m; // number of IMUs
    private int dim; // 2n + 3m
    private boolean initialized = false;
+   private boolean warnedNonFiniteInput = false;
 
    // Observability: the constructor was previously handed a parentRegistry that it dropped on the floor
    // (so the filter published nothing on hardware). These are wired to the parent registry now.
@@ -313,6 +314,19 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    @Override
    public void initialize()
    {
+      // Refuse to latch non-finite boot data: a KF permanently latches NaN (predict/Joseph spread it
+      // through x and P with no recovery when sensors come good), so stay uninitialized and retry next
+      // tick instead. While uninitialized, getEstimatedJoint* return NaN — which the consumers
+      // (JointStateUpdater / InvariantMainStateEstimator.updateJoints) treat as "fall back to the raw
+      // sensor" — and the bias getters return zero. Same fail-soft behavior as the alpha filter.
+      for (var e : jointToIndex.entrySet())
+      {
+         if (!Double.isFinite(sensorMap.getOneDoFJointOutput(e.getKey()).getPosition()))
+         {
+            warnNonFiniteInputOnce("joint position of " + e.getKey().getName() + " at initialization");
+            return;
+         }
+      }
       x.zero();
       for (var e : jointToIndex.entrySet())
          x.set(e.getValue(), sensorMap.getOneDoFJointOutput(e.getKey()).getPosition());
@@ -330,15 +344,30 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    public void computeJointState()
    {
       // Phase 1: joint predict + encoder/pair-gyro measurement updates go here.
-      if (!initialized) initialize();
+      if (!initialized)
+      {
+         initialize();
+         if (!initialized)
+            return; // boot data not valid yet; consumers keep falling back to raw sensors until it is
+      }
 
       predict();
 
-      // update encoder states
+      // update encoder states; skipped wholesale if any encoder reads non-finite (boot transient)
       int row = 0;
+      boolean encodersValid = true;
       for (OneDoFJointBasics j : jointToIndex.keySet())
-         zEnc.set(row++, 0, sensorMap.getOneDoFJointOutput(j).getPosition());
-      josephUpdate(Henc, zEnc, Renc);
+      {
+         double q = sensorMap.getOneDoFJointOutput(j).getPosition();
+         if (!Double.isFinite(q))
+         {
+            encodersValid = false;
+            warnNonFiniteInputOnce("joint position of " + j.getName());
+         }
+         zEnc.set(row++, 0, q);
+      }
+      if (encodersValid)
+         josephUpdate(Henc, zEnc, Renc);
 
       for (int i = 0; i < pairs.size(); i++)
          pairGyroUpdate(pairs.get(i));
@@ -357,6 +386,14 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private void pairGyroUpdate(Pair p)
    {
       buildPairMeasurement(p);
+      // Guard both z (IMU gyro not booted yet) and H (Jacobian built from a model whose joints were set
+      // from non-finite raw sensors by the consumer's own fallback). One bad update would latch NaN
+      // into x and P permanently, so skip this pair for the tick instead.
+      if (containsNonFinite(zMeas) || containsNonFinite(H))
+      {
+         warnNonFiniteInputOnce("pair gyro measurement " + p.parent.getSensorName() + " -> " + p.child.getSensorName());
+         return;
+      }
       josephUpdate(H, zMeas, R3);
    }
 
@@ -444,6 +481,11 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       H.set(1, baseBiasCol + 1, 1.0);
       H.set(2, baseBiasCol + 2, 1.0);
 
+      if (containsNonFinite(zAnchor) || containsNonFinite(H))
+      {
+         warnNonFiniteInputOnce("stance anchor at " + fa.foot.getName() + " (base IMU " + baseIMU.getSensorName() + ")");
+         return;
+      }
       josephUpdate(H, zAnchor, anchorR);
    }
 
@@ -524,6 +566,31 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       for (int i = 0; i < src.getNumRows(); i++)
          for (int j = 0; j < src.getNumCols(); j++)
             dst.set(row0 + i, col0 + j, scale * src.get(i,j));
+   }
+
+   /** True if any entry of the matrix is NaN or infinite. Allocation-free; O(elements). */
+   private static boolean containsNonFinite(DMatrixRMaj mat)
+   {
+      for (int i = 0; i < mat.getNumElements(); i++)
+      {
+         if (!Double.isFinite(mat.get(i)))
+            return true;
+      }
+      return false;
+   }
+
+   /**
+    * Logs the FIRST non-finite input source ever seen, once — identifying which sensor is late in the
+    * boot sequence — then stays silent (this runs on the estimator thread; the string concat only
+    * happens on that single occurrence).
+    */
+   private void warnNonFiniteInputOnce(String source)
+   {
+      if (warnedNonFiniteInput)
+         return;
+      warnedNonFiniteInput = true;
+      LogTools.warn("Non-finite input to JointLevelKFPreFilter; first offender: " + source
+            + ". Affected updates are skipped and consumers fall back to raw sensors / zero bias.");
    }
 
    private static IMUSensorReadOnly findIMU(SensorOutputMapReadOnly map, String name)
@@ -609,7 +676,19 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          return biasOut;
       }
       int col = 2 * n + 3 * ord;
-      biasOut.setIncludingFrame(imu.getMeasurementFrame(), x.get(col), x.get(col + 1), x.get(col + 2));
+      double bx = x.get(col);
+      double by = x.get(col + 1);
+      double bz = x.get(col + 2);
+      if (!Double.isFinite(bx) || !Double.isFinite(by) || !Double.isFinite(bz))
+      {
+         // Fail soft like the alpha filter's bias provider: never export a non-finite bias. This is
+         // consumed directly by the InEKF's predict (gyro - bias -> R*exp(phi*dt)), which throws
+         // NotARotationMatrixException on NaN — a hardware-only crash the joint NaN-fallback can't catch.
+         warnNonFiniteInputOnce("bias state of " + imu.getSensorName());
+         biasOut.setToZero(imu.getMeasurementFrame());
+         return biasOut;
+      }
+      biasOut.setIncludingFrame(imu.getMeasurementFrame(), bx, by, bz);
       return biasOut;
    }
 
