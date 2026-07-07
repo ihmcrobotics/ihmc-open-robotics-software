@@ -53,6 +53,8 @@ public class Gr00tClient
    private final ByteBuffer actions;
    private float policyTimingMs;
    private float serverTimingMs;
+   /** Number of leading steps in {@link #actions} that are genuine model predictions rather than the server's held/repeated tail; see {@link #unpack}. */
+   private int horizon;
 
    public Gr00tClient(String host, int port, int stateSize, int chunkLength, int imageWidth, int imageHeight)
    {
@@ -71,6 +73,7 @@ public class Gr00tClient
          images.get(side).order(ByteOrder.nativeOrder());
       actions = ByteBuffer.allocate(chunkLength * stateSize * Double.BYTES);
       actions.order(ByteOrder.nativeOrder());
+      horizon = chunkLength;
    }
 
    public void setPrompt(String prompt)
@@ -146,7 +149,7 @@ public class Gr00tClient
       try
       {
          MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(response.get());
-         unpacker.unpackMapHeader(); // 3
+         unpacker.unpackMapHeader(); // 4
             unpacker.unpackString(); // actions
             unpacker.unpackMapHeader(); // 4
                unpacker.unpackString();  // __ndarray__
@@ -168,6 +171,10 @@ public class Gr00tClient
             unpacker.unpackMapHeader();
                unpacker.unpackString(); // infer_ms
                serverTimingMs = unpacker.unpackFloat();
+            unpacker.unpackString(); // horizon
+            // Genuine-prediction count within actions; the rest (up to chunkLength) is the
+            // server's held/repeated last-real-step tail (see gr00t_openpi_bridge_server.py).
+            horizon = Math.max(1, Math.min(chunkLength, unpacker.unpackInt()));
          unpacker.close();
       }
       catch (Exception e)
@@ -189,6 +196,11 @@ public class Gr00tClient
    public ByteBuffer getActionChunk()
    {
       return actions;
+   }
+
+   public int getHorizon()
+   {
+      return horizon;
    }
 
    public float getPolicyTimingMs()
