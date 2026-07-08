@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 /**
  * Joint-level Kalman filter pre-filter (P-A architecture): one filter over the IMU tree whose pair
@@ -52,6 +53,16 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private static final double INIT_VEL_VAR = 1.0; // velocity unknown at initialization
    private static final double INIT_BIAS_VAR = 2.5e-3; // (0.05 rad/s)^2
    private static final double ANCHOR_VAR = 4.0e-4; // stance FK slip variance
+   // On-ground initialization gate: the exported base-IMU gyro bias is only observable through the phase-2
+   // stance anchor, which runs only when a foot is trusted. If the filter is seeded while the robot hangs
+   // (feet off the ground) the base bias is unobservable, its covariance grows unbounded under the bias
+   // random-walk, and the estimate wanders — which the downstream InEKF (no gyro-bias state of its own)
+   // integrates straight into orientation. So we defer initialization until BOTH feet have been firmly in
+   // contact for a short debounce window; while uninitialized the filter exports NaN joint states and zero
+   // bias, so consumers cleanly fall back to the raw gyro/sensors. Debounced (not a single-tick check)
+   // because the foot-switch contact-probability source seeds to 1.0 on the assumption feet are planted at
+   // init, so a naive "both == 1" would false-pass on the first tick(s) precisely while hanging.
+   private static final double ON_GROUND_INIT_DEBOUNCE = 0.05; // s of continuous ground contact before seeding
 
    // Declaration of all pre-allocated variables
    private final SensorOutputMapReadOnly sensorMap;
@@ -70,10 +81,18 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private boolean initialized = false;
    private boolean warnedNonFiniteInput = false;
 
+   // Optional on-ground gate (see ON_GROUND_INIT_DEBOUNCE). Null => no gating: the filter initializes as soon
+   // as boot data is finite (the behavior the package tests rely on). Wired by the consumer that owns the
+   // contact-probability signal (InvariantMainStateEstimator) via setInitializationGate.
+   private BooleanSupplier onGroundGate = null;
+   private int consecutiveOnGroundTicks = 0;
+   private final int requiredOnGroundTicks;
+
    // Observability: the constructor was previously handed a parentRegistry that it dropped on the floor
    // (so the filter published nothing on hardware). These are wired to the parent registry now.
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoBoolean yoInitialized = new YoBoolean("jointKFInitialized", registry);
+   private final YoBoolean yoWaitingForGroundContact = new YoBoolean("jointKFWaitingForGroundContact", registry);
    private final YoInteger yoStateDimension = new YoInteger("jointKFStateDimension", registry);
    private final YoInteger yoNumberOfFilteredJoints = new YoInteger("jointKFNumberOfFilteredJoints", registry);
    private final YoInteger yoNumberOfIMUs = new YoInteger("jointKFNumberOfIMUs", registry);
@@ -177,6 +196,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    {
       this.sensorMap = sensorMap;
       this.dt = estimatorDT;
+      this.requiredOnGroundTicks = Math.max(1, (int) Math.round(ON_GROUND_INIT_DEBOUNCE / estimatorDT));
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
 
@@ -567,9 +587,50 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          Renc.set(i, i, ENCODER_VAR);
    }
 
+   /**
+    * Installs the optional on-ground gate: while {@code onGround} does not read true, {@link #initialize()}
+    * stays deferred (the filter exports NaN joint states and zero bias, so consumers fall back to the raw
+    * sensors). Pass {@code null} to disable gating (the default — initialize as soon as boot data is finite).
+    * The gate is debounced internally over {@link #ON_GROUND_INIT_DEBOUNCE}; see that constant for why a
+    * single-tick check is not enough. Called once at wiring time by the consumer that owns the
+    * contact-probability signal; never on the estimator hot path.
+    */
+   public void setInitializationGate(BooleanSupplier onGround)
+   {
+      this.onGroundGate = onGround;
+      this.consecutiveOnGroundTicks = 0;
+      yoWaitingForGroundContact.set(onGround != null && !initialized);
+   }
+
+   /**
+    * True when the filter is clear to seed this tick: no gate wired, or the gate has read true for
+    * {@link #requiredOnGroundTicks} consecutive attempts (both feet firmly in contact). Advances/resets the
+    * debounce counter as a side effect, so it is called exactly once per {@link #initialize()} attempt.
+    */
+   private boolean readyToInitialize()
+   {
+      if (onGroundGate == null)
+         return true;
+      if (onGroundGate.getAsBoolean())
+         consecutiveOnGroundTicks++;
+      else
+         consecutiveOnGroundTicks = 0;
+      boolean ready = consecutiveOnGroundTicks >= requiredOnGroundTicks;
+      yoWaitingForGroundContact.set(!ready);
+      return ready;
+   }
+
    @Override
    public void initialize()
    {
+      // Do not seed the filter until the robot is firmly on the ground: the exported base-IMU gyro bias is
+      // unobservable while hanging (its only anchor is the phase-2 stance update, gated off when no foot is
+      // trusted), so seeding then lets the bias wander and the downstream InEKF integrates that into a
+      // rotating/glitching base. Staying uninitialized exports NaN/zero, which the consumers treat as
+      // "fall back to the raw gyro/sensors". No-op when no gate is wired (unit tests / non-invariant pipelines).
+      if (!readyToInitialize())
+         return;
+
       // Refuse to latch non-finite boot data: a KF permanently latches NaN (predict/Joseph spread it
       // through x and P with no recovery when sensors come good), so stay uninitialized and retry next
       // tick instead. While uninitialized, getEstimatedJoint* return NaN — which the consumers
@@ -592,6 +653,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       for (int i = 2 * n; i < dim; i++) P.set(i, i, INIT_BIAS_VAR);
       initialized = true;
       yoInitialized.set(true);
+      yoWaitingForGroundContact.set(false);
    }
 
    // ================================ Phase 1 ================================

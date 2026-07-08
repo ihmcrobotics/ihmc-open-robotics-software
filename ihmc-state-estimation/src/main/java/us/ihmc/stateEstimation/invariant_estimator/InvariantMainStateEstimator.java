@@ -21,6 +21,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter;
 import us.ihmc.stateEstimation.jointLevel.ProprioceptivePreFilter;
 import us.ihmc.stateEstimation.jointLevel.ZeroIMUBiasProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -75,6 +76,13 @@ public class InvariantMainStateEstimator implements StateEstimatorController
    private final ProprioceptivePreFilter preFilter; // may be null: raw sensor pass-through
    /** p(contact) above which a foot is handed to the pre-filter's phase 2 as trusted. */
    private static final double TRUSTED_FOOT_CONTACT_PROBABILITY_THRESHOLD = 0.5;
+   /**
+    * p(contact) at/above which, on BOTH feet, the joint-level pre-filter is allowed to seed itself: "the
+    * robot is firmly on the ground." Deliberately high (not the 0.5 trust threshold) so the base-IMU gyro
+    * bias is observable at seed time; not a literal 1.0 because the smoothed/logistic contact-probability
+    * sources asymptote just below 1.0. See {@link JointLevelKFPreFilter#setInitializationGate}.
+    */
+   private static final double ON_GROUND_INIT_CONTACT_PROBABILITY_THRESHOLD = 0.9;
    private final List<RigidBodyBasics> trustedFeetForBiasUpdate = new ArrayList<>(2); // reused, no per-tick allocation
    private final SideDependentList<RigidBodyBasics> feet = new SideDependentList<>();
 
@@ -140,6 +148,18 @@ public class InvariantMainStateEstimator implements StateEstimatorController
                                                           initialCovariance);
       invariantEstimator.setRunningAsMain(true); // disables the invariantMinusMain* self-comparisons
       registry.addChild(invariantEstimator.getYoRegistry());
+
+      // Defer the joint-level KF's initialization until both feet are firmly in contact. Seeding it while the
+      // robot hangs leaves the exported base-IMU gyro bias unobservable (its only anchor is the phase-2 stance
+      // update, which is off with no trusted foot), so the bias wanders and this estimator integrates it into a
+      // rotating base. The gate reads the same contact probability the trust decision uses; other pre-filter
+      // types ignore setInitializationGate (default no-op), so only the JOINT_KF path is affected.
+      if (preFilter instanceof JointLevelKFPreFilter jointLevelKF)
+      {
+         jointLevelKF.setInitializationGate(() ->
+                  invariantEstimator.getContactProbability(RobotSide.LEFT) >= ON_GROUND_INIT_CONTACT_PROBABILITY_THRESHOLD
+               && invariantEstimator.getContactProbability(RobotSide.RIGHT) >= ON_GROUND_INIT_CONTACT_PROBABILITY_THRESHOLD);
+      }
 
       if (enableYawSeeding)
       {
