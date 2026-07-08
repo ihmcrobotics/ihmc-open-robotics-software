@@ -22,10 +22,10 @@ public class InvariantEKFStateEstimatorFactory implements StateEstimatorControll
    private final double contactMeasurementVariance;
    private final double initialCovariance;
 
-   private static final double GYRO_VARIANCE = 1.0e-4;
-   private static final double ACCEL_VARIANCE = 1.0e-3;
-   private static final double CONTACT_VARIANCE = 1.0e-6;
-   private static final double CONTACT_MEASUREMENT_VARIANCE = 1.0e-4;
+   private static final double GYRO_VARIANCE = 1.0e-7;
+   private static final double ACCEL_VARIANCE = 1.0e-7;
+   private static final double CONTACT_VARIANCE = 1.0e-12;
+   private static final double CONTACT_MEASUREMENT_VARIANCE = 1.0e-12;
    private static final double INITIAL_COVARIANCE = 1.0;
 
 

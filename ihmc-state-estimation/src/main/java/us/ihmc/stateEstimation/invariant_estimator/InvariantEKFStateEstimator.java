@@ -112,8 +112,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    // The default provider is forward-kinematics only (runs on hardware); ContactNet replaces it later.
    private ContactProbabilityProvider contactProbabilityProvider;
    private final double baseContactVariance;                  // σ_c² at full contact (p = 1)
-   private double swingMeasurementInflation = 1.0e6;          // R_i  ×= inflation^(1−p): muted swing foot at p → 0
-   private double swingSlipInflation = 1.0e6;                 // σ_{c,i}² ×= inflation^(1−p): forgetful anchor at p → 0
+   private double swingMeasurementInflation = 9.0e1;          // R_i  ×= inflation^(1−p): muted swing foot at p → 0
+   private double swingSlipInflation = 9.0e1;                 // σ_{c,i}² ×= inflation^(1−p): forgetful anchor at p → 0
    private final Matrix3D inflatedContactCovariance = new Matrix3D();
    private final SideDependentList<YoDouble> yoContactProbability;
 
