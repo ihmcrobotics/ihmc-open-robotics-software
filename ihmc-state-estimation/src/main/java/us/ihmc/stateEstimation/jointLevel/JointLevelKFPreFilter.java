@@ -588,6 +588,45 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    }
 
    /**
+    * Rebuilds (Henc, zEnc, Renc) each tick over ONLY the joints whose encoder reads finite, one measurement
+    * row per good encoder, and returns the number of rows. This is the per-joint gate that replaces the old
+    * all-or-nothing skip: one intermittent encoder no longer unpins every joint (see {@link #computeJointState}).
+    *
+    * <p>Row r observes joint state index i with H[r,i] = 1, z[r] = q_i, R[r,r] = ENCODER_VAR. The scratch is
+    * grown to its full (n) size first, filled, then shrunk to the valid-row count — reshaping to a size no
+    * larger than the pre-allocated capacity never allocates, so this stays allocation-free on the estimator
+    * thread. When every encoder is finite this reproduces the previous full-rank identity encoder update
+    * exactly. Returns 0 when no encoder is finite (caller skips the update, as before).</p>
+    */
+   private int buildValidEncoderUpdate()
+   {
+      Henc.reshape(n, dim);
+      Henc.zero();
+      zEnc.reshape(n, 1);
+      int r = 0;
+      for (var e : jointToIndex.entrySet())
+      {
+         double q = sensorMap.getOneDoFJointOutput(e.getKey()).getPosition();
+         if (!Double.isFinite(q))
+         {
+            if (!warnedNonFiniteInput)
+               warnNonFiniteInputOnce("joint position of " + e.getKey().getName());
+            continue;
+         }
+         Henc.set(r, e.getValue(), 1.0); // this measurement row pins the joint at its state index
+         zEnc.set(r, 0, q);
+         r++;
+      }
+      Henc.reshape(r, dim);
+      zEnc.reshape(r, 1);
+      Renc.reshape(r, r);
+      Renc.zero();
+      for (int i = 0; i < r; i++)
+         Renc.set(i, i, ENCODER_VAR);
+      return r;
+   }
+
+   /**
     * Installs the optional on-ground gate: while {@code onGround} does not read true, {@link #initialize()}
     * stays deferred (the filter exports NaN joint states and zero bias, so consumers fall back to the raw
     * sensors). Pass {@code null} to disable gating (the default — initialize as soon as boot data is finite).
@@ -672,21 +711,17 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       predict();
       warnIfNonFiniteState("predict", -1);
 
-      // update encoder states; skipped wholesale if any encoder reads non-finite (boot transient)
-      int row = 0;
-      boolean encodersValid = true;
-      for (OneDoFJointBasics j : jointToIndex.keySet())
-      {
-         double q = sensorMap.getOneDoFJointOutput(j).getPosition();
-         if (!Double.isFinite(q))
-         {
-            encodersValid = false;
-            if (!warnedNonFiniteInput)
-               warnNonFiniteInputOnce("joint position of " + j.getName());
-         }
-         zEnc.set(row++, 0, q);
-      }
-      if (encodersValid)
+      // Encoder update, gated PER JOINT (not all-or-nothing). Alex's encoders are intermittent, so a single
+      // non-finite reading used to drop the WHOLE encoder update — unpinning every joint's position for that
+      // tick. With the position pin gone, q integrates q̇ (which the pair-gyro/stance-anchor updates only
+      // loosely constrain, and the anchor can bias) with no correction, so q ramps without bound and, on the
+      // mass-matrix path, P grows without bound too — the divergence that drove the joint estimates to ~1e18.
+      // Fix: build the encoder measurement over only the joints whose encoder is finite this tick, so every
+      // good encoder keeps pinning its joint while just the bad one is skipped. When all are finite (the common
+      // case) this is exactly the previous full-rank update; the reduced matrices reuse the pre-sized scratch
+      // (reshape to a smaller size never allocates), so it stays allocation-free on the estimator thread.
+      int validEncoderCount = buildValidEncoderUpdate();
+      if (validEncoderCount > 0)
       {
          josephUpdate(Henc, zEnc, Renc, "encoder");
          warnIfNonFiniteState("encoderUpdate", -1);
@@ -712,6 +747,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       CommonOps_DDRM.mult(F, P, Ptmp);
       CommonOps_DDRM.multTransB(Ptmp, F, P); // FPF^T term
       CommonOps_DDRM.addEquals(P, Q);
+      symmetrize(P); // FPF^T + Q is symmetric in exact arithmetic; force it so round-off can't drift P (matches the reference)
    }
 
    private void pairGyroUpdate(Pair p)
@@ -900,6 +936,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       KR.reshape(dim, k);
       CommonOps_DDRM.mult(K, Rm, KR);
       CommonOps_DDRM.multAddTransB(KR, K, P); // + K R K^T
+      symmetrize(P); // Joseph form is symmetric by construction; force it so round-off can't accumulate asymmetry
 
       if (containsNonFinite(x) || containsNonFinite(P))
       {
@@ -967,6 +1004,27 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       for (int i = 0; i < src.getNumRows(); i++)
          for (int j = 0; j < src.getNumCols(); j++)
             dst.set(row0 + i, col0 + j, scale * src.get(i,j));
+   }
+
+   /**
+    * In-place symmetrization P <- 0.5 (P + P^T). The predict and Joseph-form covariance updates are symmetric
+    * in exact arithmetic, but floating-point round-off leaves a tiny asymmetry each tick that a long hardware
+    * run can accumulate; forcing symmetry keeps P on the symmetric-PSD manifold the Kalman gain assumes (the
+    * same LΣL^T covariance discipline the JAX reference applies after every predict/update). Allocation-free;
+    * O(dim^2), negligible next to the O(dim^3) matrix products already in the step.
+    */
+   private static void symmetrize(DMatrixRMaj mat)
+   {
+      int rows = mat.getNumRows();
+      for (int i = 0; i < rows; i++)
+      {
+         for (int j = i + 1; j < rows; j++)
+         {
+            double avg = 0.5 * (mat.get(i, j) + mat.get(j, i));
+            mat.set(i, j, avg);
+            mat.set(j, i, avg);
+         }
+      }
    }
 
    /** True if any entry of the matrix is NaN or infinite. Allocation-free; O(elements). */

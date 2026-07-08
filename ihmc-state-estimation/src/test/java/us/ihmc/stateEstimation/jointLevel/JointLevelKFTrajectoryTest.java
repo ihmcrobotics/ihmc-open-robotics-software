@@ -296,6 +296,49 @@ public class JointLevelKFTrajectoryTest
          assertTrue(Math.abs(p1.get(i, n + i)) > 1.0e-6, "within-joint q-qdot coupling persists, joint " + i);
    }
 
+   /**
+    * Regression for the intermittent-encoder divergence: a single joint's encoder reads non-finite every tick
+    * (Alex's encoders are intermittent) while the legs move and the phase-2 stance anchor runs every tick
+    * (double support). The encoder update must be gated PER JOINT, so the joints whose encoders are still good
+    * stay pinned to their trajectory; a single bad encoder must not drop the whole update and unpin every joint.
+    *
+    * <p>Before per-joint gating this diverged hard: the whole encoder update was skipped, so every joint's
+    * position integrated a stance-anchor-biased velocity with no correction and ran away (tens of radians here,
+    * ~1e18 over a full hardware run). With gating, the good-encoder joints track to encoder precision and only
+    * the genuinely unmeasured joint drifts.</p>
+    */
+   @Test
+   public void testIntermittentEncoderWithStanceAnchorKeepsGoodJointsPinned()
+   {
+      JointLevelKFTestFixture f = JointLevelKFTestFixture.singlePair(9108L, 8, 1, 7);
+      int n = f.n;
+      double[] q = new double[n];
+      double[] qd = new double[n];
+
+      for (int k = 0; k < 500; k++) // clean warm-up: all encoders good, filter converges
+      {
+         trajectory(k, n, q, qd);
+         f.applyConsistentMotion(q, qd);
+         f.filter.computeJointState();
+         f.filter.computeImuBiases(f.feet);
+      }
+      for (int k = 500; k < 8000; k++) // joint 0's encoder is dead every tick while the legs move + anchor runs
+      {
+         trajectory(k, n, q, qd);
+         f.applyConsistentMotion(q, qd);
+         f.sensorMap.setPosition(f.filteredJoints.get(0), Double.NaN);
+         f.filter.computeJointState();
+         f.filter.computeImuBiases(f.feet);
+      }
+
+      DMatrixRMaj x = f.filter.getStateVector();
+      assertAllFinite(x, "state stays finite with a dead encoder and the stance anchor active");
+      trajectory(7999, n, q, qd);
+      for (int i = 1; i < n; i++) // every joint whose encoder is still good must remain pinned to its trajectory
+         assertEquals(q[i], x.get(i, 0), 5.0e-3,
+                      "good-encoder joint stays pinned despite joint 0's dead encoder (per-joint gating), joint " + i);
+   }
+
    private static void assertAllFinite(DMatrixRMaj matrix, String message)
    {
       for (int i = 0; i < matrix.getNumElements(); i++)
