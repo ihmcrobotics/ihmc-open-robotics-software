@@ -3,6 +3,7 @@ package us.ihmc.stateEstimation.invariant_estimator;
 import java.util.Objects;
 
 import gnu.trove.map.TObjectDoubleMap;
+import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -58,6 +59,12 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private static final int NUMBER_OF_CONTACTS = 2; // left, right feet
    private static final SideDependentList<Integer> CONTACT_INDICES = new SideDependentList<>(0, 1);
 
+   // Filter-consistency check: each contact update is a 3-DOF position measurement, so its NIS is
+   // χ²-distributed with 3 DOF. The two-sided CONSISTENCY_CONFIDENCE band gives the acceptance interval
+   // NIS should stay inside (~CONSISTENCY_CONFIDENCE of the time) when the filter is well-tuned.
+   private static final int CONTACT_MEASUREMENT_DOF = 3;
+   private static final double CONSISTENCY_CONFIDENCE = 0.95;
+
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
 
@@ -109,6 +116,13 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private double swingSlipInflation = 1.0e6;                 // σ_{c,i}² ×= inflation^(1−p): forgetful anchor at p → 0
    private final Matrix3D inflatedContactCovariance = new Matrix3D();
    private final SideDependentList<YoDouble> yoContactProbability;
+
+   // Filter-consistency: per-foot Normalized Innovation Squared (NIS = rᵀS⁻¹r) from the contact update,
+   // plus the shared two-sided χ² acceptance band it should stay inside (same DOF for both feet, so one
+   // pair). Set NaN on ticks where the contact update is skipped (frozen / no contact).
+   private final SideDependentList<YoDouble> yoContactNIS;
+   private final YoDouble yoContactNISLowerBound = new YoDouble("invariantContactNISLowerBound", registry);
+   private final YoDouble yoContactNISUpperBound = new YoDouble("invariantContactNISUpperBound", registry);
 
    // Estimate outputs for logging/comparison.
    private final YoFramePoint3D yoBasePosition = new YoFramePoint3D("invariantFilterPelvisBasePosition", ReferenceFrame.getWorldFrame(), registry);
@@ -253,6 +267,14 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       this.baseContactVariance = contactVariance;
       yoContactProbability = new SideDependentList<>(new YoDouble("invariantContactProbabilityLeft", registry),
                                                      new YoDouble("invariantContactProbabilityRight", registry));
+
+      yoContactNIS = new SideDependentList<>(new YoDouble("invariantContactNISLeft", registry),
+                                             new YoDouble("invariantContactNISRight", registry));
+      // Two-sided χ² acceptance band for the contact-update NIS (constant: fixed DOF and confidence).
+      ChiSquaredDistribution contactNISDistribution = new ChiSquaredDistribution(CONTACT_MEASUREMENT_DOF);
+      double lowerTail = 0.5 * (1.0 - CONSISTENCY_CONFIDENCE);
+      yoContactNISLowerBound.set(contactNISDistribution.inverseCumulativeProbability(lowerTail));
+      yoContactNISUpperBound.set(contactNISDistribution.inverseCumulativeProbability(1.0 - lowerTail));
       // Default fallback: forward-kinematics-only contact detection on the estimator's own sole frames
       // (already refreshed each tick in doControl, so no frame-updater hook is needed here).
       contactProbabilityProvider = new KinematicContactDetector(soleFrames, null, dt);
@@ -349,6 +371,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          ekf.predict(angularVelocity, linearAcceleration, dt);
          ekf.getState().setBaseVelocity(zeroVelocity);
          heldLastTick = true;
+         for (RobotSide side : RobotSide.values)
+            yoContactNIS.get(side).setToNaN();
          updateYoVariables();
          return;
       }
@@ -373,6 +397,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          contactMeasurementNoiseProvider.packContactCovariance(side, inflatedContactCovariance);
          inflatedContactCovariance.scale(measurementInflation(contactProbability));
          ekf.update(CONTACT_INDICES.get(side), contactInBody, inflatedContactCovariance);
+         yoContactNIS.get(side).set(ekf.getLastNormalizedInnovationSquared());
       }
 
       updateYoVariables();

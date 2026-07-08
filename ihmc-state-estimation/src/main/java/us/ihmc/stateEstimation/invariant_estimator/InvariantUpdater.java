@@ -35,6 +35,7 @@ public class InvariantUpdater
    // Fixed-size (m × m or n × n) work; measurement-sized work is reshaped per call.
    private final DMatrixRMaj innovationCovariance = new DMatrixRMaj(1, 1);    // S   (z×z)
    private final DMatrixRMaj innovationCovarianceInverse = new DMatrixRMaj(1, 1); // S⁻¹
+   private final DMatrixRMaj innovationCovarianceInverseTimesResidual = new DMatrixRMaj(1, 1); // S⁻¹·r (z×1)
    private final DMatrixRMaj hTimesCovariance = new DMatrixRMaj(1, 1);        // H·P (z×m)
    private final DMatrixRMaj covarianceTimesHTranspose = new DMatrixRMaj(1, 1); // P·Hᵀ (m×z)
    private final DMatrixRMaj gain = new DMatrixRMaj(1, 1);                    // K   (m×z)
@@ -50,6 +51,9 @@ public class InvariantUpdater
    private final Vector3D expPhi = new Vector3D();
    private final RotationMatrix expRotation = new RotationMatrix();
    private final Matrix3D expJacobian = new Matrix3D();
+
+   /** Normalized Innovation Squared rᵀ·S⁻¹·r from the most recent {@link #update}; χ²-distributed with z DOF under a consistent filter. */
+   private double normalizedInnovationSquared = Double.NaN;
 
    /** Optional contact measurement subpiece, owned and called by this updater (see {@link #updateContact}). */
    private ContactUpdater contactUpdater = null;
@@ -129,6 +133,12 @@ public class InvariantUpdater
       CommonOps_DDRM.multTransB(covariance, H, covarianceTimesHTranspose);
       innovationCovarianceInverse.reshape(z,z);
       CommonOps_DDRM.invert(innovationCovariance,innovationCovarianceInverse);
+
+      // NIS = rᵀ·S⁻¹·r — consistency statistic (χ² with z DOF); computed here while S⁻¹ and r are both in hand.
+      innovationCovarianceInverseTimesResidual.reshape(z,1);
+      CommonOps_DDRM.mult(innovationCovarianceInverse, residual, innovationCovarianceInverseTimesResidual);
+      normalizedInnovationSquared = CommonOps_DDRM.dot(residual, innovationCovarianceInverseTimesResidual);
+
       gain.reshape(m,z);
       CommonOps_DDRM.mult(covarianceTimesHTranspose,innovationCovarianceInverse,gain);
 
@@ -156,6 +166,17 @@ public class InvariantUpdater
       CommonOps_DDRM.mult(gain, measurementCovariance, gainTimesNoise); // K * R
       CommonOps_DDRM.multAddTransB(gainTimesNoise, gain, covariance); // P += KRK^T
 
+   }
+
+   /**
+    * @return the Normalized Innovation Squared rᵀ·S⁻¹·r from the most recent {@link #update} call, or
+    *         {@code NaN} if no update has run. Under a consistent filter this is χ²-distributed with z
+    *         (= measurement dimension) degrees of freedom, so comparing it against the χ² acceptance
+    *         band is a running filter-consistency check.
+    */
+   public double getNormalizedInnovationSquared()
+   {
+      return normalizedInnovationSquared;
    }
 
    /**

@@ -135,6 +135,16 @@ public class InvariantEKF
       updater.update(state, contactIndex, bodyMeasurement, bodyMeasurementCovariance, false); // learned module not wired yet
    }
 
+   /**
+    * @return the Normalized Innovation Squared rᵀ·S⁻¹·r from the most recent {@link #update} call, or
+    *         {@code NaN} if none has run. Read immediately after an {@code update} to get that
+    *         measurement's consistency statistic; a later {@code update} overwrites it.
+    */
+   public double getLastNormalizedInnovationSquared()
+   {
+      return updater.getNormalizedInnovationSquared();
+   }
+
    /** @return the number of contact columns N. */
    public int getNumberOfContacts()
    {
