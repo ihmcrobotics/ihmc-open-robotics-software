@@ -38,11 +38,18 @@ import java.util.function.BooleanSupplier;
 /**
  * Joint-level Kalman filter pre-filter (P-A architecture): one filter over the IMU tree whose pair
  * measurements z_w,ab = J(q^) S_ab qd + b_w,ab + v couple the joints on each IMU-pair path, with
- * per-IMU biases in state and a phase-2 gauge anchor for the absolute base bias. When a robot model is
+ * per-IMU biases in state and stance-foot gauge anchors for the absolute base bias. When a robot model is
  * provided, the joint process noise is the mass-matrix-induced Qa = sigma_tau^2 M(q)^-2 of the write-up
  * (eqs. (10)-(12)), recomputed each predict; otherwise a scalar-CWNA diagonal fallback.
  *
  * <p><b>Do not share an instance between pipelines</b> (the filter holds its covariance).</p>
+ *
+ * <p><b>Rev. 2 measurement model (SPEC §5-§6).</b> The gyro measurements are applied as ONE stacked Joseph
+ * update per tick over z_g = [pair diffs ; active stance anchors], not the Rev. 1 per-pair sequential updates.
+ * Its noise R_g = L Sigma L^T + Sigma_eps carries the exact shared-IMU cross-covariances (biases and gyro white
+ * noise both enter through the same edge-incidence operator L, whose blocks also ARE the bias columns of H_g).
+ * The stance anchors are merged into this phase-1 update using the previous tick's trusted-feet set;
+ * {@link #computeImuBiases} is reduced to caching that set. See jointKF_derivation.md §5-§7.</p>
  *
  * <p><b>Rev. 2 process noise (SPEC §3.2).</b> The joint process noise is now the floating-base Schur
  * complement Qa = sigma_tau^2 * Lambda(q)^-2, Lambda = M_jj - M_jb M_bb^-1 M_bj, rather than the Rev. 1
@@ -128,7 +135,6 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private DMatrixRMaj Henc, Renc, zEnc;
 
    // Measurement model matrices
-   private final DMatrixRMaj H = new DMatrixRMaj(3,0);
    private final DMatrixRMaj PHt = new DMatrixRMaj(0,0);
    private final DMatrixRMaj S = new DMatrixRMaj(0,0);
    private final DMatrixRMaj Sinv = new DMatrixRMaj(0,0);
@@ -137,14 +143,33 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private final DMatrixRMaj KR = new DMatrixRMaj(0,0); // I-KH, dim x dim, Joseph form
    private final DMatrixRMaj IKH = new DMatrixRMaj(0,0); // I-KH, dim x dim, Joseph form
    private final DMatrixRMaj Ptmp = new DMatrixRMaj(0,0);
-   private final DMatrixRMaj zMeas = new DMatrixRMaj(3,1);
-   private final DMatrixRMaj zAnchor = new DMatrixRMaj(3,1);
-   private final DMatrixRMaj R3 = new DMatrixRMaj(3,3);
    private final DMatrixRMaj Rimu = new DMatrixRMaj(3,3);
    private final DMatrixRMaj rot3 = new DMatrixRMaj(3,3);
-   private final DMatrixRMaj tmp3a = new DMatrixRMaj(3,3);
-   private final DMatrixRMaj tmp3b = new DMatrixRMaj(3,3);
-   private final DMatrixRMaj anchorR = new DMatrixRMaj(3,3);
+   private final DMatrixRMaj anchorR = new DMatrixRMaj(3,3); // Sigma_eps, the stance-anchor model-error covariance
+
+   // ---- Stacked gyro measurement (SPEC §5). ONE Joseph update per tick over z_g in R^{3(E+K)}: E = pairs
+   // (rows [0, 3E)), K = active stance anchors this tick (rows [3E, 3E+3K)). This replaces Rev. 1's per-pair
+   // sequential updates AND the separate phase-2 anchor. Biases and gyro white noise both enter through the
+   // SAME rotational edge-incidence operator L, so a block-diagonal per-pair R is inconsistent (it double-
+   // counts shared-IMU samples on a star topology, and both anchors' shared base sample in double support);
+   // the stacked R_g = L Sigma L^T + Sigma_eps-block carries the exact cross-covariances (SPEC §5.3). The bias
+   // columns of H_g ARE L: build L once per tick, use it in both places so the identity cannot drift.
+   private int E;             // number of IMU pairs (fixed at construction)
+   private int maxStackRows;  // 3 * (E + K_max), K_max = number of foot anchors; the widest stacked measurement
+   private DMatrixRMaj Hg;    // 3(E+K) x dim measurement Jacobian [ 0 | J_stack(q^) | L(q^) ]
+   private DMatrixRMaj zg;    // 3(E+K) x 1 stacked measurement (raw gyro samples)
+   private DMatrixRMaj Rg;    // 3(E+K) x 3(E+K) stacked measurement noise L Sigma L^T + Sigma_eps
+   private DMatrixRMaj Lmix;  // 3(E+K) x 3m mixing operator L (also copied into H_g's bias columns)
+   private DMatrixRMaj Sigma; // 3m x 3m blkdiag of each IMU's angular-velocity MEASUREMENT-noise covariance
+   private DMatrixRMaj LSigma; // 3(E+K) x 3m scratch for the L*Sigma product
+   private IMUSensorReadOnly[] imusByOrdinal; // ordinal -> IMU, so the per-tick Sigma build is an index loop (no
+                                              // map-iterator allocation on the estimator thread)
+   private final DMatrixRMaj identity3 = new DMatrixRMaj(3,3); // constant I3 for anchor L-blocks
+   // Previous tick's trusted-feet set: the phase-1 stacked update reads THIS tick's anchors from the set cached
+   // by last tick's computeImuBiases (SPEC §6 phase note — the IHMC estimator finalizes contact trust in
+   // phase 2, after computeJointState, so a phase-1 stacked anchor must use the prior tick's trust). Pre-sized
+   // in allocate() and only cleared/refilled on the estimator thread (no per-tick allocation).
+   private List<RigidBodyBasics> trustedFeetFromLastTick;
    // Reused LU solver for the innovation-covariance inverse, pre-sized in allocate(). This replaces the
    // per-tick CommonOps_DDRM.invert(S, Sinv), which allocates a fresh LU decomposition + solver on every
    // call once S is larger than 5x5 (i.e. the n-joint encoder update) — garbage on the estimator thread.
@@ -505,7 +530,13 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 
    private void allocate()
    {
-      int maxMeas = Math.max(n,3); // encoder update is the widest measurement
+      // Widest measurement is either the n-joint encoder block or the 3(E+K_max) stacked gyro block. Size all
+      // the KF innovation scratch (PHt, S, Sinv, K, KR, nu) and the LU solver at this width so a full-anchor
+      // stacked update never reallocates on the estimator thread.
+      E = pairs.size();
+      int kMax = footAnchors.size();
+      maxStackRows = 3 * (E + kMax);
+      int maxMeas = Math.max(n, maxStackRows);
       x.reshape(dim, 1);
       xtmp.reshape(dim, 1);
 
@@ -521,6 +552,21 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       Henc = new DMatrixRMaj(n,dim);
       Renc = new DMatrixRMaj(n,n);
       zEnc = new DMatrixRMaj(n,1);
+
+      // Stacked gyro measurement scratch, pre-sized at the max (K = K_max active anchors); each tick reshapes
+      // DOWN to the current 3(E+K) within this capacity, so no per-tick allocation. Lmix/Sigma/LSigma feed the
+      // R_g = L Sigma L^T congruence and H_g's bias columns.
+      Hg = new DMatrixRMaj(maxStackRows, dim);
+      zg = new DMatrixRMaj(maxStackRows, 1);
+      Rg = new DMatrixRMaj(maxStackRows, maxStackRows);
+      Lmix = new DMatrixRMaj(maxStackRows, 3 * m);
+      Sigma = new DMatrixRMaj(3 * m, 3 * m);
+      LSigma = new DMatrixRMaj(maxStackRows, 3 * m);
+      CommonOps_DDRM.setIdentity(identity3);
+      trustedFeetFromLastTick = new ArrayList<>(Math.max(1, kMax));
+      imusByOrdinal = new IMUSensorReadOnly[m];
+      for (var e : imuToOrdinal.entrySet()) // construction-time only; the hot path indexes this array
+         imusByOrdinal[e.getValue()] = e.getKey();
 
       // Pre-size the Joseph-form scratch. IKH in particular MUST start at dim x dim: the first josephUpdate
       // does setIdentity(IKH) *before* multAdd reshapes it, so on a 0x0 IKH the identity is silently dropped
@@ -884,10 +930,21 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          warnIfNonFiniteState("encoderUpdate", -1);
       }
 
-      for (int i = 0; i < pairs.size(); i++)
+      // Single stacked gyro update (SPEC §5-§6): all pair rows plus the active stance-anchor rows in ONE Joseph
+      // update, using the previous tick's trusted-feet set (cached in computeImuBiases). The pairs+anchors share
+      // IMU samples, so they MUST NOT be split — a per-block update cannot represent the shared-IMU noise
+      // cross-covariance carried in R_g. If ANY entry of z_g/H_g/R_g is non-finite the WHOLE block is skipped
+      // (never individual rows — a partial stack silently changes the bias-gauge structure, SPEC §6 step 3).
+      buildStackedMeasurement();
+      if (containsNonFinite(zg) || containsNonFinite(Hg) || containsNonFinite(Rg))
       {
-         pairGyroUpdate(pairs.get(i));
-         warnIfNonFiniteState("pairGyroUpdate", i);
+         if (!warnedNonFiniteInput)
+            warnNonFiniteInputOnce("stacked gyro measurement (pairs/anchors)");
+      }
+      else
+      {
+         josephUpdate(Hg, zg, Rg, "stackedGyroUpdate");
+         warnIfNonFiniteState("stackedGyroUpdate", -1);
       }
 
       updateJointYoVariables();
@@ -906,70 +963,135 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       CommonOps_DDRM.addEquals(P, Q);
    }
 
-   private void pairGyroUpdate(Pair p)
-   {
-      buildPairMeasurement(p);
-      // Guard z (IMU gyro not booted yet), H (Jacobian built from a model whose joints were set from
-      // non-finite raw sensors by the consumer's own fallback), AND R3 (built from the IMU gyro measurement
-      // covariances and the frame rotations — previously unchecked, so a non-finite covariance flowed straight
-      // into the update). One bad update would latch NaN into x and P permanently, so skip this pair for the tick.
-      if (containsNonFinite(zMeas) || containsNonFinite(H) || containsNonFinite(R3))
-      {
-         if (!warnedNonFiniteInput)
-            warnNonFiniteInputOnce("pair gyro measurement " + p.parent.getSensorName() + " -> " + p.child.getSensorName());
-         return;
-      }
-      josephUpdate(H, zMeas, R3, "pairGyro");
-   }
-
    /**
-    * Fills the pair-gyro measurement model (H, zMeas, R3) for one IMU pair, without applying the update.
-    * Split out of {@link #pairGyroUpdate} so tests can inspect the measurement model (mirrors the reference
-    * implementation's build_measurement / build_H seam).
+    * Assembles the stacked gyro measurement (H_g, z_g, R_g, and the mixing operator L = {@code Lmix}) for this
+    * tick, WITHOUT applying the update (SPEC §5). Rows: pair {@code e} occupies rows [3e, 3e+3); the active
+    * stance anchors (feet trusted last tick) follow at rows [3E, 3E+3K). Frames are already current — the
+    * estimator calls {@code updateFramesRecursively()} every tick — so, as in the Rev. 1 pair build, we do NOT
+    * re-update them here (redundant and allocates inside MovingReferenceFrame.update()). Allocation-free: every
+    * matrix is pre-sized in {@link #allocate()} and only reshaped DOWN here.
+    *
+    * <p>Convention-bound lines (SPEC §9, "convention traps") — each fails silently if wrong, so all are called
+    * out here and pinned by the nuisance-marginalization oracle test:</p>
+    * <ul>
+    *   <li>pair residual z_e = R(child-&gt;J_e) w_child - R(parent-&gt;J_e) w_parent (child +, parent -),
+    *   matching {@code setKinematicChain(parent, child)};</li>
+    *   <li>L pair blocks: +R(child-&gt;J_e) in the child IMU's bias column, -R(parent-&gt;J_e) in the parent's;</li>
+    *   <li>anchor: H q̇-columns -J_leg, L block +I3 in the base IMU's column (J frame = base measurement frame,
+    *   so the anchor's own rotation block is exactly identity), z = raw base gyro;</li>
+    *   <li>R_g = L Sigma L^T + Sigma_eps on the anchor diagonals, Sigma = each IMU's angular-velocity
+    *   MEASUREMENT-noise covariance (NOT the bias process-noise covariance).</li>
+    * </ul>
     */
-   private void buildPairMeasurement(Pair p)
+   private void buildStackedMeasurement()
    {
-      // Frames are already current: the estimator calls rootBody.updateFramesRecursively() every tick (this
-      // filter runs inside that tick and reads the same joints the alpha estimator does). Re-updating them
-      // per joint here is redundant AND allocates ~64 B/joint inside MovingReferenceFrame.update() — garbage
-      // on the estimator thread that the alpha filter never generated.
-      p.jac.reset();
-      CommonOps_DDRM.extract(p.jac.getJacobianMatrix(), 0, 3, 0, p.qdCols.length, p.Jang, 0, 0); //angular part
+      // Mark active anchors (usable + trusted last tick, SPEC §6 phase note) and count them.
+      int activeAnchors = 0;
+      for (int i = 0; i < footAnchors.size(); i++)
+      {
+         FootAnchor fa = footAnchors.get(i);
+         fa.active = fa.usable && trustedFeetFromLastTick.contains(fa.foot);
+         if (fa.active)
+            activeAnchors++;
+      }
+      int rows = 3 * (E + activeAnchors);
 
-      // z = omega_child - omega_parent, expressed in the Jacobian frame (same construction as the alpha estimator)
-      fvA.setToZero(p.child.getMeasurementFrame());
-      fvA.set(p.child.getAngularVelocityMeasurement());
-      fvA.changeFrame(p.jac.getJacobianFrame());
+      Hg.reshape(rows, dim);       Hg.zero();
+      zg.reshape(rows, 1);         zg.zero();
+      Lmix.reshape(rows, 3 * m);   Lmix.zero();
+      Sigma.reshape(3 * m, 3 * m); Sigma.zero();
+      Rg.reshape(rows, rows);      Rg.zero();
 
-      fvB.setToZero(p.parent.getMeasurementFrame());
-      fvB.set(p.parent.getAngularVelocityMeasurement());
-      fvB.changeFrame(p.jac.getJacobianFrame());
-      fvA.sub(fvB);
-      fvA.get(zMeas);
+      // Sigma = blkdiag over IMUs of each IMU's angular-velocity MEASUREMENT-noise covariance, in its own frame.
+      // Deliberately NOT getAngularVelocityBiasProcessNoiseCovariance (the bias random-walk intensity, orders of
+      // magnitude smaller); using that here makes the gyro update drastically over-confident (Rev. 1 bug class).
+      // Index loop over the ordinal->IMU array (not a map-entry iterator) to stay allocation-free.
+      for (int o = 0; o < m; o++)
+      {
+         imusByOrdinal[o].getAngularVelocityNoiseCovariance(Rimu);
+         insertScaledInto(Rimu, 1.0, Sigma, 3 * o, 3 * o);
+      }
 
-      // H (3 x dim) ; velocity block = scattered J columns, bias blocks = +R_child, -R_parent; q block = 0
-      H.reshape(3, dim);
-      H.zero();
-      for (int c = 0; c < p.qdCols.length; c++)
+      // Pair rows.
+      for (int e = 0; e < E; e++)
+      {
+         Pair p = pairs.get(e);
+         int row0 = 3 * e;
+         p.jac.reset();
+         CommonOps_DDRM.extract(p.jac.getJacobianMatrix(), 0, 3, 0, p.qdCols.length, p.Jang, 0, 0); // angular part
+
+         // z_e = omega_child - omega_parent expressed in the child body-fixed Jacobian frame (child +, parent -).
+         fvA.setToZero(p.child.getMeasurementFrame());
+         fvA.set(p.child.getAngularVelocityMeasurement());
+         fvA.changeFrame(p.jac.getJacobianFrame());
+         fvB.setToZero(p.parent.getMeasurementFrame());
+         fvB.set(p.parent.getAngularVelocityMeasurement());
+         fvB.changeFrame(p.jac.getJacobianFrame());
+         fvA.sub(fvB);
+         zg.set(row0, 0, fvA.getX());
+         zg.set(row0 + 1, 0, fvA.getY());
+         zg.set(row0 + 2, 0, fvA.getZ());
+
+         // H_g q̇-columns: +J_e scattered onto the path joints. q-columns left 0 (SPEC §5.4); bias columns via L.
+         for (int c = 0; c < p.qdCols.length; c++)
+            for (int r = 0; r < 3; r++)
+               Hg.set(row0 + r, p.qdCols[c], p.Jang.get(r, c));
+
+         // L pair blocks: +R(child->J_e) at the child IMU bias column, -R(parent->J_e) at the parent IMU column.
+         // Lmix column = state bias column minus the 2n (q,q̇) offset (p.childBias/parentBias were precomputed).
+         packRotationToJacFrame(p.child, p.jac.getJacobianFrame(), rot3);
+         insertScaledInto(rot3, +1.0, Lmix, row0, p.childBias - 2 * n);
+         packRotationToJacFrame(p.parent, p.jac.getJacobianFrame(), rot3);
+         insertScaledInto(rot3, -1.0, Lmix, row0, p.parentBias - 2 * n);
+      }
+
+      // Active stance-anchor rows (SPEC §5.2): z = raw base gyro; H q̇-columns -J_leg; L block +I3 on the base IMU.
+      int arow = 3 * E;
+      for (int i = 0; i < footAnchors.size(); i++)
+      {
+         FootAnchor fa = footAnchors.get(i);
+         if (!fa.active)
+            continue;
+         fa.jac.reset();
+         CommonOps_DDRM.extract(fa.jac.getJacobianMatrix(), 0, 3, 0, fa.qdCols.length, fa.Jang, 0, 0);
+
+         Vector3DReadOnly w = baseIMU.getAngularVelocityMeasurement();
+         zg.set(arow, 0, w.getX());
+         zg.set(arow + 1, 0, w.getY());
+         zg.set(arow + 2, 0, w.getZ());
+
+         for (int c = 0; c < fa.qdCols.length; c++)
+            for (int r = 0; r < 3; r++)
+               Hg.set(arow + r, fa.qdCols[c], -fa.Jang.get(r, c)); // -J_leg (moving omega_foot to the LHS)
+
+         insertScaledInto(identity3, +1.0, Lmix, arow, baseBiasCol - 2 * n); // +I3, base measurement frame
+         arow += 3;
+      }
+
+      // Copy L into H_g's bias columns [2n, 2n+3m): "the bias columns of H_g ARE L" (SPEC §5.3), one build, two uses.
+      for (int r = 0; r < rows; r++)
+         for (int c = 0; c < 3 * m; c++)
+            Hg.set(r, 2 * n + c, Lmix.get(r, c));
+
+      // R_g = L Sigma L^T + Sigma_eps-block. The congruence reproduces the SPEC §5.3 block table exactly (pair
+      // diagonals, shared-IMU s_e*s_f cross-blocks, pair×anchor, anchor×anchor Sigma_base). Allocation-free:
+      // LSigma/Rg are pre-sized. Then add Sigma_eps (anchorR) on each active anchor's 3x3 diagonal.
+      LSigma.reshape(rows, 3 * m);
+      CommonOps_DDRM.mult(Lmix, Sigma, LSigma);
+      CommonOps_DDRM.multTransB(LSigma, Lmix, Rg);
+      int arow2 = 3 * E;
+      for (int i = 0; i < footAnchors.size(); i++)
+      {
+         if (!footAnchors.get(i).active)
+            continue;
          for (int r = 0; r < 3; r++)
-            H.set(r, p.qdCols[c], p.Jang.get(r,c));
-      packRotationToJacFrame(p.child, p.jac.getJacobianFrame(), rot3);
-      insertScaledInto(rot3, +1.0, H, 0, p.childBias);
-      packRotationToJacFrame(p.parent, p.jac.getJacobianFrame(), rot3);
-      insertScaledInto(rot3, -1.0, H, 0, p.parentBias);
-      // q columns left 0: dJ/dq * qd neglected (encoder has pinned q)
-      // R = R_child Sigma_child R_child^T + R_parent Sigma_parent R_parent^T (L Sigma L^T), where Sigma is each
-      // IMU's angular-velocity MEASUREMENT noise covariance (the per-IMU Mahony filter output covariance, R_omega
-      // in the write-up). This is deliberately NOT getAngularVelocityBiasProcessNoiseCovariance — that is the
-      // bias random-walk intensity used in buildProcessNoise, typically orders of magnitude smaller. Using it
-      // here made the pair-gyro update drastically over-confident.
-      R3.zero();
-      packRotationToJacFrame(p.child, p.jac.getJacobianFrame(), rot3);
-      p.child.getAngularVelocityNoiseCovariance(Rimu);
-      congruenceAdd(rot3, Rimu, R3);
-      packRotationToJacFrame(p.parent, p.jac.getJacobianFrame(), rot3);
-      p.parent.getAngularVelocityNoiseCovariance(Rimu);
-      congruenceAdd(rot3, Rimu, R3);
+            for (int c = 0; c < 3; c++)
+               Rg.add(arow2 + r, arow2 + c, anchorR.get(r, c));
+         arow2 += 3;
+      }
+      // Exact symmetry for the Joseph update (the congruence is symmetric only to round-off). Reuses the
+      // Schur path's helper.
+      symmetrize(Rg);
    }
 
    // ================================ Phase 2 ================================
@@ -977,49 +1099,19 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    @Override
    public void computeImuBiases(List<RigidBodyBasics> trustedFeet)
    {
-      if (!initialized || trustedFeet.isEmpty())
-         return; // no absolute reference at the current tick; common mode bias gauge stays free
-      for (int i = 0; i < footAnchors.size(); i++)
+      // Phase 2 is now bookkeeping only (SPEC §6 phase note): the stance anchors have moved into the phase-1
+      // stacked update, so all this does is cache THIS tick's trusted-feet set for next tick's anchor rows.
+      // Splitting the anchors back into a phase-2 update would make the base-gyro correlation between the
+      // anchors and the base-adjacent pairs unexpressible (sequential updates cannot carry cross-block noise
+      // correlation) — which is exactly the bug this revision removes, so do NOT run a measurement update here.
+      // Cleared + refilled with an index loop (not addAll, which allocates via Collection.toArray); the list is
+      // pre-sized to the anchor count in allocate(), so this stays allocation-free on the estimator thread.
+      trustedFeetFromLastTick.clear();
+      if (trustedFeet != null)
       {
-         FootAnchor fa = footAnchors.get(i);
-         if (fa.usable && trustedFeet.contains(fa.foot))
-         {
-            stanceAnchorUpdate(fa);
-            warnIfNonFiniteState("stanceAnchor", i);
-         }
+         for (int i = 0; i < trustedFeet.size(); i++)
+            trustedFeetFromLastTick.add(trustedFeet.get(i));
       }
-   }
-
-   private void stanceAnchorUpdate(FootAnchor fa)
-   {
-      // Frames already current (see pairGyroUpdate); do not re-update per joint (redundant + allocates).
-      CommonOps_DDRM.extract(fa.jac.getJacobianMatrix(), 0, 3, 0, fa.qdCols.length, fa.Jang, 0, 0);
-
-      // Measurement: base IMU gyro, already in measurement frame
-      Vector3DReadOnly w = baseIMU.getAngularVelocityMeasurement();
-      zAnchor.set(0, 0, w.getX());
-      zAnchor.set(1,0, w.getY());
-      zAnchor.set(2,0, w.getZ());
-
-      // Model with no contact twist: (omega_foot = 0) => z = -J_ang * qd_leg + b_base
-      // Verify with convention before trusting, sign of J_ang and the
-      // assumption that the stance foot is non-rotating is what makes this work.
-      H.reshape(3,dim);
-      H.zero();
-      for (int c = 0; c < fa.qdCols.length; c++)
-         for (int r = 0; r < 3; r++)
-            H.set(r, fa.qdCols[c], -fa.Jang.get(r,c));
-      H.set(0, baseBiasCol, 1.0);
-      H.set(1, baseBiasCol + 1, 1.0);
-      H.set(2, baseBiasCol + 2, 1.0);
-
-      if (containsNonFinite(zAnchor) || containsNonFinite(H))
-      {
-         if (!warnedNonFiniteInput)
-            warnNonFiniteInputOnce("stance anchor at " + fa.foot.getName() + " (base IMU " + baseIMU.getSensorName() + ")");
-         return;
-      }
-      josephUpdate(H, zAnchor, anchorR, "stanceAnchor");
    }
 
    // ================================ KF core ================================
@@ -1145,13 +1237,6 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       out.set(2, 0, r.getM20());
       out.set(2, 1, r.getM21());
       out.set(2, 2, r.getM22());
-   }
-
-   private void congruenceAdd(DMatrixRMaj L, DMatrixRMaj Sigma, DMatrixRMaj accum)
-   {
-      CommonOps_DDRM.mult(L, Sigma, tmp3a);
-      CommonOps_DDRM.multTransB(tmp3a, L, tmp3b);
-      CommonOps_DDRM.addEquals(accum, tmp3b);
    }
 
    private static void insertScaledInto(DMatrixRMaj src, double scale, DMatrixRMaj dst, int row0, int col0)
@@ -1341,11 +1426,30 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       initialized = true;
    }
 
-   /** Builds the pair-gyro measurement (H, z, R) for the given pair without applying the update, for inspection. */
-   void buildPairMeasurementForTest(int pairIndex) { buildPairMeasurement(pairs.get(pairIndex)); }
-   DMatrixRMaj getMeasurementJacobian() { return H.copy(); }     // last H built (3 x dim)
-   DMatrixRMaj getMeasurementResidual() { return zMeas.copy(); } // last z built (3 x 1)
-   DMatrixRMaj getMeasurementNoise()    { return R3.copy(); }    // last R built (3 x 3)
+   /**
+    * Builds the stacked gyro measurement (H_g, z_g, R_g, L) from the current model configuration and the cached
+    * trusted-feet-from-last-tick set, WITHOUT applying the update, for inspection. Set the active anchors first
+    * with {@link #setTrustedFeetForTest} (empty => pairs-only, K = 0). Replaces the Rev. 1 per-pair
+    * {@code buildPairMeasurementForTest} seam — the filter no longer has a per-pair update path.
+    */
+   void buildStackedMeasurementForTest() { buildStackedMeasurement(); }
+   DMatrixRMaj getStackedMeasurementJacobian() { return Hg.copy(); }  // H_g (3(E+K) x dim), reshaped to this tick
+   DMatrixRMaj getStackedMeasurementResidual() { return zg.copy(); }  // z_g (3(E+K) x 1)
+   DMatrixRMaj getStackedMeasurementNoise()    { return Rg.copy(); }  // R_g (3(E+K) x 3(E+K))
+   DMatrixRMaj getMixingOperator()             { return Lmix.copy(); } // L (3(E+K) x 3m); H_g bias columns == this
+   int getStackedRowForPair(int pairIndex)     { return 3 * pairIndex; }      // pair e occupies rows [3e, 3e+3)
+   int getBiasBlockColumn(IMUSensorReadOnly imu) { return 2 * n + 3 * imuToOrdinal.get(imu); } // state col of imu's bias
+   int getImuOrdinal(IMUSensorReadOnly imu)    { return imuToOrdinal.get(imu); }
+   IMUSensorReadOnly getBaseIMU()              { return baseIMU; }
+
+   /** Overwrites the cached previous-tick trusted-feet set that {@link #buildStackedMeasurement} reads anchors from. */
+   void setTrustedFeetForTest(List<RigidBodyBasics> feet)
+   {
+      trustedFeetFromLastTick.clear();
+      if (feet != null)
+         for (int i = 0; i < feet.size(); i++)
+            trustedFeetFromLastTick.add(feet.get(i));
+   }
    int[] getPairVelocityColumns(int pairIndex) { return pairs.get(pairIndex).qdCols.clone(); }
    int getPairParentBiasColumn(int pairIndex)  { return pairs.get(pairIndex).parentBias; }
    int getPairChildBiasColumn(int pairIndex)   { return pairs.get(pairIndex).childBias; }
@@ -1373,6 +1477,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       OneDoFJointBasics[] legJoints;
       int[] qdCols;
       boolean usable; // false if any base-> foot joint is not in the state
+      boolean active; // true this tick: usable AND trusted last tick (SPEC §6); set in buildStackedMeasurement
       final DMatrixRMaj Jang = new DMatrixRMaj(3,1);
       FootAnchor(RigidBodyBasics foot)
       {

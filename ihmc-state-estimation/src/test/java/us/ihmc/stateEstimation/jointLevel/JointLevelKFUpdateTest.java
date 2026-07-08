@@ -158,15 +158,16 @@ public class JointLevelKFUpdateTest
    @Test
    public void testBiasObservability()
    {
-      // A nonzero IMU (pair-gyro) innovation moves the per-IMU residual-bias estimate.
+      // A nonzero IMU (stacked-gyro) innovation moves the per-IMU residual-bias estimate. Single pair, no
+      // trusted feet ⇒ the stacked measurement is exactly this pair's 3-row block.
       JointLevelKFTestFixture f = JointLevelKFTestFixture.singlePair(3400L, 8, 1, 7);
       f.imus.get(0).setAngularVelocity(0.05, -0.03, 0.02);
       f.imus.get(1).setAngularVelocity(-0.04, 0.06, -0.01);
       f.filter.initialize();
-      f.filter.buildPairMeasurementForTest(0);
-      DMatrixRMaj H = f.filter.getMeasurementJacobian();
-      DMatrixRMaj z = f.filter.getMeasurementResidual();
-      DMatrixRMaj R = f.filter.getMeasurementNoise();
+      f.filter.buildStackedMeasurementForTest();
+      DMatrixRMaj H = f.filter.getStackedMeasurementJacobian();
+      DMatrixRMaj z = f.filter.getStackedMeasurementResidual();
+      DMatrixRMaj R = f.filter.getStackedMeasurementNoise();
 
       int parentBias = f.filter.getPairParentBiasColumn(0);
       int childBias = f.filter.getPairChildBiasColumn(0);
