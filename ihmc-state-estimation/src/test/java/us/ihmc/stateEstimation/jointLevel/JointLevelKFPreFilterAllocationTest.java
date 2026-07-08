@@ -69,7 +69,7 @@ public class JointLevelKFPreFilterAllocationTest
       assumeTrue(threadMXBean.isThreadAllocatedMemorySupported(), "Thread allocation counting not supported on this JVM.");
       threadMXBean.setThreadAllocatedMemoryEnabled(true);
 
-      Fixture fixture = new Fixture(new Random(9001L));
+      Fixture fixture = new Fixture(new Random(9001L), false);
       JointLevelKFPreFilter filter = fixture.filter;
       List<RigidBodyBasics> trustedFeet = fixture.feet;
 
@@ -98,11 +98,50 @@ public class JointLevelKFPreFilterAllocationTest
                                bytesPerTick, after - before, MEASURED_TICKS, MAX_BYTES_PER_TICK));
    }
 
+   @Test
+   public void testSchurProcessNoiseHotPathIsAllocationFree()
+   {
+      // Same guard, but with the Schur-complement process-noise path active (elevator handed to the filter):
+      // predict() rebuilds the full mass matrix and recomputes Λ (block extraction + M_bb Cholesky solve +
+      // Λ Cholesky invert) EVERY tick. All of it must reuse the pre-warmed solvers and pre-sized scratch — no
+      // garbage on the estimator thread. This path is untested by the scalar fixture above.
+      assumeTrue(threadMXBean.isThreadAllocatedMemorySupported(), "Thread allocation counting not supported on this JVM.");
+      threadMXBean.setThreadAllocatedMemoryEnabled(true);
+
+      Fixture fixture = new Fixture(new Random(9003L), true);
+      JointLevelKFPreFilter filter = fixture.filter;
+      assertTrue(filter.isUsingMassMatrixProcessNoise(), "Schur-complement process-noise path must be active for this test.");
+      List<RigidBodyBasics> trustedFeet = fixture.feet;
+
+      filter.initialize();
+
+      Runnable oneTick = () ->
+      {
+         filter.computeJointState();
+         filter.computeImuBiases(trustedFeet);
+      };
+
+      for (int i = 0; i < WARMUP_TICKS; i++)
+         oneTick.run();
+
+      long threadId = Thread.currentThread().getId();
+      long before = threadMXBean.getThreadAllocatedBytes(threadId);
+      for (int i = 0; i < MEASURED_TICKS; i++)
+         oneTick.run();
+      long after = threadMXBean.getThreadAllocatedBytes(threadId);
+
+      double bytesPerTick = (after - before) / (double) MEASURED_TICKS;
+      assertTrue(bytesPerTick < MAX_BYTES_PER_TICK,
+                 String.format("JointLevelKFPreFilter Schur hot path allocated %.2f bytes/tick (%d bytes over %d ticks); "
+                               + "expected < %.1f. The per-tick Schur-complement rebuild is creating garbage.",
+                               bytesPerTick, after - before, MEASURED_TICKS, MAX_BYTES_PER_TICK));
+   }
+
    /** Sanity: the filter constructs, initializes, ticks, and produces finite estimates (no NaN / no per-tick throw). */
    @Test
    public void testHotPathStaysFinite()
    {
-      Fixture fixture = new Fixture(new Random(9002L));
+      Fixture fixture = new Fixture(new Random(9002L), false);
       JointLevelKFPreFilter filter = fixture.filter;
 
       filter.initialize();
@@ -134,7 +173,7 @@ public class JointLevelKFPreFilterAllocationTest
       private final List<OneDoFJointBasics> filteredJoints = new ArrayList<>();
       private final IMUSensorReadOnly baseIMU;
 
-      private Fixture(Random random)
+      private Fixture(Random random, boolean useMassMatrixProcessNoise)
       {
          Vector3D[] jointAxes = new Vector3D[10];
          for (int i = 0; i < jointAxes.length; i++)
@@ -164,7 +203,11 @@ public class JointLevelKFPreFilterAllocationTest
          this.feet = new ArrayList<>();
          feet.add(childLink); // base(parentLink) -> foot(childLink) leg chain is fully in state -> anchor usable
 
-         this.filter = new JointLevelKFPreFilter(sensorMap, pairParameters, feet, DT, new YoRegistry("test"));
+         // When useMassMatrixProcessNoise, hand the filter the model elevator so the Schur-complement path is
+         // active; otherwise use the no-model overload for the scalar-CWNA path.
+         this.filter = useMassMatrixProcessNoise
+               ? new JointLevelKFPreFilter(sensorMap, pairParameters, feet, chain.getElevator(), DT, new YoRegistry("test"))
+               : new JointLevelKFPreFilter(sensorMap, pairParameters, feet, DT, new YoRegistry("test"));
 
          for (OneDoFJointBasics joint : joints)
             if (filter.containsJoint(joint))

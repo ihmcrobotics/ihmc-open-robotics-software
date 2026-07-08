@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -30,6 +31,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
@@ -41,6 +43,14 @@ import java.util.function.BooleanSupplier;
  * (eqs. (10)-(12)), recomputed each predict; otherwise a scalar-CWNA diagonal fallback.
  *
  * <p><b>Do not share an instance between pipelines</b> (the filter holds its covariance).</p>
+ *
+ * <p><b>Rev. 2 process noise (SPEC §3.2).</b> The joint process noise is now the floating-base Schur
+ * complement Qa = sigma_tau^2 * Lambda(q)^-2, Lambda = M_jj - M_jb M_bb^-1 M_bj, rather than the Rev. 1
+ * locked-base Qa = sigma_tau^2 * M_jj^-2. Because the free base recoils, the joints accelerate more per unit
+ * torque, so Lambda ⪯ M_jj (PSD ordering) and Lambda^-2 ⪰ M_jj^-2: the effective process noise grows at fixed
+ * sigma_tau, worst for proximal joints. See the SPEC (jointKF_derivation.md §3.2, §8) for the derivation and
+ * the sigma_tau retune obligation.</p>
+ *
  * @author Lucas Libshutz
  */
 public class JointLevelKFPreFilter implements ProprioceptivePreFilter
@@ -144,18 +154,37 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private final FrameVector3D fvB = new FrameVector3D();
    private final FrameVector3D biasOut = new FrameVector3D();
 
-   // Mass-matrix-induced process noise (write-up eqs. (10)-(12)): the unmodeled torque w_tau maps to joint
-   // acceleration through M(q)^-1, so Qa = M^-1 Sigma_tau M^-T = sigma_tau^2 M(q)^-2 for scalar Sigma_tau and
-   // symmetric M. M is computed over the FILTERED joints only, with every other joint (including the floating
-   // base) treated as locked — which is exactly the filtered rows/columns block of the full mass matrix, since
-   // the composite-rigid-body entries M_ij depend only on the subtree inertias, not on which other joints are
-   // free. Null calculator (no robot model handed in) => the constant scalar-CWNA diagonal fallback.
+   // Schur-complement process noise (SPEC §3.2). The unmodeled joint torque w_tau maps to joint acceleration
+   // through the FLOATING-BASE dynamics, not the locked-base map: eliminating the (unforced) nuisance
+   // acceleration from the perturbed EOM gives delta_qddot = Lambda^-1 w_tau, Lambda = M_jj - M_jN M_NN^-1 M_Nj
+   // the Schur complement of the nuisance block. Hence Qa = sigma_tau^2 Lambda^-2.
+   //
+   // "Nuisance" = the 6-DoF floating base (SPEC §3.2) plus any UNFILTERED joints that lie on the tree path
+   // between the base and a filtered joint ("gap" joints). In the real robot the base IMU is on the base link
+   // and every joint on a pair/anchor path is itself filtered, so there are NO gap joints and this is exactly
+   // the SPEC's Lambda = M_jj - M_jb M_bb^-1 M_bj over the plain 6-DoF base. The gap term is a topology
+   // generalization (needed because the composite-rigid-body calculator prunes the subtree below any ignored
+   // joint, so an unfiltered joint above a filtered one cannot be silently locked): such gap joints are
+   // instead marginalized (treated as free) alongside the base — the conservative choice (more recoil => more
+   // process noise, consistent with §3.2's free-flyer upper bound). Genuinely OFF-path joints stay ignored and
+   // their inertia is composited into the adjacent link by the calculator (considerIgnoredSubtreesInertia).
+   //
+   // The mass matrix M is built over {base} ∪ {joints spanning base->filtered}. All columns (nuisance and each
+   // filtered joint) are resolved through the calculator's index provider — never assume ordering. Null
+   // calculator (no robot model, or no 6-DoF floating base found) => the constant scalar-CWNA diagonal fallback.
    private CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
-   private int[] massMatrixColumn; // filter joint state index -> DoF column in the calculator's mass matrix
-   private final DMatrixRMaj Mwork = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj Minv = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj MinvSq = new DMatrixRMaj(0, 0);
-   private LinearSolverDense<DMatrixRMaj> massMatrixSolver;
+   private int numNuisanceDoF;          // 6 (base) + number of gap joints; the marginalized block width N
+   private int[] massMatrixNuisanceColumns; // nuisance DoF columns of the full mass matrix (length N)
+   private int[] massMatrixColumn;      // filter joint state index -> DoF column in the calculator's mass matrix
+   private final DMatrixRMaj MNN = new DMatrixRMaj(0, 0);       // nuisance block, N x N
+   private final DMatrixRMaj MNf = new DMatrixRMaj(0, 0);       // nuisance-filtered coupling, N x n (= M_jN^T)
+   private final DMatrixRMaj Mff = new DMatrixRMaj(0, 0);       // filtered block, n x n
+   private final DMatrixRMaj MNNInvMNf = new DMatrixRMaj(0, 0); // X = M_NN^-1 M_Nf, N x n
+   private final DMatrixRMaj Lambda = new DMatrixRMaj(0, 0);    // Schur complement, n x n
+   private final DMatrixRMaj LambdaInv = new DMatrixRMaj(0, 0); // Lambda^-1, n x n
+   private final DMatrixRMaj LambdaInvSq = new DMatrixRMaj(0, 0); // Lambda^-2, n x n (in filter joint state order)
+   private LinearSolverDense<DMatrixRMaj> nuisanceMassMatrixSolver; // Cholesky over M_NN, solves M_NN X = M_Nf
+   private LinearSolverDense<DMatrixRMaj> schurSolver;          // Cholesky over Lambda, inverts it
    private boolean warnedMassMatrixFailure = false;
 
    // Rollback backups: a KF has no recovery once x/P go non-finite (predict/Joseph spread the NaN with no
@@ -248,25 +277,75 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          throw new RuntimeException("Base IMU is null, check the kinematic tree.");
       LogTools.info("Base IMU initialized as " + baseIMU.getSensorName());
 
-      // 3b) Mass-matrix-induced process noise: the calculator considers only the filtered joints of the LIVE
-      // estimator model (the same joint objects the Jacobians read), so its M(q) tracks the consumer-updated
-      // configuration each tick with no extra bookkeeping. Column mapping resolved through the index provider
-      // rather than assumed from list order, in case the input reorders joints internally.
+      // 3b) Schur-complement process noise (SPEC §3.2): the calculator is built over the FLOATING BASE plus the
+      // filtered joints of the LIVE estimator model (the same joint objects the Jacobians read), so its M(q)
+      // tracks the consumer-updated configuration each tick with no extra bookkeeping. Unlike Rev. 1 (joints
+      // only), the floating joint MUST be included so the 6x6 base block M_bb and the base-joint coupling M_bj
+      // are available for the Schur complement. Column mappings (base and each joint) are resolved through the
+      // index provider rather than assumed from list order.
       if (rootBody != null && n > 0)
       {
          List<OneDoFJointBasics> massMatrixJoints = new ArrayList<>(jointToIndex.keySet());
          // The filtered joints ARE joints of the passed-in robot model; the model root is only used as a
-         // sanity check here. NOTE: the (rootBody, joints) overload of toMultiBodySystemInput takes joints to
-         // IGNORE — the single-list overload below is the joints-to-CONSIDER one we want.
-         if (MultiBodySystemTools.getRootBody(massMatrixJoints.get(0).getPredecessor()) != rootBody)
+         // sanity check here.
+         RigidBodyBasics treeRoot = MultiBodySystemTools.getRootBody(massMatrixJoints.get(0).getPredecessor());
+         if (treeRoot != rootBody)
             LogTools.warn("The provided robot model root '" + rootBody.getName() + "' is not the root of the filtered joints' tree;"
                           + " M(q) is computed on the joints' own tree.");
-         MultiBodySystemReadOnly massMatrixInput = MultiBodySystemReadOnly.toMultiBodySystemInput(massMatrixJoints);
-         massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(massMatrixInput);
-         massMatrixColumn = new int[n];
-         for (var e : jointToIndex.entrySet())
-            massMatrixColumn[e.getValue()] = massMatrixInput.getJointMatrixIndexProvider().getJointDoFIndices(e.getKey())[0];
-         LogTools.info("Joint-level KF process noise: mass-matrix path (sigma_tau = " + SIGMA_TAU + " N*m) over " + n + " joints.");
+
+         // The base joint is the 6-DoF free-flyer at the root of the filtered joints' tree (elevator's child).
+         JointReadOnly baseJoint = findFloatingBaseJoint(treeRoot);
+         if (baseJoint == null)
+         {
+            // No floating base (e.g. a fixed-base model): the Schur complement is undefined, so degrade to the
+            // scalar-CWNA fallback rather than silently reverting to the locked-base map this revision removes.
+            LogTools.warn("Joint-level KF process noise: no 6-DoF floating base joint found at the tree root; "
+                          + "falling back to scalar CWNA (the Schur-complement path needs a floating base — SPEC §3.2).");
+         }
+         else
+         {
+            // Joints to CONSIDER = base joint + the joints spanning base->filtered (every filtered joint plus any
+            // unfiltered "gap" joints above it). The gap joints MUST be considered, not ignored: the calculator
+            // prunes the whole subtree below an ignored joint, which would zero the filtered joints' inertia if an
+            // unfiltered joint sat above them. Genuinely off-path joints are neither filtered nor spanning, so they
+            // fall in getJointsToIgnore() and their inertia is composited (considerIgnoredSubtreesInertia).
+            LinkedHashSet<JointReadOnly> spanningJoints = collectSpanningJoints(baseJoint, massMatrixJoints);
+            List<JointReadOnly> jointsToConsider = new ArrayList<>();
+            jointsToConsider.add(baseJoint);
+            jointsToConsider.addAll(spanningJoints);
+            MultiBodySystemReadOnly massMatrixInput = MultiBodySystemReadOnly.toMultiBodySystemInput(jointsToConsider);
+            massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(massMatrixInput);
+
+            var indexProvider = massMatrixInput.getJointMatrixIndexProvider();
+            // Filtered-joint columns, in filter state order.
+            massMatrixColumn = new int[n];
+            for (var e : jointToIndex.entrySet())
+               massMatrixColumn[e.getValue()] = indexProvider.getJointDoFIndices(e.getKey())[0];
+            // Nuisance columns to marginalize = base 6-DoF columns + each gap joint's column (a gap joint is a
+            // spanning joint that is not itself filtered). These are exactly the considered DoFs that are not
+            // filtered joints.
+            int[] baseColumns = indexProvider.getJointDoFIndices(baseJoint);
+            List<Integer> nuisanceColumns = new ArrayList<>();
+            for (int c : baseColumns)
+               nuisanceColumns.add(c);
+            int gapJoints = 0;
+            for (JointReadOnly spanningJoint : spanningJoints)
+            {
+               if (!jointToIndex.containsKey(spanningJoint)) // unfiltered => gap joint => marginalize it
+               {
+                  nuisanceColumns.add(indexProvider.getJointDoFIndices(spanningJoint)[0]);
+                  gapJoints++;
+               }
+            }
+            massMatrixNuisanceColumns = new int[nuisanceColumns.size()];
+            for (int i = 0; i < massMatrixNuisanceColumns.length; i++)
+               massMatrixNuisanceColumns[i] = nuisanceColumns.get(i);
+            numNuisanceDoF = massMatrixNuisanceColumns.length; // 6 + gap joints
+
+            LogTools.info("Joint-level KF process noise: Schur-complement path (sigma_tau = " + SIGMA_TAU + " N*m) over "
+                          + n + " joints, marginalizing a " + numNuisanceDoF + "-DoF nuisance block (6-DoF floating base"
+                          + (gapJoints > 0 ? " + " + gapJoints + " unfiltered gap joint(s))." : ")."));
+         }
       }
       else
       {
@@ -387,6 +466,43 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                                        parentRegistry);
    }
 
+   /**
+    * Finds the 6-DoF free-flyer joint at the root of the filtered joints' tree (SPEC §3.2 partitions the mass
+    * matrix over a 6-DoF base). In an IHMC model this is the elevator's single child joint (the SixDoFJoint /
+    * root joint). Returns {@code null} if no 6-DoF joint sits directly below the tree root (fixed-base model),
+    * which drops the filter to the scalar-CWNA fallback. Construction-only; no hot-path use.
+    */
+   private static JointReadOnly findFloatingBaseJoint(RigidBodyBasics treeRoot)
+   {
+      for (JointReadOnly childJoint : treeRoot.getChildrenJoints())
+      {
+         if (childJoint.getDegreesOfFreedom() == 6)
+            return childJoint;
+      }
+      return null;
+   }
+
+   /**
+    * Collects every joint on the tree paths from {@code baseJoint} to each filtered joint: the filtered joints
+    * themselves plus any unfiltered "gap" joints above them. Walks up from each filtered joint via
+    * predecessor/parent-joint links until it reaches {@code baseJoint}. Order is insertion order (irrelevant —
+    * all columns are later resolved by index). Construction-only; no hot-path use.
+    */
+   private static LinkedHashSet<JointReadOnly> collectSpanningJoints(JointReadOnly baseJoint, List<OneDoFJointBasics> filteredJoints)
+   {
+      LinkedHashSet<JointReadOnly> spanning = new LinkedHashSet<>();
+      for (OneDoFJointBasics filteredJoint : filteredJoints)
+      {
+         JointReadOnly joint = filteredJoint;
+         while (joint != null && joint != baseJoint)
+         {
+            spanning.add(joint);
+            joint = joint.getPredecessor().getParentJoint(); // step one link toward the root
+         }
+      }
+      return spanning;
+   }
+
    private void allocate()
    {
       int maxMeas = Math.max(n,3); // encoder update is the widest measurement
@@ -422,16 +538,29 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       innovationSolver = LinearSolverFactory_DDRM.lu(maxMeas);
       innovationSolver.setA(CommonOps_DDRM.identity(maxMeas));
 
-      // Mass-matrix scratch + Cholesky solver, pre-warmed at n so the per-tick setA()/invert() never allocate.
-      // Cholesky both exploits and enforces SPD-ness: a non-PD M (bad model state) fails setA and the previous
-      // Q is kept instead of a garbage inverse entering the filter.
+      // Schur-complement scratch + two Cholesky solvers, pre-warmed at their fixed sizes so the per-tick
+      // setA()/solve()/invert() never allocate (chol decomposes in place and reuses its internal buffers once
+      // warmed). Cholesky both exploits and enforces SPD-ness: a non-PD M_bb or Lambda (bad model state) fails
+      // setA and the previous Q is kept instead of a garbage inverse entering the filter.
       if (massMatrixCalculator != null)
       {
-         Mwork.reshape(n, n);
-         Minv.reshape(n, n);
-         MinvSq.reshape(n, n);
-         massMatrixSolver = LinearSolverFactory_DDRM.chol(n);
-         massMatrixSolver.setA(CommonOps_DDRM.identity(n));
+         int nN = numNuisanceDoF;
+         MNN.reshape(nN, nN);
+         MNf.reshape(nN, n);
+         Mff.reshape(n, n);
+         MNNInvMNf.reshape(nN, n);
+         Lambda.reshape(n, n);
+         LambdaInv.reshape(n, n);
+         LambdaInvSq.reshape(n, n);
+
+         nuisanceMassMatrixSolver = LinearSolverFactory_DDRM.chol(nN);
+         nuisanceMassMatrixSolver.setA(CommonOps_DDRM.identity(nN));
+         // Warm the nuisance solver's multi-column solve buffers at RHS width n (M_NN X = M_Nf is N x n), so the
+         // per-tick solve reuses them. The MNf scratch is still zero here — this is only a buffer warm-up.
+         nuisanceMassMatrixSolver.solve(MNf, MNNInvMNf);
+
+         schurSolver = LinearSolverFactory_DDRM.chol(n);
+         schurSolver.setA(CommonOps_DDRM.identity(n));
       }
 
       for (int i = 0; i < 3; i++)
@@ -510,17 +639,26 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    }
 
    /**
-    * Rebuilds the joint-space Van Loan blocks of Q from the mass-matrix-induced acceleration noise
-    * Qa = sigma_tau^2 M(q)^-2 (write-up eqs. (10)-(12)): unmodeled torque w_tau maps to acceleration through
-    * M(q)^-1, so Qa = M^-1 Sigma_tau M^-T, which for scalar Sigma_tau = sigma_tau^2 I and symmetric M reduces
-    * to sigma_tau^2 M^-2. Called once from {@link #buildProcessNoise()} and then at the top of every
-    * {@link #predict()}, because M(q) — read from the live model joints, whose frames the estimator refreshes
-    * each tick — is configuration-dependent. Only the (q, qd) blocks are touched; the bias random-walk block
-    * and the zero joint/bias coupling are left exactly as {@link #buildProcessNoise()} made them.
+    * Rebuilds the joint-space Van Loan blocks of Q from the Schur-complement acceleration noise
+    * Qa = sigma_tau^2 Lambda(q)^-2 (SPEC §3.2): an unmodeled joint torque w_tau propagates through the
+    * floating-base dynamics, and eliminating the (unforced) nuisance acceleration from the perturbed EOM gives
+    * delta_qddot = Lambda^-1 w_tau with Lambda = M_ff - M_jN M_NN^-1 M_Nj the Schur complement of the nuisance
+    * block (nuisance = 6-DoF base + any unfiltered gap joints; see the field comment). For the real gapless
+    * topology the nuisance is exactly the 6-DoF base and this is the SPEC's Lambda = M_jj - M_jb M_bb^-1 M_bj.
+    * For scalar Sigma_tau = sigma_tau^2 I and symmetric Lambda this is sigma_tau^2 Lambda^-2. Called once from
+    * {@link #buildProcessNoise()} and then at the top of every {@link #predict()}, because M(q) — read from the
+    * live model joints, whose frames the estimator refreshes each tick — is configuration-dependent. Only the
+    * (q, qd) blocks are touched; the bias random-walk block and the zero joint/bias coupling are left exactly
+    * as {@link #buildProcessNoise()} made them.
     *
-    * <p>Numerical failure (non-finite M, Cholesky rejection of a non-PD M, non-finite inverse) leaves the
-    * previous Q in place — which at worst is the scalar-CWNA build — and warns once. Allocation-free: the
-    * calculator, scratch matrices, and solver are all pre-sized in {@link #allocate()}.</p>
+    * <p>Numerical failure (non-finite M, Cholesky rejection of a non-PD M_NN or Lambda, non-finite
+    * intermediate) leaves the previous Q in place — which at worst is the scalar-CWNA build — and warns once,
+    * identical to the Rev. 1 fallback philosophy. Allocation-free: the calculator, all scratch matrices, and
+    * both Cholesky solvers are pre-sized/warmed in {@link #allocate()}.</p>
+    *
+    * <p>TODO(retune): SPEC §8 — Lambda^-2 ⪰ M_jj^-2, so the effective Qa grows at fixed sigma_tau relative to
+    * the Rev. 1 locked-base map. SIGMA_TAU must be retuned against quiet-standing and walking NIS by a human;
+    * do NOT carry the Rev. 1 value over as if it were still calibrated.</p>
     */
    private void updateProcessNoiseFromMassMatrix()
    {
@@ -528,41 +666,95 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          return;
 
       massMatrixCalculator.reset();
-      Mwork.set(massMatrixCalculator.getMassMatrix());
-      if (containsNonFinite(Mwork))
+      // Full mass matrix over {6-DoF base} ∪ {filtered joints}, ordered by the calculator's index provider.
+      DMatrixRMaj massMatrix = massMatrixCalculator.getMassMatrix();
+      if (containsNonFinite(massMatrix))
       {
          warnMassMatrixFailureOnce("non-finite mass matrix");
          return;
       }
-      if (!massMatrixSolver.setA(Mwork)) // Cholesky: rejects a non-PD mass matrix before it can enter Q
+
+      // Extract the blocks by resolved column index (never assume ordering — SPEC §3.2). M is symmetric, so
+      // M_jN = M_Nj^T and we only need M_NN, M_Nf, M_ff. M_ff is read in filter joint state order (row i =
+      // filtered joint i), so Lambda and Lambda^-2 come out already in state order — no permutation in the fill.
+      int nN = numNuisanceDoF;
+      for (int a = 0; a < nN; a++)
       {
-         warnMassMatrixFailureOnce("mass matrix not positive definite");
+         int ca = massMatrixNuisanceColumns[a];
+         for (int b = 0; b < nN; b++)
+            MNN.set(a, b, massMatrix.get(ca, massMatrixNuisanceColumns[b])); // M_NN (NxN)
+         for (int j = 0; j < n; j++)
+            MNf.set(a, j, massMatrix.get(ca, massMatrixColumn[j]));          // M_Nf (Nxn) = M_jN^T
+      }
+      for (int i = 0; i < n; i++)
+      {
+         int ci = massMatrixColumn[i];
+         for (int j = 0; j < n; j++)
+            Mff.set(i, j, massMatrix.get(ci, massMatrixColumn[j]));          // M_ff (nxn)
+      }
+
+      // X = M_NN^-1 M_Nf via Cholesky (rejects a non-PD nuisance block before it can enter the Schur complement).
+      if (!nuisanceMassMatrixSolver.setA(MNN))
+      {
+         warnMassMatrixFailureOnce("nuisance mass-matrix block M_NN not positive definite");
          return;
       }
-      massMatrixSolver.invert(Minv);
-      if (containsNonFinite(Minv))
+      nuisanceMassMatrixSolver.solve(MNf, MNNInvMNf); // X (Nxn); solve leaves MNf unmodified
+      if (containsNonFinite(MNNInvMNf))
       {
-         warnMassMatrixFailureOnce("non-finite mass-matrix inverse (near-singular M)");
+         warnMassMatrixFailureOnce("non-finite M_NN^-1 M_Nf (near-singular nuisance block)");
          return;
       }
-      CommonOps_DDRM.mult(Minv, Minv, MinvSq); // M^-2; M symmetric => M^-1 M^-T = M^-2
+
+      // Lambda = M_ff - M_jN X = M_ff - M_Nf^T X (M symmetric => M_jN = M_Nf^T). SPEC §3.2.
+      CommonOps_DDRM.multTransA(MNf, MNNInvMNf, Lambda); // Lambda <- M_Nf^T X
+      CommonOps_DDRM.changeSign(Lambda);                 // Lambda <- -M_jN X
+      CommonOps_DDRM.addEquals(Lambda, Mff);             // Lambda <- M_ff - M_jN X
+      // Symmetrize before the Cholesky invert: the block extraction is exact but the matrix products leave
+      // Lambda symmetric only to round-off, and Cholesky assumes exact symmetry.
+      symmetrize(Lambda);
+
+      if (!schurSolver.setA(Lambda)) // Cholesky: rejects a non-PD Schur complement before it can enter Q
+      {
+         warnMassMatrixFailureOnce("Schur complement Lambda not positive definite");
+         return;
+      }
+      schurSolver.invert(LambdaInv);
+      if (containsNonFinite(LambdaInv))
+      {
+         warnMassMatrixFailureOnce("non-finite Schur-complement inverse (near-singular Lambda)");
+         return;
+      }
+      CommonOps_DDRM.mult(LambdaInv, LambdaInv, LambdaInvSq); // Lambda^-2; Lambda symmetric => Lambda^-1 Lambda^-T = Lambda^-2
 
       double st2 = SIGMA_TAU * SIGMA_TAU;
       double dt2 = dt * dt;
       double dt3 = dt2 * dt;
       for (int i = 0; i < n; i++)
       {
-         int ci = massMatrixColumn[i];
          for (int j = 0; j < n; j++)
          {
-            int cj = massMatrixColumn[j];
-            // Symmetrized read: the Cholesky inverse is symmetric only to round-off, and Q must stay exactly
-            // symmetric or the Joseph update slowly loses P's symmetry.
-            double qa = st2 * 0.5 * (MinvSq.get(ci, cj) + MinvSq.get(cj, ci));
+            // Symmetrized read (SPEC §3.4): the Cholesky inverse and its square are symmetric only to
+            // round-off, and Q must stay exactly symmetric or the Joseph update slowly loses P's symmetry.
+            double qa = st2 * 0.5 * (LambdaInvSq.get(i, j) + LambdaInvSq.get(j, i));
             Q.set(i, j, qa * dt3 / 3.0);     // q-q block
             Q.set(i, n + j, qa * dt2 / 2.0); // q-qd cross term
             Q.set(n + i, j, qa * dt2 / 2.0);
             Q.set(n + i, n + j, qa * dt);    // qd-qd block
+         }
+      }
+   }
+
+   /** In-place symmetrization A <- 0.5 (A + A^T). Allocation-free. */
+   private static void symmetrize(DMatrixRMaj a)
+   {
+      for (int i = 0; i < a.numRows; i++)
+      {
+         for (int j = i + 1; j < a.numCols; j++)
+         {
+            double avg = 0.5 * (a.get(i, j) + a.get(j, i));
+            a.set(i, j, avg);
+            a.set(j, i, avg);
          }
       }
    }
