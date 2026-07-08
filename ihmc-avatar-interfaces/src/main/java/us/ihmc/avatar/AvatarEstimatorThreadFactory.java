@@ -570,6 +570,7 @@ public class AvatarEstimatorThreadFactory
                                                                                 getStateEstimatorParameters(),
                                                                                 imuProcessedOutputs,
                                                                                 feet,
+                                                                                fullRobotModel.getElevator(), // enables the JOINT_KF mass-matrix process noise
                                                                                 getGravity(),
                                                                                 () -> cancelGravityFromAccelerationMeasurement,
                                                                                 estimatorDT,

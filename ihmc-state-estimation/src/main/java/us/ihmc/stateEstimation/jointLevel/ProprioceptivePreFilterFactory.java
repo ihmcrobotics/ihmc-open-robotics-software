@@ -23,10 +23,17 @@ public final class ProprioceptivePreFilterFactory
    {
    }
 
+   /**
+    * @param estimatorRootBody root body (elevator) of the estimator's robot model. Used by the JOINT_KF
+    *                          implementation for the mass-matrix-induced process noise Qa = sigma_tau^2 M(q)^-2;
+    *                          may be null, degrading that filter to its scalar-CWNA process noise. Ignored by
+    *                          the other implementations.
+    */
    public static ProprioceptivePreFilter create(SensorOutputMapReadOnly sensorOutputMap,
                                                 StateEstimatorParameters stateEstimatorParameters,
                                                 List<? extends IMUSensorReadOnly> imuProcessedOutputs,
                                                 Collection<RigidBodyBasics> feet,
+                                                RigidBodyBasics estimatorRootBody,
                                                 double gravitationalAcceleration,
                                                 BooleanProvider cancelGravityFromAccelerationMeasurement,
                                                 double estimatorDT,
@@ -49,6 +56,7 @@ public final class ProprioceptivePreFilterFactory
                                                                              stateEstimatorParameters,
                                                                              imuProcessedOutputs,
                                                                              feet,
+                                                                             estimatorRootBody,
                                                                              gravitationalAcceleration,
                                                                              cancelGravityFromAccelerationMeasurement,
                                                                              estimatorDT,

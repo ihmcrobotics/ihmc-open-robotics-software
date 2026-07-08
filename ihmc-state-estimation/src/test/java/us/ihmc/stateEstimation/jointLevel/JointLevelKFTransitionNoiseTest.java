@@ -16,9 +16,10 @@ import org.junit.jupiter.api.Test;
  * Ported from {@code tests/jointKF/test_noise.py}. Locks in the transition matrix F, the discrete process
  * noise Q (continuous white-noise-acceleration / Van Loan closed form), and the encoder measurement noise.
  *
- * <p>Adaptations to this implementation: the acceleration covariance is the diagonal {@code σ_acc² I} path
- * ({@code SIGMA_ACCEL = 50}); there is no mass-matrix ({@code σ_τ² M⁻²}) path, so those reference cases are
- * omitted. The bias random walk is per-IMU, sourced from each IMU's own angular-velocity bias process-noise
+ * <p>Adaptations to this implementation: these tests exercise the diagonal {@code σ_acc² I} FALLBACK path
+ * ({@code SIGMA_ACCEL = 50}, no robot model handed to the filter). The mass-matrix ({@code σ_τ² M⁻²}) path is
+ * covered separately in {@link JointLevelKFMassMatrixNoiseTest}. The bias random walk is per-IMU, sourced from
+ * each IMU's own angular-velocity bias process-noise
  * covariance ({@code Q_bias = dt · Σ_imu}), not a single scalar {@code σ_b² dt I}. The gyro measurement noise
  * is assembled per pair (covered in {@link JointLevelKFMeasurementTest}); here we lock in the encoder block.</p>
  */

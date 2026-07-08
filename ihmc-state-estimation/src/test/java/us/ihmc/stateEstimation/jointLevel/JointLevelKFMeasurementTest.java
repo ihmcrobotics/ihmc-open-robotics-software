@@ -15,6 +15,8 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+
 /**
  * Ported from {@code tests/jointKF/test_measurement.py}. Locks in the measurement model: the encoder Jacobian
  * [I_n | 0], and the per-pair relative-gyro measurement z = ω_child − R·ω_parent with Jacobian rows
@@ -156,5 +158,67 @@ public class JointLevelKFMeasurementTest
          assertSymmetric(R, 1.0e-12, f.describe() + " pair R symmetric");
          assertPositiveSemiDefinite(R, f.describe() + " pair R PSD");
       }
+   }
+
+   @Test
+   public void testMeasurementNoiseUsesGyroMeasurementCovariance()
+   {
+      // Regression for the bias-vs-measurement covariance mix-up: R must be assembled from each IMU's
+      // angular-velocity MEASUREMENT noise (the write-up's R_ω, the per-IMU Mahony output covariance) rotated
+      // into the Jacobian frame — R = R_c Σ_c R_cᵀ + R_p Σ_p R_pᵀ — and NOT from the (typically far smaller)
+      // bias random-walk covariance, which made the pair-gyro update drastically over-confident.
+      JointLevelKFTestFixture f = JointLevelKFTestFixture.singlePair(4700L, 8, 1, 7);
+      JointLevelKFTestFixture.TestIMU parent = f.imus.get(0);
+      JointLevelKFTestFixture.TestIMU child = f.imus.get(1);
+
+      // ANISOTROPIC measurement covariances (an isotropic σ²I is rotation-invariant and could not catch a
+      // missing/wrong rotation), clearly distinct from the tiny bias process covariances.
+      parent.setAngularVelocityNoiseCovarianceDiagonal(4.0e-4, 1.0e-6, 2.5e-5);
+      child.setAngularVelocityNoiseCovarianceDiagonal(9.0e-4, 1.6e-5, 4.9e-6);
+      parent.setBiasProcessNoiseCovarianceDiagonal(1.0e-9, 1.0e-9, 1.0e-9);
+      child.setBiasProcessNoiseCovarianceDiagonal(1.0e-9, 1.0e-9, 1.0e-9);
+
+      f.filter.buildPairMeasurementForTest(0);
+      DMatrixRMaj R = f.filter.getMeasurementNoise();
+
+      // Expected, built independently: the Jacobian frame is the child's body-fixed frame, so R_child = I and
+      // R_parent is the parent-measurement-frame-to-child-frame rotation read straight off euclid.
+      RigidBodyTransform parentToChild = new RigidBodyTransform();
+      parent.getMeasurementFrame().getTransformToDesiredFrame(parentToChild, child.getMeasurementFrame());
+      DMatrixRMaj rotParent = new DMatrixRMaj(3, 3);
+      JointLevelKFPreFilter.set_matrix(rotParent, parentToChild.getRotation());
+
+      DMatrixRMaj expected = new DMatrixRMaj(3, 3);
+      DMatrixRMaj sigmaParent = new DMatrixRMaj(3, 3);
+      parent.getAngularVelocityNoiseCovariance(sigmaParent);
+      DMatrixRMaj tmp = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.mult(rotParent, sigmaParent, tmp);
+      CommonOps_DDRM.multTransB(tmp, rotParent, expected); // R_p Σ_p R_pᵀ
+      DMatrixRMaj sigmaChild = new DMatrixRMaj(3, 3);
+      child.getAngularVelocityNoiseCovariance(sigmaChild);
+      CommonOps_DDRM.addEquals(expected, sigmaChild);      // + I Σ_c Iᵀ
+
+      assertAllClose(R, expected, 1.0e-12, "pair R = R_c Σ_c R_cᵀ + R_p Σ_p R_pᵀ from the MEASUREMENT covariances");
+
+      // Explicit guard against the regression: had R been built from the bias process covariances, its trace
+      // would be ~6e-9; the measurement-built R is orders of magnitude larger.
+      double trace = R.get(0, 0) + R.get(1, 1) + R.get(2, 2);
+      assertTrue(trace > 1.0e-5, "R clearly not built from the bias random-walk covariance (trace = " + trace + ")");
+   }
+
+   @Test
+   public void testMeasurementNoiseIndependentOfBiasProcessCovariance()
+   {
+      // Scaling the bias random walk by 1000x must leave the pair measurement noise R untouched.
+      JointLevelKFTestFixture f = JointLevelKFTestFixture.singlePair(4800L, 8, 1, 7);
+      f.filter.buildPairMeasurementForTest(0);
+      DMatrixRMaj rBefore = f.filter.getMeasurementNoise();
+
+      for (JointLevelKFTestFixture.TestIMU imu : f.imus)
+         imu.setBiasProcessNoiseCovarianceDiagonal(1.0e-1, 1.0e-1, 1.0e-1);
+      f.filter.buildPairMeasurementForTest(0);
+      DMatrixRMaj rAfter = f.filter.getMeasurementNoise();
+
+      assertAllClose(rAfter, rBefore, 0.0, "pair R independent of the bias process covariance");
    }
 }

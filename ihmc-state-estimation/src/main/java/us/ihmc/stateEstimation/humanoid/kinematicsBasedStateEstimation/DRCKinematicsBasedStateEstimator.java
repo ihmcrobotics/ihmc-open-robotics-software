@@ -157,6 +157,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                                         stateEstimatorParameters,
                                                         imuProcessedOutputs,
                                                         feet.keySet(),
+                                                        inverseDynamicsStructure.getElevator(), // enables the JOINT_KF mass-matrix process noise
                                                         gravitationalAcceleration,
                                                         cancelGravityFromAccelerationMeasurement,
                                                         estimatorDT,

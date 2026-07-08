@@ -20,8 +20,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -52,21 +54,29 @@ final class JointLevelKFTestFixture
    final List<TestIMU> imus;
    final TestSensorMap sensorMap;
    final List<RigidBodyBasics> feet;
+   final RigidBodyBasics elevator;      // root of the frame tree; updateFramesRecursively() after setting joint state
+   final FloatingJointBasics rootJoint; // floating base; its twist is zeroed so link gyros come only from the joints
    final int n;
    final int m;
    final int dim;
+
+   private final Twist twistTemp = new Twist(); // scratch for reading a link's body-frame angular velocity
 
    private JointLevelKFTestFixture(JointLevelKFPreFilter filter,
                                    List<RevoluteJoint> joints,
                                    List<TestIMU> imus,
                                    TestSensorMap sensorMap,
-                                   List<RigidBodyBasics> feet)
+                                   List<RigidBodyBasics> feet,
+                                   RigidBodyBasics elevator,
+                                   FloatingJointBasics rootJoint)
    {
       this.filter = filter;
       this.joints = joints;
       this.imus = imus;
       this.sensorMap = sensorMap;
       this.feet = feet;
+      this.elevator = elevator;
+      this.rootJoint = rootJoint;
       this.filteredJoints = filter.getFilteredJointsInStateOrder();
       this.n = filter.getNumberOfFilteredJoints();
       this.m = filter.getNumberOfIMUs();
@@ -93,6 +103,19 @@ final class JointLevelKFTestFixture
       return "[n=" + n + ", m=" + m + ", pairs=" + filter.getNumberOfPairs() + "]";
    }
 
+   /** Same shape spread as {@link #shapes} but with the chain's elevator handed to the filter, so the
+    *  mass-matrix process-noise path (Qa = σ_τ² M(q)⁻²) is active instead of the scalar-CWNA fallback. */
+   static List<JointLevelKFTestFixture> shapesMassMatrix(long baseSeed)
+   {
+      List<JointLevelKFTestFixture> list = new ArrayList<>();
+      list.add(singlePairMassMatrix(baseSeed + 1, 10, 1, 9));
+      list.add(singlePairMassMatrix(baseSeed + 2, 6, 1, 5));
+      list.add(singlePairMassMatrix(baseSeed + 3, 4, 0, 3));
+      list.add(build(baseSeed + 4, 10, new int[] {1, 5, 9}, new String[] {"imuA", "imuB", "imuC"},
+                     new int[][] {{0, 1}, {1, 2}}, 2, -1, true)); // two pairs, 3 IMUs
+      return list;
+   }
+
    /** One IMU pair: parent IMU on body after {@code parentJointIndex}, child on body after {@code childJointIndex}. */
    static JointLevelKFTestFixture singlePair(long seed, int numJoints, int parentJointIndex, int childJointIndex)
    {
@@ -101,7 +124,39 @@ final class JointLevelKFTestFixture
                    new int[] {parentJointIndex, childJointIndex},
                    new String[] {"imuA", "imuB"},
                    new int[][] {{0, 1}},
-                   1); // foot = child link
+                   1, // foot = child link
+                   -1, // no poisoned IMU
+                   false); // scalar-CWNA process noise (no robot model)
+   }
+
+   /** Like {@link #singlePair} but with the mass-matrix process-noise path enabled (elevator handed to the filter). */
+   static JointLevelKFTestFixture singlePairMassMatrix(long seed, int numJoints, int parentJointIndex, int childJointIndex)
+   {
+      return build(seed,
+                   numJoints,
+                   new int[] {parentJointIndex, childJointIndex},
+                   new String[] {"imuA", "imuB"},
+                   new int[][] {{0, 1}},
+                   1,
+                   -1,
+                   true);
+   }
+
+   /**
+    * Like {@link #singlePair} but one IMU's angular-velocity bias process-noise covariance is set non-finite
+    * <em>before</em> the filter is constructed, so the construction-time guard in {@code buildProcessNoise} /
+    * {@code validateConstantModel} is exercised (regression for the NaN hardening).
+    */
+   static JointLevelKFTestFixture singlePairPoisonBias(long seed, int numJoints, int parentJointIndex, int childJointIndex, int poisonImuIndex)
+   {
+      return build(seed,
+                   numJoints,
+                   new int[] {parentJointIndex, childJointIndex},
+                   new String[] {"imuA", "imuB"},
+                   new int[][] {{0, 1}},
+                   1,
+                   poisonImuIndex,
+                   false);
    }
 
    /** Two pairs sharing a middle IMU: (a,b) and (b,c) → 3 IMUs, foot on the far (c) link. */
@@ -112,7 +167,9 @@ final class JointLevelKFTestFixture
                    new int[] {aIndex, bIndex, cIndex},
                    new String[] {"imuA", "imuB", "imuC"},
                    new int[][] {{0, 1}, {1, 2}},
-                   2); // foot = c link
+                   2, // foot = c link
+                   -1,
+                   false);
    }
 
    private static JointLevelKFTestFixture build(long seed,
@@ -120,7 +177,9 @@ final class JointLevelKFTestFixture
                                                 int[] imuBodyJointIndex,
                                                 String[] imuNames,
                                                 int[][] pairParentChild,
-                                                int footImuIndex)
+                                                int footImuIndex,
+                                                int poisonImuIndex,
+                                                boolean useMassMatrixProcessNoise)
    {
       Random random = new Random(seed);
       Vector3D[] axes = new Vector3D[numJoints];
@@ -140,6 +199,10 @@ final class JointLevelKFTestFixture
          imus.add(imu);
          imuReadOnly.add(imu);
       }
+      // Poison an IMU's bias covariance BEFORE the filter is built, so the construction-time guard sees it.
+      if (poisonImuIndex >= 0)
+         imus.get(poisonImuIndex).setBiasProcessNoiseCovarianceNonFinite();
+
       TestSensorMap sensorMap = new TestSensorMap(imuReadOnly, joints);
 
       List<IMUBasedJointStateEstimatorParameters> pairParameters = new ArrayList<>();
@@ -149,13 +212,54 @@ final class JointLevelKFTestFixture
       List<RigidBodyBasics> feet = new ArrayList<>();
       feet.add(joints.get(imuBodyJointIndex[footImuIndex]).getSuccessor());
 
-      JointLevelKFPreFilter filter = new JointLevelKFPreFilter(sensorMap, pairParameters, feet, DT, new YoRegistry("test"));
-      return new JointLevelKFTestFixture(filter, joints, imus, sensorMap, feet);
+      JointLevelKFPreFilter filter = new JointLevelKFPreFilter(sensorMap,
+                                                               pairParameters,
+                                                               feet,
+                                                               useMassMatrixProcessNoise ? chain.getElevator() : null,
+                                                               DT,
+                                                               new YoRegistry("test"));
+      return new JointLevelKFTestFixture(filter, joints, imus, sensorMap, feet, chain.getElevator(), chain.getRootJoint());
    }
 
    void setEncoder(OneDoFJointBasics joint, double q)
    {
       sensorMap.setPosition(joint, q);
+   }
+
+   /**
+    * Applies one tick of a self-consistent simulated motion: sets each filtered joint's true {@code q}/{@code q̇}
+    * on the live mecano chain and its encoder to the true {@code q}, refreshes the frames, then sets every IMU's
+    * gyro from the corresponding link's body-frame angular velocity. Because the pair measurement is
+    * {@code ω_child − R·ω_parent}, the (zeroed) base motion cancels and the relative gyro equals {@code J_ang·q̇}
+    * at the true state — so the filter can actually observe {@code q̇} (it never reads encoder velocity).
+    *
+    * @param qTrue  true positions for the filtered joints, in filter state order (length {@code n}).
+    * @param qdTrue true velocities for the filtered joints, in filter state order (length {@code n}).
+    */
+   void applyConsistentMotion(double[] qTrue, double[] qdTrue)
+   {
+      rootJoint.setJointTwistToZero();      // static base: link gyros come only from the joints (and cancel in pairs)
+      for (RevoluteJoint joint : joints)
+         joint.setQd(0.0);                  // clear non-path joints so only the filtered joints drive the measurement
+      for (int i = 0; i < n; i++)
+      {
+         OneDoFJointBasics joint = filteredJoints.get(i);
+         joint.setQ(qTrue[i]);
+         joint.setQd(qdTrue[i]);
+         sensorMap.setPosition(joint, qTrue[i]);
+      }
+      elevator.updateFramesRecursively();
+      for (TestIMU imu : imus)
+         refreshGyroFromTwist(imu);
+   }
+
+   /** Sets an IMU's gyro to its link's body-frame angular velocity (proven recipe from PelvisRotationalStateUpdaterTest). */
+   private void refreshGyroFromTwist(TestIMU imu)
+   {
+      imu.measurementLink.getBodyFixedFrame().getTwistOfFrame(twistTemp);
+      twistTemp.changeFrame(imu.getMeasurementFrame());
+      Vector3DReadOnly w = twistTemp.getAngularPart();
+      imu.setAngularVelocity(w.getX(), w.getY(), w.getZ());
    }
 
    // ---------------------------------------------------------------------------------------------------------
@@ -266,6 +370,9 @@ final class JointLevelKFTestFixture
       final Vector3D linearAcceleration = new Vector3D(0.0, 0.0, 9.81);
       final Quaternion orientation = new Quaternion();
       final DMatrixRMaj biasProcessNoiseCovariance = scaledIdentity(3, IMU_BIAS_PROCESS_VAR);
+      // Gyro MEASUREMENT noise, kept separate from the bias process noise above so tests can verify the filter
+      // reads the right one for the pair-gyro R (regression for the bias-vs-measurement covariance mix-up).
+      final DMatrixRMaj angularVelocityNoiseCovariance = scaledIdentity(3, 1.0e-4);
       final DMatrixRMaj genericCovariance = scaledIdentity(3, 1.0e-4);
 
       TestIMU(String name, RigidBodyBasics measurementLink)
@@ -278,6 +385,30 @@ final class JointLevelKFTestFixture
       void setAngularVelocity(double x, double y, double z)
       {
          angularVelocity.set(x, y, z);
+      }
+
+      /** Corrupts this IMU's bias process-noise covariance so it is non-finite (for the NaN-hardening tests). */
+      void setBiasProcessNoiseCovarianceNonFinite()
+      {
+         biasProcessNoiseCovariance.set(0, 0, Double.NaN);
+      }
+
+      /** Sets a diagonal (possibly anisotropic) gyro measurement-noise covariance. */
+      void setAngularVelocityNoiseCovarianceDiagonal(double xx, double yy, double zz)
+      {
+         angularVelocityNoiseCovariance.zero();
+         angularVelocityNoiseCovariance.set(0, 0, xx);
+         angularVelocityNoiseCovariance.set(1, 1, yy);
+         angularVelocityNoiseCovariance.set(2, 2, zz);
+      }
+
+      /** Sets a diagonal (possibly anisotropic) bias process-noise covariance. */
+      void setBiasProcessNoiseCovarianceDiagonal(double xx, double yy, double zz)
+      {
+         biasProcessNoiseCovariance.zero();
+         biasProcessNoiseCovariance.set(0, 0, xx);
+         biasProcessNoiseCovariance.set(1, 1, yy);
+         biasProcessNoiseCovariance.set(2, 2, zz);
       }
 
       @Override
@@ -325,7 +456,7 @@ final class JointLevelKFTestFixture
       @Override
       public void getAngularVelocityNoiseCovariance(DMatrixRMaj noiseCovarianceToPack)
       {
-         noiseCovarianceToPack.set(genericCovariance);
+         noiseCovarianceToPack.set(angularVelocityNoiseCovariance);
       }
 
       @Override

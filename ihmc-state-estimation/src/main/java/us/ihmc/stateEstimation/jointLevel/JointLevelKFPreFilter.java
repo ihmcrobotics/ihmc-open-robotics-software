@@ -11,7 +11,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -33,7 +35,9 @@ import java.util.List;
 /**
  * Joint-level Kalman filter pre-filter (P-A architecture): one filter over the IMU tree whose pair
  * measurements z_w,ab = J(q^) S_ab qd + b_w,ab + v couple the joints on each IMU-pair path, with
- * per-IMU biases in state and a phase-2 gauge anchor for the absolute base bias.
+ * per-IMU biases in state and a phase-2 gauge anchor for the absolute base bias. When a robot model is
+ * provided, the joint process noise is the mass-matrix-induced Qa = sigma_tau^2 M(q)^-2 of the write-up
+ * (eqs. (10)-(12)), recomputed each predict; otherwise a scalar-CWNA diagonal fallback.
  *
  * <p><b>Do not share an instance between pipelines</b> (the filter holds its covariance).</p>
  * @author Lucas Libshutz
@@ -42,7 +46,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 {
    //TUNING VARIABLES
    private static final double ENCODER_VAR = 1.0e-6; // (1-e-3 rad)^2 encoder position variance
-   private static final double SIGMA_ACCEL = 50.0; // rad/s^2 CWNA process-noise STD
+   private static final double SIGMA_ACCEL = 50.0; // rad/s^2 CWNA process-noise STD (scalar fallback when no robot model is provided)
+   private static final double SIGMA_TAU = 50.0; // N*m unmodeled-torque STD for the mass-matrix path: Qa = sigma_tau^2 M(q)^-2
    private static final double INIT_POS_VAR = 1.0e-6; // encoders trusted at initialization
    private static final double INIT_VEL_VAR = 1.0; // velocity unknown at initialization
    private static final double INIT_BIAS_VAR = 2.5e-3; // (0.05 rad/s)^2
@@ -120,12 +125,53 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private final FrameVector3D fvB = new FrameVector3D();
    private final FrameVector3D biasOut = new FrameVector3D();
 
+   // Mass-matrix-induced process noise (write-up eqs. (10)-(12)): the unmodeled torque w_tau maps to joint
+   // acceleration through M(q)^-1, so Qa = M^-1 Sigma_tau M^-T = sigma_tau^2 M(q)^-2 for scalar Sigma_tau and
+   // symmetric M. M is computed over the FILTERED joints only, with every other joint (including the floating
+   // base) treated as locked — which is exactly the filtered rows/columns block of the full mass matrix, since
+   // the composite-rigid-body entries M_ij depend only on the subtree inertias, not on which other joints are
+   // free. Null calculator (no robot model handed in) => the constant scalar-CWNA diagonal fallback.
+   private CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
+   private int[] massMatrixColumn; // filter joint state index -> DoF column in the calculator's mass matrix
+   private final DMatrixRMaj Mwork = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj Minv = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj MinvSq = new DMatrixRMaj(0, 0);
+   private LinearSolverDense<DMatrixRMaj> massMatrixSolver;
+   private boolean warnedMassMatrixFailure = false;
+
+   // Rollback backups: a KF has no recovery once x/P go non-finite (predict/Joseph spread the NaN with no
+   // way back), so a single non-finite measurement update is skipped by restoring the pre-update mean and
+   // covariance instead of latching NaN forever. Pre-sized in allocate(); .set() reuses them (no per-tick
+   // allocation). The O(dim^2) copy is negligible next to the O(dim^3) Joseph matrix products already here.
+   private final DMatrixRMaj xBackup = new DMatrixRMaj(0, 1);
+   private final DMatrixRMaj PBackup = new DMatrixRMaj(0, 0);
+   // One-shot triage: names the first predict/update stage whose output goes non-finite, so a hardware run
+   // prints exactly where the NaN enters. Latches after the first report (the KF stays NaN anyway).
+   private boolean nonFiniteStateReported = false;
+
 
    // Package-private (not private) so the allocation/behavior tests in this package can build it directly
    // from a synthetic IMU-pair setup without standing up a full StateEstimatorParameters.
+   /** Scalar-CWNA process-noise overload: no robot model, so Qa = SIGMA_ACCEL^2 I (the pre-mass-matrix behavior). */
    JointLevelKFPreFilter(SensorOutputMapReadOnly sensorMap,
                          List<IMUBasedJointStateEstimatorParameters> pairParameters,
                          Collection<RigidBodyBasics> feet,
+                         double estimatorDT,
+                         YoRegistry parentRegistry)
+   {
+      this(sensorMap, pairParameters, feet, null, estimatorDT, parentRegistry);
+   }
+
+   /**
+    * @param rootBody root of the estimator's robot model (the elevator). When non-null, the joint process
+    *                 noise is the mass-matrix-induced Qa = sigma_tau^2 M(q)^-2 (write-up eqs. (10)-(12)),
+    *                 recomputed every predict because M depends on the configuration. When null, falls back
+    *                 to the constant scalar-CWNA diagonal Qa = SIGMA_ACCEL^2 I.
+    */
+   JointLevelKFPreFilter(SensorOutputMapReadOnly sensorMap,
+                         List<IMUBasedJointStateEstimatorParameters> pairParameters,
+                         Collection<RigidBodyBasics> feet,
+                         RigidBodyBasics rootBody,
                          double estimatorDT,
                          YoRegistry parentRegistry)
    {
@@ -181,6 +227,31 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       if (baseIMU == null)
          throw new RuntimeException("Base IMU is null, check the kinematic tree.");
       LogTools.info("Base IMU initialized as " + baseIMU.getSensorName());
+
+      // 3b) Mass-matrix-induced process noise: the calculator considers only the filtered joints of the LIVE
+      // estimator model (the same joint objects the Jacobians read), so its M(q) tracks the consumer-updated
+      // configuration each tick with no extra bookkeeping. Column mapping resolved through the index provider
+      // rather than assumed from list order, in case the input reorders joints internally.
+      if (rootBody != null && n > 0)
+      {
+         List<OneDoFJointBasics> massMatrixJoints = new ArrayList<>(jointToIndex.keySet());
+         // The filtered joints ARE joints of the passed-in robot model; the model root is only used as a
+         // sanity check here. NOTE: the (rootBody, joints) overload of toMultiBodySystemInput takes joints to
+         // IGNORE — the single-list overload below is the joints-to-CONSIDER one we want.
+         if (MultiBodySystemTools.getRootBody(massMatrixJoints.get(0).getPredecessor()) != rootBody)
+            LogTools.warn("The provided robot model root '" + rootBody.getName() + "' is not the root of the filtered joints' tree;"
+                          + " M(q) is computed on the joints' own tree.");
+         MultiBodySystemReadOnly massMatrixInput = MultiBodySystemReadOnly.toMultiBodySystemInput(massMatrixJoints);
+         massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(massMatrixInput);
+         massMatrixColumn = new int[n];
+         for (var e : jointToIndex.entrySet())
+            massMatrixColumn[e.getValue()] = massMatrixInput.getJointMatrixIndexProvider().getJointDoFIndices(e.getKey())[0];
+         LogTools.info("Joint-level KF process noise: mass-matrix path (sigma_tau = " + SIGMA_TAU + " N*m) over " + n + " joints.");
+      }
+      else
+      {
+         LogTools.info("Joint-level KF process noise: scalar CWNA fallback (no robot model provided).");
+      }
 
       // 4) Precompute base->foot chains for the phase 2 stance anchoring measurement update
       if (baseIMU != null && feet != null)
@@ -273,6 +344,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                                                                     StateEstimatorParameters stateEstimatorParameters,
                                                                     List<? extends IMUSensorReadOnly> imuProcessedOutputs,
                                                                     Collection<RigidBodyBasics> feet,
+                                                                    RigidBodyBasics estimatorRootBody,
                                                                     double gravitationalAcceleration,
                                                                     BooleanProvider cancelGravityFromAccelerationMeasurement,
                                                                     double estimatorDT,
@@ -285,9 +357,12 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       // sensor map by the pair parameters' names (the same live IMU objects the alpha filter uses) and its
       // stance anchor is gyro-based. They are kept for signature parity with the alpha factory. The
       // registry, however, is now threaded through so the filter actually publishes on hardware.
+      // estimatorRootBody (the estimator model's elevator) enables the mass-matrix process noise; null is a
+      // supported degradation to the scalar-CWNA path.
       return new JointLevelKFPreFilter(sensorOutputMap,
                                        stateEstimatorParameters.getIMUBasedJointStateEstimatorParameters(),
                                        feet,
+                                       estimatorRootBody,
                                        estimatorDT,
                                        parentRegistry);
    }
@@ -317,6 +392,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       // use from reallocating on the estimator thread.
       Ptmp.reshape(dim, dim);
       IKH.reshape(dim, dim);
+      xBackup.reshape(dim, 1);
+      PBackup.reshape(dim, dim);
 
       // Reused LU solver for the innovation-covariance inverse, warmed at the widest measurement (maxMeas).
       // The warm-up forces every internal buffer to its largest size now, so per-tick setA()/invert() reuse
@@ -325,12 +402,46 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       innovationSolver = LinearSolverFactory_DDRM.lu(maxMeas);
       innovationSolver.setA(CommonOps_DDRM.identity(maxMeas));
 
+      // Mass-matrix scratch + Cholesky solver, pre-warmed at n so the per-tick setA()/invert() never allocate.
+      // Cholesky both exploits and enforces SPD-ness: a non-PD M (bad model state) fails setA and the previous
+      // Q is kept instead of a garbage inverse entering the filter.
+      if (massMatrixCalculator != null)
+      {
+         Mwork.reshape(n, n);
+         Minv.reshape(n, n);
+         MinvSq.reshape(n, n);
+         massMatrixSolver = LinearSolverFactory_DDRM.chol(n);
+         massMatrixSolver.setA(CommonOps_DDRM.identity(n));
+      }
+
       for (int i = 0; i < 3; i++)
          anchorR.set(i, i, ANCHOR_VAR);
 
       buildConstantTransition();
       buildProcessNoise();
       buildEncoderModel();
+      validateConstantModel();
+   }
+
+   /**
+    * One-time (construction) finiteness check on the constant model matrices. These are built once and reused
+    * every tick, so a single non-finite entry here — most plausibly an IMU that returns a non-finite
+    * angular-velocity bias process-noise covariance while it is still booting — permanently poisons Q (or F)
+    * and makes P go NaN on the first {@link #predict()}, with no recovery. Logged as an error naming the
+    * matrix so this shows up clearly at estimator start instead of as a silent all-NaN filter. Runs at
+    * construction only; the string work here is not on the estimator hot path.
+    */
+   private void validateConstantModel()
+   {
+      if (containsNonFinite(F))
+         LogTools.error("JointLevelKFPreFilter transition matrix F is non-finite at construction.");
+      if (containsNonFinite(Q))
+         LogTools.error("JointLevelKFPreFilter process-noise Q is non-finite at construction — check the per-IMU "
+                        + "angular-velocity bias process-noise covariances (see buildProcessNoise).");
+      if (containsNonFinite(Henc))
+         LogTools.error("JointLevelKFPreFilter encoder Jacobian Henc is non-finite at construction.");
+      if (containsNonFinite(Renc))
+         LogTools.error("JointLevelKFPreFilter encoder noise Renc is non-finite at construction.");
    }
 
    private void buildConstantTransition()
@@ -347,6 +458,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       double dt2 = dt * dt;
       double dt3 = dt2 * dt;
 
+      // Scalar-CWNA joint blocks first: this is both the no-model path and the fallback the mass-matrix
+      // update leaves in place if its very first computation fails (e.g. model not yet in a valid pose).
       for (int i = 0; i < n; i++)
       {
          Q.set(i, i, sa2 * dt3/3.0); // CT white noise accel block, per joint
@@ -357,11 +470,91 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       for (var e : imuToOrdinal.entrySet()) // bias random walk, per-IMU process noise
       {
          e.getKey().getAngularVelocityBiasProcessNoiseCovariance(Rimu);
+         // Do not let a non-finite covariance (e.g. an IMU still booting at construction) poison Q: a single
+         // NaN here spreads to P on the first predict and never recovers. Skip this IMU's bias random-walk
+         // instead, and name it so the offender is obvious in the log.
+         if (containsNonFinite(Rimu))
+         {
+            LogTools.error("Non-finite angular-velocity bias process-noise covariance from IMU " + e.getKey().getSensorName()
+                           + " at construction; skipping its Q contribution (its bias random-walk is disabled) so Q stays finite.");
+            continue;
+         }
          int col = 2 * n + 3 * e.getValue();
          for (int i = 0; i < 3; i++)
             for (int j = 0; j < 3; j++)
                Q.set(col + i, col + j, Q.get(col + i, col + j) + dt * Rimu.get(i,j));
       }
+
+      // Overwrites the joint (q, qd) blocks with the mass-matrix Qa if a model is available; no-op otherwise.
+      updateProcessNoiseFromMassMatrix();
+   }
+
+   /**
+    * Rebuilds the joint-space Van Loan blocks of Q from the mass-matrix-induced acceleration noise
+    * Qa = sigma_tau^2 M(q)^-2 (write-up eqs. (10)-(12)): unmodeled torque w_tau maps to acceleration through
+    * M(q)^-1, so Qa = M^-1 Sigma_tau M^-T, which for scalar Sigma_tau = sigma_tau^2 I and symmetric M reduces
+    * to sigma_tau^2 M^-2. Called once from {@link #buildProcessNoise()} and then at the top of every
+    * {@link #predict()}, because M(q) — read from the live model joints, whose frames the estimator refreshes
+    * each tick — is configuration-dependent. Only the (q, qd) blocks are touched; the bias random-walk block
+    * and the zero joint/bias coupling are left exactly as {@link #buildProcessNoise()} made them.
+    *
+    * <p>Numerical failure (non-finite M, Cholesky rejection of a non-PD M, non-finite inverse) leaves the
+    * previous Q in place — which at worst is the scalar-CWNA build — and warns once. Allocation-free: the
+    * calculator, scratch matrices, and solver are all pre-sized in {@link #allocate()}.</p>
+    */
+   private void updateProcessNoiseFromMassMatrix()
+   {
+      if (massMatrixCalculator == null)
+         return;
+
+      massMatrixCalculator.reset();
+      Mwork.set(massMatrixCalculator.getMassMatrix());
+      if (containsNonFinite(Mwork))
+      {
+         warnMassMatrixFailureOnce("non-finite mass matrix");
+         return;
+      }
+      if (!massMatrixSolver.setA(Mwork)) // Cholesky: rejects a non-PD mass matrix before it can enter Q
+      {
+         warnMassMatrixFailureOnce("mass matrix not positive definite");
+         return;
+      }
+      massMatrixSolver.invert(Minv);
+      if (containsNonFinite(Minv))
+      {
+         warnMassMatrixFailureOnce("non-finite mass-matrix inverse (near-singular M)");
+         return;
+      }
+      CommonOps_DDRM.mult(Minv, Minv, MinvSq); // M^-2; M symmetric => M^-1 M^-T = M^-2
+
+      double st2 = SIGMA_TAU * SIGMA_TAU;
+      double dt2 = dt * dt;
+      double dt3 = dt2 * dt;
+      for (int i = 0; i < n; i++)
+      {
+         int ci = massMatrixColumn[i];
+         for (int j = 0; j < n; j++)
+         {
+            int cj = massMatrixColumn[j];
+            // Symmetrized read: the Cholesky inverse is symmetric only to round-off, and Q must stay exactly
+            // symmetric or the Joseph update slowly loses P's symmetry.
+            double qa = st2 * 0.5 * (MinvSq.get(ci, cj) + MinvSq.get(cj, ci));
+            Q.set(i, j, qa * dt3 / 3.0);     // q-q block
+            Q.set(i, n + j, qa * dt2 / 2.0); // q-qd cross term
+            Q.set(n + i, j, qa * dt2 / 2.0);
+            Q.set(n + i, n + j, qa * dt);    // qd-qd block
+         }
+      }
+   }
+
+   /** One-shot warning for mass-matrix Q failures; the filter keeps running on the previous (finite) Q. */
+   private void warnMassMatrixFailureOnce(String reason)
+   {
+      if (warnedMassMatrixFailure)
+         return;
+      warnedMassMatrixFailure = true;
+      LogTools.warn("Mass-matrix process-noise update failed (" + reason + "); keeping the previous Q"
+            + " (scalar CWNA if this is the first computation). Reported once.");
    }
 
    private void buildEncoderModel()
@@ -415,6 +608,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       }
 
       predict();
+      warnIfNonFiniteState("predict", -1);
 
       // update encoder states; skipped wholesale if any encoder reads non-finite (boot transient)
       int row = 0;
@@ -425,22 +619,32 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          if (!Double.isFinite(q))
          {
             encodersValid = false;
-            warnNonFiniteInputOnce("joint position of " + j.getName());
+            if (!warnedNonFiniteInput)
+               warnNonFiniteInputOnce("joint position of " + j.getName());
          }
          zEnc.set(row++, 0, q);
       }
       if (encodersValid)
-         josephUpdate(Henc, zEnc, Renc);
+      {
+         josephUpdate(Henc, zEnc, Renc, "encoder");
+         warnIfNonFiniteState("encoderUpdate", -1);
+      }
 
       for (int i = 0; i < pairs.size(); i++)
+      {
          pairGyroUpdate(pairs.get(i));
+         warnIfNonFiniteState("pairGyroUpdate", i);
+      }
 
       updateJointYoVariables();
    }
 
-   /** EKF time update in isolation: x <- F x, P <- F P F^T + Q. Package-private so tests can drive it alone. */
+   /** EKF time update in isolation: x <- F x, P <- F P F^T + Q(q). Package-private so tests can drive it alone. */
    void predict()
    {
+      // Q is state-dependent on the mass-matrix path (Qa = sigma_tau^2 M(q)^-2), so refresh it from the
+      // model's current configuration before propagating the covariance. No-op on the scalar fallback path.
+      updateProcessNoiseFromMassMatrix();
       CommonOps_DDRM.mult(F, x, xtmp);
       x.set(xtmp);
       CommonOps_DDRM.mult(F, P, Ptmp);
@@ -451,15 +655,17 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private void pairGyroUpdate(Pair p)
    {
       buildPairMeasurement(p);
-      // Guard both z (IMU gyro not booted yet) and H (Jacobian built from a model whose joints were set
-      // from non-finite raw sensors by the consumer's own fallback). One bad update would latch NaN
-      // into x and P permanently, so skip this pair for the tick instead.
-      if (containsNonFinite(zMeas) || containsNonFinite(H))
+      // Guard z (IMU gyro not booted yet), H (Jacobian built from a model whose joints were set from
+      // non-finite raw sensors by the consumer's own fallback), AND R3 (built from the IMU gyro measurement
+      // covariances and the frame rotations — previously unchecked, so a non-finite covariance flowed straight
+      // into the update). One bad update would latch NaN into x and P permanently, so skip this pair for the tick.
+      if (containsNonFinite(zMeas) || containsNonFinite(H) || containsNonFinite(R3))
       {
-         warnNonFiniteInputOnce("pair gyro measurement " + p.parent.getSensorName() + " -> " + p.child.getSensorName());
+         if (!warnedNonFiniteInput)
+            warnNonFiniteInputOnce("pair gyro measurement " + p.parent.getSensorName() + " -> " + p.child.getSensorName());
          return;
       }
-      josephUpdate(H, zMeas, R3);
+      josephUpdate(H, zMeas, R3, "pairGyro");
    }
 
    /**
@@ -498,13 +704,17 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       packRotationToJacFrame(p.parent, p.jac.getJacobianFrame(), rot3);
       insertScaledInto(rot3, -1.0, H, 0, p.parentBias);
       // q columns left 0: dJ/dq * qd neglected (encoder has pinned q)
-      // R = R_child Sigma_child R_child^T + R_parent Sigma_parent R_parent^T (L Sigma L^T)
+      // R = R_child Sigma_child R_child^T + R_parent Sigma_parent R_parent^T (L Sigma L^T), where Sigma is each
+      // IMU's angular-velocity MEASUREMENT noise covariance (the per-IMU Mahony filter output covariance, R_omega
+      // in the write-up). This is deliberately NOT getAngularVelocityBiasProcessNoiseCovariance — that is the
+      // bias random-walk intensity used in buildProcessNoise, typically orders of magnitude smaller. Using it
+      // here made the pair-gyro update drastically over-confident.
       R3.zero();
       packRotationToJacFrame(p.child, p.jac.getJacobianFrame(), rot3);
-      p.child.getAngularVelocityBiasProcessNoiseCovariance(Rimu);
+      p.child.getAngularVelocityNoiseCovariance(Rimu);
       congruenceAdd(rot3, Rimu, R3);
       packRotationToJacFrame(p.parent, p.jac.getJacobianFrame(), rot3);
-      p.parent.getAngularVelocityBiasProcessNoiseCovariance(Rimu);
+      p.parent.getAngularVelocityNoiseCovariance(Rimu);
       congruenceAdd(rot3, Rimu, R3);
    }
 
@@ -519,7 +729,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       {
          FootAnchor fa = footAnchors.get(i);
          if (fa.usable && trustedFeet.contains(fa.foot))
+         {
             stanceAnchorUpdate(fa);
+            warnIfNonFiniteState("stanceAnchor", i);
+         }
       }
    }
 
@@ -548,16 +761,35 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 
       if (containsNonFinite(zAnchor) || containsNonFinite(H))
       {
-         warnNonFiniteInputOnce("stance anchor at " + fa.foot.getName() + " (base IMU " + baseIMU.getSensorName() + ")");
+         if (!warnedNonFiniteInput)
+            warnNonFiniteInputOnce("stance anchor at " + fa.foot.getName() + " (base IMU " + baseIMU.getSensorName() + ")");
          return;
       }
-      josephUpdate(H, zAnchor, anchorR);
+      josephUpdate(H, zAnchor, anchorR, "stanceAnchor");
    }
 
    // ================================ KF core ================================
    // Sequential Joseph form measurement update for any matrix of dimension k.
    // Package-private so tests can drive a single measurement update against a reference KF.
    void josephUpdate(DMatrixRMaj Hm, DMatrixRMaj zm, DMatrixRMaj Rm)
+   {
+      josephUpdate(Hm, zm, Rm, "test"); // backward-compatible overload for the package-private unit tests
+   }
+
+   /**
+    * Sequential Joseph-form measurement update, hardened against latching NaN. {@code label} names the
+    * calling update ("encoder" / "pairGyro" / "stanceAnchor") so a skip or rollback identifies its source in
+    * the log. Two extra guards over a textbook update:
+    * <ul>
+    *   <li>after the innovation inverse, if S^-1 is non-finite (S was only <em>near</em>-singular, so the LU
+    *   {@code setA} did not reject it but {@code invert} overflowed), the update is skipped <em>before</em> x
+    *   or P are touched;</li>
+    *   <li>if the completed update still leaves x or P non-finite (e.g. a finite-but-huge intermediate
+    *   overflowed to +/-Inf), the pre-update mean and covariance are restored from the backups.</li>
+    * </ul>
+    * Both leave the filter in its prior valid state rather than propagating NaN forever.
+    */
+   void josephUpdate(DMatrixRMaj Hm, DMatrixRMaj zm, DMatrixRMaj Rm, String label)
    {
       int k = Hm.getNumRows();
       PHt.reshape(dim, k);
@@ -573,10 +805,24 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       // invert writes S^-1 into Sinv. Neither allocates because S is never wider than the warm-up size.
       if (!innovationSolver.setA(S))
       {
-         LogTools.warn("Singular innovation covariance! Skipping update.");
+         if (!warnedNonFiniteInput)
+            warnNonFiniteInputOnce("singular innovation covariance in the " + label + " update");
          return;
       }
       innovationSolver.invert(Sinv);
+      // setA only rejects an *exactly* singular S; a near-singular S passes and invert overflows to Inf/NaN.
+      // Catch it here, before x/P are modified, so the bad inverse cannot enter the state.
+      if (containsNonFinite(Sinv))
+      {
+         if (!warnedNonFiniteInput)
+            warnNonFiniteInputOnce("non-finite innovation inverse (near-singular S) in the " + label + " update");
+         return;
+      }
+
+      // Snapshot for rollback: everything below writes x then P in place.
+      xBackup.set(x);
+      PBackup.set(P);
+
       K.reshape(dim, k);
       CommonOps_DDRM.mult(PHt, Sinv, K);
       CommonOps_DDRM.mult(Hm, x, nu);
@@ -592,6 +838,34 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       KR.reshape(dim, k);
       CommonOps_DDRM.mult(K, Rm, KR);
       CommonOps_DDRM.multAddTransB(KR, K, P); // + K R K^T
+
+      if (containsNonFinite(x) || containsNonFinite(P))
+      {
+         x.set(xBackup);
+         P.set(PBackup);
+         if (!warnedNonFiniteInput)
+            warnNonFiniteInputOnce("the " + label + " update produced a non-finite state; rolled back to the prior estimate");
+      }
+   }
+
+   /**
+    * One-shot triage hook: the first time the filter's state goes non-finite, logs which stage produced it
+    * (predict / encoderUpdate / pairGyroUpdate #i / stanceAnchor #i) and then stays quiet. Allocation-free
+    * until it fires (the message is only built on that single occurrence); the finiteness scans are O(dim^2)
+    * but run only until the first report. With the input/inverse/rollback guards above this should not fire —
+    * if it does, its stage name is the exact place NaN enters, which is what to chase next.
+    */
+   private void warnIfNonFiniteState(String stage, int index)
+   {
+      if (nonFiniteStateReported)
+         return;
+      if (containsNonFinite(x) || containsNonFinite(P))
+      {
+         nonFiniteStateReported = true;
+         LogTools.error("JointLevelKFPreFilter state first went non-finite after stage '" + stage + "'"
+                        + (index >= 0 ? " #" + index : "") + " [x non-finite=" + containsNonFinite(x)
+                        + ", P non-finite=" + containsNonFinite(P) + "]. This is where the NaN enters.");
+      }
    }
 
 
@@ -797,6 +1071,11 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    DMatrixRMaj getCovariance()       { return P.copy(); }
    DMatrixRMaj getTransitionMatrix() { return F.copy(); }
    DMatrixRMaj getProcessNoise()     { return Q.copy(); }
+
+   /** True when Q's joint blocks come from Qa = sigma_tau^2 M(q)^-2 (a robot model was provided). */
+   boolean isUsingMassMatrixProcessNoise() { return massMatrixCalculator != null; }
+   /** Recomputes the mass-matrix Q blocks from the model's current configuration (no-op on the scalar path). */
+   void updateProcessNoiseFromMassMatrixForTest() { updateProcessNoiseFromMassMatrix(); }
    DMatrixRMaj getEncoderJacobian()  { return Henc.copy(); }
    DMatrixRMaj getEncoderNoise()     { return Renc.copy(); }
 
