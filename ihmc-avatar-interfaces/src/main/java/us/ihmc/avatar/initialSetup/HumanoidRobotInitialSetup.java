@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -34,6 +35,22 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class HumanoidRobotInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
+   /** Default height of the pelvis above the ground when lying down, used by {@link PoseType#GROUND_PRONE} and {@link PoseType#GROUND_SUPINE}. */
+   public static final double DEFAULT_GROUND_PELVIS_HEIGHT = 0.35;
+
+   /**
+    * Describes the high-level pose the robot should be initialized in.
+    */
+   public enum PoseType
+   {
+      /** Robot is standing upright on its feet. */
+      STANDING,
+      /** Robot is lying face-down on the ground. */
+      GROUND_PRONE,
+      /** Robot is lying face-up on the ground. */
+      GROUND_SUPINE
+   }
+
    protected double initialYaw = 0.0;
    protected double initialGroundHeight = 0.0;
    protected final Vector3D additionalOffset = new Vector3D();
@@ -45,9 +62,50 @@ public class HumanoidRobotInitialSetup implements RobotInitialSetup<HumanoidFloa
    protected final Map<String, Double> jointPositions = new HashMap<>();
    protected final HumanoidJointNameMap jointMap;
 
+   protected PoseType poseType = PoseType.STANDING;
+   protected double groundPelvisHeight = DEFAULT_GROUND_PELVIS_HEIGHT;
+
    public HumanoidRobotInitialSetup(HumanoidJointNameMap jointMap)
    {
       this.jointMap = jointMap;
+   }
+
+   /**
+    * Template method that configures this initial setup for {@link #getPoseType()}: first the joint positions via
+    * {@link #configureJointPositions()}, then the root joint pose via {@link #configureRootPose(RobotDefinition)}.
+    */
+   public void configureInitialSetup(RobotDefinition robotDefinition)
+   {
+      configureJointPositions();
+      configureRootPose(robotDefinition);
+   }
+
+   /**
+    * Hook for subclasses to set up the joint positions for {@link #getPoseType()}. Default implementation does nothing.
+    */
+   protected void configureJointPositions()
+   {
+   }
+
+   /**
+    * Configures the root joint position/orientation based on {@link #getPoseType()}. Standing robots are placed so
+    * their lowest sole is at the ground, while ground poses place the pelvis {@link #getGroundPelvisHeight()} above
+    * the ground with the robot lying on its front or back.
+    */
+   protected void configureRootPose(RobotDefinition robotDefinition)
+   {
+      switch (poseType)
+      {
+         case STANDING -> setRootJointHeightSuchThatLowestSoleIsAtZero(robotDefinition);
+         case GROUND_PRONE -> setGroundRootPose(Math.PI / 2.0);
+         case GROUND_SUPINE -> setGroundRootPose(-Math.PI / 2.0);
+      }
+   }
+
+   private void setGroundRootPose(double pitch)
+   {
+      rootJointPosition.set(0.0, 0.0, groundPelvisHeight);
+      rootJointOrientation.setYawPitchRoll(0.0, pitch, 0.0);
    }
 
    public void setJoint(RobotSide robotSide, LegJointName legJointName, double q)
@@ -278,9 +336,39 @@ public class HumanoidRobotInitialSetup implements RobotInitialSetup<HumanoidFloa
       return jointPositions;
    }
 
+   public void setPoseType(PoseType poseType)
+   {
+      this.poseType = poseType;
+   }
+
+   public PoseType getPoseType()
+   {
+      return poseType;
+   }
+
+   public void setGroundPelvisHeight(double groundPelvisHeight)
+   {
+      this.groundPelvisHeight = groundPelvisHeight;
+   }
+
+   public double getGroundPelvisHeight()
+   {
+      return groundPelvisHeight;
+   }
+
+   public void setRootJointPosition(Tuple3DReadOnly rootJointPosition)
+   {
+      this.rootJointPosition.set(rootJointPosition);
+   }
+
    public Point3D getRootJointPosition()
    {
       return rootJointPosition;
+   }
+
+   public void setRootJointOrientation(Orientation3DReadOnly rootJointOrientation)
+   {
+      this.rootJointOrientation.set(rootJointOrientation);
    }
 
    public Quaternion getRootJointOrientation()
