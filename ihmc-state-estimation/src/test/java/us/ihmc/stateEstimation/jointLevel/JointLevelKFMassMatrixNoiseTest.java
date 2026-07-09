@@ -42,7 +42,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 public class JointLevelKFMassMatrixNoiseTest
 {
    private static final double DT = JointLevelKFTestFixture.DT;
-   private static final double SIGMA_TAU = 50.0;   // matches JointLevelKFPreFilter.SIGMA_TAU
+   private static final double SIGMA_TAU = 5.0;    // matches JointLevelKFPreFilter.SIGMA_TAU (retuned after Schur switch)
+   private static final double QA_MAX = 900.0;     // matches JointLevelKFPreFilter.QA_MAX (Qa conditioning cap)
    private static final double SIGMA_ACCEL = 50.0; // matches JointLevelKFPreFilter.SIGMA_ACCEL (fallback path)
 
    /**
@@ -141,6 +142,13 @@ public class JointLevelKFMassMatrixNoiseTest
       for (int i = 0; i < n; i++)
          for (int j = 0; j < n; j++)
             qa.set(i, j, st2 * 0.5 * (lambdaInvSq.get(i, j) + lambdaInvSq.get(j, i)));
+      // Mirror the filter's physical conditioning cap: uniformly scale Qa down so no diagonal exceeds QA_MAX
+      // (independent reproduction of the near-singular-Lambda guard, so the oracle still validates the full Qa).
+      double maxDiag = 0.0;
+      for (int i = 0; i < n; i++)
+         maxDiag = Math.max(maxDiag, qa.get(i, i));
+      if (maxDiag > QA_MAX)
+         CommonOps_DDRM.scale(QA_MAX / maxDiag, qa);
       return qa;
    }
 

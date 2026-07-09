@@ -65,7 +65,19 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    //TUNING VARIABLES
    private static final double ENCODER_VAR = 1.0e-6; // (1-e-3 rad)^2 encoder position variance
    private static final double SIGMA_ACCEL = 50.0; // rad/s^2 CWNA process-noise STD (scalar fallback when no robot model is provided)
-   private static final double SIGMA_TAU = 50.0; // N*m unmodeled-torque STD for the mass-matrix path: Qa = sigma_tau^2 M(q)^-2
+   // N*m unmodeled-torque STD for the mass-matrix path: Qa = sigma_tau^2 Lambda(q)^-2. Retuned from 50 -> 5
+   // after the Rev.2 Schur switch (SPEC §8): Lambda^-2 ⪰ M_jj^-2 inflated Qa relative to the Rev.1 locked-base
+   // map at a fixed sigma_tau, and the carried-over 50 made ONE predict inject O(10) (rad/s)^2 of joint-velocity
+   // variance — the Alex002 velocity-covariance blow-up. 5 N*m is a defensible interim value PENDING final
+   // quiet-standing/walking NIS calibration by a human (TODO(retune) on updateProcessNoiseFromMassMatrix).
+   private static final double SIGMA_TAU = 5.0;
+   // Physical cap on the per-joint acceleration process-noise VARIANCE (sigma_qdd_max = 30 rad/s^2)^2. Qa =
+   // sigma_tau^2 Lambda^-2 is the free-flyer UPPER bound on acceleration noise (SPEC §3.2); for a near-singular
+   // Lambda (a proximal joint whose base recoil nearly cancels its inertia — Alex's LEFT_HIP_X) Lambda^-2 is
+   // enormous, and the Cholesky PD guard does NOT catch it (near-singular is still PD). The cap bounds Qa by
+   // uniformly scaling Lambda^-2 down (preserves symmetry/PSD/joint coupling) so no joint's Qa diagonal exceeds
+   // this. A joint physically cannot carry an acceleration-noise STD above ~30 rad/s^2.
+   private static final double QA_MAX = 900.0;
    private static final double INIT_POS_VAR = 1.0e-6; // encoders trusted at initialization
    private static final double INIT_VEL_VAR = 1.0; // velocity unknown at initialization
    private static final double INIT_BIAS_VAR = 2.5e-3; // (0.05 rad/s)^2
@@ -197,6 +209,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    // The mass matrix M is built over {base} ∪ {joints spanning base->filtered}. All columns (nuisance and each
    // filtered joint) are resolved through the calculator's index provider — never assume ordering. Null
    // calculator (no robot model, or no 6-DoF floating base found) => the constant scalar-CWNA diagonal fallback.
+   // NOTE: CompositeRigidBodyMassMatrixCalculator is correct here. DynamicsMatrixCalculator merely wraps this
+   // same calculator (it holds one internally, built over the whole-body-control toolbox) and computes the
+   // identical M(q) — switching changes nothing numerically. Process-noise magnitude is governed by SIGMA_TAU
+   // and the QA_MAX conditioning cap in updateProcessNoiseFromMassMatrix, not by the choice of calculator.
    private CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
    private int numNuisanceDoF;          // 6 (base) + number of gap joints; the marginalized block width N
    private int[] massMatrixNuisanceColumns; // nuisance DoF columns of the full mass matrix (length N)
@@ -211,6 +227,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private LinearSolverDense<DMatrixRMaj> nuisanceMassMatrixSolver; // Cholesky over M_NN, solves M_NN X = M_Nf
    private LinearSolverDense<DMatrixRMaj> schurSolver;          // Cholesky over Lambda, inverts it
    private boolean warnedMassMatrixFailure = false;
+   private boolean warnedMassMatrixConditioningCap = false;
 
    // Rollback backups: a KF has no recovery once x/P go non-finite (predict/Joseph spread the NaN with no
    // way back), so a single non-finite measurement update is skipped by restoring the pre-update mean and
@@ -774,6 +791,23 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       CommonOps_DDRM.mult(LambdaInv, LambdaInv, LambdaInvSq); // Lambda^-2; Lambda symmetric => Lambda^-1 Lambda^-T = Lambda^-2
 
       double st2 = SIGMA_TAU * SIGMA_TAU;
+
+      // Physical conditioning cap (see QA_MAX): a near-singular-but-PD Lambda (proximal joint, base recoil nearly
+      // cancels its inertia) makes Lambda^-2 — hence Qa = st2 * Lambda^-2 — enormous, which the Cholesky PD guard
+      // above cannot catch (it only rejects a NON-PD Lambda). Left unbounded, one predict injects O(10-1e4)
+      // (rad/s)^2 of joint-velocity variance (the Alex002 blow-up: the velocity covariance explodes in a single
+      // step while the encoder-pinned position covariance stays sane). Bound Qa's largest diagonal at QA_MAX by
+      // uniformly scaling Lambda^-2 down; a single scalar keeps Qa exactly symmetric and PSD and preserves the
+      // dense joint coupling (§3.4/§7), it only limits the overall intensity. Warn once when it binds.
+      double maxLambdaInvSqDiag = 0.0;
+      for (int i = 0; i < n; i++)
+         maxLambdaInvSqDiag = Math.max(maxLambdaInvSqDiag, LambdaInvSq.get(i, i));
+      double maxAllowedLambdaInvSqDiag = QA_MAX / st2; // st2 * this = QA_MAX
+      if (maxLambdaInvSqDiag > maxAllowedLambdaInvSqDiag)
+      {
+         CommonOps_DDRM.scale(maxAllowedLambdaInvSqDiag / maxLambdaInvSqDiag, LambdaInvSq);
+         warnMassMatrixConditioningCapOnce();
+      }
       double dt2 = dt * dt;
       double dt3 = dt2 * dt;
       for (int i = 0; i < n; i++)
@@ -813,6 +847,19 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       warnedMassMatrixFailure = true;
       LogTools.warn("Mass-matrix process-noise update failed (" + reason + "); keeping the previous Q"
             + " (scalar CWNA if this is the first computation). Reported once.");
+   }
+
+   /** One-shot warning that the Qa conditioning cap (QA_MAX) bound the Schur process noise — i.e. Lambda was
+    *  near-singular for some joint (a near-singular-but-PD Lambda the Cholesky guard cannot see). Named so a
+    *  hardware run reveals the near-singular-inertia joint instead of silently blowing up the velocity covariance. */
+   private void warnMassMatrixConditioningCapOnce()
+   {
+      if (warnedMassMatrixConditioningCap)
+         return;
+      warnedMassMatrixConditioningCap = true;
+      LogTools.warn("Joint-level KF process noise: Qa = sigma_tau^2 Lambda^-2 hit the conditioning cap QA_MAX ("
+            + QA_MAX + " (rad/s^2)^2) — the Schur complement Lambda is near-singular for a proximal/light joint, so "
+            + "its unbounded Lambda^-2 was clamped to a physical acceleration-noise variance. Reported once.");
    }
 
    private void buildEncoderModel()
