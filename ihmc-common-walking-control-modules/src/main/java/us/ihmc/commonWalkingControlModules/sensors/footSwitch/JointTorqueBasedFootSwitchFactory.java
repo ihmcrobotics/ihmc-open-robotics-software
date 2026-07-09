@@ -132,7 +132,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
          contactForceThresholdLow = new DoubleParameter(namePrefix + "JacobianTThresholdForceLow", registry, defaultContactThresholdForceLow);
          contactForceThresholdHigh = new DoubleParameter(namePrefix + "JacobianTThresholdForceHigh", registry, defaultContactThresholdForceHigh);
          contactCoPThreshold = new DoubleParameter(namePrefix + "JacobianTThresholdContactCoP", registry, defaultContactCoPThreshold);
-         compensateGravity = new BooleanParameter(namePrefix + "JacobianTCompensateGravity", registry, true);
+         compensateGravity = new BooleanParameter(namePrefix + "JacobianTCompensateGravity", registry, Boolean.parseBoolean(System.getProperty("alex.footSwitch.jtCompensateGravity", "true")));
          useJacobianTranspose = new BooleanParameter(namePrefix + "UseJacobianTranspose", registry, defaultUseJacobianTranspose);
          verticalVelocityThreshold = new DoubleParameter(namePrefix + "VerticalVelocityThreshold", registry, defaultVerticalVelocityThreshold);
          verticalVelocityHighThreshold = new DoubleParameter(namePrefix + "VerticalVelocityHighThreshold", registry, defaultVerticalVelocityHighThreshold);

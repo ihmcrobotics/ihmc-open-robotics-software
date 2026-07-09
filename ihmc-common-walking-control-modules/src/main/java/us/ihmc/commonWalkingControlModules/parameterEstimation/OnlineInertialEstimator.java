@@ -23,6 +23,16 @@ public interface OnlineInertialEstimator
 
    void setContactWrenches(SideDependentList<DMatrixRMaj> wrenches);
 
+   /** Hand/nub contact Jacobians for grasp rejection (a second contact channel). See {@link #setHandContactWrenches}. */
+   void setHandContactJacobians(SideDependentList<DMatrixRMaj> jacobians);
+
+   /**
+    * Hand/nub contact wrenches for grasp rejection: only the INTERNAL (squeeze / grasp-map null-space) component
+    * of the two-nub grasp wrench, expressed in the same frame as the hand contact Jacobians. Subtracted from the
+    * measurement exactly like the foot contacts so the squeeze is not attributed to the forearm inertial parameters.
+    */
+   void setHandContactWrenches(SideDependentList<DMatrixRMaj> wrenches);
+
    void setProcessCovariance(DMatrix processCovariance);
 
    void setMeasurementCovariance(DMatrix measurementCovariance);

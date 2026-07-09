@@ -44,6 +44,12 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
    private final SideDependentList<DMatrixRMaj> contactJacobians = new SideDependentList<>();
    private final SideDependentList<DMatrixRMaj> contactWrenches = new SideDependentList<>();
 
+   // Hand/nub contacts (grasp rejection): a second contact channel, subtracted exactly like the feet. Only the
+   // INTERNAL (squeeze / grasp-map null-space) component of the nub wrench is fed here, so it is removed from the
+   // measurement while the external gravitational share stays in the regressor. Zero unless grasp rejection is on.
+   private final SideDependentList<DMatrixRMaj> handContactJacobians = new SideDependentList<>();
+   private final SideDependentList<DMatrixRMaj> handContactWrenches = new SideDependentList<>();
+
    private final DMatrixRMaj measurement;
 
    private final AlphaFilteredYoMatrix filteredResidual;
@@ -73,6 +79,8 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
       {
          contactJacobians.put(side, new DMatrixRMaj(Wrench.SIZE, nDoFs));
          contactWrenches.put(side, new DMatrixRMaj(Wrench.SIZE, 1));
+         handContactJacobians.put(side, new DMatrixRMaj(Wrench.SIZE, nDoFs));
+         handContactWrenches.put(side, new DMatrixRMaj(Wrench.SIZE, 1));
       }
 
       measurement = new DMatrixRMaj(nDoFs, 1);
@@ -110,6 +118,12 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
       {
          // NOTE: the minus for the contact wrench contribution
          CommonOps_DDRM.multAddTransA(-1.0, contactJacobians.get(side), contactWrenches.get(side), measurement);
+      }
+
+      // Torque from hand/nub contact wrenches (internal grasp component only; zero unless grasp rejection is on)
+      for (RobotSide side : RobotSide.values)
+      {
+         CommonOps_DDRM.multAddTransA(-1.0, handContactJacobians.get(side), handContactWrenches.get(side), measurement);
       }
 
       // Torque from bias
@@ -170,6 +184,20 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
    {
       for (RobotSide side : RobotSide.values)
          this.contactWrenches.get(side).set(contactWrenches.get(side));
+   }
+
+   @Override
+   public void setHandContactJacobians(SideDependentList<DMatrixRMaj> jacobians)
+   {
+      for (RobotSide side : RobotSide.values)
+         handContactJacobians.get(side).set(jacobians.get(side));
+   }
+
+   @Override
+   public void setHandContactWrenches(SideDependentList<DMatrixRMaj> wrenches)
+   {
+      for (RobotSide side : RobotSide.values)
+         handContactWrenches.get(side).set(wrenches.get(side));
    }
 
    private void filter(DMatrix matrixToFilter, AlphaFilteredYoMatrix filterContainer)

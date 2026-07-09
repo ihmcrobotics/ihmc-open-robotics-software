@@ -59,7 +59,8 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
    private final YoDouble tikhonovPriorVarianceAlpha; // mass (loose -> data dominates)
    private final YoDouble tikhonovPriorVarianceD;     // inertia diagonal
    private final YoDouble tikhonovPriorVarianceS;     // inertia off-diagonal
-   private final YoDouble tikhonovPriorVarianceT;     // first moment / CoM (tight -> held near nominal)
+   private final YoDouble tikhonovPriorVarianceT;     // first moment / CoM t1,t2 (tight -> held near nominal)
+   private final YoDouble tikhonovPriorVarianceT3;    // t3 (down-axis CoM) override; index 9, defaults to varT
    private final DMatrixRMaj priorCovarianceDiag;   // R_prior (full state size, block-diagonal per body)
    private final DMatrixRMaj priorInnovationCovariance; // S = P + R_prior
    private final DMatrixRMaj priorInnovationCovarianceInv;
@@ -82,6 +83,12 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
 
    private final SideDependentList<DMatrixRMaj> contactJacobians = new SideDependentList<>();
    private final SideDependentList<DMatrixRMaj> contactWrenches = new SideDependentList<>();
+
+   // Hand/nub contacts (grasp rejection): a second contact channel, subtracted exactly like the feet. Only the
+   // INTERNAL (squeeze / grasp-map null-space) component of the nub wrench is fed here, so it is removed from the
+   // measurement while the external gravitational share stays in the regressor. Zero unless grasp rejection is on.
+   private final SideDependentList<DMatrixRMaj> handContactJacobians = new SideDependentList<>();
+   private final SideDependentList<DMatrixRMaj> handContactWrenches = new SideDependentList<>();
 
    private int nBodies;
    private final List<RigidBodyInertialParameters> inertialParameters = new ArrayList<>();
@@ -126,6 +133,8 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
       {
          contactJacobians.put(side, new DMatrixRMaj(Wrench.SIZE, nDoFs));
          contactWrenches.put(side, new DMatrixRMaj(Wrench.SIZE, 1));
+         handContactJacobians.put(side, new DMatrixRMaj(Wrench.SIZE, nDoFs));
+         handContactWrenches.put(side, new DMatrixRMaj(Wrench.SIZE, 1));
       }
 
       java.util.List<double[]> comCouplingList = new java.util.ArrayList<>();
@@ -179,11 +188,13 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
          tikhonovPriorVarianceD = new YoDouble("tikhonovPriorVarianceD", registry);
          tikhonovPriorVarianceS = new YoDouble("tikhonovPriorVarianceS", registry);
          tikhonovPriorVarianceT = new YoDouble("tikhonovPriorVarianceT", registry);
+         tikhonovPriorVarianceT3 = new YoDouble("tikhonovPriorVarianceT3", registry);
          // index map within a body: 0=alpha, 1..3=d, 4..6=s, 7..9=t
          tikhonovPriorVarianceAlpha.set(perBodyPriorVariance != null ? perBodyPriorVariance[0] : 1.0e6);
          tikhonovPriorVarianceD.set(perBodyPriorVariance != null ? perBodyPriorVariance[1] : 1.0e-2);
          tikhonovPriorVarianceS.set(perBodyPriorVariance != null ? perBodyPriorVariance[4] : 1.0e-2);
          tikhonovPriorVarianceT.set(perBodyPriorVariance != null ? perBodyPriorVariance[7] : 1.0e-2);
+         tikhonovPriorVarianceT3.set(perBodyPriorVariance != null ? perBodyPriorVariance[9] : 1.0e-2);
          priorCovarianceDiag = new DMatrixRMaj(stateSize, stateSize);
          LogTools.info("InertialPhysicallyConsistentKalmanFilter: Tikhonov prior available (live YoVariables); enabled="
                        + tikhonovPriorEnabled.getValue());
@@ -195,6 +206,7 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
          tikhonovPriorVarianceD = null;
          tikhonovPriorVarianceS = null;
          tikhonovPriorVarianceT = null;
+         tikhonovPriorVarianceT3 = null;
          priorCovarianceDiag = new DMatrixRMaj(0, 0);
       }
       priorInnovationCovariance = new DMatrixRMaj(stateSize, stateSize);
@@ -256,6 +268,12 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
       {
          // NOTE: the minus for the contact wrench contribution
          CommonOps_DDRM.multAddTransA(-1.0, contactJacobians.get(side), contactWrenches.get(side), measurement);
+      }
+
+      // Torque from hand/nub contact wrenches (internal grasp component only; zero unless grasp rejection is on)
+      for (RobotSide side : RobotSide.values)
+      {
+         CommonOps_DDRM.multAddTransA(-1.0, handContactJacobians.get(side), handContactWrenches.get(side), measurement);
       }
 
       // Torque from bias
@@ -372,6 +390,7 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
       double varD = tikhonovPriorVarianceD.getValue();
       double varS = tikhonovPriorVarianceS.getValue();
       double varT = tikhonovPriorVarianceT.getValue();
+      double varT3 = tikhonovPriorVarianceT3.getValue();
       priorCovarianceDiag.zero();
       for (int b = 0; b < nBodies; ++b)
       {
@@ -381,8 +400,9 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
             priorCovarianceDiag.set(base + p, base + p, varD);
          for (int p = 4; p <= 6; ++p)
             priorCovarianceDiag.set(base + p, base + p, varS);
-         for (int p = 7; p <= 9; ++p)
-            priorCovarianceDiag.set(base + p, base + p, varT);
+         priorCovarianceDiag.set(base + 7, base + 7, varT);
+         priorCovarianceDiag.set(base + 8, base + 8, varT);
+         priorCovarianceDiag.set(base + 9, base + 9, varT3);
       }
 
       for (int i = 0; i < nBodies; ++i)
@@ -479,6 +499,20 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
    {
       for (RobotSide side : RobotSide.values)
          contactWrenches.get(side).set(wrenches.get(side));
+   }
+
+   @Override
+   public void setHandContactJacobians(SideDependentList<DMatrixRMaj> jacobians)
+   {
+      for (RobotSide side : RobotSide.values)
+         handContactJacobians.get(side).set(jacobians.get(side));
+   }
+
+   @Override
+   public void setHandContactWrenches(SideDependentList<DMatrixRMaj> wrenches)
+   {
+      for (RobotSide side : RobotSide.values)
+         handContactWrenches.get(side).set(wrenches.get(side));
    }
 
    private void filter(DMatrix matrixToFilter, AlphaFilteredYoMatrix filterContainer)

@@ -4,7 +4,12 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
@@ -63,6 +68,21 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final SideDependentList<JointBasics[]> legJoints;
    private final SideDependentList<GeometricJacobian> compactContactJacobians;
    private final SideDependentList<DMatrixRMaj> fullContactJacobians;
+
+   // Two-nub force-closure grasp rejection: a per-side nub contact (arm joint path -> nub-end frame), whose
+   // INTERNAL (squeeze) wrench is subtracted from the measurement so it is not attributed to forearm inertia.
+   private final boolean graspRejectionEnabled;
+   private final GraspInternalWrenchCalculator graspCalculator;
+   private final SideDependentList<JointBasics[]> armJoints = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> nubFrames = new SideDependentList<>();
+   private final SideDependentList<GeometricJacobian> compactNubJacobians = new SideDependentList<>();
+   private final SideDependentList<DMatrixRMaj> fullNubJacobians = new SideDependentList<>();
+   private final SideDependentList<DMatrixRMaj> handContactWrenches = new SideDependentList<>();
+   private final FramePoint3D leftNubPosition = new FramePoint3D();
+   private final FramePoint3D rightNubPosition = new FramePoint3D();
+   private final double knownGraspSqueeze;
+   private final YoDouble graspSqueezeApplied;
+   private final YoDouble graspNubDistance;
 
    private final DMatrixRMaj wholeSystemTorques;
 
@@ -198,6 +218,43 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          fullContactJacobians.put(side, new DMatrixRMaj(Wrench.SIZE, nDoFs));
       }
 
+      // Two-nub force-closure grasp rejection: build a nub contact (arm joint path elevator->hand, Jacobian
+      // expressed at a fixed nub-end frame off the hand link) per side. Requires a non-null nub offset for BOTH
+      // sides (force closure needs both nubs). The nub frame coincides with where the sim wrencher applies the
+      // grasp and where the nub-tracking monitor reports, so the estimator's contact frame matches the load point.
+      knownGraspSqueeze = inertialEstimationParameters.getKnownGraspSqueeze();
+      graspSqueezeApplied = new YoDouble("graspSqueezeApplied", registry);
+      graspNubDistance = new YoDouble("graspNubDistance", registry);
+      Vector3D leftNubOffset = inertialEstimationParameters.isGraspRejectionEnabled() ? inertialEstimationParameters.getNubContactOffsetInHandFrame(RobotSide.LEFT) : null;
+      Vector3D rightNubOffset = inertialEstimationParameters.isGraspRejectionEnabled() ? inertialEstimationParameters.getNubContactOffsetInHandFrame(RobotSide.RIGHT) : null;
+      graspRejectionEnabled = leftNubOffset != null && rightNubOffset != null;
+      if (graspRejectionEnabled)
+      {
+         SideDependentList<Vector3D> nubOffsets = new SideDependentList<>(leftNubOffset, rightNubOffset);
+         for (RobotSide side : RobotSide.values)
+         {
+            RigidBodyBasics hand = controllerRobotModel.getHand(side);
+            RigidBodyTransform handToNub = new RigidBodyTransform();
+            handToNub.getTranslation().set(nubOffsets.get(side));
+            ReferenceFrame nubFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("nubContactFrame" + side.name(),
+                                                                                                       hand.getParentJoint().getFrameAfterJoint(),
+                                                                                                       handToNub);
+            nubFrames.put(side, nubFrame);
+            armJoints.put(side, MultiBodySystemTools.createJointPath(controllerRobotModel.getElevator(), hand));
+            compactNubJacobians.put(side, new GeometricJacobian(armJoints.get(side), nubFrame));
+            fullNubJacobians.put(side, new DMatrixRMaj(Wrench.SIZE, nDoFs));
+            handContactWrenches.put(side, new DMatrixRMaj(Wrench.SIZE, 1));
+         }
+         graspCalculator = new GraspInternalWrenchCalculator(nubFrames, ReferenceFrame.getWorldFrame());
+         LogTools.info("InertialParameterManager: two-nub grasp rejection ON (method=" + inertialEstimationParameters.getGraspRejectionMethod()
+                       + ", knownSqueeze=" + knownGraspSqueeze + " N, hands "
+                       + controllerRobotModel.getHand(RobotSide.LEFT).getName() + "/" + controllerRobotModel.getHand(RobotSide.RIGHT).getName() + ").");
+      }
+      else
+      {
+         graspCalculator = null;
+      }
+
       wholeSystemTorques = new DMatrixRMaj(nDoFs, 1);
 
       String[] measurementNames = inertialEstimationParameters.getMeasurementNames();
@@ -288,6 +345,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          filter.setContactJacobians(fullContactJacobians);
          filter.setContactWrenches(contactWrenches);
 
+         if (graspRejectionEnabled)
+         {
+            updateNubContacts();
+            filter.setHandContactJacobians(fullNubJacobians);
+            filter.setHandContactWrenches(handContactWrenches);
+         }
+
          if (excludeBias.getValue())
             filter.setTorqueFromBias(biasWindowFilter.getZero());
          else
@@ -339,6 +403,25 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    {
       for (RobotSide side : RobotSide.values)
          footSwitches.get(side).getMeasuredWrench().get(contactWrenches.get(side));
+   }
+
+   /**
+    * Update the nub contact Jacobians and the internal (squeeze) wrench to subtract. Stage A (KNOWN): the squeeze
+    * magnitude is prescribed and the grasp line is taken from the two nub-frame origins. Stage B (JACOBIAN) is
+    * added later. The packed {@code handContactWrenches} are pure point-contact forces in each nub frame.
+    */
+   private void updateNubContacts()
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         compactNubJacobians.get(side).compute();
+         jointIndexHandler.compactBlockToFullBlock(armJoints.get(side), compactNubJacobians.get(side).getJacobianMatrix(), fullNubJacobians.get(side));
+      }
+      leftNubPosition.setToZero(nubFrames.get(RobotSide.LEFT));
+      rightNubPosition.setToZero(nubFrames.get(RobotSide.RIGHT));
+      graspCalculator.computeFromKnownSqueeze(leftNubPosition, rightNubPosition, knownGraspSqueeze, handContactWrenches);
+      graspSqueezeApplied.set(graspCalculator.getSqueeze());
+      graspNubDistance.set(graspCalculator.getDistance());
    }
 
    private void updateRegressorAndInverseDynamicsModels()

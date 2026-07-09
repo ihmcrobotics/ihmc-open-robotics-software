@@ -1,9 +1,11 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
 import org.ejml.data.DMatrixRMaj;
+import us.ihmc.commonWalkingControlModules.parameterEstimation.GraspRejectionMethod;
 import us.ihmc.commonWalkingControlModules.parameterEstimation.InertialEstimatorType;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.Set;
@@ -154,4 +156,48 @@ public interface InertialEstimationParameters
    double getNormalizedInnovationThreshold();
 
    double[] getMaxParameterDeltaRates();
+
+   /**
+    * Two-nub force-closure grasp rejection: when true, {@link us.ihmc.commonWalkingControlModules.parameterEstimation.InertialParameterManager}
+    * builds a nub contact frame per side and subtracts the INTERNAL (squeeze) component of the grasp wrench from
+    * the measurement, so the squeeze is not mis-attributed to the forearm inertial parameters. Default off.
+    */
+   default boolean isGraspRejectionEnabled()
+   {
+      return false;
+   }
+
+   /** KNOWN (Stage A, prescribed squeeze) vs JACOBIAN (Stage B, force backed out of arm torques). */
+   default GraspRejectionMethod getGraspRejectionMethod()
+   {
+      return GraspRejectionMethod.KNOWN;
+   }
+
+   /**
+    * The nub-end contact point for grasp rejection, expressed in the hand ({@code getHand(side)}) link frame
+    * (frame-after-joint). The manager builds a fixed-offset nub frame there for the contact Jacobian. Return
+    * {@code null} (default) to disable the nub contact for that side.
+    */
+   default us.ihmc.euclid.tuple3D.Vector3D getNubContactOffsetInHandFrame(RobotSide side)
+   {
+      return null;
+   }
+
+   /** Stage A: the prescribed squeeze magnitude lambda (N). Should match the testbed's commanded squeeze. */
+   default double getKnownGraspSqueeze()
+   {
+      return 0.0;
+   }
+
+   /** Stage B: damping (sigma^2) for the damped-least-squares arm-Jacobian force back-out. */
+   default double getGraspJacobianDampedLeastSquaresLambda()
+   {
+      return 1.0e-4;
+   }
+
+   /** Stage B: manipulability gate sqrt(det(J J^T)); below this the force back-out is frozen/skipped. */
+   default double getGraspJacobianSingularityThreshold()
+   {
+      return 1.0e-3;
+   }
 }
