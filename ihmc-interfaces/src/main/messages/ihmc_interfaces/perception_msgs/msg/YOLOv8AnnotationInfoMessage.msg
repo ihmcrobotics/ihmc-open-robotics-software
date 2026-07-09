@@ -10,7 +10,7 @@ float32 confidence
 vision_msgs/BoundingBox2D bounding_box
 
 # Polygons representing the mask of the detection
-UInt16MultiArrayHack mask_polygons
+Float32MultiArrayHack mask_polygons
 
 # TODO: jros2 replace above with below
-# std_msgs/UInt16MultiArray mask_polygons
+# std_msgs/Float32MultiArray mask_polygons

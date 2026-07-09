@@ -15,9 +15,19 @@ public interface HighLevelControllerParameters
 
    WholeBodySetpointParameters getStandPrepParameters();
 
+   default WholeBodySetpointParameters getGroundPrepParameters()
+   {
+      return null;
+   }
+
    default WholeBodySetpointParameters getFallingControllerParameters()
    {
       return null;
+   }
+
+   default boolean getIsRobotOffSupport()
+   {
+      return false;
    }
 
    HighLevelControllerName getDefaultInitialControllerState();

@@ -55,6 +55,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    private final List<RDXLeafNode<?, ?>> currentlyExecutingLeaves = new ArrayList<>();
    private RDXBehaviorTreeNode<?, ?> selectedNode = null;
    private final RDXActionProgressWidgetsManager progressWidgetsManager = new RDXActionProgressWidgetsManager();
+   private final RDXBehaviorTreeTimeline timeline = new RDXBehaviorTreeTimeline();
    private final ImGuiRootIconWidget rootIconWidget = new ImGuiRootIconWidget();
 
    public RDXBehaviorTreeRootNode(long id,

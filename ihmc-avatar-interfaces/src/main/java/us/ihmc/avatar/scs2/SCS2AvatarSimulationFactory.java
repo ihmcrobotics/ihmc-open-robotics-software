@@ -76,6 +76,9 @@ import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
+import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoPhysicsEngine;
+import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParameters;
+import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
@@ -171,6 +174,11 @@ public class SCS2AvatarSimulationFactory
          false);
    protected final OptionalFactoryField<Consumer<RobotDefinition>> bulletCollisionMutator = new OptionalFactoryField<>(
          "bulletCollisionMutator");
+   protected final OptionalFactoryField<Boolean> useMujocoPhysicsEngine = new OptionalFactoryField<>(
+         "useMujocoPhysicsEngine",
+         false);
+   protected final OptionalFactoryField<MujocoSimulationParametersReadOnly> mujocoSimulationParameters = new OptionalFactoryField<>(
+         "mujocoSimulationParameters");
    protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>(
          "impulseBasedPhysicsEngineParameters");
    protected final OptionalFactoryField<GroundContactModelParameters> groundContactModelParameters = new OptionalFactoryField<>(
@@ -342,6 +350,20 @@ public class SCS2AvatarSimulationFactory
       {
          physicsEngineFactory = (inertialFrame, rootRegistry) -> new BulletPhysicsEngine(inertialFrame, rootRegistry);
       }
+      else if (useMujocoPhysicsEngine.hasValue() && useMujocoPhysicsEngine.get())
+      {
+         // MuJoCo requires its internal timestep to match the SCS2 session DT, otherwise sim time
+         // diverges from wall time. Start from caller-supplied parameters if present, then
+         // override timestep so ordering of setSimulationDT vs setMujocoSimulationParameters
+         // doesn't matter.
+         // Copy into a mutable instance so we can override the timestep without mutating the
+         // caller-supplied (read-only) parameters.
+         MujocoSimulationParameters mujocoParameters = new MujocoSimulationParameters();
+         if (mujocoSimulationParameters.hasValue())
+            mujocoParameters.set(mujocoSimulationParameters.get());
+         mujocoParameters.setTimestep(simulationDT.get());
+         physicsEngineFactory = (inertialFrame, rootRegistry) -> new MujocoPhysicsEngine(inertialFrame, rootRegistry, mujocoParameters);
+      }
       else
       {
          physicsEngineFactory = (inertialFrame, rootRegistry) ->
@@ -376,12 +398,16 @@ public class SCS2AvatarSimulationFactory
          simulationConstructionSet.addTerrainObject(terrainObjectDefinition);
       }
       robot = simulationConstructionSet.addRobot(robotDefinition);
-      robot.addThrottledController(new SCS2StateEstimatorDebugVariables(simulationConstructionSet.getInertialFrame(),
-                                                                        gravity.get(),
-                                                                        robotModel.getEstimatorDT(),
-                                                                        robot.getControllerManager()
-                                                                             .getControllerInput()),
-                                   robotModel.getEstimatorDT());
+
+      // The debug variables don't need to be updated when the GUI isn't shown as users won't have a way of debugging
+      if (showGUI.get())
+      {
+         robot.addThrottledController(new SCS2StateEstimatorDebugVariables(simulationConstructionSet.getInertialFrame(),
+                                                                           gravity.get(),
+                                                                           robotModel.getEstimatorDT(),
+                                                                           robot.getControllerManager().getControllerInput()), robotModel.getEstimatorDT());
+      }
+
       if (createRigidBodyMutators.hasValue() && createRigidBodyMutators.get())
       {
          robot.addThrottledController(new SCS2RobotRigidBodyMutator(robot,
@@ -745,7 +771,7 @@ public class SCS2AvatarSimulationFactory
          yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getSCS2YoGraphics());
          stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                              stepGeneratorThread.getYoVariableRegistry()));
-         if (ikStreamingRTThread != null)
+         if (ikStreamingRTThread != null && ikStreamingRTThread.isYoVariableServerEnabled())
          {
             yoVariableServer.addRegistry(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTThread.getSCS2YoGraphics());
             stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingRTThread.getHumanoidRobotContextData().getTimestamp(),
@@ -1136,6 +1162,16 @@ public class SCS2AvatarSimulationFactory
    public void setBulletCollisionMutator(Consumer<RobotDefinition> bulletCollisionMutator)
    {
       this.bulletCollisionMutator.set(bulletCollisionMutator);
+   }
+
+   public void setUseMujocoPhysicsEngine(boolean useMujocoPhysicsEngine)
+   {
+      this.useMujocoPhysicsEngine.set(useMujocoPhysicsEngine);
+   }
+
+   public void setMujocoSimulationParameters(MujocoSimulationParametersReadOnly mujocoSimulationParameters)
+   {
+      this.mujocoSimulationParameters.set(mujocoSimulationParameters);
    }
 
    public void setEnableSimulatedRobotDamping(boolean enableSimulatedRobotDamping)

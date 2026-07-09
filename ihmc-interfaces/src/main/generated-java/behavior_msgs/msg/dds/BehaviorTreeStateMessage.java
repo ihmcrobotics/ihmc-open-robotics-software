@@ -37,7 +37,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public static final byte ABILITY_HAND_ACTION = (byte) 16;
    public static final byte ARM_ACTION = (byte) 17;
    public static final byte HAND_WRENCH_ACTION = (byte) 18;
-   public static final byte SCREW_PRIMITIVE_ACTION = (byte) 19;
    public static final byte PELVIS_ACTION = (byte) 20;
    public static final byte WAIT_ACTION = (byte) 21;
    public static final byte LEG_ACTION = (byte) 22;
@@ -87,7 +86,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.AbilityHandActionStateMessage>  ability_hand_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmActionStateMessage>  arm_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionStateMessage>  hand_wrench_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage>  screw_primitive_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisActionStateMessage>  pelvis_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitActionStateMessage>  wait_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.LegActionStateMessage>  leg_actions_;
@@ -120,7 +118,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       ability_hand_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.AbilityHandActionStateMessage> (120, new behavior_msgs.msg.dds.AbilityHandActionStateMessagePubSubType());
       arm_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmActionStateMessage> (120, new behavior_msgs.msg.dds.ArmActionStateMessagePubSubType());
       hand_wrench_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionStateMessage> (120, new behavior_msgs.msg.dds.HandWrenchActionStateMessagePubSubType());
-      screw_primitive_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage> (120, new behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessagePubSubType());
       pelvis_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisActionStateMessage> (120, new behavior_msgs.msg.dds.PelvisActionStateMessagePubSubType());
       wait_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitActionStateMessage> (120, new behavior_msgs.msg.dds.WaitActionStateMessagePubSubType());
       leg_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.LegActionStateMessage> (120, new behavior_msgs.msg.dds.LegActionStateMessagePubSubType());
@@ -163,7 +160,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       ability_hand_actions_.set(other.ability_hand_actions_);
       arm_actions_.set(other.arm_actions_);
       hand_wrench_actions_.set(other.hand_wrench_actions_);
-      screw_primitive_actions_.set(other.screw_primitive_actions_);
       pelvis_actions_.set(other.pelvis_actions_);
       wait_actions_.set(other.wait_actions_);
       leg_actions_.set(other.leg_actions_);
@@ -353,12 +349,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage>  getScrewPrimitiveActions()
-   {
-      return screw_primitive_actions_;
-   }
-
-
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisActionStateMessage>  getPelvisActions()
    {
       return pelvis_actions_;
@@ -543,13 +533,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
          {  if (!this.hand_wrench_actions_.get(i).epsilonEquals(other.hand_wrench_actions_.get(i), epsilon)) return false; }
       }
 
-      if (this.screw_primitive_actions_.size() != other.screw_primitive_actions_.size()) { return false; }
-      else
-      {
-         for (int i = 0; i < this.screw_primitive_actions_.size(); i++)
-         {  if (!this.screw_primitive_actions_.get(i).epsilonEquals(other.screw_primitive_actions_.get(i), epsilon)) return false; }
-      }
-
       if (this.pelvis_actions_.size() != other.pelvis_actions_.size()) { return false; }
       else
       {
@@ -618,7 +601,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       if (!this.ability_hand_actions_.equals(otherMyClass.ability_hand_actions_)) return false;
       if (!this.arm_actions_.equals(otherMyClass.arm_actions_)) return false;
       if (!this.hand_wrench_actions_.equals(otherMyClass.hand_wrench_actions_)) return false;
-      if (!this.screw_primitive_actions_.equals(otherMyClass.screw_primitive_actions_)) return false;
       if (!this.pelvis_actions_.equals(otherMyClass.pelvis_actions_)) return false;
       if (!this.wait_actions_.equals(otherMyClass.wait_actions_)) return false;
       if (!this.leg_actions_.equals(otherMyClass.leg_actions_)) return false;
@@ -683,8 +665,6 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append(this.arm_actions_);      builder.append(", ");
       builder.append("hand_wrench_actions=");
       builder.append(this.hand_wrench_actions_);      builder.append(", ");
-      builder.append("screw_primitive_actions=");
-      builder.append(this.screw_primitive_actions_);      builder.append(", ");
       builder.append("pelvis_actions=");
       builder.append(this.pelvis_actions_);      builder.append(", ");
       builder.append("wait_actions=");

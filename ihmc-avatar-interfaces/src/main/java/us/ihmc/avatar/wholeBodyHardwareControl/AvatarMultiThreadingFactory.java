@@ -357,7 +357,8 @@ public class AvatarMultiThreadingFactory
                                                                             masterRobotModel.getHumanoidRobotKinematicsCollisionModel(),
                                                                             ikStreamingParameters));
 
-      yoVariableServer.addRegistry(avatarIKStreaming.get().getYoVariableRegistry(), avatarIKStreaming.get().getSCS2YoGraphics());
+      if (yoVariableServer != null && avatarIKStreaming.get().isYoVariableServerEnabled())
+         yoVariableServer.addRegistry(avatarIKStreaming.get().getYoVariableRegistry(), avatarIKStreaming.get().getSCS2YoGraphics());
 
       setupIKStreamingTaskAndThread(avatarIKStreaming.get(), yoVariableServer);
 
@@ -548,7 +549,7 @@ public class AvatarMultiThreadingFactory
       IKStreamingRTPluginFactory.IKStreamingRTTask ikStreamingTask = IKStreamingRTPluginFactory.createIKStreamingRTTask(ikStreamingThread, masterThreadDt);
 
       // Add post-IK streaming callback to update YoVariable server with IK streaming registry
-      if (yoVariableServer != null)
+      if (yoVariableServer != null && ikStreamingThread.isYoVariableServerEnabled())
          ikStreamingTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingThread.getHumanoidRobotContextData().getTimestamp(),
                                                                            ikStreamingThread.getYoVariableRegistry()));
 
@@ -623,6 +624,7 @@ public class AvatarMultiThreadingFactory
          controllerFactory.useDefaultStandTransitionControlState(STAND_PREP_STATE, WALKING);
          controllerFactory.useDefaultWalkingControlState();
          controllerFactory.useDefaultDoNothingControlState();
+         controllerFactory.useDefaultFallingControlState();
          controllerFactory.useDefaultExitWalkingTransitionControlState(STAND_PREP_STATE);
 
          // setup transitions
@@ -632,23 +634,24 @@ public class AvatarMultiThreadingFactory
          controllerFactory.addRequestableTransition(STAND_TRANSITION_STATE, STAND_PREP_STATE);
          controllerFactory.addRequestableTransition(FREEZE_STATE, STAND_PREP_STATE);
          controllerFactory.addRequestableTransition(WALKING, EXIT_WALKING);
+         controllerFactory.addRequestableTransition(FALLING_STATE, STAND_PREP_STATE);
 
-         // Always be able to request to go to freeze, since that's often a good failure state. Also add this as a failure transition for all states
+         // Always be able to request to go to freeze, falling, do nothing, and whatever the fallback state is
          for (HighLevelControllerName highLevelControllerName : HighLevelControllerName.values)
          {
-            if (highLevelControllerName == FREEZE_STATE)
-               continue;
+            if (!highLevelControllerName.equals(DO_NOTHING_BEHAVIOR))
+               controllerFactory.addRequestableTransition(highLevelControllerName, DO_NOTHING_BEHAVIOR);
 
-            controllerFactory.addRequestableTransition(highLevelControllerName, FREEZE_STATE);
+            if (!highLevelControllerName.equals(FREEZE_STATE))
+               controllerFactory.addRequestableTransition(highLevelControllerName, FREEZE_STATE);
+
+            if (!highLevelControllerName.equals(FALLING_STATE))
+               controllerFactory.addRequestableTransition(highLevelControllerName, FALLING_STATE);
+
+            if (!highLevelControllerName.equals(fallbackControllerState))
+               controllerFactory.addRequestableTransition(highLevelControllerName, fallbackControllerState);
+
             controllerFactory.addControllerFailureTransition(highLevelControllerName, fallbackControllerState);
-         }
-
-         for (HighLevelControllerName highLevelControllerName : HighLevelControllerName.values)
-         {
-            if (highLevelControllerName == DO_NOTHING_BEHAVIOR)
-               continue;
-
-            controllerFactory.addRequestableTransition(highLevelControllerName, DO_NOTHING_BEHAVIOR);
          }
 
          controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING, false);
@@ -657,23 +660,6 @@ public class AvatarMultiThreadingFactory
          controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE,
                                                                                controllerFactory,
                                                                                !highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady()));
-
-         // Transition to DO_NOTHING in the event of a fault
-         hardwareCommunicationInterface.addFaultListener(change ->
-                                                         {
-                                                            if (hardwareCommunicationInterface.hasRobotFaulted())
-                                                               controllerFactory.getRequestedControlStateEnum().set(DO_NOTHING_BEHAVIOR);
-                                                         });
-
-         // Add fault listener to unservo robot quickly in the event of a fault
-         hardwareCommunicationInterface.addFaultListener(change ->
-                                                         {
-                                                            if (hardwareCommunicationInterface.hasRobotFaulted())
-                                                               lowLevelOutputProcessor.unservoRobotQuickly();
-                                                         });
-
-         // Unservo robot if Estopping
-         hardwareCommunicationInterface.addSoftEStopListener(change -> lowLevelOutputProcessor.unservoRobotQuickly());
 
          // Transition to DO_NOTHING when the robot is unservoed
          lowLevelOutputProcessor.addMasterGainListener(change ->

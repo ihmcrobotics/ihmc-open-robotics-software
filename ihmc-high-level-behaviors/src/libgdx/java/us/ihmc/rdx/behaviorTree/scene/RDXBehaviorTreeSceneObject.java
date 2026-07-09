@@ -80,7 +80,7 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
    {
       boolean remove = false;
 
-      ImGui.text("%s %d%s".formatted(getName(), getID(), isFrozen() ? " (FROZEN)" : ""));
+      ImGui.text("%s %d%s%s".formatted(getName(), getID(), isValid() ? "" : " (INVALID)", isFrozen() ? " (FROZEN)" : ""));
       ImGui.sameLine();
       if (ImGuiTools.smallCheckbox(labels.getHidden("Select%s%d".formatted(getName(), getID())), getGizmo().isSelected()))
          getGizmo().setSelected(!getGizmo().isSelected());

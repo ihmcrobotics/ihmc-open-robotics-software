@@ -112,6 +112,12 @@ public class RDXHardwareControlStateManager
          sendStandPrepRequest();
       }
       ImGui.sameLine();
+      if (ImGui.button(labels.get("Ground Prep")))
+      {
+         RDXBaseUI.pushNotification("Commanding ground prep...");
+         sendGroundPrepRequest();
+      }
+      ImGui.sameLine();
       if (ImGui.button(labels.get("Stand Prep Transition")))
       {
          RDXBaseUI.pushNotification("Commanding stand prep transition...");
@@ -233,6 +239,13 @@ public class RDXHardwareControlStateManager
    {
       HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
       highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.STAND_PREP_STATE.toByte());
+      controllerHelper.publishToController(highLevelStateMessage);
+   }
+
+   public void sendGroundPrepRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.GROUND_PREP_STATE.toByte());
       controllerHelper.publishToController(highLevelStateMessage);
    }
 

@@ -628,7 +628,10 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       String ret = getClass().getSimpleName() + ": ";
       ret += "base = " + spatialAccelerationCommand.getBase() + ", ";
       ret += "endEffector = " + spatialAccelerationCommand.getEndEffector() + ", ";
-      ret += "position = " + referencePosition;
+      ret += "position = " + referencePosition + ", ";
+      ret += "weight = " + spatialAccelerationCommand.getWeightMatrix() + ", ";
+      ret += "selection = " + spatialAccelerationCommand.getSelectionMatrix() + ", ";
+      ret += "gains = " + gains;
       return ret;
    }
 }

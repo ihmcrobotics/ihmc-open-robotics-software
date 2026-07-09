@@ -74,7 +74,7 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       newTargetPoint = new TypedNotification<>();
 
       ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName() + "Node");
-      imagePublisher = new RawImagePublisher(ros2Node, 1.0);
+      imagePublisher = new RawImagePublisher(ros2Node, 0.5);
       resetRequestPublisher = ros2Node.createPublisher(objectToTrack.topics.reset());
       resultRelayPublisher = ros2Node.createPublisher(objectToTrack.topics.ihmcResult());
       statePublisher = ros2Node.createPublisher(objectToTrack.topics.ihmcState());
@@ -231,7 +231,6 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       depthImage.getGpuImageMat().convertTo(depth32Mat, opencv_core.CV_32FC1, depthImage.getDepthDiscretization());
       RawImage depth32FImage = depthImage.replaceImage(depth32Mat, PixelFormat.GRAY_F32);
 
-      // RawImage resizedSegmentation = RawImageTools.resize(segmentation, depth32FImage.getWidth(), depth32FImage.getHeight());
       GpuMat resizedSegmentationMat = new GpuMat();
       YOLOv8Tools.resizeWithCrop(segmentation.getGpuImageMat(), resizedSegmentationMat, depth32Mat.size());
       RawImage resizedSegmentation = depthImage.replaceImage(resizedSegmentationMat, PixelFormat.GRAY8);

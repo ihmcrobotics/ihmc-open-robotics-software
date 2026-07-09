@@ -9,10 +9,12 @@ import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
 import imgui.type.ImString;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -95,11 +97,18 @@ public class RDXInteractableFrameModel
       selectablePose3DGizmo.calculate3DViewPick(input);
 
       Line3DReadOnly pickRay = input.getPickRayInWorld();
-      double closestCollisionDistance = collisionCalculator.calculateClosestCollision(pickRay);
-      if (!Double.isNaN(closestCollisionDistance))
+      try
       {
-         pickResult.setDistanceToCamera(closestCollisionDistance);
-         input.addPickResult(pickResult);
+         double closestCollisionDistance = collisionCalculator.calculateClosestCollision(pickRay);
+         if (!Double.isNaN(closestCollisionDistance))
+         {
+            pickResult.setDistanceToCamera(closestCollisionDistance);
+            input.addPickResult(pickResult);
+         }
+      }
+      catch (NotARotationMatrixException exception)
+      {
+         DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(exception);
       }
    }
 
