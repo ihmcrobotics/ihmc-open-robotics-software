@@ -2,7 +2,9 @@ package us.ihmc.stateEstimation.jointLevel;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -109,6 +111,9 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private int dim; // 2n + 3m
    private boolean initialized = false;
    private boolean warnedNonFiniteInput = false;
+   // Separate one-shot flag for the near-singular innovation-covariance diagnostic (warnSingularInnovationOnce),
+   // so its detailed S-conditioning report is not swallowed by an unrelated earlier non-finite-input warning.
+   private boolean warnedSingularInnovation = false;
 
    // Optional on-ground gate (see ON_GROUND_INIT_DEBOUNCE). Null => no gating: the filter initializes as soon
    // as boot data is finite (the behavior the package tests rely on). Wired by the consumer that owns the
@@ -1198,8 +1203,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       // invert writes S^-1 into Sinv. Neither allocates because S is never wider than the warm-up size.
       if (!innovationSolver.setA(S))
       {
-         if (!warnedNonFiniteInput)
-            warnNonFiniteInputOnce("singular innovation covariance in the " + label + " update");
+         warnSingularInnovationOnce(label, "S is exactly singular (LU factorization rejected it)", Hm, Rm);
          return;
       }
       innovationSolver.invert(Sinv);
@@ -1207,8 +1211,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       // Catch it here, before x/P are modified, so the bad inverse cannot enter the state.
       if (containsNonFinite(Sinv))
       {
-         if (!warnedNonFiniteInput)
-            warnNonFiniteInputOnce("non-finite innovation inverse (near-singular S) in the " + label + " update");
+         warnSingularInnovationOnce(label, "S^-1 is non-finite (S is near-singular and its inverse overflowed)", Hm, Rm);
          return;
       }
 
@@ -1316,6 +1319,172 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       warnedNonFiniteInput = true;
       LogTools.warn("Non-finite input to JointLevelKFPreFilter; first offender: " + source
             + ". Affected updates are skipped and consumers fall back to raw sensors / zero bias.");
+   }
+
+   /**
+    * One-shot diagnostic for a singular / near-singular innovation covariance S = H P H^T + R, which forces the
+    * offending measurement update to be skipped — a hidden way the filter keeps diverging even after the Qa cap
+    * binds (a near-singular Lambda inflates P, which makes S ill-conditioned). Names WHICH physical measurement
+    * is degenerate: S is symmetric PSD, so the eigenvector of its smallest eigenvalue is the measurement
+    * direction with almost no innovation variance; the rows carrying the most weight in it are the pairs / stance
+    * anchors / encoder joints driving the ill-conditioning. The eigen/string work runs only on this single
+    * occurrence — never on the healthy hot path.
+    *
+    * @param label  the update ("encoder" / "stackedGyroUpdate"); selects the row-to-physical-element mapping.
+    * @param reason how S was found bad (exactly singular vs inverse overflowed).
+    * @param Hm     this update's measurement Jacobian. S is recomputed from it because the solver's {@code setA}
+    *               may have overwritten the shared S buffer in place with its LU factors.
+    * @param Rm     this update's measurement noise.
+    */
+   private void warnSingularInnovationOnce(String label, String reason, DMatrixRMaj Hm, DMatrixRMaj Rm)
+   {
+      if (warnedSingularInnovation)
+         return;
+      warnedSingularInnovation = true;
+      LogTools.warn(describeSingularInnovation(label, reason, Hm, Rm) + " Reported once.");
+   }
+
+   /**
+    * Builds the singular-innovation diagnostic string used by {@link #warnSingularInnovationOnce}. Package-private
+    * so a test can assert the row -> physical-element mapping directly instead of scraping the log output.
+    */
+   String describeSingularInnovation(String label, String reason, DMatrixRMaj Hm, DMatrixRMaj Rm)
+   {
+      int k = Hm.getNumRows();
+      // Recompute S = H P H^T + R fresh (setA above may have decomposed the field S in place). Rare path — ok to allocate.
+      DMatrixRMaj phT = new DMatrixRMaj(dim, k);
+      DMatrixRMaj Sfresh = new DMatrixRMaj(k, k);
+      CommonOps_DDRM.multTransB(P, Hm, phT);
+      CommonOps_DDRM.mult(Hm, phT, Sfresh);
+      CommonOps_DDRM.addEquals(Sfresh, Rm);
+
+      StringBuilder msg = new StringBuilder();
+      msg.append("JointLevelKFPreFilter: near-singular innovation covariance in the ").append(label)
+         .append(" update — ").append(reason).append(", so this measurement was skipped this tick. ");
+
+      EigenDecomposition_F64<DMatrixRMaj> eig = DecompositionFactory_DDRM.eig(k, true, true); // symmetric, with eigenvectors
+      if (eig.decompose(Sfresh))
+      {
+         int minIdx = 0;
+         double minEig = Double.POSITIVE_INFINITY, maxEig = Double.NEGATIVE_INFINITY;
+         for (int i = 0; i < k; i++)
+         {
+            double lambda = eig.getEigenvalue(i).getReal();
+            if (lambda < minEig) { minEig = lambda; minIdx = i; }
+            if (lambda > maxEig) { maxEig = lambda; }
+         }
+         double cond = minEig != 0.0 ? Math.abs(maxEig / minEig) : Double.POSITIVE_INFINITY;
+         msg.append(String.format("cond(S)=%.3e, smallest eigenvalue=%.3e. ", cond, minEig));
+
+         DMatrixRMaj v = eig.getEigenVector(minIdx); // the near-null measurement direction
+         if (v != null)
+         {
+            msg.append("Measurement rows carrying that near-null direction (|weight| -> physical element): ");
+            boolean[] used = new boolean[k];
+            int reported = 0;
+            for (int rank = 0; rank < 4; rank++)
+            {
+               int best = -1;
+               double bestAbs = -1.0;
+               for (int i = 0; i < k; i++)
+               {
+                  if (used[i])
+                     continue;
+                  double a = Math.abs(v.get(i));
+                  if (a > bestAbs) { bestAbs = a; best = i; }
+               }
+               if (best < 0 || bestAbs < 1.0e-3)
+                  break;
+               used[best] = true;
+               if (reported > 0)
+                  msg.append("; ");
+               msg.append(String.format("%.2f -> %s", bestAbs, describeMeasurementRow(best, label, Hm)));
+               reported++;
+            }
+            if (reported == 0)
+               msg.append("(spread across the whole block; no single row dominates)");
+         }
+      }
+      else
+      {
+         int minRow = 0;
+         double minDiag = Double.POSITIVE_INFINITY;
+         for (int i = 0; i < k; i++)
+            if (Sfresh.get(i, i) < minDiag) { minDiag = Sfresh.get(i, i); minRow = i; }
+         msg.append(String.format("(eigen-decomposition failed; smallest S diagonal %.3e at %s)",
+                                  minDiag, describeMeasurementRow(minRow, label, Hm)));
+      }
+      msg.append(" This element/joint is driving the innovation ill-conditioning.");
+      return msg.toString();
+   }
+
+   /**
+    * Maps a measurement row to the physical element it observes, for the singular-innovation diagnostic. Encoder
+    * rows are mapped through {@code Hm} (the observed joint is the column with the unit entry), so this stays
+    * correct even if the encoder update is later gated to a joint subset. Stacked gyro rows follow the SPEC §5
+    * layout: rows [3e,3e+3) are pair e; rows [3E,...) are the active stance anchors in {@code footAnchors} order.
+    * Diagnostic-only; never on the hot path.
+    */
+   private String describeMeasurementRow(int row, String label, DMatrixRMaj Hm)
+   {
+      if (label != null && label.startsWith("encoder"))
+      {
+         int col = -1;
+         for (int c = 0; c < Hm.getNumCols(); c++)
+            if (Hm.get(row, c) != 0.0) { col = c; break; }
+         return "encoder q of joint " + ((col >= 0 && col < n) ? jointNameByStateIndex(col) : "?");
+      }
+      int block = row / 3;
+      int axis = row % 3;
+      char ax = axis == 0 ? 'x' : axis == 1 ? 'y' : 'z';
+      if (block < E)
+      {
+         Pair p = pairs.get(block);
+         return "gyro pair " + block + " (" + p.parent.getSensorName() + "->" + p.child.getSensorName()
+                + "), axis " + ax + ", chain=[" + jointNamesOf(p.chainJoints) + "]";
+      }
+      FootAnchor fa = nthActiveAnchor(block - E);
+      if (fa != null)
+         return "stance anchor (foot " + fa.foot.getName() + "), axis " + ax + ", leg=[" + jointNamesOf(fa.legJoints) + "]";
+      return "gyro row " + row + " (unmapped)";
+   }
+
+   /** Reverse of {@code jointToIndex} for the diagnostic path: filter-joint name at a given state index. */
+   private String jointNameByStateIndex(int stateIndex)
+   {
+      for (var e : jointToIndex.entrySet())
+         if (e.getValue() == stateIndex)
+            return e.getKey().getName();
+      return "?idx" + stateIndex;
+   }
+
+   /** The {@code activeIdx}-th anchor with {@code active == true}, in footAnchors order (matches the stacked-row layout). */
+   private FootAnchor nthActiveAnchor(int activeIdx)
+   {
+      int count = 0;
+      for (int i = 0; i < footAnchors.size(); i++)
+      {
+         FootAnchor fa = footAnchors.get(i);
+         if (fa.active)
+         {
+            if (count == activeIdx)
+               return fa;
+            count++;
+         }
+      }
+      return null;
+   }
+
+   private static String jointNamesOf(OneDoFJointBasics[] joints)
+   {
+      StringBuilder sb = new StringBuilder();
+      for (int i = 0; i < joints.length; i++)
+      {
+         if (i > 0)
+            sb.append(",");
+         sb.append(joints[i].getName());
+      }
+      return sb.toString();
    }
 
    private static IMUSensorReadOnly findIMU(SensorOutputMapReadOnly map, String name)
