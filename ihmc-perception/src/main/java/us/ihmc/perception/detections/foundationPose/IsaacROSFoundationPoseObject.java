@@ -17,7 +17,7 @@ public enum IsaacROSFoundationPoseObject
    EXPLOSIVE_CHARGE("Explosive Charge", "charge", "charge"),
    DOOR_PANEL("Door Panel", "door_panel", "door_panel"),
    DOOR_HANDLE("Door Lever", "door_handle", "door_lever"),
-   DOOR_LEVER_WAVY("Door Lever Wavy", "door_lever_wavy", "door_lever"),
+   DOOR_LEVER("Door Lever", "door_lever", "door_lever"),
    DOOR_KNOB("Door Knob", "door_knob", "door_knob"),
    DOOR_PULL_HANDLE("Door Pull Handle", "door_pull_handle", "door_pull_handle"); // TODO: Add model
 

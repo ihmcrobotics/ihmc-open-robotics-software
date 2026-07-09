@@ -12,14 +12,20 @@ import us.ihmc.communication.ros2.tf2.ROS2MutableFrame;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImagePublisher;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
+import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.tools.RawImageTools;
 import us.ihmc.ros2.ROS2Node;
@@ -71,10 +77,15 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
    private volatile CategoryLevelFoundationPoseInstantDetection latestResult;
    private final List<Consumer<CategoryLevelFoundationPoseInstantDetection>> resultCallbacks = new ArrayList<>();
 
+   private volatile Pose3D rawFoundationPose = null;
+
    private boolean wasEnabled = false;
 
    private static final boolean EXPORT_FOUNDATIONPOSE_INPUTS = true;
    private static final String EXPORT_ROOT = System.getProperty("user.home") + "/foundationpose_topic_dump";
+
+   // private volatile FramePose3D latestTrackingPose = null;
+   // private volatile Vector3D latestTrackingSize = null;
 
    private long exportIndex = 0;
 
@@ -95,8 +106,10 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       poseEstimationResultSubscription = ros2Node.createSubscription2(topics.poseEstimationOutput(), this::updateLatestResult);
       trackingResultSubscription = ros2Node.createSubscription2(topics.trackingOutput(), this::updateLatestResult);
 
-      CategoryLevelFoundationPoseObject object =
-            CategoryLevelFoundationPoseObject.fromCategoryAndInstance(target.category(), target.instance());
+      // poseEstimationResultSubscription = ros2Node.createSubscription2(topics.poseEstimationOutput(), results -> updateLatestResult(results, false));
+      // trackingResultSubscription = ros2Node.createSubscription2(topics.trackingOutput(), results -> updateLatestResult(results, true));
+
+      CategoryLevelFoundationPoseObject object = CategoryLevelFoundationPoseObject.fromCategoryAndInstance(target.category(), target.instance());
 
       parameters = new SyncedCategoryLevelFoundationPoseParameters(ros2Node, crdtInfo, object);
 
@@ -135,6 +148,7 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
          return;
 
       FramePose3D poseInWorld = new FramePose3D(sensorFrame, result.getBbox().getCenter());
+      rawFoundationPose = new Pose3D(result.getBbox().getCenter());
       poseInWorld.prependRotation(FOUNDATION_POSE_TO_IHMC_ROTATION);
 
       synchronized (sensorFrame)
@@ -231,10 +245,14 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       RawImage rgbImage = RawImageTools.convertColor(colorImage, PixelFormat.RGB8);
 
       GpuMat depth32Mat = new GpuMat();
-      depthImage.getGpuImageMat().convertTo(depth32Mat, opencv_core.CV_32FC1);
+      depthImage.getGpuImageMat().convertTo(depth32Mat, opencv_core.CV_32FC1, depthImage.getDepthDiscretization());
+      // depthImage.getGpuImageMat().convertTo(depth32Mat, opencv_core.CV_32FC1);
       RawImage depth32FImage = depthImage.replaceImage(depth32Mat, PixelFormat.GRAY_F32);
 
-      RawImage resizedSegmentation = RawImageTools.resize(segmentation, depth32FImage.getWidth(), depth32FImage.getHeight());
+      //  RawImage resizedSegmentation = RawImageTools.resize(segmentation, depth32FImage.getWidth(), depth32FImage.getHeight());
+      GpuMat resizedSegmentationMat = new GpuMat();
+      YOLOv8Tools.resizeWithCrop(segmentation.getGpuImageMat(), resizedSegmentationMat, depth32Mat.size());
+      RawImage resizedSegmentation = depthImage.replaceImage(resizedSegmentationMat, PixelFormat.GRAY8);
 
       synchronized (sensorFrame)
       {
@@ -247,7 +265,7 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       ROS2Topic<Image> segmentationTopic = topics.segmentation();
       ROS2Topic<CameraInfo> cameraInfoTopic = topics.cameraInfo();
 
-      // exportFoundationPoseInputs(rgbImage, depth32FImage);
+      //  exportFoundationPoseInputs(rgbImage, depth32FImage, resizedSegmentation);
 
       imagePublisher.publishImage(rgbTopic, rgbImage, sensorFrame);
       imagePublisher.publishImage(depthTopic, depth32FImage, sensorFrame);
@@ -309,13 +327,14 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       return parameters;
    }
 
-   private void exportFoundationPoseInputs(RawImage rgbImage, RawImage depthImage)
+   private void exportFoundationPoseInputs(RawImage rgbImage, RawImage depthImage, RawImage maskImage)
    {
       if (!EXPORT_FOUNDATIONPOSE_INPUTS)
          return;
 
       RawImage rgbExport = null;
       RawImage depthExport = null;
+      RawImage maskExport = null;
 
       Mat bgrMat = null;
       Mat depthU16 = null;
@@ -324,31 +343,46 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       {
          rgbExport = rgbImage.get();
          depthExport = depthImage.get();
+         maskExport = maskImage.get();
 
-         if (rgbExport == null || depthExport == null)
+         if (rgbExport == null || depthExport == null || maskExport == null)
             return;
 
          String safeTargetName = sanitize(target.key());
          Path targetDirectory = Path.of(EXPORT_ROOT, safeTargetName);
          Path rgbDirectory = targetDirectory.resolve("rgb");
          Path depthDirectory = targetDirectory.resolve("depth");
+         Path maskDirectory = targetDirectory.resolve("mask");
+         Path poseDirectory = targetDirectory.resolve("pose");
 
          Files.createDirectories(rgbDirectory);
          Files.createDirectories(depthDirectory);
+         Files.createDirectories(maskDirectory);
+         Files.createDirectories(poseDirectory);
 
-         String frameName = String.format("%06d", exportIndex++);
+         long timestampNs = rgbExport.getAcquisitionTime().getEpochSecond() * 1_000_000_000L
+                            + rgbExport.getAcquisitionTime().getNano();
+
+         String frameName = String.valueOf(timestampNs);
 
          Mat rgbCpu = rgbExport.getCpuImageMat();
          Mat depthCpu = depthExport.getCpuImageMat();
+         Mat maskCpu = maskExport.getCpuImageMat();
 
+         // Export RGB as PNG
          bgrMat = new Mat();
          opencv_imgproc.cvtColor(rgbCpu, bgrMat, opencv_imgproc.COLOR_RGB2BGR);
          opencv_imgcodecs.imwrite(rgbDirectory.resolve(frameName + ".png").toString(), bgrMat);
 
+         // Export depth as uint16 millimeter PNG
          depthU16 = new Mat();
-         depthCpu.convertTo(depthU16, opencv_core.CV_16UC1);
+         depthCpu.convertTo(depthU16, opencv_core.CV_16UC1, 1000.0, 0.0);
          opencv_imgcodecs.imwrite(depthDirectory.resolve(frameName + ".png").toString(), depthU16);
 
+         // Export mask as PNG
+         opencv_imgcodecs.imwrite(maskDirectory.resolve(frameName + ".png").toString(), maskCpu);
+
+         // Export camera intrinsics
          CameraIntrinsics intrinsics = rgbExport.getIntrinsicsCopy();
 
          try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(targetDirectory.resolve("cam_K.txt"))))
@@ -356,6 +390,19 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
             writer.printf(Locale.US, "%.18e %.18e %.18e%n", intrinsics.getFx(), 0.0, intrinsics.getCx());
             writer.printf(Locale.US, "%.18e %.18e %.18e%n", 0.0, intrinsics.getFy(), intrinsics.getCy());
             writer.printf(Locale.US, "%.18e %.18e %.18e%n", 0.0, 0.0, 1.0);
+         }
+
+         // Export latest method output pose as JSON, if available
+         CategoryLevelFoundationPoseInstantDetection resultToExport = latestResult;
+
+         if (resultToExport != null)
+         {
+            writePoseJson(poseDirectory.resolve(frameName + ".json"),
+                          rawFoundationPose,
+                          new Vector3D(resultToExport.getBoundingBox().getSize()),
+                          intrinsics,
+                          rgbExport.getWidth(),
+                          rgbExport.getHeight());
          }
       }
       catch (Exception exception)
@@ -370,11 +417,67 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
          if (bgrMat != null)
             bgrMat.release();
 
+         if (maskExport != null)
+            maskExport.release();
+
          if (depthExport != null)
             depthExport.release();
 
          if (rgbExport != null)
             rgbExport.release();
+      }
+   }
+
+   private void writePoseJson(Path jsonPath,
+                              Pose3DReadOnly pose,
+                              Vector3D size,
+                              CameraIntrinsics intrinsics,
+                              int width,
+                              int height) throws Exception
+
+   {
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.set(pose);
+
+      Quaternion q = new Quaternion(pose.getOrientation());
+
+      double x = pose.getPosition().getX();
+      double y = pose.getPosition().getY();
+      double z = pose.getPosition().getZ();
+
+      try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(jsonPath)))
+      {
+         writer.printf(Locale.US, "{%n");
+         writer.printf(Locale.US, "  \"camera_data\": {%n");
+         writer.printf(Locale.US, "    \"height\": %d,%n", height);
+         writer.printf(Locale.US, "    \"width\": %d,%n", width);
+         writer.printf(Locale.US, "    \"intrinsics\": {\"fx\": %.9f, \"fy\": %.9f, \"cx\": %.9f, \"cy\": %.9f}%n",
+                       intrinsics.getFx(), intrinsics.getFy(), intrinsics.getCx(), intrinsics.getCy());
+         writer.printf(Locale.US, "  },%n");
+         writer.printf(Locale.US, "  \"objects\": [%n");
+         writer.printf(Locale.US, "    {%n");
+         writer.printf(Locale.US, "      \"class\": \"%s\",%n", target.category());
+         writer.printf(Locale.US, "      \"name\": \"%s\",%n", target.instance());
+         writer.printf(Locale.US, "      \"provenance\": \"supervisepose\",%n");
+
+         writer.printf(Locale.US, "      \"transform_matrix\": [%n");
+         writer.printf(Locale.US, "        [%.9f, %.9f, %.9f, %.9f],%n",
+                       transform.getRotation().getM00(), transform.getRotation().getM01(), transform.getRotation().getM02(), x);
+         writer.printf(Locale.US, "        [%.9f, %.9f, %.9f, %.9f],%n",
+                       transform.getRotation().getM10(), transform.getRotation().getM11(), transform.getRotation().getM12(), y);
+         writer.printf(Locale.US, "        [%.9f, %.9f, %.9f, %.9f],%n",
+                       transform.getRotation().getM20(), transform.getRotation().getM21(), transform.getRotation().getM22(), z);
+         writer.printf(Locale.US, "        [0.0, 0.0, 0.0, 1.0]%n");
+         writer.printf(Locale.US, "      ],%n");
+
+         writer.printf(Locale.US, "      \"location\": [%.9f, %.9f, %.9f],%n", x, y, z);
+         writer.printf(Locale.US, "      \"quaternion_xyzw\": [%.9f, %.9f, %.9f, %.9f],%n",
+                       q.getX(), q.getY(), q.getZ(), q.getS());
+         writer.printf(Locale.US, "      \"scale\": [%.9f, %.9f, %.9f]%n",
+                       size.getX(), size.getY(), size.getZ());
+         writer.printf(Locale.US, "    }%n");
+         writer.printf(Locale.US, "  ]%n");
+         writer.printf(Locale.US, "}%n");
       }
    }
 

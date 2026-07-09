@@ -302,6 +302,32 @@ public class YOLOv8DetectionExecutor
                              RawImage erodedObjectMask = objectMask.replaceImage(erodedMask);
                              objectMask.release();
 
+                             // RawImage objectMask = detection.mask();
+
+                             // float erosionRadius = modelParameters.getErosionKernelRadii().getValueReadOnly(detection.objectClassID());
+
+                             // Mat maskCpu = objectMask.getCpuImageMat();
+
+                             // Mat distanceMap = new Mat();
+                             // opencv_imgproc.distanceTransform(maskCpu,
+                             //                                 distanceMap,
+                             //                                opencv_imgproc.DIST_L2,
+                             //                                opencv_imgproc.DIST_MASK_PRECISE);
+
+                             // Mat erodedMask = new Mat();
+                             // opencv_imgproc.threshold(distanceMap,
+                             //                         erodedMask,
+                             //                         erosionRadius,
+                             //                         255.0,
+                             //                         opencv_imgproc.THRESH_BINARY);
+
+                             // erodedMask.convertTo(erodedMask, objectMask.getOpenCVType());
+
+                             // RawImage erodedObjectMask = objectMask.replaceImage(erodedMask);
+
+                             // distanceMap.release();
+                             // objectMask.release();
+
                              RawImage segmentedDepth = segmenter.removeBackground(depthRef, erodedObjectMask);
                              if (segmentedDepth == null)
                              {

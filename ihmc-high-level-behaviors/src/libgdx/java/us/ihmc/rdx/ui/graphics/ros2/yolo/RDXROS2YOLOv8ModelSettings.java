@@ -170,7 +170,7 @@ public class RDXROS2YOLOv8ModelSettings
          {
             for (int i = 0; i < detectableObjectClassCount; ++i)
             {
-               classSettings[i].erosionKernelRadius.set(universalErosionKernelRadius);
+               classSettings[i].erosionKernelRadius.set(universalErosionKernelRadius.get());
                classSettings[i].markDirty();
             }
          }

@@ -3,7 +3,9 @@ package us.ihmc.perception.detections.yolo;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_cudawarping;
 import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Point;
@@ -160,9 +162,6 @@ public class YOLOv8Tools
       return new Scalar(b, g, r, 255.0);
    }
 
-   /**
-    * Preserved behavior from your current branch.
-    */
    public static void annotateImage(Mat inputImage, Mat annotatedImage, List<YOLOv8InstantDetection> detections)
    {
       Mat greenMat = GREEN_MAT.get();
@@ -227,9 +226,6 @@ public class YOLOv8Tools
       }
    }
 
-   /**
-    * Preserved behavior from your current branch.
-    */
    public static void annotateTargets(Mat image, List<AnnotatedTarget2D> targets)
    {
       for (AnnotatedTarget2D t : targets)
@@ -288,34 +284,28 @@ public class YOLOv8Tools
       }
    }
 
-   /**
-    * Added from the other branch.
-    */
-   public static void resizeWithCrop(Mat inputImage, Mat outputImage, Size desiredSize)
+
+   public static void resizeWithCrop(GpuMat inputImage, GpuMat outputImage, Size desiredSize)
    {
-      Mat resizedMat = new Mat();
+      GpuMat resizedMat = new GpuMat();
 
       int desiredWidth = desiredSize.width();
       int desiredHeight = desiredSize.height();
       double scaleFactor = Math.max((double) desiredWidth / inputImage.cols(), (double) desiredHeight / inputImage.rows());
 
+      // Use explicit target dimensions so the resized image always fully covers desiredSize
       int resizedWidth = (int) Math.ceil(inputImage.cols() * scaleFactor);
       int resizedHeight = (int) Math.ceil(inputImage.rows() * scaleFactor);
-      opencv_imgproc.resize(inputImage, resizedMat, new Size(resizedWidth, resizedHeight), 0.0, 0.0, opencv_imgproc.INTER_LINEAR);
+      opencv_cudawarping.resize(inputImage, resizedMat, new Size(resizedWidth, resizedHeight), 0.0, 0.0, opencv_imgproc.INTER_LINEAR, null);
 
       int horizontalCrop = Math.max(resizedWidth - desiredWidth, 0) / 2;
       int verticalCrop = Math.max(resizedHeight - desiredHeight, 0) / 2;
 
       Rect roi = new Rect(horizontalCrop, verticalCrop, desiredWidth, desiredHeight);
       resizedMat.apply(roi).copyTo(outputImage);
-
-      roi.close();
       resizedMat.close();
    }
 
-   /**
-    * Added from the other branch.
-    */
    public static int[][] getMaskAsPolygons(Mat mask, float precision)
    {
       MatVector contours = new MatVector();
@@ -344,9 +334,6 @@ public class YOLOv8Tools
       return polygons;
    }
 
-   /**
-    * Added from the other branch.
-    */
    public static void drawObjectOutlines(Mat inputImage,
                                          Mat annotatedImage,
                                          List<YOLOv8InstantDetection> detections,
@@ -380,24 +367,39 @@ public class YOLOv8Tools
          opencv_imgproc.putText(annotatedImage, text, textLocation, FONT, FONT_SCALE_SMALL, GREEN, FONT_THICKNESS - 1, TEXT_LINE_TYPE, false);
 
          RawImage mask = detection.getObjectMask();
-         if (mask != null)
-         {
-            Mat maskMat = mask.getCpuImageMat();
-            if (maskMat != null && !maskMat.isNull())
-            {
-               Mat resizedMask = new Mat();
-               resizeWithCrop(maskMat, resizedMask, annotatedImage.size());
+         if (mask == null)
+            continue;
 
-               MatVector contours = new MatVector();
-               Mat hierarchy = new Mat();
-               opencv_imgproc.findContours(resizedMask, contours, hierarchy, opencv_imgproc.RETR_TREE, opencv_imgproc.CHAIN_APPROX_SIMPLE);
-               opencv_imgproc.drawContours(annotatedImage, contours, -1, GREEN, 4, LINE_TYPE, hierarchy, Integer.MAX_VALUE, new Point());
+         Mat maskMat = mask.getCpuImageMat();
+         if (maskMat == null || maskMat.isNull())
+            continue;
 
-               hierarchy.close();
-               contours.close();
-               resizedMask.close();
-            }
-         }
+         GpuMat gpuMaskMat = new GpuMat();
+         gpuMaskMat.upload(maskMat);
+
+         GpuMat gpuResizedMask = new GpuMat();
+
+         resizeWithCrop(gpuMaskMat, gpuResizedMask, annotatedImage.size());
+
+         Mat resizedMask = new Mat();
+         gpuResizedMask.download(resizedMask);
+
+         MatVector contours = new MatVector();
+         Mat hierarchy = new Mat();
+
+         opencv_imgproc.findContours(resizedMask, contours, hierarchy,
+                                     opencv_imgproc.RETR_TREE,
+                                     opencv_imgproc.CHAIN_APPROX_SIMPLE);
+
+         opencv_imgproc.drawContours(annotatedImage, contours, -1, GREEN, 4,
+                                     LINE_TYPE, hierarchy,
+                                     Integer.MAX_VALUE, new Point());
+
+         hierarchy.close();
+         contours.close();
+         resizedMask.close();
+         gpuMaskMat.close();
+         gpuResizedMask.close();
       }
    }
 
