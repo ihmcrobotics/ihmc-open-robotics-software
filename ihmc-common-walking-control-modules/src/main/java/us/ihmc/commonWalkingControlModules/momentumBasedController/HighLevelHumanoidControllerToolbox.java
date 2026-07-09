@@ -467,9 +467,12 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
     * body's own kinematic chain. The contactable body must also be part of the contactable-plane-bodies list given to
     * the controller core.
     *
-    * <p>{@code contactPointInSoleFrame} is the secondary contact point expressed in this side's sole frame; it is added
-    * to the default foot polygon so whole-foot geometric consumers (e.g. CoP trajectory planning) see the full foot
-    * support region even though the main contact state only carries the main plate's points.</p>
+    * <p>{@code contactPointInSoleFrame} is the secondary contact point expressed in this side's sole frame, and is
+    * expected to be one of the {@code ContactableFoot}'s contact points: the {@code ContactableFoot} describes the
+    * whole-foot support region (used by geometric consumers such as {@code SupportState}, CoP planning, and the default
+    * foot polygon), while this call <b>carves that point out of the main foot contact state</b> so the QP allocates its
+    * contact force through the secondary body instead of the main foot body. The default foot polygon also gains the
+    * point in case it was not part of the {@code ContactableFoot} (duplicates are removed by the convex hull).</p>
     */
    public void registerSecondaryFootContact(RobotSide robotSide, ContactablePlaneBody contactableBody, Point2DReadOnly contactPointInSoleFrame)
    {
@@ -486,7 +489,38 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          FrameConvexPolygon2D defaultFootPolygon = defaultFootPolygons.get(robotSide);
          defaultFootPolygon.addVertex(contactPointInSoleFrame);
          defaultFootPolygon.update();
+
+         carveSecondaryPointOutOfPrimaryContactState(robotSide, contactPointInSoleFrame);
       }
+   }
+
+   /**
+    * "Carves" the contact point matching {@code contactPointInSoleFrame} out of the main foot contact state by setting
+    * its max normal force to zero: the point remains part of the foot geometry (support polygon, {@code SupportState}),
+    * but the QP cannot allocate any force to it on the main foot body — the force is carried by the secondary body's
+    * contact state instead. The zero bound is a {@code YoDouble} that persists across support/swing cycling
+    * ({@code setFullyConstrained()}/{@code clear()} only toggle the in-contact flags).
+    */
+   private void carveSecondaryPointOutOfPrimaryContactState(RobotSide robotSide, Point2DReadOnly contactPointInSoleFrame)
+   {
+      double epsilon = 1.0e-4;
+      YoPlaneContactState footContactState = footContactStates.get(robotSide);
+      int matches = 0;
+
+      for (int i = 0; i < footContactState.getTotalNumberOfContactPoints(); i++)
+      {
+         YoContactPoint contactPoint = footContactState.getContactPoints().get(i);
+         if (Math.abs(contactPoint.getX() - contactPointInSoleFrame.getX()) < epsilon
+               && Math.abs(contactPoint.getY() - contactPointInSoleFrame.getY()) < epsilon)
+         {
+            footContactState.setMaxContactPointNormalForce(contactPoint, 0.0);
+            matches++;
+         }
+      }
+
+      if (matches != 1)
+         throw new IllegalArgumentException("Secondary foot contact point " + contactPointInSoleFrame + " matched " + matches + " " + robotSide
+               + " foot contact points; expected exactly 1 to carve out of the main foot contact state.");
    }
 
    private void updateSecondaryFootContactStates()

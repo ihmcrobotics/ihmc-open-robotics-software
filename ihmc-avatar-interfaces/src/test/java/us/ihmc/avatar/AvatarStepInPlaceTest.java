@@ -68,6 +68,11 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       return new OffsetAndYawRobotInitialSetup();
    }
 
+   /** Hook for robot-specific simulation factory configuration (e.g. a custom output writer). Default: no-op. */
+   protected void configureSimulationTestHelperFactory(SCS2AvatarTestingSimulationFactory simulationTestHelperFactory)
+   {
+   }
+
    @BeforeEach
    public void setup()
    {
@@ -83,6 +88,7 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
                                                                                                                                              flatGround,
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setStartingLocationOffset(getStartingLocation());
+      configureSimulationTestHelperFactory(simulationTestHelperFactory);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
 
