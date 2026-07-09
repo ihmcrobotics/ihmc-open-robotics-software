@@ -36,7 +36,7 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 public class HumanoidRobotInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    /** Default height of the pelvis above the ground when lying down, used by {@link PoseType#GROUND_PRONE} and {@link PoseType#GROUND_SUPINE}. */
-   public static final double DEFAULT_GROUND_PELVIS_HEIGHT = 0.35;
+   public static final double DEFAULT_GROUND_PELVIS_HEIGHT = 0.2;
 
    /**
     * Describes the high-level pose the robot should be initialized in.

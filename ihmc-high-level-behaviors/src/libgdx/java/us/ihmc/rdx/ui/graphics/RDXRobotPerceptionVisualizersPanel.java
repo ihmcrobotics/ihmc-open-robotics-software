@@ -47,7 +47,7 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
       this.ros2Helper = new ROS2Helper(ros2Node);
 
       // Common robot visualizer
-      robotVisualizer = new RDXROS2RobotVisualizer(ros2Helper, syncedRobot);
+      robotVisualizer = createRobotVisualizer(ros2Helper, syncedRobot);
       robotVisualizer.setPinned(true);
       robotVisualizer.setActive(true);
       addVisualizer(robotVisualizer);
@@ -59,10 +59,15 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
       // Additional visualizers instantiated in robot specific class
    }
 
+   protected RDXROS2RobotVisualizer createRobotVisualizer(ROS2Helper ros2Helper, ROS2SyncedRobotModel syncedRobot)
+   {
+      return new RDXROS2RobotVisualizer(ros2Helper, syncedRobot);
+   }
+
    @Override
    public void create(RDXBaseUI baseUI)
    {
-      robotVisualizer.setupCameraTracking(baseUI.getPrimary3DPanel().getCamera3D());
+      getRobotVisualizer().setupCameraTracking(baseUI.getPrimary3DPanel().getCamera3D());
       // Let subclass setup optional interactable sensors, etc.
       setupAdditionalSensors(baseUI);
 
