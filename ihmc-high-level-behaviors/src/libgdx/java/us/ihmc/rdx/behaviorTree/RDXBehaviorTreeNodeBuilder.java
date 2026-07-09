@@ -45,7 +45,6 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       REGISTRY.put(WalkActionDefinition.class, RDXWalkAction::new);
       REGISTRY.put(ArmActionDefinition.class, RDXArmAction::new);
       REGISTRY.put(HandWrenchActionDefinition.class, RDXHandWrenchAction::new);
-      REGISTRY.put(ScrewPrimitiveActionDefinition.class, RDXScrewPrimitiveAction::new);
       REGISTRY.put(PelvisActionDefinition.class, RDXPelvisAction::new);
       REGISTRY.put(AbilityHandActionDefinition.class, RDXAbilityHandAction::new);
       REGISTRY.put(EZGripperActionDefinition.class, RDXEZGripperAction::new);

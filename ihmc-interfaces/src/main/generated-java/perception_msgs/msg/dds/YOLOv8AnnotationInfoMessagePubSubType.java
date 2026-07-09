@@ -15,7 +15,7 @@ public class YOLOv8AnnotationInfoMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e83cd5c97ca3fc1ae46714dcc045b49fb53052cf0d6ccc8ffd3204d09fa6678c";
+   		return "a2e08f831699de77fe94f04dfb21a0d987677f0148d24c5451464ad14ed72922";
    }
    
    @Override
@@ -57,7 +57,7 @@ public class YOLOv8AnnotationInfoMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += vision_msgs.msg.dds.BoundingBox2DPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += perception_msgs.msg.dds.UInt16MultiArrayHackPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += perception_msgs.msg.dds.Float32MultiArrayHackPubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -79,7 +79,7 @@ public class YOLOv8AnnotationInfoMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += vision_msgs.msg.dds.BoundingBox2DPubSubType.getCdrSerializedSize(data.getBoundingBox(), current_alignment);
 
-      current_alignment += perception_msgs.msg.dds.UInt16MultiArrayHackPubSubType.getCdrSerializedSize(data.getMaskPolygons(), current_alignment);
+      current_alignment += perception_msgs.msg.dds.Float32MultiArrayHackPubSubType.getCdrSerializedSize(data.getMaskPolygons(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -94,7 +94,7 @@ public class YOLOv8AnnotationInfoMessagePubSubType implements us.ihmc.pubsub.Top
       cdr.write_type_5(data.getConfidence());
 
       vision_msgs.msg.dds.BoundingBox2DPubSubType.write(data.getBoundingBox(), cdr);
-      perception_msgs.msg.dds.UInt16MultiArrayHackPubSubType.write(data.getMaskPolygons(), cdr);
+      perception_msgs.msg.dds.Float32MultiArrayHackPubSubType.write(data.getMaskPolygons(), cdr);
    }
 
    public static void read(perception_msgs.msg.dds.YOLOv8AnnotationInfoMessage data, us.ihmc.idl.CDR cdr)
@@ -103,7 +103,7 @@ public class YOLOv8AnnotationInfoMessagePubSubType implements us.ihmc.pubsub.Top
       data.setConfidence(cdr.read_type_5());
       	
       vision_msgs.msg.dds.BoundingBox2DPubSubType.read(data.getBoundingBox(), cdr);	
-      perception_msgs.msg.dds.UInt16MultiArrayHackPubSubType.read(data.getMaskPolygons(), cdr);	
+      perception_msgs.msg.dds.Float32MultiArrayHackPubSubType.read(data.getMaskPolygons(), cdr);	
 
    }
 
@@ -114,7 +114,7 @@ public class YOLOv8AnnotationInfoMessagePubSubType implements us.ihmc.pubsub.Top
       ser.write_type_5("confidence", data.getConfidence());
       ser.write_type_a("bounding_box", new vision_msgs.msg.dds.BoundingBox2DPubSubType(), data.getBoundingBox());
 
-      ser.write_type_a("mask_polygons", new perception_msgs.msg.dds.UInt16MultiArrayHackPubSubType(), data.getMaskPolygons());
+      ser.write_type_a("mask_polygons", new perception_msgs.msg.dds.Float32MultiArrayHackPubSubType(), data.getMaskPolygons());
 
    }
 
@@ -125,7 +125,7 @@ public class YOLOv8AnnotationInfoMessagePubSubType implements us.ihmc.pubsub.Top
       data.setConfidence(ser.read_type_5("confidence"));
       ser.read_type_a("bounding_box", new vision_msgs.msg.dds.BoundingBox2DPubSubType(), data.getBoundingBox());
 
-      ser.read_type_a("mask_polygons", new perception_msgs.msg.dds.UInt16MultiArrayHackPubSubType(), data.getMaskPolygons());
+      ser.read_type_a("mask_polygons", new perception_msgs.msg.dds.Float32MultiArrayHackPubSubType(), data.getMaskPolygons());
 
    }
 

@@ -26,7 +26,6 @@ byte EZGRIPPER_ACTION = 15
 byte ABILITY_HAND_ACTION = 16
 byte ARM_ACTION = 17
 byte HAND_WRENCH_ACTION = 18
-byte SCREW_PRIMITIVE_ACTION = 19
 byte PELVIS_ACTION = 20
 byte WAIT_ACTION = 21
 byte LEG_ACTION = 22
@@ -89,8 +88,6 @@ behavior_msgs/AbilityHandActionStateMessage[<=120] ability_hand_actions
 behavior_msgs/ArmActionStateMessage[<=120] arm_actions
 
 behavior_msgs/HandWrenchActionStateMessage[<=120] hand_wrench_actions
-
-behavior_msgs/ScrewPrimitiveActionStateMessage[<=120] screw_primitive_actions
 
 behavior_msgs/PelvisActionStateMessage[<=120] pelvis_actions
 

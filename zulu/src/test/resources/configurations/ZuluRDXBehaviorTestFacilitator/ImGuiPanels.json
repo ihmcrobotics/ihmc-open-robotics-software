@@ -1,0 +1,14 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "Behavior Tree" : true,
+    "Behavior Timeline" : false,
+    "Scene" : true,
+    "Facilitator" : true,
+    "Perception Visualizers" : true,
+    "/experimental_camera/zed/left_color###RDXImageVisualizer1:/experimental_camera/zed/left_color" : false,
+    "ROS 2 Stats" : false,
+    "Zulu Robot Visualizer" : false
+  }
+}

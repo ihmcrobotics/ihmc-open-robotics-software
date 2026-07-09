@@ -7,8 +7,8 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-      * This message is used to select which RL model the controller should run
-      */
+       * This message represents the command to switch to a desired policy
+       */
 public class RLModelSelectionMessage extends Packet<RLModelSelectionMessage> implements Settable<RLModelSelectionMessage>, EpsilonComparable<RLModelSelectionMessage>
 {
    /**
