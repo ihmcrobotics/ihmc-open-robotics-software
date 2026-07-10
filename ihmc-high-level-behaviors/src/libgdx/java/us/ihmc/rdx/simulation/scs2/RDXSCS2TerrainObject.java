@@ -39,6 +39,9 @@ public class RDXSCS2TerrainObject
 
    public void update()
    {
+      if (visualFrameGraphicsNode == null)
+         return;
+
       if (bulletTerrainObject != null)
       {
          centerOfMassFrame.update(transformToParent ->
@@ -53,11 +56,17 @@ public class RDXSCS2TerrainObject
 
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      if (visualFrameGraphicsNode == null)
+         return;
+
       visualFrameGraphicsNode.getRenderables(renderables, pool);
    }
 
    public void getCollisionRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      if (collisionFrameGraphicsNode == null)
+         return;
+
       collisionFrameGraphicsNode.getRenderables(renderables, pool);
    }
 

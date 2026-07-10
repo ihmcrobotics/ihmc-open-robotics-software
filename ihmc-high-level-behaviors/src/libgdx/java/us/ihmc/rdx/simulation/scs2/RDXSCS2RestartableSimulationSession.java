@@ -1,9 +1,13 @@
 package us.ihmc.rdx.simulation.scs2;
 
 import imgui.ImGui;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.scs2.simulation.SimulationSession;
+
+import com.badlogic.gdx.Gdx;
 
 import java.util.ArrayList;
 import java.util.function.Supplier;
@@ -13,7 +17,6 @@ public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSessio
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private Supplier<SimulationSession> sessionBuilder;
-   private final ArrayList<String> robotsToHide = new ArrayList<>();
    private final ArrayList<String> variableWidgets = new ArrayList<>();
    private volatile boolean starting = false;
    private final ArrayList<Runnable> destroyables = new ArrayList<>();
@@ -68,15 +71,43 @@ public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSessio
       waitForSessionToBeStopped();
 
       startSession(sessionBuilder.get());
+      finishBuildSimulation();
+   }
 
+   /**
+    * Builds the MuJoCo/RL session off the render thread, then starts the RDX session on the GL thread.
+    * With a simple flat-ground visual, startSession is short; the long part is session construction.
+    */
+   public void buildSimulationAsync()
+   {
+      starting = true;
+      ThreadTools.startAThread(() ->
+      {
+         try
+         {
+            waitForSessionToBeStopped();
+            SimulationSession session = sessionBuilder.get();
+
+            Gdx.app.postRunnable(() ->
+            {
+               startSession(session);
+               finishBuildSimulation();
+            });
+         }
+         catch (Exception e)
+         {
+            LogTools.error("Failed to start simulation session asynchronously: {}", e.getMessage());
+            e.printStackTrace();
+            starting = false;
+         }
+      }, getClass().getSimpleName() + "Build");
+   }
+
+   private void finishBuildSimulation()
+   {
       for (String yoVariableName : variableWidgets)
       {
          getPlottingManager().addVariableWidget(yoVariableName);
-      }
-
-      for (String robotToHide : robotsToHide)
-      {
-         getShowRobotMap().get(robotToHide).set(false);
       }
 
       starting = false;
@@ -101,11 +132,6 @@ public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSessio
             destroyable.run();
          }
       }
-   }
-
-   public ArrayList<String> getRobotsToHide()
-   {
-      return robotsToHide;
    }
 
    public void addVariableWidget(String yoVariableName)

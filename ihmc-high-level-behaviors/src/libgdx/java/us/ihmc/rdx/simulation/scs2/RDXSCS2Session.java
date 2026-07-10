@@ -64,6 +64,7 @@ public class RDXSCS2Session
    private final RDXRenderableAdapter renderables = new RDXRenderableAdapter(this::getRenderables);
    private final ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
    private final ArrayList<Runnable> additionalImGuiWidgets = new ArrayList<>();
+   private final ArrayList<String> robotsToHide = new ArrayList<>();
    private boolean stoppingSession = false;
    private final StatelessNotification sessionStoppedNotification = new StatelessNotification();
 
@@ -85,7 +86,7 @@ public class RDXSCS2Session
          stopSession();
          waitForSessionToBeStopped();
       }
-      
+
       sessionStartedHandled = false;
 
       this.session = session;
@@ -144,6 +145,9 @@ public class RDXSCS2Session
       robots.clear();
       for (RobotDefinition robotDefinition : session.getRobotDefinitions())
       {
+         if (!shouldCreateRobotGraphics(robotDefinition.getName()))
+            continue;
+
          RDXSCS2Robot robot = new RDXSCS2Robot(robotDefinition);
          robots.add(robot);
          robot.create(yoManager);
@@ -174,7 +178,7 @@ public class RDXSCS2Session
       showRobotMap.clear();
       for (RobotDefinition robotDefinition : session.getRobotDefinitions())
       {
-         ImBoolean imBoolean = new ImBoolean(true);
+         ImBoolean imBoolean = new ImBoolean(shouldCreateRobotGraphics(robotDefinition.getName()));
          showRobotPairs.add(ImmutablePair.of(imBoolean, robotDefinition.getName()));
          showRobotMap.put(robotDefinition.getName(), imBoolean);
       }
@@ -522,6 +526,16 @@ public class RDXSCS2Session
    public ArrayList<Runnable> getAdditionalImGuiWidgets()
    {
       return additionalImGuiWidgets;
+   }
+
+   public ArrayList<String> getRobotsToHide()
+   {
+      return robotsToHide;
+   }
+
+   private boolean shouldCreateRobotGraphics(String robotName)
+   {
+      return !robotsToHide.contains(robotName);
    }
 
    public boolean isSessionThreadRunning()
