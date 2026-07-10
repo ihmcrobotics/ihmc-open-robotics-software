@@ -43,7 +43,7 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    /** Selected once at construction time; the default preserves the historical behavior for all robots. */
    public JointLevelEstimatorType getJointLevelEstimatorType()
    {
-      return JointLevelEstimatorType.JOINT_KF;
+      return JointLevelEstimatorType.ALPHA_COMPLEMENTARY;
    }
 
    public boolean requestWristForceSensorCalibrationAtStart()

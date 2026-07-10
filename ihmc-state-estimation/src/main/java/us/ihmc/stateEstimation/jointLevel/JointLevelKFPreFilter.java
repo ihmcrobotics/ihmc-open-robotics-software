@@ -109,9 +109,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          "LEFT_HIP_X",  "LEFT_HIP_Z",  "LEFT_HIP_Y",  "LEFT_KNEE_Y",
          "RIGHT_HIP_X", "RIGHT_HIP_Z", "RIGHT_HIP_Y", "RIGHT_KNEE_Y"};
    private static final double[] ALPHA_VALUES = {
-         0.0615204,
-         0.0874047,  0.0470331,  0.0590893,  0.0707300,
-         0.0875451,  0.0470778,  0.0592207,  0.0707707};
+         5.61133e-2,
+         6.01544e-2, 2.94985e-2, 2.82043e-2, 2.47925e-2,
+         5.52493e-2, 3.34146e-2, 2.56966e-2, 2.49771e-2
+   };
    // TRIPWIRE ONLY (Part B item 2 — no longer a scaler). Physical ceiling on the per-joint acceleration
    // process-noise VARIANCE (~ (30 rad/s^2)^2). With the reflected-rotor-inertia floor on Lambda_eff (item 1),
    // max diag(Qa) must sit far below this; if it ever would not, that is a model/config regression to SURFACE,
