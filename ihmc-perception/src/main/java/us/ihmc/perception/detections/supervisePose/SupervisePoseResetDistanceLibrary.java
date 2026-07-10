@@ -1,8 +1,8 @@
-package us.ihmc.perception.detections.foundationPose;
+package us.ihmc.perception.detections.supervisePose;
 
 import java.util.Map;
 
-public class CategoryLevelFoundationPoseResetDistanceLibrary
+public class SupervisePoseResetDistanceLibrary
 {
    /**
     * Offline-precomputed reset distances in meters.
@@ -44,12 +44,12 @@ public class CategoryLevelFoundationPoseResetDistanceLibrary
       return RESET_DISTANCE_MAP.getOrDefault(category + "/" + instance, DEFAULT_RESET_DISTANCE);
    }
 
-   public static double getResetDistance(CategoryLevelFoundationPoseObject object)
+   public static double getResetDistance(SupervisePoseObject object)
    {
       return getResetDistance(object.category, object.instance);
    }
 
-   private CategoryLevelFoundationPoseResetDistanceLibrary()
+   private SupervisePoseResetDistanceLibrary()
    {
    }
 }

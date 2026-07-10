@@ -1,6 +1,6 @@
-package us.ihmc.perception.detections.foundationPose;
+package us.ihmc.perception.detections.supervisePose;
 
-public enum CategoryLevelFoundationPoseObject
+public enum SupervisePoseObject
 {
    TRAFFIC_BARRIER_1("Traffic Barrier 1", "traffic_barrier", "traffic_barrier_1", "traffic_barrier"),
    BOTTLE_1("Bottle 1", "bottle", "bottle_1", "bottle"),
@@ -21,32 +21,32 @@ public enum CategoryLevelFoundationPoseObject
    TRASH_CAN_2("Trash Can 2", "trash_can", "trash_can_2", "trash_can"),
    TRASH_CAN_3("Trash Can 3", "trash_can", "trash_can_3", "trash_can");
 
-   public static final CategoryLevelFoundationPoseObject[] VALUES = values();
+   public static final SupervisePoseObject[] VALUES = values();
 
    public final String titleCaseName;
    public final String category;
    public final String instance;
    public final String yoloClass;
-   public final CategoryLevelFoundationPoseAPI.CategoryLevelFoundationPoseTopics topics;
+   public final SupervisePoseAPI.SupervisePoseTopics topics;
 
-   CategoryLevelFoundationPoseObject(String titleCaseName, String category, String instance, String yoloClass)
+   SupervisePoseObject(String titleCaseName, String category, String instance, String yoloClass)
    {
       this.titleCaseName = titleCaseName;
       this.category = category;
       this.instance = instance;
       this.yoloClass = yoloClass;
-      this.topics = CategoryLevelFoundationPoseAPI.topics(category, instance);
+      this.topics = SupervisePoseAPI.topics(category, instance);
    }
 
-   public static CategoryLevelFoundationPoseObject fromCategoryAndInstance(String category, String instance)
+   public static SupervisePoseObject fromCategoryAndInstance(String category, String instance)
    {
-      for (CategoryLevelFoundationPoseObject object : VALUES)
+      for (SupervisePoseObject object : VALUES)
       {
          if (object.category.equals(category) && object.instance.equals(instance))
             return object;
       }
 
-      throw new IllegalArgumentException("No CategoryLevelFoundationPoseObject for " + category + "/" + instance);
+      throw new IllegalArgumentException("No SupervisePoseObject for " + category + "/" + instance);
    }
 
    public String key()

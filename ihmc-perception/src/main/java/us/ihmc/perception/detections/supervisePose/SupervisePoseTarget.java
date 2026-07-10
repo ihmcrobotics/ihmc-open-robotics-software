@@ -1,10 +1,10 @@
-package us.ihmc.perception.detections.foundationPose;
+package us.ihmc.perception.detections.supervisePose;
 
 import java.util.Objects;
 
-public record CategoryLevelFoundationPoseTarget(String category, String instance, String yoloClass)
+public record SupervisePoseTarget(String category, String instance, String yoloClass)
 {
-   public CategoryLevelFoundationPoseTarget
+   public SupervisePoseTarget
    {
       Objects.requireNonNull(category);
       Objects.requireNonNull(instance);

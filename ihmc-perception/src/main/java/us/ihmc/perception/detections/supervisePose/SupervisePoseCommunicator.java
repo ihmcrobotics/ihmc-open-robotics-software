@@ -1,4 +1,4 @@
-package us.ihmc.perception.detections.foundationPose;
+package us.ihmc.perception.detections.supervisePose;
 
 import ihmc_common_msgs.msg.dds.Box3DMessage;
 import org.bytedeco.opencv.global.opencv_core;
@@ -52,9 +52,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
+public class SupervisePoseCommunicator implements AutoCloseable
 {
-   private static final RotationMatrix FOUNDATION_POSE_TO_IHMC_ROTATION = new RotationMatrix(new double[] {0, 0, 1,
+   private static final RotationMatrix SUPERVISE_POSE_TO_IHMC_ROTATION = new RotationMatrix(new double[] {0, 0, 1,
                                                                                                            -1, 0, 0,
                                                                                                            0, -1, 0});
 
@@ -65,36 +65,36 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
    private final ROS2Subscription<Detection3DArray> poseEstimationResultSubscription;
    private final ROS2Subscription<Detection3DArray> trackingResultSubscription;
 
-   private final SyncedCategoryLevelFoundationPoseParameters parameters;
+   private final SyncedSupervisePoseParameters parameters;
    private final ROS2MutableFrame sensorFrame;
 
-   private final CategoryLevelFoundationPoseTarget target;
-   private final CategoryLevelFoundationPoseAPI.CategoryLevelFoundationPoseTopics topics;
+   private final SupervisePoseTarget target;
+   private final SupervisePoseAPI.SupervisePoseTopics topics;
 
    private final Point3D targetPoint = new Point3D();
    private final TypedNotification<Point3DReadOnly> newTargetPoint = new TypedNotification<>();
 
-   private volatile CategoryLevelFoundationPoseInstantDetection latestResult;
-   private final List<Consumer<CategoryLevelFoundationPoseInstantDetection>> resultCallbacks = new ArrayList<>();
+   private volatile SupervisePoseInstantDetection latestResult;
+   private final List<Consumer<SupervisePoseInstantDetection>> resultCallbacks = new ArrayList<>();
 
-   private volatile Pose3D rawFoundationPose = null;
+   private volatile Pose3D rawSupervisePose = null;
 
    private boolean wasEnabled = false;
 
-   private static final boolean EXPORT_FOUNDATIONPOSE_INPUTS = true;
-   private static final String EXPORT_ROOT = System.getProperty("user.home") + "/foundationpose_topic_dump";
+   private static final boolean EXPORT_SUPERVISEPOSE_INPUTS = true;
+   private static final String EXPORT_ROOT = System.getProperty("user.home") + "/supervisepose_topic_dump";
 
    // private volatile FramePose3D latestTrackingPose = null;
    // private volatile Vector3D latestTrackingSize = null;
 
    private long exportIndex = 0;
 
-   public CategoryLevelFoundationPoseCommunicator(CategoryLevelFoundationPoseTarget target, CRDTInfo crdtInfo)
+   public SupervisePoseCommunicator(SupervisePoseTarget target, CRDTInfo crdtInfo)
    {
       this.target = target;
-      this.topics = CategoryLevelFoundationPoseAPI.topics(target.category(), target.instance());
+      this.topics = SupervisePoseAPI.topics(target.category(), target.instance());
 
-      LogTools.info("Category-level FP target: {}/{}", target.category(), target.instance());
+      LogTools.info("SupervisePose target: {}/{}", target.category(), target.instance());
       LogTools.info("RGB topic: {}", topics.rgbImage());
 
       ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName() + "_" + sanitize(target.key()));
@@ -109,9 +109,9 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       // poseEstimationResultSubscription = ros2Node.createSubscription2(topics.poseEstimationOutput(), results -> updateLatestResult(results, false));
       // trackingResultSubscription = ros2Node.createSubscription2(topics.trackingOutput(), results -> updateLatestResult(results, true));
 
-      CategoryLevelFoundationPoseObject object = CategoryLevelFoundationPoseObject.fromCategoryAndInstance(target.category(), target.instance());
+      SupervisePoseObject object = SupervisePoseObject.fromCategoryAndInstance(target.category(), target.instance());
 
-      parameters = new SyncedCategoryLevelFoundationPoseParameters(ros2Node, crdtInfo, object);
+      parameters = new SyncedSupervisePoseParameters(ros2Node, crdtInfo, object);
 
       parameters.getEnabled().setValue(false);
 
@@ -123,12 +123,12 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       return s.replace('/', '_');
    }
 
-   public CategoryLevelFoundationPoseTarget getTarget()
+   public SupervisePoseTarget getTarget()
    {
       return target;
    }
 
-   public CategoryLevelFoundationPoseAPI.CategoryLevelFoundationPoseTopics getTopics()
+   public SupervisePoseAPI.SupervisePoseTopics getTopics()
    {
       return topics;
    }
@@ -148,26 +148,26 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
          return;
 
       FramePose3D poseInWorld = new FramePose3D(sensorFrame, result.getBbox().getCenter());
-      rawFoundationPose = new Pose3D(result.getBbox().getCenter());
-      poseInWorld.prependRotation(FOUNDATION_POSE_TO_IHMC_ROTATION);
+      rawSupervisePose = new Pose3D(result.getBbox().getCenter());
+      poseInWorld.prependRotation(SUPERVISE_POSE_TO_IHMC_ROTATION);
 
       synchronized (sensorFrame)
       {
          poseInWorld.changeFrame(ReferenceFrame.getWorldFrame());
       }
 
-      latestResult = new CategoryLevelFoundationPoseInstantDetection(target,
-                                                                     new Box3D(poseInWorld, result.getBbox().getSize()),
-                                                                     Instant.now());
+      latestResult = new SupervisePoseInstantDetection(target,
+                                                       new Box3D(poseInWorld, result.getBbox().getSize()),
+                                                       Instant.now());
 
-      LogTools.info("Received FoundationPose result for {}/{}", target.category(), target.instance());
+      LogTools.info("Received SupervisePose result for {}/{}", target.category(), target.instance());
 
       Box3DMessage resultRelayMessage = new Box3DMessage();
       resultRelayMessage.getPose().set(poseInWorld);
       resultRelayMessage.getSize().set(result.getBbox().getSize());
       resultRelayPublisher.publish(resultRelayMessage);
 
-      for (Consumer<CategoryLevelFoundationPoseInstantDetection> resultCallback : resultCallbacks)
+      for (Consumer<SupervisePoseInstantDetection> resultCallback : resultCallbacks)
          resultCallback.accept(latestResult);
    }
 
@@ -265,7 +265,7 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       ROS2Topic<Image> segmentationTopic = topics.segmentation();
       ROS2Topic<CameraInfo> cameraInfoTopic = topics.cameraInfo();
 
-      //  exportFoundationPoseInputs(rgbImage, depth32FImage, resizedSegmentation);
+      //  exportSupervisePoseInputs(rgbImage, depth32FImage, resizedSegmentation);
 
       imagePublisher.publishImage(rgbTopic, rgbImage, sensorFrame);
       imagePublisher.publishImage(depthTopic, depth32FImage, sensorFrame);
@@ -287,12 +287,12 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       resetRequestPublisher.publish(new Empty());
    }
 
-   public CategoryLevelFoundationPoseInstantDetection getLatestResult()
+   public SupervisePoseInstantDetection getLatestResult()
    {
       return latestResult;
    }
 
-   public void addResultCallback(Consumer<CategoryLevelFoundationPoseInstantDetection> resultCallback)
+   public void addResultCallback(Consumer<SupervisePoseInstantDetection> resultCallback)
    {
       resultCallbacks.add(resultCallback);
    }
@@ -322,14 +322,14 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       newTargetPoint.set(targetPoint);
    }
 
-   public SyncedCategoryLevelFoundationPoseParameters getParameters()
+   public SyncedSupervisePoseParameters getParameters()
    {
       return parameters;
    }
 
-   private void exportFoundationPoseInputs(RawImage rgbImage, RawImage depthImage, RawImage maskImage)
+   private void exportSupervisePoseInputs(RawImage rgbImage, RawImage depthImage, RawImage maskImage)
    {
-      if (!EXPORT_FOUNDATIONPOSE_INPUTS)
+      if (!EXPORT_SUPERVISEPOSE_INPUTS)
          return;
 
       RawImage rgbExport = null;
@@ -393,12 +393,12 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
          }
 
          // Export latest method output pose as JSON, if available
-         CategoryLevelFoundationPoseInstantDetection resultToExport = latestResult;
+         SupervisePoseInstantDetection resultToExport = latestResult;
 
          if (resultToExport != null)
          {
             writePoseJson(poseDirectory.resolve(frameName + ".json"),
-                          rawFoundationPose,
+                          rawSupervisePose,
                           new Vector3D(resultToExport.getBoundingBox().getSize()),
                           intrinsics,
                           rgbExport.getWidth(),
@@ -407,7 +407,7 @@ public class CategoryLevelFoundationPoseCommunicator implements AutoCloseable
       }
       catch (Exception exception)
       {
-         LogTools.error("Failed to export FoundationPose inputs for {}", target.key(), exception);
+         LogTools.error("Failed to export SupervisePose inputs for {}", target.key(), exception);
       }
       finally
       {

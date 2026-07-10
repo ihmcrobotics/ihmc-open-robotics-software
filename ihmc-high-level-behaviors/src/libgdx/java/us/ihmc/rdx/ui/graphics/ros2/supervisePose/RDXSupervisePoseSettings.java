@@ -1,12 +1,12 @@
-package us.ihmc.rdx.ui.graphics.ros2.foundationPose;
+package us.ihmc.rdx.ui.graphics.ros2.supervisePose;
 
 import imgui.ImGui;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.perception.detections.foundationPose.CategoryLevelFoundationPoseObject;
-import us.ihmc.perception.detections.foundationPose.SyncedCategoryLevelFoundationPoseParameters;
+import us.ihmc.perception.detections.supervisePose.SupervisePoseObject;
+import us.ihmc.perception.detections.supervisePose.SyncedSupervisePoseParameters;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -14,28 +14,28 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 
-public class RDXCategoryLevelFoundationPoseSettings
+public class RDXSupervisePoseSettings
 {
-   private final CategoryLevelFoundationPoseObject object;
+   private final SupervisePoseObject object;
 
    private final ROS2Publisher<Empty> resetRequestPublisher;
-   private final SyncedCategoryLevelFoundationPoseParameters parameters;
+   private final SyncedSupervisePoseParameters parameters;
 
    private final ImGuiUniqueLabelMap labels;
    private final ImBooleanWrapper enabled;
    private final ImBooleanWrapper autoResetEnabled;
    private final ImDoubleWrapper resetDistance;
 
-   public RDXCategoryLevelFoundationPoseSettings(ROS2Node ros2Node,
-                                                 ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator,
-                                                 CategoryLevelFoundationPoseObject object)
+   public RDXSupervisePoseSettings(ROS2Node ros2Node,
+                                   ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator,
+                                   SupervisePoseObject object)
    {
       this.object = object;
 
       resetRequestPublisher = ros2Node.createPublisher(object.topics.reset());
 
       CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, ros2ClockOffsetEstimator);
-      parameters = new SyncedCategoryLevelFoundationPoseParameters(ros2Node, crdtInfo, object);
+      parameters = new SyncedSupervisePoseParameters(ros2Node, crdtInfo, object);
 
       labels = new ImGuiUniqueLabelMap(getClass());
 
@@ -56,12 +56,12 @@ public class RDXCategoryLevelFoundationPoseSettings
                                                                                      "%05.2f"));
    }
 
-   public CategoryLevelFoundationPoseObject getObject()
+   public SupervisePoseObject getObject()
    {
       return object;
    }
 
-   public SyncedCategoryLevelFoundationPoseParameters getParameters()
+   public SyncedSupervisePoseParameters getParameters()
    {
       return parameters;
    }

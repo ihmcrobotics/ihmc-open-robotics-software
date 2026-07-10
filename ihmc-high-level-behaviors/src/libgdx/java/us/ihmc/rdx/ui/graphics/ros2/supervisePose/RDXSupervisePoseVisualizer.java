@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.ros2.foundationPose;
+package us.ihmc.rdx.ui.graphics.ros2.supervisePose;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -12,7 +12,7 @@ import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.shape.primitives.Box3D;
-import us.ihmc.perception.detections.foundationPose.CategoryLevelFoundationPoseObject;
+import us.ihmc.perception.detections.supervisePose.SupervisePoseObject;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXBoxVisualizer;
@@ -31,29 +31,29 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-public class RDXCategoryLevelFoundationPoseVisualizer extends RDXROS2MultiTopicVisualizer
+public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
 {
    private static final int TABLE_COLUMN_COUNT = 5;
 
    private final ROS2Node ros2Node;
    private final List<ROS2Topic<?>> resultTopics;
 
-   private final Map<CategoryLevelFoundationPoseObject, RDXCategoryLevelFoundationPoseSettings> settingsMap;
-   private final Map<CategoryLevelFoundationPoseObject, CategoryLevelFoundationPoseResultVisualizer> resultVisualizers;
-   private final Map<String, List<CategoryLevelFoundationPoseObject>> objectsByCategory;
+   private final Map<SupervisePoseObject, RDXSupervisePoseSettings> settingsMap;
+   private final Map<SupervisePoseObject, SupervisePoseResultVisualizer> resultVisualizers;
+   private final Map<String, List<SupervisePoseObject>> objectsByCategory;
    private final Set<String> selectedCategories;
 
-   public RDXCategoryLevelFoundationPoseVisualizer(String title,
-                                                   ROS2Node ros2Node,
-                                                   ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator)
+   public RDXSupervisePoseVisualizer(String title,
+                                     ROS2Node ros2Node,
+                                     ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator)
    {
       this(title, ros2Node, ros2ClockOffsetEstimator, Collections.emptySet());
    }
 
-   public RDXCategoryLevelFoundationPoseVisualizer(String title,
-                                                   ROS2Node ros2Node,
-                                                   ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator,
-                                                   Set<String> selectedCategories)
+   public RDXSupervisePoseVisualizer(String title,
+                                     ROS2Node ros2Node,
+                                     ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator,
+                                     Set<String> selectedCategories)
    {
       super(title);
 
@@ -76,13 +76,13 @@ public class RDXCategoryLevelFoundationPoseVisualizer extends RDXROS2MultiTopicV
       resultVisualizers = new LinkedHashMap<>();
       objectsByCategory = new LinkedHashMap<>();
 
-      for (CategoryLevelFoundationPoseObject object : CategoryLevelFoundationPoseObject.VALUES)
+      for (SupervisePoseObject object : SupervisePoseObject.VALUES)
       {
          if (!shouldIncludeCategory(object.category))
             continue;
 
          resultTopics.add(object.topics.ihmcResult());
-         settingsMap.put(object, new RDXCategoryLevelFoundationPoseSettings(ros2Node, ros2ClockOffsetEstimator, object));
+         settingsMap.put(object, new RDXSupervisePoseSettings(ros2Node, ros2ClockOffsetEstimator, object));
          objectsByCategory.computeIfAbsent(object.category, key -> new ArrayList<>()).add(object);
       }
 
@@ -102,12 +102,9 @@ public class RDXCategoryLevelFoundationPoseVisualizer extends RDXROS2MultiTopicV
    {
       super.create();
 
-      for (CategoryLevelFoundationPoseObject object : settingsMap.keySet())
+      for (SupervisePoseObject object : settingsMap.keySet())
       {
-         resultVisualizers.put(object,
-                               new CategoryLevelFoundationPoseResultVisualizer(ros2Node,
-                                                                               object,
-                                                                               getFrequency(object.topics.ihmcResult())));
+         resultVisualizers.put(object, new SupervisePoseResultVisualizer(ros2Node, object, getFrequency(object.topics.ihmcResult())));
       }
    }
 
@@ -122,10 +119,10 @@ public class RDXCategoryLevelFoundationPoseVisualizer extends RDXROS2MultiTopicV
    {
       super.update();
 
-      for (RDXCategoryLevelFoundationPoseSettings settings : settingsMap.values())
+      for (RDXSupervisePoseSettings settings : settingsMap.values())
          settings.update();
 
-      for (CategoryLevelFoundationPoseResultVisualizer visualizer : resultVisualizers.values())
+      for (SupervisePoseResultVisualizer visualizer : resultVisualizers.values())
          visualizer.update();
    }
 
@@ -141,14 +138,14 @@ public class RDXCategoryLevelFoundationPoseVisualizer extends RDXROS2MultiTopicV
       float resetButtonWidth = ImGui.calcTextSize("Reset").x + (2.0f * style.getItemInnerSpacingX()) + 1.0f;
       float distanceWidgetWidth = Math.max(110.0f, resetButtonWidth);
 
-      for (Map.Entry<String, List<CategoryLevelFoundationPoseObject>> entry : objectsByCategory.entrySet())
+      for (Map.Entry<String, List<SupervisePoseObject>> entry : objectsByCategory.entrySet())
       {
          String category = entry.getKey();
-         List<CategoryLevelFoundationPoseObject> categoryObjects = entry.getValue();
+         List<SupervisePoseObject> categoryObjects = entry.getValue();
 
          if (ImGui.treeNode(labels.get(category)))
          {
-            String tableName = "CategoryLevelFoundationPoseTable_" + category;
+            String tableName = "SupervisePoseTable_" + category;
 
             if (ImGui.beginTable(labels.getHidden(tableName), TABLE_COLUMN_COUNT, tableFlags))
             {
@@ -161,9 +158,9 @@ public class RDXCategoryLevelFoundationPoseVisualizer extends RDXROS2MultiTopicV
                ImGui.tableHeadersRow();
                ImGui.setItemAllowOverlap();
 
-               for (CategoryLevelFoundationPoseObject object : categoryObjects)
+               for (SupervisePoseObject object : categoryObjects)
                {
-                  RDXCategoryLevelFoundationPoseSettings settings = settingsMap.get(object);
+                  RDXSupervisePoseSettings settings = settingsMap.get(object);
                   if (settings != null)
                      settings.renderAsTableRow();
                }
@@ -182,12 +179,12 @@ public class RDXCategoryLevelFoundationPoseVisualizer extends RDXROS2MultiTopicV
       if (!sceneLevelCheck(sceneLevels))
          return;
 
-      for (CategoryLevelFoundationPoseObject object : settingsMap.keySet())
+      for (SupervisePoseObject object : settingsMap.keySet())
       {
-         RDXCategoryLevelFoundationPoseSettings settings = settingsMap.get(object);
+         RDXSupervisePoseSettings settings = settingsMap.get(object);
          if (settings != null && settings.getParameters().getEnabled().getValue())
          {
-            CategoryLevelFoundationPoseResultVisualizer visualizer = resultVisualizers.get(object);
+            SupervisePoseResultVisualizer visualizer = resultVisualizers.get(object);
             if (visualizer != null)
                visualizer.getRenderables(renderables, pool);
          }
@@ -197,22 +194,22 @@ public class RDXCategoryLevelFoundationPoseVisualizer extends RDXROS2MultiTopicV
    @Override
    public void destroy()
    {
-      for (RDXCategoryLevelFoundationPoseSettings settings : settingsMap.values())
+      for (RDXSupervisePoseSettings settings : settingsMap.values())
          settings.destroy();
 
-      for (CategoryLevelFoundationPoseResultVisualizer visualizer : resultVisualizers.values())
+      for (SupervisePoseResultVisualizer visualizer : resultVisualizers.values())
          visualizer.dispose();
    }
 
-   private static class CategoryLevelFoundationPoseResultVisualizer implements RenderableProvider
+   private static class SupervisePoseResultVisualizer implements RenderableProvider
    {
       private final ROS2Subscription<Box3DMessage> resultSubscription;
       private final Box3D latestResult;
       private final RDXBoxVisualizer boxVisualizer;
       private final RDXReferenceFrameGraphic referenceFrameGraphic;
 
-      public CategoryLevelFoundationPoseResultVisualizer(ROS2Node ros2Node,
-                                                         CategoryLevelFoundationPoseObject object,
+      public SupervisePoseResultVisualizer(ROS2Node ros2Node,
+                                                         SupervisePoseObject object,
                                                          ImGuiAveragedFrequencyText frequencyText)
       {
          latestResult = new Box3D();

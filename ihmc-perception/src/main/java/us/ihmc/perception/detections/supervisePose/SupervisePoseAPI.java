@@ -1,4 +1,4 @@
-package us.ihmc.perception.detections.foundationPose;
+package us.ihmc.perception.detections.supervisePose;
 
 import ihmc_common_msgs.msg.dds.Box3DMessage;
 import perception_msgs.msg.dds.FoundationPoseParameters;
@@ -9,18 +9,18 @@ import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import vision_msgs.msg.dds.Detection3DArray;
 
-public class CategoryLevelFoundationPoseAPI
+public class SupervisePoseAPI
 {
    static final ROS2Topic<?> FOUNDATION_POSE_TOPIC =
          new ROS2Topic<>().withPrefix("foundationpose").withQoS(ROS2QosProfile.RELIABLE());
 
-   public static CategoryLevelFoundationPoseTopics topics(String category, String instance)
+   public static SupervisePoseTopics topics(String category, String instance)
    {
       ROS2Topic<?> base = FOUNDATION_POSE_TOPIC.withModule(category + "/" + instance);
-      return new CategoryLevelFoundationPoseTopics(base);
+      return new SupervisePoseTopics(base);
    }
 
-   public record CategoryLevelFoundationPoseTopics(
+   public record SupervisePoseTopics(
          ROS2Topic<Image> poseEstimationDepthImage,
          ROS2Topic<Image> poseEstimationRGBImage,
          ROS2Topic<Image> poseEstimationSegmentation,
@@ -41,7 +41,7 @@ public class CategoryLevelFoundationPoseAPI
          ROS2Topic<Box3DMessage> ihmcResult,
          ROS2Topic<FoundationPoseParameters> ihmcParameters)
    {
-      public CategoryLevelFoundationPoseTopics(ROS2Topic<?> base)
+      public SupervisePoseTopics(ROS2Topic<?> base)
       {
          this(base.withSuffix("pose_estimation/depth_image").withType(Image.class),
               base.withSuffix("pose_estimation/image").withType(Image.class),

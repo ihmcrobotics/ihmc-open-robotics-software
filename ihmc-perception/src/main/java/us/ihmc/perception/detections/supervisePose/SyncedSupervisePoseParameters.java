@@ -1,4 +1,4 @@
-package us.ihmc.perception.detections.foundationPose;
+package us.ihmc.perception.detections.supervisePose;
 
 import perception_msgs.msg.dds.FoundationPoseParameters;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
@@ -10,7 +10,7 @@ import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.ROS2Topic;
 
-public class SyncedCategoryLevelFoundationPoseParameters extends LatestTimestampModifiable
+public class SyncedSupervisePoseParameters extends LatestTimestampModifiable
 {
    private final FoundationPoseParameters message;
 
@@ -21,22 +21,22 @@ public class SyncedCategoryLevelFoundationPoseParameters extends LatestTimestamp
    private final CRDTBidirectionalBoolean autoResetEnabled;
    private final CRDTBidirectionalDouble resetDistance;
 
-   public SyncedCategoryLevelFoundationPoseParameters(ROS2Node ros2Node,
-                                                      CRDTInfo crdtInfo,
-                                                      CategoryLevelFoundationPoseObject object)
+   public SyncedSupervisePoseParameters(ROS2Node ros2Node,
+                                        CRDTInfo crdtInfo,
+                                        SupervisePoseObject object)
    {
       this(ros2Node,
            crdtInfo,
            "FoundationPose " + object.category + "/" + object.instance + " Parameters",
            object.topics.ihmcParameters(),
-           CategoryLevelFoundationPoseResetDistanceLibrary.getResetDistance(object));
+           SupervisePoseResetDistanceLibrary.getResetDistance(object));
    }
 
-   public SyncedCategoryLevelFoundationPoseParameters(ROS2Node ros2Node,
-                                                      CRDTInfo crdtInfo,
-                                                      String modifierName,
-                                                      ROS2Topic<FoundationPoseParameters> parametersTopic,
-                                                      double defaultResetDistance)
+   public SyncedSupervisePoseParameters(ROS2Node ros2Node,
+                                        CRDTInfo crdtInfo,
+                                        String modifierName,
+                                        ROS2Topic<FoundationPoseParameters> parametersTopic,
+                                        double defaultResetDistance)
    {
       super(crdtInfo);
       setModifierName(modifierName);
