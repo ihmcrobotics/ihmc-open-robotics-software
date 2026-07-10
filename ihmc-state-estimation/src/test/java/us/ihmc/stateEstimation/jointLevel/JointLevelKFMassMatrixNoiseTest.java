@@ -141,7 +141,6 @@ public class JointLevelKFMassMatrixNoiseTest
    }
 
    private static final double ROTOR_DEFAULT = 0.005; // JointLevelKFPreFilter.ROTOR_INERTIA_DEFAULT (synthetic joints match no table key)
-   private static final double ALPHA = 0.15;          // JointLevelKFPreFilter.ALPHA
 
    /**
     * Independent reference for the Rev.2 process noise, UPDATED for Part B items 1 &amp; 3 (was Qa = σ_τ² Λ⁻²
@@ -169,11 +168,13 @@ public class JointLevelKFMassMatrixNoiseTest
       return qa;
    }
 
-   /** σ_τ,i mirroring the filter: ALPHA*τ_max,i, or SIGMA_TAU when the effort limit is absent/non-finite. */
+   /** σ_τ,i mirroring the filter: alpha_i*τ_max,i (per-joint alpha via the filter's seam), or SIGMA_TAU when the
+    *  effort limit is absent/non-finite (the random-chain case). */
    private static double referenceSigmaTau(JointLevelKFTestFixture f, int stateIndex)
    {
       double tauMax = f.filteredJoints.get(stateIndex).getEffortLimitUpper();
-      return (Double.isFinite(tauMax) && tauMax > 0.0) ? ALPHA * tauMax : SIGMA_TAU;
+      String name = f.filteredJoints.get(stateIndex).getName();
+      return (Double.isFinite(tauMax) && tauMax > 0.0) ? JointLevelKFPreFilter.alphaForName(name) * tauMax : SIGMA_TAU;
    }
 
    @Test

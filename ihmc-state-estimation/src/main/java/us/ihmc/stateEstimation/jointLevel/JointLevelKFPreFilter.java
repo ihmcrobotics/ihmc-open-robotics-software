@@ -74,12 +74,20 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    // per-joint STD is sigma_tau,i = ALPHA * tau_max,i (see ALPHA and sigmaTauPerJoint). Kept at 5 N*m as the
    // Rev.2 interim (Lambda^-2 ⪰ M_jj^-2 inflated Qa vs. the Rev.1 locked-base map). TODO(retune) with ALPHA.
    private static final double SIGMA_TAU = 5.0;
-   // Per-joint unmodeled-torque STD as a fraction of the joint's effort limit: sigma_tau,i = ALPHA * tau_max,i
-   // (Part B item 3), tau_max,i from OneDoFJointReadOnly.getEffortLimitUpper(). Physically the unmodeled torque
-   // scales with the actuator's own torque capacity, so this is a far better prior than a single scalar across a
-   // hip (217 N*m) and a wrist (a few N*m). TODO(retune): ALPHA=0.15 is an interim, uncalibrated value — the
-   // human calibrates it against quiet-standing then walking NIS, gyro block and encoder block separately.
-   private static final double ALPHA = 0.15;
+   // Per-joint unmodeled-torque STD as a fraction of the joint's effort limit: sigma_tau,i = alpha_i * tau_max,i
+   // (Part B item 3), tau_max,i from OneDoFJointReadOnly.getEffortLimitUpper(). Two levels of per-joint scaling:
+   // tau_max,i already scales by each actuator's torque capacity (a hip 217 N*m vs a wrist a few), and alpha_i is
+   // the dimensionless "fraction of capacity that is unmodeled". alpha_i is a scalar default with per-joint
+   // OVERRIDES (below), matched by case-insensitive name substring exactly like the rotor table — so a joint the
+   // QA_MAX tripwire flags can be knocked down without touching the rest of the robot.
+   //
+   // TODO(retune): ALPHA_DEFAULT=0.15 is interim/uncalibrated; calibrate against quiet-standing then walking NIS,
+   // gyro block and encoder block separately. The KNEE override (0.03) was set 2026-07-10 because RIGHT_KNEE_Y
+   // tripped QA_MAX on hardware (max diag(Qa)=14842 at 0.15 — the knee's floating-base Schur inertia is light, so
+   // 15% of its 217 N*m capacity is a lot of unmodeled acceleration): 0.03 -> Qa ~ 594 < QA_MAX (900).
+   private static final double ALPHA_DEFAULT = 0.15;
+   private static final String[] ALPHA_JOINT_KEYS = {"KNEE"};
+   private static final double[] ALPHA_VALUES     = {0.03};
    // TRIPWIRE ONLY (Part B item 2 — no longer a scaler). Physical ceiling on the per-joint acceleration
    // process-noise VARIANCE (~ (30 rad/s^2)^2). With the reflected-rotor-inertia floor on Lambda_eff (item 1),
    // max diag(Qa) must sit far below this; if it ever would not, that is a model/config regression to SURFACE,
@@ -109,10 +117,16 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    // the IMU's SensorNoiseParameters are unset (Alex historically ran with a null SensorNoiseParameters => all
    // covariances 0). A zero Sigma removes the innovation-covariance floor on the pure-bias rows of every 1-DoF
    // chain, collapsing lambda_min(S) (the logged 2.155e-12) and, via the Joseph K R K^T squaring loop, diverging
-   // P. Any IMU whose gyro-noise trace is below SIGMA_GYRO_FLOOR_TRACE is floored to SIGMA_GYRO_FLOOR * I3, a
-   // datasheet-plausible raw-gyro white-noise variance.
-   private static final double SIGMA_GYRO_FLOOR = 1.0e-4;        // (0.01 rad/s)^2 per axis
-   private static final double SIGMA_GYRO_FLOOR_TRACE = 3.0e-4;  // 3 * (0.01 rad/s)^2
+   // P. Any IMU whose gyro-noise trace is below SIGMA_GYRO_FLOOR_TRACE is floored to SIGMA_GYRO_FLOOR * I3.
+   //
+   // 2026-07-10: lowered 1e-4 -> 1e-6 (sigma 0.01 -> 0.001 rad/s). This is a SAFETY NET only — the real gyro
+   // Sigma is now wired via AlexSensorNoiseParameters and sits above it, so the floor should not normally engage.
+   // The old 1e-4 was ~2500x the wired value; because the JointKF uses Sigma to weight the gyro in BOTH the
+   // joint-velocity and the base-bias estimate, that over-inflation lazily degraded the base gyro-bias estimate
+   // the downstream InEKF relies on. 1e-6 keeps lambda_min(S) ~6 orders above the 2e-12 collapse (the COND_S_MAX
+   // gate backstops), while no longer over-inflating the gyro when a real (small) Sigma is present.
+   private static final double SIGMA_GYRO_FLOOR = 1.0e-6;        // (0.001 rad/s)^2 per axis (safety net)
+   private static final double SIGMA_GYRO_FLOOR_TRACE = 3.0e-6;  // 3 * (0.001 rad/s)^2
    // Active innovation-covariance conditioning gate (Part B item 5). cond(S) is estimated from the Cholesky
    // factor diagonal ((max L_ii / min L_ii)^2 — no eigendecomposition); above this the whole stacked update is
    // skipped, because a finite-but-ill-conditioned S inverts to a huge gain that the Joseph K R K^T loop squares
@@ -588,6 +602,17 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       return v < 0.0 ? ROTOR_INERTIA_DEFAULT : v;
    }
 
+   /** Per-joint alpha (fraction of tau_max used as the unmodeled-torque STD) by case-insensitive name substring;
+    *  the override table value if matched, else ALPHA_DEFAULT. Package-private so tests can mirror sigma_tau. */
+   static double alphaForName(String jointName)
+   {
+      String upper = jointName.toUpperCase();
+      for (int i = 0; i < ALPHA_JOINT_KEYS.length; i++)
+         if (upper.contains(ALPHA_JOINT_KEYS[i]))
+            return ALPHA_VALUES[i];
+      return ALPHA_DEFAULT;
+   }
+
    /**
     * Builds the per-joint reflected-rotor-inertia diagonal (Part B item 1) and the per-joint unmodeled-torque
     * STD sigma_tau,i = ALPHA * tau_max,i (Part B item 3), both in filter joint state order. Any joint with no
@@ -622,7 +647,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          }
          else
          {
-            sigmaTauPerJoint[idx] = ALPHA * tauMax;
+            sigmaTauPerJoint[idx] = alphaForName(joint.getName()) * tauMax;
          }
       }
    }

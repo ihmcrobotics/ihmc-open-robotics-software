@@ -22,13 +22,22 @@ public class InvariantEKFStateEstimatorFactory implements StateEstimatorControll
    private final double contactMeasurementVariance;
    private final double initialCovariance;
 
-   // KNOWN OPEN QUESTION (for the human): GYRO_VARIANCE/ACCEL_VARIANCE are consumed as continuous-time
-   // process-noise variances (units rad^2/s and m^2/s^3 per the InvariantPropagator Javadoc), whereas the SDF
-   // numbers below are discrete-time sample stddevs at 1 kHz. A dt (= estimatorDT = 1e-3 s) discretization factor
-   // may therefore belong on these terms. Per the user's explicit decision they are set to the raw sigma^2 (no dt);
-   // retune against NIS on hardware. Do NOT change the InvariantPropagator to compensate.
-   private static final double GYRO_VARIANCE = 4.0e-8;   // ORIGINAL: 1.0e-7 (placeholder). (2e-4 rad/s)^2 from Alex model.sdf gyro density.
-   private static final double ACCEL_VARIANCE = 2.89e-4; // ORIGINAL: 1.0e-7 (placeholder; accel was ~3600x too small -> overconfident, drift-prone root link). (1.7e-2 m/s^2)^2 from Alex model.sdf accel density.
+   // These are the InvariantEKF's CONTINUOUS-time process-noise variances (rad^2/s on the orientation block,
+   // m^2/s^3 on the velocity block, per InvariantPropagator), NOT sensor covariances — the InEKF never reads the
+   // per-IMU getAngular/LinearAccelerationNoiseCovariance (those feed only the JointLevelKF). They are a TUNING
+   // pair balancing how contact updates split innovation between orientation and velocity.
+   //
+   // 2026-07-10: REVERTED to the original 1e-7/1e-7. A hardware test (Alex_001/.../pitchDrift) with the
+   // SDF-derived values below drove excessive pelvis PITCH drift after init: lowering gyro var (1e-7 -> 4e-8) and
+   // raising accel var (1e-7 -> 2.89e-4) shifted the orientation:velocity process-noise ratio from 1:1 to ~1:7000,
+   // so the contact update corrects velocity and leaves orientation "stiff" -> uncorrected gyro drift accumulates
+   // in pitch. The 1e-7 pair was empirically tuned and works; do not retune it off a raw-sigma^2 units argument
+   // (the SDF numbers are discrete 1 kHz stddevs, not continuous PSDs, and the measurement model / contact noise /
+   // dt all factor into the "right" value). Retune only against NIS if ever needed.
+   // SDF-density reference, if revisiting WITH a proper continuous-PSD conversion: gyro (2e-4 rad/s)^2 = 4e-8,
+   // accel (1.7e-2 m/s^2)^2 = 2.89e-4.
+   private static final double GYRO_VARIANCE = 1.0e-7;
+   private static final double ACCEL_VARIANCE = 1.0e-7;
    private static final double CONTACT_VARIANCE = 1.0e-12;
    private static final double CONTACT_MEASUREMENT_VARIANCE = 1.0e-12;
    private static final double INITIAL_COVARIANCE = 1.0;
