@@ -74,6 +74,8 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
+
 public class HighLevelHumanoidControllerFactory implements CloseableAndDisposable
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -363,6 +365,29 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       if (!fallbackControlStateEnum.equals(HighLevelControllerName.FALLING_STATE))
          stateTransitionFactories.add(new ControllerFailedTransitionFactory(currentControlStateEnum, HighLevelControllerName.FALLING_STATE));
    }
+
+   public List<ControllerStateTransitionFactory<HighLevelControllerName>> getStateTransitionFactories()
+   {
+      return stateTransitionFactories;
+   }
+
+   public void removeFailureTransitionFactories(HighLevelControllerName controllerToRemove)
+   {
+      int i = 0;
+      while (i < stateTransitionFactories.size())
+      {
+         if (stateTransitionFactories.get(i) instanceof ControllerFailedTransitionFactory failedFactory)
+         {
+            if (failedFactory.getStateToAttachEnum() == controllerToRemove)
+            {
+               stateTransitionFactories.remove(i);
+               continue;
+            }
+         }
+         i++;
+      }
+   }
+
 
    public void addCustomStateTransition(ControllerStateTransitionFactory<HighLevelControllerName> stateTransitionFactory)
    {
