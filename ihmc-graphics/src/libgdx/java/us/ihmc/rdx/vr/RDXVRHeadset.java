@@ -35,6 +35,7 @@ public class RDXVRHeadset extends RDXVRTrackedDevice
    // by default, so non-teleop VR apps are unaffected. In the device frame the axes are X-right, Y-up, Z-back.
    private final RigidBodyTransform cameraPovOffsetTransform = new RigidBodyTransform();
    private final ReferenceFrame cameraPovOffsetFrame;
+   private final ReferenceFrame xForwardZUpCameraPovFrame;
    private final Vector3D cameraPovLocalTranslation = new Vector3D();
 
    public RDXVRHeadset(ReferenceFrame vrPlayAreaYUpZBackFrame)
@@ -48,6 +49,12 @@ public class RDXVRHeadset extends RDXVRTrackedDevice
       xForwardZUpHeadsetFrame
             = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("xForwardZUpHeadsetFrame",
                                                                                 getDeviceYUpZBackFrame(),
+                                                                                headsetXRightZDownToXForwardZUp);
+      // Same X-forward/Z-up convention as xForwardZUpHeadsetFrame, but hung off the camera POV offset frame, so anything
+      // parented here (e.g. a head-locked HUD) is displaced by exactly the same offset as the rendered eyes.
+      xForwardZUpCameraPovFrame
+            = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("xForwardZUpCameraPovFrame",
+                                                                                cameraPovOffsetFrame,
                                                                                 headsetXRightZDownToXForwardZUp);
    }
 
@@ -75,6 +82,16 @@ public class RDXVRHeadset extends RDXVRTrackedDevice
    public ReferenceFrame getCameraPovOffsetFrame()
    {
       return cameraPovOffsetFrame;
+   }
+
+   /**
+    * X-forward/Z-up frame that rides the camera POV offset. Anchor head-locked graphics here rather than to
+    * {@link #getXForwardZUpHeadsetFrame()}: that one is a sibling of the offset frame, so a POV offset would move the
+    * eyes without moving the graphic, making it slide across the view.
+    */
+   public ReferenceFrame getXForwardZUpCameraPovFrame()
+   {
+      return xForwardZUpCameraPovFrame;
    }
 
    public void initSystem()
