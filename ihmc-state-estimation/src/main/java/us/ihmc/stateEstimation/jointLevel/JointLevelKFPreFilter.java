@@ -202,6 +202,13 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private YoDouble[] yoJointPositionLowerBound;
    private YoDouble[] yoJointVelocityUpperBound;
    private YoDouble[] yoJointVelocityLowerBound;
+   // Per-IMU estimated gyro bias (IMU frame), indexed by ordinal. Published so the bias this filter EXPORTS to
+   // the downstream InEKF (via getAngularVelocityBiasInIMUFrame) is visible — a runaway base-IMU bias here is
+   // integrated straight into the InEKF's base orientation, so it must not be an unlogged black box.
+   private YoDouble[] yoImuGyroBiasX;
+   private YoDouble[] yoImuGyroBiasY;
+   private YoDouble[] yoImuGyroBiasZ;
+   private YoDouble[] yoImuGyroBiasNorm;
 
    // State and constant model
    private final DMatrixRMaj x = new DMatrixRMaj(0,1); // reshaped to dimx1 later when constructed
@@ -700,6 +707,21 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          yoJointVelocityUpperBound[idx] = new YoDouble("jointKF_qd_" + jointName + "_upperBound", registry);
          yoJointVelocityLowerBound[idx] = new YoDouble("jointKF_qd_" + jointName + "_lowerBound", registry);
       }
+
+      // Per-IMU gyro-bias diagnostics (IMU frame), named by sensor. imusByOrdinal is populated by allocate(),
+      // which runs before this method in the constructor.
+      yoImuGyroBiasX = new YoDouble[m];
+      yoImuGyroBiasY = new YoDouble[m];
+      yoImuGyroBiasZ = new YoDouble[m];
+      yoImuGyroBiasNorm = new YoDouble[m];
+      for (int o = 0; o < m; o++)
+      {
+         String imuName = imusByOrdinal[o].getSensorName();
+         yoImuGyroBiasX[o] = new YoDouble("jointKF_gyroBias_" + imuName + "_X", registry);
+         yoImuGyroBiasY[o] = new YoDouble("jointKF_gyroBias_" + imuName + "_Y", registry);
+         yoImuGyroBiasZ[o] = new YoDouble("jointKF_gyroBias_" + imuName + "_Z", registry);
+         yoImuGyroBiasNorm[o] = new YoDouble("jointKF_gyroBias_" + imuName + "_norm", registry);
+      }
    }
 
    /**
@@ -721,6 +743,18 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          yoJointPositionLowerBound[i].set(q - sigmaQ);
          yoJointVelocityUpperBound[i].set(qd + sigmaQd);
          yoJointVelocityLowerBound[i].set(qd - sigmaQd);
+      }
+
+      // Per-IMU gyro bias straight from the state (IMU frame). The base-IMU entry is the one the InEKF subtracts;
+      // a physical MEMS gyro bias is ~0.001-0.01 rad/s, so a norm approaching 0.1+ rad/s here is a divergence.
+      for (int o = 0; o < m; o++)
+      {
+         int col = 2 * n + 3 * o;
+         double bx = x.get(col), by = x.get(col + 1), bz = x.get(col + 2);
+         yoImuGyroBiasX[o].set(bx);
+         yoImuGyroBiasY[o].set(by);
+         yoImuGyroBiasZ[o].set(bz);
+         yoImuGyroBiasNorm[o].set(Math.sqrt(bx * bx + by * by + bz * bz));
       }
    }
 

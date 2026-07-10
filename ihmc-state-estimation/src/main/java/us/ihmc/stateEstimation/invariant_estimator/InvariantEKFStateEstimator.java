@@ -87,6 +87,14 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    // Per-tick temporaries.
    private final FrameVector3D angularVelocity = new FrameVector3D();
    private final FrameVector3D linearAcceleration = new FrameVector3D();
+
+   // Safeguard on the gyro bias handed up by the joint-level pre-filter. That bias is subtracted from the raw
+   // gyro and integrated straight into base orientation, so a runaway upstream estimate (observed ~0.45 rad/s on
+   // hardware, 2026-07-10) drives the base pitch to drift. A physical MEMS gyro bias is ~0.001-0.01 rad/s; clamp
+   // per axis so a bad upstream bias cannot destroy the estimate, and PUBLISH the applied bias (previously an
+   // unlogged black box that had to be backed out arithmetically from the drift).
+   private static final double MAX_GYRO_BIAS = 0.05; // rad/s per axis
+   private final FrameVector3D appliedGyroBias = new FrameVector3D();
    private final FramePoint3D contactInBody = new FramePoint3D();
    private final FramePoint3D contactInWorld = new FramePoint3D();
    private final RotationMatrix tempRotation = new RotationMatrix();
@@ -149,6 +157,14 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final SideDependentList<YoDouble> yoContactResidualNorm;
    private final SideDependentList<YoBoolean> yoContactUpdateApplied;
    private final YoInteger yoInvariantUpdateGateSkipCount = new YoInteger("invariantUpdateGateSkipCount", registry);
+
+   // The gyro bias (IMU frame) actually subtracted from the raw gyro this tick, AFTER the MAX_GYRO_BIAS clamp,
+   // plus a count of ticks the clamp bound. This is the "is the upstream bias sane" diagnostic.
+   private final YoDouble yoAppliedGyroBiasX = new YoDouble("invariantAppliedGyroBiasX", registry);
+   private final YoDouble yoAppliedGyroBiasY = new YoDouble("invariantAppliedGyroBiasY", registry);
+   private final YoDouble yoAppliedGyroBiasZ = new YoDouble("invariantAppliedGyroBiasZ", registry);
+   private final YoDouble yoAppliedGyroBiasNorm = new YoDouble("invariantAppliedGyroBiasNorm", registry);
+   private final YoInteger yoGyroBiasClampCount = new YoInteger("invariantGyroBiasClampCount", registry);
 
    // Estimate outputs for logging/comparison.
    private final YoFramePoint3D yoBasePosition = new YoFramePoint3D("invariantFilterPelvisBasePosition", ReferenceFrame.getWorldFrame(), registry);
@@ -387,7 +403,18 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       // IMU omega and a: bias-corrected in the measurement frame (where the bias is estimated),
       // THEN expressed in the pelvis frame. Frame-checked sub() throws on a wrong-frame provider.
       angularVelocity.setIncludingFrame(imuSensor.getMeasurementFrame(), imuSensor.getAngularVelocityMeasurement());
-      angularVelocity.sub(imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuSensor));
+      // Clamp the upstream gyro bias to a physically plausible range before subtracting: a runaway bias would
+      // otherwise be integrated straight into base orientation (the pitch-drift mechanism). Publish the applied
+      // (post-clamp) bias for visibility.
+      appliedGyroBias.setIncludingFrame(imuSensor.getMeasurementFrame(), imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuSensor));
+      boolean clamped = clampGyroBias(appliedGyroBias);
+      if (clamped)
+         yoGyroBiasClampCount.set(yoGyroBiasClampCount.getValue() + 1);
+      yoAppliedGyroBiasX.set(appliedGyroBias.getX());
+      yoAppliedGyroBiasY.set(appliedGyroBias.getY());
+      yoAppliedGyroBiasZ.set(appliedGyroBias.getZ());
+      yoAppliedGyroBiasNorm.set(appliedGyroBias.norm());
+      angularVelocity.sub(appliedGyroBias);
       angularVelocity.changeFrame(pelvisFrame);
       linearAcceleration.setIncludingFrame(imuSensor.getMeasurementFrame(), imuSensor.getLinearAccelerationMeasurement());
       linearAcceleration.sub(imuBiasProvider.getLinearAccelerationBiasInIMUFrame(imuSensor));
@@ -474,6 +501,22 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    public void setGravityLevelingEnabled(boolean gravityLevelingEnabled)
    {
       this.gravityLevelingEnabled = gravityLevelingEnabled;
+   }
+
+   /** Clamps each gyro-bias component to ±{@link #MAX_GYRO_BIAS}; returns true if any axis was clamped. */
+   private static boolean clampGyroBias(FrameVector3D bias)
+   {
+      double x = clampComponent(bias.getX());
+      double y = clampComponent(bias.getY());
+      double z = clampComponent(bias.getZ());
+      boolean clamped = x != bias.getX() || y != bias.getY() || z != bias.getZ();
+      bias.set(x, y, z);
+      return clamped;
+   }
+
+   private static double clampComponent(double v)
+   {
+      return Math.max(-MAX_GYRO_BIAS, Math.min(MAX_GYRO_BIAS, v));
    }
 
    private void updateYoVariables()
