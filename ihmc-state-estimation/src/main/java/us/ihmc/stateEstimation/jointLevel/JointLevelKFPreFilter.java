@@ -3,7 +3,9 @@ package us.ihmc.stateEstimation.jointLevel;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.dense.row.decomposition.chol.CholeskyDecompositionInner_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.dense.row.linsol.chol.LinearSolverChol_DDRM;
 import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
@@ -67,19 +69,55 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    //TUNING VARIABLES
    private static final double ENCODER_VAR = 1.0e-6; // (1-e-3 rad)^2 encoder position variance
    private static final double SIGMA_ACCEL = 50.0; // rad/s^2 CWNA process-noise STD (scalar fallback when no robot model is provided)
-   // N*m unmodeled-torque STD for the mass-matrix path: Qa = sigma_tau^2 Lambda(q)^-2. Retuned from 50 -> 5
-   // after the Rev.2 Schur switch (SPEC §8): Lambda^-2 ⪰ M_jj^-2 inflated Qa relative to the Rev.1 locked-base
-   // map at a fixed sigma_tau, and the carried-over 50 made ONE predict inject O(10) (rad/s)^2 of joint-velocity
-   // variance — the Alex002 velocity-covariance blow-up. 5 N*m is a defensible interim value PENDING final
-   // quiet-standing/walking NIS calibration by a human (TODO(retune) on updateProcessNoiseFromMassMatrix).
+   // N*m unmodeled-torque STD for the mass-matrix path: Qa = Lambda_eff^-1 diag(sigma_tau,i^2) Lambda_eff^-T.
+   // SIGMA_TAU is now only the FALLBACK STD used for a joint whose effort limit is absent/non-finite; the live
+   // per-joint STD is sigma_tau,i = ALPHA * tau_max,i (see ALPHA and sigmaTauPerJoint). Kept at 5 N*m as the
+   // Rev.2 interim (Lambda^-2 ⪰ M_jj^-2 inflated Qa vs. the Rev.1 locked-base map). TODO(retune) with ALPHA.
    private static final double SIGMA_TAU = 5.0;
-   // Physical cap on the per-joint acceleration process-noise VARIANCE (sigma_qdd_max = 30 rad/s^2)^2. Qa =
-   // sigma_tau^2 Lambda^-2 is the free-flyer UPPER bound on acceleration noise (SPEC §3.2); for a near-singular
-   // Lambda (a proximal joint whose base recoil nearly cancels its inertia — Alex's LEFT_HIP_X) Lambda^-2 is
-   // enormous, and the Cholesky PD guard does NOT catch it (near-singular is still PD). The cap bounds Qa by
-   // uniformly scaling Lambda^-2 down (preserves symmetry/PSD/joint coupling) so no joint's Qa diagonal exceeds
-   // this. A joint physically cannot carry an acceleration-noise STD above ~30 rad/s^2.
+   // Per-joint unmodeled-torque STD as a fraction of the joint's effort limit: sigma_tau,i = ALPHA * tau_max,i
+   // (Part B item 3), tau_max,i from OneDoFJointReadOnly.getEffortLimitUpper(). Physically the unmodeled torque
+   // scales with the actuator's own torque capacity, so this is a far better prior than a single scalar across a
+   // hip (217 N*m) and a wrist (a few N*m). TODO(retune): ALPHA=0.15 is an interim, uncalibrated value — the
+   // human calibrates it against quiet-standing then walking NIS, gyro block and encoder block separately.
+   private static final double ALPHA = 0.15;
+   // TRIPWIRE ONLY (Part B item 2 — no longer a scaler). Physical ceiling on the per-joint acceleration
+   // process-noise VARIANCE (~ (30 rad/s^2)^2). With the reflected-rotor-inertia floor on Lambda_eff (item 1),
+   // max diag(Qa) must sit far below this; if it ever would not, that is a model/config regression to SURFACE,
+   // not to hide. When max diag(Qa) > QA_MAX we warn once (naming the argmax joint) and count it in
+   // jointKFQaCapWouldBindCount, but we DO NOT rescale — the old uniform CommonOps_DDRM.scale coupled one
+   // joint's outlier into GLOBAL Q starvation (hips down ~6 orders), which collapsed P onto the measurement
+   // floors and CAUSED the min-side S singularity. A cap that silently rescales the whole robot is worse than
+   // the disease.
    private static final double QA_MAX = 900.0;
+   // Reflected rotor inertia n^2 * J_rotor (kg*m^2) per joint, matched by case-insensitive joint-name substring
+   // (Part B item 1). Added as a diagonal term to the Schur complement Lambda BEFORE inversion:
+   // Lambda_eff = Lambda + diag(n_i^2 J_rotor,i). Physics: the rotor spins behind the gearbox about its own
+   // axis and does not couple through the floating base, so the post-Schur diagonal add is simultaneously the
+   // EXACT drivetrain term and a principled regularizer (it floors lambda_min(Lambda_eff) by Weyl). Distal
+   // joints' link-side apparent inertia is as low as ~8e-4 kg*m^2 while their drivetrains reflect 0.05-0.07 —
+   // without this term Lambda^-2 has diagonal outliers up to ~1.6e6 and Qa blows up for proximal/light joints.
+   private static final String[] ROTOR_INERTIA_JOINT_KEYS = {
+         "HIP_X", "HIP_Z", "HIP_Y", "KNEE", "ANKLE_Y", "ANKLE_X", "SPINE",
+         "SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW",
+         "WRIST_Z", "WRIST_X", "GRIPPER_Z", "NECK_Z", "NECK_Y"};
+   private static final double[] ROTOR_INERTIA_VALUES = {
+         0.062, 0.02, 0.167, 0.167, 0.07, 0.05, 0.062,
+         0.067, 0.067, 0.022, 0.022,
+         0.005, 0.005, 0.005, 0.005, 0.005};
+   private static final double ROTOR_INERTIA_DEFAULT = 0.005; // conservative floor for an unmatched filtered joint
+   // Gyro measurement-noise floor (Part B item 4). getAngularVelocityNoiseCovariance is zero on hardware whenever
+   // the IMU's SensorNoiseParameters are unset (Alex historically ran with a null SensorNoiseParameters => all
+   // covariances 0). A zero Sigma removes the innovation-covariance floor on the pure-bias rows of every 1-DoF
+   // chain, collapsing lambda_min(S) (the logged 2.155e-12) and, via the Joseph K R K^T squaring loop, diverging
+   // P. Any IMU whose gyro-noise trace is below SIGMA_GYRO_FLOOR_TRACE is floored to SIGMA_GYRO_FLOOR * I3, a
+   // datasheet-plausible raw-gyro white-noise variance.
+   private static final double SIGMA_GYRO_FLOOR = 1.0e-4;        // (0.01 rad/s)^2 per axis
+   private static final double SIGMA_GYRO_FLOOR_TRACE = 3.0e-4;  // 3 * (0.01 rad/s)^2
+   // Active innovation-covariance conditioning gate (Part B item 5). cond(S) is estimated from the Cholesky
+   // factor diagonal ((max L_ii / min L_ii)^2 — no eigendecomposition); above this the whole stacked update is
+   // skipped, because a finite-but-ill-conditioned S inverts to a huge gain that the Joseph K R K^T loop squares
+   // each tick (the P divergence mechanism the LU/isFinite guards were blind to).
+   private static final double COND_S_MAX = 1.0e9;
    private static final double INIT_POS_VAR = 1.0e-6; // encoders trusted at initialization
    private static final double INIT_VEL_VAR = 1.0; // velocity unknown at initialization
    private static final double INIT_BIAS_VAR = 2.5e-3; // (0.05 rad/s)^2
@@ -130,6 +168,14 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private final YoInteger yoStateDimension = new YoInteger("jointKFStateDimension", registry);
    private final YoInteger yoNumberOfFilteredJoints = new YoInteger("jointKFNumberOfFilteredJoints", registry);
    private final YoInteger yoNumberOfIMUs = new YoInteger("jointKFNumberOfIMUs", registry);
+   // Conditioning telemetry (Part B items 2 & 5). Counters latch how often each safety path WOULD/DID engage
+   // so a hardware run surfaces a model/config regression instead of hiding it; the gyro-block S diagnostics are
+   // read straight off the Cholesky factor diagonal each tick (cheap, no eigendecomposition).
+   private final YoInteger yoQaCapWouldBindCount = new YoInteger("jointKFQaCapWouldBindCount", registry);
+   private final YoInteger yoInnovationGateSkipCount = new YoInteger("jointKFInnovationGateSkipCount", registry);
+   private final YoDouble yoCondSProxyLog10 = new YoDouble("jointKFCondSProxyLog10", registry);
+   private final YoDouble yoMinSDiag = new YoDouble("jointKFMinSDiag", registry);
+   private final YoDouble yoMaxSDiag = new YoDouble("jointKFMaxSDiag", registry);
 
    // Per-joint filtered state (q, qd) and the 1-sigma covariance envelope around each. All indexed by the
    // joint's state index (the same index used into x and P). Allocated once in the constructor after n is
@@ -190,7 +236,11 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    // Reused LU solver for the innovation-covariance inverse, pre-sized in allocate(). This replaces the
    // per-tick CommonOps_DDRM.invert(S, Sinv), which allocates a fresh LU decomposition + solver on every
    // call once S is larger than 5x5 (i.e. the n-joint encoder update) — garbage on the estimator thread.
-   private LinearSolverDense<DMatrixRMaj> innovationSolver;
+   // Cholesky (S = H P H^T + R is symmetric PD by construction). setA failure = non-PD => skip. Its factor L
+   // (L L^T = S) also gives the conditioning/floor gate cheaply: S's pivots are L_ii^2, so cond(S) ~
+   // (max L_ii / min L_ii)^2 with no eigendecomposition (Part B item 5).
+   private LinearSolverChol_DDRM innovationSolver;
+   private final DMatrixRMaj Lchol = new DMatrixRMaj(0, 0); // scratch for the innovation Cholesky factor L (k x k)
    private final RigidBodyTransform tmpTransform = new RigidBodyTransform();
    private final FrameVector3D fvA = new FrameVector3D();
    private final FrameVector3D fvB = new FrameVector3D();
@@ -226,13 +276,21 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private final DMatrixRMaj MNf = new DMatrixRMaj(0, 0);       // nuisance-filtered coupling, N x n (= M_jN^T)
    private final DMatrixRMaj Mff = new DMatrixRMaj(0, 0);       // filtered block, n x n
    private final DMatrixRMaj MNNInvMNf = new DMatrixRMaj(0, 0); // X = M_NN^-1 M_Nf, N x n
-   private final DMatrixRMaj Lambda = new DMatrixRMaj(0, 0);    // Schur complement, n x n
-   private final DMatrixRMaj LambdaInv = new DMatrixRMaj(0, 0); // Lambda^-1, n x n
-   private final DMatrixRMaj LambdaInvSq = new DMatrixRMaj(0, 0); // Lambda^-2, n x n (in filter joint state order)
+   private final DMatrixRMaj Lambda = new DMatrixRMaj(0, 0);    // Schur complement Lambda_eff (rotor diag added in place), n x n
+   private final DMatrixRMaj LambdaInv = new DMatrixRMaj(0, 0); // Lambda_eff^-1, n x n
+   private final DMatrixRMaj Ytau = new DMatrixRMaj(0, 0);      // Lambda_eff^-1 with column j scaled by sigma_tau,j, n x n (Part B item 3)
+   private final DMatrixRMaj Qa = new DMatrixRMaj(0, 0);        // Qa = Ytau Ytau^T (PSD, symmetric BY CONSTRUCTION), n x n
    private LinearSolverDense<DMatrixRMaj> nuisanceMassMatrixSolver; // Cholesky over M_NN, solves M_NN X = M_Nf
-   private LinearSolverDense<DMatrixRMaj> schurSolver;          // Cholesky over Lambda, inverts it
+   private LinearSolverDense<DMatrixRMaj> schurSolver;          // Cholesky over Lambda_eff, inverts it
+   // Reflected rotor inertia diagonals (Part B item 1), built at construction in filter/nuisance order.
+   private double[] rotorInertiaDiag;          // length n, added to Lambda's diagonal (filter joint state order)
+   private double[] nuisanceRotorInertiaDiag;  // length numNuisanceDoF: 0 on base rows, rotor inertia on gap-joint rows
+   private double[] sigmaTauPerJoint;          // length n, sigma_tau,i = ALPHA * tau_max,i (Part B item 3)
    private boolean warnedMassMatrixFailure = false;
    private boolean warnedMassMatrixConditioningCap = false;
+   private boolean sigmaFloorInitialized = false; // Sigma validated/floored/cached on first buildStackedMeasurement
+   private boolean gyroSigmaFloored = false;   // any IMU's gyro noise was floored (Part B item 4)
+   private boolean warnedGyroFloorRegression = false; // one-shot: R_g pair-row diagonal fell below the floor at runtime
 
    // Rollback backups: a KF has no recovery once x/P go non-finite (predict/Joseph spread the NaN with no
    // way back), so a single non-finite measurement update is skipped by restoring the pre-update mean and
@@ -286,6 +344,14 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
             LogTools.warn("Skipping pair, IMU not found: parent = " + pp.getParentIMUName() + " child = " + pp.getChildIMUName());
             continue;
          }
+         // Structural asserts (Part B item 6): a self-pair or a pair whose two IMUs sit on the same measurement
+         // link has zero H, zero z and zero noise — S is singular by construction (SPEC §5). Fail loud at boot.
+         if (parent == child)
+            throw new IllegalArgumentException("JointLevelKFPreFilter: pair '" + pp.getEstimatorName() + "' has the same IMU ("
+                  + parent.getSensorName() + ") as parent and child.");
+         if (parent.getMeasurementLink() == child.getMeasurementLink())
+            throw new IllegalArgumentException("JointLevelKFPreFilter: pair '" + pp.getEstimatorName() + "' parent and child IMUs "
+                  + "share the measurement link " + parent.getMeasurementLink().getName() + " (zero-DoF chain).");
          Pair p = new Pair(parent,child);
          p.jac.setKinematicChain(parent.getMeasurementLink(),child.getMeasurementLink());
          p.jac.setJacobianFrame(child.getMeasurementLink().getBodyFixedFrame());
@@ -303,6 +369,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       n = jointToIndex.size();
       m = imuToOrdinal.size();
       dim = 2 * n + 3 * m;
+
+      // Acyclicity assert (Part B item 6): with the exact R_g, a cycle's telescoping row-combination has zero H,
+      // zero z and zero noise, so S is singular BY CONSTRUCTION (SPEC §5.3). The used IMU graph MUST be a tree.
+      assertAcyclicIMUGraph();
 
       // 2) Second pass: assemble state sinze columns are known as n is fixed.
       for (Pair p: pairs)
@@ -373,20 +443,35 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
             // filtered joints.
             int[] baseColumns = indexProvider.getJointDoFIndices(baseJoint);
             List<Integer> nuisanceColumns = new ArrayList<>();
+            // Parallel rotor-inertia diagonal for the nuisance block (Part B item 1): 0 on the 6 base DoF (the
+            // free base carries no reflected rotor inertia), the joint's reflected rotor inertia on each gap
+            // joint (so a marginalized unfiltered joint still floors M_NN). None on Alex today; kept general.
+            List<Double> nuisanceRotor = new ArrayList<>();
             for (int c : baseColumns)
+            {
                nuisanceColumns.add(c);
+               nuisanceRotor.add(0.0);
+            }
             int gapJoints = 0;
             for (JointReadOnly spanningJoint : spanningJoints)
             {
                if (!jointToIndex.containsKey(spanningJoint)) // unfiltered => gap joint => marginalize it
                {
                   nuisanceColumns.add(indexProvider.getJointDoFIndices(spanningJoint)[0]);
+                  double gapRotor = lookupRotorInertia(spanningJoint.getName());
+                  if (gapRotor < 0.0)
+                     gapRotor = ROTOR_INERTIA_DEFAULT;
+                  nuisanceRotor.add(gapRotor);
                   gapJoints++;
                }
             }
             massMatrixNuisanceColumns = new int[nuisanceColumns.size()];
+            nuisanceRotorInertiaDiag = new double[nuisanceColumns.size()];
             for (int i = 0; i < massMatrixNuisanceColumns.length; i++)
+            {
                massMatrixNuisanceColumns[i] = nuisanceColumns.get(i);
+               nuisanceRotorInertiaDiag[i] = nuisanceRotor.get(i);
+            }
             numNuisanceDoF = massMatrixNuisanceColumns.length; // 6 + gap joints
 
             LogTools.info("Joint-level KF process noise: Schur-complement path (sigma_tau = " + SIGMA_TAU + " N*m) over "
@@ -428,6 +513,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 
          }
       }
+      // Per-joint reflected rotor inertia (item 1) and per-joint sigma_tau (item 3), in filter state order.
+      // Built BEFORE allocate() because allocate() -> buildProcessNoise() -> updateProcessNoiseFromMassMatrix()
+      // reads both.
+      buildRotorInertiaAndSigmaTau();
       allocate();
 
       yoStateDimension.set(dim);
@@ -435,6 +524,131 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       yoNumberOfIMUs.set(m);
 
       createJointYoVariables();
+
+      // Boot-time census (Part B item 6): every hardware boot prints the chain-DoF layout and, for each 1-DoF
+      // chain, the joint axis and its two pure-bias sentinel rows (the min-side rows whose S floor is Sigma).
+      logChainDoFCensus();
+   }
+
+   /**
+    * Union-find acyclicity check on the used IMU graph (Part B item 6). Each pair is an edge between its two
+    * IMU ordinals; if an edge ever joins two already-connected IMUs the graph has a cycle, which makes the
+    * stacked S singular by construction with the exact R_g (SPEC §5.3 — the cycle's telescoping row-combination
+    * carries the identity 0 = 0: zero H, zero z, zero noise). THROW naming the redundant pair to drop (its
+    * chain joints are already covered by the rest of the spanning tree, so dropping it loses no information).
+    * Construction-only.
+    */
+   private void assertAcyclicIMUGraph()
+   {
+      int[] parent = new int[m];
+      for (int i = 0; i < m; i++)
+         parent[i] = i;
+      for (Pair p : pairs)
+      {
+         int a = find(parent, imuToOrdinal.get(p.parent));
+         int b = find(parent, imuToOrdinal.get(p.child));
+         if (a == b)
+            throw new IllegalStateException("JointLevelKFPreFilter: the used IMU graph has a CYCLE — the pair "
+                  + p.parent.getSensorName() + "->" + p.child.getSensorName() + " closes a loop. With the exact R_g a "
+                  + "cycle's telescoping row-combination has zero H, zero z and zero noise, so the stacked innovation "
+                  + "covariance S is singular by construction (SPEC §5.3). Drop this redundant pair — its chain joints "
+                  + "are already covered by the remaining edges, so removing it loses no information.");
+         parent[a] = b;
+      }
+      // E <= m - 1 for a forest; with connectivity from the base IMU the used graph is a tree. (A disconnected
+      // forest is not an error here — an IMU island simply contributes an independent sub-filter.)
+   }
+
+   private static int find(int[] parent, int i)
+   {
+      while (parent[i] != i)
+      {
+         parent[i] = parent[parent[i]];
+         i = parent[i];
+      }
+      return i;
+   }
+
+   /** Reflected rotor inertia for a joint by case-insensitive name substring (Part B item 1); -1 if unmatched. */
+   private static double lookupRotorInertia(String jointName)
+   {
+      String upper = jointName.toUpperCase();
+      for (int i = 0; i < ROTOR_INERTIA_JOINT_KEYS.length; i++)
+         if (upper.contains(ROTOR_INERTIA_JOINT_KEYS[i]))
+            return ROTOR_INERTIA_VALUES[i];
+      return -1.0;
+   }
+
+   /** Package-private test seam: the reflected rotor inertia the filter actually applies to the named joint —
+    *  the table match, or the conservative default when unmatched. Lets the mass-matrix Qa oracle reconstruct
+    *  Lambda_eff exactly (Part C), independent of whether a synthetic joint name happens to hit a table key. */
+   static double reflectedRotorInertiaForNameOrDefault(String jointName)
+   {
+      double v = lookupRotorInertia(jointName);
+      return v < 0.0 ? ROTOR_INERTIA_DEFAULT : v;
+   }
+
+   /**
+    * Builds the per-joint reflected-rotor-inertia diagonal (Part B item 1) and the per-joint unmodeled-torque
+    * STD sigma_tau,i = ALPHA * tau_max,i (Part B item 3), both in filter joint state order. Any joint with no
+    * rotor-table match gets the conservative default floor (warn); any joint with no finite positive effort
+    * limit falls back to the scalar SIGMA_TAU (warn). Construction-only; the per-tick process-noise update just
+    * reads these arrays (allocation-free).
+    */
+   private void buildRotorInertiaAndSigmaTau()
+   {
+      rotorInertiaDiag = new double[n];
+      sigmaTauPerJoint = new double[n];
+      for (var e : jointToIndex.entrySet())
+      {
+         OneDoFJointBasics joint = e.getKey();
+         int idx = e.getValue();
+
+         double rotor = lookupRotorInertia(joint.getName());
+         if (rotor < 0.0)
+         {
+            rotor = ROTOR_INERTIA_DEFAULT;
+            LogTools.warn("JointLevelKFPreFilter: no reflected-rotor-inertia table entry for filtered joint '"
+                          + joint.getName() + "'; applying the conservative default floor " + ROTOR_INERTIA_DEFAULT + " kg*m^2.");
+         }
+         rotorInertiaDiag[idx] = rotor;
+
+         double tauMax = joint.getEffortLimitUpper();
+         if (!Double.isFinite(tauMax) || tauMax <= 0.0)
+         {
+            LogTools.warn("JointLevelKFPreFilter: filtered joint '" + joint.getName() + "' has no finite positive effort"
+                          + " limit (" + tauMax + "); falling back to the scalar SIGMA_TAU = " + SIGMA_TAU + " N*m for its sigma_tau.");
+            sigmaTauPerJoint[idx] = SIGMA_TAU;
+         }
+         else
+         {
+            sigmaTauPerJoint[idx] = ALPHA * tauMax;
+         }
+      }
+   }
+
+   /**
+    * Logs the chain-DoF census and, for each 1-DoF chain, the joint axis and its two pure-bias sentinel rows
+    * (Part B item 6). The pure-bias rows are the two gyro axes orthogonal to the single joint axis: with a zero
+    * gyro Sigma their innovation variance has no floor, so they are the min-side rows the Sigma floor (item 4)
+    * protects. Construction-only string work; never on the hot path.
+    */
+   private void logChainDoFCensus()
+   {
+      StringBuilder sb = new StringBuilder("JointLevelKFPreFilter chain-DoF census (" + pairs.size() + " pairs over " + m + " IMUs, tree):");
+      for (Pair p : pairs)
+      {
+         int dof = p.chainJoints.length;
+         sb.append("\n  ").append(p.parent.getSensorName()).append("->").append(p.child.getSensorName())
+           .append(" : ").append(dof).append("-DoF chain [").append(jointNamesOf(p.chainJoints)).append("]");
+         if (dof == 1)
+         {
+            Vector3DReadOnly axis = p.chainJoints[0].getJointAxis();
+            sb.append("  (1-DoF sentinel: joint axis ~[").append(String.format("%.2f,%.2f,%.2f", axis.getX(), axis.getY(), axis.getZ()))
+              .append("]; the two rows orthogonal to it observe PURE bias — min-side S floor = Sigma)");
+         }
+      }
+      LogTools.info(sb.toString());
    }
 
    /**
@@ -590,6 +804,11 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       for (var e : imuToOrdinal.entrySet()) // construction-time only; the hot path indexes this array
          imusByOrdinal[e.getValue()] = e.getKey();
 
+      // Sigma is validated + floored and cached on the FIRST buildStackedMeasurement (Part B item 4), not here:
+      // an IMU's SensorNoiseParameters may be assigned after this filter is constructed (the package tests set
+      // them post-construction; hardware sets them before the first tick), so deferring to first use captures the
+      // real covariance instead of a construction-time zero. Once built it is reused every tick (never re-read).
+
       // Pre-size the Joseph-form scratch. IKH in particular MUST start at dim x dim: the first josephUpdate
       // does setIdentity(IKH) *before* multAdd reshapes it, so on a 0x0 IKH the identity is silently dropped
       // and the first covariance update becomes -KH instead of I-KH. Sizing both here also keeps their first
@@ -599,12 +818,14 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       xBackup.reshape(dim, 1);
       PBackup.reshape(dim, dim);
 
-      // Reused LU solver for the innovation-covariance inverse, warmed at the widest measurement (maxMeas).
-      // The warm-up forces every internal buffer to its largest size now, so per-tick setA()/invert() reuse
-      // them and never allocate — unlike CommonOps_DDRM.invert, which news up a decomposition every call for
-      // any matrix wider than 5 (the n-joint encoder update).
-      innovationSolver = LinearSolverFactory_DDRM.lu(maxMeas);
+      // Reused Cholesky solver for the innovation-covariance inverse (Part B item 5), warmed at the widest
+      // measurement (maxMeas). S = H P H^T + R is symmetric PD by construction, so Cholesky is the right
+      // factorization: setA returns false on a NON-PD S (a strictly stronger, better-conditioned reject than
+      // LU's exact-singular test), and its factor L (L L^T = S) gives the conditioning/floor gate for free. The
+      // warm-up forces every internal buffer to its largest size now, so per-tick setA()/invert() never allocate.
+      innovationSolver = new LinearSolverChol_DDRM(new CholeskyDecompositionInner_DDRM(true)); // lower-triangular L
       innovationSolver.setA(CommonOps_DDRM.identity(maxMeas));
+      Lchol.reshape(maxMeas, maxMeas);
 
       // Schur-complement scratch + two Cholesky solvers, pre-warmed at their fixed sizes so the per-tick
       // setA()/solve()/invert() never allocate (chol decomposes in place and reuses its internal buffers once
@@ -619,7 +840,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          MNNInvMNf.reshape(nN, n);
          Lambda.reshape(n, n);
          LambdaInv.reshape(n, n);
-         LambdaInvSq.reshape(n, n);
+         Ytau.reshape(n, n);
+         Qa.reshape(n, n);
 
          nuisanceMassMatrixSolver = LinearSolverFactory_DDRM.chol(nN);
          nuisanceMassMatrixSolver.setA(CommonOps_DDRM.identity(nN));
@@ -761,6 +983,13 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
             Mff.set(i, j, massMatrix.get(ci, massMatrixColumn[j]));          // M_ff (nxn)
       }
 
+      // Gap-joint reflected rotor inertia on the nuisance-block diagonal (Part B item 1): 0 on the 6 base rows,
+      // the joint's reflected rotor inertia on each unfiltered gap joint (none on Alex; kept general). Floors
+      // M_NN the same way the filtered rotor diagonal floors Lambda_eff below.
+      if (nuisanceRotorInertiaDiag != null)
+         for (int a = 0; a < nN; a++)
+            MNN.add(a, a, nuisanceRotorInertiaDiag[a]);
+
       // X = M_NN^-1 M_Nf via Cholesky (rejects a non-PD nuisance block before it can enter the Schur complement).
       if (!nuisanceMassMatrixSolver.setA(MNN))
       {
@@ -782,46 +1011,67 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       // Lambda symmetric only to round-off, and Cholesky assumes exact symmetry.
       symmetrize(Lambda);
 
-      if (!schurSolver.setA(Lambda)) // Cholesky: rejects a non-PD Schur complement before it can enter Q
+      // Lambda_eff = Lambda + diag(reflected rotor inertia) (Part B item 1, the primary fix). The rotor spins
+      // behind the gearbox about its own axis and does not couple through the floating base, so this post-Schur
+      // diagonal add is the EXACT drivetrain term — and simultaneously a principled regularizer: by Weyl it
+      // floors lambda_min(Lambda_eff) >= min_i rotorInertiaDiag[i], so Lambda_eff^-1 has no proximal-joint
+      // outliers and Qa cannot blow up the way the un-floored sigma_tau^2 Lambda^-2 did on Alex002.
+      for (int i = 0; i < n; i++)
+         Lambda.add(i, i, rotorInertiaDiag[i]);
+
+      if (!schurSolver.setA(Lambda)) // Cholesky: rejects a non-PD Lambda_eff before it can enter Q
       {
-         warnMassMatrixFailureOnce("Schur complement Lambda not positive definite");
+         warnMassMatrixFailureOnce("Schur complement Lambda_eff not positive definite");
          return;
       }
-      schurSolver.invert(LambdaInv);
+      schurSolver.invert(LambdaInv); // LambdaInv = Lambda_eff^-1 (symmetric)
       if (containsNonFinite(LambdaInv))
       {
-         warnMassMatrixFailureOnce("non-finite Schur-complement inverse (near-singular Lambda)");
+         warnMassMatrixFailureOnce("non-finite Schur-complement inverse (near-singular Lambda_eff)");
          return;
       }
-      CommonOps_DDRM.mult(LambdaInv, LambdaInv, LambdaInvSq); // Lambda^-2; Lambda symmetric => Lambda^-1 Lambda^-T = Lambda^-2
 
-      double st2 = SIGMA_TAU * SIGMA_TAU;
-
-      // Physical conditioning cap (see QA_MAX): a near-singular-but-PD Lambda (proximal joint, base recoil nearly
-      // cancels its inertia) makes Lambda^-2 — hence Qa = st2 * Lambda^-2 — enormous, which the Cholesky PD guard
-      // above cannot catch (it only rejects a NON-PD Lambda). Left unbounded, one predict injects O(10-1e4)
-      // (rad/s)^2 of joint-velocity variance (the Alex002 blow-up: the velocity covariance explodes in a single
-      // step while the encoder-pinned position covariance stays sane). Bound Qa's largest diagonal at QA_MAX by
-      // uniformly scaling Lambda^-2 down; a single scalar keeps Qa exactly symmetric and PSD and preserves the
-      // dense joint coupling (§3.4/§7), it only limits the overall intensity. Warn once when it binds.
-      double maxLambdaInvSqDiag = 0.0;
+      // Per-joint Sigma_tau via the Gram form (Part B item 3): Y = Lambda_eff^-1 with column j scaled by
+      // sigma_tau,j, then Qa = Y Y^T = Lambda_eff^-1 diag(sigma_tau^2) Lambda_eff^-T. Qa is PSD AND exactly
+      // symmetric by construction, so the Van Loan fill below reads it directly (no symmetrized read). This
+      // replaces the scalar Qa = sigma_tau^2 Lambda^-2; per-joint sigma_tau = ALPHA * tau_max,i scales the
+      // process noise with each actuator's own torque capacity instead of one number across hip and wrist.
       for (int i = 0; i < n; i++)
-         maxLambdaInvSqDiag = Math.max(maxLambdaInvSqDiag, LambdaInvSq.get(i, i));
-      double maxAllowedLambdaInvSqDiag = QA_MAX / st2; // st2 * this = QA_MAX
-      if (maxLambdaInvSqDiag > maxAllowedLambdaInvSqDiag)
+         for (int j = 0; j < n; j++)
+            Ytau.set(i, j, LambdaInv.get(i, j) * sigmaTauPerJoint[j]); // scale column j by sigma_tau,j
+      CommonOps_DDRM.multTransB(Ytau, Ytau, Qa); // Qa = Y Y^T
+
+      // QA_MAX tripwire (Part B item 2 — SURFACE, do not rescale). With the rotor floor on Lambda_eff, max
+      // diag(Qa) must sit far below QA_MAX; if it ever would not, that is a model/config regression. Warn once
+      // (naming the argmax joint by state index -> name) and count every tick it would bind — but keep Qa as
+      // computed. The old uniform CommonOps_DDRM.scale coupled one joint's outlier into GLOBAL Q starvation
+      // (hips down ~6 orders), which collapsed P onto the measurement floors and CAUSED the min-side S
+      // singularity; a cap that silently rescales the whole robot is worse than the disease.
+      double maxQaDiag = 0.0;
+      int argMaxJoint = 0;
+      for (int i = 0; i < n; i++)
       {
-         CommonOps_DDRM.scale(maxAllowedLambdaInvSqDiag / maxLambdaInvSqDiag, LambdaInvSq);
-         warnMassMatrixConditioningCapOnce();
+         if (Qa.get(i, i) > maxQaDiag)
+         {
+            maxQaDiag = Qa.get(i, i);
+            argMaxJoint = i;
+         }
       }
+      if (maxQaDiag > QA_MAX)
+      {
+         yoQaCapWouldBindCount.increment();
+         warnQaCapWouldBindOnce(argMaxJoint, maxQaDiag);
+      }
+
       double dt2 = dt * dt;
       double dt3 = dt2 * dt;
       for (int i = 0; i < n; i++)
       {
          for (int j = 0; j < n; j++)
          {
-            // Symmetrized read (SPEC §3.4): the Cholesky inverse and its square are symmetric only to
-            // round-off, and Q must stay exactly symmetric or the Joseph update slowly loses P's symmetry.
-            double qa = st2 * 0.5 * (LambdaInvSq.get(i, j) + LambdaInvSq.get(j, i));
+            // Qa is exactly symmetric by construction (Y Y^T), so read directly (Part B item 3 removed the
+            // 0.5*(a_ij + a_ji) symmetrized read). Van Loan dt^3/3, dt^2/2, dt structure unchanged (SPEC §3.4).
+            double qa = Qa.get(i, j);
             Q.set(i, j, qa * dt3 / 3.0);     // q-q block
             Q.set(i, n + j, qa * dt2 / 2.0); // q-qd cross term
             Q.set(n + i, j, qa * dt2 / 2.0);
@@ -854,17 +1104,59 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
             + " (scalar CWNA if this is the first computation). Reported once.");
    }
 
-   /** One-shot warning that the Qa conditioning cap (QA_MAX) bound the Schur process noise — i.e. Lambda was
-    *  near-singular for some joint (a near-singular-but-PD Lambda the Cholesky guard cannot see). Named so a
-    *  hardware run reveals the near-singular-inertia joint instead of silently blowing up the velocity covariance. */
-   private void warnMassMatrixConditioningCapOnce()
+   /** One-shot warning that the Qa TRIPWIRE (QA_MAX) would bind (Part B item 2): max diag(Qa) exceeded the
+    *  physical acceleration-noise ceiling. NOT rescaled — surfaced. With the reflected-rotor-inertia floor on
+    *  Lambda_eff this should never fire; if it does, the named joint is a model/config regression (a rotor-table
+    *  gap, a bad mass matrix, or a genuinely near-singular Lambda_eff) to chase, and jointKFQaCapWouldBindCount
+    *  counts every tick it binds. */
+   private void warnQaCapWouldBindOnce(int argMaxJointStateIndex, double maxQaDiag)
    {
       if (warnedMassMatrixConditioningCap)
          return;
       warnedMassMatrixConditioningCap = true;
-      LogTools.warn("Joint-level KF process noise: Qa = sigma_tau^2 Lambda^-2 hit the conditioning cap QA_MAX ("
-            + QA_MAX + " (rad/s^2)^2) — the Schur complement Lambda is near-singular for a proximal/light joint, so "
-            + "its unbounded Lambda^-2 was clamped to a physical acceleration-noise variance. Reported once.");
+      LogTools.warn("Joint-level KF process noise: max diag(Qa) = " + maxQaDiag + " (rad/s^2)^2 exceeds the QA_MAX tripwire ("
+            + QA_MAX + ") at joint '" + jointNameByStateIndex(argMaxJointStateIndex) + "'. Qa is NOT rescaled (a uniform "
+            + "scale would starve global Q, the old failure mode); this indicates a model/config regression — check the "
+            + "reflected-rotor-inertia table entry and the mass matrix for this joint. Counting in jointKFQaCapWouldBindCount. Reported once.");
+   }
+
+   /**
+    * Validates and floors each IMU's angular-velocity MEASUREMENT-noise covariance ONCE, at construction, and
+    * fills the cached block-diagonal {@code Sigma} (Part B item 4). An IMU whose gyro-noise trace is zero /
+    * non-finite (an unset SensorNoiseParameters — Alex historically ran with a null one, so every covariance was
+    * the 3x3 zero) is an ERROR: its zero Sigma removes the innovation-covariance floor on the pure-bias rows of
+    * every 1-DoF chain, which collapses lambda_min(S) and diverges P. An IMU whose trace is positive but below
+    * the conditioning floor is a softer WARN. Either way the block is substituted with SIGMA_GYRO_FLOOR * I3. The
+    * flooring decision is made HERE, once; the per-tick build copies this cached Sigma (never re-reads a
+    * possibly-zero covariance).
+    */
+   private void buildAndFloorSigma()
+   {
+      Sigma.zero();
+      for (int o = 0; o < m; o++)
+      {
+         imusByOrdinal[o].getAngularVelocityNoiseCovariance(Rimu);
+         boolean nonFinite = containsNonFinite(Rimu);
+         double trace = nonFinite ? Double.NaN : Rimu.get(0, 0) + Rimu.get(1, 1) + Rimu.get(2, 2);
+         if (nonFinite || !(trace >= SIGMA_GYRO_FLOOR_TRACE))
+         {
+            gyroSigmaFloored = true;
+            String name = imusByOrdinal[o].getSensorName();
+            if (nonFinite || !(trace > 0.0))
+               LogTools.error("JointLevelKFPreFilter: IMU '" + name + "' has an unset/zero/non-finite angular-velocity "
+                     + "noise covariance (trace=" + trace + "). A zero Sigma removes the innovation-covariance floor on "
+                     + "the pure-bias rows of every 1-DoF chain (the min-side S collapse). Substituting the gyro floor "
+                     + SIGMA_GYRO_FLOOR + " (rad/s)^2 * I3; fix the sensor SensorNoiseParameters at the source.");
+            else
+               LogTools.warn("JointLevelKFPreFilter: IMU '" + name + "' gyro-noise trace " + trace + " (rad/s)^2 is below "
+                     + "the conditioning floor " + SIGMA_GYRO_FLOOR_TRACE + "; substituting " + SIGMA_GYRO_FLOOR
+                     + " * I3 for innovation-covariance conditioning.");
+            Rimu.zero();
+            for (int d = 0; d < 3; d++)
+               Rimu.set(d, d, SIGMA_GYRO_FLOOR);
+         }
+         insertScaledInto(Rimu, 1.0, Sigma, 3 * o, 3 * o);
+      }
    }
 
    private void buildEncoderModel()
@@ -999,6 +1291,11 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          warnIfNonFiniteState("stackedGyroUpdate", -1);
       }
 
+      // P hygiene (Part B item 7): re-symmetrize P once per tick. The Joseph products keep P symmetric only to
+      // round-off; a slow asymmetry drift eventually corrupts the Cholesky conditioning gate. O(dim^2),
+      // negligible next to the Joseph O(dim^3) products.
+      symmetrize(P);
+
       updateJointYoVariables();
    }
 
@@ -1037,6 +1334,14 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
     */
    private void buildStackedMeasurement()
    {
+      // Validate + floor + cache Sigma on first use (Part B item 4). One-time; the warn/error strings build only
+      // on this first fire. After this the cached Sigma is reused unchanged (never re-read from the IMUs).
+      if (!sigmaFloorInitialized)
+      {
+         buildAndFloorSigma();
+         sigmaFloorInitialized = true;
+      }
+
       // Mark active anchors (usable + trusted last tick, SPEC §6 phase note) and count them.
       int activeAnchors = 0;
       for (int i = 0; i < footAnchors.size(); i++)
@@ -1051,18 +1356,13 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       Hg.reshape(rows, dim);       Hg.zero();
       zg.reshape(rows, 1);         zg.zero();
       Lmix.reshape(rows, 3 * m);   Lmix.zero();
-      Sigma.reshape(3 * m, 3 * m); Sigma.zero();
       Rg.reshape(rows, rows);      Rg.zero();
 
-      // Sigma = blkdiag over IMUs of each IMU's angular-velocity MEASUREMENT-noise covariance, in its own frame.
-      // Deliberately NOT getAngularVelocityBiasProcessNoiseCovariance (the bias random-walk intensity, orders of
-      // magnitude smaller); using that here makes the gyro update drastically over-confident (Rev. 1 bug class).
-      // Index loop over the ordinal->IMU array (not a map-entry iterator) to stay allocation-free.
-      for (int o = 0; o < m; o++)
-      {
-         imusByOrdinal[o].getAngularVelocityNoiseCovariance(Rimu);
-         insertScaledInto(Rimu, 1.0, Sigma, 3 * o, 3 * o);
-      }
+      // Sigma (blkdiag over IMUs of each IMU's angular-velocity MEASUREMENT-noise covariance, in its own frame)
+      // is a measurement-noise CONSTANT, built and FLOORED once at construction (buildAndFloorSigma, Part B
+      // item 4). It is NOT rebuilt here — re-reading getAngularVelocityNoiseCovariance every tick would re-admit
+      // a possibly-zero covariance (the min-side S collapse). Deliberately NOT the bias process-noise covariance
+      // (the bias random-walk intensity, orders of magnitude smaller — a Rev. 1 over-confidence bug class).
 
       // Pair rows.
       for (int e = 0; e < E; e++)
@@ -1144,6 +1444,23 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       // Exact symmetry for the Joseph update (the congruence is symmetric only to round-off). Reuses the
       // Schur path's helper.
       symmetrize(Rg);
+
+      // Runtime floor tripwire (Part B item 4). Each pair row of R_g = L Sigma L^T is a rotation-congruence of
+      // the floored Sigma blocks (parent + child), so its diagonal is ~2 * floor and cannot fall below the floor
+      // unless the L/Sigma assembly regresses. Warn once if any pair-row diagonal drops below half the floor.
+      if (!warnedGyroFloorRegression)
+      {
+         double minPairDiag = Double.POSITIVE_INFINITY;
+         for (int r = 0; r < 3 * E; r++)
+            minPairDiag = Math.min(minPairDiag, Rg.get(r, r));
+         if (minPairDiag < 0.5 * SIGMA_GYRO_FLOOR)
+         {
+            warnedGyroFloorRegression = true;
+            LogTools.warn("JointLevelKFPreFilter: min R_g pair-row diagonal " + minPairDiag + " fell below half the gyro floor "
+                  + SIGMA_GYRO_FLOOR + " — the Sigma floor should make this impossible; the stacked-measurement assembly (L or "
+                  + "Sigma) has regressed. Reported once.");
+         }
+      }
    }
 
    // ================================ Phase 2 ================================
@@ -1199,16 +1516,53 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       CommonOps_DDRM.mult(Hm, PHt, S);
       CommonOps_DDRM.addEquals(S, Rm); // innovation covariance S = H P H^T + R (the +R was previously missing,
                                        // which made the gain over-confident and could grow the covariance)
-      // Allocation-free inverse via the pre-warmed solver (see allocate()). setA decomposes S in place;
-      // invert writes S^-1 into Sinv. Neither allocates because S is never wider than the warm-up size.
+      // Cholesky factor + ACTIVE conditioning/floor gate (Part B item 5). symmetrize first (Cholesky assumes
+      // exact symmetry; S is symmetric only to round-off). setA returns false on a NON-PD S => skip. Then read
+      // the factor diagonal: S's pivots are L_ii^2, so cond(S) ~ (max L_ii / min L_ii)^2 and lambda_min(S) ~
+      // (min L_ii)^2 — both with NO eigendecomposition. A finite-but-ill-conditioned S (cond > COND_S_MAX)
+      // inverts to a huge gain the Joseph K R K^T loop squares each tick — the divergence the old LU/isFinite
+      // guards were blind to — so the WHOLE block is skipped. The floor gate catches the dual pathology: a pivot
+      // below half the applicable measurement-noise floor (ENCODER_VAR / SIGMA_GYRO_FLOOR) is algebraically
+      // impossible for a healthy S = H P H^T + R and signals a collapsed (zero-Sigma) row.
+      symmetrize(S);
       if (!innovationSolver.setA(S))
       {
-         warnSingularInnovationOnce(label, "S is exactly singular (LU factorization rejected it)", Hm, Rm);
+         warnSingularInnovationOnce(label, "S is not positive definite (Cholesky factorization rejected it)", Hm, Rm);
+         return;
+      }
+      Lchol.reshape(k, k); // shrink into the capacity pre-reserved in allocate() (no realloc); getT needs an exact k x k target
+      innovationSolver.getDecomposition().getT(Lchol);
+      double minLii = Double.POSITIVE_INFINITY, maxLii = 0.0;
+      for (int i = 0; i < k; i++)
+      {
+         double lii = Lchol.get(i, i);
+         if (lii < minLii) minLii = lii;
+         if (lii > maxLii) maxLii = lii;
+      }
+      double minPivot = minLii * minLii;                 // ~ lambda_min(S)
+      double maxPivot = maxLii * maxLii;                 // ~ lambda_max(S)
+      double condProxy = minLii > 0.0 ? (maxLii / minLii) * (maxLii / minLii) : Double.POSITIVE_INFINITY;
+      if (label != null && label.startsWith("stackedGyro")) // publish the gyro-block S diagnostics every tick (cheap)
+      {
+         yoCondSProxyLog10.set(Math.log10(condProxy));
+         yoMinSDiag.set(minPivot);
+         yoMaxSDiag.set(maxPivot);
+      }
+      if (condProxy > COND_S_MAX)
+      {
+         yoInnovationGateSkipCount.increment();
+         warnSingularInnovationOnce(label, String.format("cond(S) proxy %.3e exceeds COND_S_MAX %.1e; whole block gated", condProxy, COND_S_MAX), Hm, Rm);
+         return;
+      }
+      double rFloor = (label != null && label.startsWith("encoder")) ? ENCODER_VAR : SIGMA_GYRO_FLOOR;
+      if (minPivot < 0.5 * rFloor)
+      {
+         yoInnovationGateSkipCount.increment();
+         warnSingularInnovationOnce(label, String.format("min S pivot %.3e below half the R floor %.3e (collapsed row); block gated", minPivot, rFloor), Hm, Rm);
          return;
       }
       innovationSolver.invert(Sinv);
-      // setA only rejects an *exactly* singular S; a near-singular S passes and invert overflows to Inf/NaN.
-      // Catch it here, before x/P are modified, so the bad inverse cannot enter the state.
+      // A PD, well-conditioned S still gets a residual-overflow guard before x/P are touched.
       if (containsNonFinite(Sinv))
       {
          warnSingularInnovationOnce(label, "S^-1 is non-finite (S is near-singular and its inverse overflowed)", Hm, Rm);
@@ -1365,45 +1719,29 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       EigenDecomposition_F64<DMatrixRMaj> eig = DecompositionFactory_DDRM.eig(k, true, true); // symmetric, with eigenvectors
       if (eig.decompose(Sfresh))
       {
-         int minIdx = 0;
+         int minIdx = 0, maxIdx = 0;
          double minEig = Double.POSITIVE_INFINITY, maxEig = Double.NEGATIVE_INFINITY;
          for (int i = 0; i < k; i++)
          {
             double lambda = eig.getEigenvalue(i).getReal();
             if (lambda < minEig) { minEig = lambda; minIdx = i; }
-            if (lambda > maxEig) { maxEig = lambda; }
+            if (lambda > maxEig) { maxEig = lambda; maxIdx = i; }
          }
          double cond = minEig != 0.0 ? Math.abs(maxEig / minEig) : Double.POSITIVE_INFINITY;
-         msg.append(String.format("cond(S)=%.3e, smallest eigenvalue=%.3e. ", cond, minEig));
-
-         DMatrixRMaj v = eig.getEigenVector(minIdx); // the near-null measurement direction
-         if (v != null)
-         {
-            msg.append("Measurement rows carrying that near-null direction (|weight| -> physical element): ");
-            boolean[] used = new boolean[k];
-            int reported = 0;
-            for (int rank = 0; rank < 4; rank++)
-            {
-               int best = -1;
-               double bestAbs = -1.0;
-               for (int i = 0; i < k; i++)
-               {
-                  if (used[i])
-                     continue;
-                  double a = Math.abs(v.get(i));
-                  if (a > bestAbs) { bestAbs = a; best = i; }
-               }
-               if (best < 0 || bestAbs < 1.0e-3)
-                  break;
-               used[best] = true;
-               if (reported > 0)
-                  msg.append("; ");
-               msg.append(String.format("%.2f -> %s", bestAbs, describeMeasurementRow(best, label, Hm)));
-               reported++;
-            }
-            if (reported == 0)
-               msg.append("(spread across the whole block; no single row dominates)");
-         }
+         // Report BOTH ends (Part B item 5). When the pathology is a lambda_MAX blow-up (P diverging), the
+         // SMALLEST eigenvector points at the HEALTHIEST rows — so naming only the min side (as the prior
+         // diagnostic did) mis-blames the stance-leg encoders. Compare lambda_max against a sane innovation
+         // scale to say which side is actually pathological.
+         final double SANE_INNOVATION_SCALE = 1.0e6;
+         boolean maxSidePathological = maxEig > SANE_INNOVATION_SCALE;
+         msg.append(String.format("cond(S)=%.3e, lambda_min=%.3e, lambda_max=%.3e — the %s side is pathological. ",
+                                  cond, minEig, maxEig,
+                                  maxSidePathological ? "MAX (lambda_max above a sane innovation scale ~1e6; P has diverged)"
+                                                      : "MIN (lambda_min collapsed toward 0; a row lost its noise floor)"));
+         msg.append("min-side rows (near-null measurement directions): ");
+         appendDominantRows(msg, eig.getEigenVector(minIdx), k, label, Hm);
+         msg.append(". max-side rows (P-blowup directions): ");
+         appendDominantRows(msg, eig.getEigenVector(maxIdx), k, label, Hm);
       }
       else
       {
@@ -1414,8 +1752,42 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          msg.append(String.format("(eigen-decomposition failed; smallest S diagonal %.3e at %s)",
                                   minDiag, describeMeasurementRow(minRow, label, Hm)));
       }
-      msg.append(" This element/joint is driving the innovation ill-conditioning.");
+      msg.append(" This is where the innovation ill-conditioning lives.");
       return msg.toString();
+   }
+
+   /** Appends the up-to-4 rows carrying the most weight in eigenvector {@code v}, as "|weight| -> physical
+    *  element", for the both-ends singular-innovation diagnostic. Diagnostic-only; never on the hot path. */
+   private void appendDominantRows(StringBuilder msg, DMatrixRMaj v, int k, String label, DMatrixRMaj Hm)
+   {
+      if (v == null)
+      {
+         msg.append("(eigenvector unavailable)");
+         return;
+      }
+      boolean[] used = new boolean[k];
+      int reported = 0;
+      for (int rank = 0; rank < 4; rank++)
+      {
+         int best = -1;
+         double bestAbs = -1.0;
+         for (int i = 0; i < k; i++)
+         {
+            if (used[i])
+               continue;
+            double a = Math.abs(v.get(i));
+            if (a > bestAbs) { bestAbs = a; best = i; }
+         }
+         if (best < 0 || bestAbs < 1.0e-3)
+            break;
+         used[best] = true;
+         if (reported > 0)
+            msg.append("; ");
+         msg.append(String.format("%.2f -> %s", bestAbs, describeMeasurementRow(best, label, Hm)));
+         reported++;
+      }
+      if (reported == 0)
+         msg.append("(spread across the whole block; no single row dominates)");
    }
 
    /**

@@ -22,8 +22,13 @@ public class InvariantEKFStateEstimatorFactory implements StateEstimatorControll
    private final double contactMeasurementVariance;
    private final double initialCovariance;
 
-   private static final double GYRO_VARIANCE = 1.0e-7;
-   private static final double ACCEL_VARIANCE = 1.0e-7;
+   // KNOWN OPEN QUESTION (for the human): GYRO_VARIANCE/ACCEL_VARIANCE are consumed as continuous-time
+   // process-noise variances (units rad^2/s and m^2/s^3 per the InvariantPropagator Javadoc), whereas the SDF
+   // numbers below are discrete-time sample stddevs at 1 kHz. A dt (= estimatorDT = 1e-3 s) discretization factor
+   // may therefore belong on these terms. Per the user's explicit decision they are set to the raw sigma^2 (no dt);
+   // retune against NIS on hardware. Do NOT change the InvariantPropagator to compensate.
+   private static final double GYRO_VARIANCE = 4.0e-8;   // ORIGINAL: 1.0e-7 (placeholder). (2e-4 rad/s)^2 from Alex model.sdf gyro density.
+   private static final double ACCEL_VARIANCE = 2.89e-4; // ORIGINAL: 1.0e-7 (placeholder; accel was ~3600x too small -> overconfident, drift-prone root link). (1.7e-2 m/s^2)^2 from Alex model.sdf accel density.
    private static final double CONTACT_VARIANCE = 1.0e-12;
    private static final double CONTACT_MEASUREMENT_VARIANCE = 1.0e-12;
    private static final double INITIAL_COVARIANCE = 1.0;

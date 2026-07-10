@@ -121,15 +121,19 @@ public class JointLevelKFStandingStabilityTest
       return m;
    }
 
-   /** Qa = σ_τ² Λ⁻² with the physical conditioning cap: uniformly scale Qa down so no diagonal exceeds QA_MAX
-    *  (preserves symmetry / PSD / joint coupling). Mirrors the filter's post-fix updateProcessNoiseFromMassMatrix. */
-   private static DMatrixRMaj qaFromLambdaCapped(DMatrixRMaj lambda, double sigmaTau)
+   private static final double ROTOR_DEFAULT = 0.005; // JointLevelKFPreFilter.ROTOR_INERTIA_DEFAULT (synthetic joints match no table key)
+
+   /** New-model reference Qa (Part B items 1 &amp; 3, replacing the old QA_MAX-capped σ_τ² Λ⁻²): Lambda_eff =
+    *  Λ + rotorDefault·I, then Qa = σ_τ² Lambda_eff⁻². The synthetic chain's joints match no rotor-table key (so
+    *  each rotor term is the default) and have no finite effort limit (so σ_τ is the uniform SIGMA_TAU fallback),
+    *  which makes the Gram form collapse to σ_τ² Lambda_eff⁻². Mirrors the filter's updateProcessNoiseFromMassMatrix.
+    *  The QA_MAX cap is no longer applied (demoted to a tripwire). */
+   private static DMatrixRMaj qaFromLambdaEff(JointLevelKFTestFixture f, DMatrixRMaj lambda, double sigmaTau)
    {
-      DMatrixRMaj qa = qaFromLambda(lambda, sigmaTau);
-      double md = maxDiag(qa);
-      if (md > QA_MAX)
-         CommonOps_DDRM.scale(QA_MAX / md, qa);
-      return qa;
+      DMatrixRMaj lambdaEff = lambda.copy();
+      for (int i = 0; i < lambdaEff.numRows; i++) // per-joint rotor via the filter's own seam (exact match)
+         lambdaEff.add(i, i, JointLevelKFPreFilter.reflectedRotorInertiaForNameOrDefault(f.filteredJoints.get(i).getName()));
+      return qaFromLambda(lambdaEff, sigmaTau);
    }
 
    // ============================ CHECK #1 + #2: Λ conditioning and predict-Qa mechanism ============================
@@ -142,7 +146,7 @@ public class JointLevelKFStandingStabilityTest
       {
          int n = f.n;
          DMatrixRMaj lambda = referenceSchur(f)[0];
-         DMatrixRMaj qa = qaFromLambdaCapped(lambda, SIGMA_TAU); // matches the fixed filter (σ_τ retune + cap)
+         DMatrixRMaj qa = qaFromLambdaEff(f, lambda, SIGMA_TAU); // matches the fixed filter (rotor-inertia floor + Gram σ_τ, no cap)
 
          double cond = condSPD(lambda);
          double lmin = minEig(lambda);
@@ -172,7 +176,10 @@ public class JointLevelKFStandingStabilityTest
          // predict adds Q; the q̇q̇ increment equals dt*Qa (Van Loan). Assert that identity holds (mechanism proof).
          double expectedIncrement = DT * qa.get(worst, worst);
          double actualIncrement = pqdAfter - pqdBefore;
-         assertTrue(Math.abs(actualIncrement - expectedIncrement) <= 1e-6 * Math.max(1.0, expectedIncrement),
+         // 1e-4 (was 1e-6): filter forms Qa via the Gram outer product Y Yᵀ over a Cholesky-inverted Lambda_eff,
+         // the reference via LU inv·inv — they diverge a few round-off orders on ill-conditioned random Λ_eff
+         // (pure numerics, not a model gap; the exact Gram algebra is pinned by JointLevelKFRotorAndGramTest).
+         assertTrue(Math.abs(actualIncrement - expectedIncrement) <= 1e-4 * Math.max(1.0, expectedIncrement),
                     f.describe() + " one-predict P_qdqd increment must equal dt*Qa (predict is the inflation source): "
                     + actualIncrement + " vs " + expectedIncrement);
       }
@@ -273,21 +280,31 @@ public class JointLevelKFStandingStabilityTest
    }
 
    @Test
-   public void testConditioningCapBoundsQaEvenForNearSingularLambda()
+   public void testRotorInertiaFloorBoundsQaForNearSingularLambda()
    {
-      // Independent validation of the STRUCTURAL half of the fix (the Λ-conditioning cap), which σ_τ retune alone
-      // cannot provide: a deliberately near-singular Λ (λ_min ~ 1e-2, Alex's proximal-hip regime) must still yield
-      // a physically-bounded Qa. Computes Qa the same way the filter does, with and without the cap.
+      // Independent validation of the STRUCTURAL half of the fix (Part B item 1, the reflected-rotor-inertia
+      // floor), which σ_τ retune alone cannot provide — and which REPLACES the old uniform QA_MAX rescale
+      // (now only a tripwire, item 2): a deliberately near-singular Λ (λ_min ~ 2e-2, Alex's proximal-hip regime)
+      // makes the UN-floored Qa = σ_τ² Λ⁻² blow up, but adding the rotor inertia diagonal (Lambda_eff = Λ +
+      // diag(J_rotor)) floors λ_min(Lambda_eff) by Weyl and bounds Qa — with NO uniform rescale.
+      double sigmaTau = 5.0;
+      double rotor = 0.05; // a realistic reflected rotor inertia (Alex ankle/hip scale)
       double[] nearSingularLambdaDiag = {2.0, 0.02, 1.5}; // one near-singular (proximal-hip-like) mode
       DMatrixRMaj lambda = CommonOps_DDRM.identity(3);
       for (int i = 0; i < 3; i++) lambda.set(i, i, nearSingularLambdaDiag[i]);
 
-      DMatrixRMaj qaUncapped = qaFromLambda(lambda, 5.0);
-      DMatrixRMaj qaCapped = qaFromLambdaCapped(lambda, 5.0);
-      System.out.printf("=== cap validation (near-singular Λ, λ_min=%.2e): Qa maxdiag uncapped=%.3e capped=%.3e ===%n",
-                        0.02, maxDiag(qaUncapped), maxDiag(qaCapped));
-      assertTrue(maxDiag(qaUncapped) > QA_MAX * 1.5, "near-singular Λ makes uncapped Qa exceed the physical cap");
-      assertTrue(maxDiag(qaCapped) <= QA_MAX * (1.0 + 1e-9), "the cap bounds Qa at the physical maximum");
+      DMatrixRMaj qaUnfloored = qaFromLambda(lambda, sigmaTau);
+      DMatrixRMaj lambdaEff = lambda.copy();
+      for (int i = 0; i < 3; i++) lambdaEff.add(i, i, rotor);
+      DMatrixRMaj qaFloored = qaFromLambda(lambdaEff, sigmaTau); // σ_τ² Lambda_eff⁻²
+
+      // Weyl: λ_min(Lambda_eff) ≥ λ_min(Λ) + rotor ⇒ max diag(Qa) ≤ σ_τ² / (λ_min(Λ) + rotor)².
+      double weylBound = sigmaTau * sigmaTau / Math.pow(minEig(lambda) + rotor, 2);
+      System.out.printf("=== rotor-floor validation (near-singular Λ, λ_min=%.2e): Qa maxdiag unfloored=%.3e floored=%.3e (Weyl bound %.3e) ===%n",
+                        minEig(lambda), maxDiag(qaUnfloored), maxDiag(qaFloored), weylBound);
+      assertTrue(maxDiag(qaUnfloored) > QA_MAX * 1.5, "near-singular Λ makes the UN-floored Qa exceed the physical scale (the old blow-up)");
+      assertTrue(maxDiag(qaFloored) <= weylBound * (1.0 + 1e-9), "the rotor-inertia floor bounds Qa by the Weyl λ_min(Lambda_eff) floor");
+      assertTrue(maxDiag(qaFloored) < maxDiag(qaUnfloored), "the rotor floor strictly reduces the worst Qa diagonal");
    }
 
    private static double maxAbs(DMatrixRMaj a)
