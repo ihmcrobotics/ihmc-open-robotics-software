@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Build with Gradle, then run the main class with java (IntelliJ-style).
+# Ctrl+C goes to the JVM, not a Gradle daemon wrapper.
+#
+# Usage:
+#   run-main <gradle-project> <main-class> [args...]
+#
+# Examples (from alex/):
+#   ../ihmc-open-robotics-software/scripts/run-main :alex-test us.ihmc.alex.rdx.AlexRDXBehaviorTestFacilitator
+#
+# Examples (from primary/):
+#   ihmc-open-robotics-software/scripts/run-main :alex:alex-test us.ihmc.alex.rdx.AlexRDXBehaviorTestFacilitator
+
+set -euo pipefail
+
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+INIT_SCRIPT="$SCRIPT_DIR/run-main.init.gradle.kts"
+
+if [[ $# -lt 2 ]]; then
+   echo "Usage: run-main <gradle-project> <main-class> [args...]" >&2
+   echo "Example: run-main :alex-test us.ihmc.alex.rdx.AlexRDXBehaviorTestFacilitator" >&2
+   exit 1
+fi
+
+PROJECT=$1
+MAIN=$2
+shift 2
+
+[[ $PROJECT == :* ]] || PROJECT=":$PROJECT"
+
+OUT_DIR=$(mktemp -d "${TMPDIR:-/tmp}/ihmc-run-main.XXXXXX")
+
+gradle "${PROJECT}:writeRunMainClasspath" \
+   -PrunMainOutDir="$OUT_DIR" \
+   --init-script "$INIT_SCRIPT"
+
+WORKDIR=$(cat "$OUT_DIR/workdir")
+ARGFILE="$OUT_DIR/java.args"
+
+cd "$WORKDIR"
+# Replace this shell with the JVM so signals (Ctrl+C) match IntelliJ / java behavior
+exec java @"$ARGFILE" "$MAIN" "$@"
