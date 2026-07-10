@@ -81,10 +81,23 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    // OVERRIDES (below), matched by case-insensitive name substring exactly like the rotor table — so a joint the
    // QA_MAX tripwire flags can be knocked down without touching the rest of the robot.
    //
-   // TODO(retune): ALPHA_DEFAULT=0.15 is interim/uncalibrated; calibrate against quiet-standing then walking NIS,
-   // gyro block and encoder block separately. The KNEE override (0.03) was set 2026-07-10 because RIGHT_KNEE_Y
-   // tripped QA_MAX on hardware (max diag(Qa)=14842 at 0.15 — the knee's floating-base Schur inertia is light, so
-   // 15% of its 217 N*m capacity is a lot of unmodeled acceleration): 0.03 -> Qa ~ 594 < QA_MAX (900).
+   // RETUNE PRINCIPLE (2026-07-10, hardware log 20260710_135507): a uniform ALPHA fixes the unmodeled torque at a
+   // fixed FRACTION OF TORQUE CAPACITY, but the torque->acceleration map Lambda_eff^-1 varies by orders of
+   // magnitude across joints, so sqrt(diag(Qa)_i) = |Lambda_eff^-1|_ii * alpha_i * tau_max,i spans orders of
+   // magnitude and joints trip QA_MAX one after another (knee was knocked to 0.03; a hip/spine_Z is the new argmax
+   // binding EVERY tick in that log). The physically-motivated fix is to equalize the unmodeled-ACCELERATION STD
+   // (the CWNA quantity for a (q,qd) filter) across joints at a common target TARGET_QDD_STD:
+   //     alpha_i = TARGET_QDD_STD / (|Lambda_eff^-1|_ii * tau_max,i)   ==>   alpha_i = alpha_old_i * sqrt(TARGET_QDD_STD^2 / diag(Qa)_i)
+   // The second form is how to CALIBRATE from a run: read the per-joint yoQaDiag (jointKF_QaDiag_<joint>) at the
+   // current alpha and rescale (iterate 2-3x; off-diagonal Lambda_eff^-1 coupling makes it not one-shot). Validation:
+   // the knee logged diag(Qa)=14842 at alpha=0.15, so TARGET_QDD_STD=24 -> alpha=0.15*sqrt(576/14842)=0.0295 ~ the
+   // hand-picked 0.03. TARGET_QDD_STD is set to 20 rad/s^2 (var 400) for a 2.25x variance margin under QA_MAX=900,
+   // so quiet standing sits well below the cap and only genuine walking transients trip it (a tripwire, not a clamp).
+   //
+   // TODO(calibrate-from-run): the non-KNEE ALPHA_VALUES below are NOT YET the equalized values — they still need
+   // the per-joint diag(Qa) from a run to populate via the formula above. Until then non-listed joints use
+   // ALPHA_DEFAULT. Do NOT hand-guess them (per the "no retune off a units argument alone" rule).
+   private static final double TARGET_QDD_STD = 20.0; // rad/s^2, common unmodeled-acceleration STD target for the ALPHA equalization
    private static final double ALPHA_DEFAULT = 0.15;
    private static final String[] ALPHA_JOINT_KEYS = {"KNEE"};
    private static final double[] ALPHA_VALUES     = {0.03};
@@ -202,6 +215,14 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private YoDouble[] yoJointPositionLowerBound;
    private YoDouble[] yoJointVelocityUpperBound;
    private YoDouble[] yoJointVelocityLowerBound;
+   // Per-joint process-noise diagnostics (Part B item 2, extended for the ALPHA retune). yoQaDiag[i] is
+   // diag(Qa)_i — joint i's acceleration process-noise VARIANCE ((rad/s^2)^2) this tick, the quantity the QA_MAX
+   // tripwire thresholds. yoQaCapBindCount[i] counts the ticks joint i was the argmax that exceeded QA_MAX. The
+   // aggregate jointKFQaCapWouldBindCount says the cap binds but not WHICH joint, so it cannot drive the per-joint
+   // ALPHA retune (equalize sqrt(diag(Qa)) across joints -> alpha_i = sigma*_qdd / (|Lambda_eff^-1|_ii * tau_max,i));
+   // these per-joint reads are the measurement that closes it. Indexed by joint state index.
+   private YoDouble[] yoQaDiag;
+   private YoInteger[] yoQaCapBindCount;
    // Per-IMU estimated gyro bias (IMU frame), indexed by ordinal. Published so the bias this filter EXPORTS to
    // the downstream InEKF (via getAngularVelocityBiasInIMUFrame) is visible — a runaway base-IMU bias here is
    // integrated straight into the InEKF's base orientation, so it must not be an unlogged black box.
@@ -696,6 +717,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       yoJointPositionLowerBound = new YoDouble[n];
       yoJointVelocityUpperBound = new YoDouble[n];
       yoJointVelocityLowerBound = new YoDouble[n];
+      yoQaDiag = new YoDouble[n];
+      yoQaCapBindCount = new YoInteger[n];
       for (var e : jointToIndex.entrySet())
       {
          int idx = e.getValue();
@@ -706,6 +729,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          yoJointPositionLowerBound[idx] = new YoDouble("jointKF_q_" + jointName + "_lowerBound", registry);
          yoJointVelocityUpperBound[idx] = new YoDouble("jointKF_qd_" + jointName + "_upperBound", registry);
          yoJointVelocityLowerBound[idx] = new YoDouble("jointKF_qd_" + jointName + "_lowerBound", registry);
+         yoQaDiag[idx] = new YoDouble("jointKF_QaDiag_" + jointName, registry);
+         yoQaCapBindCount[idx] = new YoInteger("jointKF_QaCapBind_" + jointName + "_count", registry);
       }
 
       // Per-IMU gyro-bias diagnostics (IMU frame), named by sensor. imusByOrdinal is populated by allocate(),
@@ -1110,15 +1135,22 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       int argMaxJoint = 0;
       for (int i = 0; i < n; i++)
       {
-         if (Qa.get(i, i) > maxQaDiag)
+         double qaDiag = Qa.get(i, i);
+         // Per-joint acceleration process-noise variance, the input the ALPHA equalization is calibrated from
+         // (null on the construction-time call, which runs before createJointYoVariables()).
+         if (yoQaDiag != null)
+            yoQaDiag[i].set(qaDiag);
+         if (qaDiag > maxQaDiag)
          {
-            maxQaDiag = Qa.get(i, i);
+            maxQaDiag = qaDiag;
             argMaxJoint = i;
          }
       }
       if (maxQaDiag > QA_MAX)
       {
          yoQaCapWouldBindCount.increment();
+         if (yoQaCapBindCount != null) // per-joint attribution: WHICH joint's alpha needs knocking down
+            yoQaCapBindCount[argMaxJoint].increment();
          warnQaCapWouldBindOnce(argMaxJoint, maxQaDiag);
       }
 

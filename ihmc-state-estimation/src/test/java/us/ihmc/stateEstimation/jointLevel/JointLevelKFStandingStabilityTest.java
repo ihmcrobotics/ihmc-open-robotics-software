@@ -232,6 +232,86 @@ public class JointLevelKFStandingStabilityTest
       return out;
    }
 
+   // ============================ CHECK #5: the per-joint ALPHA acceleration-equalization principle ============================
+
+   private static final double TARGET_QDD_STD = 20.0; // rad/s², mirrors JointLevelKFPreFilter.TARGET_QDD_STD
+
+   @Test
+   public void testAccelerationEqualizedSigmaTauFloorsAtTargetAndEqualizesDominantTerm()
+   {
+      // PROPERTY (the per-joint ALPHA fix). Uniform ALPHA fixes σ_τ,i = α·τ_max,i at a fixed fraction of TORQUE
+      // capacity, but the torque→acceleration map Λ_eff⁻¹ spans orders of magnitude across joints, so the per-joint
+      // acceleration STD sqrt(diag(Qa)_i) = |Λ_eff⁻¹ column energy|·σ_τ also spans orders of magnitude and joints
+      // trip QA_MAX one after another (Alex002 log 20260710_135507: knee knocked to 0.03, a hip/spine_Z now binds
+      // EVERY tick). The fix equalizes the acceleration STD by σ_τ,i = TARGET/|Λ_eff⁻¹|_ii (≡ α_i = TARGET /
+      // (|Λ_eff⁻¹|_ii·τ_max,i)). Two model-independent theorems, proved on the synthetic mass matrices:
+      //   (a) FLOOR: diag(Qa)_i = Σ_j (Λ_eff⁻¹_ij σ_j)², whose own-column (j=i) term is exactly TARGET² ⇒
+      //       sqrt(diag(Qa)_i) ≥ TARGET for every joint — a common lower bound the uniform rule has no analogue of.
+      //   (b) DOMINANT-TERM EQUALIZATION: the own-column STD |Λ_eff⁻¹|_ii·σ_i = TARGET is IDENTICAL across joints,
+      //       whereas the uniform rule's own-column STD sigmaUni·|Λ_eff⁻¹|_ii inherits the full |Λ_eff⁻¹|_ii spread.
+      // Together: equalization removes the per-joint inertia spread that makes the uniform rule trip the cap.
+      StringBuilder report = new StringBuilder("=== PROPERTY: acceleration-equalized σ_τ (TARGET=" + TARGET_QDD_STD + " rad/s²) ===\n");
+      for (JointLevelKFTestFixture f : JointLevelKFTestFixture.shapesMassMatrix(9500L))
+      {
+         int n = f.n;
+         DMatrixRMaj lambdaEff = referenceSchur(f)[0].copy();
+         for (int i = 0; i < n; i++) // Λ_eff = Λ + diag(reflected rotor inertia), the filter's own seam (exact match)
+            lambdaEff.add(i, i, JointLevelKFPreFilter.reflectedRotorInertiaForNameOrDefault(f.filteredJoints.get(i).getName()));
+         DMatrixRMaj inv = new DMatrixRMaj(n, n);
+         CommonOps_DDRM.invert(lambdaEff, inv);
+
+         double[] sigmaEq = new double[n];    // equalized σ_τ,i = TARGET / |Λ_eff⁻¹|_ii
+         double sumSq = 0.0, invMin = Double.POSITIVE_INFINITY, invMax = 0.0;
+         for (int i = 0; i < n; i++)
+         {
+            double aii = Math.abs(inv.get(i, i));
+            sigmaEq[i] = TARGET_QDD_STD / aii;
+            sumSq += sigmaEq[i] * sigmaEq[i];
+            invMin = Math.min(invMin, aii);
+            invMax = Math.max(invMax, aii);
+         }
+         double sigmaUni = Math.sqrt(sumSq / n); // uniform σ_τ at MATCHED total power Σσ² (fair comparison)
+
+         double[] stdEq = accelStd(inv, sigmaEq);
+         double eqLo = arrayMin(stdEq), eqHi = arrayMax(stdEq);
+         // own-column STDs: equalized = TARGET ∀i (spread 1); uniform = sigmaUni·|inv_ii| (spread = |inv_ii| range)
+         double uniOwnSpread = invMax / invMin;
+         report.append(String.format("%s n=%d  eq[full std %.2f..%.2f]  |Λ_eff⁻¹|_ii spread x%.2e (uniform own-term spread)%n",
+                                      f.describe(), n, eqLo, eqHi, uniOwnSpread));
+
+         for (int i = 0; i < n; i++)
+         {
+            // (a) floor: every equalized joint STD is at least TARGET.
+            assertTrue(stdEq[i] >= TARGET_QDD_STD * (1.0 - 1e-6),
+                       f.describe() + " equalized joint " + i + " STD " + stdEq[i] + " must be ≥ TARGET " + TARGET_QDD_STD);
+            // (b) dominant-term equalization is EXACT: |inv_ii|·σEq_i == TARGET for every joint.
+            double ownTerm = Math.abs(inv.get(i, i)) * sigmaEq[i];
+            assertTrue(Math.abs(ownTerm - TARGET_QDD_STD) <= 1e-9 * TARGET_QDD_STD,
+                       f.describe() + " equalized own-column STD " + ownTerm + " must equal TARGET " + TARGET_QDD_STD);
+         }
+         // Sanity: the fixtures must actually exercise a nontrivial inertia spread, else the property is vacuous.
+         assertTrue(uniOwnSpread > 1.0 + 1e-9, f.describe() + " fixture must have a nontrivial |Λ_eff⁻¹|_ii spread");
+      }
+      System.out.println(report);
+   }
+
+   /** sqrt(diag(Λ⁻¹ diag(σ²) Λ⁻ᵀ))_i — the per-joint acceleration process-noise STD for a given per-joint σ_τ. */
+   private static double[] accelStd(DMatrixRMaj inv, double[] sigma)
+   {
+      int n = inv.numRows;
+      double[] std = new double[n];
+      for (int i = 0; i < n; i++)
+      {
+         double d = 0.0;
+         for (int j = 0; j < n; j++) { double t = inv.get(i, j) * sigma[j]; d += t * t; }
+         std[i] = Math.sqrt(d);
+      }
+      return std;
+   }
+
+   private static double arrayMin(double[] a) { double m = Double.POSITIVE_INFINITY; for (double v : a) m = Math.min(m, v); return m; }
+   private static double arrayMax(double[] a) { double m = 0.0; for (double v : a) m = Math.max(m, v); return m; }
+
    // ============================ CHECK #4: property test the fix must pass (run on current filter) ============================
 
    // Physical bound on the velocity variance a SINGLE 1 ms predict() may inject. A joint accelerates at most
