@@ -125,6 +125,14 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private boolean gravityLevelingEnabled = true;
    private static final double QUASI_STATIC_ACCEL_TOLERANCE = 0.05; // ‖a‖ within ±5% of |g|
    private static final double QUASI_STATIC_GYRO_THRESHOLD = 0.15;  // rad/s; "barely rotating"
+   private static final double QUASI_STATIC_HORIZONTAL_ACCEL_THRESHOLD = 0.5; // m/s²; horizontal specific force (≈2.9° tilt at |g|)
+
+   // Optional: restrict the PITCH leveling to double support (roll is always leveled). Fore-aft accel — which
+   // fakes pitch tilt and leans the base forward — is smallest with both feet planted. Default OFF: the
+   // anisotropic σ_pitch + horizontal-accel gate are the primary defense, and keeping pitch observable in single
+   // support leaves the tilt diagnostic live to root-cause any residual pitch divergence (rather than hide it).
+   private boolean gatePitchOnDoubleSupport = false;
+   private static final double DOUBLE_SUPPORT_CONTACT_PROBABILITY = 0.5; // per-foot p above which a foot counts as planted
 
    // Soft contact handling: a per-foot contact probability p ∈ [0,1] drives two covariance knobs each tick.
    // The default provider is forward-kinematics only (runs on hardware); ContactNet replaces it later.
@@ -149,6 +157,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final YoDouble yoGravityTiltErrorPitch = new YoDouble("invariantGravityTiltErrorPitch", registry);
    private final YoDouble yoGravityTiltErrorRoll = new YoDouble("invariantGravityTiltErrorRoll", registry);
    private final YoBoolean yoGravityUpdateActive = new YoBoolean("invariantGravityUpdateActive", registry);
+   private final YoBoolean yoGravityPitchObservable = new YoBoolean("invariantGravityPitchObservable", registry);
 
    // Per-foot contact-update conditioning diagnostics (mirrors the JointKF S-conditioning): cond(S) proxy (log10),
    // residual norm, and whether the update was applied (the conditioning gate can skip it). Plus a global
@@ -485,13 +494,25 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     */
    private void updateGravityLeveling()
    {
+      // Pitch is leveled only when observable: always in double support; in single support only if the
+      // double-support pitch gate is off. Roll is always leveled. Set before assemble() (it builds R).
+      boolean doubleSupport = getContactProbability(RobotSide.LEFT) >= DOUBLE_SUPPORT_CONTACT_PROBABILITY
+                           && getContactProbability(RobotSide.RIGHT) >= DOUBLE_SUPPORT_CONTACT_PROBABILITY;
+      boolean pitchObservable = !gatePitchOnDoubleSupport || doubleSupport;
+      ekf.setGravityPitchObservable(pitchObservable);
+      yoGravityPitchObservable.set(pitchObservable);
+
       ekf.assembleGravityLeveling(linearAcceleration);
       yoGravityTiltErrorAngle.set(ekf.getGravityTiltErrorAngle());
       yoGravityTiltErrorPitch.set(ekf.getGravityTiltErrorPitch());
       yoGravityTiltErrorRoll.set(ekf.getGravityTiltErrorRoll());
 
       boolean apply = gravityLevelingEnabled
-            && ekf.isGravityQuasiStatic(linearAcceleration, angularVelocity, QUASI_STATIC_ACCEL_TOLERANCE, QUASI_STATIC_GYRO_THRESHOLD);
+            && ekf.isGravityQuasiStatic(linearAcceleration,
+                                        angularVelocity,
+                                        QUASI_STATIC_ACCEL_TOLERANCE,
+                                        QUASI_STATIC_GYRO_THRESHOLD,
+                                        QUASI_STATIC_HORIZONTAL_ACCEL_THRESHOLD);
       yoGravityUpdateActive.set(apply);
       if (apply)
          ekf.applyGravityLeveling();
@@ -501,6 +522,16 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    public void setGravityLevelingEnabled(boolean gravityLevelingEnabled)
    {
       this.gravityLevelingEnabled = gravityLevelingEnabled;
+   }
+
+   /**
+    * If true, the PITCH leveling is applied only in double support (roll is always leveled). Default false.
+    * Experimental knob to try if the anisotropic σ_pitch + horizontal-accel gate leave a residual forward lean;
+    * off by default so single-support pitch stays observable for diagnosis rather than masked.
+    */
+   public void setGatePitchOnDoubleSupport(boolean gatePitchOnDoubleSupport)
+   {
+      this.gatePitchOnDoubleSupport = gatePitchOnDoubleSupport;
    }
 
    /** Clamps each gyro-bias component to ±{@link #MAX_GYRO_BIAS}; returns true if any axis was clamped. */

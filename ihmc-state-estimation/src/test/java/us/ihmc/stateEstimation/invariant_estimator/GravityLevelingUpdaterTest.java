@@ -120,6 +120,135 @@ public class GravityLevelingUpdaterTest
       assertTrue(tiltAngle(yawedEkf) < 1.0e-9, "stays level");
    }
 
+   private static final double ROLL_VAR = 2.5e-3;   // (2.9°)²
+   private static final double PITCH_VAR = 1.9e-1;  // (25°)²
+
+   /**
+    * Anisotropic R structure. At an upright estimate û_p = R̂ᵀe_x = e_x, so R must be diag(σ_pitch², σ_roll²,
+    * σ_roll²): the pitch-informing residual direction (x) carries the loose σ_pitch², roll (y) and the gravity
+    * null (z) carry the tight σ_roll². Off-diagonals zero; symmetric.
+    */
+   @Test
+   public void testAnisotropicMeasurementCovarianceStructure()
+   {
+      InvariantState state = new InvariantState(0);
+      state.setRotation(new RotationMatrix()); // identity
+
+      GravityLevelingUpdater updater = new GravityLevelingUpdater(state.getTangentSize(), ROLL_VAR, PITCH_VAR, G);
+      updater.assemble(state, new Vector3D(0.0, 0.0, G));
+
+      DMatrixRMaj r = updater.getMeasurementCovariance();
+      assertEquals(PITCH_VAR, r.get(0, 0), 1.0e-12, "σ_pitch² on the pitch-informing (x) direction");
+      assertEquals(ROLL_VAR, r.get(1, 1), 1.0e-12, "σ_roll² on the roll-informing (y) direction");
+      assertEquals(ROLL_VAR, r.get(2, 2), 1.0e-12, "σ_roll² on the gravity-null (z) direction");
+      for (int i = 0; i < 3; i++)
+         for (int j = i + 1; j < 3; j++)
+         {
+            assertEquals(0.0, r.get(i, j), 1.0e-12, "R off-diagonal (" + i + "," + j + ") zero at identity");
+            assertEquals(r.get(i, j), r.get(j, i), 1.0e-15, "R symmetric");
+         }
+   }
+
+   /**
+    * The core anisotropy property: at a realistic (converged) covariance, ONE gravity update corrects far less
+    * PITCH than ROLL for the same tilt magnitude. The per-tick Kalman gain is P/(P+σ²), so the pitch:roll
+    * correction ratio is ≈ (P+σ_roll²)/(P+σ_pitch²) — with σ_pitch² ≫ σ_roll² the accelerometer barely nudges
+    * pitch each tick (so fore-aft accel that slips the gate can't yank the base forward in a few ticks) while
+    * still fully authoritative on roll (the JointKF's roll drift). Steady-state pitch is instead set by the gyro
+    * propagation, and sustained fore-aft contamination is rejected by the quasi-static gate, not by R.
+    */
+   @Test
+   public void testPitchCorrectionAuthorityBelowRoll()
+   {
+      double theta = 0.10;              // small tilt to level
+      double p0 = 1.0e-2;               // a converged-filter covariance (NOT the initial P=1)
+
+      double rollReduction = theta - oneStepTiltAfterCorrection(0.0, 0.0, theta, p0); // rolled by θ → level
+      double pitchReduction = theta - oneStepTiltAfterCorrection(0.0, theta, 0.0, p0); // pitched by θ → level
+
+      assertTrue(rollReduction > 5.0 * pitchReduction,
+                 "roll correction/tick (" + rollReduction + ") must dominate pitch (" + pitchReduction + ")");
+      assertTrue(pitchReduction > 0.0, "pitch still corrects (finite σ_pitch, not frozen)");
+   }
+
+   /** Initializes upright-except-(yaw,pitch,roll) at covariance p0·I, applies ONE gravity update from true gravity, returns the residual tilt angle. */
+   private static double oneStepTiltAfterCorrection(double yaw, double pitch, double roll, double p0)
+   {
+      InvariantEKF ekf = new InvariantEKF(0, 1.0e-7, 1.0e-7, 1.0e-12); // default anisotropic (roll tight, pitch loose)
+      int m = ekf.getState().getTangentSize();
+      RotationMatrix r0 = new RotationMatrix();
+      r0.setYawPitchRoll(yaw, pitch, roll);
+      DMatrixRMaj p = CommonOps_DDRM.identity(m);
+      CommonOps_DDRM.scale(p0, p);
+      ekf.initialize(r0, new Vector3D(), new Vector3D(), new Vector3D[0], p);
+
+      ekf.assembleGravityLeveling(new Vector3D(0.0, 0.0, G)); // robot truly upright ⇒ static specific force = g e_z
+      ekf.applyGravityLeveling();
+      assertSymmetricPSD(ekf.getState().getCovariance());
+      return tiltAngle(ekf);
+   }
+
+   /** Roll is fully trusted, so a pure roll tilt still levels — the JointKF's roll fix survives the anisotropy. */
+   @Test
+   public void testRollStillLevelsUnderAnisotropy()
+   {
+      Vector3D trueGravity = new Vector3D(0.0, 0.0, G);
+      InvariantEKF ekf = new InvariantEKF(0, 1.0e-7, 1.0e-7, 1.0e-12); // default anisotropic
+      int m = ekf.getState().getTangentSize();
+      RotationMatrix rolled = new RotationMatrix();
+      rolled.setYawPitchRoll(0.0, 0.0, 0.20);
+      ekf.initialize(rolled, new Vector3D(), new Vector3D(), new Vector3D[0], CommonOps_DDRM.identity(m));
+
+      for (int i = 0; i < 200; i++)
+      {
+         ekf.assembleGravityLeveling(trueGravity);
+         ekf.applyGravityLeveling();
+      }
+      assertTrue(tiltAngle(ekf) < 1.0e-3, "roll leveled under anisotropic noise: tilt → " + tiltAngle(ekf));
+   }
+
+   /**
+    * The double-support pitch gate: {@code setPitchObservable(false)} must freeze the pitch correction (σ_pitch²
+    * → disabled) while STILL leveling roll — so single-support keeps the roll fix without the pitch lean.
+    */
+   @Test
+   public void testPitchGateFreezesPitchButNotRoll()
+   {
+      InvariantState state = new InvariantState(0);
+      state.setRotation(new RotationMatrix());
+      GravityLevelingUpdater updater = new GravityLevelingUpdater(state.getTangentSize(), ROLL_VAR, PITCH_VAR, G);
+      updater.setPitchObservable(false);
+      updater.assemble(state, new Vector3D(0.0, 0.0, G));
+
+      DMatrixRMaj r = updater.getMeasurementCovariance();
+      assertTrue(r.get(0, 0) > 1.0e3, "pitch direction variance jumps to the disabled value (" + r.get(0, 0) + ")");
+      assertEquals(ROLL_VAR, r.get(1, 1), 1.0e-12, "roll direction stays trusted");
+   }
+
+   /**
+    * Horizontal-accel gate: a fore-aft specific force whose NORM still sits within ±5% of |g| (so the norm gate
+    * passes) is rejected by the horizontal component, while pure vertical gravity passes.
+    */
+   @Test
+   public void testHorizontalAccelGateRejectsForeAftButPassesGravity()
+   {
+      InvariantState state = new InvariantState(0);
+      state.setRotation(new RotationMatrix());
+      GravityLevelingUpdater updater = new GravityLevelingUpdater(state.getTangentSize(), ROLL_VAR, PITCH_VAR, G);
+      Vector3D zeroOmega = new Vector3D();
+
+      updater.assemble(state, new Vector3D(0.0, 0.0, G));
+      assertTrue(updater.isQuasiStatic(new Vector3D(0.0, 0.0, G), zeroOmega, 0.05, 0.15, 0.5),
+                 "pure gravity passes the gate");
+
+      // 3 m/s² fore-aft with a slightly reduced vertical: ‖a‖ ≈ 9.36 m/s², within ±5% of g (norm gate passes)…
+      Vector3D foreAft = new Vector3D(3.0, 0.0, Math.sqrt(G * G - 3.0 * 3.0));
+      updater.assemble(state, foreAft);
+      assertTrue(Math.abs(foreAft.norm() - G) <= 0.05 * G, "sanity: norm gate alone would pass");
+      assertTrue(!updater.isQuasiStatic(foreAft, zeroOmega, 0.05, 0.15, 0.5),
+                 "…but the horizontal-accel gate rejects the fore-aft component");
+   }
+
    /** Tilt angle = angle between the estimated body up-axis (R̂ᵀ e_z) and world up. */
    private static double tiltAngle(InvariantEKF ekf)
    {

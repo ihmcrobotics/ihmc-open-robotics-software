@@ -35,8 +35,11 @@ public class InvariantEKF
 
    /** |g| (m/s²), used only by the gravity-leveling quasi-static gate. */
    private static final double GRAVITY_MAGNITUDE = 9.81;
-   /** σ_tilt² default for the gravity-leveling measurement (rad²); ~ (0.05 rad ≈ 2.9°)². TODO(retune) vs NIS. */
-   private static final double DEFAULT_TILT_MEASUREMENT_VARIANCE = 2.5e-3;
+   /** σ_roll² default for the gravity-leveling measurement (rad²); ~ (0.05 rad ≈ 2.9°)². Trust the accel for roll. */
+   private static final double DEFAULT_ROLL_MEASUREMENT_VARIANCE = 2.5e-3;
+   /** σ_pitch² default (rad²); ~ (0.44 rad ≈ 25°)². Distrust the accel for pitch — fore-aft accel fakes pitch tilt
+    *  and leans the base forward. Finite (not off) so pitch still levels slowly and the tilt diagnostic stays live. */
+   private static final double DEFAULT_PITCH_MEASUREMENT_VARIANCE = 1.9e-1;
 
    /**
     * Builds a filter with the given contact count and continuous process-noise variances, wiring the
@@ -53,7 +56,10 @@ public class InvariantEKF
       propagator = new InvariantPropagator(numberOfContacts, gyroVariance, accelVariance, contactVariance);
       updater = new InvariantUpdater(state.getTangentSize());
       updater.setContactUpdater(new ContactUpdater(numberOfContacts));
-      gravityUpdater = new GravityLevelingUpdater(state.getTangentSize(), DEFAULT_TILT_MEASUREMENT_VARIANCE, GRAVITY_MAGNITUDE);
+      gravityUpdater = new GravityLevelingUpdater(state.getTangentSize(),
+                                                  DEFAULT_ROLL_MEASUREMENT_VARIANCE,
+                                                  DEFAULT_PITCH_MEASUREMENT_VARIANCE,
+                                                  GRAVITY_MAGNITUDE);
    }
 
    /**
@@ -173,13 +179,20 @@ public class InvariantEKF
    }
 
    /** @return true if the accelerometer can be trusted as a gravity reference this tick (see {@link GravityLevelingUpdater#isQuasiStatic}). */
-   public boolean isGravityQuasiStatic(Vector3DReadOnly specificForceBody, Vector3DReadOnly angularVelocity, double accelToleranceRatio, double gyroThreshold)
+   public boolean isGravityQuasiStatic(Vector3DReadOnly specificForceBody, Vector3DReadOnly angularVelocity,
+                                       double accelToleranceRatio, double gyroThreshold, double horizontalAccelThreshold)
    {
-      return gravityUpdater.isQuasiStatic(specificForceBody, angularVelocity, accelToleranceRatio, gyroThreshold);
+      return gravityUpdater.isQuasiStatic(specificForceBody, angularVelocity, accelToleranceRatio, gyroThreshold, horizontalAccelThreshold);
    }
 
-   /** Sets σ_tilt² (rad²) for the gravity-leveling measurement noise. */
+   /** Sets σ_roll² and σ_pitch² (rad²) for the (anisotropic) gravity-leveling measurement noise. */
+   public void setGravityMeasurementVariances(double rollVariance, double pitchVariance) { gravityUpdater.setMeasurementVariances(rollVariance, pitchVariance); }
+
+   /** Isotropic convenience: sets σ_roll² = σ_pitch² for the gravity-leveling measurement noise. */
    public void setTiltMeasurementVariance(double tiltMeasurementVariance) { gravityUpdater.setTiltMeasurementVariance(tiltMeasurementVariance); }
+
+   /** Gates the gravity-leveling PITCH observation on/off (roll is always observed). See {@link GravityLevelingUpdater#setPitchObservable}. */
+   public void setGravityPitchObservable(boolean pitchObservable) { gravityUpdater.setPitchObservable(pitchObservable); }
 
    /** Total tilt error angle (rad) between measured and predicted gravity direction — valid every tick, even when the update is gated off. */
    public double getGravityTiltErrorAngle() { return gravityUpdater.getTiltErrorAngle(); }
