@@ -368,7 +368,7 @@ public class RDXSCS2Session
       }
       ImGui.popItemWidth();
       ImGui.text("In: %d  Out: %d".formatted(yoManager.getInPoint(), yoManager.getOutPoint()));
-      ImGui.checkbox(labels.get("Pause and end of buffer"), pauseAtEndOfBuffer);
+      ImGui.checkbox(labels.get("Pause at end of buffer"), pauseAtEndOfBuffer);
       if (ImGui.checkbox("Run at real-time rate", runAtRealtimeRate))
       {
          session.submitRunAtRealTimeRate(runAtRealtimeRate.get());
