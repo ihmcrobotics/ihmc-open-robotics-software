@@ -5,14 +5,18 @@ import controller_msgs.msg.dds.EStopMasterGainStatusMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.HighLevelStateMessage;
+import controller_msgs.msg.dds.RLModelSelectionMessage;
+import controller_msgs.msg.dds.RLPolicyState;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
+import imgui.type.ImInt;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -35,6 +39,9 @@ public class RDXHardwareControlStateManager
    protected final ImDouble desiredMasterGain = new ImDouble();
    protected final EStopMasterGainCommandMessage hardwareCommandMessage = new EStopMasterGainCommandMessage();
    protected final EStopMasterGainStatusMessage hardwareStatusMessage = new EStopMasterGainStatusMessage();
+   protected final ImInt desiredRLModel = new ImInt();
+   protected String[] rlModelNames = new String[0];
+   private boolean hasReceivedRLPolicyState = false;
    protected HighLevelControllerName currentHighLevelState = null;
 
    public RDXHardwareControlStateManager(ROS2ControllerHelper controllerHelper)
@@ -52,6 +59,48 @@ public class RDXHardwareControlStateManager
       {  // TODO: Create a HighLevelStateStatusMessage that is periodically published, so we can always know current state
          currentHighLevelState = HighLevelControllerName.fromByte(message.getEndHighLevelControllerName());
       });
+      controllerHelper.subscribeToControllerViaVolatileCallback(RLPolicyState.class, this::consumeRLPolicyStateMessage);
+      controllerHelper.subscribeViaVolatileCallback(robotName -> HumanoidControllerAPI.getLowFrequencyTopic(RLPolicyState.class, robotName),
+                                                    this::consumeRLPolicyStateMessage);
+   }
+
+   protected void consumeRLPolicyStateMessage(RLPolicyState rlPolicyState)
+   {
+      int availableModelCount = Math.min(Byte.toUnsignedInt(rlPolicyState.getNumAvailableModels()), rlPolicyState.getAvailableModels().size());
+      if (availableModelCount <= 0)
+      {
+         rlModelNames = new String[0];
+         desiredRLModel.set(0);
+         return;
+      }
+
+      String[] modelNames = new String[availableModelCount];
+      for (int i = 0; i < availableModelCount; i++)
+      {
+         String modelName = rlPolicyState.getAvailableModels().get(i).toString();
+         modelNames[i] = (modelName == null || modelName.isEmpty()) ? "Model %d".formatted(i) : modelName;
+      }
+      boolean modelListChanged = rlModelNames.length != modelNames.length;
+      if (!modelListChanged)
+      {
+         for (int i = 0; i < modelNames.length; i++)
+         {
+            if (!rlModelNames[i].equals(modelNames[i]))
+            {
+               modelListChanged = true;
+               break;
+            }
+         }
+      }
+      rlModelNames = modelNames;
+
+      int currentModel = Byte.toUnsignedInt(rlPolicyState.getCurrentModel());
+      if ((!hasReceivedRLPolicyState || modelListChanged) && currentModel >= 0 && currentModel < rlModelNames.length)
+         desiredRLModel.set(currentModel);
+      else if (desiredRLModel.get() >= rlModelNames.length)
+         desiredRLModel.set(rlModelNames.length - 1);
+
+      hasReceivedRLPolicyState = true;
    }
 
    protected void consumeHardwareStatusMessage(EStopMasterGainStatusMessage hardwareStatusMessage)
@@ -130,16 +179,26 @@ public class RDXHardwareControlStateManager
          sendExitWalkingRequest();
       }
       ImGui.setCursorPosX(widgetStartX);
-      if (ImGui.button(labels.get("RL Transition")))
+      if (ImGui.button(labels.get("RL Control")))
       {
-         RDXBaseUI.pushNotification("Commanding RL transition...");
-         sendRLTransitionRequest();
+         RDXBaseUI.pushNotification("Commanding RL Control...");
+         sendRLRequest();
       }
+
+      ImGui.text("RL Model:");
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Exit RL")))
+      ImGui.setCursorPosX(widgetStartX);
+      ImGui.setNextItemWidth(150.0f);
+      if (rlModelNames.length > 0)
       {
-         RDXBaseUI.pushNotification("Commanding exit RL...");
-         sendExitRLRequest();
+         if (ImGui.combo(labels.get("RL Model"), desiredRLModel, rlModelNames))
+         {
+            sendRLModelSelectionRequest();
+         }
+      }
+      else
+      {
+         ImGui.textDisabled("Waiting for RL models...");
       }
 
       ImGui.text("Command:");
@@ -219,6 +278,18 @@ public class RDXHardwareControlStateManager
       homeChest.setTrajectoryTime(trajectoryTime);
       controllerHelper.publishToController(homeChest);
       RDXBaseUI.pushNotification("Commanding N-pose...");
+   }
+
+   public void sendRLModelSelectionRequest()
+   {
+      int selectedModelIndex = desiredRLModel.get();
+      if (rlModelNames.length > 0)
+         selectedModelIndex = Math.max(0, Math.min(selectedModelIndex, rlModelNames.length - 1));
+
+      RLModelSelectionMessage modelSelectionMessage = new RLModelSelectionMessage();
+      modelSelectionMessage.setDesiredModel((byte) selectedModelIndex);
+      modelSelectionMessage.setExecuteDesiredModel(true);
+      controllerHelper.publishToController(modelSelectionMessage);
    }
 
    public void sendRLTransitionRequest()
