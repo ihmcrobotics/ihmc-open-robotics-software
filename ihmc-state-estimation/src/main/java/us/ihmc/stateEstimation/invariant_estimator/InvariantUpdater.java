@@ -2,6 +2,8 @@ package us.ihmc.stateEstimation.invariant_estimator;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.decomposition.chol.CholeskyDecompositionInner_DDRM;
+import org.ejml.interfaces.decomposition.CholeskyDecomposition_F64;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -54,6 +56,22 @@ public class InvariantUpdater
 
    /** Normalized Innovation Squared rᵀ·S⁻¹·r from the most recent {@link #update}; χ²-distributed with z DOF under a consistent filter. */
    private double normalizedInnovationSquared = Double.NaN;
+
+   // Innovation-covariance conditioning diagnostics + gate (mirrors JointLevelKFPreFilter.josephUpdate). A
+   // finite-but-ill-conditioned S = HPHᵀ + R inverts to a huge gain that the Joseph K R Kᵀ term squares each
+   // tick; the plain CommonOps invert below is blind to it. cond(S) is estimated from the Cholesky factor
+   // diagonal — S's pivots are L_ii², so cond(S) ≈ (max L_ii / min L_ii)² — with no eigendecomposition. If S is
+   // non-PD or cond(S) exceeds COND_S_MAX the update is SKIPPED (state and P untouched) and counted.
+   private static final double COND_S_MAX = 1.0e9;
+   private final CholeskyDecomposition_F64<DMatrixRMaj> conditioningChol = new CholeskyDecompositionInner_DDRM(true);
+   private final DMatrixRMaj symmetricInnovationCovariance = new DMatrixRMaj(1, 1); // symmetrized copy for the Cholesky
+   private final DMatrixRMaj choleskyFactor = new DMatrixRMaj(1, 1);                 // L (z×z), for the cond proxy
+   private double conditionProxy = Double.NaN;   // ≈ cond(S)
+   private double minSDiagonal = Double.NaN;     // ≈ λ_min(S) = (min L_ii)²
+   private double maxSDiagonal = Double.NaN;     // ≈ λ_max(S) = (max L_ii)²
+   private double residualNorm = Double.NaN;     // ‖residual‖ of the most recent update (contact or gravity)
+   private boolean lastUpdateApplied = false;    // false when the conditioning gate skipped the last update
+   private int gateSkipCount = 0;                // running count of gate-skipped updates
 
    /** Optional contact measurement subpiece, owned and called by this updater (see {@link #updateContact}). */
    private ContactUpdater contactUpdater = null;
@@ -128,6 +146,41 @@ public class InvariantUpdater
       CommonOps_DDRM.multTransB(hTimesCovariance, H, innovationCovariance);
       CommonOps_DDRM.addEquals(innovationCovariance, measurementCovariance);
 
+      // Conditioning gate + diagnostics (cheap Cholesky, no eigendecomposition). Compute BEFORE touching x/P so
+      // an ill-conditioned S cannot enter the state. If S is non-PD or cond(S) > COND_S_MAX, skip the update.
+      lastUpdateApplied = false;
+      residualNorm = Math.sqrt(CommonOps_DDRM.dot(residual, residual));
+      symmetricInnovationCovariance.reshape(z, z);
+      symmetricInnovationCovariance.set(innovationCovariance);
+      symmetrize(symmetricInnovationCovariance);
+      if (!conditioningChol.decompose(symmetricInnovationCovariance)) // S not positive definite
+      {
+         conditionProxy = Double.POSITIVE_INFINITY;
+         minSDiagonal = 0.0;
+         maxSDiagonal = Double.NaN;
+         normalizedInnovationSquared = Double.NaN;
+         gateSkipCount++;
+         return;
+      }
+      choleskyFactor.reshape(z, z);
+      conditioningChol.getT(choleskyFactor);
+      double minLii = Double.POSITIVE_INFINITY, maxLii = 0.0;
+      for (int i = 0; i < z; i++)
+      {
+         double lii = choleskyFactor.get(i, i);
+         if (lii < minLii) minLii = lii;
+         if (lii > maxLii) maxLii = lii;
+      }
+      minSDiagonal = minLii * minLii;
+      maxSDiagonal = maxLii * maxLii;
+      conditionProxy = minLii > 0.0 ? (maxLii / minLii) * (maxLii / minLii) : Double.POSITIVE_INFINITY;
+      if (conditionProxy > COND_S_MAX)
+      {
+         normalizedInnovationSquared = Double.NaN;
+         gateSkipCount++;
+         return; // ill-conditioned S: skip the whole update, state and P untouched
+      }
+
       // K = P·Hᵀ·S⁻¹
       covarianceTimesHTranspose.reshape(m,z);
       CommonOps_DDRM.multTransB(covariance, H, covarianceTimesHTranspose);
@@ -166,7 +219,35 @@ public class InvariantUpdater
       CommonOps_DDRM.mult(gain, measurementCovariance, gainTimesNoise); // K * R
       CommonOps_DDRM.multAddTransB(gainTimesNoise, gain, covariance); // P += KRK^T
 
+      lastUpdateApplied = true;
    }
+
+   /** In-place symmetrization A ← 0.5(A + Aᵀ). Cholesky assumes exact symmetry; S is symmetric only to round-off. */
+   private static void symmetrize(DMatrixRMaj a)
+   {
+      for (int i = 0; i < a.numRows; i++)
+      {
+         for (int j = i + 1; j < a.numCols; j++)
+         {
+            double avg = 0.5 * (a.get(i, j) + a.get(j, i));
+            a.set(i, j, avg);
+            a.set(j, i, avg);
+         }
+      }
+   }
+
+   /** ≈ cond(S) of the most recent update, from the Cholesky factor diagonal; +Inf if S was non-PD. */
+   public double getConditionProxy()            { return conditionProxy; }
+   /** ≈ λ_min(S) = (min L_ii)² of the most recent update. */
+   public double getMinSDiagonal()              { return minSDiagonal; }
+   /** ≈ λ_max(S) = (max L_ii)² of the most recent update. */
+   public double getMaxSDiagonal()              { return maxSDiagonal; }
+   /** ‖residual‖ of the most recent update (contact or gravity). */
+   public double getResidualNorm()              { return residualNorm; }
+   /** False when the conditioning gate skipped the most recent update (state and P were left untouched). */
+   public boolean wasLastUpdateApplied()        { return lastUpdateApplied; }
+   /** Running count of updates skipped by the conditioning gate. */
+   public int getGateSkipCount()                { return gateSkipCount; }
 
    /**
     * @return the Normalized Innovation Squared rᵀ·S⁻¹·r from the most recent {@link #update} call, or

@@ -36,7 +36,9 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.euclid.YoQuaternion;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * Adapter that runs the {@link InvariantEKF} as an IHMC {@link StateEstimatorController}.
@@ -108,6 +110,14 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private static final double CONTACT_HOLD_THRESHOLD = 0.5; // both feet below -> base translation will be unobservable
    private final Vector3D zeroVelocity = new Vector3D(); // final, stays zero
 
+   // Gravity-leveling (tilt) update: the accelerometer-as-gravity-reference measurement that gives roll/pitch a
+   // DIRECT observation (the contact update's Jacobian has a zero rotation block, so without this pitch/roll only
+   // drift open-loop off the gyro). Applied only when quasi-static so real linear acceleration isn't mistaken for
+   // tilt; the tilt-error DIAGNOSTIC is computed every tick regardless. TODO(retune) the gate/variance vs NIS.
+   private boolean gravityLevelingEnabled = true;
+   private static final double QUASI_STATIC_ACCEL_TOLERANCE = 0.05; // ‖a‖ within ±5% of |g|
+   private static final double QUASI_STATIC_GYRO_THRESHOLD = 0.15;  // rad/s; "barely rotating"
+
    // Soft contact handling: a per-foot contact probability p ∈ [0,1] drives two covariance knobs each tick.
    // The default provider is forward-kinematics only (runs on hardware); ContactNet replaces it later.
    private ContactProbabilityProvider contactProbabilityProvider;
@@ -123,6 +133,22 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final SideDependentList<YoDouble> yoContactNIS;
    private final YoDouble yoContactNISLowerBound = new YoDouble("invariantContactNISLowerBound", registry);
    private final YoDouble yoContactNISUpperBound = new YoDouble("invariantContactNISUpperBound", registry);
+
+   // Gravity-leveling (tilt) diagnostics — the hardware-available "is pitch/roll wrong" signal (no ground truth
+   // needed): the angle/roll/pitch between the measured gravity direction and the filter's estimate, computed
+   // EVERY tick even when the update is gated off. yoGravityUpdateActive flags the ticks the tilt update fired.
+   private final YoDouble yoGravityTiltErrorAngle = new YoDouble("invariantGravityTiltErrorAngle", registry);
+   private final YoDouble yoGravityTiltErrorPitch = new YoDouble("invariantGravityTiltErrorPitch", registry);
+   private final YoDouble yoGravityTiltErrorRoll = new YoDouble("invariantGravityTiltErrorRoll", registry);
+   private final YoBoolean yoGravityUpdateActive = new YoBoolean("invariantGravityUpdateActive", registry);
+
+   // Per-foot contact-update conditioning diagnostics (mirrors the JointKF S-conditioning): cond(S) proxy (log10),
+   // residual norm, and whether the update was applied (the conditioning gate can skip it). Plus a global
+   // gate-skip counter across contact + gravity updates.
+   private final SideDependentList<YoDouble> yoContactCondSProxyLog10;
+   private final SideDependentList<YoDouble> yoContactResidualNorm;
+   private final SideDependentList<YoBoolean> yoContactUpdateApplied;
+   private final YoInteger yoInvariantUpdateGateSkipCount = new YoInteger("invariantUpdateGateSkipCount", registry);
 
    // Estimate outputs for logging/comparison.
    private final YoFramePoint3D yoBasePosition = new YoFramePoint3D("invariantFilterPelvisBasePosition", ReferenceFrame.getWorldFrame(), registry);
@@ -270,6 +296,12 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
 
       yoContactNIS = new SideDependentList<>(new YoDouble("invariantContactNISLeft", registry),
                                              new YoDouble("invariantContactNISRight", registry));
+      yoContactCondSProxyLog10 = new SideDependentList<>(new YoDouble("invariantContactCondSProxyLog10Left", registry),
+                                                         new YoDouble("invariantContactCondSProxyLog10Right", registry));
+      yoContactResidualNorm = new SideDependentList<>(new YoDouble("invariantContactResidualNormLeft", registry),
+                                                      new YoDouble("invariantContactResidualNormRight", registry));
+      yoContactUpdateApplied = new SideDependentList<>(new YoBoolean("invariantContactUpdateAppliedLeft", registry),
+                                                       new YoBoolean("invariantContactUpdateAppliedRight", registry));
       // Two-sided χ² acceptance band for the contact-update NIS (constant: fixed DOF and confidence).
       ChiSquaredDistribution contactNISDistribution = new ChiSquaredDistribution(CONTACT_MEASUREMENT_DOF);
       double lowerTail = 0.5 * (1.0 - CONSISTENCY_CONFIDENCE);
@@ -369,10 +401,16 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          // gyro as usual, but hold translation: zero the base velocity so the accel/gravity residual can't ramp
          // it (the -2 m/s drift in Z while hanging). Contact updates skipped by returning
          ekf.predict(angularVelocity, linearAcceleration, dt);
+         // Gravity leveling is orientation-only (H has no translation columns), so it is safe while base
+         // translation is held — and it is the ONLY roll/pitch observation available while hanging/no-contact.
+         updateGravityLeveling();
          ekf.getState().setBaseVelocity(zeroVelocity);
          heldLastTick = true;
          for (RobotSide side : RobotSide.values)
+         {
             yoContactNIS.get(side).setToNaN();
+            yoContactUpdateApplied.get(side).set(false);
+         }
          updateYoVariables();
          return;
       }
@@ -387,6 +425,10 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
 
       ekf.predict(angularVelocity, linearAcceleration, dt);
 
+      // Gravity-leveling: the roll/pitch anchor the contact update cannot provide (its Jacobian has a zero
+      // rotation block). Diagnostic refreshed every tick; update applied only when quasi-static.
+      updateGravityLeveling();
+
       // Knob 1 (measurement covariance): inflate a swing foot's contact FK noise so it stops dragging the
       // base velocity, while a stance foot keeps constraining it.
       for (RobotSide side : RobotSide.values)
@@ -398,9 +440,40 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          inflatedContactCovariance.scale(measurementInflation(contactProbability));
          ekf.update(CONTACT_INDICES.get(side), contactInBody, inflatedContactCovariance);
          yoContactNIS.get(side).set(ekf.getLastNormalizedInnovationSquared());
+         yoContactCondSProxyLog10.get(side).set(Math.log10(ekf.getLastConditionProxy()));
+         yoContactResidualNorm.get(side).set(ekf.getLastResidualNorm());
+         yoContactUpdateApplied.get(side).set(ekf.wasLastUpdateApplied());
       }
+      yoInvariantUpdateGateSkipCount.set(ekf.getUpdateGateSkipCount());
 
       updateYoVariables();
+   }
+
+   /**
+    * Refreshes the gravity-leveling tilt diagnostic (every tick) and applies the accelerometer tilt update when
+    * enabled and quasi-static. The tilt diagnostic — the angle/roll/pitch between the measured gravity direction
+    * and the filter's estimate — is a hardware-available "is pitch/roll wrong" signal that needs no ground truth
+    * (unlike the sim-only ground-truth comparator, and unlike invariantMinusMain* which is NaN when the invariant
+    * filter is the main estimator). Call right after {@link InvariantEKF#predict}.
+    */
+   private void updateGravityLeveling()
+   {
+      ekf.assembleGravityLeveling(linearAcceleration);
+      yoGravityTiltErrorAngle.set(ekf.getGravityTiltErrorAngle());
+      yoGravityTiltErrorPitch.set(ekf.getGravityTiltErrorPitch());
+      yoGravityTiltErrorRoll.set(ekf.getGravityTiltErrorRoll());
+
+      boolean apply = gravityLevelingEnabled
+            && ekf.isGravityQuasiStatic(linearAcceleration, angularVelocity, QUASI_STATIC_ACCEL_TOLERANCE, QUASI_STATIC_GYRO_THRESHOLD);
+      yoGravityUpdateActive.set(apply);
+      if (apply)
+         ekf.applyGravityLeveling();
+   }
+
+   /** Enables/disables the accelerometer gravity-leveling (tilt) update. The tilt diagnostic is published regardless. */
+   public void setGravityLevelingEnabled(boolean gravityLevelingEnabled)
+   {
+      this.gravityLevelingEnabled = gravityLevelingEnabled;
    }
 
    private void updateYoVariables()

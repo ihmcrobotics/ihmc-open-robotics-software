@@ -31,6 +31,12 @@ public class InvariantEKF
    private final InvariantState state;
    private final InvariantPropagator propagator;
    private final InvariantUpdater updater;
+   private final GravityLevelingUpdater gravityUpdater;
+
+   /** |g| (m/s²), used only by the gravity-leveling quasi-static gate. */
+   private static final double GRAVITY_MAGNITUDE = 9.81;
+   /** σ_tilt² default for the gravity-leveling measurement (rad²); ~ (0.05 rad ≈ 2.9°)². TODO(retune) vs NIS. */
+   private static final double DEFAULT_TILT_MEASUREMENT_VARIANCE = 2.5e-3;
 
    /**
     * Builds a filter with the given contact count and continuous process-noise variances, wiring the
@@ -47,6 +53,7 @@ public class InvariantEKF
       propagator = new InvariantPropagator(numberOfContacts, gyroVariance, accelVariance, contactVariance);
       updater = new InvariantUpdater(state.getTangentSize());
       updater.setContactUpdater(new ContactUpdater(numberOfContacts));
+      gravityUpdater = new GravityLevelingUpdater(state.getTangentSize(), DEFAULT_TILT_MEASUREMENT_VARIANCE, GRAVITY_MAGNITUDE);
    }
 
    /**
@@ -144,6 +151,50 @@ public class InvariantEKF
    {
       return updater.getNormalizedInnovationSquared();
    }
+
+   /**
+    * Assembles the gravity-leveling (tilt) measurement from the current state and the bias-corrected body-frame
+    * specific force, and refreshes the tilt-error diagnostic — WITHOUT applying the correction. Call this every
+    * tick so the tilt-error diagnostic ({@link #getGravityTiltErrorAngle()} etc.) tracks pitch/roll error
+    * continuously; then gate on {@link #isGravityQuasiStatic} and call {@link #applyGravityLeveling()} only when
+    * the accelerometer is a trustworthy gravity reference.
+    *
+    * @param specificForceBody the bias-corrected body-frame specific force a (the vector fed to {@link #predict}). Not modified.
+    */
+   public void assembleGravityLeveling(Vector3DReadOnly specificForceBody)
+   {
+      gravityUpdater.assemble(state, specificForceBody);
+   }
+
+   /** Applies the gravity-leveling correction assembled by the last {@link #assembleGravityLeveling} (X and P updated in place). */
+   public void applyGravityLeveling()
+   {
+      updater.update(state, gravityUpdater.getMeasurementJacobian(), gravityUpdater.getResidual(), gravityUpdater.getMeasurementCovariance());
+   }
+
+   /** @return true if the accelerometer can be trusted as a gravity reference this tick (see {@link GravityLevelingUpdater#isQuasiStatic}). */
+   public boolean isGravityQuasiStatic(Vector3DReadOnly specificForceBody, Vector3DReadOnly angularVelocity, double accelToleranceRatio, double gyroThreshold)
+   {
+      return gravityUpdater.isQuasiStatic(specificForceBody, angularVelocity, accelToleranceRatio, gyroThreshold);
+   }
+
+   /** Sets σ_tilt² (rad²) for the gravity-leveling measurement noise. */
+   public void setTiltMeasurementVariance(double tiltMeasurementVariance) { gravityUpdater.setTiltMeasurementVariance(tiltMeasurementVariance); }
+
+   /** Total tilt error angle (rad) between measured and predicted gravity direction — valid every tick, even when the update is gated off. */
+   public double getGravityTiltErrorAngle() { return gravityUpdater.getTiltErrorAngle(); }
+   /** Body-frame roll component (rad) of the tilt error. */
+   public double getGravityTiltErrorRoll()  { return gravityUpdater.getTiltErrorRoll(); }
+   /** Body-frame pitch component (rad) of the tilt error. */
+   public double getGravityTiltErrorPitch() { return gravityUpdater.getTiltErrorPitch(); }
+
+   // Innovation-covariance conditioning diagnostics from the most recent update (contact or gravity).
+   public double getLastConditionProxy() { return updater.getConditionProxy(); }
+   public double getLastMinSDiagonal()   { return updater.getMinSDiagonal(); }
+   public double getLastMaxSDiagonal()   { return updater.getMaxSDiagonal(); }
+   public double getLastResidualNorm()   { return updater.getResidualNorm(); }
+   public boolean wasLastUpdateApplied() { return updater.wasLastUpdateApplied(); }
+   public int getUpdateGateSkipCount()   { return updater.getGateSkipCount(); }
 
    /** @return the number of contact columns N. */
    public int getNumberOfContacts()
