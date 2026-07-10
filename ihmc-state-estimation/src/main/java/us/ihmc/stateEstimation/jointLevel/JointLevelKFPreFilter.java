@@ -89,18 +89,29 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    // (the CWNA quantity for a (q,qd) filter) across joints at a common target TARGET_QDD_STD:
    //     alpha_i = TARGET_QDD_STD / (|Lambda_eff^-1|_ii * tau_max,i)   ==>   alpha_i = alpha_old_i * sqrt(TARGET_QDD_STD^2 / diag(Qa)_i)
    // The second form is how to CALIBRATE from a run: read the per-joint yoQaDiag (jointKF_QaDiag_<joint>) at the
-   // current alpha and rescale (iterate 2-3x; off-diagonal Lambda_eff^-1 coupling makes it not one-shot). Validation:
-   // the knee logged diag(Qa)=14842 at alpha=0.15, so TARGET_QDD_STD=24 -> alpha=0.15*sqrt(576/14842)=0.0295 ~ the
-   // hand-picked 0.03. TARGET_QDD_STD is set to 20 rad/s^2 (var 400) for a 2.25x variance margin under QA_MAX=900,
-   // so quiet standing sits well below the cap and only genuine walking transients trip it (a tripwire, not a clamp).
+   // current alpha and rescale (iterate 2-3x; off-diagonal Lambda_eff^-1 coupling makes it not one-shot).
+   // TARGET_QDD_STD = 20 rad/s^2 (var 400) gives a 2.25x variance margin under QA_MAX = 900, so quiet standing
+   // sits below the cap and only genuine walking transients trip it (a tripwire, not a per-tick clamp).
    //
-   // TODO(calibrate-from-run): the non-KNEE ALPHA_VALUES below are NOT YET the equalized values — they still need
-   // the per-joint diag(Qa) from a run to populate via the formula above. Until then non-listed joints use
-   // ALPHA_DEFAULT. Do NOT hand-guess them (per the "no retune off a units argument alone" rule).
+   // CALIBRATED 2026-07-10 from a live STAND_PREP read of jointKF_QaDiag_<joint> on the instrumented build:
+   // ALPHA_VALUES below are the equalized set alpha_i = alpha_old_i * sqrt(400 / diag(Qa)_i), one per filtered
+   // joint. Cross-check: the LEFT/RIGHT pairs agree to ~0.2% (HIP_X 0.0874 vs 0.0875, HIP_Z/HIP_Y/KNEE likewise)
+   // — the legs are physically identical, so that symmetry validates the measurement. The knee RAISED from the
+   // old reactive 0.03 to ~0.071: in quiet STAND_PREP its diag(Qa) ~ 72 = (8.5 rad/s^2)^2 sat well UNDER target,
+   // i.e. it was over-damped there (0.03 had been set against a more dynamic config that logged diag(Qa)=14842 at
+   // alpha=0.15). diag(Qa) is CONFIGURATION-DEPENDENT, so re-read jointKF_QaDiag_<joint> after a gait change and
+   // iterate until every sqrt(diag(Qa)) ~ 20 and the jointKF_QaCapBind_<joint>_count counters stay flat. All 9
+   // currently-filtered joints are listed; ALPHA_DEFAULT is the fallback for any future unlisted filtered joint.
    private static final double TARGET_QDD_STD = 20.0; // rad/s^2, common unmodeled-acceleration STD target for the ALPHA equalization
-   private static final double ALPHA_DEFAULT = 0.15;
-   private static final String[] ALPHA_JOINT_KEYS = {"KNEE"};
-   private static final double[] ALPHA_VALUES     = {0.03};
+   private static final double ALPHA_DEFAULT = 0.15;  // fallback only (surfaces an unlisted filtered joint via the QA_MAX tripwire)
+   private static final String[] ALPHA_JOINT_KEYS = {
+         "SPINE_Z",
+         "LEFT_HIP_X",  "LEFT_HIP_Z",  "LEFT_HIP_Y",  "LEFT_KNEE_Y",
+         "RIGHT_HIP_X", "RIGHT_HIP_Z", "RIGHT_HIP_Y", "RIGHT_KNEE_Y"};
+   private static final double[] ALPHA_VALUES = {
+         0.0615204,
+         0.0874047,  0.0470331,  0.0590893,  0.0707300,
+         0.0875451,  0.0470778,  0.0592207,  0.0707707};
    // TRIPWIRE ONLY (Part B item 2 — no longer a scaler). Physical ceiling on the per-joint acceleration
    // process-noise VARIANCE (~ (30 rad/s^2)^2). With the reflected-rotor-inertia floor on Lambda_eff (item 1),
    // max diag(Qa) must sit far below this; if it ever would not, that is a model/config regression to SURFACE,
