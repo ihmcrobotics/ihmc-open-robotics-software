@@ -11,6 +11,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import perception_msgs.msg.dds.YOLOv8ModelInfo;
 import us.ihmc.commons.MathTools;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -63,12 +65,12 @@ public class YOLOv8Tools
       double inverseStdDev = 1.0 / standardDeviation;
 
       return pointCloud.parallelStream().filter(point ->
-      {
-         Vector3D zVector = new Vector3D(point);
-         zVector.sub(centroid);
-         zVector.scale(inverseStdDev);
-         return zVector.norm() < zScoreThreshold;
-      }).collect(Collectors.toList());
+                                                {
+                                                   Vector3D zVector = new Vector3D(point);
+                                                   zVector.sub(centroid);
+                                                   zVector.scale(inverseStdDev);
+                                                   return zVector.norm() < zScoreThreshold;
+                                                }).collect(Collectors.toList());
    }
 
    public static double calculateStandardDeviationAndCentroid(List<? extends Point3DReadOnly> pointCloud, Point3DBasics centroidToPack)
@@ -137,6 +139,8 @@ public class YOLOv8Tools
    public static Point3D32 computeCentroidOfPointCloud(List<Point3D32> pointCloud, int pointsToAverage)
    {
       int numberOfPointsToUse = Math.min(pointsToAverage, pointCloud.size());
+      if (numberOfPointsToUse <= 0)
+         return new Point3D32();
 
       Point3D32 centroid = new Point3D32();
       for (int i = 0; i < numberOfPointsToUse; i++)
@@ -144,6 +148,18 @@ public class YOLOv8Tools
       centroid.scale(1.0 / numberOfPointsToUse);
 
       return centroid;
+   }
+
+   private static Scalar colorForId(int id)
+   {
+      if (id < 0)
+         return GREEN;
+
+      int r = (id * 37) % 255;
+      int g = (id * 17) % 255;
+      int b = (id * 97) % 255;
+
+      return new Scalar(b, g, r, 255.0);
    }
 
    public static void resizeWithCrop(Mat inputImage, Mat outputImage, Size desiredSize)
@@ -244,24 +260,32 @@ public class YOLOv8Tools
     * @param annotatedImage Annotated output Mat.
     * @param detections     YOLO detections.
     */
+   /**
+    * Annotates the {@code inputImage} using the {@code detections} and puts the result in {@code annotatedImage}.
+    *
+    * @param inputImage     Image on which YOLO was run on.
+    * @param annotatedImage Annotated output Mat.
+    * @param detections     YOLO detections.
+    */
    public static void annotateImage(Mat inputImage, Mat annotatedImage, List<YOLOv8InstantDetection> detections)
    {
-      Mat greenMat = GREEN_MAT.get();
-      if (!OpenCVTools.dimensionsMatch(inputImage, greenMat))
-         opencv_imgproc.resize(greenMat, greenMat, inputImage.size());
-
       inputImage.copyTo(annotatedImage);
 
       for (YOLOv8InstantDetection detection : detections)
       {
-         String text = String.format("%s: %.2f", detection.getDetectedObjectClass(), detection.getConfidence());
+         int trackId = detection.getTrackId();
+         Scalar color = colorForId(trackId);
+
+         String text = trackId >= 0
+               ? String.format(Locale.US, "ID:%d %s: %.2f", trackId, detection.getDetectedObjectClass(), detection.getConfidence())
+               : String.format(Locale.US, "%s: %.2f", detection.getDetectedObjectClass(), detection.getConfidence());
 
          // Draw the bounding box
          Rect boundingBox = new Rect((int) Math.round(detection.getBoundingBox().getMinX()),
                                      (int) Math.round(detection.getBoundingBox().getMinY()),
                                      (int) Math.round(detection.getBoundingBox().getMaxX() - detection.getBoundingBox().getMinX()),
                                      (int) Math.round(detection.getBoundingBox().getMaxY() - detection.getBoundingBox().getMinY()));
-         opencv_imgproc.rectangle(annotatedImage, boundingBox, GREEN, 5, LINE_TYPE, 0);
+         opencv_imgproc.rectangle(annotatedImage, boundingBox, color, 5, LINE_TYPE, 0);
 
          // Draw text background
          Size textSize = opencv_imgproc.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
@@ -270,24 +294,80 @@ public class YOLOv8Tools
          int textBoxClampedY = MathTools.clamp(boundingBox.y() - textSize.height(), 0, annotatedImage.rows() - textSize.height());
 
          Rect textBox = new Rect(textBoxClampedX, textBoxClampedY, textSize.width(), textSize.height());
-         opencv_imgproc.rectangle(annotatedImage, textBox, GREEN, opencv_imgproc.FILLED, LINE_TYPE, 0);
+         opencv_imgproc.rectangle(annotatedImage, textBox, color, opencv_imgproc.FILLED, LINE_TYPE, 0);
 
          // Draw the text
          Point textLocation = new Point(textBoxClampedX, textBoxClampedY + textSize.height());
          opencv_imgproc.putText(annotatedImage, text, textLocation, FONT, FONT_SCALE, WHITE, FONT_THICKNESS, TEXT_LINE_TYPE, false);
 
-         // Add green tint to show mask
          RawImage mask = detection.getObjectMask();
-         Mat maskMat = mask.getCpuImageMat();
+         if (mask != null)
+         {
+            Mat maskMat = mask.getCpuImageMat();
+            if (maskMat != null && !maskMat.isNull())
+            {
+               Mat resizedMask = new Mat();
+               resizeWithCrop(maskMat, resizedMask, annotatedImage.size());
 
-         // Scaling to match annotatedImage and crop away the letter box lines added to the mask during YOLO processing to match aspect ratio
-         Mat resizedMask = new Mat();
-         resizeWithCrop(maskMat, resizedMask, annotatedImage.size());
+               Mat colorMat = new Mat(annotatedImage.rows(), annotatedImage.cols(), annotatedImage.type(), color);
+               opencv_core.add(annotatedImage, colorMat, annotatedImage, resizedMask, -1);
 
-         opencv_core.add(annotatedImage, greenMat, annotatedImage, resizedMask, -1);
-         resizedMask.close();
+               colorMat.close();
+               resizedMask.close();
+            }
+         }
 
          boundingBox.close();
+         textBox.close();
+      }
+   }
+
+   public static void annotateTargets(Mat image, List<AnnotatedTarget2D> targets)
+   {
+      for (AnnotatedTarget2D target : targets)
+      {
+         if (target.bbox == null)
+            continue;
+
+         int x1 = Math.round(target.bbox[0]);
+         int y1 = Math.round(target.bbox[1]);
+         int x2 = Math.round(target.bbox[2]);
+         int y2 = Math.round(target.bbox[3]);
+
+         Scalar color = colorForId(target.targetId);
+
+         if (target.mask != null)
+         {
+            Mat maskMat = target.mask.getCpuImageMat();
+            if (maskMat != null && !maskMat.isNull())
+            {
+               Mat resizedMask = new Mat();
+               resizeWithCrop(maskMat, resizedMask, image.size());
+
+               Mat colorMat = new Mat(image.rows(), image.cols(), image.type(), color);
+               opencv_core.add(image, colorMat, image, resizedMask, -1);
+
+               colorMat.close();
+               resizedMask.close();
+            }
+         }
+
+         opencv_imgproc.rectangle(image, new Point(x1, y1), new Point(x2, y2), color, 4, LINE_TYPE, 0);
+
+         String objectName = target.name == null || target.name.isBlank() ? "Object" : prettifyName(target.name);
+         String label = String.format(Locale.US, "ID:%d %.2f %s", target.targetId, target.score, objectName);
+
+         Size textSize = opencv_imgproc.getTextSize(label, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
+
+         int textBoxClampedX = MathTools.clamp(x1, 0, image.cols() - textSize.width());
+         int textBoxClampedY = MathTools.clamp(y1 - textSize.height(), 0, image.rows() - textSize.height());
+
+         Rect textBox = new Rect(textBoxClampedX, textBoxClampedY, textSize.width(), textSize.height());
+         opencv_imgproc.rectangle(image, textBox, color, opencv_imgproc.FILLED, LINE_TYPE, 0);
+
+         Point textLocation = new Point(textBoxClampedX, textBoxClampedY + textSize.height());
+         opencv_imgproc.putText(image, label, textLocation, FONT, FONT_SCALE, WHITE, FONT_THICKNESS, TEXT_LINE_TYPE, false);
+
          textBox.close();
       }
    }
@@ -324,9 +404,13 @@ public class YOLOv8Tools
          opencv_imgproc.putText(annotatedImage, text, textLocation, FONT, FONT_SCALE_SMALL, BLACK, FONT_THICKNESS + 1, TEXT_LINE_TYPE, false);
          opencv_imgproc.putText(annotatedImage, text, textLocation, FONT, FONT_SCALE_SMALL, GREEN, FONT_THICKNESS - 1, TEXT_LINE_TYPE, false);
 
-         // Add green tint to show mask
          RawImage mask = detection.getObjectMask();
+         if (mask == null)
+            continue;
+
          Mat maskMat = mask.getCpuImageMat();
+         if (maskMat == null || maskMat.isNull())
+            continue;
 
          // Scaling to match annotatedImage and crop away the letter box lines added to the mask during YOLO processing to match aspect ratio
          Mat resizedMask = new Mat();
@@ -337,8 +421,22 @@ public class YOLOv8Tools
          opencv_imgproc.findContours(resizedMask, contours, hierarchy, opencv_imgproc.RETR_TREE, opencv_imgproc.CHAIN_APPROX_SIMPLE);
          opencv_imgproc.drawContours(annotatedImage, contours, -1, GREEN, 4, LINE_TYPE, hierarchy, Integer.MAX_VALUE, new Point());
 
+         hierarchy.close();
+         contours.close();
          resizedMask.close();
       }
+   }
+
+   private static String prettifyName(String rawName)
+   {
+      if (rawName == null || rawName.isBlank())
+         return "Object";
+
+      String cleaned = rawName.replace('_', ' ').trim().toLowerCase(Locale.US);
+      if (cleaned.isEmpty())
+         return "Object";
+
+      return Character.toUpperCase(cleaned.charAt(0)) + cleaned.substring(1);
    }
 
    public static List<URL> getYOLOModelDirectories(URL baseModelsDirectory)

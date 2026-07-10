@@ -74,7 +74,7 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       newTargetPoint = new TypedNotification<>();
 
       ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName() + "Node");
-      imagePublisher = new RawImagePublisher(ros2Node, 0.5);
+      imagePublisher = new RawImagePublisher(ros2Node, 1.0);
       resetRequestPublisher = ros2Node.createPublisher(objectToTrack.topics.reset());
       resultRelayPublisher = ros2Node.createPublisher(objectToTrack.topics.ihmcResult());
       statePublisher = ros2Node.createPublisher(objectToTrack.topics.ihmcState());
