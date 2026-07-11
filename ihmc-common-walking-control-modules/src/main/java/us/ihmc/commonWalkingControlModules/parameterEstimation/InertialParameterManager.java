@@ -111,6 +111,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoDouble normalizedInnovationThreshold;
 
    private final YoBoolean passThroughEstimatesToController;
+   private final YoDouble passThroughGain;
    private final YoBoolean tare;
 
    private final YoBoolean areParametersPhysicallyConsistent;
@@ -295,6 +296,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       passThroughEstimatesToController = new YoBoolean("passThroughEstimatesToController", registry);
       passThroughEstimatesToController.set(false);
 
+      // Trust gain in [0, 1] scaling the estimator delta blended into the controller model when pass-through is
+      // on: 0 = nominal (no estimate applied even with pass-through on), 1 = full estimate. Ramp up at runtime.
+      passThroughGain = new YoDouble("inertialEstimatorPassthroughGain", registry);
+      passThroughGain.set(0.0);
+
       tare = new YoBoolean("tare", registry);
       tare.set(false);
 
@@ -449,7 +455,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private void updateControllerRobotModel()
    {
       baselineCalculator.calculateRateLimitedParameterDeltas(modelHandler.getBodyArray(RobotModelTask.ESTIMATE));
-      baselineCalculator.addRateLimitedParameterDeltas(modelHandler.getBodyArray(RobotModelTask.CONTROLLER));
+      baselineCalculator.addRateLimitedParameterDeltas(modelHandler.getBodyArray(RobotModelTask.CONTROLLER), passThroughGain.getValue());
    }
 
    private void updateTareSpatialInertias()

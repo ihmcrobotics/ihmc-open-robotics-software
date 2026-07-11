@@ -133,20 +133,27 @@ public class InertialBaselineCalculator
    }
 
    /**
-    * Add the rate-limited inertial parameter deltas to the URDF spatial inertias.
+    * Add the rate-limited inertial parameter deltas to the URDF spatial inertias, scaled by a trust gain.
+    * <p>
+    * The result per body is {@code urdfNominal + gain * rateLimitedDelta}, a linear blend in the inertial
+    * parameter basis between the nominal (URDF) values ({@code gain = 0}) and the full rate-limited estimate
+    * ({@code gain = 1}). Because the physically-consistent inertial parameters form a convex set and both the
+    * nominal and the (consistency-checked) estimate lie in it, any {@code gain} in [0, 1] also yields a
+    * physically-consistent result; values outside [0, 1] extrapolate and lose that guarantee.
     *
     * @param bodies the list of bodies to add and pack the inertial parameter deltas into. Modified.
+    * @param gain   trust factor scaling the applied delta (0 = nominal, 1 = full estimate).
     */
-   public void addRateLimitedParameterDeltas(RigidBodyBasics[] bodies)
+   public void addRateLimitedParameterDeltas(RigidBodyBasics[] bodies, double gain)
    {
       for (int i = 0; i < bodies.length; i++)
       {
          if (basisSets[i].isEmpty())  // Only update the bodies we're estimating
             continue;
 
-         // Add the deltas from the tare value to the urdf value -- these are what we send to the controller.
+         // Add the (gain-scaled) deltas from the tare value to the urdf value -- these are what we send to the controller.
          for (int j = 0; j < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; j++)
-            rateLimitedParameterDeltaContainer.set(j, 0, rateLimitedParameterDeltas[i][j].getDoubleValue());
+            rateLimitedParameterDeltaContainer.set(j, 0, gain * rateLimitedParameterDeltas[i][j].getDoubleValue());
          RigidBodyInertialParametersTools.addParameterDelta(urdfSpatialInertias[i], rateLimitedParameterDeltaContainer, bodies[i].getInertia());
       }
    }
