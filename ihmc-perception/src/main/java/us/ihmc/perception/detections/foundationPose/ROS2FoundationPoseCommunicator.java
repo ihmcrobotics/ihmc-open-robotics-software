@@ -3,18 +3,18 @@ package us.ihmc.perception.detections.foundationPose;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.FoundationPoseRequest;
-import perception_msgs.msg.dds.FoundationPoseResult;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.FoundationPoseRequest;
+import perception_msgs.FoundationPoseResult;
+import perception_msgs.ImageMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.communication.HumanoidROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.ImageSensor;
 
 import java.util.ArrayList;
@@ -26,18 +26,19 @@ public class ROS2FoundationPoseCommunicator
    private static final BytePointer JPG = new BytePointer(".jpg");
    private static final BytePointer PNG = new BytePointer(".png");
 
-   private static final ROS2Topic<?> FOUNDATION_POSE_TOPIC = new ROS2Topic<>().withPrefix("foundation_pose").withQoS(ROS2QosProfile.RELIABLE());
+   private static final HumanoidROS2Topic<?> FOUNDATION_POSE_TOPIC = new HumanoidROS2Topic<>().withPrefix("foundation_pose");
    private static final ROS2Topic<ImageMessage> COLOR_TOPIC = FOUNDATION_POSE_TOPIC.withModule("color_rgb8").withType(ImageMessage.class);
    private static final ROS2Topic<ImageMessage> DEPTH_TOPIC = FOUNDATION_POSE_TOPIC.withModule("depth_mono16").withType(ImageMessage.class);
    private static final ROS2Topic<FoundationPoseRequest> REQUEST_TOPIC = FOUNDATION_POSE_TOPIC.withModule("request").withType(FoundationPoseRequest.class);
-   private static final ROS2Topic<std_msgs.msg.dds.String> REMOVE_TOPIC = FOUNDATION_POSE_TOPIC.withModule("remove").withType(std_msgs.msg.dds.String.class);
+   private static final ROS2Topic<std_msgs.String_> REMOVE_TOPIC = FOUNDATION_POSE_TOPIC.withModule("remove").withType(std_msgs.String_.class);
    private static final ROS2Topic<FoundationPoseResult> RESULT_TOPIC = FOUNDATION_POSE_TOPIC.withModule("result").withType(FoundationPoseResult.class);
 
+   private final ROS2Node ros2Node;
    private final ROS2Publisher<FoundationPoseRequest> requestPublisher;
    private final FoundationPoseRequest requestMessage;
 
-   private final ROS2Publisher<std_msgs.msg.dds.String> removePublisher;
-   private final std_msgs.msg.dds.String removeMessage;
+   private final ROS2Publisher<std_msgs.String_> removePublisher;
+   private final std_msgs.String_ removeMessage;
 
    private final ROS2Publisher<ImageMessage> colorPublisher;
    private final ROS2Publisher<ImageMessage> depthPublisher;
@@ -50,21 +51,23 @@ public class ROS2FoundationPoseCommunicator
    private final RepeatingTaskThread sensorPublishThread;
 
    private final List<Consumer<FoundationPoseResult>> resultCallbacks;
+   private final FoundationPoseResult resultBuffer = new FoundationPoseResult();
 
    public ROS2FoundationPoseCommunicator(ROS2Node ros2Node, ImageSensor imageSensor, int colorKey, int depthKey)
    {
+      this.ros2Node = ros2Node;
       requestPublisher = ros2Node.createPublisher(REQUEST_TOPIC);
       requestMessage = new FoundationPoseRequest();
 
       removePublisher = ros2Node.createPublisher(REMOVE_TOPIC);
-      removeMessage = new std_msgs.msg.dds.String();
+      removeMessage = new std_msgs.String_();
 
       colorPublisher = ros2Node.createPublisher(COLOR_TOPIC);
       depthPublisher = ros2Node.createPublisher(DEPTH_TOPIC);
       colorMessage = new ImageMessage();
       depthMessage = new ImageMessage();
 
-      ros2Node.createSubscription2(RESULT_TOPIC, this::onResultReceived);
+      ros2Node.createSubscriptionSampler(RESULT_TOPIC, this::onResultReceived);
 
       this.imageSensor = imageSensor;
       this.colorKey = colorKey;
@@ -138,16 +141,17 @@ public class ROS2FoundationPoseCommunicator
       sensorPublishThread.kill();
       sensorPublishThread.interrupt();
 
-      requestPublisher.remove();
-      removePublisher.remove();
-      colorPublisher.remove();
-      depthPublisher.remove();
+      ros2Node.destroyPublisher(requestPublisher);
+      ros2Node.destroyPublisher(removePublisher);
+      ros2Node.destroyPublisher(colorPublisher);
+      ros2Node.destroyPublisher(depthPublisher);
    }
 
-   private void onResultReceived(FoundationPoseResult result)
+   private void onResultReceived(FoundationPoseResult sample)
    {
+      resultBuffer.set(sample);
       for (Consumer<FoundationPoseResult> resultCallback : resultCallbacks)
-         resultCallback.accept(result);
+         resultCallback.accept(resultBuffer);
    }
 
    private void publishSensor()

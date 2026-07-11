@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.NeckDesiredAccelerationsMessage;
+import controller_msgs.NeckDesiredAccelerationsMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
 public class NeckDesiredAccelerationsCommand implements Command<NeckDesiredAccelerationsCommand, NeckDesiredAccelerationsMessage>

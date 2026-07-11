@@ -2,14 +2,14 @@ package us.ihmc.rdx.ui.graphics.ros2.yolo;
 
 import imgui.ImGui;
 import imgui.ImGuiStyle;
-import perception_msgs.msg.dds.YOLOv8ModelInfo;
+import perception_msgs.YOLOv8ModelInfo;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.perception.detections.yolo.SyncedYOLOv8ExecutorParameters;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.ros2.ROS2Node;
 
 import java.util.ArrayList;
 import java.util.List;

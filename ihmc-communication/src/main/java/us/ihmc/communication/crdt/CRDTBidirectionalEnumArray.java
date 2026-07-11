@@ -1,6 +1,6 @@
 package us.ihmc.communication.crdt;
 
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
 
 /**
  * Represents an enum array that can be modified by both the
@@ -33,11 +33,11 @@ public class CRDTBidirectionalEnumArray<T extends Enum<T>> extends CRDTBidirecti
       return getValueInternal().length;
    }
 
-   public void toMessage(IDLSequence.Byte messageArray)
+   public void toMessage(IDLByteSequence messageArray)
    {
       T[] values = getValueInternal();
-      messageArray.resetQuick();
-      for (int i = 0; i < Math.min(getLength(), messageArray.size()); i++)
+      messageArray.clear();
+      for (int i = 0; i < getLength(); i++)
       {
          messageArray.add(values[i] == null ? -1 : (byte) values[i].ordinal());
       }
@@ -52,7 +52,7 @@ public class CRDTBidirectionalEnumArray<T extends Enum<T>> extends CRDTBidirecti
       }
    }
 
-   public void fromMessage(IDLSequence.Byte messageArray, T[] enumValues)
+   public void fromMessage(IDLByteSequence messageArray, T[] enumValues)
    {
       if (isModificationIncoming())
       {

@@ -1,10 +1,9 @@
 package us.ihmc.communication.controllerAPI.command;
 
 import org.apache.commons.lang3.NotImplementedException;
-
 import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.jros2.ROS2Message;
 
 /**
  * A command has to be used when interacting with the {@link CommandInputManager} that represents
@@ -12,7 +11,7 @@ import us.ihmc.euclid.interfaces.Settable;
  * <p>
  * As a message, a command holds onto the required data to execute for instance a body trajectory.
  * Unlike a message, a command HAS to be garbage free, and to be able to copy the data held in a
- * message through the {@link #setFromMessage(Settable)} method. When a new message is created and
+ * message through the {@link #setFromMessage(ROS2Message)} method. When a new message is created and
  * one wants it to be consumed by the controller, the corresponding command has to be created and
  * registered to the input API.
  * </p>
@@ -22,10 +21,10 @@ import us.ihmc.euclid.interfaces.Settable;
  * @author Sylvain
  *
  * @param <C> Type of the final implementation of this command. It is used for the copy method
- *           {@link #setFromMessage(Settable)}.
+ *           {@link #setFromMessage(ROS2Message)}.
  * @param <M> Type of the corresponding message that this command can copy.
  */
-public interface Command<C extends Command<C, M>, M extends Settable<M>> extends Settable<C>
+public interface Command<C extends Command<C, M>, M extends ROS2Message<M>> extends Settable<C>
 {
    /**
     * Clear all the data held in this Command. Used when the data has been processed by the controller
@@ -40,11 +39,6 @@ public interface Command<C extends Command<C, M>, M extends Settable<M>> extends
     */
    public abstract void setFromMessage(M message);
 
-   /**
-    * Informs which {@link Packet} class this Command is associated with.
-    * 
-    * @return {@link Packet} class this Command is associated with.
-    */
    public abstract Class<M> getMessageClass();
 
    /**

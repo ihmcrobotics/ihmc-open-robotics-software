@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import behavior_msgs.msg.dds.BehaviorTreeYoDataMessage;
+import behavior_msgs.BehaviorTreeYoDataMessage;
 import org.apache.commons.lang3.function.TriFunction;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -10,11 +10,11 @@ import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.ImageSensor;
 
 /**
@@ -30,7 +30,7 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
    public ROS2BehaviorTreeExecutor(
          ROS2ControllerHelper ros2ControllerHelper,
          ROS2SyncedRobotModel syncedRobot,
-         TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
+         TriFunction<DRCRobotModel, ROS2Node, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
          ImageSensor imageSensor,
          YOLOv8DetectionExecutor yolo,
          IsaacROSFoundationPoseCommunicatorMap foundationPose,
@@ -39,7 +39,7 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
    {
       super(syncedRobot, peerClockEstimator, ros2ControllerHelper, kinematicsSimulationBuilder, imageSensor, yolo, foundationPose, terrainMapData);
 
-      ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2ControllerHelper);
+      ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2ControllerHelper.getROS2Node());
 
       yoDataPublisher = ros2ControllerHelper.getROS2Node().createPublisher(AutonomyAPI.BEHAVIOR_YO_DATA);
    }

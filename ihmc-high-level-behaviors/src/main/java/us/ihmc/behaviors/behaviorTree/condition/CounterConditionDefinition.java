@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.condition;
 
-import behavior_msgs.msg.dds.ConditionNodeDefinitionMessage;
+import behavior_msgs.ConditionNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.crdt.CRDTBidirectionalLong;
@@ -48,7 +48,7 @@ public class CounterConditionDefinition
 
    public void toMessage(ConditionNodeDefinitionMessage message)
    {
-      message.setCountTo(countTo.toMessage());
+      message.setCountTo((int) countTo.toMessage());
    }
 
    public void fromMessage(ConditionNodeDefinitionMessage message)

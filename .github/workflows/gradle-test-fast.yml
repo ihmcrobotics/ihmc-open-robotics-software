@@ -140,12 +140,12 @@ jobs:
     with:
       subproject: 'ihmc-high-level-behaviors'
       test-category: 'fast'
-  ihmc-interfaces:
+  ihmc-interfaces-jros2:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     secrets:
       ROSIE_PERSONAL_ACCESS_TOKEN: ${{ secrets.ROSIE_PERSONAL_ACCESS_TOKEN }}
     with:
-      subproject: 'ihmc-interfaces'
+      subproject: 'ihmc-interfaces-jros2'
       test-category: 'fast'
   ihmc-java-toolkit:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main

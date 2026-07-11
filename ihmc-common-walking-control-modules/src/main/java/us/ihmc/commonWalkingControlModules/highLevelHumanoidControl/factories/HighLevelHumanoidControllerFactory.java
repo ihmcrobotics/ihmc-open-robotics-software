@@ -1,13 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.WholeBodyStreamingMessage;
+import controller_msgs.WholeBodyTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -42,6 +36,8 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -59,8 +55,6 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
@@ -73,6 +67,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class HighLevelHumanoidControllerFactory implements CloseableAndDisposable
 {
@@ -683,7 +683,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerToolbox.attachRobotMotionStatusChangedListener(listener);
    }
 
-   public void createControllerNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node)
+   public void createControllerNetworkSubscriber(String robotName, AsyncROS2Node asyncROS2Node)
    {
       ROS2Topic<?> inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
       ROS2Topic<?> outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
@@ -691,7 +691,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                                 commandInputManager,
                                                                                                 outputTopic,
                                                                                                 statusMessageOutputManager,
-                                                                                                realtimeROS2Node);
+                                                                                                asyncROS2Node);
 
       controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class,
                                                                        9,

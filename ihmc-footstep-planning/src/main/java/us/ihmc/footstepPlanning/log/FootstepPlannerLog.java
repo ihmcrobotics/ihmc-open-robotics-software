@@ -1,10 +1,10 @@
 package us.ihmc.footstepPlanning.log;
 
-import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket;
-import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
-import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
-import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import toolbox_msgs.msg.dds.SwingPlannerParametersPacket;
+import toolbox_msgs.AStarBodyPathPlannerParametersPacket;
+import toolbox_msgs.FootstepPlannerParametersPacket;
+import toolbox_msgs.FootstepPlanningRequestPacket;
+import toolbox_msgs.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.SwingPlannerParametersPacket;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.footstepPlanning.bodyPath.BodyPathLatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;

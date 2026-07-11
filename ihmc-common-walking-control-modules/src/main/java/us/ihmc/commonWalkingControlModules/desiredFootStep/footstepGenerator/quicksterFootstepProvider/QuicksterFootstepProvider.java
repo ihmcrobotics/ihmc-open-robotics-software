@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.quicksterFootstepProvider;
 
-import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.FootstepStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.commons.MathTools;

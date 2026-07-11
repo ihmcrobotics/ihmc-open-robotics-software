@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
-import controller_msgs.msg.dds.AbortWalkingMessage;
+import controller_msgs.AbortWalkingMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
 public class TestCommand implements Command<TestCommand,AbortWalkingMessage>

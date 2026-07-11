@@ -1,5 +1,8 @@
 package us.ihmc.avatar.wholeBodyHardwareControl;
 
+import static us.ihmc.avatar.wholeBodyHardwareControl.AvatarMultiThreadingManager.runAll;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
+
 import org.apache.commons.math3.util.Precision;
 import us.ihmc.affinity.Processor;
 import us.ihmc.avatar.*;
@@ -30,6 +33,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.realtime.MonotonicTime;
@@ -45,8 +49,6 @@ import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.time.ThreadTimer;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
@@ -70,9 +72,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-
-import static us.ihmc.avatar.wholeBodyHardwareControl.AvatarMultiThreadingManager.runAll;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
 /**
  * This class is responsible for creating the estimator, controller, and optionally step generator and IK streaming modules.
@@ -106,8 +105,8 @@ public class AvatarMultiThreadingFactory
    public final String IHMC_ROS_STATE_ESTIMATOR_NODE_NAME;
    public final String IHMC_ROS_CONTROLLER_NODE_NAME;
    public final String IHMC_ROS_IKSTREAMING_NODE_NAME;
-   private final RealtimeROS2Node estimatorRealtimeROS2Node;
-   private final RealtimeROS2Node controllerRealtimeROS2Node;
+   private final AsyncROS2Node estimatorAsyncROS2Node;
+   private final AsyncROS2Node controllerAsyncROS2Node;
    private final PeriodicThreadSchedulerFactory ros2ThreadFactory;
 
    // Estimator
@@ -194,15 +193,15 @@ public class AvatarMultiThreadingFactory
       else
          ros2ThreadFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
 
-      estimatorRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME, ros2ThreadFactory);
-      controllerRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_CONTROLLER_NODE_NAME, ros2ThreadFactory);
+      estimatorAsyncROS2Node = new AsyncROS2Node(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME);
+      controllerAsyncROS2Node = new AsyncROS2Node(IHMC_ROS_CONTROLLER_NODE_NAME);
 
       // Create estimator and estimator thread
       avatarEstimator = createAndAddEstimatorThread(robotModel, sensorReaderFactory);
 
       // Create high-level controller factory
       avatarControllerFactory = createHighLevelControllerFactory(robotModel,
-                                                                 controllerRealtimeROS2Node,
+                                                                 controllerAsyncROS2Node,
                                                                  lowLevelOutputProcessor,
                                                                  standPrepStateFactory,
                                                                  freezeStateFactory);
@@ -260,7 +259,7 @@ public class AvatarMultiThreadingFactory
       HumanoidRobotContextDataFactory estimatorContextDataFactory = new HumanoidRobotContextDataFactory();
 
       AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
-      avatarEstimatorThreadFactory.setROS2Info(estimatorRealtimeROS2Node, robotModel.getSimpleRobotName());
+      avatarEstimatorThreadFactory.setROS2Info(estimatorAsyncROS2Node, robotModel.getSimpleRobotName());
 
       avatarEstimatorThreadFactory.configureWithWholeBodyControllerParameters(robotModel);
       avatarEstimatorThreadFactory.configureWithDRCRobotModel(robotModel);
@@ -308,7 +307,7 @@ public class AvatarMultiThreadingFactory
                                                                                  avatarControllerFactory,
                                                                                  controllerContextFactory,
                                                                                  null,
-                                                                                 controllerRealtimeROS2Node,
+                                                                                 controllerAsyncROS2Node,
                                                                                  GRAVITY,
                                                                                  false);
 
@@ -331,7 +330,7 @@ public class AvatarMultiThreadingFactory
                                                                               avatarControllerFactory.getCommandInputManager(),
                                                                               masterRobotModel,
                                                                               null,
-                                                                              controllerRealtimeROS2Node);
+                                                                              controllerAsyncROS2Node);
 
       avatarStepGenerator.set(stepGenerator);
 
@@ -350,7 +349,7 @@ public class AvatarMultiThreadingFactory
    public IKStreamingRTPluginFactory.IKStreamingRTThread createAndAddIKStreamingThread(KinematicsStreamingToolboxParameters ikStreamingParameters)
    {
       avatarIKStreaming.set(new IKStreamingRTPluginFactory().createRTThread(masterRobotModel.getSimpleRobotName(),
-                                                                            estimatorRealtimeROS2Node,
+                                                                            estimatorAsyncROS2Node,
                                                                             avatarControllerFactory.getCommandInputManager(),
                                                                             avatarControllerFactory.getStatusOutputManager(), masterRobotModel,
                                                                             controllerContextFactory,
@@ -416,23 +415,16 @@ public class AvatarMultiThreadingFactory
       estimatorTask.addCallbackPostTask(() -> runAll(postEstimatorRunnables));
 
       // Add estimatorr startup callback to start spinning node
-      estimatorTask.addRunnableOnStartup(() ->
-                                         {
-                                            estimatorRealtimeROS2Node.spin();
-                                            LogTools.info("Estimator node has started spinning");
-                                         });
+      estimatorTask.addRunnableOnStartup(() -> LogTools.info("Estimator node has started"));
 
       // Add estimator cleanup callback to stop spinning node
-      estimatorTask.addRunnableOnCleanup(() ->
-                                         {
-                                            estimatorRealtimeROS2Node.stopSpinning();
-                                            LogTools.info("Estimator node has stopped Spinning");
-                                         });
+      estimatorTask.addRunnableOnCleanup(() -> LogTools.info("Estimator node has stopped spinning"));
 
       // Add estimator cleanup callback to destroy node
       estimatorTask.addRunnableOnCleanup(() ->
                                          {
-                                            estimatorRealtimeROS2Node.destroy();
+                                            if (!estimatorAsyncROS2Node.isClosed())
+                                               estimatorAsyncROS2Node.close();
                                             LogTools.info("Estimator node has been destroyed");
                                          });
 
@@ -476,23 +468,16 @@ public class AvatarMultiThreadingFactory
       controllerTask.addCallbackPostTask(() -> runAll(postControllerRunnables));
 
       // Add controller startup callback to start spinning node
-      controllerTask.addRunnableOnStartup(() ->
-                                          {
-                                             controllerRealtimeROS2Node.spin();
-                                             LogTools.info("Controller node has started spinning");
-                                          });
+      controllerTask.addRunnableOnStartup(() -> LogTools.info("Controller node has started"));
 
       // Add controller cleanup callback to stop spinning node
-      controllerTask.addRunnableOnCleanup(() ->
-                                          {
-                                             controllerRealtimeROS2Node.stopSpinning();
-                                             LogTools.info("Controller node has stopped Spinning");
-                                          });
+      controllerTask.addRunnableOnCleanup(() -> LogTools.info("Controller node has stopped spinning"));
 
       // Add controller cleanup callback to destroy node
       controllerTask.addRunnableOnCleanup(() ->
                                           {
-                                             controllerRealtimeROS2Node.destroy();
+                                             if (!controllerAsyncROS2Node.isClosed())
+                                                controllerAsyncROS2Node.close();
                                              LogTools.info("Controller node has been destroyed");
                                           });
 
@@ -572,7 +557,7 @@ public class AvatarMultiThreadingFactory
     * Creates and sets up factory for high-level controller
     */
    private HighLevelHumanoidControllerFactory createHighLevelControllerFactory(DRCRobotModel robotModel,
-                                                                               RealtimeROS2Node ros2Node,
+                                                                               AsyncROS2Node ros2Node,
                                                                                AvatarLowLevelOutputProcessor lowLevelOutputProcessor,
                                                                                HighLevelControllerStateFactory standPrepStateFactory,
                                                                                HighLevelControllerStateFactory freezeStateFactory)
@@ -1106,9 +1091,9 @@ public class AvatarMultiThreadingFactory
       return avatarEstimator.getSCS2YoGraphics();
    }
 
-   public RealtimeROS2Node getEstimatorROS2Node()
+   public AsyncROS2Node getEstimatorROS2Node()
    {
-      return estimatorRealtimeROS2Node;
+      return estimatorAsyncROS2Node;
    }
 
    public FullHumanoidRobotModel getEstimatorFullRobotModel()

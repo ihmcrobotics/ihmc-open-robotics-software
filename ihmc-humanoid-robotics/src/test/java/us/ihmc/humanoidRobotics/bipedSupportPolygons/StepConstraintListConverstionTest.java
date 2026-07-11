@@ -1,7 +1,9 @@
 package us.ihmc.humanoidRobotics.bipedSupportPolygons;
 
-import controller_msgs.msg.dds.StepConstraintMessage;
-import controller_msgs.msg.dds.StepConstraintsListMessage;
+import static org.junit.jupiter.api.Assertions.*;
+
+import controller_msgs.StepConstraintMessage;
+import controller_msgs.StepConstraintsListMessage;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -14,8 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class StepConstraintListConverstionTest
 {
@@ -118,12 +118,12 @@ public class StepConstraintListConverstionTest
 
    private static void assertMessageEquals(String failureMessage, PlanarRegion expected, StepConstraintMessage actual, double epsilon)
    {
-      EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getNormal(), actual.getRegionNormal(), epsilon);
-      EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getPoint(), actual.getRegionOrigin(), epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getNormal(), actual.getRegionNormal().getVector(), epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getPoint(), actual.getRegionOrigin().getPoint(), epsilon);
       assertEquals(expected.getConcaveHullSize(), actual.getConcaveHullSize(), failureMessage);
       for (int i = 0; i < expected.getConcaveHullSize(); i++)
       {
-         EuclidCoreTestTools.assertEquals(failureMessage, expected.getConcaveHullVertex(i), new Point2D(actual.getVertexBuffer().get(i)), epsilon);
+         EuclidCoreTestTools.assertEquals(failureMessage, expected.getConcaveHullVertex(i), new Point2D(actual.getVertexBuffer().get(i).getPoint()), epsilon);
       }
    }
 

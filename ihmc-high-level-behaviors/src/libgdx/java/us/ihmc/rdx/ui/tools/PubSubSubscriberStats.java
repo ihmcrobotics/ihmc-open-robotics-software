@@ -1,34 +1,28 @@
 package us.ihmc.rdx.ui.tools;
 
-import us.ihmc.pubsub.participant.Participant;
-import us.ihmc.pubsub.subscriber.Subscriber;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.Statistics;
 
 public class PubSubSubscriberStats extends PubSubCommonStats
 {
-   private final Subscriber<?> subscriber;
+   private final ROS2Subscription<?> subscription;
 
-   public PubSubSubscriberStats(Participant participant, Subscriber<?> subscriber)
+   public PubSubSubscriberStats(ROS2Node node, ROS2Subscription<?> subscription)
    {
-      super(participant);
-
-      this.subscriber = subscriber;
-   }
-
-   public Subscriber<?> getSubscriber()
-   {
-      return subscriber;
+      super(node);
+      this.subscription = subscription;
    }
 
    @Override
-   public long getNumberOfEvents()
+   protected void readSizeStatistics(Statistics statisticsToPack)
    {
-      return subscriber.getNumberOfReceivedMessages();
+      subscription.readMessageSizeStatistics(statisticsToPack);
    }
 
-   @Override
-   public long getCumulativePayloadBytes()
+   public ROS2Subscription<?> getSubscription()
    {
-      return subscriber.getCumulativePayloadBytes();
+      return subscription;
    }
 
    public double getReceiveFrequency()

@@ -1,12 +1,12 @@
 package us.ihmc.communication.property;
 
-import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
+import ihmc_common_msgs.PrimitiveDataVectorMessage;
 import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.property.StoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetBasics;
@@ -38,11 +38,13 @@ public class StoredPropertySetROS2Input
                                      StoredPropertySetBasics storedPropertySetToUpdate)
    {
       this.storedPropertySetToUpdate = storedPropertySetToUpdate;
-      ros2Node.createSubscription2(inputTopic, this::acceptMessage);
+      ros2Node.createSubscriptionSampler(inputTopic, this::acceptMessage);
    }
 
-   private void acceptMessage(PrimitiveDataVectorMessage message)
+   private void acceptMessage(PrimitiveDataVectorMessage sample)
    {
+      PrimitiveDataVectorMessage message = new PrimitiveDataVectorMessage();
+      message.set(sample);
       receptionNotification.set(message);
       ++numberOfMessagesReceived;
       receptionTimer.reset();

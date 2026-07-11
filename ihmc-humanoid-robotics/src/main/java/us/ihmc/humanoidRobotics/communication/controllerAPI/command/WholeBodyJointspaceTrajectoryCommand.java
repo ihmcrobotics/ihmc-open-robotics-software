@@ -1,14 +1,14 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.List;
-import java.util.Random;
-
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage;
+import controller_msgs.OneDoFJointTrajectoryMessage;
+import controller_msgs.WholeBodyJointspaceTrajectoryMessage;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
+
+import java.util.List;
+import java.util.Random;
 
 public final class WholeBodyJointspaceTrajectoryCommand extends QueueableCommand<WholeBodyJointspaceTrajectoryCommand, WholeBodyJointspaceTrajectoryMessage>
 {
@@ -66,7 +66,7 @@ public final class WholeBodyJointspaceTrajectoryCommand extends QueueableCommand
       clear();
       sequenceId = message.getSequenceId();
       setQueueableCommandVariables(message.getQueueingProperties());
-      List<OneDoFJointTrajectoryMessage> trajectoryPointListArray = message.getJointTrajectoryMessages();
+      var trajectoryPointListArray = message.getJointTrajectoryMessages();
 
       for (int i = 0; i < message.getJointHashCodes().size(); i++)
       {

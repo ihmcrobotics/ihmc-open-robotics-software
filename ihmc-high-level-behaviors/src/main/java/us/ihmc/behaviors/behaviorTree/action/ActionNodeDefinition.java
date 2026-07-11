@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action;
 
-import behavior_msgs.msg.dds.ActionNodeDefinitionMessage;
+import behavior_msgs.ActionNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;

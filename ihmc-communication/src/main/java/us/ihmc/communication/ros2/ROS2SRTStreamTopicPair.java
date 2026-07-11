@@ -1,8 +1,8 @@
 package us.ihmc.communication.ros2;
 
-import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.SRTStreamStatus;
-import us.ihmc.ros2.ROS2Topic;
+import perception_msgs.ImageMessage;
+import perception_msgs.SRTStreamStatus;
+import us.ihmc.jros2.ROS2Topic;
 
 /**
  * Pair of an SRT stream topic and an image message topic.

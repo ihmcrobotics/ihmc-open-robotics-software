@@ -1,12 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.subscribers;
 
-import controller_msgs.msg.dds.LocalizationPacket;
-import controller_msgs.msg.dds.PelvisPoseErrorPacket;
-import ihmc_common_msgs.msg.dds.StampedPosePacket;
+import controller_msgs.LocalizationPacket;
+import controller_msgs.PelvisPoseErrorPacket;
+import ihmc_common_msgs.StampedPosePacket;
 import us.ihmc.communication.StateEstimatorAPI;
-import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -16,24 +15,18 @@ public class PelvisPoseCorrectionCommunicator implements PelvisPoseCorrectionCom
    private final ROS2Publisher<PelvisPoseErrorPacket> poseErrorPublisher;
    private final ROS2Publisher<LocalizationPacket> localizationPublisher;
 
-   public PelvisPoseCorrectionCommunicator(RealtimeROS2Node realtimeROS2Node, String robotName)
+   public PelvisPoseCorrectionCommunicator(ROS2Node asyncROS2Node, String robotName)
    {
-      if (realtimeROS2Node != null && robotName != null)
+      if (asyncROS2Node != null && robotName != null)
       {
-         poseErrorPublisher = realtimeROS2Node.createPublisher(StateEstimatorAPI.getTopic(PelvisPoseErrorPacket.class, robotName));
-         localizationPublisher = realtimeROS2Node.createPublisher(StateEstimatorAPI.getTopic(LocalizationPacket.class, robotName));
+         poseErrorPublisher = asyncROS2Node.createPublisher(StateEstimatorAPI.getTopic(PelvisPoseErrorPacket.class, robotName));
+         localizationPublisher = asyncROS2Node.createPublisher(StateEstimatorAPI.getTopic(LocalizationPacket.class, robotName));
       }
       else
       {
          poseErrorPublisher = null;
          localizationPublisher = null;
       }
-   }
-
-   @Override
-   public void onNewDataMessage(Subscriber<StampedPosePacket> subscriber)
-   {
-      receivedPacket(subscriber.takeNextData());
    }
 
    @Override
