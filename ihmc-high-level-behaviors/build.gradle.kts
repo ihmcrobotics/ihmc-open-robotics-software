@@ -35,6 +35,6 @@ testDependencies {
    api(ihmc.sourceSetProject("libgdx"))
    api("us.ihmc:ihmc-graphics-libgdx-test:source")
    api("us.ihmc:ihmc-path-planning-test:source")
-   api("us.ihmc:scs2-bullet-simulation-test:17-0.33.0")
+   api("us.ihmc:scs2-bullet-simulation-test:17-0.33.1")
    api("us.ihmc:example-simulations:source")
 }
