@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.StepConstraintMessage;
+import controller_msgs.StepConstraintMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -46,13 +46,13 @@ public class StepConstraintRegionCommand implements Command<StepConstraintRegion
    {
       clear();
 
-      setRegionTransformProperties(message.getRegionOrigin(), message.getRegionOrientation());
+      setRegionTransformProperties(message.getRegionOrigin().getPoint(), message.getRegionOrientation().getQuaternion());
 
       int vertexIndex = 0;
       int upperBound = message.getConcaveHullSize();
 
       for (; vertexIndex < upperBound; vertexIndex++)
-         addConcaveHullVertex().set(message.getVertexBuffer().get(vertexIndex));
+         addConcaveHullVertex().set(message.getVertexBuffer().get(vertexIndex).getPoint());
 
       for (int polygonIndex = 0; polygonIndex < message.getNumberOfHolesInRegion(); polygonIndex++)
       {
@@ -62,7 +62,7 @@ public class StepConstraintRegionCommand implements Command<StepConstraintRegion
 
          for (; vertexIndex < upperBound; vertexIndex++)
          {
-            hole.addVertex(message.getVertexBuffer().get(vertexIndex));
+            hole.addVertex(message.getVertexBuffer().get(vertexIndex).getPoint());
          }
          hole.update();
       }

@@ -1,6 +1,6 @@
 package us.ihmc.communication.crdt;
 
-import us.ihmc.idl.IDLSequence.Float;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 
 /**
  * Represents a float array that can be modified by both the
@@ -49,10 +49,10 @@ public class CRDTBidirectionalFloatArray extends CRDTBidirectionalMutableField<f
       System.arraycopy(getValueInternal(), 0, messageArray, 0, Math.min(getLength(), messageArray.length));
    }
 
-   public void toMessage(Float message)
+   public void toMessage(IDLFloatSequence message)
    {
       message.clear();
-      message.add(getValue());
+      message.addAll(getValue());
    }
 
    public void fromMessage(float[] messageArray)
@@ -63,11 +63,14 @@ public class CRDTBidirectionalFloatArray extends CRDTBidirectionalMutableField<f
       }
    }
 
-   public void fromMessage(Float message)
+   public void fromMessage(IDLFloatSequence message)
    {
       if (isModificationIncoming())
       {
-         message.toArray(getValue());
+         for (int i = 0; i < message.size() && i < getLength(); ++i)
+         {
+            getValueInternal()[i] = message.get(i);
+         }
       }
    }
 }

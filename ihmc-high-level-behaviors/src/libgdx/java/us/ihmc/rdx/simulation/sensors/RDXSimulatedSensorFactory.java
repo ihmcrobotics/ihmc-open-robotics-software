@@ -75,6 +75,44 @@ public class RDXSimulatedSensorFactory
       return zed;
    }
 
+   /**
+    * Lower-resolution ZED X Mini for simulation UI. Halves width and height to reduce LibGDX
+    * framebuffer, OpenCV, and ROS image traffic memory by roughly 4x per camera.
+    */
+   public static RDXSimulatedImageSensor createZEDXMiniImageSensorForSimulation()
+   {
+      ZEDModelData modelData = ZEDModelData.ZED_X_MINI;
+      int imageWidth = 480;
+      int imageHeight = 300;
+      RDXSimulatedImageSensor zed = new RDXSimulatedImageSensor(modelData.name(), 15.0);
+      zed.addCamera("left",
+                    imageWidth,
+                    imageHeight,
+                    ZEDModelData.ZED_X_MINI.getVerticalFOV(),
+                    modelData.getMinimumDepthDistance(),
+                    modelData.getMaximumDepthDistance(),
+                    true,
+                    ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
+                    true,
+                    ZEDImageSensor.DEPTH_IMAGE_KEY,
+                    15,
+                    new RigidBodyTransform(new RotationMatrix(), new Vector3D(0.0, modelData.getCenterToCameraDistance(), 0.0)));
+      zed.addCamera("right",
+                    imageWidth,
+                    imageHeight,
+                    ZEDModelData.ZED_X_MINI.getVerticalFOV(),
+                    modelData.getMinimumDepthDistance(),
+                    modelData.getMaximumDepthDistance(),
+                    true,
+                    ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY,
+                    false,
+                    -1,
+                    0,
+                    new RigidBodyTransform(new RotationMatrix(), new Vector3D(0.0, -modelData.getCenterToCameraDistance(), 0.0)));
+
+      return zed;
+   }
+
    public static RDXSimulatedImageSensor createZED2iImageSensor()
    {
       ZEDModelData modelData = ZEDModelData.ZED_2I;

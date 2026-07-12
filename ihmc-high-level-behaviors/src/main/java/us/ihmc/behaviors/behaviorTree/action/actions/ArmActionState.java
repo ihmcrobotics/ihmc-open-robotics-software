@@ -1,6 +1,8 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.ArmActionStateMessage;
+import static us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition.MAX_NUMBER_OF_JOINTS;
+
+import behavior_msgs.ArmActionStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.communication.crdt.*;
@@ -10,8 +12,6 @@ import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import static us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition.MAX_NUMBER_OF_JOINTS;
 
 public class ArmActionState extends ActionNodeState<ArmActionDefinition>
 {
@@ -80,8 +80,8 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
       previewJointAngles.toMessage(message.getJointAngles());
       message.setSolutionQuality(solutionQuality.toMessage());
       screwPrimitive.toMessage(message);
-      force.toMessage(message.getForce());
-      torque.toMessage(message.getTorque());
+      force.toMessage(message.getForce().getVector());
+      torque.toMessage(message.getTorque().getVector());
    }
 
    public void fromMessage(ArmActionStateMessage message)
@@ -95,8 +95,8 @@ public class ArmActionState extends ActionNodeState<ArmActionDefinition>
       previewJointAngles.fromMessage(message.getJointAngles());
       solutionQuality.fromMessage(message.getSolutionQuality());
       screwPrimitive.fromMessage(message);
-      force.fromMessage(message.getForce());
-      torque.fromMessage(message.getTorque());
+      force.fromMessage(message.getForce().getVector());
+      torque.fromMessage(message.getTorque().getVector());
    }
 
    public CRDTDetachableReferenceFrame getPalmFrame()

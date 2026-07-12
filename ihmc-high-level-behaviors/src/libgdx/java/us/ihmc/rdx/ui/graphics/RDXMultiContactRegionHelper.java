@@ -1,17 +1,17 @@
 package us.ihmc.rdx.ui.graphics;
 
-import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
+import perception_msgs.FramePlanarRegionsListMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -23,7 +23,12 @@ public class RDXMultiContactRegionHelper
    public RDXMultiContactRegionHelper(FullHumanoidRobotModel ghostFullRobotModel, ROS2Node ros2Node)
    {
       this.ghostFullRobotModel = ghostFullRobotModel;
-      ros2Node.createSubscription(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, s -> latestPlanarRegionsMessage.set(s.takeNextData()));
+      ros2Node.createSubscriptionSampler(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, sample ->
+      {
+         FramePlanarRegionsListMessage copy = new FramePlanarRegionsListMessage();
+         copy.set(sample);
+         latestPlanarRegionsMessage.set(copy);
+      });
    }
 
    public Vector3D getNormalOfClosestRegion(RobotSide robotSide)

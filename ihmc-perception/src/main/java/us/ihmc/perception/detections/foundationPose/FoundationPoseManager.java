@@ -3,12 +3,12 @@ package us.ihmc.perception.detections.foundationPose;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ImageSensor;
 
 import java.time.Duration;
@@ -138,7 +138,7 @@ public class FoundationPoseManager
                                      {
                                         FoundationPoseInstantDetection instantDetection = new FoundationPoseInstantDetection(result.getMeshFileAsString(),
                                                                                                                              result.getObjectIdAsString(),
-                                                                                                                             result.getObjectPose(),
+                                                                                                                             result.getObjectPose().getPose(),
                                                                                                                              MessageTools.toInstant(result.getTimestamp()));
                                         resultCallback.accept(List.of(instantDetection));
                                      });

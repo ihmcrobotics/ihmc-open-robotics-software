@@ -1,6 +1,6 @@
 package us.ihmc.communication.crdt;
 
-import controller_msgs.msg.dds.RigidBodyTransformMessage;
+import controller_msgs.RigidBodyTransformMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;

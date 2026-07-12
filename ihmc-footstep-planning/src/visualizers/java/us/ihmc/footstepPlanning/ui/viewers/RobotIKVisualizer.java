@@ -1,20 +1,11 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.ToDoubleFunction;
-import java.util.zip.CRC32;
-
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.communication.UserInterfaceIKMode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
@@ -34,6 +25,16 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.ToDoubleFunction;
+import java.util.zip.CRC32;
 
 public class RobotIKVisualizer
 {
@@ -242,8 +243,15 @@ public class RobotIKVisualizer
       if (robotConfigurationData.getJointNameHash() != jointNameHash)
          throw new RuntimeException("Joint names do not match for RobotConfigurationData");
 
-      newRootJointPoseReference.set(new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootPosition()));
-      newJointConfigurationReference.set(robotConfigurationData.getJointAngles().toArray());
+      newRootJointPoseReference.set(new RigidBodyTransform(robotConfigurationData.getRootOrientation().getQuaternion(),
+                                                           robotConfigurationData.getRootPosition().getPoint()));
+      IDLFloatSequence jointAngles = robotConfigurationData.getJointAngles();
+      float[] jointAngleArray = new float[jointAngles.size()];
+      for (int i = 0; i < jointAngles.size(); i++)
+      {
+         jointAngleArray[i] = jointAngles.get(i);
+      }
+      newJointConfigurationReference.set(jointAngleArray);
    }
 
    public void submitNewConfiguration(RigidBodyTransform rootJointTransform, ToDoubleFunction<String> jointAngles)

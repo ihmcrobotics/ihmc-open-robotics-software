@@ -1,12 +1,12 @@
 package us.ihmc.behaviors.behaviorTree.control.buildingExploration;
 
-import behavior_msgs.msg.dds.BuildingExplorationStateMessage;
+import behavior_msgs.BuildingExplorationStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalState;
 
-import javax.annotation.Nullable;
 import java.util.Stack;
+import javax.annotation.Nullable;
 
 public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExplorationDefinition>
 {

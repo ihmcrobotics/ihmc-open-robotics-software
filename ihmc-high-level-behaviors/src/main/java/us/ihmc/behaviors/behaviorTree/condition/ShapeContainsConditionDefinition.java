@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.condition;
 
-import behavior_msgs.msg.dds.ConditionNodeDefinitionMessage;
+import behavior_msgs.ConditionNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -195,12 +195,12 @@ public class ShapeContainsConditionDefinition
       shapeTransformToParent.toMessage(message.getShapeTransformToParent());
       message.setSphereRadius((float) sphereRadius.toMessage());
       message.setCheckColor(checkColor.toMessage());
-      message.setHueMin(hueMin.toMessage());
-      message.setHueMax(hueMax.toMessage());
-      message.setSaturationMin(saturationMin.toMessage());
-      message.setSaturationMax(saturationMax.toMessage());
-      message.setValueMin(valueMin.toMessage());
-      message.setValueMax(valueMax.toMessage());
+      message.setHueMin((short) hueMin.toMessage());
+      message.setHueMax((short) hueMax.toMessage());
+      message.setSaturationMin((short) saturationMin.toMessage());
+      message.setSaturationMax((short) saturationMax.toMessage());
+      message.setValueMin((short) valueMin.toMessage());
+      message.setValueMax((short) valueMax.toMessage());
    }
 
    public void fromMessage(ConditionNodeDefinitionMessage message)

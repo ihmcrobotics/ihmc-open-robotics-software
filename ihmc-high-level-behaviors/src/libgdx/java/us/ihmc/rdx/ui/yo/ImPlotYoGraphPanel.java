@@ -10,8 +10,6 @@ import imgui.type.ImInt;
 import imgui.type.ImString;
 import us.ihmc.behaviors.tools.yo.YoDoubleClientHelper;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImPlotTools;
@@ -25,7 +23,7 @@ import java.util.*;
 public class ImPlotYoGraphPanel
 {
    private final String title;
-   private final String controllerHost = NetworkParameters.getHost(NetworkParameterKeys.robotController);
+   private final String controllerHost = System.getProperty("ihmc.robot.controller.host", "127.0.0.1");
    private final int bufferSize;
    private final HashMap<String, ArrayList<ImPlotYoGraph>> graphs = new HashMap<>();
    private final YoVariableClientHelper yoClientHelper;
@@ -60,7 +58,6 @@ public class ImPlotYoGraphPanel
    public void startYoVariableClient()
    {
       //      Set<String> graphGroupNameKeySet = graphGroups.keySet();
-      //      String robotControllerHost = NetworkParameters.getHost(NetworkParameterKeys.robotController);
       //      String graphGroupName;
       //      if (robotControllerHost.trim().toLowerCase().contains("cpu4") && graphGroupNameKeySet.contains("Real robot"))
       //      {

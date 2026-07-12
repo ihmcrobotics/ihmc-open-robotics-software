@@ -1,23 +1,24 @@
 package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepStatusMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingLogger;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
-import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.ros2.ROS2Topic;
 
 public class WaitingToLandState implements State
 {
-   private final ROS2Helper ros2Helper;
    private final ContinuousHikingParameters continuousHikingParameters;
 
    private final ROS2Topic<FootstepDataListMessage> controllerFootstepDataTopic;
+   private final ROS2Publisher<FootstepDataListMessage> footstepPublisher;
    private final ContinuousPlanner continuousPlanner;
    private final ControllerFootstepQueueMonitor controllerQueueMonitor;
    private FootstepStatusMessage previousFootstepStatusMessage = new FootstepStatusMessage();
@@ -27,21 +28,20 @@ public class WaitingToLandState implements State
     * This state exists to send a plan to the controller (that is if we have a plan to send). Then we will exist this state when the next step is started. Once
     * that step is started we want to plan again in order to keep walking, so leave this state.
     */
-   public WaitingToLandState(ROS2Helper ros2Helper,
+   public WaitingToLandState(ROS2Node ros2Node,
                              String simpleRobotName,
                              ContinuousPlanner continuousPlanner,
                              ControllerFootstepQueueMonitor controllerQueueMonitor,
                              ContinuousHikingParameters continuousHikingParameters,
                              ContinuousHikingLogger continuousHikingLogger)
    {
-      this.ros2Helper = ros2Helper;
       this.continuousHikingParameters = continuousHikingParameters;
       this.continuousPlanner = continuousPlanner;
       this.controllerQueueMonitor = controllerQueueMonitor;
       this.continuousHikingLogger = continuousHikingLogger;
 
       controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, simpleRobotName);
-      ros2Helper.createPublisher(controllerFootstepDataTopic);
+      footstepPublisher = ros2Node.createPublisher(controllerFootstepDataTopic);
    }
 
    @Override
@@ -58,7 +58,7 @@ public class WaitingToLandState implements State
             LogTools.info(message);
             continuousHikingLogger.appendString(message);
 
-            ros2Helper.publish(controllerFootstepDataTopic, footstepDataList);
+            footstepPublisher.publish(footstepDataList);
             continuousPlanner.setPlanAvailable(false);
          }
          else

@@ -1,5 +1,7 @@
 package us.ihmc.rdx.behaviorTree;
 
+import static us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry.getClassFromTypeName;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -7,21 +9,19 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionTaskspaceTrajectoryMode;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.rdx.behaviorTree.actions.RDXArmAction;
 import us.ihmc.rdx.behaviorTree.actions.RDXNeckAction;
 import us.ihmc.rdx.behaviorTree.actions.RDXSceneAction;
-import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionTaskspaceTrajectoryMode;
 import us.ihmc.rdx.behaviorTree.actions.RDXSpineAction;
 import us.ihmc.rdx.behaviorTree.actions.RDXWalkAction;
 import us.ihmc.rdx.behaviorTree.condition.RDXConditionNode;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import static us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry.getClassFromTypeName;
 
 public class RDXBehaviorNodeDuplication
 {

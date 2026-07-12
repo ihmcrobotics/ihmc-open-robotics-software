@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.velocityBasedWalkingAPI;
 
-import controller_msgs.msg.dds.VelocityBasedWalkingInputMessage;
+import controller_msgs.VelocityBasedWalkingInputMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
 public class VelocityBasedWalkingInputCommand implements Command<VelocityBasedWalkingInputCommand, VelocityBasedWalkingInputMessage>

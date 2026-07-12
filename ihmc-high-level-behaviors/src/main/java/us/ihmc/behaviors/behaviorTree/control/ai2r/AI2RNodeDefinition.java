@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.control.ai2r;
 
-import behavior_msgs.msg.dds.AI2RNodeDefinitionMessage;
+import behavior_msgs.AI2RNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;

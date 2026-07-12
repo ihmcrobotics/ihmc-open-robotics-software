@@ -3,10 +3,11 @@ package us.ihmc.perception.streaming;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.ImageMessage;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
@@ -14,14 +15,13 @@ import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
+import javax.annotation.Nullable;
 
 public class ROS2SRTVideoStreamImageMessageRelayWorker
 {
+   private final ROS2Node loopbackPublisherNode;
    private final ROS2Publisher<ImageMessage> publisher;
    private final ROS2SRTVideoSubscriber subscriber;
 
@@ -47,6 +47,7 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
                                                     ROS2SRTStreamTopicPair streamTopicPair,
                                                     CompressionType compressionType)
    {
+      this.loopbackPublisherNode = loopbackPublisherNode;
       PixelFormat outputPixelFormat = streamTopicPair.isDepth() ? PixelFormat.GRAY16 : PixelFormat.BGR8;
 
       imageMessage = new ImageMessage();
@@ -56,7 +57,7 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
 
       // Create publisher and subscriber using two separate nodes as publisher should ideally only publish on loopback.
       publisher = loopbackPublisherNode.createPublisher(streamTopicPair.imageMessageTopic());
-      subscriber = new ROS2SRTVideoSubscriber(new ROS2Helper(subscriberNode), streamTopicPair.streamStatusTopic(), outputPixelFormat);
+      subscriber = new ROS2SRTVideoSubscriber(subscriberNode, streamTopicPair.streamStatusTopic(), outputPixelFormat);
       subscriber.addNewFrameConsumer(this::republishFrameAsImageMessage);
       subscriber.subscribe();
 
@@ -77,7 +78,7 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
    public void destroy()
    {
       subscriber.destroy();
-      publisher.remove();
+      loopbackPublisherNode.destroyPublisher(publisher);
       if (cudajpegProcessor != null)
          cudajpegProcessor.destroy();
    }
