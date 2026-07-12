@@ -160,7 +160,18 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private static final double INIT_POS_VAR = 1.0e-6; // encoders trusted at initialization
    private static final double INIT_VEL_VAR = 1.0; // velocity unknown at initialization
    private static final double INIT_BIAS_VAR = 2.5e-3; // (0.05 rad/s)^2
-   private static final double ANCHOR_VAR = 4.0e-4; // stance FK slip variance
+   private static final double ANCHOR_VAR = 4.0e-4; // stance FK slip variance (Sigma_eps)
+   /**
+    * Encoder joint-VELOCITY noise STD (rad/s) for leg joints on a base->foot chain that are NOT filter states
+    * (on Alex: the ankles, because there are no foot IMUs). Their measured velocity enters the stance-anchor row
+    * as a known input, so by the standard input-noise congruence its covariance must be propagated into the
+    * anchor's measurement covariance:  R_anchor = Sigma_eps + J_U diag(SIGMA_QD_UNFILTERED^2) J_U^T.
+    * <p>
+    * Conservative placeholder: MEASURE the actual qd noise of the ankle encoder signal and retune. Erring large
+    * is safe -- it merely weakens the anchor, which still fixes the bias gauge, just with more averaging. Erring
+    * small is NOT safe: it over-trusts a noisy input and feeds that noise into the base gyro-bias estimate.
+    */
+   private static final double SIGMA_QD_UNFILTERED = 0.1; // rad/s
    // On-ground initialization gate: the exported base-IMU gyro bias is only observable through the phase-2
    // stance anchor, which runs only when a foot is trusted. If the filter is seeded while the robot hangs
    // (feet off the ground) the base bias is unobservable, its covariance grows unbounded under the bias
@@ -214,6 +225,13 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private final YoInteger yoInnovationGateSkipCount = new YoInteger("jointKFInnovationGateSkipCount", registry);
    private final YoDouble yoCondSProxyLog10 = new YoDouble("jointKFCondSProxyLog10", registry);
    private final YoDouble yoMinSDiag = new YoDouble("jointKFMinSDiag", registry);
+   // The two variables that would have caught the pitch drift months earlier, and that condS/minSDiag CANNOT.
+   // S is the innovation covariance of the MEASURED directions -- the bias-DIFFERENCE rows -- which stay
+   // perfectly well-conditioned even while the common-mode bias gauge is unfixed. A nullspace of H is invisible
+   // to S by construction; it shows up in P. So watch the anchor count (0 => gauge unfixed => bias WILL diverge)
+   // and the base-bias covariance trace (unbounded growth <=> unobservable). See FINDINGS.md §F.4.
+   private final YoInteger yoActiveAnchorCount = new YoInteger("jointKFActiveAnchorCount", registry);
+   private final YoDouble yoBiasPTrace = new YoDouble("jointKF_biasPTrace", registry);
    private final YoDouble yoMaxSDiag = new YoDouble("jointKFMaxSDiag", registry);
 
    // Per-joint filtered state (q, qd) and the 1-sigma covariance envelope around each. All indexed by the
@@ -262,7 +280,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private final DMatrixRMaj Ptmp = new DMatrixRMaj(0,0);
    private final DMatrixRMaj Rimu = new DMatrixRMaj(3,3);
    private final DMatrixRMaj rot3 = new DMatrixRMaj(3,3);
-   private final DMatrixRMaj anchorR = new DMatrixRMaj(3,3); // Sigma_eps, the stance-anchor model-error covariance
+   // (The stance-anchor covariance is no longer a constant Sigma_eps: it is per-anchor and per-tick, held in
+   //  FootAnchor.R, because the unfiltered-joint congruence J_U diag(sigma_qd^2) J_U^T depends on the posture.)
 
    // ---- Stacked gyro measurement (SPEC §5). ONE Joseph update per tick over z_g in R^{3(E+K)}: E = pairs
    // (rows [0, 3E)), K = active stance anchors this tick (rows [3E, 3E+3K)). This replaces Rev. 1's per-pair
@@ -551,22 +570,54 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
             fa.legJoints = leg.toArray(new OneDoFJointBasics[0]);
             fa.Jang.reshape(3, fa.legJoints.length);
             fa.qdCols = new int[fa.legJoints.length];
+
+            // A leg joint that is NOT a filter state does not disable the anchor -- it only has to be KNOWN, not
+            // ESTIMATED. Splitting the chain into filtered F and unfiltered U, the anchor equation
+            //    omega_base = -J_F qd_F - J_U qd_U + b_base
+            // moves the unfiltered part to the measurement side (see buildStackedMeasurement):
+            //    z' = omega_base + J_U qd_U^meas = -J_F qd_F + b_base + noise'
+            // The +I3 on b_base -- the ONLY absolute bias observation in the filter, and hence the ONLY thing
+            // that fixes the 3-dim common-mode bias gauge -- is untouched by this split, so the anchor keeps its
+            // observability role for ANY subset of filtered leg joints.
+            //
+            // This used to set usable=false whenever any chain joint was unfiltered. On Alex that is ALWAYS: the
+            // robot has no foot IMUs, so the shin->foot pair is never built, so the ankles are never filtered
+            // joints -- and they sit on the pelvis->foot chain. Both anchors were therefore dead on every tick
+            // since day one, the bias gauge was never fixed, and the exported pelvis gyro bias random-walked to
+            // 0.17 rad/s and drove the base pitch drift. See FINDINGS.md Part F.
             fa.usable = true;
+            int unfiltered = 0;
             for (int c = 0; c < fa.legJoints.length; c++)
             {
                Integer idx = jointToIndex.get(fa.legJoints[c]);
                if (idx == null)
                {
-                  fa.usable = false;
-                  fa.qdCols[c] = -1;
+                  fa.qdCols[c] = -1; // unfiltered: contributes J_U * qd^meas to z', no H column
+                  unfiltered++;
                }
                else
                   fa.qdCols[c] = n + idx;
             }
+            // A chain with no joints at all cannot anchor anything (degenerate model).
+            if (fa.legJoints.length == 0)
+               fa.usable = false;
+            if (unfiltered > 0)
+               LogTools.info("JointLevelKFPreFilter: foot anchor " + foot.getName() + " has " + unfiltered + " of "
+                             + fa.legJoints.length + " chain joints unfiltered; their measured velocities are folded into the "
+                             + "anchor measurement and their encoder noise into the anchor covariance.");
             footAnchors.add(fa);
-
          }
       }
+
+      // Structural assert (gauge fixing): the pair rows see the bias ONLY as a difference, so the common-mode
+      // bias is a 3-dim nullspace of H. The anchor's +I3 on the base bias is the one row that fixes it. With no
+      // usable anchor the base-IMU gyro bias is unobservable FOREVER -- it random-walks, gets subtracted from the
+      // gyro, and integrates straight into base orientation. That is not a degraded mode, it is a broken filter,
+      // and it must never boot silently again (it did, for months). Fail loud, like the self-pair/acyclic asserts.
+      if (baseIMU != null && feet != null && !feet.isEmpty() && footAnchors.stream().noneMatch(fa -> fa.usable))
+         throw new IllegalArgumentException("JointLevelKFPreFilter: no usable foot anchor. The base-IMU gyro bias is a gauge "
+               + "freedom fixed ONLY by the stance-anchor rows; without one it is unobservable and will diverge. "
+               + "Check that the base IMU's measurement link connects to at least one foot.");
       // Per-joint reflected rotor inertia (item 1) and per-joint sigma_tau (item 3), in filter state order.
       // Built BEFORE allocate() because allocate() -> buildProcessNoise() -> updateProcessNoiseFromMassMatrix()
       // reads both.
@@ -793,6 +844,12 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          yoImuGyroBiasZ[o].set(bz);
          yoImuGyroBiasNorm[o].set(Math.sqrt(bx * bx + by * by + bz * bz));
       }
+
+      // trace of P's base-bias 3x3 block. This is the diagnostic that detects an unfixed gauge: an unobservable
+      // direction has NO measurement to shrink it, so its covariance grows without bound under Q. Bounded =>
+      // the anchor is doing its job. Monotonically climbing => the base bias is unobservable and will diverge.
+      if (baseBiasCol >= 0)
+         yoBiasPTrace.set(P.get(baseBiasCol, baseBiasCol) + P.get(baseBiasCol + 1, baseBiasCol + 1) + P.get(baseBiasCol + 2, baseBiasCol + 2));
    }
 
    // Mirrors AlphaComplimentaryFilter.createForKinematicsEstiamtor, works for the factory implementation
@@ -949,8 +1006,6 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          schurSolver.setA(CommonOps_DDRM.identity(n));
       }
 
-      for (int i = 0; i < 3; i++)
-         anchorR.set(i, i, ANCHOR_VAR);
 
       buildConstantTransition();
       buildProcessNoise();
@@ -1445,7 +1500,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          sigmaFloorInitialized = true;
       }
 
-      // Mark active anchors (usable + trusted last tick, SPEC §6 phase note) and count them.
+      // Mark active anchors (usable + trusted last tick, SPEC §6 phase note) and count them. activeAnchors == 0
+      // means the base-bias gauge is unfixed THIS TICK -- see yoActiveAnchorCount.
       int activeAnchors = 0;
       for (int i = 0; i < footAnchors.size(); i++)
       {
@@ -1454,6 +1510,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          if (fa.active)
             activeAnchors++;
       }
+      yoActiveAnchorCount.set(activeAnchors);
       int rows = 3 * (E + activeAnchors);
 
       Hg.reshape(rows, dim);       Hg.zero();
@@ -1500,7 +1557,16 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          insertScaledInto(rot3, -1.0, Lmix, row0, p.parentBias - 2 * n);
       }
 
-      // Active stance-anchor rows (SPEC §5.2): z = raw base gyro; H q̇-columns -J_leg; L block +I3 on the base IMU.
+      // Active stance-anchor rows (SPEC §5.2). A planted foot has zero angular velocity, so
+      //    omega_base = -J_leg qd_leg    =>    omega_base^meas = -J_F qd_F - J_U qd_U + b_base + noise
+      // where F = leg joints that ARE filter states and U = leg joints that are not (the ankles on Alex -- no
+      // foot IMUs, so no shin->foot pair, so they never became states). The unfiltered joints are KNOWN, not
+      // estimated, so they move to the measurement side:
+      //    z' = omega_base^meas + J_U qd_U^meas = -J_F qd_F + b_base + noise'
+      // H q̇-columns get -J_F on the FILTERED columns only; the L block stays +I3 on the base IMU. That +I3 is
+      // the only absolute bias observation in the model and the only thing that fixes the common-mode bias
+      // gauge -- it does not depend on which leg joints are states, so the anchor's observability role survives
+      // the split intact. The price is qd_U^meas's encoder noise, propagated into R below. See FINDINGS.md §F.
       int arow = 3 * E;
       for (int i = 0; i < footAnchors.size(); i++)
       {
@@ -1515,9 +1581,37 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          zg.set(arow + 1, 0, w.getY());
          zg.set(arow + 2, 0, w.getZ());
 
+         // Sigma_eps + J_U diag(sigma_qd^2) J_U^T, accumulated as we walk the chain.
+         fa.R.zero();
+         for (int r = 0; r < 3; r++)
+            fa.R.add(r, r, ANCHOR_VAR);
+
          for (int c = 0; c < fa.qdCols.length; c++)
-            for (int r = 0; r < 3; r++)
-               Hg.set(arow + r, fa.qdCols[c], -fa.Jang.get(r, c)); // -J_leg (moving omega_foot to the LHS)
+         {
+            if (fa.qdCols[c] >= 0)
+            {
+               // Filtered joint: a state, so it gets an H column.
+               for (int r = 0; r < 3; r++)
+                  Hg.set(arow + r, fa.qdCols[c], -fa.Jang.get(r, c)); // -J_F
+            }
+            else
+            {
+               // Unfiltered joint: fold J_U(:,c) * qd^meas into z', and its noise into R.
+               double qdMeasured = sensorMap.getOneDoFJointOutput(fa.legJoints[c]).getVelocity();
+               if (!Double.isFinite(qdMeasured))
+               {
+                  warnNonFiniteInputOnce("joint velocity of unfiltered anchor joint " + fa.legJoints[c].getName());
+                  qdMeasured = 0.0;
+               }
+               for (int r = 0; r < 3; r++)
+                  zg.add(arow + r, 0, fa.Jang.get(r, c) * qdMeasured); // z' = z + J_U qd_U^meas
+
+               // Rank-1 congruence: J_U(:,c) sigma^2 J_U(:,c)^T.
+               for (int r = 0; r < 3; r++)
+                  for (int cc = 0; cc < 3; cc++)
+                     fa.R.add(r, cc, SIGMA_QD_UNFILTERED * SIGMA_QD_UNFILTERED * fa.Jang.get(r, c) * fa.Jang.get(cc, c));
+            }
+         }
 
          insertScaledInto(identity3, +1.0, Lmix, arow, baseBiasCol - 2 * n); // +I3, base measurement frame
          arow += 3;
@@ -1530,18 +1624,23 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 
       // R_g = L Sigma L^T + Sigma_eps-block. The congruence reproduces the SPEC §5.3 block table exactly (pair
       // diagonals, shared-IMU s_e*s_f cross-blocks, pair×anchor, anchor×anchor Sigma_base). Allocation-free:
-      // LSigma/Rg are pre-sized. Then add Sigma_eps (anchorR) on each active anchor's 3x3 diagonal.
+      // LSigma/Rg are pre-sized. Then add each active anchor's own 3x3 block, which is NO LONGER the constant
+      // Sigma_eps: it is Sigma_eps + J_U diag(sigma_qd^2) J_U^T, built per tick in the anchor loop above because
+      // J_U depends on the configuration. This is desirable, not just correct -- the anchor automatically
+      // de-weights itself in postures where the unfiltered (ankle) Jacobian is large, i.e. exactly where an
+      // ankle-velocity error does the most damage to the base gyro-bias estimate.
       LSigma.reshape(rows, 3 * m);
       CommonOps_DDRM.mult(Lmix, Sigma, LSigma);
       CommonOps_DDRM.multTransB(LSigma, Lmix, Rg);
       int arow2 = 3 * E;
       for (int i = 0; i < footAnchors.size(); i++)
       {
-         if (!footAnchors.get(i).active)
+         FootAnchor fa = footAnchors.get(i);
+         if (!fa.active)
             continue;
          for (int r = 0; r < 3; r++)
             for (int c = 0; c < 3; c++)
-               Rg.add(arow2 + r, arow2 + c, anchorR.get(r, c));
+               Rg.add(arow2 + r, arow2 + c, fa.R.get(r, c));
          arow2 += 3;
       }
       // Exact symmetry for the Joseph update (the congruence is symmetric only to round-off). Reuses the
@@ -2132,6 +2231,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    int getBiasBlockColumn(IMUSensorReadOnly imu) { return 2 * n + 3 * imuToOrdinal.get(imu); } // state col of imu's bias
    int getImuOrdinal(IMUSensorReadOnly imu)    { return imuToOrdinal.get(imu); }
    IMUSensorReadOnly getBaseIMU()              { return baseIMU; }
+   /** Anchors active on the last {@link #buildStackedMeasurementForTest}. 0 => the base-bias gauge is unfixed. */
+   int getActiveAnchorCountForTest()           { return yoActiveAnchorCount.getValue(); }
 
    /** Overwrites the cached previous-tick trusted-feet set that {@link #buildStackedMeasurement} reads anchors from. */
    void setTrustedFeetForTest(List<RigidBodyBasics> feet)
@@ -2166,10 +2267,13 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       final RigidBodyBasics foot;
       final GeometricJacobianCalculator jac = new GeometricJacobianCalculator();
       OneDoFJointBasics[] legJoints;
+      /** Filter qd column per chain joint, or -1 if that joint is NOT a filter state (folded into z' instead). */
       int[] qdCols;
-      boolean usable; // false if any base-> foot joint is not in the state
+      boolean usable; // false only for a degenerate (jointless) base->foot chain
       boolean active; // true this tick: usable AND trusted last tick (SPEC §6); set in buildStackedMeasurement
       final DMatrixRMaj Jang = new DMatrixRMaj(3,1);
+      /** Per-tick anchor covariance Sigma_eps + J_U Sigma_qdU J_U^T (configuration-dependent; see buildStackedMeasurement). */
+      final DMatrixRMaj R = new DMatrixRMaj(3,3);
       FootAnchor(RigidBodyBasics foot)
       {
          this.foot = foot;

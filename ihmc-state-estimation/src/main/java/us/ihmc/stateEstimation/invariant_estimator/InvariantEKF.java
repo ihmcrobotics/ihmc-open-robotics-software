@@ -179,11 +179,23 @@ public class InvariantEKF
    }
 
    /** @return true if the accelerometer can be trusted as a gravity reference this tick (see {@link GravityLevelingUpdater#isQuasiStatic}). */
-   public boolean isGravityQuasiStatic(Vector3DReadOnly specificForceBody, Vector3DReadOnly angularVelocity,
+   public boolean isGravityQuasiStatic(Vector3DReadOnly specificForceBody, Vector3DReadOnly rawAngularVelocity,
                                        double accelToleranceRatio, double gyroThreshold, double horizontalAccelThreshold)
    {
-      return gravityUpdater.isQuasiStatic(specificForceBody, angularVelocity, accelToleranceRatio, gyroThreshold, horizontalAccelThreshold);
+      return gravityUpdater.isQuasiStatic(specificForceBody, rawAngularVelocity, accelToleranceRatio, gyroThreshold, horizontalAccelThreshold);
    }
+
+   /**
+    * Advances the quasi-static gate's sensor-only gravity reference. Call once per tick, before
+    * {@link #isGravityQuasiStatic}, with RAW sensor values. See {@link GravityLevelingUpdater#updateGravityReference}.
+    */
+   public void updateGravityReference(Vector3DReadOnly specificForceBody, Vector3DReadOnly rawAngularVelocity, double dt)
+   {
+      gravityUpdater.updateGravityReference(specificForceBody, rawAngularVelocity, dt);
+   }
+
+   /** The sensor-only gravity reference used by the quasi-static gate (unit, body frame). For tests/diagnostics. */
+   public Vector3DReadOnly getGravityReference() { return gravityUpdater.getGravityReference(); }
 
    /** Sets σ_roll² and σ_pitch² (rad²) for the (anisotropic) gravity-leveling measurement noise. */
    public void setGravityMeasurementVariances(double rollVariance, double pitchVariance) { gravityUpdater.setMeasurementVariances(rollVariance, pitchVariance); }

@@ -86,6 +86,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
 
    // Per-tick temporaries.
    private final FrameVector3D angularVelocity = new FrameVector3D();
+   /** RAW gyro in the pelvis frame (no bias correction). The quasi-static gate must not see a runaway bias. */
+   private final FrameVector3D rawAngularVelocity = new FrameVector3D();
    private final FrameVector3D linearAcceleration = new FrameVector3D();
 
    // Safeguard on the gyro bias handed up by the joint-level pre-filter. That bias is subtracted from the raw
@@ -93,7 +95,13 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    // hardware, 2026-07-10) drives the base pitch to drift. A physical MEMS gyro bias is ~0.001-0.01 rad/s; clamp
    // per axis so a bad upstream bias cannot destroy the estimate, and PUBLISH the applied bias (previously an
    // unlogged black box that had to be backed out arithmetically from the drift).
-   private static final double MAX_GYRO_BIAS = 0.05; // rad/s per axis
+   // 0.02 rad/s = 1.1 deg/s. The previous 0.05 was not a safeguard: it licensed 2.9 deg/s (172 deg/min) of
+   // open-loop drift, and in log 20260712_163634 the applied bias sat PINNED at +-0.05 on two of three axes for
+   // minutes (JointKF truth: 0.152/-0.021/0.072). A saturating clamp is a tripwire that has already fired, not a
+   // fix -- the fix is the stance-anchor gauge restoration in JointLevelKFPreFilter (FINDINGS.md Part F). With
+   // that in place a healthy bias is O(0.001-0.01), so invariantGyroBiasClampCount should now stay ~0; a rising
+   // count means the gauge is unfixed again.
+   private static final double MAX_GYRO_BIAS = 0.02; // rad/s per axis
    private final FrameVector3D appliedGyroBias = new FrameVector3D();
    private final FramePoint3D contactInBody = new FramePoint3D();
    private final FramePoint3D contactInWorld = new FramePoint3D();
@@ -158,6 +166,9 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final YoDouble yoGravityTiltErrorRoll = new YoDouble("invariantGravityTiltErrorRoll", registry);
    private final YoBoolean yoGravityUpdateActive = new YoBoolean("invariantGravityUpdateActive", registry);
    private final YoBoolean yoGravityPitchObservable = new YoBoolean("invariantGravityPitchObservable", registry);
+   /** Watchdog: seconds since the tilt update last fired. A corrector that stops firing must be visible — the
+    *  old gate latched off silently for the last 247 s of hardware log 20260712_163634 (FINDINGS.md §F.3). */
+   private final YoDouble yoGravitySecondsSinceUpdate = new YoDouble("invariantGravitySecondsSinceUpdate", registry);
 
    // Per-foot contact-update conditioning diagnostics (mirrors the JointKF S-conditioning): cond(S) proxy (log10),
    // residual norm, and whether the update was applied (the conditioning gate can skip it). Plus a global
@@ -423,11 +434,18 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoAppliedGyroBiasY.set(appliedGyroBias.getY());
       yoAppliedGyroBiasZ.set(appliedGyroBias.getZ());
       yoAppliedGyroBiasNorm.set(appliedGyroBias.norm());
+      // Keep the RAW gyro too: the quasi-static gate and its gravity reference must be built from sensors only,
+      // never from a filter state or an upstream bias that could itself be diverging (FINDINGS.md §F.3).
+      rawAngularVelocity.setIncludingFrame(imuSensor.getMeasurementFrame(), imuSensor.getAngularVelocityMeasurement());
+      rawAngularVelocity.changeFrame(pelvisFrame);
       angularVelocity.sub(appliedGyroBias);
       angularVelocity.changeFrame(pelvisFrame);
       linearAcceleration.setIncludingFrame(imuSensor.getMeasurementFrame(), imuSensor.getLinearAccelerationMeasurement());
       linearAcceleration.sub(imuBiasProvider.getLinearAccelerationBiasInIMUFrame(imuSensor));
       linearAcceleration.changeFrame(pelvisFrame);
+
+      // Advance the gate's sensor-only gravity reference every tick, on both the held and the normal path.
+      ekf.updateGravityReference(linearAcceleration, rawAngularVelocity, dt);
 
       boolean noContact = getContactProbability(RobotSide.LEFT) < CONTACT_HOLD_THRESHOLD && getContactProbability(RobotSide.RIGHT) < CONTACT_HOLD_THRESHOLD;
 
@@ -509,13 +527,20 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
 
       boolean apply = gravityLevelingEnabled
             && ekf.isGravityQuasiStatic(linearAcceleration,
-                                        angularVelocity,
+                                        rawAngularVelocity,
                                         QUASI_STATIC_ACCEL_TOLERANCE,
                                         QUASI_STATIC_GYRO_THRESHOLD,
                                         QUASI_STATIC_HORIZONTAL_ACCEL_THRESHOLD);
       yoGravityUpdateActive.set(apply);
       if (apply)
+      {
          ekf.applyGravityLeveling();
+         yoGravitySecondsSinceUpdate.set(0.0);
+      }
+      else
+      {
+         yoGravitySecondsSinceUpdate.add(dt);
+      }
    }
 
    /** Enables/disables the accelerometer gravity-leveling (tilt) update. The tilt diagnostic is published regardless. */

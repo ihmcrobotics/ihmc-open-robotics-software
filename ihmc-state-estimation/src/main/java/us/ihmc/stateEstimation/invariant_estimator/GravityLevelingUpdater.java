@@ -35,11 +35,14 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
  * violated most along the PITCH axis: fore-aft locomotion accelerates the CoM fore/aft, so that horizontal
  * specific force masquerades as pitch tilt and, trusted, leans the base forward. Lateral (roll) accelerations
  * are smaller and roughly symmetric over a stride. So instead of an isotropic {@code R = σ_tilt²·I₃} we trust
- * roll and distrust pitch. In the measurement's body frame the pitch-informing direction is {@code û_p = R̂ᵀe_x}
- * (= H's {@code δφ_y} column) and the roll-informing direction is {@code R̂ᵀe_y}, so
+ * roll and distrust pitch. The direction to distrust is the residual produced by a <b>body</b>-pitch error:
+ * from {@code f̂ = Exp(δθ)·ĝ_body} the residual is {@code r = δθ × ĝ_body}, so a pure body-pitch error
+ * {@code δθ = θ·e_y} lands along {@code û_p = normalize(e_y × ĝ_body)}, and
  * <pre>
- *   R = σ_roll² I₃ + (σ_pitch² − σ_roll²) û_p û_pᵀ  =  diag(σ_pitch², σ_roll², σ_roll²) in {û_p, R̂ᵀe_y, ĝ}
+ *   R = σ_roll² I₃ + (σ_pitch² − σ_roll²) û_p û_pᵀ
  * </pre>
+ * (NOT {@code R̂ᵀe_x} — that is the residual direction of a WORLD-Y rotation. The two agree only at zero yaw; at
+ * yaw ψ they differ by exactly ψ, aiming the pitch distrust at the wrong axis. See jointkf_bias_observability.md §4.)
  * which is PSD and still yaw-safe ({@code ĝ = R̂ᵀe_z} carries {@code σ_roll²}, regularizing the null direction).
  * {@code σ_pitch² = σ_roll²} recovers the isotropic update; a large {@code σ_pitch²} recovers a pure roll update.
  * When {@link #setPitchObservable(boolean) pitch is gated out} (e.g. single-support), {@code σ_pitch²} jumps to
@@ -69,14 +72,31 @@ public class GravityLevelingUpdater
    private double pitchMeasurementVariance;            // σ_pitch² (rad², on the pitch-informing residual direction)
    private boolean pitchObservable = true;             // when false, σ_pitch² → PITCH_DISABLED_VARIANCE (roll-only)
 
+   /**
+    * Time constant (s) of the quasi-static gate's gravity reference (see {@link #updateGravityReference}).
+    * Short enough that a raw-gyro bias contributes only ~σ_b·τ of reference tilt (0.01 rad/s · 0.5 s = 5 mrad,
+    * i.e. 0.05 m/s² of apparent horizontal accel — negligible against the 0.5 m/s² gate).
+    */
+   private static final double GRAVITY_REFERENCE_TIME_CONSTANT = 0.5;
+
    // Pre-allocated scratch (allocation-free hot path).
    private final RotationMatrix rotation = new RotationMatrix();
    private final Vector3D predictedGravityBody = new Vector3D();  // ĝ_body = R̂ᵀ e_z
    private final Vector3D measuredGravityBody = new Vector3D();   // f̂ = a/‖a‖
-   private final Vector3D rTransposeEx = new Vector3D();          // R̂ᵀ e_x (= û_p, the pitch-informing direction)
+   private final Vector3D rTransposeEx = new Vector3D();          // R̂ᵀ e_x
    private final Vector3D rTransposeEy = new Vector3D();          // R̂ᵀ e_y
+   private final Vector3D pitchDirection = new Vector3D();        // û_p = normalize(e_y × ĝ_body), body-pitch residual dir
    private final Vector3D tiltErrorVector = new Vector3D();       // ĝ_body × f̂ (≈ body-frame roll/pitch error)
-   private final Vector3D horizontalAccel = new Vector3D();       // a − (a·ĝ)ĝ, for the quasi-static gate
+   private final Vector3D horizontalAccel = new Vector3D();       // a − (a·ĝ_ref)ĝ_ref, for the quasi-static gate
+
+   /**
+    * Gate-only gravity reference ĝ_ref: a unit body-frame estimate of the world up-axis maintained by a
+    * complementary filter over the RAW gyro and the accelerometer. It deliberately reads NO filter state —
+    * see {@link #isQuasiStatic} for why that is the whole point.
+    */
+   private final Vector3D gravityReferenceBody = new Vector3D();
+   private final Vector3D referenceRate = new Vector3D();         // ω × ĝ_ref
+   private boolean gravityReferenceInitialized = false;
 
    private static final Vector3D E_X = new Vector3D(1.0, 0.0, 0.0);
    private static final Vector3D E_Y = new Vector3D(0.0, 1.0, 0.0);
@@ -168,15 +188,24 @@ public class GravityLevelingUpdater
          // column δφ_z (index 2) stays zero → yaw unobserved.
       }
 
-      // Anisotropic R = σ_roll² I₃ + (σ_pitch²_eff − σ_roll²) û_p û_pᵀ,  û_p = R̂ᵀe_x (the pitch-informing
-      // direction). Rebuilt every tick because û_p depends on R̂. See the class Javadoc for why pitch is distrusted.
+      // Anisotropic R = σ_roll² I₃ + (σ_pitch²_eff − σ_roll²) û_p û_pᵀ, with û_p the residual direction produced
+      // by a BODY-pitch error. From f̂ = Exp(δθ)·ĝ_body, the residual is r = δθ × ĝ_body, so a pure body-pitch
+      // error δθ = θ·e_y lands along û_p = normalize(e_y × ĝ_body). (The old û_p = R̂ᵀe_x is the residual
+      // direction of a WORLD-Y rotation; the two coincide only at zero yaw — at yaw ψ they differ by exactly ψ,
+      // aiming the pitch distrust at the wrong axis. See jointkf_bias_observability.md §4.)
+      pitchDirection.cross(E_Y, predictedGravityBody);
+      double pitchDirectionNorm = pitchDirection.norm();
       double effectivePitchVariance = pitchObservable ? pitchMeasurementVariance : PITCH_DISABLED_VARIANCE;
-      double pitchMinusRoll = effectivePitchVariance - rollMeasurementVariance;
+      // Degenerate when ĝ_body ∥ e_y (robot on its side): body pitch is not identifiable from gravity, so fall
+      // back to isotropic R rather than inflating a meaningless direction.
+      double pitchMinusRoll = pitchDirectionNorm > 1.0e-6 ? effectivePitchVariance - rollMeasurementVariance : 0.0;
+      if (pitchDirectionNorm > 1.0e-6)
+         pitchDirection.scale(1.0 / pitchDirectionNorm);
       for (int r = 0; r < 3; r++)
       {
-         double ur = elementOf(rTransposeEx, r);
+         double ur = elementOf(pitchDirection, r);
          for (int c = 0; c < 3; c++)
-            measurementCovariance.set(r, c, (r == c ? rollMeasurementVariance : 0.0) + pitchMinusRoll * ur * elementOf(rTransposeEx, c));
+            measurementCovariance.set(r, c, (r == c ? rollMeasurementVariance : 0.0) + pitchMinusRoll * ur * elementOf(pitchDirection, c));
       }
 
       // Diagnostic: tilt-error vector ĝ_body × f̂ (small-angle rotation aligning predicted → measured).
@@ -194,32 +223,102 @@ public class GravityLevelingUpdater
     * (‖a‖ ≈ |g|), the body is barely rotating (‖ω‖ small), AND the HORIZONTAL specific force is small. The last
     * condition is the important one: a ‖a‖-norm-only gate of ±5% still admits up to ~0.3|g| of horizontal accel
     * (≈18° of false tilt) whenever the vertical channel compensates, so the fore-aft accel that leans the base
-    * forward slips through. Requires {@link #assemble} to have run this tick (it supplies ĝ_body = R̂ᵀe_z).
+    * forward slips through.
     *
-    * @param specificForceBody       the bias-corrected body-frame specific force a. Not modified.
-    * @param angularVelocity         the bias-corrected body-frame angular velocity ω. Not modified.
+    * <p><b>The horizontal term must NOT be referenced to the estimate — that is a self-latching bug.</b> This
+    * gate previously resolved the horizontal component against {@code ĝ = R̂ᵀe_z}, the filter's own up-axis. For
+    * a genuinely static robot the accelerometer reads {@code a = g·u_true}, so that quantity evaluates to
+    * {@code ‖a_horiz‖ = g·sin θ} where <b>θ is the tilt error itself</b> — making the gate
+    * {@code θ ≤ arcsin(0.5/9.81) = 0.051 rad}. The only tilt corrector in the filter therefore switched itself
+    * OFF exactly when its own error exceeded 2.9°, and since the error then grows monotonically it could never
+    * re-close. A corrector whose gate depends on its own error is unstable by construction; hardware log
+    * 20260712_163634 latched at t=597 s and never leveled again (FINDINGS.md §F.3).
+    *
+    * <p>The horizontal term is now resolved against {@link #updateGravityReference ĝ_ref}, a gravity reference
+    * built from the raw gyro and accelerometer alone, and {@code lowRotation} uses the RAW gyro. <b>No term in
+    * this gate reads any filter state</b>, so it cannot latch. Known trade-off: a <i>sustained, constant</i>
+    * horizontal acceleration with ‖a‖ ≈ |g| is eventually absorbed into ĝ_ref and would slip through — that
+    * requires sliding feet or an accelerating vehicle (a constant-speed treadmill has zero acceleration), and is
+    * strictly preferable to a corrector that latches off permanently.
+    *
+    * @param specificForceBody       the body-frame specific force a. Not modified.
+    * @param rawAngularVelocity      the RAW body-frame angular velocity ω (no bias correction). Not modified.
     * @param accelToleranceRatio     allowed fractional deviation of ‖a‖ from |g| (e.g. 0.05 = ±5%).
     * @param gyroThreshold           max ‖ω‖ (rad/s) for "barely rotating".
-    * @param horizontalAccelThreshold max ‖a − (a·ĝ)ĝ‖ (m/s²): horizontal specific force w.r.t. the estimated up.
+    * @param horizontalAccelThreshold max ‖a − (a·ĝ_ref)ĝ_ref‖ (m/s²) w.r.t. the sensor-only gravity reference.
     * @return true if the accelerometer can be trusted as a gravity reference this tick.
     */
    public boolean isQuasiStatic(Vector3DReadOnly specificForceBody,
-                                Vector3DReadOnly angularVelocity,
+                                Vector3DReadOnly rawAngularVelocity,
                                 double accelToleranceRatio,
                                 double gyroThreshold,
                                 double horizontalAccelThreshold)
    {
       double accelNorm = specificForceBody.norm();
       boolean accelNearGravity = Math.abs(accelNorm - gravityMagnitude) <= accelToleranceRatio * gravityMagnitude;
-      boolean lowRotation = angularVelocity.norm() <= gyroThreshold;
+      // RAW gyro, not the bias-corrected one: a runaway upstream bias must not be able to close this gate either.
+      boolean lowRotation = rawAngularVelocity.norm() <= gyroThreshold;
 
-      // a_horiz = a − (a·ĝ)ĝ, with ĝ = predictedGravityBody (unit) from the last assemble().
-      horizontalAccel.set(predictedGravityBody);
-      horizontalAccel.scale(-specificForceBody.dot(predictedGravityBody));
-      horizontalAccel.add(specificForceBody);
-      boolean lowHorizontalAccel = horizontalAccel.norm() <= horizontalAccelThreshold;
+      // a_horiz = a − (a·ĝ_ref)ĝ_ref, with ĝ_ref the sensor-only gravity reference (NOT R̂ᵀe_z — see Javadoc).
+      // Until the reference has been seeded, admit the tick on the other two terms rather than block on a zero.
+      boolean lowHorizontalAccel = true;
+      if (gravityReferenceInitialized)
+      {
+         horizontalAccel.set(gravityReferenceBody);
+         horizontalAccel.scale(-specificForceBody.dot(gravityReferenceBody));
+         horizontalAccel.add(specificForceBody);
+         lowHorizontalAccel = horizontalAccel.norm() <= horizontalAccelThreshold;
+      }
 
       return accelNearGravity && lowRotation && lowHorizontalAccel;
+   }
+
+   /**
+    * Advances the quasi-static gate's gravity reference ĝ_ref. <b>Call once per tick, before
+    * {@link #isQuasiStatic}</b>, with raw (not bias-corrected, not filter-derived) sensor values.
+    *
+    * <p>ĝ_ref is a complementary filter: gyro-propagate the previous reference so it stays fixed in the world
+    * as the body rotates, then blend it toward the measured specific-force direction with time constant
+    * {@link #GRAVITY_REFERENCE_TIME_CONSTANT}. Since the world up-axis in body coordinates evolves as
+    * {@code ĝ⁺ = exp(−ω Δt)·ĝ ≈ ĝ − Δt (ω × ĝ)}, the gyro supplies the high-frequency content and the
+    * accelerometer pins the low-frequency level, so the reference neither lags a rotating body nor inherits the
+    * accelerometer's transient noise.</p>
+    *
+    * @param specificForceBody   the body-frame specific force a. Not modified.
+    * @param rawAngularVelocity  the RAW body-frame gyro ω (no bias correction). Not modified.
+    * @param dt                  the estimator timestep (s).
+    */
+   public void updateGravityReference(Vector3DReadOnly specificForceBody, Vector3DReadOnly rawAngularVelocity, double dt)
+   {
+      double accelNorm = specificForceBody.norm();
+      if (accelNorm < 1.0e-9)
+         return;
+
+      if (!gravityReferenceInitialized)
+      {
+         gravityReferenceBody.setAndScale(1.0 / accelNorm, specificForceBody);
+         gravityReferenceInitialized = true;
+         return;
+      }
+
+      // ĝ⁻ = ĝ − Δt (ω × ĝ): carry the reference with the body using the raw gyro.
+      referenceRate.cross(rawAngularVelocity, gravityReferenceBody);
+      gravityReferenceBody.scaleAdd(-dt, referenceRate, gravityReferenceBody);
+
+      // ĝ_ref = α·ĝ⁻ + (1−α)·f̂ : pin the low-frequency level to the accelerometer.
+      double alpha = Math.exp(-dt / GRAVITY_REFERENCE_TIME_CONSTANT);
+      gravityReferenceBody.scale(alpha);
+      gravityReferenceBody.scaleAdd((1.0 - alpha) / accelNorm, specificForceBody, gravityReferenceBody);
+
+      double norm = gravityReferenceBody.norm();
+      if (norm > 1.0e-9)
+         gravityReferenceBody.scale(1.0 / norm);
+   }
+
+   /** The sensor-only gravity reference ĝ_ref used by {@link #isQuasiStatic} (unit, body frame). For tests. */
+   public Vector3DReadOnly getGravityReference()
+   {
+      return gravityReferenceBody;
    }
 
    public DMatrixRMaj getMeasurementJacobian()  { return measurementJacobian; }
