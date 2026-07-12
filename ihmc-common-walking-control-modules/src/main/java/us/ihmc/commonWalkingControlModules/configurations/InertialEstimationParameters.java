@@ -27,6 +27,18 @@ public interface InertialEstimationParameters
    InertialEstimatorType getTypeOfEstimatorToUse();
 
    /**
+    * Initial value of the manager's {@code enableFilter} YoBoolean. When true, the filter runs (and computes
+    * residuals/estimates) from the first tick with no external poke. Simulation entries poke {@code enableFilter}
+    * true after construction; entries without that seed step (e.g. the hardware control process) rely on this
+    * default. Returns false by default so behaviour is unchanged unless a robot opts in. Independent of pass-through:
+    * enabling the filter does NOT feed the controller ({@code passThroughEstimatesToController}/gain still gate that).
+    */
+   default boolean getEnableFilterOnStartup()
+   {
+      return false;
+   }
+
+   /**
     * When true (and using the physically-consistent EKF), each estimated body uses the generalized
     * parameterization (Eq. (11) of Rucker and Wensing): a physically-consistent deviation from the body's
     * known nominal inertia, rather than the absolute parameterization (Eq. (1)). Intended for estimating a

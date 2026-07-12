@@ -135,7 +135,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       basisSets = inertialEstimationParameters.getBasisSets();
 
       enableFilter = new YoBoolean("enableFilter", registry);
-      enableFilter.set(false);
+      // Default from the parameters (false unless a robot opts in, e.g. Alex hardware runs the estimator open-loop
+      // from startup). Sim entries additionally poke this true post-construction, which is a no-op when already true.
+      enableFilter.set(inertialEstimationParameters.getEnableFilterOnStartup());
 
       modelHandler = new MultipleHumanoidModelHandler<>(RobotModelTask.class);
       FullHumanoidRobotModel controllerRobotModel = toolbox.getFullRobotModel();

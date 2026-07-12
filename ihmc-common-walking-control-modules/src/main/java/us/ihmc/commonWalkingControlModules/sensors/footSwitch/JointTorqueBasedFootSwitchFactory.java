@@ -132,7 +132,16 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
          contactForceThresholdLow = new DoubleParameter(namePrefix + "JacobianTThresholdForceLow", registry, defaultContactThresholdForceLow);
          contactForceThresholdHigh = new DoubleParameter(namePrefix + "JacobianTThresholdForceHigh", registry, defaultContactThresholdForceHigh);
          contactCoPThreshold = new DoubleParameter(namePrefix + "JacobianTThresholdContactCoP", registry, defaultContactCoPThreshold);
-         compensateGravity = new BooleanParameter(namePrefix + "JacobianTCompensateGravity", registry, Boolean.parseBoolean(System.getProperty("alex.footSwitch.jtCompensateGravity", "true")));
+         // Default OFF. On Alex hardware no -D flags are set, so this hardcoded default IS the hardware behaviour.
+         // With OFF: contact detection uses the raw joint-torque back-solve wrench (JointTorqueBasedFootSwitch.calculate
+         // line ~473), which works well on hardware; and getWrench() (line ~556, wired INVERTED to the detection path)
+         // hands the consumer -- the inertial-parameter estimator -- the gravity-SUBTRACTED wrench, which is the one
+         // the estimator needs (its regressor already models link gravity; the raw wrench double-counts leg gravity by
+         // ~90 N and prevents the mass estimate from converging). A headless foot-switch-mode sweep confirmed OFF
+         // recovers a +5 kg payload to within ~40 g, matching a true F/T sensor, while ON stalls at ~1.2 kg. Do NOT
+         // flip this back to ON without decoupling getWrench() from the detection flag -- doing so silently corrupts
+         // the estimator's contact wrench. Override per-run with -Dalex.footSwitch.jtCompensateGravity for experiments.
+         compensateGravity = new BooleanParameter(namePrefix + "JacobianTCompensateGravity", registry, Boolean.parseBoolean(System.getProperty("alex.footSwitch.jtCompensateGravity", "false")));
          useJacobianTranspose = new BooleanParameter(namePrefix + "UseJacobianTranspose", registry, defaultUseJacobianTranspose);
          verticalVelocityThreshold = new DoubleParameter(namePrefix + "VerticalVelocityThreshold", registry, defaultVerticalVelocityThreshold);
          verticalVelocityHighThreshold = new DoubleParameter(namePrefix + "VerticalVelocityHighThreshold", registry, defaultVerticalVelocityHighThreshold);
