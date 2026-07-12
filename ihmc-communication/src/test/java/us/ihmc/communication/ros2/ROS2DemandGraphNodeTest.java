@@ -1,16 +1,15 @@
 package us.ihmc.communication.ros2;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import std_msgs.msg.dds.Empty;
+import std_msgs.Empty;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
-
-import static org.junit.jupiter.api.Assertions.*;
+import us.ihmc.communication.HumanoidROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 @Disabled
 public class ROS2DemandGraphNodeTest
@@ -20,9 +19,8 @@ public class ROS2DemandGraphNodeTest
    @Test
    public void testIsDemanded()
    {
-      ROS2Node ros2Node = new ROS2NodeBuilder().build("demand_graph_test_is_demanded");
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-      ROS2Topic<Empty> testTopic = ROS2Tools.IHMC_ROOT.withSuffix("demand_graph_test_is_demanded").withType(Empty.class);
+      ROS2Node ros2Node = new ROS2Node("demand_graph_test_is_demanded");
+      HumanoidROS2Topic<Empty> testTopic = HumanoidROS2Topic.IHMC_ROOT.withSuffix("demand_graph_test_is_demanded").withType(Empty.class);
 
       ROS2DemandGraphNode testNode = new ROS2DemandGraphNode(ros2Node, testTopic);
       ROS2Heartbeat testHeartbeat = new ROS2Heartbeat(ros2Node, testTopic);
@@ -39,16 +37,15 @@ public class ROS2DemandGraphNodeTest
 
       testHeartbeat.destroy();
       testNode.destroy();
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    @Test
    public void testDependantDemand()
    {
-      ROS2Node ros2Node = new ROS2NodeBuilder().build("demand_graph_test_dependant");
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-      ROS2Topic<Empty> testTopic = ROS2Tools.IHMC_ROOT.withSuffix("demand_graph_test_dependant").withType(Empty.class);
-      ROS2Topic<Empty> dependantTopic = testTopic.withPrefix("dependant");
+      ROS2Node ros2Node = new ROS2Node("demand_graph_test_dependant");
+      HumanoidROS2Topic<Empty> testTopic = HumanoidROS2Topic.IHMC_ROOT.withSuffix("demand_graph_test_dependant").withType(Empty.class);
+      HumanoidROS2Topic<Empty> dependantTopic = testTopic.withPrefix("dependant");
 
       ROS2Heartbeat testHeartbeat = new ROS2Heartbeat(ros2Node, testTopic);
       ROS2DemandGraphNode testNode = new ROS2DemandGraphNode(ros2Node, testTopic);
@@ -83,16 +80,15 @@ public class ROS2DemandGraphNodeTest
       testHeartbeat.destroy();
       dependantNode.destroy();
       dependantHeartbeat.destroy();
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    @Test
    public void testDemandChangedCallback()
    {
-      ROS2Node ros2Node = new ROS2NodeBuilder().build("demand_graph_test_dependant");
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-      ROS2Topic<Empty> testTopic = ROS2Tools.IHMC_ROOT.withSuffix("demand_graph_test_dependant").withType(Empty.class);
-      ROS2Topic<Empty> dependantTopic = testTopic.withPrefix("dependant");
+      ROS2Node ros2Node = new ROS2Node("demand_graph_test_dependant");
+      HumanoidROS2Topic<Empty> testTopic = HumanoidROS2Topic.IHMC_ROOT.withSuffix("demand_graph_test_dependant").withType(Empty.class);
+      HumanoidROS2Topic<Empty> dependantTopic = testTopic.withPrefix("dependant");
 
       ROS2Heartbeat testHeartbeat = new ROS2Heartbeat(ros2Node, testTopic);
       ROS2DemandGraphNode testNode = new ROS2DemandGraphNode(ros2Node, testTopic);
@@ -139,6 +135,6 @@ public class ROS2DemandGraphNodeTest
       dependantHeartbeat.destroy();
       testNode.destroy();
       testHeartbeat.destroy();
-      ros2Node.destroy();
+      ros2Node.close();
    }
 }

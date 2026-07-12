@@ -1,18 +1,21 @@
 package us.ihmc.avatar.multiContact;
 
+import ihmc_common_msgs.SelectionMatrix3DMessage;
+import ihmc_common_msgs.WeightMatrix3DMessage;
 import org.apache.commons.lang3.tuple.Pair;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.KinematicsToolboxCenterOfMassMessage;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspacePathTools;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class MultiContactScriptStatistics
 {
@@ -300,7 +303,7 @@ public class MultiContactScriptStatistics
    {
       if (prev == null || next == null)
          return false;
-      return !prev.getInputMessage().epsilonEquals(next.getInputMessage(), 1e-3);
+      return !centerOfMassMessagesEqual(prev.getInputMessage(), next.getInputMessage(), 1e-3);
    }
 
    private static class KFStats
@@ -378,9 +381,11 @@ public class MultiContactScriptStatistics
    {
       if (!anchorA.getRigidBodyName().equals(anchorB.getRigidBodyName()))
          return false;
-      if (!anchorA.getInputMessage().getControlFramePositionInEndEffector().epsilonEquals(anchorB.getInputMessage().getControlFramePositionInEndEffector(), 1e-4))
+      if (!anchorA.getInputMessage().getControlFramePositionInEndEffector().getPoint()
+                  .epsilonEquals(anchorB.getInputMessage().getControlFramePositionInEndEffector().getPoint(), 1e-4))
          return false;
-      if (!contactAnchor && !anchorA.getInputMessage().getControlFrameOrientationInEndEffector().epsilonEquals(anchorB.getInputMessage().getControlFrameOrientationInEndEffector(), 1e-4))
+      if (!contactAnchor && !anchorA.getInputMessage().getControlFrameOrientationInEndEffector().getQuaternion()
+                  .epsilonEquals(anchorB.getInputMessage().getControlFrameOrientationInEndEffector().getQuaternion(), 1e-4))
          return false;
       return true;
    }
@@ -390,21 +395,30 @@ public class MultiContactScriptStatistics
       KinematicsToolboxRigidBodyMessage messageA = anchorA.getInputMessage();
       KinematicsToolboxRigidBodyMessage messageB = anchorB.getInputMessage();
 
-      if (!messageA.getLinearSelectionMatrix().epsilonEquals(messageB.getLinearSelectionMatrix(), 0.0))
+      if (!selectionMatricesEqual(messageA.getLinearSelectionMatrix(), messageB.getLinearSelectionMatrix()))
          return true;
-      if (!messageA.getAngularSelectionMatrix().epsilonEquals(messageB.getAngularSelectionMatrix(), 0.0))
-         return true;
-
-      if (!messageA.getLinearWeightMatrix().epsilonEquals(messageB.getLinearWeightMatrix(), 1e-5))
-         return true;
-      if (!messageA.getLinearWeightMatrix().epsilonEquals(messageB.getLinearWeightMatrix(), 1e-5))
+      if (!selectionMatricesEqual(messageA.getAngularSelectionMatrix(), messageB.getAngularSelectionMatrix()))
          return true;
 
-      if (messageA.getLinearSelectionMatrix().getXSelected() && !EuclidCoreTools.epsilonEquals(messageA.getDesiredPositionInWorld().getX(), messageB.getDesiredPositionInWorld().getX(), 1e-3))
+      if (!weightMatricesEqual(messageA.getLinearWeightMatrix(), messageB.getLinearWeightMatrix(), 1e-5))
          return true;
-      if (messageA.getLinearSelectionMatrix().getYSelected() && !EuclidCoreTools.epsilonEquals(messageA.getDesiredPositionInWorld().getY(), messageB.getDesiredPositionInWorld().getY(), 1e-3))
+      if (!weightMatricesEqual(messageA.getAngularWeightMatrix(), messageB.getAngularWeightMatrix(), 1e-5))
          return true;
-      if (messageA.getLinearSelectionMatrix().getZSelected() && !EuclidCoreTools.epsilonEquals(messageA.getDesiredPositionInWorld().getZ(), messageB.getDesiredPositionInWorld().getZ(), 1e-3))
+
+      if (messageA.getLinearSelectionMatrix().getXSelected()
+          && !EuclidCoreTools.epsilonEquals(messageA.getDesiredPositionInWorld().getPoint().getX(),
+                                            messageB.getDesiredPositionInWorld().getPoint().getX(),
+                                            1e-3))
+         return true;
+      if (messageA.getLinearSelectionMatrix().getYSelected()
+          && !EuclidCoreTools.epsilonEquals(messageA.getDesiredPositionInWorld().getPoint().getY(),
+                                            messageB.getDesiredPositionInWorld().getPoint().getY(),
+                                            1e-3))
+         return true;
+      if (messageA.getLinearSelectionMatrix().getZSelected()
+          && !EuclidCoreTools.epsilonEquals(messageA.getDesiredPositionInWorld().getPoint().getZ(),
+                                            messageB.getDesiredPositionInWorld().getPoint().getZ(),
+                                            1e-3))
          return true;
 
       if (contactAnchor)
@@ -412,8 +426,8 @@ public class MultiContactScriptStatistics
 
       Vector3D rotationA = new Vector3D();
       Vector3D rotationB = new Vector3D();
-      messageA.getDesiredOrientationInWorld().getRotationVector(rotationA);
-      messageB.getDesiredOrientationInWorld().getRotationVector(rotationB);
+      messageA.getDesiredOrientationInWorld().getQuaternion().getRotationVector(rotationA);
+      messageB.getDesiredOrientationInWorld().getQuaternion().getRotationVector(rotationB);
 
       if (messageA.getAngularSelectionMatrix().getXSelected() && !EuclidCoreTools.epsilonEquals(rotationA.getX(), rotationB.getX(), 1e-3))
          return true;
@@ -436,33 +450,83 @@ public class MultiContactScriptStatistics
 
    private static boolean areSixDoFAnchorsEqual(KinematicsToolboxRigidBodyMessage messageA, KinematicsToolboxRigidBodyMessage messageB)
    {
-      if (!messageA.getLinearSelectionMatrix().epsilonEquals(messageB.getLinearSelectionMatrix(), 0.0))
+      if (!selectionMatricesEqual(messageA.getLinearSelectionMatrix(), messageB.getLinearSelectionMatrix()))
          return false;
-      if (!messageA.getAngularSelectionMatrix().epsilonEquals(messageB.getAngularSelectionMatrix(), 0.0))
-         return false;
-
-      if (!messageA.getLinearWeightMatrix().epsilonEquals(messageB.getLinearWeightMatrix(), 0.0))
-         return false;
-      if (!messageA.getLinearWeightMatrix().epsilonEquals(messageB.getLinearWeightMatrix(), 0.0))
+      if (!selectionMatricesEqual(messageA.getAngularSelectionMatrix(), messageB.getAngularSelectionMatrix()))
          return false;
 
-      if (messageA.getLinearSelectionMatrix().getXSelected() && !EuclidCoreTools.epsilonEquals(messageA.getDesiredPositionInWorld().getX(), messageB.getDesiredPositionInWorld().getX(), 1e-3))
+      if (!weightMatricesEqual(messageA.getLinearWeightMatrix(), messageB.getLinearWeightMatrix(), 0.0))
          return false;
-      if (messageA.getLinearSelectionMatrix().getYSelected() && !EuclidCoreTools.epsilonEquals(messageA.getDesiredPositionInWorld().getY(), messageB.getDesiredPositionInWorld().getY(), 1e-3))
+      if (!weightMatricesEqual(messageA.getAngularWeightMatrix(), messageB.getAngularWeightMatrix(), 0.0))
          return false;
-      if (messageA.getLinearSelectionMatrix().getZSelected() && !EuclidCoreTools.epsilonEquals(messageA.getDesiredPositionInWorld().getZ(), messageB.getDesiredPositionInWorld().getZ(), 1e-3))
+
+      if (messageA.getLinearSelectionMatrix().getXSelected()
+          && !EuclidCoreTools.epsilonEquals(messageA.getDesiredPositionInWorld().getPoint().getX(),
+                                            messageB.getDesiredPositionInWorld().getPoint().getX(),
+                                            1e-3))
+         return false;
+      if (messageA.getLinearSelectionMatrix().getYSelected()
+          && !EuclidCoreTools.epsilonEquals(messageA.getDesiredPositionInWorld().getPoint().getY(),
+                                            messageB.getDesiredPositionInWorld().getPoint().getY(),
+                                            1e-3))
+         return false;
+      if (messageA.getLinearSelectionMatrix().getZSelected()
+          && !EuclidCoreTools.epsilonEquals(messageA.getDesiredPositionInWorld().getPoint().getZ(),
+                                            messageB.getDesiredPositionInWorld().getPoint().getZ(),
+                                            1e-3))
          return false;
 
       Vector3D rotationA = new Vector3D();
       Vector3D rotationB = new Vector3D();
-      messageA.getDesiredOrientationInWorld().getRotationVector(rotationA);
-      messageB.getDesiredOrientationInWorld().getRotationVector(rotationB);
+      messageA.getDesiredOrientationInWorld().getQuaternion().getRotationVector(rotationA);
+      messageB.getDesiredOrientationInWorld().getQuaternion().getRotationVector(rotationB);
 
       if (messageA.getAngularSelectionMatrix().getXSelected() && !EuclidCoreTools.epsilonEquals(rotationA.getX(), rotationB.getX(), 1e-3))
          return false;
       if (messageA.getAngularSelectionMatrix().getYSelected() && !EuclidCoreTools.epsilonEquals(rotationA.getY(), rotationB.getY(), 1e-3))
          return false;
       if (messageA.getAngularSelectionMatrix().getZSelected() && !EuclidCoreTools.epsilonEquals(rotationA.getZ(), rotationB.getZ(), 1e-3))
+         return false;
+
+      return true;
+   }
+
+   private static boolean selectionMatricesEqual(SelectionMatrix3DMessage messageA, SelectionMatrix3DMessage messageB)
+   {
+      return messageA.getXSelected() == messageB.getXSelected() && messageA.getYSelected() == messageB.getYSelected()
+            && messageA.getZSelected() == messageB.getZSelected();
+   }
+
+   private static boolean weightMatricesEqual(WeightMatrix3DMessage messageA, WeightMatrix3DMessage messageB, double epsilon)
+   {
+      return EuclidCoreTools.epsilonEquals(messageA.getXWeight(), messageB.getXWeight(), epsilon)
+            && EuclidCoreTools.epsilonEquals(messageA.getYWeight(), messageB.getYWeight(), epsilon)
+            && EuclidCoreTools.epsilonEquals(messageA.getZWeight(), messageB.getZWeight(), epsilon);
+   }
+
+   private static boolean centerOfMassMessagesEqual(KinematicsToolboxCenterOfMassMessage messageA,
+                                                  KinematicsToolboxCenterOfMassMessage messageB,
+                                                  double epsilon)
+   {
+      if (!selectionMatricesEqual(messageA.getSelectionMatrix(), messageB.getSelectionMatrix()))
+         return false;
+      if (!weightMatricesEqual(messageA.getWeights(), messageB.getWeights(), epsilon))
+         return false;
+
+      if (messageA.getSelectionMatrix().getXSelected()
+          && !EuclidCoreTools.epsilonEquals(messageA.getDesiredPositionInWorld().getPoint().getX(),
+                                            messageB.getDesiredPositionInWorld().getPoint().getX(),
+                                            epsilon))
+         return false;
+      if (messageA.getSelectionMatrix().getYSelected()
+          && !EuclidCoreTools.epsilonEquals(messageA.getDesiredPositionInWorld().getPoint().getY(),
+                                            messageB.getDesiredPositionInWorld().getPoint().getY(),
+                                            epsilon))
+         return false;
+      if (messageA.getSelectionMatrix().getZSelected()
+          && !EuclidCoreTools.epsilonEquals(messageA.getDesiredPositionInWorld().getPoint().getZ(),
+                                            messageB.getDesiredPositionInWorld().getPoint().getZ(),
+                                            epsilon))
          return false;
 
       return true;

@@ -1,6 +1,9 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
+import static behavior_msgs.WalkActionDefinitionMessage.*;
+import static us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner.Footstep;
+
+import controller_msgs.FootstepDataListMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.TrajectoryTrackingErrorCalculator;
@@ -35,9 +38,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import static behavior_msgs.msg.dds.WalkActionDefinitionMessage.*;
-import static us.ihmc.footstepPlanning.simplePlanners.QuickFootstepPlanner.Footstep;
 
 public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, WalkActionDefinition>
 {
@@ -351,6 +351,7 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
       footstepDataListMessage.getQueueingProperties().setExecutionMode(definition.getExecutionMode().getValue().toByte());
       footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       state.getLogger().info("Commanding {} footsteps", footstepDataListMessage.getFootstepDataList().size());
+      controllerStatusTracker.getFinishedWalkingNotification().poll();
       ros2ControllerHelper.publishToController(footstepDataListMessage);
       for (RobotSide side : RobotSide.values)
       {
@@ -430,8 +431,9 @@ public class WalkActionExecutor extends ActionNodeExecutor<WalkActionState, Walk
 
       int incompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();
       boolean isWalking = controllerStatusTracker.isWalking();
+      boolean walkingFinished = controllerStatusTracker.getFinishedWalkingNotification().peek();
       meetsDesiredCompletionCriteria &= incompleteFootsteps == 0;
-      meetsDesiredCompletionCriteria &= !isWalking;
+      meetsDesiredCompletionCriteria &= walkingFinished || !isWalking;
 
       if (meetsDesiredCompletionCriteria || hitTimeLimit || state.getFailed())
       {

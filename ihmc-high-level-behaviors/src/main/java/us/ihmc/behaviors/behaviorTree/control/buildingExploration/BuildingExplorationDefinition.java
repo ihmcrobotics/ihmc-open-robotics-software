@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.control.buildingExploration;
 
-import behavior_msgs.msg.dds.BuildingExplorationDefinitionMessage;
+import behavior_msgs.BuildingExplorationDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 

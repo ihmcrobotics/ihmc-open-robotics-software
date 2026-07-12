@@ -2,9 +2,8 @@
 
 #### Generate messages
 
-1. Run `us.ihmc.idl.IHMCInterfacesGenerateMessages`, 
-   located in `ihmc-interfaces\src\generator\java`
-   with `ihmc-open-robotics-software/ihmc-interfaces` set as the working directory.
+1. From `ihmc-open-robotics-software/ihmc-interfaces-jros2`, run `./gradlew generateMessages`
+   to regenerate Java message classes from the `.msg` definitions under `messages/ihmc_interfaces`.
 2. Update the standalone `ihmc_msgs` and `ihmc_interfaces` repositories on GitHub.
 
 #### Step Develop branch

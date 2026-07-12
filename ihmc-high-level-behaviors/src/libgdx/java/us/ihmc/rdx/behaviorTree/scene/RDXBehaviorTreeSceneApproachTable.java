@@ -1,7 +1,7 @@
 package us.ihmc.rdx.behaviorTree.scene;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
+import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.BehaviorTreeSceneObjectStateMessage;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -53,8 +53,8 @@ public class RDXBehaviorTreeSceneApproachTable extends RDXBehaviorTreeSceneObjec
       leftTablePoints = message.getLeftTablePoints();
       rightTablePoints = message.getRightTablePoints();
 
-      LibGDXTools.toLibGDX(message.getLeftCapsuleCenter(), capsules.get(RobotSide.LEFT).transform);
-      LibGDXTools.toLibGDX(message.getRightCapsuleCenter(), capsules.get(RobotSide.RIGHT).transform);
+      LibGDXTools.toLibGDX(message.getLeftCapsuleCenter().getPoint(), capsules.get(RobotSide.LEFT).transform);
+      LibGDXTools.toLibGDX(message.getRightCapsuleCenter().getPoint(), capsules.get(RobotSide.RIGHT).transform);
    }
 
    @Override

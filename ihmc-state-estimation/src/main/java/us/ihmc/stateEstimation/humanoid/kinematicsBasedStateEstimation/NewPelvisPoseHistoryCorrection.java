@@ -1,7 +1,9 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import controller_msgs.msg.dds.PelvisPoseErrorPacket;
-import ihmc_common_msgs.msg.dds.StampedPosePacket;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
+
+import controller_msgs.PelvisPoseErrorPacket;
+import ihmc_common_msgs.StampedPosePacket;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -28,8 +30,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
 
 public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionInterface
 {
@@ -257,7 +257,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       StampedPosePacket newPacket = pelvisPoseCorrectionCommunicator.getNewExternalPose();
       if (enableProcessNewPackets.getBooleanValue())
       {
-         timeStampedExternalPose.setTransform3D(newPacket.getPose());
+         timeStampedExternalPose.setTransform3D(newPacket.getPose().getPose());
          timeStampedExternalPose.setTimeStamp(newPacket.getTimestamp());
 
          if (outdatedPoseUpdater.stateEstimatorTimeStampedBufferIsInRange(timeStampedExternalPose.getTimeStamp()))

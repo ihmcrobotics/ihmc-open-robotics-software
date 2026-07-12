@@ -4,14 +4,11 @@ import static us.ihmc.robotics.Assert.assertArrayEquals;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.Random;
-
+import controller_msgs.NeckDesiredAccelerationsMessage;
+import controller_msgs.NeckTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.NeckDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.NeckTrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
@@ -30,6 +27,8 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.Random;
 
 public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements MultiRobotTestInterface
 {

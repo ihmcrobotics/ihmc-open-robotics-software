@@ -1,10 +1,8 @@
 package us.ihmc.avatar.testTools;
 
-import java.util.Random;
-
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisTrajectoryMessage;
+import controller_msgs.ArmTrajectoryMessage;
+import controller_msgs.ChestTrajectoryMessage;
+import controller_msgs.PelvisTrajectoryMessage;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -22,6 +20,8 @@ import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.Random;
 
 public class AvatarRandomTestMessages
 {

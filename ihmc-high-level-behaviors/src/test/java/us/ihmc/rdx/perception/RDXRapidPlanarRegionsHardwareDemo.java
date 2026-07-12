@@ -1,11 +1,11 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.commons.thread.RepeatingTaskThread;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.RawImage;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractionThread;
-import us.ihmc.sensors.ImageSensor;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -13,8 +13,7 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.zed.global.zed;
@@ -32,7 +31,7 @@ public class RDXRapidPlanarRegionsHardwareDemo
    private RDXROS2FramePlanarRegionsVisualizer planarRegionsVisualizer;
    private final ZEDImageSensor zedImageSensor;
    private final RepeatingTaskThread zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
-   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("rapid_regions_node");
+   private final ROS2Node ros2Node = new ROS2Node("rapid_regions_node");
    private final RapidPlanarRegionsExtractionThread rapidPlanarRegionsExtractionThread;
 
    public RDXRapidPlanarRegionsHardwareDemo()
@@ -107,7 +106,7 @@ public class RDXRapidPlanarRegionsHardwareDemo
             pointCloudVisualizer.destroy();
             planarRegionsVisualizer.destroy();
             rapidRegionsUI.destroy();
-            ros2Node.destroy();
+            ros2Node.close();
 
             baseUI.dispose();
          }

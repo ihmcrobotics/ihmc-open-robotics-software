@@ -1,29 +1,27 @@
 package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
-import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
-import ihmc_common_msgs.msg.dds.PoseListMessage;
-import ihmc_common_msgs.msg.dds.QueueableMessage;
+import behavior_msgs.ContinuousHikingCommandMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.QueuedFootstepStatusMessage;
+import ihmc_common_msgs.PoseListMessage;
+import ihmc_common_msgs.QueueableMessage;
 import org.jetbrains.annotations.NotNull;
-import std_msgs.msg.dds.Float32;
+import std_msgs.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.activeMapping.ActiveMappingParameterToolBox;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.TerrainPlanningDebugger;
-import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
-import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -33,15 +31,19 @@ import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,8 +53,6 @@ import java.util.function.Supplier;
 
 public class JustWaitState implements State
 {
-   @NotNull
-   private final ROS2Helper ros2Helper;
    @NotNull
    private final ROS2SyncedRobotModel syncedRobot;
    private final AtomicReference<ContinuousHikingCommandMessage> commandMessage;
@@ -67,6 +67,7 @@ public class JustWaitState implements State
    private final Supplier<EnvironmentHandler> environmentHandlerSupplier;
 
    private final ROS2Topic<FootstepDataListMessage> controllerFootstepDataTopic;
+   private final ROS2Publisher<FootstepDataListMessage> footstepPublisher;
    private final FramePose3D midFeetZUpPose = new FramePose3D();
    private final MovingReferenceFrame midFeetZUpFrame;
    private final FramePose3D startPose = new FramePose3D();
@@ -75,7 +76,7 @@ public class JustWaitState implements State
    private AtomicBoolean useEnvironmentData = new AtomicBoolean(false);
 
    public JustWaitState(DRCRobotModel robotModel,
-                        ROS2Helper ros2Helper,
+                        ROS2Node ros2Node,
                         ROS2SyncedRobotModel syncedRobot,
                         AtomicReference<ContinuousHikingCommandMessage> commandMessage,
                         ControllerFootstepQueueMonitor controllerQueueMonitor,
@@ -83,7 +84,6 @@ public class JustWaitState implements State
                         ActiveMappingParameterToolBox activeMappingParameterToolBox,
                         Supplier<EnvironmentHandler> environmentHandlerSupplier)
    {
-      this.ros2Helper = ros2Helper;
       this.syncedRobot = syncedRobot;
       this.commandMessage = commandMessage;
       this.controllerQueueMonitor = controllerQueueMonitor;
@@ -102,11 +102,11 @@ public class JustWaitState implements State
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
 
       controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
-      ros2Helper.createPublisher(controllerFootstepDataTopic);
+      footstepPublisher = ros2Node.createPublisher(controllerFootstepDataTopic);
 
-      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.ROTATE_90_DEGREES, this::rotate90Degrees);
-      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.ROTATE_GOAL_FOOTSTEPS, this::planToGoal);
-      ros2Helper.subscribeViaCallback(ContinuousHikingAPI.SQUARE_UP_STEP, this::squareUpStep);
+      ros2Node.createSubscriptionSampler(ContinuousHikingAPI.ROTATE_90_DEGREES, this::rotate90Degrees);
+      ros2Node.createSubscriptionSampler(ContinuousHikingAPI.ROTATE_GOAL_FOOTSTEPS, this::planToGoal);
+      ros2Node.createSubscriptionSampler(ContinuousHikingAPI.SQUARE_UP_STEP, sample -> squareUpStep());
    }
 
    @Override
@@ -279,7 +279,7 @@ public class JustWaitState implements State
                                   {
                                      useEnvironmentData.set(true);
                                      logFootStePlan();
-                                     ros2Helper.publish(controllerFootstepDataTopic, footstepDataListMessage);
+                                     footstepPublisher.publish(footstepDataListMessage);
                                   }
                                   else
                                   {
@@ -300,7 +300,7 @@ public class JustWaitState implements State
       if (controllerQueueMonitor.getNumberOfIncompleteFootsteps() > 0)
       {
          firstStepInQueue = controllerQueueMonitor.getFirstFootstepInQueue();
-         List<QueuedFootstepStatusMessage> controllerFootstepQueue = controllerQueueMonitor.getControllerFootstepQueue();
+         IDLObjectSequence<QueuedFootstepStatusMessage> controllerFootstepQueue = controllerQueueMonitor.getControllerFootstepQueue();
 
          RobotSide robotSide = RobotSide.fromByte(controllerFootstepQueue.get(0).getRobotSide());
 
@@ -365,7 +365,7 @@ public class JustWaitState implements State
 
       logFootStePlan();
 
-      ros2Helper.publish(controllerFootstepDataTopic, footstepDataListMessage);
+      footstepPublisher.publish(footstepDataListMessage);
    }
 
    public void logFootStePlan()

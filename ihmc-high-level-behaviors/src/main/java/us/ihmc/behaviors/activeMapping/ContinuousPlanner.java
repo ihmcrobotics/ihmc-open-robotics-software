@@ -1,9 +1,9 @@
 package us.ihmc.behaviors.activeMapping;
 
-import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
+import behavior_msgs.ContinuousHikingCommandMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepStatusMessage;
+import controller_msgs.QueuedFootstepStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.ThreadTools;
@@ -12,6 +12,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -62,7 +63,7 @@ public class ContinuousPlanner
 
    private final AtomicReference<ContinuousHikingCommandMessage> commandMessage;
    private AtomicReference<FootstepStatusMessage> latestFootstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
-   private List<QueuedFootstepStatusMessage> controllerQueue = new ArrayList<>();
+   private IDLObjectSequence<QueuedFootstepStatusMessage> controllerQueue;
 
    private boolean initialized = false;
    private boolean planAvailable = false;
@@ -326,7 +327,7 @@ public class ContinuousPlanner
    }
 
    public FootstepDataListMessage getLimitedFootstepDataListMessage(ContinuousHikingParameters continuousHIkingParameters,
-                                                                    List<QueuedFootstepStatusMessage> controllerQueue)
+                                                                    IDLObjectSequence<QueuedFootstepStatusMessage> controllerQueue)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       footstepDataListMessage.setDefaultSwingDuration(continuousHIkingParameters.getSwingTime());
@@ -335,10 +336,10 @@ public class ContinuousPlanner
 
       // We expect the plannerOutput to contain this number of steps we ask for
       int index = 0;
-      if (!controllerQueue.isEmpty() && !continuousHikingParameters.getOverrideEntireQueueEachStep())
+      if (controllerQueue != null && controllerQueue.size() > 0 && !continuousHikingParameters.getOverrideEntireQueueEachStep())
       {
          PlannedFootstep stepToNotOverride = new PlannedFootstep(RobotSide.fromByte(controllerQueue.get(1).getRobotSide()),
-                                                                 new Pose3D(controllerQueue.get(1).getLocation(), controllerQueue.get(1).getOrientation()));
+                                                                 new Pose3D(controllerQueue.get(1).getLocation().getPoint(), controllerQueue.get(1).getOrientation().getQuaternion()));
          footstepDataListMessage.getFootstepDataList().add().set(stepToNotOverride.getAsMessage());
          index = 1;
       }
@@ -375,7 +376,7 @@ public class ContinuousPlanner
    public void setImminentStanceToPlanFrom()
    {
       // This means the controller queue is not empty, and we want to plan from where we are going to be, not where we currently are, or we are going to step in place
-      if (latestFootstepStatusMessage != null && !controllerQueue.isEmpty())
+      if (latestFootstepStatusMessage != null && controllerQueue != null && controllerQueue.size() > 0)
       {
          getImminentStanceFromLatestStatus(latestFootstepStatusMessage, controllerQueue);
       }
@@ -405,7 +406,7 @@ public class ContinuousPlanner
    }
 
    public void getImminentStanceFromLatestStatus(AtomicReference<FootstepStatusMessage> footstepStatusMessage,
-                                                 List<QueuedFootstepStatusMessage> controllerQueue)
+                                                 IDLObjectSequence<QueuedFootstepStatusMessage> controllerQueue)
    {
       // Sometimes no message exists, by default ignore the message if its null and use what ever the imminent side was last time
       RobotSide imminentFootSide = imminentFootstepSide;
@@ -422,8 +423,8 @@ public class ContinuousPlanner
       }
 
       FramePose3D imminentFootstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                         footstepStatusMessage.get().getDesiredFootPositionInWorld(),
-                                                         footstepStatusMessage.get().getDesiredFootOrientationInWorld());
+                                                         footstepStatusMessage.get().getDesiredFootPositionInWorld().getPoint(),
+                                                         footstepStatusMessage.get().getDesiredFootOrientationInWorld().getQuaternion());
 
       FramePose3D nextRobotStepAfterCurrent;
 
@@ -435,8 +436,8 @@ public class ContinuousPlanner
       else
       {
          nextRobotStepAfterCurrent = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                     controllerQueue.get(index).getLocation(),
-                                                     controllerQueue.get(index).getOrientation());
+                                                     controllerQueue.get(index).getLocation().getPoint(),
+                                                     controllerQueue.get(index).getOrientation().getQuaternion());
       }
 
       updateImminentStance(nextRobotStepAfterCurrent, imminentFootstepPose, imminentFootSide);
@@ -509,7 +510,7 @@ public class ContinuousPlanner
       this.latestFootstepStatusMessage = latestFootstepStatusMessage;
    }
 
-   public void setLatestControllerQueue(List<QueuedFootstepStatusMessage> controllerQueue)
+   public void setLatestControllerQueue(IDLObjectSequence<QueuedFootstepStatusMessage> controllerQueue)
    {
       this.controllerQueue = controllerQueue;
    }

@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI;
 
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsStreamingToolboxConfigurationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

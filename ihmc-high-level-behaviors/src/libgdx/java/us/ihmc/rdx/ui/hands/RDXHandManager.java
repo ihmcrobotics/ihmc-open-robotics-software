@@ -7,12 +7,12 @@ import us.ihmc.avatar.drcRobot.RobotVersion;
 import us.ihmc.handsros2.HandInterface;
 import us.ihmc.handsros2.HandType;
 import us.ihmc.handsros2.ezGripper.EZGripperROS2HardwareCommunication;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.hands.psyonicAbilityHand.RDXAbilityHand;
 import us.ihmc.rdx.ui.hands.sakeEZGripper.RDXEZGripper;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
 
 /**
  * Manages the UI for a humanoid robot's hands. A hand configuration is like "open", "closed", etc.

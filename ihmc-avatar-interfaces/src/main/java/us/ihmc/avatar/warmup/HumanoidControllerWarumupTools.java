@@ -1,15 +1,15 @@
 package us.ihmc.avatar.warmup;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.HandLoadBearingMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
+import controller_msgs.ArmTrajectoryMessage;
+import controller_msgs.ChestTrajectoryMessage;
+import controller_msgs.FootTrajectoryMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import controller_msgs.HandLoadBearingMessage;
+import controller_msgs.OneDoFJointTrajectoryMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.SO3TrajectoryMessage;
+import ihmc_common_msgs.SO3TrajectoryPointMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -157,7 +157,7 @@ public class HumanoidControllerWarumupTools
          handLoadBearingMessage.getContactPointInBodyFrame().set(handControlPoint);
 
          // random surface normal along xy plane
-         handLoadBearingMessage.getContactNormalInWorld().set(0.5, 0.5, 0.0);
+         handLoadBearingMessage.getContactNormalInWorld().getVector().set(0.5, 0.5, 0.0);
       }
 
       return handLoadBearingMessage;

@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
+import controller_msgs.AutomaticManipulationAbortMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
 public class AutomaticManipulationAbortCommand implements Command<AutomaticManipulationAbortCommand, AutomaticManipulationAbortMessage>
