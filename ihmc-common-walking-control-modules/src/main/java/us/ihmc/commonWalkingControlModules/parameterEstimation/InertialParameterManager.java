@@ -50,6 +50,11 @@ import java.util.*;
  */
 public class InertialParameterManager implements SCS2YoGraphicHolder
 {
+   /** Physical inconsistency recurs every tick once it starts, so cap the logging to keep it out of the journal. */
+   private static final int MAX_PHYSICAL_CONSISTENCY_WARNINGS = 10;
+
+   private int physicalConsistencyWarningCount = 0;
+
    private final YoBoolean enableFilter;
 
    private final MultipleHumanoidModelHandler<RobotModelTask> modelHandler;
@@ -510,7 +515,12 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          if (!RigidBodyInertialParametersTools.isPhysicallyConsistent(estimateModelBody.getInertia()))
          {
-            LogTools.error("Inertial parameter estimate for " + estimateModelBody.getName() + " is not physically consistent");
+            if (physicalConsistencyWarningCount < MAX_PHYSICAL_CONSISTENCY_WARNINGS)
+            {
+               physicalConsistencyWarningCount++;
+               LogTools.warn("Inertial parameter estimate for " + estimateModelBody.getName() + " is not physically consistent"
+                             + (physicalConsistencyWarningCount == MAX_PHYSICAL_CONSISTENCY_WARNINGS ? " (suppressing further warnings)" : ""));
+            }
             areParametersPhysicallyConsistent.set(false);
             break;
          }
