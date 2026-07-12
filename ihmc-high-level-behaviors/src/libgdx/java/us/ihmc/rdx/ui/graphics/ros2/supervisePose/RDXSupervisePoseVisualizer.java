@@ -12,6 +12,7 @@ import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.perception.detections.supervisePose.SupervisePoseCommunicator.State;
 import us.ihmc.perception.detections.supervisePose.SupervisePoseObject;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -204,16 +205,22 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
    private static class SupervisePoseResultVisualizer implements RenderableProvider
    {
       private final ROS2Subscription<Box3DMessage> resultSubscription;
+      private final ROS2Subscription<std_msgs.msg.dds.Byte> stateSubscription;
+
       private final Box3D latestResult;
+      private State state;
+
       private final RDXBoxVisualizer boxVisualizer;
       private final RDXReferenceFrameGraphic referenceFrameGraphic;
 
       public SupervisePoseResultVisualizer(ROS2Node ros2Node,
-                                                         SupervisePoseObject object,
-                                                         ImGuiAveragedFrequencyText frequencyText)
+                                           SupervisePoseObject object,
+                                           ImGuiAveragedFrequencyText frequencyText)
       {
          latestResult = new Box3D();
          latestResult.setToNaN();
+
+         state = State.DISABLED;
 
          boxVisualizer = new RDXBoxVisualizer();
          boxVisualizer.setColor(Color.RED);
@@ -221,19 +228,31 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
 
          referenceFrameGraphic = new RDXReferenceFrameGraphic(0.1);
 
-         resultSubscription = ros2Node.createSubscription2(object.topics.ihmcResult(), message ->
-         {
-            frequencyText.ping();
+         stateSubscription =
+               ros2Node.createSubscription2(object.topics.ihmcState(),
+                                            message -> state = State.fromByte(message.getData()));
 
-            latestResult.getPose().set(message.getPose());
-            latestResult.getSize().set(message.getSize());
-            boxVisualizer.generateMesh(latestResult);
-            referenceFrameGraphic.getFramePose3D().set(message.getPose());
-         });
+         resultSubscription =
+               ros2Node.createSubscription2(object.topics.ihmcResult(), message ->
+               {
+                  frequencyText.ping();
+
+                  latestResult.getPose().set(message.getPose());
+                  latestResult.getSize().set(message.getSize());
+                  referenceFrameGraphic.getFramePose3D().set(message.getPose());
+               });
       }
 
       public void update()
       {
+         boxVisualizer.setColor(switch (state)
+                                {
+                                   case DISABLED -> Color.RED;
+                                   case ESTIMATING_POSE -> Color.ORANGE;
+                                   case TRACKING -> Color.GREEN;
+                                });
+
+         boxVisualizer.generateMesh(latestResult);
          boxVisualizer.update();
          referenceFrameGraphic.updateFromFramePose();
       }
@@ -250,6 +269,7 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
          boxVisualizer.dispose();
          referenceFrameGraphic.dispose();
          resultSubscription.remove();
+         stateSubscription.remove();
       }
    }
 }

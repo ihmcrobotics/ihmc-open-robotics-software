@@ -4,6 +4,7 @@ import ihmc_common_msgs.msg.dds.Box3DMessage;
 import perception_msgs.msg.dds.FoundationPoseParameters;
 import sensor_msgs.msg.dds.CameraInfo;
 import sensor_msgs.msg.dds.Image;
+import std_msgs.msg.dds.Byte;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -11,12 +12,11 @@ import vision_msgs.msg.dds.Detection3DArray;
 
 public class SupervisePoseAPI
 {
-   static final ROS2Topic<?> FOUNDATION_POSE_TOPIC =
-         new ROS2Topic<>().withPrefix("foundationpose").withQoS(ROS2QosProfile.RELIABLE());
+   static final ROS2Topic<?> SUPERVISE_POSE_TOPIC = new ROS2Topic<>().withPrefix("foundationpose").withQoS(ROS2QosProfile.RELIABLE());
 
    public static SupervisePoseTopics topics(String category, String instance)
    {
-      ROS2Topic<?> base = FOUNDATION_POSE_TOPIC.withModule(category + "/" + instance);
+      ROS2Topic<?> base = SUPERVISE_POSE_TOPIC.withModule(category + "/" + instance);
       return new SupervisePoseTopics(base);
    }
 
@@ -39,6 +39,7 @@ public class SupervisePoseAPI
          ROS2Topic<Empty> reset,
 
          ROS2Topic<Box3DMessage> ihmcResult,
+         ROS2Topic<Byte> ihmcState,
          ROS2Topic<FoundationPoseParameters> ihmcParameters)
    {
       public SupervisePoseTopics(ROS2Topic<?> base)
@@ -61,6 +62,7 @@ public class SupervisePoseAPI
               base.withSuffix("reset").withType(Empty.class),
 
               base.withSuffix("ihmc/result").withType(Box3DMessage.class),
+              base.withSuffix("ihmc/state").withType(Byte.class),
               base.withSuffix("ihmc/parameters").withType(FoundationPoseParameters.class));
       }
    }
