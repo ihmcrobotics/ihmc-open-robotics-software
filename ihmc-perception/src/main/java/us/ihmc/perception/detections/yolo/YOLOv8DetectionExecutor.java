@@ -269,14 +269,6 @@ public class YOLOv8DetectionExecutor
 
                           YOLOv8DetectionList yoloResults = yoloModel.run(bgrImage);
 
-                          RawImage newest = bgrImage.get();
-                          if (newest != null)
-                          {
-                             if (newestColorImage.poll())
-                                newestColorImage.read().release();
-                             newestColorImage.set(newest);
-                          }
-
                           SyncedYOLOv8ModelParameters modelParameters = parameters.getModelParameters().get(yoloModel.getName());
                           if (modelParameters == null)
                           {
@@ -301,32 +293,6 @@ public class YOLOv8DetectionExecutor
                                                                                        new Point(erosionKernelRadius, erosionKernelRadius)));
                              RawImage erodedObjectMask = objectMask.replaceImage(erodedMask);
                              objectMask.release();
-
-                             // RawImage objectMask = detection.mask();
-
-                             // float erosionRadius = modelParameters.getErosionKernelRadii().getValueReadOnly(detection.objectClassID());
-
-                             // Mat maskCpu = objectMask.getCpuImageMat();
-
-                             // Mat distanceMap = new Mat();
-                             // opencv_imgproc.distanceTransform(maskCpu,
-                             //                                 distanceMap,
-                             //                                opencv_imgproc.DIST_L2,
-                             //                                opencv_imgproc.DIST_MASK_PRECISE);
-
-                             // Mat erodedMask = new Mat();
-                             // opencv_imgproc.threshold(distanceMap,
-                             //                         erodedMask,
-                             //                         erosionRadius,
-                             //                         255.0,
-                             //                         opencv_imgproc.THRESH_BINARY);
-
-                             // erodedMask.convertTo(erodedMask, objectMask.getOpenCVType());
-
-                             // RawImage erodedObjectMask = objectMask.replaceImage(erodedMask);
-
-                             // distanceMap.release();
-                             // objectMask.release();
 
                              RawImage segmentedDepth = segmenter.removeBackground(depthRef, erodedObjectMask);
                              if (segmentedDepth == null)
@@ -378,16 +344,8 @@ public class YOLOv8DetectionExecutor
                           Mat frameForGmc = bgrImage.getCpuImageMat();
                           botSortTracker.update(frameForGmc, trackableDetections);
 
-                          LogTools.info("tracked={} lost={} dets={}",
-                                        botSortTracker.getTrackedCount(),
-                                        botSortTracker.getLostCount(),
-                                        trackableDetections.size());
-
                           for (int i = 0; i < trackableDetections.size(); i++)
                              newAnnotatedImageDetections.get(i).setTrackId(trackableDetections.get(i).getTrackId());
-
-                          for (YOLOv8InstantDetection d : trackableDetections)
-                             LogTools.info("Track: class={} id={}", d.getDetectedObjectClass(), d.getTrackId());
 
                           int frameW = bgrImage.getWidth();
                           int frameH = bgrImage.getHeight();
@@ -461,6 +419,20 @@ public class YOLOv8DetectionExecutor
                              annotatedTargets = newAnnotatedTargets;
                              for (AnnotatedTarget2D at : prev)
                                 at.destroy();
+                          }
+
+                          /*
+                           * Make the RGB frame available only after its corresponding annotation targets have been generated.
+                           */
+
+                          RawImage newest = bgrImage.get();
+
+                          if (newest != null)
+                          {
+                             if (newestColorImage.poll())
+                                newestColorImage.read().release();
+
+                             newestColorImage.set(newest);
                           }
 
                           detectionConsumerCallbacks.forEach(cb -> cb.accept(yoloInstantDetections));

@@ -254,6 +254,15 @@ public class SupervisePoseCommunicator implements AutoCloseable
       YOLOv8Tools.resizeWithCrop(segmentation.getGpuImageMat(), resizedSegmentationMat, depth32Mat.size());
       RawImage resizedSegmentation = depthImage.replaceImage(resizedSegmentationMat, PixelFormat.GRAY8);
 
+      LogTools.info(String.format(
+            "SupervisePose resize: mask=%dx%d depth=%dx%d rgb=%dx%d",
+            segmentation.getWidth(),
+            segmentation.getHeight(),
+            depth32FImage.getWidth(),
+            depth32FImage.getHeight(),
+            rgbImage.getWidth(),
+            rgbImage.getHeight()));
+
       synchronized (sensorFrame)
       {
          sensorFrame.setNewTransformToParent(colorImage.getTransformToWorld());

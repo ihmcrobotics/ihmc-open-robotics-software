@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.tools.io.resources.ResourceTools;
@@ -155,9 +156,11 @@ public class YOLOv8Tools
       if (id < 0)
          return GREEN;
 
-      int r = (id * 37) % 255;
-      int g = (id * 17) % 255;
-      int b = (id * 97) % 255;
+      int colorId = id + 1;
+
+      int r = (colorId * 37) % 255;
+      int g = (colorId * 17) % 255;
+      int b = (colorId * 97) % 255;
 
       return new Scalar(b, g, r, 255.0);
    }
@@ -260,13 +263,6 @@ public class YOLOv8Tools
     * @param annotatedImage Annotated output Mat.
     * @param detections     YOLO detections.
     */
-   /**
-    * Annotates the {@code inputImage} using the {@code detections} and puts the result in {@code annotatedImage}.
-    *
-    * @param inputImage     Image on which YOLO was run on.
-    * @param annotatedImage Annotated output Mat.
-    * @param detections     YOLO detections.
-    */
    public static void annotateImage(Mat inputImage, Mat annotatedImage, List<YOLOv8InstantDetection> detections)
    {
       inputImage.copyTo(annotatedImage);
@@ -345,6 +341,7 @@ public class YOLOv8Tools
                resizeWithCrop(maskMat, resizedMask, image.size());
 
                Mat colorMat = new Mat(image.rows(), image.cols(), image.type(), color);
+
                opencv_core.add(image, colorMat, image, resizedMask, -1);
 
                colorMat.close();
