@@ -2,11 +2,12 @@ package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
 import imgui.type.ImInt;
-import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
-import std_msgs.msg.dds.Int64;
+import perception_msgs.ZEDSVOCurrentFileMessage;
+import std_msgs.Int64;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -44,7 +45,8 @@ public class RDXZEDSVORecorderPanel
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
-   private final ROS2Helper ros2Helper;
+   private final ROS2Node ros2Node;
+   private final ROS2PublisherMap publisherMap;
    private ZEDSVOCurrentFileMessage latestMessage;
 
    private final ImInt requestedPosition = new ImInt();
@@ -53,10 +55,16 @@ public class RDXZEDSVORecorderPanel
 
    private final Throttler requestThrottler = new Throttler().setFrequency(5.0);
 
-   public RDXZEDSVORecorderPanel(ROS2Helper ros2Helper)
+   public RDXZEDSVORecorderPanel(ROS2Node ros2Node)
    {
-      this.ros2Helper = ros2Helper;
-      ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_CURRENT_FILE, message -> this.latestMessage = message);
+      this.ros2Node = ros2Node;
+      this.publisherMap = new ROS2PublisherMap(ros2Node);
+      ros2Node.createSubscriptionSampler(PerceptionAPI.ZED_SVO_CURRENT_FILE, sample ->
+      {
+         ZEDSVOCurrentFileMessage copy = new ZEDSVOCurrentFileMessage();
+         copy.set(sample);
+         latestMessage = copy;
+      });
    }
 
    public void update()
@@ -109,7 +117,7 @@ public class RDXZEDSVORecorderPanel
 
          if (ImGui.button(labels.get(paused ? "Play" : "Pause")))
          {
-            ros2Helper.publish(paused ? PerceptionAPI.ZED_SVO_PLAY : PerceptionAPI.ZED_SVO_PAUSE);
+            publisherMap.publish(paused ? PerceptionAPI.ZED_SVO_PLAY : PerceptionAPI.ZED_SVO_PAUSE);
             paused = !paused;
          }
 
@@ -133,6 +141,6 @@ public class RDXZEDSVORecorderPanel
    {
       Int64 positionMessage = new Int64();
       positionMessage.setData(requestedPosition.get());
-      ros2Helper.publish(PerceptionAPI.ZED_SVO_SET_POSITION, positionMessage);
+      publisherMap.publish(PerceptionAPI.ZED_SVO_SET_POSITION, positionMessage);
    }
 }

@@ -1,15 +1,15 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import behavior_msgs.msg.dds.BehaviorTreeYoDataMessage;
+import behavior_msgs.BehaviorTreeYoDataMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.AutonomyAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.yoVariables.euclid.YoPose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -50,7 +50,16 @@ public class ROS2BehaviorTreeYoRegistry
    {
       this.fullRobotModel = fullRobotModel;
 
-      subscription = ROS2Tools.createSwapReferenceSubscription(ros2Node, AutonomyAPI.BEHAVIOR_YO_DATA, notification);
+      var behaviorYoDataTopic = AutonomyAPI.BEHAVIOR_YO_DATA;
+      SwapReference<BehaviorTreeYoDataMessage> swapReference = new SwapReference<>(() -> ROS2Message.createInstance(behaviorYoDataTopic.getType()));
+      ros2Node.createSubscriptionSampler(behaviorYoDataTopic, sample ->
+      {
+         var messageToPack = swapReference.getForThreadOne();
+         messageToPack.set(sample);
+         swapReference.swap();
+         notification.set();
+      });
+      subscription = swapReference;
 
       for (int i = 0; i < sceneObjectPoses.length; i++)
          sceneObjectPoses[i] = new YoPose3D("sceneObject" + i, registry);
@@ -97,7 +106,7 @@ public class ROS2BehaviorTreeYoRegistry
                sceneObjects.set(data.getNumberOfSceneObjects());
 
                for (int i = 0; i < sceneObjectPoses.length; i++)
-                  sceneObjectPoses[i].set(data.getSceneObjectPose()[i]);
+                  sceneObjectPoses[i].set(data.getSceneObjectPose()[i].getPose());
 
                automaticExecution.set(data.getAutomaticExecution());
                executionNextIndex.set(data.getExecutionNextIndex());
@@ -114,8 +123,8 @@ public class ROS2BehaviorTreeYoRegistry
 
                for (RobotSide side : RobotSide.values)
                {
-                  currentHandPoses.get(side).set(data.getCurrentHandPose()[side.ordinal()]);
-                  goalHandPoses.get(side).set(data.getGoalHandPose()[side.ordinal()]);
+                  currentHandPoses.get(side).set(data.getCurrentHandPose()[side.ordinal()].getPose());
+                  goalHandPoses.get(side).set(data.getGoalHandPose()[side.ordinal()].getPose());
                }
             }
          }

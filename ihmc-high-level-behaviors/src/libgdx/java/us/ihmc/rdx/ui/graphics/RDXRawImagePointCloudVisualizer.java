@@ -56,7 +56,7 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
     * For example, if the color images have one second of delay compared to depth,
     * at least one second of history is required to sync the color and depth.
     */
-   private final ImFloat historyLength = new ImFloat(1.0f);
+   private final ImFloat historyLength = new ImFloat(0.3f);
 
    /**
     * Maximum de-synchronization allowed between color and depth images,

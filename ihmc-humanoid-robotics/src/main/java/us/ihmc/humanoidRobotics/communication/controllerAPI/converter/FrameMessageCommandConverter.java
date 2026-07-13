@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.converter;
 
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class FrameMessageCommandConverter implements CommandConversionInterface
@@ -16,7 +16,7 @@ public class FrameMessageCommandConverter implements CommandConversionInterface
 
    /** {@inheritDoc} */
    @Override
-   public <C extends Command<?, M>, M extends Settable<M>> boolean isConvertible(C command, M message)
+   public <C extends Command<?, M>, M extends ROS2Message<M>> boolean isConvertible(C command, M message)
    {
       return command instanceof FrameBasedCommand;
    }
@@ -24,7 +24,7 @@ public class FrameMessageCommandConverter implements CommandConversionInterface
    /** {@inheritDoc} */
    @SuppressWarnings("unchecked")
    @Override
-   public <C extends Command<?, M>, M extends Settable<M>> void process(C command, M message)
+   public <C extends Command<?, M>, M extends ROS2Message<M>> void process(C command, M message)
    {
       FrameBasedCommand<M> frameBasedCommand = (FrameBasedCommand<M>) command;
       frameBasedCommand.set(referenceFrameHashCodeResolver, message);

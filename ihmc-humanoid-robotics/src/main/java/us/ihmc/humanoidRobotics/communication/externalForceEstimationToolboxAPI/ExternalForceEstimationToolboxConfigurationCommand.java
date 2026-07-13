@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI;
 
-import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
 import gnu.trove.list.array.TIntArrayList;
+import toolbox_msgs.ExternalForceEstimationConfigurationMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -43,7 +43,7 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
       for (int i = 0; i < message.getRigidBodyHashCodes().size(); i++)
       {
          this.rigidBodyHashCodes.add(message.getRigidBodyHashCodes().get(i));
-         this.contactPointPositions.add().set(message.getContactPointPositions().get(i));
+         this.contactPointPositions.add().set(message.getContactPointPositions().get(i).getPoint());
       }
 
       this.estimateContactLocation = message.getEstimateContactLocation();

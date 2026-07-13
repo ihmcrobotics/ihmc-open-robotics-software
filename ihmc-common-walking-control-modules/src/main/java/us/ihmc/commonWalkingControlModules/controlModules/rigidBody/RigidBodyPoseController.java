@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import controller_msgs.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.TaskspaceTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;

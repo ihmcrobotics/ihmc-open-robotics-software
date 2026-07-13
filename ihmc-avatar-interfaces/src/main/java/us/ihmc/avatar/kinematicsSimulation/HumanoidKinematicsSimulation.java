@@ -1,12 +1,12 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepStatusMessage;
+import controller_msgs.WalkingStatusMessage;
+import controller_msgs.WholeBodyStreamingMessage;
+import controller_msgs.WholeBodyTrajectoryMessage;
 import gnu.trove.map.TObjectDoubleMap;
-import std_msgs.msg.dds.Empty;
+import std_msgs.Empty;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
@@ -33,7 +33,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -51,6 +51,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -68,10 +71,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
@@ -106,20 +105,19 @@ import java.util.concurrent.atomic.AtomicReference;
 public class HumanoidKinematicsSimulation
 {
    public static final ROS2Topic<Empty> KINEMATICS_SIMULATION_HEARTBEAT
-         = ROS2Tools.IHMC_ROOT.withModule("kinematics_simulation").withOutput().withSuffix("heartbeat").withType(Empty.class);
+         = HumanoidROS2Topic.IHMC_ROOT.withModule("kinematics_simulation").withOutput().withSuffix("heartbeat").withType(Empty.class);
    private static final double GRAVITY_Z = 9.81;
    private static final double LIDAR_SPINDLE_SPEED = 2.5;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final HumanoidKinematicsSimulationParameters kinematicsSimulationParameters;
    private final PausablePeriodicThread controlThread;
    private final ROS2Node ros2Node;
-   private final RealtimeROS2Node realtimeROS2Node;
+   private final AsyncROS2Node asyncROS2Node;
    private final ROS2Heartbeat heartbeat;
    private final RobotConfigurationDataPublisher robotConfigurationDataPublisher;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder(RobotMotionStatus.UNKNOWN);
-   private double yoVariableServerTime = 0.0;
    private final Stopwatch monotonicTimer = new Stopwatch();
    private final Stopwatch updateTimer = new Stopwatch();
    private final YoDouble yoTime;
@@ -165,10 +163,9 @@ public class HumanoidKinematicsSimulation
       this.kinematicsSimulationParameters = kinematicsSimulationParameters;
 
       // instantiate some existing controller ROS2 API?
-      ROS2NodeBuilder nodeBuilder = kinematicsSimulationParameters.getRos2NodeBuilder();
-      if (nodeBuilder == null)
-         nodeBuilder = new ROS2NodeBuilder();
-      ros2Node = nodeBuilder.build(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME);
+      ROS2Node configuredROS2Node = kinematicsSimulationParameters.getROS2Node();
+      ros2Node = configuredROS2Node != null ? configuredROS2Node
+                                            : new ROS2Node(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME);
       heartbeat = new ROS2Heartbeat(ros2Node, KINEMATICS_SIMULATION_HEARTBEAT);
 
       String robotName = robotModel.getSimpleRobotName();
@@ -268,14 +265,14 @@ public class HumanoidKinematicsSimulation
       walkingParentRegistry.addChild(walkingController.getYoVariableRegistry());
 
       // create controller network subscriber here!!
-      realtimeROS2Node = nodeBuilder.buildRealtime(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
+      asyncROS2Node = new AsyncROS2Node(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
       ROS2Topic inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
       ROS2Topic outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
                                                                                                 walkingInputManager,
                                                                                                 outputTopic,
                                                                                                 walkingOutputManager,
-                                                                                                realtimeROS2Node);
+                                                                                                asyncROS2Node);
       controllerNetworkSubscriber.addMessageFilter(message ->
       {
          if (message instanceof FootstepDataListMessage)
@@ -297,11 +294,16 @@ public class HumanoidKinematicsSimulation
 
       for (RobotSide side : RobotSide.values)
          if (robotModel.getRobotVersion().getHandType(side) == HandType.ABILITY_HAND)
-            abilityHands.put(side, new AbilityHandKinematicsSimulation(side, ros2Node, fullRobotModel));
+         {
+            AbilityHandKinematicsSimulation handSimulation = new AbilityHandKinematicsSimulation(side,
+                                                                                                 ros2Node,
+                                                                                                 fullRobotModel,
+                                                                                                 robotModel.getHandModel(side));
+            if (handSimulation.isEnabled())
+               abilityHands.put(side, handSimulation);
+         }
 
       robotConfigurationDataPublisher = createRobotConfigurationDataPublisher(robotModel.getSimpleRobotName());
-
-      realtimeROS2Node.spin();
 
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(kinematicsSimulationParameters::getDt,
                                                                                        GRAVITY_Z,
@@ -429,7 +431,7 @@ public class HumanoidKinematicsSimulation
       rcdPublisherFactory.setPublishPeriod(0L);
       rcdPublisherFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
       
-      rcdPublisherFactory.setROS2Info(realtimeROS2Node, HumanoidControllerAPI.getOutputTopic(robotName));
+      rcdPublisherFactory.setROS2Info(asyncROS2Node, HumanoidControllerAPI.getOutputTopic(robotName));
 
       return rcdPublisherFactory.createRobotConfigurationDataPublisher();
    }
@@ -545,14 +547,14 @@ public class HumanoidKinematicsSimulation
       integrator.setIntegrationDT(kinematicsSimulationParameters.getDt());
       integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
 
-      yoVariableServerTime += Conversions.millisecondsToSeconds(1);
+      // Use simulation yoTime (not a fixed 1 ms increment) so YoVariable logger/server timestamps track robot time.
       if (kinematicsSimulationParameters.getLogToFile())
       {
-         intraprocessYoVariableLogger.update(Conversions.secondsToNanoseconds(yoVariableServerTime));
+         intraprocessYoVariableLogger.update(Conversions.secondsToNanoseconds(yoTime.getValue()));
       }
       if (kinematicsSimulationParameters.getCreateYoVariableServer())
       {
-         yoVariableServer.update(Conversions.secondsToNanoseconds(yoVariableServerTime));
+         yoVariableServer.update(Conversions.secondsToNanoseconds(yoTime.getValue()));
       }
    }
 
@@ -570,8 +572,8 @@ public class HumanoidKinematicsSimulation
       RobotSide side = RobotSide.fromByte(statusMessage.getRobotSide());
       FootstepStatus status = FootstepStatus.fromByte(statusMessage.getFootstepStatus());
       FramePose3D desiredFootstep = new FramePose3D(worldFrame,
-                                                    statusMessage.getDesiredFootPositionInWorld(),
-                                                    statusMessage.getDesiredFootOrientationInWorld());
+                                                    statusMessage.getDesiredFootPositionInWorld().getPoint(),
+                                                    statusMessage.getDesiredFootOrientationInWorld().getQuaternion());
 
       switch (status)
       {
@@ -614,10 +616,11 @@ public class HumanoidKinematicsSimulation
       LogTools.info("Shutting down...");
       if (intraprocessYoVariableLogger != null)
          intraprocessYoVariableLogger.destroy();
-      controlThread.destroy();
+      if (controlThread != null)
+         controlThread.destroy();
       heartbeat.destroy();
-      ros2Node.destroy();
-      realtimeROS2Node.destroy();
+      ros2Node.close();
+      asyncROS2Node.close();
       if (yoVariableServer != null)
          yoVariableServer.close();
    }

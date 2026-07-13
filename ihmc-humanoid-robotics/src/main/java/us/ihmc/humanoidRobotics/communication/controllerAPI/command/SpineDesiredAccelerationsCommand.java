@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
+import controller_msgs.SpineDesiredAccelerationsMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
 public class SpineDesiredAccelerationsCommand implements Command<SpineDesiredAccelerationsCommand, SpineDesiredAccelerationsMessage>

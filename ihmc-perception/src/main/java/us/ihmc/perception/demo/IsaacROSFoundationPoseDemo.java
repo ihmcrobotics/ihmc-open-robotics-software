@@ -3,13 +3,12 @@ package us.ihmc.perception.demo;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImagePublisher;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
@@ -35,7 +34,7 @@ public class IsaacROSFoundationPoseDemo
 {
    private static final String SVO_FILE = "/opt/ihmc/LogData/UserFolders/TomaszFolder/20251020_ZEDXMini_DoorChargeBarrierBottle.svo2";
 
-   private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
+   private final ROS2Node ros2Node = new ROS2Node(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
 
    private final RawImagePublisher imagePublisher = new RawImagePublisher(ros2Node, 0.5);
@@ -105,7 +104,7 @@ public class IsaacROSFoundationPoseDemo
       yoloExecutor.destroy();
       foundationPoseCommunicators.closeCommunicators();
       peerClockOffsetEstimator.destroy();
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    public static void main(String[] args)

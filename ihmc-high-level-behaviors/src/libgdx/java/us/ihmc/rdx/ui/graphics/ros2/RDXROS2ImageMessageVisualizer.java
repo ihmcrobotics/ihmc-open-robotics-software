@@ -2,15 +2,15 @@ package us.ihmc.rdx.ui.graphics.ros2;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jetbrains.annotations.Nullable;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.ImageMessage;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Subscription;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.SwapReference;
 
 public class RDXROS2ImageMessageVisualizer extends RDXROS2ImageVisualizer<ImageMessage>
@@ -45,14 +45,14 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2ImageVisualizer<ImageM
    private void subscribe()
    {
       if (subscription != null)
-         subscription.remove();
-      subscription = ros2Node.createSubscription2(topic, this::queueRenderImage);
+         ros2Node.destroySubscription(subscription);
+      subscription = ros2Node.createSubscriptionSampler(topic, this::queueRenderImage);
    }
 
    private void unsubscribe()
    {
       if (subscription != null)
-         subscription.remove();
+         ros2Node.destroySubscription(subscription);
       subscription = null;
    }
 
@@ -63,7 +63,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2ImageVisualizer<ImageM
 
       // Pack the message data into thread 1's image message object
       ImageMessage imageMessageA = imageMessageSwapReference.getForThreadOne();
-      imageMessageA.getData().resetQuick();
+      imageMessageA.getData().clear();
       imageMessageA.set(imageMessage);
 
       // Update some message statistics

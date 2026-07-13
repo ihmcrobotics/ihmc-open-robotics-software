@@ -1,9 +1,11 @@
 package us.ihmc.footstepPlanning.ui.components;
 
-import perception_msgs.msg.dds.TerrainMapMessage;
-import toolbox_msgs.msg.dds.FootstepPlanningTimingsMessage;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import perception_msgs.TerrainMapMessage;
+import toolbox_msgs.FootstepPlanningTimingsMessage;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -12,20 +14,18 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
-import us.ihmc.perception.gpuMapping.TerrainMapData;
-import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 public class FootstepPathCalculatorModule
 {

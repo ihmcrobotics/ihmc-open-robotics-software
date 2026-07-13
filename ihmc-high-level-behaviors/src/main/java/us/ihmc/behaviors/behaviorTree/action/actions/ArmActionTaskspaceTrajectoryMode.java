@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
+
 public enum ArmActionTaskspaceTrajectoryMode
 {
    SINGLE_POSE,

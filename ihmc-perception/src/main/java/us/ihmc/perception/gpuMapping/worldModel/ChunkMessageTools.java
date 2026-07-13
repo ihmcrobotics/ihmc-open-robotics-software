@@ -5,15 +5,17 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ChunkMessage;
+import perception_msgs.ChunkMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
 
 public class ChunkMessageTools
 {
    public static void unpackMessageToChunk(ChunkMessage chunkMessage, Chunk chunkToPack)
    {
       // Decode the PNG compressed height map data
-      Mat compressedMat = new Mat(chunkMessage.getHeights().getBuffer().array());
+      Mat compressedMat = new Mat(MessageTools.toByteArray(chunkMessage.getHeights()));
       Mat chunkMap = new Mat(chunkMessage.getCellsPerAxis(), 2 * chunkMessage.getCellsPerAxis(), opencv_core.CV_16UC1);
       opencv_imgcodecs.imdecode(compressedMat, opencv_imgcodecs.IMREAD_UNCHANGED, chunkMap);
 
@@ -46,8 +48,11 @@ public class ChunkMessageTools
 
       // Pack the compressed data into the message
       int compressedDataSize = (int) compressedData.limit();
-      compressedData.get(messageToPack.getHeights().getBuffer().array(), 0, compressedDataSize);
-      messageToPack.getHeights().getBuffer().position(compressedDataSize);
+      byte[] compressedBytes = new byte[compressedDataSize];
+      compressedData.get(compressedBytes);
+      IDLByteSequence heights = messageToPack.getHeights();
+      heights.clear();
+      heights.addAll(compressedBytes);
 
       // Close pointers
       dataPointer.close();

@@ -1,14 +1,17 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
+
+import controller_msgs.CapturabilityBasedStatus;
+import controller_msgs.RobotConfigurationData;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.KinematicsToolboxCenterOfMassMessage;
+import toolbox_msgs.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxPrivilegedConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
@@ -36,10 +39,10 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -74,9 +77,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("humanoid-toolbox")
 public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRobotTestInterface
@@ -589,7 +589,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       message.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(controlLinear, controlLinear, controlLinear));
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(weight));
       message.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(controlAngular, controlAngular, controlAngular));
-      message.getDesiredPositionInWorld().add(shift);
+      message.getDesiredPositionInWorld().getPoint().add(shift);
       return message;
    }
 
@@ -602,7 +602,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
    {
       KinematicsToolboxCenterOfMassMessage message = new KinematicsToolboxCenterOfMassMessage();
       message.getDesiredPositionInWorld().set(computeCenterOfMass3D(robot));
-      message.getDesiredPositionInWorld().add(shift);
+      message.getDesiredPositionInWorld().getPoint().add(shift);
       message.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, zSelected));
       message.getWeights().set(MessageTools.createWeightMatrix3DMessage(weight));
       return message;
@@ -834,20 +834,20 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
 
       SideDependentList<ContactablePlaneBody> contactableFeet = extractContactableFeet(currentRobotModel, contactPointParameters);
 
-      Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
-      Object<Point3D> rightFootSupportPolygon2d = capturabilityBasedStatus.getRightFootSupportPolygon3d();
+      IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
+      IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> rightFootSupportPolygon2d = capturabilityBasedStatus.getRightFootSupportPolygon3d();
       if (isLeftFootInSupport)
          contactableFeet.get(RobotSide.LEFT)
                         .getContactPointsCopy()
                         .stream()
                         .peek(cp -> cp.changeFrame(worldFrame))
-                        .forEach(cp -> leftFootSupportPolygon2d.add().set(cp.getX(), cp.getY(), 0.0));
+                        .forEach(cp -> leftFootSupportPolygon2d.add().getPoint().set(cp.getX(), cp.getY(), 0.0));
       if (isRightFootInSupport)
          contactableFeet.get(RobotSide.RIGHT)
                         .getContactPointsCopy()
                         .stream()
                         .peek(cp -> cp.changeFrame(worldFrame))
-                        .forEach(cp -> rightFootSupportPolygon2d.add().set(cp.getX(), cp.getY(), 0.0));
+                        .forEach(cp -> rightFootSupportPolygon2d.add().getPoint().set(cp.getX(), cp.getY(), 0.0));
       return capturabilityBasedStatus;
    }
 }

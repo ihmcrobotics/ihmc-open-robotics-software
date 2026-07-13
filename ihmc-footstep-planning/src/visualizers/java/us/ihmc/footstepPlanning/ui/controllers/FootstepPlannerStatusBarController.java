@@ -3,12 +3,7 @@ package us.ihmc.footstepPlanning.ui.controllers;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerExceptionStackTrace;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTimings;
 
-import java.text.NumberFormat;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.apache.commons.lang3.tuple.Pair;
-
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataMessage;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -32,6 +27,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.communication.UIStepAdjustmentFrame;
 import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerStatusBarController.FootstepResponseTableRow;
@@ -39,6 +35,9 @@ import us.ihmc.messager.TopicListener;
 import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+
+import java.text.NumberFormat;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlannerStatusBarController
 {

@@ -1,10 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import controller_msgs.msg.dds.ManipulationAbortedStatus;
-import rcl_interfaces.msg.dds.Log;
+import controller_msgs.ManipulationAbortedStatus;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -54,9 +50,9 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesired
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
-import us.ihmc.humanoidRobotics.communication.velocityBasedWalkingAPI.VelocityBasedWalkingInputCommand;
 import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
+import us.ihmc.humanoidRobotics.communication.velocityBasedWalkingAPI.VelocityBasedWalkingInputCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -65,6 +61,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class WalkingCommandConsumer
 {
@@ -436,7 +435,6 @@ public class WalkingCommandConsumer
       for (int i = 0; i < armTrajectoryCommands.size(); i++)
       {
          ArmTrajectoryCommand command = armTrajectoryCommands.get(i);
-         LogTools.info("RECEIVED ON CONTROLLER SIDE!!! JOINT COMMANDS ARE: " + command.getJointspaceTrajectory().getTrajectoryEndTime());
          RobotSide robotSide = command.getRobotSide();
          RigidBodyControlManager handManager = handManagers.get(robotSide);
          if (handManager != null && (allowCommand || command.getForceExecution()))

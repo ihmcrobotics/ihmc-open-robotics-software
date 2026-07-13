@@ -1,24 +1,25 @@
 package us.ihmc.rdx.ui.lerobot;
 
-import behavior_msgs.msg.dds.VLAOperationMessage;
+import static us.ihmc.lerobot.VLAUpdateThread.UI;
+
+import behavior_msgs.VLAOperationMessage;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.ArmTrajectoryMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -29,6 +30,8 @@ import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.lerobot.VLAUpdateThread;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
@@ -39,11 +42,7 @@ import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.tools.Timer;
-
-import static us.ihmc.lerobot.VLAUpdateThread.UI;
 
 /**
  * UI for remotely operating {@link VLAUpdateThread}.
@@ -58,6 +57,7 @@ public class RDXVLAOperation
    private final ROS2Publisher<ArmTrajectoryMessage> armTrajectoryPublisher;
    private String statusMessage = "Not yet connected to robot";
    private final TypedNotification<VLAOperationMessage> statusSubscription;
+   private final VLAOperationMessage statusCopy = new VLAOperationMessage();
    private final ROS2Publisher<VLAOperationMessage> commandPublisher;
    private final ImGuiAveragedFrequencyText commsFrequencyText = new ImGuiAveragedFrequencyText();
    private final SideDependentList<RDXReferenceFrameGraphic> actionHandPoseGraphics = new SideDependentList<>();
@@ -82,7 +82,14 @@ public class RDXVLAOperation
       running = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
       controlRobot = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
 
-      statusSubscription = ROS2Tools.createNotificationSubscription(ros2Node, UI.getTopic(ROS2ActorDesignation.OPERATOR.getIncomingQualifier()));
+      var statusTopic = UI.getTopic(ROS2ActorDesignation.OPERATOR.getIncomingQualifier());
+      TypedNotification<VLAOperationMessage> typedNotification = new TypedNotification<>();
+      ros2Node.createSubscriptionSampler(statusTopic, sample ->
+      {
+         statusCopy.set(sample);
+         typedNotification.set(statusCopy);
+      });
+      statusSubscription = typedNotification;
       commandPublisher = ros2Node.createPublisher(UI.getTopic(ROS2ActorDesignation.OPERATOR.getOutgoingQualifier()));
 
       this.syncedRobot = syncedRobot;
@@ -121,8 +128,8 @@ public class RDXVLAOperation
          controlRobot.fromMessage(status.getControlRobot());
          for (RobotSide side : RobotSide.values)
          {
-            actionHandPoseGraphics.get(side).setPoseInWorldFrame(status.getActionHandPoses()[side.ordinal()]);
-            actionForearmPoseGraphics.get(side).setPoseInWorldFrame(status.getActionForearmPoses()[side.ordinal()]);
+            actionHandPoseGraphics.get(side).setPoseInWorldFrame(status.getActionHandPoses()[side.ordinal()].getPose());
+            actionForearmPoseGraphics.get(side).setPoseInWorldFrame(status.getActionForearmPoses()[side.ordinal()].getPose());
          }
          statusMessage = status.getStatusMessageAsString();
       }

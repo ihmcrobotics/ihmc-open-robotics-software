@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
 import java.util.Objects;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
+import toolbox_msgs.KinematicsToolboxInputCollectionMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.robotModels.JointHashCodeResolver;

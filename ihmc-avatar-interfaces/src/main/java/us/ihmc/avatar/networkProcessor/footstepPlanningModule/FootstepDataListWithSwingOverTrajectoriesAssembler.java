@@ -1,7 +1,7 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsStatus;
@@ -23,6 +23,8 @@ import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import static us.ihmc.communication.controllerAPI.command.QueueableCommand.VALID_MESSAGE_DEFAULT_ID;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,7 +119,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
       }
 
       footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
-      footstepDataListMessage.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
+      footstepDataListMessage.getQueueingProperties().setPreviousMessageId(VALID_MESSAGE_DEFAULT_ID);
       return footstepDataListMessage;
    }
 
@@ -176,7 +178,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
       }
 
       footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
-      footstepDataListMessage.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
+      footstepDataListMessage.getQueueingProperties().setPreviousMessageId(VALID_MESSAGE_DEFAULT_ID);
       return footstepDataListMessage;
    }
 }

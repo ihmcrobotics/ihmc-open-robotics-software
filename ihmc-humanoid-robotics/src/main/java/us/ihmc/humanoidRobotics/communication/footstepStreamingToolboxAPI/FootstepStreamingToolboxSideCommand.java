@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI;
 
-import toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage;
+import toolbox_msgs.FootstepStreamingToolboxSideMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -46,10 +46,10 @@ public class FootstepStreamingToolboxSideCommand implements Command<FootstepStre
       sequenceId = message.getSequenceId();
       timestamp = message.getTimestamp();
       side = RobotSide.fromByte(message.getSide());
-      robotFootPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getRobotFootPositionInWorld(), message.getRobotFootOrientationInWorld());
-      currentPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getCurrentPositionInWorld(), message.getCurrentOrientationInWorld());
+      robotFootPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getRobotFootPositionInWorld().getPoint(), message.getRobotFootOrientationInWorld().getQuaternion());
+      currentPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getCurrentPositionInWorld().getPoint(), message.getCurrentOrientationInWorld().getQuaternion());
       hasCurrentVelocity = message.getHasCurrentVelocity();
-      currentVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getCurrentAngularVelocityInWorld(), message.getCurrentLinearVelocityInWorld());
+      currentVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getCurrentAngularVelocityInWorld().getVector(), message.getCurrentLinearVelocityInWorld().getVector());
    }
 
    public void setTimestamp(long timestamp)

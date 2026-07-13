@@ -1,6 +1,6 @@
 package us.ihmc.communication.property;
 
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.ArrayList;

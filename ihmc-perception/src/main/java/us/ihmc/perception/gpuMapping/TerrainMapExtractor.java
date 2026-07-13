@@ -1,5 +1,8 @@
 package us.ihmc.perception.gpuMapping;
 
+import static org.bytedeco.cuda.global.cudart.cudaFree;
+import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
+
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
@@ -13,9 +16,6 @@ import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 
 import java.net.URL;
-
-import static org.bytedeco.cuda.global.cudart.cudaFree;
-import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 
 public class TerrainMapExtractor
 {
@@ -43,7 +43,7 @@ public class TerrainMapExtractor
 
    /**
     * The types of these mats depend on the data we are trying to store.
-    * Check the {@link perception_msgs.msg.dds.TerrainMapMessage} to ensure these are the same
+    * Check the {@link perception_msgs.TerrainMapMessage} to ensure these are the same
     */
    private final GpuMat normalXMat;
    private final GpuMat normalYMat;

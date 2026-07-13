@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.ArmActionStateMessage;
+import behavior_msgs.ArmActionStateMessage;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
@@ -11,7 +11,7 @@ import static us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition.
 public class ScrewPrimitiveState
 {
    /** This limit is defined in the .msg file and limited to the size in the SE3TrajectoryMessage. */
-   public static final int TRAJECTORY_SIZE_LIMIT = new ArmActionStateMessage().getPreviewTrajectory().getCurrentCapacity();
+   public static final int TRAJECTORY_SIZE_LIMIT = new ArmActionStateMessage().getPreviewTrajectory().getMaxSize();
 
    private final DetachableReferenceFrame screwFrame;
    private final CRDTStatusPoseList previewTrajectory;

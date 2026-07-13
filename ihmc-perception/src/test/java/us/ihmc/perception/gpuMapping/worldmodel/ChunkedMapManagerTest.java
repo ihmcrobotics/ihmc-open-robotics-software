@@ -5,13 +5,12 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.perception.gpuMapping.HeightMapParameters;
 import us.ihmc.perception.gpuMapping.worldModel.Chunk;
 import us.ihmc.perception.gpuMapping.worldModel.ChunkTools;
 import us.ihmc.perception.gpuMapping.worldModel.ChunkedMapManager;
 import us.ihmc.perception.tools.PerceptionDebugTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
 
 import java.util.Collection;
 
@@ -25,7 +24,7 @@ public class ChunkedMapManagerTest
    @Test
    public void testChunksGetHeightsCorrectly()
    {
-      ROS2Node ros2Node = new ROS2NodeBuilder().build("test_node");
+      ROS2Node ros2Node = new ROS2Node("test_node");
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       heightMapParameters.setCellSize(0.02);
       heightMapParameters.setGlobalWidthInMeters(1.0);
