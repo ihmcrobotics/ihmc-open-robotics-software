@@ -122,6 +122,7 @@ public class GravityLevelingUpdaterTest
 
    private static final double ROLL_VAR = 2.5e-3;   // (2.9°)²
    private static final double PITCH_VAR = 1.9e-1;  // (25°)²
+   private static final double DT = 1.0e-3;         // estimator tick, for driving the gate's gravity reference
 
    /**
     * Anisotropic R structure. At an upright estimate û_p = R̂ᵀe_x = e_x, so R must be diag(σ_pitch², σ_roll²,
@@ -236,17 +237,133 @@ public class GravityLevelingUpdaterTest
       state.setRotation(new RotationMatrix());
       GravityLevelingUpdater updater = new GravityLevelingUpdater(state.getTangentSize(), ROLL_VAR, PITCH_VAR, G);
       Vector3D zeroOmega = new Vector3D();
+      Vector3D gravity = new Vector3D(0.0, 0.0, G);
 
-      updater.assemble(state, new Vector3D(0.0, 0.0, G));
-      assertTrue(updater.isQuasiStatic(new Vector3D(0.0, 0.0, G), zeroOmega, 0.05, 0.15, 0.5),
-                 "pure gravity passes the gate");
+      // The gate's gravity reference is now driven from the sensors (as production does every tick), not read
+      // off the estimate. Settle it on pure gravity first.
+      settleGravityReference(updater, gravity);
+
+      updater.assemble(state, gravity);
+      assertTrue(updater.isQuasiStatic(gravity, zeroOmega, 0.05, 0.15, 0.5), "pure gravity passes the gate");
 
       // 3 m/s² fore-aft with a slightly reduced vertical: ‖a‖ ≈ 9.36 m/s², within ±5% of g (norm gate passes)…
       Vector3D foreAft = new Vector3D(3.0, 0.0, Math.sqrt(G * G - 3.0 * 3.0));
+      updater.updateGravityReference(foreAft, zeroOmega, DT); // one tick: the slow reference barely moves
       updater.assemble(state, foreAft);
       assertTrue(Math.abs(foreAft.norm() - G) <= 0.05 * G, "sanity: norm gate alone would pass");
       assertTrue(!updater.isQuasiStatic(foreAft, zeroOmega, 0.05, 0.15, 0.5),
                  "…but the horizontal-accel gate rejects the fore-aft component");
+   }
+
+   /**
+    * THE REGRESSION TEST FOR THE PITCH DRIFT (FINDINGS.md §F.3).
+    *
+    * <p>The robot is genuinely static: the accelerometer reads pure gravity and the gyro reads zero. The gate
+    * must therefore say "quasi-static" NO MATTER WHAT the filter's attitude estimate is — the robot's motion is
+    * a fact about the world, not about our belief. The old gate resolved the horizontal specific force against
+    * {@code ĝ = R̂ᵀe_z}, which for a static robot evaluates to {@code g·sin θ} with θ the tilt error itself, so
+    * it switched the corrector OFF for θ > arcsin(0.5/9.81) = 2.92° and could never re-close. Hardware log
+    * 20260712_163634 latched at t=597 s and never leveled again for the remaining 247 s.
+    */
+   @Test
+   public void testQuasiStaticGateIsIndependentOfEstimatorAttitude()
+   {
+      GravityLevelingUpdater updater = new GravityLevelingUpdater(new InvariantState(0).getTangentSize(), ROLL_VAR, PITCH_VAR, G);
+      Vector3D zeroOmega = new Vector3D();
+      Vector3D trueGravity = new Vector3D(0.0, 0.0, G); // robot upright and STATIC: this is ground truth
+
+      settleGravityReference(updater, trueGravity);
+
+      // Sweep the ESTIMATE's tilt error from 0 to 15°, well past the old 2.92° lockout. The measurement is
+      // unchanged throughout — only our (wrong) belief moves.
+      for (int degrees = 0; degrees <= 15; degrees++)
+      {
+         InvariantState state = new InvariantState(0);
+         RotationMatrix wrongEstimate = new RotationMatrix();
+         wrongEstimate.setToPitchOrientation(Math.toRadians(degrees));
+         state.setRotation(wrongEstimate);
+         updater.assemble(state, trueGravity);
+
+         assertTrue(updater.isQuasiStatic(trueGravity, zeroOmega, 0.05, 0.15, 0.5),
+                    "the robot is static, so the gate MUST stay open at a tilt error of " + degrees
+                    + "° — a corrector whose gate depends on its own error is unstable by construction");
+      }
+   }
+
+   /**
+    * The gate must not be closable by a diverging upstream gyro bias either — {@code lowRotation} takes the RAW
+    * gyro. (Second latent latch: on hardware the bias-corrected ‖ω‖ reached 0.074 rad/s against a 0.15 gate
+    * while the robot stood still.)
+    */
+   @Test
+   public void testRotationGateUsesRawGyroNotBiasCorrupted()
+   {
+      InvariantState state = new InvariantState(0);
+      state.setRotation(new RotationMatrix());
+      GravityLevelingUpdater updater = new GravityLevelingUpdater(state.getTangentSize(), ROLL_VAR, PITCH_VAR, G);
+      Vector3D gravity = new Vector3D(0.0, 0.0, G);
+      settleGravityReference(updater, gravity);
+      updater.assemble(state, gravity);
+
+      assertTrue(updater.isQuasiStatic(gravity, new Vector3D(0.0, 0.0, 0.0), 0.05, 0.15, 0.5),
+                 "a truly still robot (raw gyro ~ 0) passes the rotation gate");
+      assertTrue(!updater.isQuasiStatic(gravity, new Vector3D(0.0, 0.3, 0.0), 0.05, 0.15, 0.5),
+                 "a genuinely rotating robot is still rejected");
+   }
+
+   /**
+    * The anisotropic R must distrust BODY pitch. At non-zero yaw the old {@code û_p = R̂ᵀe_x} points at the
+    * residual direction of a WORLD-Y rotation instead, so the 76× distrust lands on the wrong axis (the hardware
+    * log's yaw was −0.32 rad ≈ 18° off). See jointkf_bias_observability.md §4.
+    */
+   @Test
+   public void testPitchDistrustAxisIsBodyYAtNonZeroYaw()
+   {
+      InvariantState state = new InvariantState(0);
+      RotationMatrix yawed = new RotationMatrix();
+      yawed.setToYawOrientation(Math.toRadians(90.0));
+      state.setRotation(yawed);
+
+      GravityLevelingUpdater updater = new GravityLevelingUpdater(state.getTangentSize(), ROLL_VAR, PITCH_VAR, G);
+      Vector3D gravityBody = new Vector3D();
+      yawed.inverseTransform(new Vector3D(0.0, 0.0, G), gravityBody); // what a static, yawed robot measures
+      updater.assemble(state, gravityBody);
+
+      DMatrixRMaj R = updater.getMeasurementCovariance();
+      Vector3D gHat = new Vector3D(gravityBody);
+      gHat.normalize();
+
+      // Residual of a pure BODY-pitch error is e_y × ĝ_body; of a pure BODY-roll error, e_x × ĝ_body.
+      Vector3D pitchResidualDir = new Vector3D();
+      pitchResidualDir.cross(new Vector3D(0.0, 1.0, 0.0), gHat);
+      pitchResidualDir.normalize();
+      Vector3D rollResidualDir = new Vector3D();
+      rollResidualDir.cross(new Vector3D(1.0, 0.0, 0.0), gHat);
+      rollResidualDir.normalize();
+
+      assertEquals(PITCH_VAR, quadraticForm(R, pitchResidualDir), 1.0e-9,
+                   "the body-pitch residual direction must carry sigma_pitch^2, even at 90 deg of yaw");
+      assertEquals(ROLL_VAR, quadraticForm(R, rollResidualDir), 1.0e-9,
+                   "the body-roll residual direction must still carry sigma_roll^2");
+   }
+
+   /** uᵀ R u. */
+   private static double quadraticForm(DMatrixRMaj R, Vector3D u)
+   {
+      double[] v = {u.getX(), u.getY(), u.getZ()};
+      double sum = 0.0;
+      for (int r = 0; r < 3; r++)
+         for (int c = 0; c < 3; c++)
+            sum += v[r] * R.get(r, c) * v[c];
+      return sum;
+   }
+
+   /** Drives the sensor-only gravity reference to steady state on a constant specific force, as production does. */
+   private static void settleGravityReference(GravityLevelingUpdater updater, Vector3D specificForce)
+   {
+      Vector3D zeroOmega = new Vector3D();
+      for (int i = 0; i < 3000; i++)
+         updater.updateGravityReference(specificForce, zeroOmega, DT);
    }
 
    /** Tilt angle = angle between the estimated body up-axis (R̂ᵀ e_z) and world up. */

@@ -172,6 +172,28 @@ final class JointLevelKFTestFixture
                    false);
    }
 
+   /**
+    * ALEX'S ACTUAL TOPOLOGY: the foot sits BEYOND the last IMU, so the joints between the last IMU's link and the
+    * foot (Alex: the ankles) are on the base→foot chain but are NOT filter states — because with no foot IMU
+    * there is no shin→foot pair to bring them in. One IMU pair spanning joints (parent..child], foot on the
+    * successor of {@code footJointIndex} further down the chain.
+    *
+    * <p>This is the configuration whose anchor used to be silently disabled, taking the base gyro-bias gauge
+    * with it. See FINDINGS.md Part F.
+    */
+   static JointLevelKFTestFixture singlePairFootBeyondIMUs(long seed, int numJoints, int parentJointIndex, int childJointIndex, int footJointIndex)
+   {
+      return build(seed,
+                   numJoints,
+                   new int[] {parentJointIndex, childJointIndex},
+                   new String[] {"imuA", "imuB"},
+                   new int[][] {{0, 1}},
+                   1,
+                   -1,
+                   false,
+                   footJointIndex);
+   }
+
    private static JointLevelKFTestFixture build(long seed,
                                                 int numJoints,
                                                 int[] imuBodyJointIndex,
@@ -180,6 +202,20 @@ final class JointLevelKFTestFixture
                                                 int footImuIndex,
                                                 int poisonImuIndex,
                                                 boolean useMassMatrixProcessNoise)
+   {
+      return build(seed, numJoints, imuBodyJointIndex, imuNames, pairParentChild, footImuIndex, poisonImuIndex, useMassMatrixProcessNoise, -1);
+   }
+
+   /** @param footJointIndex absolute joint index whose successor is the foot, or -1 to use {@code footImuIndex}'s link. */
+   private static JointLevelKFTestFixture build(long seed,
+                                                int numJoints,
+                                                int[] imuBodyJointIndex,
+                                                String[] imuNames,
+                                                int[][] pairParentChild,
+                                                int footImuIndex,
+                                                int poisonImuIndex,
+                                                boolean useMassMatrixProcessNoise,
+                                                int footJointIndex)
    {
       Random random = new Random(seed);
       Vector3D[] axes = new Vector3D[numJoints];
@@ -210,7 +246,8 @@ final class JointLevelKFTestFixture
          pairParameters.add(new IMUBasedJointStateEstimatorParameters("pair", true, imuNames[pc[0]], imuNames[pc[1]], 0.0, 0.0));
 
       List<RigidBodyBasics> feet = new ArrayList<>();
-      feet.add(joints.get(imuBodyJointIndex[footImuIndex]).getSuccessor());
+      int footJoint = footJointIndex >= 0 ? footJointIndex : imuBodyJointIndex[footImuIndex];
+      feet.add(joints.get(footJoint).getSuccessor());
 
       JointLevelKFPreFilter filter = new JointLevelKFPreFilter(sensorMap,
                                                                pairParameters,
