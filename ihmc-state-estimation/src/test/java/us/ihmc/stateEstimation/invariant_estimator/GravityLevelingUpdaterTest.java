@@ -376,6 +376,159 @@ public class GravityLevelingUpdaterTest
       return Math.acos(Math.min(1.0, Math.max(-1.0, bodyUp.dot(UP))));
    }
 
+   // ==================================================================================================
+   // Roll-sway property tests (Alex002 hardware log 20260712_185914).
+   //
+   // A balancing biped violates the quasi-static assumption in the worst possible way: the lateral CoM
+   // acceleration ÿ that the balance controller produces IN RESPONSE TO the roll this update publishes shows
+   // up in the accelerometer as an apparent tilt ÿ/g of the SAME sign — positive feedback through the
+   // controller. On hardware the roll estimate oscillated at ω_b = 3.08 rad/s (0.49 Hz) with 6.5× the true
+   // tilt amplitude, growing until the robot fell.
+   //
+   // The fix is a bandwidth argument, and it has TWO halves that must BOTH hold. Testing only the first would
+   // pass for a naive low-pass filter, which would destroy the update. So:
+   //   (1) the ÿ/g artifact must be REJECTED at ω_b, and
+   //   (2) TRUE tilt must still pass at UNITY GAIN at that same ω_b (the gyro carries it).
+   // Together these are the defining property of the complementary gravity reference.
+   // ==================================================================================================
+
+   /** Lateral balance mode measured on hardware: 0.49 Hz. */
+   private static final double BALANCE_OMEGA = 2.0 * Math.PI * 0.49;
+   /** Theoretical artifact rejection of the τ-low-pass at ω_b: 1/√(1+(ω_b τ)²). τ = 5 s ⇒ ≈ 0.065 (15×). */
+   private static final double PREDICTED_ARTIFACT_GAIN = 1.0 / Math.sqrt(1.0 + Math.pow(BALANCE_OMEGA * 5.0, 2));
+
+   /**
+    * (1) ARTIFACT REJECTION. Body perfectly upright and NOT rotating (ω = 0), but subjected to a sinusoidal
+    * lateral specific force at the balance frequency — exactly the swaying-robot case. The true tilt is zero, so
+    * every bit of residual the updater produces is a lie. Assert the residual the filter is fed is attenuated by
+    * at least 10× relative to the raw accelerometer's apparent tilt (ÿ/g), i.e. close to the predicted 15×.
+    *
+    * <p>Before the fix this test would see gain ≈ 1.0 (the raw f̂ was the measurement) — the residual WAS the
+    * artifact, and the filter believed all of it.
+    */
+   @Test
+   public void testLateralAccelArtifactIsRejectedAtTheBalanceFrequency()
+   {
+      InvariantState state = new InvariantState(0);
+      state.setRotation(new RotationMatrix()); // upright, and it never rotates: TRUE TILT IS ZERO THROUGHOUT
+
+      GravityLevelingUpdater updater = new GravityLevelingUpdater(state.getTangentSize(), ROLL_VAR, PITCH_VAR, G);
+      Vector3D zeroOmega = new Vector3D();
+
+      double lateralAccelAmplitude = 0.21;                       // m/s², the amplitude measured on hardware
+      double rawArtifactAmplitude = lateralAccelAmplitude / G;   // what the RAW accelerometer calls "roll tilt"
+
+      settleGravityReference(updater, new Vector3D(0.0, 0.0, G));
+
+      double maxResidualY = 0.0;
+      // Run several full periods past the reference's transient, then measure the residual amplitude.
+      int ticks = (int) (12.0 / DT);
+      int measureAfter = (int) (8.0 / DT);
+      for (int i = 0; i < ticks; i++)
+      {
+         double t = i * DT;
+         // Specific force of an upright, laterally accelerating body: a = Rᵀ(a_world − g) with R = I.
+         Vector3D specificForce = new Vector3D(0.0, lateralAccelAmplitude * Math.sin(BALANCE_OMEGA * t), G);
+         updater.updateGravityReference(specificForce, zeroOmega, DT);
+         updater.assemble(state, specificForce);
+         if (i > measureAfter)
+            maxResidualY = Math.max(maxResidualY, Math.abs(updater.getResidual().get(1, 0)));
+      }
+
+      double achievedGain = maxResidualY / rawArtifactAmplitude;
+      assertTrue(achievedGain < 0.1,
+                 "the lateral-accel artifact must be rejected by >10x at the balance mode, but the update was fed "
+                 + achievedGain + " of it (predicted " + PREDICTED_ARTIFACT_GAIN + "). A gain near 1.0 means the "
+                 + "update is again correcting against the raw specific force -> positive feedback -> roll sway.");
+      // And it should actually match the first-order theory, not merely be small for some accidental reason.
+      assertEquals(PREDICTED_ARTIFACT_GAIN, achievedGain, 0.03, "artifact gain should match 1/sqrt(1+(w*tau)^2)");
+   }
+
+   /**
+    * (2) TRUE-TILT PASSTHROUGH — the property that forbids "just low-pass the accelerometer". The body genuinely
+    * rolls sinusoidally at the SAME balance frequency, with a gyro consistent with that motion and an
+    * accelerometer that reads pure (rotated) gravity. The gravity reference must track the true body-frame
+    * gravity direction with UNITY gain — the gyro supplies exactly the content the accelerometer low-pass
+    * removes. A naive low-pass of f̂ would lag/attenuate here and fail.
+    */
+   @Test
+   public void testTrueTiltStillPassesAtUnityGainAtTheBalanceFrequency()
+   {
+      GravityLevelingUpdater updater = new GravityLevelingUpdater(new InvariantState(0).getTangentSize(), ROLL_VAR, PITCH_VAR, G);
+
+      double rollAmplitude = 0.03; // rad, ~1.7°
+
+      settleGravityReference(updater, new Vector3D(0.0, 0.0, G));
+
+      double maxTrackingError = 0.0;
+      int ticks = (int) (12.0 / DT);
+      int measureAfter = (int) (8.0 / DT);
+      for (int i = 0; i < ticks; i++)
+      {
+         double t = i * DT;
+         double roll = rollAmplitude * Math.sin(BALANCE_OMEGA * t);
+         double rollRate = rollAmplitude * BALANCE_OMEGA * Math.cos(BALANCE_OMEGA * t);
+
+         RotationMatrix trueRotation = new RotationMatrix();
+         trueRotation.setYawPitchRoll(0.0, 0.0, roll);
+
+         // A truly tilting, non-translating body: a = Rᵀ(0 − g) = Rᵀ (0,0,g). Gyro sees the real roll rate.
+         Vector3D specificForce = new Vector3D();
+         trueRotation.inverseTransform(new Vector3D(0.0, 0.0, G), specificForce);
+         Vector3D omega = new Vector3D(rollRate, 0.0, 0.0);
+
+         updater.updateGravityReference(specificForce, omega, DT);
+
+         if (i > measureAfter)
+         {
+            // Truth: the world up-axis expressed in body frame.
+            Vector3D trueGravityBody = new Vector3D();
+            trueRotation.inverseTransform(UP, trueGravityBody);
+            Vector3D error = new Vector3D(updater.getGravityReference());
+            error.sub(trueGravityBody);
+            maxTrackingError = Math.max(maxTrackingError, error.norm());
+         }
+      }
+
+      // Unity gain: the reference must follow the real tilt to well within a tenth of its amplitude.
+      assertTrue(maxTrackingError < 0.1 * rollAmplitude,
+                 "the gravity reference must track TRUE tilt at unity gain (gyro-carried) at the balance mode; "
+                 + "tracking error was " + maxTrackingError + " rad against a " + rollAmplitude
+                 + " rad true roll. If this fails, the fix has degenerated into a naive low-pass and the update "
+                 + "can no longer see real tilt.");
+   }
+
+   /**
+    * (3) DC AUTHORITY PRESERVED. The whole point of this update is to hold roll/pitch against a residual gyro
+    * bias, which is a DC problem. Low-passing the measurement must not cost any DC gain: a STATIC tilt must
+    * still produce the full residual, so the filter still levels a standing lean. (This is what a σ_roll²
+    * detune — the obvious alternative fix — would have thrown away.)
+    */
+   @Test
+   public void testStaticTiltStillProducesFullResidual()
+   {
+      double roll = 0.05; // rad, a 2.9° standing lean
+
+      InvariantState state = new InvariantState(0);
+      state.setRotation(new RotationMatrix()); // the ESTIMATE thinks it is upright...
+
+      GravityLevelingUpdater updater = new GravityLevelingUpdater(state.getTangentSize(), ROLL_VAR, PITCH_VAR, G);
+
+      // ...but the robot is really, statically, rolled: a = Rᵀ(0,0,g), ω = 0.
+      RotationMatrix trueRotation = new RotationMatrix();
+      trueRotation.setYawPitchRoll(0.0, 0.0, roll);
+      Vector3D specificForce = new Vector3D();
+      trueRotation.inverseTransform(new Vector3D(0.0, 0.0, G), specificForce);
+
+      settleGravityReference(updater, specificForce);
+      updater.assemble(state, specificForce);
+
+      // Residual = ĝ_ref − R̂ᵀe_z = (0, sin(roll), cos(roll)−1): full, undiminished tilt information.
+      assertEquals(0.0, updater.getResidual().get(0, 0), 1.0e-6, "residual x");
+      assertEquals(Math.sin(roll), updater.getResidual().get(1, 0), 1.0e-4, "residual y must carry the FULL static tilt");
+      assertEquals(Math.cos(roll) - 1.0, updater.getResidual().get(2, 0), 1.0e-4, "residual z");
+   }
+
    private static void assertSymmetricPSD(DMatrixRMaj p)
    {
       int n = p.getNumRows();

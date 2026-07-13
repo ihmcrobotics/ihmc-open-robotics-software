@@ -17,9 +17,14 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
  * observed slow pitch drift). When the robot is quasi-static the accelerometer measures gravity direction,
  * which directly observes tilt — this class turns that into a proper invariant measurement update.</p>
  *
- * <p><b>Measurement model.</b> The body-frame specific force is {@code a = Rᵀ(a_world − g)}; when quasi-static
- * {@code a_world ≈ 0}, so the normalized specific force {@code f̂ = a/‖a‖ ≈ Rᵀ e_z} is the world up-axis seen
- * in body frame. The prediction is {@code ĝ_body = R̂ᵀ e_z}. With this package's right-invariant error
+ * <p><b>Measurement model.</b> The body-frame specific force is {@code a = Rᵀ(a_world − g)}, so the normalized
+ * specific force {@code f̂ = a/‖a‖} equals the world up-axis in body frame ONLY when {@code a_world ≈ 0}. For a
+ * balancing biped that assumption is false in the worst possible way — {@code a_world} is the lateral CoM
+ * acceleration the balance controller produces in response to this update's own output — so the measurement
+ * fed to the filter is <b>{@code ĝ_ref}</b>, the gyro/accelerometer complementary gravity reference (see
+ * {@link #updateGravityReference} and the block comment in {@link #assemble}), which carries true tilt at unity
+ * gain and low-passes that artifact away. Everything below is written with {@code f̂} standing for that
+ * measurement. The prediction is {@code ĝ_body = R̂ᵀ e_z}. With this package's right-invariant error
  * convention {@code R̂ = Exp(δφ)·R} (so {@code X̂ = exp(ξ)·X}):
  * <pre>
  *   f̂ = Rᵀ e_z = R̂ᵀ Exp(δφ) e_z ≈ ĝ_body − R̂ᵀ[e_z]ₓ δφ
@@ -73,16 +78,33 @@ public class GravityLevelingUpdater
    private boolean pitchObservable = true;             // when false, σ_pitch² → PITCH_DISABLED_VARIANCE (roll-only)
 
    /**
-    * Time constant (s) of the quasi-static gate's gravity reference (see {@link #updateGravityReference}).
-    * Short enough that a raw-gyro bias contributes only ~σ_b·τ of reference tilt (0.01 rad/s · 0.5 s = 5 mrad,
-    * i.e. 0.05 m/s² of apparent horizontal accel — negligible against the 0.5 m/s² gate).
+    * Time constant τ (s) of the gravity reference ĝ_ref (see {@link #updateGravityReference}), which is BOTH the
+    * quasi-static gate's reference and — since the roll-sway fix — the measurement this update actually corrects
+    * against.
+    *
+    * <p><b>Why τ is 5 s and not 0.5 s.</b> Linearizing the complementary filter about upright, its roll channel is
+    * <pre>
+    *   ĝ_ref = HPF_τ(∫ω_raw) + LPF_τ(f̂) = φ + HPF_τ(b_raw·t) + LPF_τ(ÿ/g)
+    * </pre>
+    * i.e. the TRUE tilt φ passes with <b>unity gain at every frequency</b> (the gyro carries it), while the two
+    * error terms are shaped: the raw-gyro bias contributes a constant b_raw·τ, and the lateral-acceleration
+    * artifact ÿ/g is low-passed with corner 1/τ. τ is therefore the single knob that trades <i>static</i>
+    * raw-gyro-bias offset against <i>dynamic</i> rejection of the robot's own acceleration — and it costs nothing
+    * in true-tilt tracking.
+    *
+    * <p>τ must be chosen so the artifact is rejected at the robot's LATERAL BALANCE frequency, ω_b ≈ 3.1 rad/s
+    * (0.49 Hz, measured — Alex002 log 20260712_185914). Rejection there is 1/√(1+(ω_b τ)²):
+    * τ = 0.5 s gives only 0.55 (45% rejected — useless), τ = 5 s gives 0.065 (15× rejected).
+    * The cost is a static offset b_raw·τ = 0.001 rad/s · 5 s ≈ 5 mrad = 0.3°, using the RAW gyro whose true bias
+    * is small (0.001 rad/s, measured on a motionless robot) — not the upstream JointKF bias, which is not.
     */
-   private static final double GRAVITY_REFERENCE_TIME_CONSTANT = 0.5;
+   private static final double GRAVITY_REFERENCE_TIME_CONSTANT = 5.0;
 
    // Pre-allocated scratch (allocation-free hot path).
    private final RotationMatrix rotation = new RotationMatrix();
-   private final Vector3D predictedGravityBody = new Vector3D();  // ĝ_body = R̂ᵀ e_z
-   private final Vector3D measuredGravityBody = new Vector3D();   // f̂ = a/‖a‖
+   private final Vector3D predictedGravityBody = new Vector3D();     // ĝ_body = R̂ᵀ e_z
+   private final Vector3D measuredGravityBody = new Vector3D();      // the update's measurement: ĝ_ref (see assemble)
+   private final Vector3D rawMeasuredGravityBody = new Vector3D();   // f̂ = a/‖a‖ — DIAGNOSTIC ONLY (tilt-error vars)
    private final Vector3D rTransposeEx = new Vector3D();          // R̂ᵀ e_x
    private final Vector3D rTransposeEy = new Vector3D();          // R̂ᵀ e_y
    private final Vector3D pitchDirection = new Vector3D();        // û_p = normalize(e_y × ĝ_body), body-pitch residual dir
@@ -164,14 +186,47 @@ public class GravityLevelingUpdater
    {
       state.getRotation(rotation);
 
-      // ĝ_body = R̂ᵀ e_z (world up seen in body); measured f̂ = a/‖a‖.
+      // ĝ_body = R̂ᵀ e_z (world up seen in body).
       rotation.inverseTransform(E_Z, predictedGravityBody);
-      measuredGravityBody.set(specificForceBody);
-      double norm = measuredGravityBody.norm();
-      if (norm > 1.0e-9)
-         measuredGravityBody.scale(1.0 / norm);
 
-      // residual = f̂ − ĝ_body ≈ −R̂ᵀ[e_z]ₓ δφ.
+      // Raw normalized specific force f̂ = a/‖a‖. This is the DIAGNOSTIC signal only — see below.
+      rawMeasuredGravityBody.set(specificForceBody);
+      double rawNorm = rawMeasuredGravityBody.norm();
+      if (rawNorm > 1.0e-9)
+         rawMeasuredGravityBody.scale(1.0 / rawNorm);
+
+      // ---------------------------------------------------------------------------------------------------
+      // The MEASUREMENT is ĝ_ref (the gyro/accel complementary gravity reference), NOT the instantaneous f̂.
+      //
+      // f̂ is not a measurement of gravity — it is a measurement of gravity PLUS the body's own acceleration:
+      //   a = Rᵀ(a_world − g)  ⇒  f̂ ≈ ĝ_body + (Rᵀ a_world)/g.
+      // For a balancing biped a_world is not noise: it is the lateral CoM acceleration ÿ that the balance
+      // controller itself produces in response to the roll this very update publishes. That closes a POSITIVE
+      // FEEDBACK loop through the controller:
+      //     phantom roll in the estimate → controller torques to correct it → real lateral pelvis accel ÿ
+      //     → f̂ tilts by ÿ/g (same sign) → MORE phantom roll.
+      // Alex002 log 20260712_185914 (t=200-212 s, whole-body control, this update firing on 97% of ticks): the
+      // roll ESTIMATE oscillated at 0.49 Hz with amplitude 1.17°, while the true roll (raw-gyro integration)
+      // was only 0.19° — the accelerometer's apparent tilt was 6.5× the real tilt and was almost entirely
+      // ÿ/g (ÿ ≈ 0.21 m/s², i.e. 2.3 cm of lateral sway). The oscillation grew (0.86° → 2.84° rms) until the
+      // robot fell at t=226 s. Note 0.21 m/s² sails straight through the 0.5 m/s² horizontal-accel gate — the
+      // gate cannot fix this, and tightening it only trades the limit cycle for open-loop drift.
+      //
+      // ĝ_ref (see updateGravityReference) is the same sensors combined correctly: the gyro carries the true
+      // tilt at ALL frequencies (unity gain), and the accelerometer is low-passed with time constant τ, so the
+      // ÿ/g artifact is attenuated by 1/√(1+(ωτ)²) — 15× at the 0.49 Hz balance mode. This removes the
+      // artifact WITHOUT weakening the update's DC authority, which is what the pitch/roll drift correction
+      // actually needs. (Detuning σ_roll² instead would give up both together: it lowers the leveling loop
+      // bandwidth λ ∝ 1/σ², and λ is exactly the authority that holds the base against a residual gyro bias.)
+      //
+      // Gravity is DC. Any AC content in the specific-force DIRECTION is, by construction, not gravity.
+      // ---------------------------------------------------------------------------------------------------
+      if (gravityReferenceInitialized)
+         measuredGravityBody.set(gravityReferenceBody);
+      else
+         measuredGravityBody.set(rawMeasuredGravityBody); // first tick, before the reference is seeded
+
+      // residual = ĝ_ref − ĝ_body ≈ −R̂ᵀ[e_z]ₓ δφ.
       residual.set(0, 0, measuredGravityBody.getX() - predictedGravityBody.getX());
       residual.set(1, 0, measuredGravityBody.getY() - predictedGravityBody.getY());
       residual.set(2, 0, measuredGravityBody.getZ() - predictedGravityBody.getZ());
@@ -208,9 +263,12 @@ public class GravityLevelingUpdater
             measurementCovariance.set(r, c, (r == c ? rollMeasurementVariance : 0.0) + pitchMinusRoll * ur * elementOf(pitchDirection, c));
       }
 
-      // Diagnostic: tilt-error vector ĝ_body × f̂ (small-angle rotation aligning predicted → measured).
-      // Its body-frame x/y ≈ roll/pitch error; angle = atan2(‖ĝ×f̂‖, ĝ·f̂).
-      tiltErrorVector.cross(predictedGravityBody, measuredGravityBody);
+      // Diagnostic: tilt-error vector ĝ_body × f̂, deliberately against the RAW f̂ (not the ĝ_ref the update now
+      // corrects against), so the published invariantGravityTiltError* keep their original meaning — "what is the
+      // accelerometer saying about tilt RIGHT NOW, relative to the estimate". That is the signal that exposed the
+      // roll sway (est + tiltErrorRoll reconstructs the accelerometer-implied roll), and it must stay observable
+      // rather than be filtered into agreement with the update.
+      tiltErrorVector.cross(predictedGravityBody, rawMeasuredGravityBody);
    }
 
    private static double elementOf(Vector3DReadOnly v, int index)
@@ -325,10 +383,10 @@ public class GravityLevelingUpdater
    public DMatrixRMaj getResidual()             { return residual; }
    public DMatrixRMaj getMeasurementCovariance(){ return measurementCovariance; }
 
-   /** Total tilt error angle (rad) between measured and predicted gravity direction — valid every tick. */
+   /** Total tilt error angle (rad) between the RAW accelerometer direction and the predicted one — valid every tick. */
    public double getTiltErrorAngle()
    {
-      return Math.atan2(tiltErrorVector.norm(), predictedGravityBody.dot(measuredGravityBody));
+      return Math.atan2(tiltErrorVector.norm(), predictedGravityBody.dot(rawMeasuredGravityBody));
    }
 
    /** Body-frame roll component (rad) of the tilt error (x of ĝ_body × f̂). */
