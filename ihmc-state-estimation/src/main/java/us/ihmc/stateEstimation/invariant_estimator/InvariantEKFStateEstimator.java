@@ -103,6 +103,14 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    // count means the gauge is unfixed again.
    private static final double MAX_GYRO_BIAS = 0.02; // rad/s per axis
    private final FrameVector3D appliedGyroBias = new FrameVector3D();
+   /**
+    * The same applied bias, re-expressed in the pelvis frame for logging only. The pelvis IMU is mounted yawed
+    * +90 deg about Z (PELVIS_IMU_JOINT rpy="0.005114 -0.0001262 1.570796"), so an IMU-frame bias axis is NOT the
+    * pelvis axis of the same name: pelvis_X(roll) = -imu_Y and pelvis_Y(pitch) = +imu_X. Publishing the bias only
+    * in the IMU frame next to pelvis-frame rates invites reading a pitch bias as a roll bias. Kept separate from
+    * {@link #appliedGyroBias}, which MUST stay in the IMU frame for the frame-checked sub() below.
+    */
+   private final FrameVector3D appliedGyroBiasInPelvis = new FrameVector3D();
    private final FramePoint3D contactInBody = new FramePoint3D();
    private final FramePoint3D contactInWorld = new FramePoint3D();
    private final RotationMatrix tempRotation = new RotationMatrix();
@@ -178,13 +186,35 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final SideDependentList<YoBoolean> yoContactUpdateApplied;
    private final YoInteger yoInvariantUpdateGateSkipCount = new YoInteger("invariantUpdateGateSkipCount", registry);
 
-   // The gyro bias (IMU frame) actually subtracted from the raw gyro this tick, AFTER the MAX_GYRO_BIAS clamp,
-   // plus a count of ticks the clamp bound. This is the "is the upstream bias sane" diagnostic.
-   private final YoDouble yoAppliedGyroBiasX = new YoDouble("invariantAppliedGyroBiasX", registry);
-   private final YoDouble yoAppliedGyroBiasY = new YoDouble("invariantAppliedGyroBiasY", registry);
-   private final YoDouble yoAppliedGyroBiasZ = new YoDouble("invariantAppliedGyroBiasZ", registry);
+   // The gyro bias actually subtracted from the raw gyro this tick, AFTER the MAX_GYRO_BIAS clamp, plus a count
+   // of ticks the clamp bound. This is the "is the upstream bias sane" diagnostic.
+   //
+   // Published in BOTH frames, with the frame in the name. The pelvis IMU is yawed +90 deg about Z relative to
+   // the pelvis, so the IMU-frame axes are NOT the pelvis axes of the same name (pelvis roll = -imu_Y, pelvis
+   // pitch = +imu_X). Every one of these variables used to be IMU-frame with nothing in the name saying so,
+   // sitting directly beside pelvis-frame rates -- which is exactly how a pitch bias gets read as a roll bias.
+   // The bias is ESTIMATED in the IMU frame (that is where it physically lives), so that stays the primary; the
+   // pelvis-frame copy is what you want when correlating against roll/pitch drift.
+   private final YoDouble yoAppliedGyroBiasImuX = new YoDouble("invariantAppliedGyroBiasInIMUFrameX", registry);
+   private final YoDouble yoAppliedGyroBiasImuY = new YoDouble("invariantAppliedGyroBiasInIMUFrameY", registry);
+   private final YoDouble yoAppliedGyroBiasImuZ = new YoDouble("invariantAppliedGyroBiasInIMUFrameZ", registry);
+   private final YoDouble yoAppliedGyroBiasPelvisX = new YoDouble("invariantAppliedGyroBiasInPelvisFrameX", registry);
+   private final YoDouble yoAppliedGyroBiasPelvisY = new YoDouble("invariantAppliedGyroBiasInPelvisFrameY", registry);
+   private final YoDouble yoAppliedGyroBiasPelvisZ = new YoDouble("invariantAppliedGyroBiasInPelvisFrameZ", registry);
+   // Frame-invariant, so it needs no frame in the name and the old name is kept.
    private final YoDouble yoAppliedGyroBiasNorm = new YoDouble("invariantAppliedGyroBiasNorm", registry);
    private final YoInteger yoGyroBiasClampCount = new YoInteger("invariantGyroBiasClampCount", registry);
+
+   // The RAW (un-bias-corrected) gyro expressed in the PELVIS frame -- the apples-to-apples partner for
+   // invariantRootAngularVelocityBody{X,Y,Z}. Without this, the only raw gyro in the log is IMU-frame
+   // (gyroscope_pelvis_imu*, pelvis_imuAngularVelocityInIMUFrame*), and comparing either of those against the
+   // pelvis-frame estimate shows the mount rotation, not an estimator error: invariant_X tracks -raw_Y, so the
+   // two "agree" in sign only when raw_X*raw_Y < 0, i.e. it flips with the motion quadrant and reads as an
+   // intermittent, configuration-dependent sign error. It is not one. Diff THESE two and you see the bias, and
+   // nothing else.
+   private final YoDouble yoRawAngularVelocityBodyX = new YoDouble("invariantRawAngularVelocityBodyX", registry);
+   private final YoDouble yoRawAngularVelocityBodyY = new YoDouble("invariantRawAngularVelocityBodyY", registry);
+   private final YoDouble yoRawAngularVelocityBodyZ = new YoDouble("invariantRawAngularVelocityBodyZ", registry);
 
    // Estimate outputs for logging/comparison.
    private final YoFramePoint3D yoBasePosition = new YoFramePoint3D("invariantFilterPelvisBasePosition", ReferenceFrame.getWorldFrame(), registry);
@@ -430,14 +460,26 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       boolean clamped = clampGyroBias(appliedGyroBias);
       if (clamped)
          yoGyroBiasClampCount.set(yoGyroBiasClampCount.getValue() + 1);
-      yoAppliedGyroBiasX.set(appliedGyroBias.getX());
-      yoAppliedGyroBiasY.set(appliedGyroBias.getY());
-      yoAppliedGyroBiasZ.set(appliedGyroBias.getZ());
-      yoAppliedGyroBiasNorm.set(appliedGyroBias.norm());
+      yoAppliedGyroBiasImuX.set(appliedGyroBias.getX());
+      yoAppliedGyroBiasImuY.set(appliedGyroBias.getY());
+      yoAppliedGyroBiasImuZ.set(appliedGyroBias.getZ());
+      yoAppliedGyroBiasNorm.set(appliedGyroBias.norm()); // frame-invariant
+      // Same bias in the pelvis frame, for correlating against roll/pitch drift. Uses its own scratch: rotating
+      // appliedGyroBias itself would break the frame-checked sub() below, which needs it in the IMU frame.
+      appliedGyroBiasInPelvis.setIncludingFrame(appliedGyroBias);
+      appliedGyroBiasInPelvis.changeFrame(pelvisFrame);
+      yoAppliedGyroBiasPelvisX.set(appliedGyroBiasInPelvis.getX());
+      yoAppliedGyroBiasPelvisY.set(appliedGyroBiasInPelvis.getY());
+      yoAppliedGyroBiasPelvisZ.set(appliedGyroBiasInPelvis.getZ());
       // Keep the RAW gyro too: the quasi-static gate and its gravity reference must be built from sensors only,
       // never from a filter state or an upstream bias that could itself be diverging (FINDINGS.md §F.3).
       rawAngularVelocity.setIncludingFrame(imuSensor.getMeasurementFrame(), imuSensor.getAngularVelocityMeasurement());
       rawAngularVelocity.changeFrame(pelvisFrame);
+      // Publish it: this is the pelvis-frame raw gyro, the ONLY correct thing to diff against
+      // invariantRootAngularVelocityBody*. Their difference is exactly the applied bias, by construction.
+      yoRawAngularVelocityBodyX.set(rawAngularVelocity.getX());
+      yoRawAngularVelocityBodyY.set(rawAngularVelocity.getY());
+      yoRawAngularVelocityBodyZ.set(rawAngularVelocity.getZ());
       angularVelocity.sub(appliedGyroBias);
       angularVelocity.changeFrame(pelvisFrame);
       linearAcceleration.setIncludingFrame(imuSensor.getMeasurementFrame(), imuSensor.getLinearAccelerationMeasurement());
