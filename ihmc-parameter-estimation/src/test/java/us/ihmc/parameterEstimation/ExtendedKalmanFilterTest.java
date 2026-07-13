@@ -285,6 +285,46 @@ public class ExtendedKalmanFilterTest
       }
    }
 
+   @Test
+   public void testResetOnRandomLinearSystems()
+   {
+      Random random = new Random(1234);
+
+      for (int i = 0; i < ITERATIONS; ++i)
+      {
+         int stateSize = random.nextInt(10) + 1;
+         int measurementSize = random.nextInt(10) + 1;
+
+         DMatrixRMaj Q = RandomMatrices_DDRM.diagonal(stateSize, 1e-3, 1.0, random);
+         DMatrixRMaj R = RandomMatrices_DDRM.diagonal(measurementSize, 1e-3, 1.0, random);
+         DMatrixRMaj P0 = RandomMatrices_DDRM.diagonal(stateSize, 1.0, 10.0, random);
+
+         DMatrixRMaj A = RandomMatrices_DDRM.rectangle(stateSize, stateSize, -1.0, 1.0, random);
+         DMatrixRMaj C = RandomMatrices_DDRM.rectangle(measurementSize, stateSize, -1.0, 1.0, random);
+
+         DMatrixRMaj x0 = RandomMatrices_DDRM.rectangle(stateSize, 1, -1.0, 1.0, random);
+
+         TrivialExtendedKalmanFilter filter = new TrivialExtendedKalmanFilter(x0, A, C, P0, Q, R);
+
+         // Run the filter on random measurements, so that it moves away from the state and covariance it started at.
+         for (int tick = 0; tick < 10; ++tick)
+            filter.calculateEstimate(RandomMatrices_DDRM.rectangle(measurementSize, 1, -1.0, 1.0, random));
+
+         filter.reset();
+
+         // The filter should be back exactly where it started, with its working containers cleared.
+         assertArrayEquals(x0.getData(), filter.getState().getData(), EPSILON);
+         assertArrayEquals(P0.getData(), filter.covariance.getData(), EPSILON);
+         assertArrayEquals(new double[stateSize], filter.predictedState.getData(), EPSILON);
+         assertArrayEquals(new double[measurementSize], filter.getMeasurementResidual().getData(), EPSILON);
+         assertEquals(0.0, filter.getNormalizedInnovation(), EPSILON);
+
+         // ...and Q and R, which are tuning rather than filter state, should be untouched.
+         assertArrayEquals(Q.getData(), filter.processCovariance.getData(), EPSILON);
+         assertArrayEquals(R.getData(), filter.measurementCovariance.getData(), EPSILON);
+      }
+   }
+
    private static class TrivialExtendedKalmanFilter extends ExtendedKalmanFilter
    {
       private final DMatrixRMaj A;

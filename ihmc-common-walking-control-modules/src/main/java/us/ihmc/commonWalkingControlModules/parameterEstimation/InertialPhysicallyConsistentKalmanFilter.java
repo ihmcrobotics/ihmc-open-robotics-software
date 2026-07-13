@@ -101,12 +101,20 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
    private final DMatrixRMaj regressorBlock;
 
    private final DMatrixRMaj parameterThetaBasisContainer;
+   private final DMatrixRMaj parameterPiBasisContainer;
 
    private final DMatrixRMaj kalmanGainBlockContainer;
 
    private final DMatrixRMaj measurement;
 
    private final AlphaFilteredYoMatrix filteredResidual;
+   /**
+    * Set by {@link #reset()} to clear the residual filter's memory. {@link AlphaFilteredYoMatrix} has no reset, but it
+    * asks us for its alpha every tick, so handing it alpha = 0 for one tick makes its own update
+    * ({@code filtered = alpha * previous + (1 - alpha) * current}) overwrite the remembered (pre-reset) output with the
+    * current value. Cleared again as soon as that tick's filter call has happened.
+    */
+   private boolean clearResidualFilterMemory = false;
 
    public InertialPhysicallyConsistentKalmanFilter(FullRobotModel model, InertialEstimationParameters parameters, DoubleProvider dt, YoRegistry parentRegistry)
    {
@@ -226,14 +234,66 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
       regressorBlock = new DMatrixRMaj(measurementCovariance.getNumRows(), RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
 
       parameterThetaBasisContainer = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1);
+      parameterPiBasisContainer = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1);
       kalmanGainBlockContainer = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, measurementCovariance.getNumRows());
 
       measurement = new DMatrixRMaj(nDoFs, 1);
 
-      DoubleProvider postProcessingAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt.getValue());
+      DoubleProvider postProcessingAlpha = () -> clearResidualFilterMemory ? 0.0
+            : AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt.getValue());
       filteredResidual = new AlphaFilteredYoMatrix("filteredResidual_", postProcessingAlpha, nDoFs, 1, parameters.getMeasurementNames(), null, registry);
 
       setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
+   }
+
+   /**
+    * Re-seeds the filter to the nominal model: on top of the base class re-seeding the state and covariance, the
+    * per-body parameters -- which are the authoritative state of this filter, the base class's Pi-basis state being
+    * only a re-packed copy -- are put back to nominal, and the residual filter's memory is cleared.
+    * <p>
+    * In the generalized parameterization theta = 0 is exactly the nominal, so the deviation is simply zeroed. In the
+    * absolute parameterization there is no such fixed point, so each body is re-seeded from the URDF Pi-basis values
+    * that the base class just restored into {@code state}.
+    * </p>
+    */
+   @Override
+   public void reset()
+   {
+      super.reset();
+
+      for (int i = 0; i < nBodies; ++i)
+      {
+         RigidBodyInertialParameters bodyParameters = inertialParameters.get(i);
+         if (bodyParameters.isGeneralized())
+         {
+            parameterThetaBasisContainer.zero();
+            bodyParameters.setParameterVectorThetaBasis(parameterThetaBasisContainer);
+         }
+         else
+         {
+            CommonOps_DDRM.extract(state,
+                                   i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                   (i + 1) * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                   0,
+                                   1,
+                                   parameterPiBasisContainer,
+                                   0,
+                                   0);
+            bodyParameters.setParameterVectorPiBasis(parameterPiBasisContainer);
+         }
+         bodyParameters.update();
+
+         // Keep the base class's Pi-basis state in lockstep with the per-body parameters, as the update step does.
+         MatrixMissingTools.setMatrixRows(state,
+                                          i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                          bodyParameters.getParameterVectorPiBasis(),
+                                          0,
+                                          RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+      }
+
+      filteredResidual.zero();
+      clearResidualFilterMemory = true;
+      updateWatchers();
    }
 
    /** For inertial parameters, the process model is the identity mapping -- we assume that the parameters are constant. */
@@ -361,6 +421,9 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
    public void preUpdateHook()
    {
       filter(getMeasurementResidual(), filteredResidual);
+      // The filter has now consumed the one zeroed alpha, so its memory holds the post-reset residual, not the
+      // pre-reset one. Back to the tuned alpha from here on.
+      clearResidualFilterMemory = false;
       getMeasurementResidual().set(filteredResidual);
    }
 

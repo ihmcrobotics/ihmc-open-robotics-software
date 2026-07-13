@@ -158,6 +158,45 @@ public class InertialBaselineCalculator
       }
    }
 
+   /**
+    * Zeroes the parameter deltas and clears the rate limiters' memory, so that nothing of a previous (possibly
+    * diverged) estimate is left to slew back down from.
+    */
+   public void resetParameterDeltas()
+   {
+      for (int i = 0; i < parameterDeltas.length; i++)
+      {
+         if (basisSets[i].isEmpty())  // Only the bodies we're estimating have deltas
+            continue;
+
+         parameterDeltas[i].zero();
+         for (int j = 0; j < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; j++)
+         {
+            rateLimitedParameterDeltas[i][j].set(0.0);
+            rateLimitedParameterDeltas[i][j].reset();
+         }
+      }
+   }
+
+   /**
+    * Restores the inertial parameters of the bodies being estimated back to their nominal (URDF) values, discarding
+    * any deltas previously added to them.
+    *
+    * @param bodies the list of bodies to restore to nominal. Modified.
+    */
+   public void restoreNominalParameters(RigidBodyBasics[] bodies)
+   {
+      rateLimitedParameterDeltaContainer.zero();
+      for (int i = 0; i < bodies.length; i++)
+      {
+         if (basisSets[i].isEmpty())  // Only restore the bodies we're estimating
+            continue;
+
+         // A zero delta on top of the nominal is the nominal -- reused so the frame handling matches the normal path.
+         RigidBodyInertialParametersTools.addParameterDelta(urdfSpatialInertias[i], rateLimitedParameterDeltaContainer, bodies[i].getInertia());
+      }
+   }
+
    public SpatialInertiaReadOnly[] getURDFSpatialInertias()
    {
       return urdfSpatialInertias;

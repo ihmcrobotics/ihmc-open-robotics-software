@@ -51,6 +51,13 @@ public abstract class ExtendedKalmanFilter
    protected final DMatrixRMaj covariance;
 
    /**
+    * The state and covariance the filter was constructed with, kept so that {@link #reset()} can re-seed the filter
+    * if it diverges.
+    */
+   protected final DMatrixRMaj initialState;
+   protected final DMatrixRMaj initialCovariance;
+
+   /**
     * The predicted estimate of the state according to the process model of the filter.
     */
    protected final DMatrixRMaj predictedState;
@@ -139,6 +146,8 @@ public abstract class ExtendedKalmanFilter
       state = new DMatrixRMaj(stateSize, 1);
       predictedState = new DMatrixRMaj(stateSize, 1);
       covariance = new DMatrixRMaj(stateSize, stateSize);
+      initialState = new DMatrixRMaj(stateSize, 1);
+      initialCovariance = CommonOps_DDRM.identity(stateSize);
       predictedCovariance = new DMatrixRMaj(stateSize, stateSize);
       predictedCovarianceContainer = new DMatrixRMaj(stateSize, stateSize);
 
@@ -184,8 +193,36 @@ public abstract class ExtendedKalmanFilter
       this.processCovariance.set(processCovariance);
       this.measurementCovariance.set(measurementCovariance);
 
+      this.initialState.set(initialState);
+      this.initialCovariance.set(initialCovariance);
+
       state.set(initialState);
       covariance.set(initialCovariance);
+   }
+
+   /**
+    * Re-seeds the filter to the state estimate and covariance it was constructed with, and clears every working
+    * container, as if the filter had just been built. Intended as a recovery action if the filter diverges.
+    * <p>
+    * The process covariance 'Q' and measurement covariance 'R' are deliberately left alone: they are tuning, not
+    * filter state, and are re-set from their tuning variables on every tick anyway.
+    * </p>
+    */
+   public void reset()
+   {
+      state.set(initialState);
+      covariance.set(initialCovariance);
+
+      predictedState.zero();
+      predictedCovariance.zero();
+      updatedState.zero();
+      updatedCovariance.zero();
+
+      measurementResidual.zero();
+      residualCovariance.zero();
+      inverseResidualCovariance.zero();
+      kalmanGain.zero();
+      normalizedInnovation.zero();
    }
 
    /**
@@ -412,6 +449,11 @@ public abstract class ExtendedKalmanFilter
    public void setMeasurementCovariance(DMatrix measurementCovariance)
    {
       this.measurementCovariance.set(measurementCovariance);
+   }
+
+   public DMatrixRMaj getState()
+   {
+      return state;
    }
 
    public DMatrixRMaj getMeasurementResidual()

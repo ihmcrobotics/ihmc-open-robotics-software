@@ -53,6 +53,13 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
    private final DMatrixRMaj measurement;
 
    private final AlphaFilteredYoMatrix filteredResidual;
+   /**
+    * Set by {@link #reset()} to clear the residual filter's memory. {@link AlphaFilteredYoMatrix} has no reset, but it
+    * asks us for its alpha every tick, so handing it alpha = 0 for one tick makes its own update
+    * ({@code filtered = alpha * previous + (1 - alpha) * current}) overwrite the remembered (pre-reset) output with the
+    * current value. Cleared again as soon as that tick's filter call has happened.
+    */
+   private boolean clearResidualFilterMemory = false;
 
    public InertialKalmanFilter(FullRobotModel model, InertialEstimationParameters parameters, DoubleProvider dt, YoRegistry parentRegistry)
    {
@@ -85,10 +92,20 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
 
       measurement = new DMatrixRMaj(nDoFs, 1);
 
-      DoubleProvider postProcessingAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt.getValue());
+      DoubleProvider postProcessingAlpha = () -> clearResidualFilterMemory ? 0.0
+            : AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt.getValue());
       filteredResidual = new AlphaFilteredYoMatrix("filteredResidual_", postProcessingAlpha, nDoFs, 1, parameters.getMeasurementNames(), null, registry);
 
       setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
+   }
+
+   /** On top of the base class re-seeding the state and covariance, clear the residual filter's memory. */
+   @Override
+   public void reset()
+   {
+      super.reset();
+      filteredResidual.zero();
+      clearResidualFilterMemory = true;
    }
 
    /** For inertial parameters, the process model is the identity mapping -- we assume that the parameters are constant. */
@@ -151,6 +168,9 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
    public void preUpdateHook()
    {
       filter(getMeasurementResidual(), filteredResidual);
+      // The filter has now consumed the one zeroed alpha, so its memory holds the post-reset residual, not the
+      // pre-reset one. Back to the tuned alpha from here on.
+      clearResidualFilterMemory = false;
       getMeasurementResidual().set(filteredResidual);
    }
 

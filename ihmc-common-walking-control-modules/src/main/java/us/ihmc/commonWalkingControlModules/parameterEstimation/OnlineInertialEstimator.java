@@ -11,6 +11,15 @@ public interface OnlineInertialEstimator
 {
    DMatrix calculateEstimate(DMatrix observation);
 
+   /**
+    * Re-seeds the estimator to the nominal model and the covariance it was constructed with, discarding everything
+    * it has learned. Intended as a recovery action if the estimator diverges.
+    */
+   void reset();
+
+   /** The current estimate, in the Pi basis. */
+   DMatrix getState();
+
    DMatrix getMeasurementResidual();
 
    void setRegressor(DMatrix regressor);

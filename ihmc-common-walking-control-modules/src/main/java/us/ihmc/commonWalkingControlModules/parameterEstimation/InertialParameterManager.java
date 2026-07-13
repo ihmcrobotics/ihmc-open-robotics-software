@@ -102,6 +102,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private OnlineInertialEstimator filter;
    private final YoMatrix estimate;
    private final AlphaFilteredYoMatrix filteredEstimate;
+   /**
+    * Set by {@link #resetEstimator()} to clear the estimate filter's memory. {@link AlphaFilteredYoMatrix} has no
+    * reset, but it asks us for its alpha every tick, so handing it alpha = 0 for one tick makes its own update
+    * ({@code filtered = alpha * previous + (1 - alpha) * current}) overwrite the remembered (pre-reset, possibly
+    * diverged) output with the current value. Without this the filter would drag the diverged estimate back into the
+    * robot models on the tick after the reset. Cleared again as soon as that tick's filter call has happened.
+    */
+   private boolean clearEstimateFilterMemory = false;
 
    private final YoMatrix residual;
 
@@ -118,8 +126,16 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoBoolean passThroughEstimatesToController;
    private final YoDouble passThroughGain;
    private final YoBoolean tare;
+   private final YoBoolean resetEstimator;
 
    private final YoBoolean areParametersPhysicallyConsistent;
+
+   /**
+    * Whether the estimator has ever written its estimate into the controller's robot model, i.e. whether pass-through
+    * has been on at any point. Used by {@link #resetEstimator()} to know whether the controller model needs restoring
+    * to nominal -- if the estimator never touched it, it must be left well alone.
+    */
+   private boolean hasWrittenToControllerRobotModel = false;
 
    private enum RobotModelTask
    {
@@ -276,7 +292,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       String[] estimateNames = inertialEstimationParameters.getEstimateNames();
       estimate = new YoMatrix("", nParameters, 1, estimateNames, null, registry);
-      DoubleProvider defaultEstimateFilteringAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(inertialEstimationParameters.getBreakFrequencyForEstimateFiltering(), dt.getValue());
+      DoubleProvider defaultEstimateFilteringAlpha = () -> clearEstimateFilterMemory ? 0.0
+            : AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(inertialEstimationParameters.getBreakFrequencyForEstimateFiltering(), dt.getValue());
       filteredEstimate = new AlphaFilteredYoMatrix("filtered_", defaultEstimateFilteringAlpha, nParameters, 1, estimateNames, null, registry);
 
       int windowSizeInTicks = (int) (inertialEstimationParameters.getBiasCompensationWindowSizeInSeconds() / dt.getValue());
@@ -311,6 +328,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       tare = new YoBoolean("tare", registry);
       tare.set(false);
 
+      // Operator escape hatch if the estimator diverges: throws away everything the filter has learned and starts
+      // again from the nominal model. Polled and self-cleared in update(). See resetEstimator().
+      resetEstimator = new YoBoolean("resetEstimator", registry);
+      resetEstimator.set(false);
+
       areParametersPhysicallyConsistent = new YoBoolean("areParametersPhysicallyConsistent", registry);
       areParametersPhysicallyConsistent.set(false);
    }
@@ -334,6 +356,17 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          updateTareSpatialInertias();
          tare.set(false);
+      }
+
+      // Handle a requested reset of the estimator. Outside the enableFilter check, so that a diverged estimator can
+      // also be cleaned up with the filter switched off. We skip the filter for this tick and pick it up again on the
+      // next one, so that the nominal re-seed is actually what the estimate holds for a tick -- running the update
+      // immediately would overwrite it before anyone (a log, a plot, the controller) could see it.
+      if (resetEstimator.getValue())
+      {
+         resetEstimator();
+         resetEstimator.set(false);
+         return;
       }
 
       // Main loop of inertial estimator
@@ -374,6 +407,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
          estimate.set(filter.calculateEstimate(wholeSystemTorques));
          filteredEstimate.setAndSolve(estimate);
+         // The filter has now consumed the one zeroed alpha, so its memory holds the post-reset estimate rather than a
+         // pre-reset (possibly diverged) one. Back to the tuned alpha from here on.
+         clearEstimateFilterMemory = false;
          residual.set(filter.getMeasurementResidual());
 
          normalizedInnovation.set(filter.getNormalizedInnovation());
@@ -390,6 +426,46 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
          updateVisuals();
       }
+   }
+
+   /**
+    * Throws away everything the estimator has learned and starts again from the nominal model, as a recovery action
+    * if the filter diverges. The filter's state is re-seeded to the nominal inertial parameters and its covariance to
+    * the value it was constructed with, the estimate and residual outputs and their smoothing filters are cleared,
+    * and both the estimate and controller robot models are put back to their nominal inertias -- so a diverged
+    * estimate is removed from the controller immediately rather than slewing back down through the rate limiters.
+    * <p>
+    * Deliberately NOT reset, because they are operator intent rather than filter state, and each has its own control:
+    * the measurement bias ({@code eraseBias}), the tare values ({@code tare}), the process and measurement covariance
+    * tuning, whether the filter is enabled ({@code enableFilter}), and the pass-through gain.
+    * </p>
+    */
+   private void resetEstimator()
+   {
+      filter.reset();
+
+      estimate.set(filter.getState());
+      // Show the nominal re-seed immediately, and have the filter throw away its remembered output next tick.
+      filteredEstimate.set(estimate);
+      clearEstimateFilterMemory = true;
+      residual.zero();
+      normalizedInnovation.set(0.0);
+
+      baselineCalculator.resetParameterDeltas();
+      baselineCalculator.restoreNominalParameters(modelHandler.getBodyArray(RobotModelTask.ESTIMATE));
+
+      // Only put the controller's model back if the estimator is the one that changed it -- with pass-through off it
+      // is not ours to touch.
+      if (hasWrittenToControllerRobotModel)
+         baselineCalculator.restoreNominalParameters(modelHandler.getBodyArray(RobotModelTask.CONTROLLER));
+
+      // Re-arm the physical consistency warnings, the estimate is nominal and therefore consistent again.
+      physicalConsistencyWarningCount = 0;
+      areParametersPhysicallyConsistent.set(true);
+
+      updateVisuals();
+
+      LogTools.info("InertialParameterManager: estimator reset -- parameters re-seeded to nominal, covariance re-initialized.");
    }
 
    private void updateFilterCovariances()
@@ -463,6 +539,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    {
       baselineCalculator.calculateRateLimitedParameterDeltas(modelHandler.getBodyArray(RobotModelTask.ESTIMATE));
       baselineCalculator.addRateLimitedParameterDeltas(modelHandler.getBodyArray(RobotModelTask.CONTROLLER), passThroughGain.getValue());
+      hasWrittenToControllerRobotModel = true;
    }
 
    private void updateTareSpatialInertias()
