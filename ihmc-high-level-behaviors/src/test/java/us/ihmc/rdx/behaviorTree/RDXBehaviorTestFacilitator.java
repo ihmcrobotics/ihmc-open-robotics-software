@@ -425,7 +425,7 @@ public class RDXBehaviorTestFacilitator
             behaviorTreeUI.createAndSetupDefault(baseUI);
 
             if (fullPhysicsMode)
-               ThreadTools.startAThread(() -> startFullPhysicsSimulation(baseUI), "StartFullPhysicsSimulation");
+               startFullPhysicsSimulation(baseUI);
          }
 
          @Override
