@@ -145,7 +145,7 @@ public class RDXSCS2Session
       robots.clear();
       for (RobotDefinition robotDefinition : session.getRobotDefinitions())
       {
-         if (!shouldCreateRobotGraphics(robotDefinition.getName()))
+         if (robotsToHide.contains(robotDefinition.getName()))
             continue;
 
          RDXSCS2Robot robot = new RDXSCS2Robot(robotDefinition);
@@ -178,7 +178,7 @@ public class RDXSCS2Session
       showRobotMap.clear();
       for (RobotDefinition robotDefinition : session.getRobotDefinitions())
       {
-         ImBoolean imBoolean = new ImBoolean(shouldCreateRobotGraphics(robotDefinition.getName()));
+         ImBoolean imBoolean = new ImBoolean(!robotsToHide.contains(robotDefinition.getName()));
          showRobotPairs.add(ImmutablePair.of(imBoolean, robotDefinition.getName()));
          showRobotMap.put(robotDefinition.getName(), imBoolean);
       }
@@ -531,11 +531,6 @@ public class RDXSCS2Session
    public ArrayList<String> getRobotsToHide()
    {
       return robotsToHide;
-   }
-
-   private boolean shouldCreateRobotGraphics(String robotName)
-   {
-      return !robotsToHide.contains(robotName);
    }
 
    public boolean isSessionThreadRunning()

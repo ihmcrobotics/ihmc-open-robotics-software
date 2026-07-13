@@ -75,7 +75,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-/** Includes RDX UI, RDX operated kinematics sim, SVO playback, no physics. */
+/** Includes RDX UI, RDX operated kinematics or full-physics sim, SVO playback. */
 public class RDXBehaviorTestFacilitator
 {
    /** Disable perception if CUDA 12.9.1 is not installed or not working */
@@ -84,7 +84,6 @@ public class RDXBehaviorTestFacilitator
    private final Supplier<DRCRobotModel> robotModelBuilder;
    private final TriFunction<DRCRobotModel, ROS2Node, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;
    private final BiFunction<RDXBaseUI, DRCRobotModel, RDXSCS2HumanoidSimulationManager> fullSimulationManagerBuilder;
-   private final boolean fullPhysicsMode;
    private final Supplier<RDXBaseUI> baseUIBuilder;
    private final WorkspaceResourceDirectory treeFilesDirectory;
    private final Function<DRCRobotModel, RobotCollisionModel> selectionCollisionModelBuilder;
@@ -124,7 +123,6 @@ public class RDXBehaviorTestFacilitator
       this.robotModelBuilder = robotModelBuilder;
       this.kinematicsSimulationBuilder = kinematicsSimulationBuilder;
       this.fullSimulationManagerBuilder = fullSimulationManagerBuilder;
-      this.fullPhysicsMode = fullSimulationManagerBuilder != null;
       this.baseUIBuilder = baseUIBuilder;
       this.treeFilesDirectory = treeFilesDirectory;
       this.selectionCollisionModelBuilder = selectionCollisionModelBuilder;
@@ -133,7 +131,7 @@ public class RDXBehaviorTestFacilitator
 
       relayNode = ros2NodeFactory.apply("facilitator_relay");
 
-      if (!fullPhysicsMode)
+      if (fullSimulationManagerBuilder == null)
          ThreadTools.startAThread(this::startKinematicsSimulation, "StartKinematicsSimulation");
       if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
          ThreadTools.startAThread(() -> ExceptionTools.handle(this::launchRDXUI, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE), "RDX");
@@ -148,7 +146,6 @@ public class RDXBehaviorTestFacilitator
       kinematicsSimulation = kinematicsSimulationBuilder.apply(robotModelBuilder.get(), ros2NodeFactory.apply("kinematics_sim"), initialWalkingPose);
       waitForRobotReady(kinematicsSimulation.getYoRegistry());
    }
-
 
    private void startFullPhysicsSimulation(RDXBaseUI baseUI)
    {
@@ -185,11 +182,8 @@ public class RDXBehaviorTestFacilitator
 
    private void destroyActiveSimulation()
    {
-      if (fullPhysicsMode)
-      {
-         if (fullPhysicsSimulationManager != null)
-            fullPhysicsSimulationManager.destroySessionForRebuild();
-      }
+      if (fullPhysicsSimulationManager != null)
+         fullPhysicsSimulationManager.destroySessionForRebuild();
       else if (kinematicsSimulation != null)
       {
          kinematicsSimulation.destroy();
@@ -197,10 +191,24 @@ public class RDXBehaviorTestFacilitator
       }
    }
 
+   private void restartActiveSimulation()
+   {
+      if (fullPhysicsSimulationManager != null)
+      {
+         fullPhysicsSimulationManager.destroySessionForRebuild();
+         fullPhysicsSimulationManager.buildSimulationAsync();
+      }
+      else
+      {
+         kinematicsSimulation.destroy();
+         startKinematicsSimulation();
+      }
+   }
+
    private boolean isSimulationRunning()
    {
-      if (fullPhysicsMode)
-         return fullPhysicsSimulationManager != null && fullPhysicsSimulationManager.isSessionThreadRunning();
+      if (fullPhysicsSimulationManager != null)
+         return fullPhysicsSimulationManager.isSessionThreadRunning();
       else
          return kinematicsSimulation != null;
    }
@@ -369,18 +377,7 @@ public class RDXBehaviorTestFacilitator
             {
                ImGui.beginDisabled(!isSimulationRunning());
                if (ImGui.button(labels.get("Restart Simulation")))
-               {
-                  if (fullPhysicsMode)
-                  {
-                     fullPhysicsSimulationManager.destroySessionForRebuild();
-                     fullPhysicsSimulationManager.buildSimulationAsync();
-                  }
-                  else
-                  {
-                     kinematicsSimulation.destroy();
-                     startKinematicsSimulation();
-                  }
-               }
+                  restartActiveSimulation();
                ImGui.endDisabled();
                if (zedSensor != null)
                {
@@ -424,7 +421,7 @@ public class RDXBehaviorTestFacilitator
                                                      ros2);
             behaviorTreeUI.createAndSetupDefault(baseUI);
 
-            if (fullPhysicsMode)
+            if (fullSimulationManagerBuilder != null)
                startFullPhysicsSimulation(baseUI);
          }
 
