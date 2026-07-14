@@ -128,6 +128,21 @@ public abstract class ExtendedKalmanFilter
     */
    private final DMatrixRMaj normalizedInnovationContainer;
 
+   /**
+    * When true, the filter still predicts, evaluates the measurement model and computes the residual and the
+    * normalized innovation, but does NOT touch the state or the covariance -- the parameters are held exactly
+    * where they are.
+    * <p>
+    * This exists so that the residual can be OBSERVED at a known parameter value. Estimating an additive
+    * measurement bias and the parameters from the same residual is not possible simultaneously -- the filter
+    * absorbs the bias into the parameters and drives the residual to zero, so anything averaging that residual
+    * measures nothing. Holding the parameters separates the two in time: hold, average the residual to get the
+    * bias, then release. Note that turning the filter OFF instead does not work, because then no residual is
+    * computed at all.
+    * </p>
+    */
+   private boolean parametersHeld = false;
+
    /** Terms used for calculating the Joseph form of the covariance update. */
    private final DMatrixRMaj josephTransposeTerm;
    private final DMatrixRMaj josephTransposeTermContainer;
@@ -237,14 +252,39 @@ public abstract class ExtendedKalmanFilter
       predictionStep();
       calculateMeasurementResidual(observation);
       preUpdateHook();
+      // Always run the gate: it linearizes the measurement model and computes the normalized innovation, which are
+      // wanted for monitoring even when the parameters are held.
       boolean validMeasurement = queryInnovationGate();
-      if (validMeasurement)
-         updateStep();
-      else
-         applyInnovationGate();
+      // When held, neither branch runs, so `state` and `covariance` are left untouched -- not even the prediction
+      // step's covariance growth is committed. The residual, however, has been computed and is available.
+      if (!parametersHeld)
+      {
+         if (validMeasurement)
+            updateStep();
+         else
+            applyInnovationGate();
+      }
       postSolveHook();
 
       return state;
+   }
+
+   /**
+    * Hold the parameters where they are: predict, evaluate the measurement model and compute the residual, but do
+    * not update the state or the covariance. See {@link #parametersHeld}.
+    * <p>
+    * Subclasses that mutate the estimate in {@link #postSolveHook()} must check {@link #isParametersHeld()} and
+    * skip that mutation, otherwise the hold leaks.
+    * </p>
+    */
+   public void setParametersHeld(boolean parametersHeld)
+   {
+      this.parametersHeld = parametersHeld;
+   }
+
+   public boolean isParametersHeld()
+   {
+      return parametersHeld;
    }
 
    /**

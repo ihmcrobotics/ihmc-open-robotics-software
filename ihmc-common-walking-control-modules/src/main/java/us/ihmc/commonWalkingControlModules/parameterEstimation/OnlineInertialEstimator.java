@@ -17,6 +17,15 @@ public interface OnlineInertialEstimator
     */
    void reset();
 
+   /**
+    * Hold the parameters where they are: the estimator still computes its measurement residual, but does not
+    * update its state or covariance. Used to observe the residual at a KNOWN parameter value so that an additive
+    * measurement bias can be identified -- see {@code tareProcess} in {@link InertialParameterManager}.
+    */
+   void setParametersHeld(boolean parametersHeld);
+
+   boolean isParametersHeld();
+
    /** The current estimate, in the Pi basis. */
    DMatrix getState();
 

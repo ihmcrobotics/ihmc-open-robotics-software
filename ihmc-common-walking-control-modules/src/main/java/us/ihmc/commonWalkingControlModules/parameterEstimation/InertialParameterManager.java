@@ -114,9 +114,26 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoMatrix residual;
 
    private final InertialBiasWindowFilter biasWindowFilter;
-   private final YoBoolean calculateBias;
    private final YoBoolean excludeBias;
    private final YoBoolean eraseBias;
+
+   /**
+    * Operator request to TARE THE PROCESS: re-seed the parameters to nominal, then -- with the parameters held
+    * there -- average the measurement residual over one window and fold it into the bias. See {@link #tareProcess()}.
+    */
+   private final YoBoolean tareProcess;
+   /**
+    * True while a {@link #tareProcess()} run is in progress; self-clears when the bias window fills. This is also
+    * what gates the collection of residuals into the bias window: a tare is the ONLY way to move the bias, because
+    * the bias is only meaningful when it is measured at a known (nominal, held) parameter value.
+    */
+   private final YoBoolean tareProcessInProgress;
+   /**
+    * Holds the estimator's parameters where they are: the residual is still computed, but the state and covariance
+    * are not updated. Set by {@link #tareProcess()} for the duration of the tare; also exposed on its own so the
+    * residual can be watched at nominal without the filter chasing it.
+    */
+   private final YoBoolean holdParametersAtNominal;
 
    private final DoubleProvider accelerationCalculationAlpha;  // useful to have a master setting, we want to filter all DoFs equally
 
@@ -125,7 +142,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final YoBoolean passThroughEstimatesToController;
    private final YoDouble passThroughGain;
-   private final YoBoolean tare;
    private final YoBoolean resetEstimator;
 
    private final YoBoolean areParametersPhysicallyConsistent;
@@ -297,12 +313,18 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       filteredEstimate = new AlphaFilteredYoMatrix("filtered_", defaultEstimateFilteringAlpha, nParameters, 1, estimateNames, null, registry);
 
       int windowSizeInTicks = (int) (inertialEstimationParameters.getBiasCompensationWindowSizeInSeconds() / dt.getValue());
-      calculateBias = new YoBoolean("calculateBias", registry);
       biasWindowFilter = new InertialBiasWindowFilter(nDoFs, windowSizeInTicks, measurementNames, registry);
       excludeBias = new YoBoolean("excludeBias", registry);
       excludeBias.set(false);
       eraseBias = new YoBoolean("eraseBias", registry);
       eraseBias.set(false);
+
+      tareProcess = new YoBoolean("tareProcess", registry);
+      tareProcess.set(false);
+      tareProcessInProgress = new YoBoolean("tareProcessInProgress", registry);
+      tareProcessInProgress.set(false);
+      holdParametersAtNominal = new YoBoolean("holdParametersAtNominal", registry);
+      holdParametersAtNominal.set(false);
 
       normalizedInnovation = new YoDouble("normalizedInnovation", registry);
       normalizedInnovation.set(0.0);
@@ -325,9 +347,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       passThroughGain = new YoDouble("inertialEstimatorPassthroughGain", registry);
       passThroughGain.set(0.0);
 
-      tare = new YoBoolean("tare", registry);
-      tare.set(false);
-
       // Operator escape hatch if the estimator diverges: throws away everything the filter has learned and starts
       // again from the nominal model. Polled and self-cleared in update(). See resetEstimator().
       resetEstimator = new YoBoolean("resetEstimator", registry);
@@ -339,23 +358,18 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    public void update()
    {
-      // Handle bias compensation
-      if (calculateBias.getValue())
-      {
-         boolean isBiasCalculated = biasWindowFilter.update(residual);
-         calculateBias.set(isBiasCalculated);
-      }
       if (eraseBias.getValue())
       {
          biasWindowFilter.reset();
          eraseBias.set(false);
       }
 
-      // Handle taring of spatial inertias
-      if (tare.getValue())
+      // Handle a requested process tare. Only the ARMING happens here; the residuals are collected at the bottom of
+      // update(), after the filter has actually produced this tick's residual.
+      if (tareProcess.getValue())
       {
-         updateTareSpatialInertias();
-         tare.set(false);
+         startTareProcess();
+         tareProcess.set(false);
       }
 
       // Handle a requested reset of the estimator. Outside the enableFilter check, so that a diverged estimator can
@@ -372,6 +386,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       // Main loop of inertial estimator
       if (enableFilter.getValue())
       {
+         // Hold the parameters while a process tare is running: the filter still computes its residual, but does not
+         // chase it. Without this the filter would absorb the very mismatch we are trying to measure.
+         filter.setParametersHeld(holdParametersAtNominal.getValue());
+
          updateFilterCovariances();
 
          updateContactJacobians();
@@ -414,6 +432,12 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
          normalizedInnovation.set(filter.getNormalizedInnovation());
 
+         // Collect residuals for the bias HERE, not at the top of update(): this tick's residual has just been
+         // produced, and -- during a process tare -- it was produced at a known, held parameter value, which is the
+         // whole point. Reading it at the top would sample the PREVIOUS tick's residual instead.
+         if (tareProcessInProgress.getValue() && biasWindowFilter.update(residual))
+            finishTareProcess();  // window full: the bias has just been accumulated
+
          // Pack smoothed estimate back into estimate robot bodies
          RegressorTools.packRigidBodies(basisSets, filteredEstimate, modelHandler.getBodyArray(RobotModelTask.ESTIMATE));
 
@@ -436,8 +460,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
     * estimate is removed from the controller immediately rather than slewing back down through the rate limiters.
     * <p>
     * Deliberately NOT reset, because they are operator intent rather than filter state, and each has its own control:
-    * the measurement bias ({@code eraseBias}), the tare values ({@code tare}), the process and measurement covariance
-    * tuning, whether the filter is enabled ({@code enableFilter}), and the pass-through gain.
+    * the measurement bias ({@code eraseBias}), the process and measurement covariance tuning, whether the filter is
+    * enabled ({@code enableFilter}), and the pass-through gain.
     * </p>
     */
    private void resetEstimator()
@@ -463,9 +487,76 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       physicalConsistencyWarningCount = 0;
       areParametersPhysicallyConsistent.set(true);
 
+      // Abort any in-flight process tare. Note this is safe to run during startTareProcess()'s own call to this
+      // method, which re-arms these flags immediately afterwards -- but if an operator resets MID-tare, the filter
+      // must not be left held forever with a half-filled bias window.
+      if (tareProcessInProgress.getValue())
+      {
+         tareProcessInProgress.set(false);
+         holdParametersAtNominal.set(false);
+         filter.setParametersHeld(false);
+         biasWindowFilter.rearm();
+         LogTools.warn("InertialParameterManager: estimator reset during a process tare -- tare ABORTED, bias unchanged.");
+      }
+
       updateVisuals();
 
       LogTools.info("InertialParameterManager: estimator reset -- parameters re-seeded to nominal, covariance re-initialized.");
+   }
+
+   /**
+    * Arms a process tare: the estimator is re-seeded to nominal, its parameters are HELD there, and the measurement
+    * residual is collected over one bias window.
+    * <p>
+    * This is the "zero the scale before you put the load on it" operation. On hardware the residual is not zero even
+    * with the correct (nominal) parameters, because the rest of the model is not ideal -- friction, torque-sensor
+    * offsets, and inertial error in the OTHER links all show up in it. Left alone, the estimator will happily explain
+    * that mismatch by moving the one body it is allowed to move, which is how the parameters walk off into the
+    * degenerate directions. Taring instead attributes it to where it belongs: an additive measurement bias.
+    * </p>
+    * <p>
+    * Afterwards, theta = 0 is a genuine fixed point -- parameters at nominal AND residual at zero -- so anything the
+    * filter subsequently moves is the added payload, which is what the estimate is supposed to mean.
+    * </p>
+    * <p>
+    * Run this UNLOADED, with the robot in (or near) the pose it will operate in. The bias is a single constant, but
+    * the mismatch it stands in for is configuration-dependent, so a tare taken in one pose is only good near that
+    * pose.
+    * </p>
+    */
+   private void startTareProcess()
+   {
+      if (!enableFilter.getValue())
+      {
+         LogTools.warn("InertialParameterManager: tareProcess requested but the filter is disabled -- no residual is "
+                       + "computed with the filter off, so there is nothing to tare. Ignoring.");
+         return;
+      }
+
+      // Parameters back to nominal: the bias must be measured at a KNOWN parameter value, and nominal is the one the
+      // estimate is defined as a deviation from.
+      resetEstimator();
+
+      // Keep the existing bias and collect the mismatch that REMAINS on top of it; the window filter accumulates.
+      // The rearm() is what makes a re-tare safe: without it the window is still full from last time, and the very
+      // next update() would re-average those stale samples and add them a second time.
+      biasWindowFilter.rearm();
+      holdParametersAtNominal.set(true);
+      tareProcessInProgress.set(true);
+
+      LogTools.info("InertialParameterManager: process tare STARTED -- parameters re-seeded to nominal and held; "
+                    + "collecting the residual over the bias window.");
+   }
+
+   /** Completes a process tare: the bias has just been accumulated, so release the parameters. */
+   private void finishTareProcess()
+   {
+      holdParametersAtNominal.set(false);
+      filter.setParametersHeld(false);
+      tareProcessInProgress.set(false);
+
+      LogTools.info("InertialParameterManager: process tare COMPLETE -- bias identified at nominal parameters, filter "
+                    + "released. Deviations from here on are the added payload.");
    }
 
    private void updateFilterCovariances()
@@ -542,11 +633,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       hasWrittenToControllerRobotModel = true;
    }
 
-   private void updateTareSpatialInertias()
-   {
-      baselineCalculator.updateTareSpatialInertias(modelHandler.getBodyArray(RobotModelTask.ESTIMATE));
-   }
-
    private void zeroInverseDynamicsParameters(Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets)
    {
       RigidBodyBasics[] bodies = modelHandler.getBodyArray(RobotModelTask.INVERSE_DYNAMICS);
@@ -607,13 +693,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private void updateVisuals()
    {
       RigidBodyReadOnly[] controllerModelBodies = modelHandler.getBodyArray(RobotModelTask.CONTROLLER);
-      SpatialInertiaReadOnly[] tareSpatialInertias = baselineCalculator.getURDFSpatialInertias();
+      SpatialInertiaReadOnly[] nominalSpatialInertias = baselineCalculator.getURDFSpatialInertias();
       for (int i = 0; i < controllerModelBodies.length; i++)
       {
          RigidBodyReadOnly controllerBody = controllerModelBodies[i];
-         SpatialInertiaReadOnly tareForBody = tareSpatialInertias[i];
+         SpatialInertiaReadOnly nominalForBody = nominalSpatialInertias[i];
 
-         double scale = EuclidCoreTools.clamp(controllerBody.getInertia().getMass() / tareForBody.getMass() / 2.0, 0.0, 1.0);
+         double scale = EuclidCoreTools.clamp(controllerBody.getInertia().getMass() / nominalForBody.getMass() / 2.0, 0.0, 1.0);
 
          if (controllerBody.getInertia() != null)
             yoInertiaEllipsoids.get(i).update(scale);

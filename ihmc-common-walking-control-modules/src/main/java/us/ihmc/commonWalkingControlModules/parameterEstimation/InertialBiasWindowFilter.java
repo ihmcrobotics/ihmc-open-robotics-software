@@ -75,19 +75,36 @@ public class InertialBiasWindowFilter
    }
 
    /**
-    * Calculates the bias for each degree of freedom by averaging the measurements in the window.
+    * ACCUMULATES the bias: averages the residuals in the window and ADDS that average to the existing bias.
+    * <p>
+    * The addition is deliberate. The residuals being averaged are produced by a measurement model that already
+    * has the current bias subtracted, so their mean is the bias that is still MISSING, not the total. Overwriting
+    * would therefore throw the existing bias away and leave only the remainder -- correct only when starting from
+    * zero, and wrong on every re-tare.
+    * </p>
     */
    public void calculateBias()
    {
       CommonOps_DDRM.sumRows(measurements, biasContainer);
       CommonOps_DDRM.scale(1.0 / windowSize, biasContainer);
-      bias.set(biasContainer);
+
+      for (int i = 0; i < biasContainer.getNumRows(); i++)
+         bias.set(i, 0, bias.get(i, 0) + biasContainer.get(i, 0));
    }
 
-   public void reset()
+   /** Clears the measurement window so a fresh set of residuals can be collected. The bias itself is KEPT. */
+   public void rearm()
    {
       counter = 0;
       measurements.zero();
+   }
+
+   /** Clears the measurement window AND zeroes the bias, discarding everything previously identified. */
+   public void reset()
+   {
+      rearm();
+      biasContainer.zero();
+      bias.zero();
    }
 
    public DMatrix getBias()

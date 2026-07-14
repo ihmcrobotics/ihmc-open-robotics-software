@@ -8,7 +8,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
-import us.ihmc.mecano.yoVariables.spatial.YoSpatialInertia;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -20,11 +19,16 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.util.Set;
 
 /**
- * This class is used to calculate the differences ("deltas") in inertial parameters between a set of rigid bodies and a set of corresponding tare values, as
- * well as adding the calculated deltas to another set of rigid bodies actually used by the controller.
+ * This class is used to calculate the differences ("deltas") in inertial parameters between a set of rigid bodies and the nominal (URDF) values, as well as
+ * adding the calculated deltas to another set of rigid bodies actually used by the controller.
  * <p>
- * The tare values are by default the values of the inertial parameters as they are defined in the URDF file, but can be overwritten in case of drift on the
- * robot. The deltas are fed to the controller's rigid bodies in a rate-limited manner to avoid large jumps in the inertial parameters.
+ * The deltas are fed to the controller's rigid bodies in a rate-limited manner to avoid large jumps in the inertial parameters.
+ * </p>
+ * <p>
+ * There used to be a separate, operator-movable "tare" that the deltas were calculated FROM, distinct from the nominal values they were added TO. It was
+ * removed: moving it broke the convex-interpolation property relied on below (see {@link #addRateLimitedParameterDeltas}), and it duplicated -- and could
+ * silently contradict -- the estimator's own notion of nominal (theta = 0 in the generalized parameterization). Model mismatch on the real robot is anchored in
+ * TORQUE space instead, by the measurement bias; see {@code tareProcess} in {@link InertialParameterManager}.
  * </p>
  *
  * @author James Foster
@@ -32,10 +36,8 @@ import java.util.Set;
 public class InertialBaselineCalculator
 {
    private final Set<SpatialInertiaBasisOption>[] basisSets;
-   /** The spatial inertias of the {@code model} as they are defined in the URDF file and controller, and what the parameter deltas are added to. */
+   /** The nominal (URDF) spatial inertias: both what the parameter deltas are calculated FROM and what they are added TO. */
    private final SpatialInertiaReadOnly[] urdfSpatialInertias;
-   /** The tare values of the spatial inertias, that any inertial parameter deltas are calculated from. */
-   private final YoSpatialInertia[] tareSpatialInertias;
 
    private final YoMatrix[] parameterDeltas;
    private final RateLimitedYoVariable[][] rateLimitedParameterDeltas;
@@ -49,18 +51,10 @@ public class InertialBaselineCalculator
       basisSets = parameters.getBasisSets();
 
       int nBodies = model.getRootBody().subtreeArray().length;
-      tareSpatialInertias = new YoSpatialInertia[nBodies];
       urdfSpatialInertias = new SpatialInertiaBasics[nBodies];
       RigidBodyBasics[] bodies = model.getRootBody().subtreeArray();
       for (int i = 0; i < nBodies; i++)
-      {
          urdfSpatialInertias[i] = new SpatialInertia(bodies[i].getInertia());
-
-         if (basisSets[i].isEmpty())  // Only create tares for bodies we're estimating
-            continue;
-
-         tareSpatialInertias[i] = new YoSpatialInertia(bodies[i].getInertia(), "_tare", registry);
-      }
 
       String[] basisNames = RigidBodyInertialParametersTools.getNamesForPiBasis();
       double[] defaultMaxParameterDeltaRates = parameters.getMaxParameterDeltaRates();
@@ -96,28 +90,9 @@ public class InertialBaselineCalculator
    }
 
    /**
-    * Update the tare spatial inertias with the current spatial inertias of the bodies.
+    * Calculate the rate-limited inertial parameter deltas from nominal for the bodies that are being estimated.
     *
-    * @param bodies the list of bodies to update the tare spatial inertias with. Not modified.
-    */
-   public void updateTareSpatialInertias(RigidBodyReadOnly[] bodies)
-   {
-      if (bodies.length != tareSpatialInertias.length)
-         throw new RuntimeException("The number of bodies does not match the number of tare spatial inertias.");
-
-      for (int i = 0; i < bodies.length; i++)
-      {
-         if (basisSets[i].isEmpty())  // Only tare the bodies we're estimating
-            continue;
-
-         tareSpatialInertias[i].set(bodies[i].getInertia());
-      }
-   }
-
-   /**
-    * Calculate the rate-limited inertial parameter deltas from tare for the bodies that are being estimated.
-    *
-    * @param bodies the list of bodies to calculate the rate-limited inertial parameter deltas from tare for. Not modified.
+    * @param bodies the list of bodies to calculate the rate-limited inertial parameter deltas from nominal for. Not modified.
     */
    public void calculateRateLimitedParameterDeltas(RigidBodyReadOnly[] bodies)
    {
@@ -126,7 +101,7 @@ public class InertialBaselineCalculator
          if (basisSets[i].isEmpty())  // Only update the bodies we're estimating
             continue;
 
-         RigidBodyInertialParametersTools.calculateParameterDelta(bodies[i].getInertia(), tareSpatialInertias[i], parameterDeltas[i]);
+         RigidBodyInertialParametersTools.calculateParameterDelta(bodies[i].getInertia(), urdfSpatialInertias[i], parameterDeltas[i]);
          for (int j = 0; j < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; j++)
             rateLimitedParameterDeltas[i][j].update();
       }
@@ -135,11 +110,19 @@ public class InertialBaselineCalculator
    /**
     * Add the rate-limited inertial parameter deltas to the URDF spatial inertias, scaled by a trust gain.
     * <p>
-    * The result per body is {@code urdfNominal + gain * rateLimitedDelta}, a linear blend in the inertial
-    * parameter basis between the nominal (URDF) values ({@code gain = 0}) and the full rate-limited estimate
-    * ({@code gain = 1}). Because the physically-consistent inertial parameters form a convex set and both the
-    * nominal and the (consistency-checked) estimate lie in it, any {@code gain} in [0, 1] also yields a
-    * physically-consistent result; values outside [0, 1] extrapolate and lose that guarantee.
+    * The delta is calculated from the SAME nominal values it is added back to, so the result per body is
+    * <pre>
+    *   nominal + gain * (estimate - nominal)  =  (1 - gain) * nominal + gain * estimate
+    * </pre>
+    * i.e. a true convex combination of the nominal (URDF) values ({@code gain = 0}) and the full rate-limited
+    * estimate ({@code gain = 1}). Because the physically-consistent inertial parameters form a convex cone and
+    * both endpoints lie in it, any {@code gain} in [0, 1] also yields a physically-consistent result; values
+    * outside [0, 1] extrapolate and lose that guarantee.
+    * <p>
+    * This property is why the movable "tare" was removed. With a tare distinct from the nominal, the result was
+    * {@code nominal + gain * (estimate - tare)} -- a translation, not an interpolation. Cones are not closed under
+    * subtraction, so that expression could leave the physically-consistent set entirely (e.g. a tare snapshotted
+    * from a diverged estimate could drive the mass negative).
     *
     * @param bodies the list of bodies to add and pack the inertial parameter deltas into. Modified.
     * @param gain   trust factor scaling the applied delta (0 = nominal, 1 = full estimate).

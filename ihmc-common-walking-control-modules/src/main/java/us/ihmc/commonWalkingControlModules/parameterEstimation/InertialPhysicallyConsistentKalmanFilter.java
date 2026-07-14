@@ -427,11 +427,17 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
       getMeasurementResidual().set(filteredResidual);
    }
 
-   /** Post solve, optionally apply the Tikhonov prior toward nominal, then update the watchers. */
+   /**
+    * Post solve, optionally apply the Tikhonov prior toward nominal, then update the watchers.
+    * <p>
+    * The prior mutates theta, so it must be skipped while the parameters are held -- otherwise the hold leaks and
+    * the residual being averaged for the bias would no longer correspond to a fixed parameter value.
+    * </p>
+    */
    @Override
    public void postSolveHook()
    {
-      if (priorAvailable && tikhonovPriorEnabled.getValue())
+      if (priorAvailable && tikhonovPriorEnabled.getValue() && !isParametersHeld())
          applyTikhonovPrior();
       updateWatchers();
    }
