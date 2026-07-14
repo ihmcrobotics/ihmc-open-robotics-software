@@ -67,7 +67,7 @@ import java.util.function.BooleanSupplier;
 public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 {
    //TUNING VARIABLES
-   private static final double ENCODER_VAR = 1.0e-6; // (1-e-3 rad)^2 encoder position variance
+   private static final double ENCODER_VAR = 5.0e-5; // (1-e-3 rad)^2 encoder position variance
    private static final double SIGMA_ACCEL = 50.0; // rad/s^2 CWNA process-noise STD (scalar fallback when no robot model is provided)
    // N*m unmodeled-torque STD for the mass-matrix path: Qa = Lambda_eff^-1 diag(sigma_tau,i^2) Lambda_eff^-T.
    // SIGMA_TAU is now only the FALLBACK STD used for a joint whose effort limit is absent/non-finite; the live
