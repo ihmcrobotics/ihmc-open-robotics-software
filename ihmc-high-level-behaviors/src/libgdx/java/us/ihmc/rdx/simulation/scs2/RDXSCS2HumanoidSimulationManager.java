@@ -62,7 +62,8 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
       });
       getDestroyables().add(() ->
       {
-         avatarSimulation.destroy();
+         if (avatarSimulation != null)
+            avatarSimulation.destroy();
       });
 
       robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, initialYaw, initialX, initialY);

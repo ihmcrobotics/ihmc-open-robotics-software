@@ -104,7 +104,7 @@ public class RDXBehaviorTestFacilitator
    private RDXROS2BehaviorTree behaviorTreeUI;
    private RDXRawImagePointCloudVisualizer pointCloudVisualizer;
    private final Notification uiIsReady = new Notification();
-   private volatile boolean destroyRequested = false;
+   private volatile boolean destroyed = false;
 
    private final ROS2ControllerHelper ros2ControllerHelper;
 
@@ -132,7 +132,12 @@ public class RDXBehaviorTestFacilitator
       relayNode = ros2NodeFactory.apply("facilitator_relay");
 
       if (fullSimulationManagerBuilder == null)
+      {
+         LogTools.info("Starting kinematics simulation");
          ThreadTools.startAThread(this::startKinematicsSimulation, "StartKinematicsSimulation");
+      }
+      else
+         LogTools.info("Starting full-physics simulation");
       if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
          ThreadTools.startAThread(() -> ExceptionTools.handle(this::launchRDXUI, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE), "RDX");
       ThreadTools.startAThread(this::startBehaviorTree, "StartBehaviorTree");
@@ -318,9 +323,10 @@ public class RDXBehaviorTestFacilitator
                zedSensor.close();
             destroyActiveSimulation();
             thread.blockingKill();
-            ros2Node.close();
+            peerClockEstimator.destroy();
             syncedRobot.destroy();
             behaviorTree.destroy();
+            ros2Node.close();
          }
          catch (Exception e)
          {
@@ -443,9 +449,6 @@ public class RDXBehaviorTestFacilitator
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
-
-            if (destroyRequested)
-               Gdx.app.exit(); // FIXME: This is not working
          }
 
          @Override
@@ -454,7 +457,9 @@ public class RDXBehaviorTestFacilitator
             visualizersPanel.destroy();
             robotVisualizer.destroy();
             behaviorTreeUI.destroy();
-            destroyActiveSimulation();
+            destroy();
+            peerClockEstimator.destroy();
+            syncedRobot.destroy();
             ros2Node.close();
             baseUI.dispose();
          }
@@ -522,11 +527,18 @@ public class RDXBehaviorTestFacilitator
 
    public void destroy()
    {
-      destroyActiveSimulation();
-      destroyBehaviorThread.run();
+      if (!destroyed)
+      {
+         destroyed = true;
 
-      destroyRequested = true;
+         destroyActiveSimulation();
+         if (destroyBehaviorThread != null)
+            destroyBehaviorThread.run();
+         relayNode.close();
+         ros2ControllerHelper.getROS2Node().close();
 
-      ros2ControllerHelper.getROS2Node().close();
+         if (Gdx.app != null)
+            Gdx.app.postRunnable(() -> Gdx.app.exit());
+      }
    }
 }

@@ -124,14 +124,10 @@ public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSessio
    public void destroySessionForRebuild()
    {
       if (isSessionThreadRunning())
-      {
          stopSession();
 
-         for (Runnable destroyable : destroyables)
-         {
-            destroyable.run();
-         }
-      }
+      for (Runnable destroyable : destroyables)
+         destroyable.run();
    }
 
    public void addVariableWidget(String yoVariableName)
