@@ -1,11 +1,11 @@
 package us.ihmc.behaviors.tools.walkingController;
 
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class SwingFootTracker
 {
@@ -36,7 +36,7 @@ public class SwingFootTracker
             {
                currentFootstep = newFootstep;
                swingSide = RobotSide.fromByte(currentFootstep.getRobotSide());
-               targetFootstepPose = new RigidBodyTransform(currentFootstep.getOrientation(), currentFootstep.getLocation());
+               targetFootstepPose = new RigidBodyTransform(currentFootstep.getOrientation().getQuaternion(), currentFootstep.getLocation().getPoint());
                isLanding = false;
             }
 

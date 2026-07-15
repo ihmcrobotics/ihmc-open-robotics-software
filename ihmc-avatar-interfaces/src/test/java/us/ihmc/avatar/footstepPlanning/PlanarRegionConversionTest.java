@@ -1,8 +1,11 @@
 package us.ihmc.avatar.footstepPlanning;
 
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
+
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.PlanarRegionMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.PlanarRegionMessage;
+import perception_msgs.PlanarRegionsListMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.shape.tools.EuclidShapeTestTools;
@@ -22,9 +25,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public class PlanarRegionConversionTest
 {

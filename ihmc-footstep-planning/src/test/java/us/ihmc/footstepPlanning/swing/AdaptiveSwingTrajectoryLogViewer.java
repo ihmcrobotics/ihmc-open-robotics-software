@@ -66,7 +66,8 @@ public class AdaptiveSwingTrajectoryLogViewer
       scs.startOnAThread();
 
       FootstepPlan footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(log.getStatusPacket().getFootstepDataList());
-      SideDependentList<Pose3D> initialFootPoses = new SideDependentList<>(log.getRequestPacket().getStartLeftFootPose(), log.getRequestPacket().getStartRightFootPose());
+      SideDependentList<Pose3D> initialFootPoses = new SideDependentList<>(log.getRequestPacket().getStartLeftFootPose().getPose(),
+                                                                          log.getRequestPacket().getStartRightFootPose().getPose());
 
       adaptiveSwingTrajectoryCalculator.setTerrainMapData(terrainMapData);
       adaptiveSwingTrajectoryCalculator.setSwingParameters(initialFootPoses, footstepPlan);

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import controller_msgs.msg.dds.WrenchTrajectoryStatusMessage;
+import controller_msgs.WrenchTrajectoryStatusMessage;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;

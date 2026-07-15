@@ -14,7 +14,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -22,7 +22,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -106,14 +106,14 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
       }
 
       // Update region graphic
-      Object<Point3D> ikSupportRegion = kinematicsToolboxOutputStatus.getSupportRegion();
+      var ikSupportRegion = kinematicsToolboxOutputStatus.getSupportRegion();
       if (ikSupportRegion.size() >= 3)
       {
          this.supportRegion.clear();
 
          for (int i = 0; i < ikSupportRegion.size(); i++)
          {
-            this.supportRegion.addVertex(ikSupportRegion.get(i));
+            this.supportRegion.addVertex(ikSupportRegion.get(i).getPoint());
          }
 
          this.supportRegion.update();

@@ -1,11 +1,11 @@
 package us.ihmc.avatar.ros2.networkTest.profiles;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.RobotConfigurationData;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestProfile;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.communication.HumanoidROS2Topic;
+import us.ihmc.jros2.ROS2QoSProfile;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
@@ -19,9 +19,9 @@ import java.util.List;
  */
 public class RobotConfigurationData100HzNetworkTestProfile extends ROS2NetworkTestProfile
 {
-   public static final ROS2QosProfile QOS_PROFILE = ROS2QosProfile.RELIABLE();
+   public static final ROS2QoSProfile QOS_PROFILE = ROS2QoSProfile.RELIABLE;
 
-   private static final ROS2Topic<RobotConfigurationData> TOPIC = ROS2Tools.IHMC_ROOT.withModule("rcd100Hz").withType(RobotConfigurationData.class);
+   private static final ROS2Topic<RobotConfigurationData> TOPIC = HumanoidROS2Topic.IHMC_ROOT.withModule("rcd100Hz").withType(RobotConfigurationData.class);
 
    public static final double PUBLISH_FREQUENCY = 100.0;
    public static final double EXPERIMENT_DURATION = 100.0;

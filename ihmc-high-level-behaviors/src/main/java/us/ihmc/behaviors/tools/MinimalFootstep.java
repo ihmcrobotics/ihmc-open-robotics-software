@@ -1,16 +1,13 @@
 package us.ihmc.behaviors.tools;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import behavior_msgs.msg.dds.MinimalFootstepListMessage;
-import behavior_msgs.msg.dds.MinimalFootstepMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepQueueStatusMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
-import ihmc_common_msgs.msg.dds.Point2DMessage;
+import behavior_msgs.MinimalFootstepListMessage;
+import behavior_msgs.MinimalFootstepMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import controller_msgs.FootstepQueueStatusMessage;
+import controller_msgs.FootstepStatusMessage;
+import controller_msgs.QueuedFootstepStatusMessage;
+import ihmc_common_msgs.Point2DMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -25,6 +22,9 @@ import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MinimalFootstep
 {
@@ -60,7 +60,8 @@ public class MinimalFootstep
    public MinimalFootstep(FootstepStatusMessage footstepStatusMessageToCopy)
    {
       this(RobotSide.fromByte(footstepStatusMessageToCopy.getRobotSide()),
-           new Pose3D(footstepStatusMessageToCopy.getActualFootPositionInWorld(), footstepStatusMessageToCopy.getActualFootOrientationInWorld()),
+           new Pose3D(footstepStatusMessageToCopy.getActualFootPositionInWorld().getPoint(),
+                      footstepStatusMessageToCopy.getActualFootOrientationInWorld().getQuaternion()),
            null,
            null);
    }
@@ -96,13 +97,12 @@ public class MinimalFootstep
    public static ArrayList<MinimalFootstep> convertFootstepQueueMessage(FootstepQueueStatusMessage queueStatusMessage, String description)
    {
       ArrayList<MinimalFootstep> minimalFootsteps = new ArrayList<>();
-      List<QueuedFootstepStatusMessage> queuedFootsteps = queueStatusMessage.getQueuedFootstepList();
       int size = queueStatusMessage.getQueuedFootstepList().size();
 
       for (int i = 0; i < size; i++)
       {
-         QueuedFootstepStatusMessage queuedFootstep = queuedFootsteps.get(i);
-         Pose3D pose = new Pose3D(queuedFootstep.getLocation(), queuedFootstep.getOrientation());
+         QueuedFootstepStatusMessage queuedFootstep = queueStatusMessage.getQueuedFootstepList().get(i);
+         Pose3D pose = new Pose3D(queuedFootstep.getLocation().getPoint(), queuedFootstep.getOrientation().getQuaternion());
          minimalFootsteps.add(new MinimalFootstep(RobotSide.fromByte(queuedFootstep.getRobotSide()), pose, i == size - 1 ? description : ""));
       }
 
@@ -128,12 +128,13 @@ public class MinimalFootstep
       {
          FootstepDataMessage footstep = footstepDataListMessage.getFootstepDataList().get(i);
          ConvexPolygon2D foothold = new ConvexPolygon2D();
-         for (Point3D contactPoint : footstep.getPredictedContactPoints2d())
+         for (int cp = 0; cp < footstep.getPredictedContactPoints2d().size(); cp++)
          {
+            us.ihmc.euclid.tuple3D.Point3D contactPoint = footstep.getPredictedContactPoints2d().get(cp).getPoint();
             foothold.addVertex(contactPoint);
          }
          foothold.update();
-         Pose3D pose = new Pose3D(footstep.getLocation(), footstep.getOrientation());
+         Pose3D pose = new Pose3D(footstep.getLocation().getPoint(), footstep.getOrientation().getQuaternion());
          minimalFootsteps.add(new MinimalFootstep(RobotSide.fromByte(footstep.getRobotSide()), pose, foothold, i == size - 1 ? description : ""));
       }
       return minimalFootsteps;
@@ -147,15 +148,16 @@ public class MinimalFootstep
       {
          FootstepDataMessage footstep = footstepDataListMessage.getFootstepDataList().get(i);
          MinimalFootstepMessage minimalFootstep = minimalFootsteps.getMinimalFootsteps().add();
-         for (Point3D contactPoint : footstep.getPredictedContactPoints2d())
+         for (int cp = 0; cp < footstep.getPredictedContactPoints2d().size(); cp++)
          {
+            us.ihmc.euclid.tuple3D.Point3D contactPoint = footstep.getPredictedContactPoints2d().get(cp).getPoint();
             Point2DMessage vertex = minimalFootstep.getSupportPolygon().add();
             vertex.setX(contactPoint.getX());
             vertex.setY(contactPoint.getY());
          }
          minimalFootstep.setRobotSide(footstep.getRobotSide());
-         minimalFootstep.getPosition().set(footstep.getLocation());
-         minimalFootstep.getOrientation().set(footstep.getOrientation());
+         minimalFootstep.getPosition().set(footstep.getLocation().getPoint());
+         minimalFootstep.getOrientation().set(footstep.getOrientation().getQuaternion());
          minimalFootstep.setDescription( i == size - 1 ? description : "");
       }
       return minimalFootsteps;
@@ -174,7 +176,7 @@ public class MinimalFootstep
             foothold.addVertex(contactPoint.getX(), contactPoint.getY());
          }
          foothold.update();
-         Pose3D pose = new Pose3D(footstep.getPosition(), footstep.getOrientation());
+         Pose3D pose = new Pose3D(footstep.getPosition().getPoint(), footstep.getOrientation().getQuaternion());
          minimalFootsteps.add(new MinimalFootstep(RobotSide.fromByte(footstep.getRobotSide()), pose, foothold, footstep.getDescriptionAsString()));
       }
       return minimalFootsteps;

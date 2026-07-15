@@ -1,22 +1,23 @@
 package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxAPI;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class KinematicsPlanningToolboxCommandConverter implements CommandConversionInterface
 {
@@ -53,7 +54,7 @@ public class KinematicsPlanningToolboxCommandConverter implements CommandConvers
    }
 
    @Override
-   public <C extends Command<?, M>, M extends Settable<M>> boolean isConvertible(C command, M message)
+   public <C extends Command<?, M>, M extends ROS2Message<M>> boolean isConvertible(C command, M message)
    {
       if (command instanceof KinematicsPlanningToolboxAPI<?>)
          return true;
@@ -61,7 +62,7 @@ public class KinematicsPlanningToolboxCommandConverter implements CommandConvers
    }
 
    @Override
-   public <C extends Command<?, M>, M extends Settable<M>> void process(C command, M message)
+   public <C extends Command<?, M>, M extends ROS2Message<M>> void process(C command, M message)
    {
       KinematicsPlanningToolboxAPI<M> kinematicsPlanningCommand = (KinematicsPlanningToolboxAPI<M>) command;
       kinematicsPlanningCommand.set(message, rigidBodyHashMap, referenceFrameHashCodeResolver);

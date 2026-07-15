@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI;
 
-import toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage;
+import toolbox_msgs.FootstepStreamingToolboxInputMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.robotics.robotSide.RobotSide;

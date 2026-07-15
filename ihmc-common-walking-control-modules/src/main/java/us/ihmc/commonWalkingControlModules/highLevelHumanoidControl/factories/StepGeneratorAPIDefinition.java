@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
-import controller_msgs.msg.dds.ControllerWalkToGoalStatusMessage;
-import controller_msgs.msg.dds.ControllerWaypointStatusMessage;
+import controller_msgs.ContinuousStepGeneratorStatusMessage;
+import controller_msgs.ControllerWalkToGoalStatusMessage;
+import controller_msgs.ControllerWaypointStatusMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorInputCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorParametersCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerReleaseGoalCommand;
@@ -13,9 +13,10 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeightMapCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2TopicNameTools;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Topic;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -24,7 +25,7 @@ import java.util.List;
 public class StepGeneratorAPIDefinition
 {
    private static final List<Class<? extends Command<?, ?>>> stepGeneratorSupportedCommands;
-   private static final List<Class<? extends Settable<?>>> stepGeneratorSupportedStatusMessages;
+   private static final List<Class<? extends ROS2Message<?>>> stepGeneratorSupportedStatusMessages;
    private static final HashSet<Class<?>> inputMessageClasses = new HashSet<>();
    private static final HashSet<Class<?>> outputMessageClasses = new HashSet<>();
 
@@ -41,9 +42,20 @@ public class StepGeneratorAPIDefinition
       commands.add(HeightMapCommand.class);
 
       stepGeneratorSupportedCommands = Collections.unmodifiableList(commands);
-      stepGeneratorSupportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));
+      for (Class<? extends Command<?, ?>> commandClass : stepGeneratorSupportedCommands)
+      {
+         try
+         {
+            Command<?, ?> command = commandClass.getDeclaredConstructor().newInstance();
+            inputMessageClasses.add(command.getMessageClass());
+         }
+         catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e)
+         {
+            throw new RuntimeException(e);
+         }
+      }
 
-      List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
+      List<Class<? extends ROS2Message<?>>> statusMessages = new ArrayList<>();
       statusMessages.add(ContinuousStepGeneratorStatusMessage.class);
       statusMessages.add(ControllerWalkToGoalStatusMessage.class);
       statusMessages.add(ControllerWaypointStatusMessage.class);
@@ -67,7 +79,7 @@ public class StepGeneratorAPIDefinition
       return outputMessageClasses;
    }
 
-   public static List<Class<? extends Settable<?>>> getStepGeneratorSupportedStatusMessages()
+   public static List<Class<? extends ROS2Message<?>>> getStepGeneratorSupportedStatusMessages()
    {
       return stepGeneratorSupportedStatusMessages;
    }
@@ -82,15 +94,11 @@ public class StepGeneratorAPIDefinition
       return HumanoidControllerAPI.getOutputTopic(robotName);
    }
 
-   public static <T> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
+   public static <T extends ROS2Message<T>> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
    {
-      if (inputMessageClasses.contains(messageClass))
+      if (inputMessageClasses.contains(messageClass) || outputMessageClasses.contains(messageClass))
       {
-         return getInputTopic(robotName).withTypeName(messageClass);
-      }
-      if (outputMessageClasses.contains(messageClass))
-      {
-         return getOutputTopic(robotName).withTypeName(messageClass);
+         return HumanoidControllerAPI.getTopic(messageClass, robotName);
       }
 
       throw new RuntimeException("Topic does not exist: " + messageClass);

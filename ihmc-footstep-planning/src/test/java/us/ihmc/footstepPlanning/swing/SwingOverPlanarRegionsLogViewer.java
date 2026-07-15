@@ -1,10 +1,7 @@
 package us.ihmc.footstepPlanning.swing;
 
-import java.awt.Color;
-import java.io.File;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -30,6 +27,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.awt.Color;
+import java.io.File;
+
 /**
  * This class doesn't really work anymore. The swing over planar regions planner has been removed from the FootstepPlanningModule. A local instance of
  * planning for the footstep plan should be implemented for this viewer to work sufficiently well.
@@ -54,7 +54,7 @@ public class SwingOverPlanarRegionsLogViewer
       {
          FootstepDataMessage message = footsteps.getFootstepDataList().get(i);
          footstepPlan.addFootstep(RobotSide.fromByte(message.getRobotSide()),
-                                  new FramePose3D(ReferenceFrame.getWorldFrame(), message.getLocation(), message.getOrientation()));
+                                  new FramePose3D(ReferenceFrame.getWorldFrame(), message.getLocation().getPoint(), message.getOrientation().getQuaternion()));
       }
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setFromPacket(log.getRequestPacket());
