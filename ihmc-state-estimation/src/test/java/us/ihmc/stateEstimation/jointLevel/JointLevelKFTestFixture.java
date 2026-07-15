@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.ToDoubleFunction;
 
 import org.ejml.data.Complex_F64;
 import org.ejml.data.DMatrixRMaj;
@@ -49,6 +50,8 @@ final class JointLevelKFTestFixture
    static final double IMU_BIAS_PROCESS_VAR = 1.0e-4;
 
    final JointLevelKFPreFilter filter;
+   /** Parent of the filter's registry, so tests can findVariable(...) the filter's published YoVariables. */
+   final YoRegistry registry;
    final List<RevoluteJoint> joints;
    final List<OneDoFJointBasics> filteredJoints; // in filter state order
    final List<TestIMU> imus;
@@ -63,6 +66,7 @@ final class JointLevelKFTestFixture
    private final Twist twistTemp = new Twist(); // scratch for reading a link's body-frame angular velocity
 
    private JointLevelKFTestFixture(JointLevelKFPreFilter filter,
+                                   YoRegistry registry,
                                    List<RevoluteJoint> joints,
                                    List<TestIMU> imus,
                                    TestSensorMap sensorMap,
@@ -71,6 +75,7 @@ final class JointLevelKFTestFixture
                                    FloatingJointBasics rootJoint)
    {
       this.filter = filter;
+      this.registry = registry;
       this.joints = joints;
       this.imus = imus;
       this.sensorMap = sensorMap;
@@ -127,6 +132,60 @@ final class JointLevelKFTestFixture
                    1, // foot = child link
                    -1, // no poisoned IMU
                    false); // scalar-CWNA process noise (no robot model)
+   }
+
+   /**
+    * Like {@link #singlePair} but with a per-joint encoder position measurement-noise STD lookup (by joint
+    * name; NaN / non-positive falls back to the filter's built-in scalar), for the per-joint R wiring and
+    * NIS-consistency tests.
+    */
+   static JointLevelKFTestFixture singlePairWithEncoderNoise(long seed,
+                                                             int numJoints,
+                                                             int parentJointIndex,
+                                                             int childJointIndex,
+                                                             ToDoubleFunction<String> encoderPositionNoiseStd)
+   {
+      return build(seed,
+                   numJoints,
+                   new int[] {parentJointIndex, childJointIndex},
+                   new String[] {"imuA", "imuB"},
+                   new int[][] {{0, 1}},
+                   1,
+                   -1,
+                   false,
+                   -1,
+                   encoderPositionNoiseStd,
+                   null,
+                   null,
+                   false);
+   }
+
+   /**
+    * Like {@link #singlePairWithEncoderNoise} but with the direct joint-velocity measurement channel enabled:
+    * per-joint velocity noise STD and effective low-pass corner (Hz) lookups, both by joint name (corner null
+    * or NaN => no lag inflation).
+    */
+   static JointLevelKFTestFixture singlePairWithDirectVelocity(long seed,
+                                                               int numJoints,
+                                                               int parentJointIndex,
+                                                               int childJointIndex,
+                                                               ToDoubleFunction<String> encoderPositionNoiseStd,
+                                                               ToDoubleFunction<String> encoderVelocityNoiseStd,
+                                                               ToDoubleFunction<String> velocityBreakFrequencyHz)
+   {
+      return build(seed,
+                   numJoints,
+                   new int[] {parentJointIndex, childJointIndex},
+                   new String[] {"imuA", "imuB"},
+                   new int[][] {{0, 1}},
+                   1,
+                   -1,
+                   false,
+                   -1,
+                   encoderPositionNoiseStd,
+                   encoderVelocityNoiseStd,
+                   velocityBreakFrequencyHz,
+                   true);
    }
 
    /** Like {@link #singlePair} but with the mass-matrix process-noise path enabled (elevator handed to the filter). */
@@ -217,6 +276,30 @@ final class JointLevelKFTestFixture
                                                 boolean useMassMatrixProcessNoise,
                                                 int footJointIndex)
    {
+      return build(seed, numJoints, imuBodyJointIndex, imuNames, pairParentChild, footImuIndex, poisonImuIndex, useMassMatrixProcessNoise, footJointIndex,
+                   null, null, null, false);
+   }
+
+   /**
+    * @param encoderPositionNoiseStd per-joint encoder position noise STD lookup handed to the filter, or null for the scalar default.
+    * @param encoderVelocityNoiseStd per-joint encoder velocity noise STD lookup, or null for the scalar default.
+    * @param velocityBreakFrequencyHz per-joint effective low-pass corner of the velocity measurement, or null for no lag inflation.
+    * @param useDirectVelocityMeasurement boot-time enable for the direct-velocity channel.
+    */
+   private static JointLevelKFTestFixture build(long seed,
+                                                int numJoints,
+                                                int[] imuBodyJointIndex,
+                                                String[] imuNames,
+                                                int[][] pairParentChild,
+                                                int footImuIndex,
+                                                int poisonImuIndex,
+                                                boolean useMassMatrixProcessNoise,
+                                                int footJointIndex,
+                                                ToDoubleFunction<String> encoderPositionNoiseStd,
+                                                ToDoubleFunction<String> encoderVelocityNoiseStd,
+                                                ToDoubleFunction<String> velocityBreakFrequencyHz,
+                                                boolean useDirectVelocityMeasurement)
+   {
       Random random = new Random(seed);
       Vector3D[] axes = new Vector3D[numJoints];
       for (int i = 0; i < numJoints; i++)
@@ -249,13 +332,18 @@ final class JointLevelKFTestFixture
       int footJoint = footJointIndex >= 0 ? footJointIndex : imuBodyJointIndex[footImuIndex];
       feet.add(joints.get(footJoint).getSuccessor());
 
+      YoRegistry testRegistry = new YoRegistry("test");
       JointLevelKFPreFilter filter = new JointLevelKFPreFilter(sensorMap,
                                                                pairParameters,
                                                                feet,
                                                                useMassMatrixProcessNoise ? chain.getElevator() : null,
+                                                               encoderPositionNoiseStd,
+                                                               encoderVelocityNoiseStd,
+                                                               velocityBreakFrequencyHz,
+                                                               useDirectVelocityMeasurement,
                                                                DT,
-                                                               new YoRegistry("test"));
-      return new JointLevelKFTestFixture(filter, joints, imus, sensorMap, feet, chain.getElevator(), chain.getRootJoint());
+                                                               testRegistry);
+      return new JointLevelKFTestFixture(filter, testRegistry, joints, imus, sensorMap, feet, chain.getElevator(), chain.getRootJoint());
    }
 
    void setEncoder(OneDoFJointBasics joint, double q)

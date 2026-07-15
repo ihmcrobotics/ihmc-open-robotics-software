@@ -38,6 +38,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.ToDoubleFunction;
 
 /**
  * Joint-level Kalman filter pre-filter (P-A architecture): one filter over the IMU tree whose pair
@@ -67,7 +68,12 @@ import java.util.function.BooleanSupplier;
 public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 {
    //TUNING VARIABLES
-   private static final double ENCODER_VAR = 5.0e-5; // (1-e-3 rad)^2 encoder position variance
+   // Fallback encoder position variance (rad^2), used for any joint the per-joint lookup does not cover
+   // (encoderPositionNoiseStd == null or returns NaN). sigma ~ 7.1e-3 rad. Hardware-measured per-joint values
+   // (walking-run FFT/PSD noise floor, 2026-07-15) run sigma 5.6e-5..7.5e-4 rad — variances 2-4 ORDERS OF
+   // MAGNITUDE below this fallback — so an Alex joint silently on the fallback badly under-trusts its encoder;
+   // watch jointKF_encR_<joint> at boot.
+   private static final double ENCODER_VAR = 5.0e-5;
    private static final double SIGMA_ACCEL = 50.0; // rad/s^2 CWNA process-noise STD (scalar fallback when no robot model is provided)
    // N*m unmodeled-torque STD for the mass-matrix path: Qa = Lambda_eff^-1 diag(sigma_tau,i^2) Lambda_eff^-T.
    // SIGMA_TAU is now only the FALLBACK STD used for a joint whose effort limit is absent/non-finite; the live
@@ -172,6 +178,17 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
     * small is NOT safe: it over-trusts a noisy input and feeds that noise into the base gyro-bias estimate.
     */
    private static final double SIGMA_QD_UNFILTERED = 0.1; // rad/s
+   /**
+    * Smoothing corner (Hz) for the measured-q̇ slew estimate that drives the direct-velocity channel's lag
+    * inflation. The firmware/alpha low-pass makes q̇^meas a LAGGED measurement; for a first-order filter the
+    * identity u - y = ẏ/ω_c is EXACT, so the instantaneous lag error is the measured signal's own slope over
+    * the effective corner (cascade: 1/ω_eff = Σ 1/ω_stage). The slope must be estimated from a finite
+    * difference of the NOISY measurement — raw, its variance 2σ²/dt² would inflate R by ~2 orders of magnitude
+    * at quiet standing, exactly the regime the channel exists for — so it is low-passed here. 5 Hz sits above
+    * the gait band (slew tracking stays honest through swing) while cutting the FD noise contribution to ~σ²
+    * order. See refreshDirectVelocityNoise().
+    */
+   private static final double LAG_SLEW_SMOOTHING_HZ = 5.0;
    // On-ground initialization gate: the exported base-IMU gyro bias is only observable through the phase-2
    // stance anchor, which runs only when a foot is trusted. If the filter is seeded while the robot hangs
    // (feet off the ground) the base bias is unobservable, its covariance grows unbounded under the bias
@@ -253,6 +270,20 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    // these per-joint reads are the measurement that closes it. Indexed by joint state index.
    private YoDouble[] yoQaDiag;
    private YoInteger[] yoQaCapBindCount;
+   // Per-joint encoder-update diagnostics. yoEncNIS[i] is the normalized innovation squared nu_i^2 / S_ii of
+   // encoder row i this tick — E[NIS] = 1 for a consistent filter, so a per-joint mean far from 1 reads
+   // directly as "R_i is wrong by that factor". Published BEFORE the conditioning gates so a gated tick still
+   // shows the innovation that tripped it. yoEncR[i] is the wired measurement variance (constant; logged so a
+   // joint that silently fell back to ENCODER_VAR is visible). Indexed by joint state index.
+   private YoDouble[] yoEncNIS;
+   private YoDouble[] yoEncR;
+   // Direct-velocity channel diagnostics, same semantics as the encoder pair: yoQdNIS[i] = nu_i^2/S_ii of
+   // velocity row i (E[NIS] = 1 when R is honest), yoQdR[i] = this tick's APPLIED variance — measured floor
+   // plus the adaptive lag inflation, so the inflation itself is visible in the log. yoUseDirectVelocity is
+   // the live kill switch (settable from SCS mid-run for the hardware A/B).
+   private YoDouble[] yoQdNIS;
+   private YoDouble[] yoQdR;
+   private YoBoolean yoUseDirectVelocity;
    // Per-IMU estimated gyro bias (IMU frame), indexed by ordinal. Published so the bias this filter EXPORTS to
    // the downstream InEKF (via getAngularVelocityBiasInIMUFrame) is visible — a runaway base-IMU bias here is
    // integrated straight into the InEKF's base orientation, so it must not be an unlogged black box.
@@ -268,6 +299,27 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private final DMatrixRMaj F = new DMatrixRMaj(0,0); // dim x dim transition matrix
    private final DMatrixRMaj Q = new DMatrixRMaj(0,0); // dim x dim process noise
    private DMatrixRMaj Henc, Renc, zEnc;
+   /** Wired per-joint encoder position measurement variance (rad^2), state order; ENCODER_VAR where unwired. */
+   private double[] encVarPerJoint;
+   /** min_i encVarPerJoint[i]: the encoder-block S-pivot floor. A healthy S = H P H^T + R has every pivot >= its
+    *  row's R_ii, so the collapsed-row gate must threshold on the SMALLEST wired variance, not on ENCODER_VAR —
+    *  with per-joint values below the scalar fallback the old constant would false-trip the gate. */
+   private double encVarFloorMin = ENCODER_VAR;
+   // Direct joint-velocity measurement channel ("encoderVelocity" update): the twitter firmware reports a
+   // drive-side-filtered output velocity per joint; treating it as a measurement of the q̇ states pins the
+   // J·q̇ part of every pair-gyro row, which makes the IMU bias DIFFERENCES directly inferable each tick
+   // instead of only through the process model (the anchor still fixes the common mode). H_qd = [0 | I_n | 0].
+   private DMatrixRMaj Hqd, Rqd, zqd;
+   /** Wired per-joint encoder velocity measurement variance ((rad/s)^2); SIGMA_QD_UNFILTERED^2 where unwired. */
+   private double[] qdMeasVarPerJoint;
+   /** 1/omega_eff (s) of the measurement's low-pass cascade per joint; 0 => no lag inflation (unknown/sim). */
+   private double[] invOmegaEffPerJoint;
+   /** Last tick's measured q̇ (NaN before the first sample) and its LAG_SLEW_SMOOTHING_HZ-smoothed slope. */
+   private double[] prevZqd, qdSlewSmoothed;
+   private double lagSlewSmoothingAlpha;
+   /** min_i qdMeasVarPerJoint[i]: S-pivot floor for the velocity rows (lag inflation only ever raises R). */
+   private double qdVarFloorMin = SIGMA_QD_UNFILTERED * SIGMA_QD_UNFILTERED;
+   private final boolean useDirectVelocityMeasurement;
 
    // Measurement model matrices
    private final DMatrixRMaj PHt = new DMatrixRMaj(0,0);
@@ -385,15 +437,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                          double estimatorDT,
                          YoRegistry parentRegistry)
    {
-      this(sensorMap, pairParameters, feet, null, estimatorDT, parentRegistry);
+      this(sensorMap, pairParameters, feet, null, null, null, null, false, estimatorDT, parentRegistry);
    }
 
-   /**
-    * @param rootBody root of the estimator's robot model (the elevator). When non-null, the joint process
-    *                 noise is the mass-matrix-induced Qa = sigma_tau^2 M(q)^-2 (write-up eqs. (10)-(12)),
-    *                 recomputed every predict because M depends on the configuration. When null, falls back
-    *                 to the constant scalar-CWNA diagonal Qa = SIGMA_ACCEL^2 I.
-    */
+   /** Overload without per-joint encoder noise lookups: every joint uses the scalar fallbacks. */
    JointLevelKFPreFilter(SensorOutputMapReadOnly sensorMap,
                          List<IMUBasedJointStateEstimatorParameters> pairParameters,
                          Collection<RigidBodyBasics> feet,
@@ -401,8 +448,59 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                          double estimatorDT,
                          YoRegistry parentRegistry)
    {
+      this(sensorMap, pairParameters, feet, rootBody, null, null, null, false, estimatorDT, parentRegistry);
+   }
+
+   /** Overload without the direct-velocity channel (per-joint encoder noise lookups only). */
+   JointLevelKFPreFilter(SensorOutputMapReadOnly sensorMap,
+                         List<IMUBasedJointStateEstimatorParameters> pairParameters,
+                         Collection<RigidBodyBasics> feet,
+                         RigidBodyBasics rootBody,
+                         ToDoubleFunction<String> encoderPositionNoiseStd,
+                         ToDoubleFunction<String> encoderVelocityNoiseStd,
+                         double estimatorDT,
+                         YoRegistry parentRegistry)
+   {
+      this(sensorMap, pairParameters, feet, rootBody, encoderPositionNoiseStd, encoderVelocityNoiseStd, null, false, estimatorDT, parentRegistry);
+   }
+
+   /**
+    * @param rootBody root of the estimator's robot model (the elevator). When non-null, the joint process
+    *                 noise is the mass-matrix-induced Qa = sigma_tau^2 M(q)^-2 (write-up eqs. (10)-(12)),
+    *                 recomputed every predict because M depends on the configuration. When null, falls back
+    *                 to the constant scalar-CWNA diagonal Qa = SIGMA_ACCEL^2 I.
+    * @param encoderPositionNoiseStd per-joint encoder position measurement-noise STD (rad) by joint name, for
+    *                 the direct q update's R. Null lookup, or NaN / non-positive for a joint, falls back to
+    *                 ENCODER_VAR for that joint. Wired variances are published as jointKF_encR_&lt;joint&gt;.
+    * @param encoderVelocityNoiseStd per-joint encoder velocity measurement-noise STD (rad/s) by joint name.
+    *                 Consumed (a) for base-&gt;foot chain joints that are not filter states (Alex: the ankles),
+    *                 whose measured qd is folded into the stance-anchor measurement and its noise into the
+    *                 anchor covariance by the rank-1 congruence J_U sigma^2 J_U^T, and (b) as the noise floor
+    *                 of the direct-velocity channel for the filtered joints when that channel is enabled.
+    *                 Null / NaN / non-positive falls back to SIGMA_QD_UNFILTERED for that joint.
+    * @param jointVelocityMeasurementBreakFrequencyHz effective first-order corner (Hz) of the low-pass cascade
+    *                 the measured joint velocity passed through before reaching this filter (drive-side LPF +
+    *                 sensor-processing alpha: 1/f_eff = sum of 1/f_stage). Drives the direct-velocity channel's
+    *                 adaptive lag inflation; null / NaN / non-positive disables inflation for that joint (the
+    *                 measurement is treated as instantaneous — correct in sim, honest on hardware only when the
+    *                 corner sits far above the motion band).
+    * @param useDirectVelocityMeasurement boot-time default for the direct-velocity channel; the live YoBoolean
+    *                 jointKFUseDirectVelocityMeasurement can flip it mid-run for hardware A/Bs.
+    */
+   JointLevelKFPreFilter(SensorOutputMapReadOnly sensorMap,
+                         List<IMUBasedJointStateEstimatorParameters> pairParameters,
+                         Collection<RigidBodyBasics> feet,
+                         RigidBodyBasics rootBody,
+                         ToDoubleFunction<String> encoderPositionNoiseStd,
+                         ToDoubleFunction<String> encoderVelocityNoiseStd,
+                         ToDoubleFunction<String> jointVelocityMeasurementBreakFrequencyHz,
+                         boolean useDirectVelocityMeasurement,
+                         double estimatorDT,
+                         YoRegistry parentRegistry)
+   {
       this.sensorMap = sensorMap;
       this.dt = estimatorDT;
+      this.useDirectVelocityMeasurement = useDirectVelocityMeasurement;
       this.requiredOnGroundTicks = Math.max(1, (int) Math.round(ON_GROUND_INIT_DEBOUNCE / estimatorDT));
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -442,6 +540,53 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       n = jointToIndex.size();
       m = imuToOrdinal.size();
       dim = 2 * n + 3 * m;
+
+      // Per-joint encoder position variance, resolved once (lookup is by joint NAME; state order thereafter).
+      // The S-pivot floor for the encoder block follows the smallest wired variance — see encVarFloorMin.
+      encVarPerJoint = new double[n];
+      int unwiredEncoderJoints = 0;
+      for (var e : jointToIndex.entrySet())
+      {
+         double std = encoderPositionNoiseStd == null ? Double.NaN : encoderPositionNoiseStd.applyAsDouble(e.getKey().getName());
+         if (Double.isFinite(std) && std > 0.0)
+            encVarPerJoint[e.getValue()] = std * std;
+         else
+         {
+            encVarPerJoint[e.getValue()] = ENCODER_VAR;
+            unwiredEncoderJoints++;
+         }
+      }
+      for (int i = 0; i < n; i++)
+         encVarFloorMin = Math.min(encVarFloorMin, encVarPerJoint[i]);
+      if (encoderPositionNoiseStd != null && unwiredEncoderJoints > 0)
+         LogTools.warn("JointLevelKFPreFilter: " + unwiredEncoderJoints + " of " + n + " filtered joints have no wired "
+               + "encoder position noise; they fall back to ENCODER_VAR = " + ENCODER_VAR + " rad^2 — orders of magnitude "
+               + "above the measured per-joint values, so those encoders will be badly under-trusted. Check jointKF_encR_<joint>.");
+
+      // Direct-velocity channel wiring: measured noise floor + effective low-pass corner per joint, resolved
+      // once by name. 1/omega_eff = 0 disables the lag inflation for that joint (measurement treated as
+      // instantaneous); the smoothing alpha for the slew estimate is fixed by LAG_SLEW_SMOOTHING_HZ.
+      qdMeasVarPerJoint = new double[n];
+      invOmegaEffPerJoint = new double[n];
+      prevZqd = new double[n];
+      qdSlewSmoothed = new double[n];
+      for (var e : jointToIndex.entrySet())
+      {
+         int idx = e.getValue();
+         String name = e.getKey().getName();
+         double std = encoderVelocityNoiseStd == null ? Double.NaN : encoderVelocityNoiseStd.applyAsDouble(name);
+         qdMeasVarPerJoint[idx] = (Double.isFinite(std) && std > 0.0) ? std * std : SIGMA_QD_UNFILTERED * SIGMA_QD_UNFILTERED;
+         double fc = jointVelocityMeasurementBreakFrequencyHz == null ? Double.NaN : jointVelocityMeasurementBreakFrequencyHz.applyAsDouble(name);
+         invOmegaEffPerJoint[idx] = (Double.isFinite(fc) && fc > 0.0) ? 1.0 / (2.0 * Math.PI * fc) : 0.0;
+         prevZqd[idx] = Double.NaN;
+      }
+      for (int i = 0; i < n; i++)
+         qdVarFloorMin = Math.min(qdVarFloorMin, qdMeasVarPerJoint[i]);
+      lagSlewSmoothingAlpha = Math.exp(-2.0 * Math.PI * LAG_SLEW_SMOOTHING_HZ * dt);
+      if (useDirectVelocityMeasurement)
+         LogTools.info("JointLevelKFPreFilter: direct joint-velocity measurement channel ENABLED over " + n
+               + " joints (adaptive lag inflation on " + (int) java.util.Arrays.stream(invOmegaEffPerJoint).filter(v -> v > 0.0).count()
+               + " of them; live kill switch: jointKFUseDirectVelocityMeasurement).");
 
       // Acyclicity assert (Part B item 6): with the exact R_g, a cycle's telescoping row-combination has zero H,
       // zero z and zero noise, so S is singular BY CONSTRUCTION (SPEC §5.3). The used IMU graph MUST be a tree.
@@ -570,6 +715,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
             fa.legJoints = leg.toArray(new OneDoFJointBasics[0]);
             fa.Jang.reshape(3, fa.legJoints.length);
             fa.qdCols = new int[fa.legJoints.length];
+            fa.qdVar = new double[fa.legJoints.length];
 
             // A leg joint that is NOT a filter state does not disable the anchor -- it only has to be KNOWN, not
             // ESTIMATED. Splitting the chain into filtered F and unfiltered U, the anchor equation
@@ -597,6 +743,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                }
                else
                   fa.qdCols[c] = n + idx;
+               // Per-joint encoder VELOCITY variance for the anchor's input-noise congruence (only the
+               // unfiltered columns are ever read, but fill every slot — cheap, and no -1 bookkeeping).
+               double qdStd = encoderVelocityNoiseStd == null ? Double.NaN : encoderVelocityNoiseStd.applyAsDouble(fa.legJoints[c].getName());
+               fa.qdVar[c] = (Double.isFinite(qdStd) && qdStd > 0.0) ? qdStd * qdStd : SIGMA_QD_UNFILTERED * SIGMA_QD_UNFILTERED;
             }
             // A chain with no joints at all cannot anchor anything (degenerate model).
             if (fa.legJoints.length == 0)
@@ -782,6 +932,12 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       yoJointVelocityLowerBound = new YoDouble[n];
       yoQaDiag = new YoDouble[n];
       yoQaCapBindCount = new YoInteger[n];
+      yoEncNIS = new YoDouble[n];
+      yoEncR = new YoDouble[n];
+      yoQdNIS = new YoDouble[n];
+      yoQdR = new YoDouble[n];
+      yoUseDirectVelocity = new YoBoolean("jointKFUseDirectVelocityMeasurement", registry);
+      yoUseDirectVelocity.set(useDirectVelocityMeasurement);
       for (var e : jointToIndex.entrySet())
       {
          int idx = e.getValue();
@@ -794,6 +950,14 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          yoJointVelocityLowerBound[idx] = new YoDouble("jointKF_qd_" + jointName + "_lowerBound", registry);
          yoQaDiag[idx] = new YoDouble("jointKF_QaDiag_" + jointName, registry);
          yoQaCapBindCount[idx] = new YoInteger("jointKF_QaCapBind_" + jointName + "_count", registry);
+         yoEncNIS[idx] = new YoDouble("jointKF_encNIS_" + jointName, registry);
+         yoEncNIS[idx].set(Double.NaN); // no encoder update has run yet
+         yoEncR[idx] = new YoDouble("jointKF_encR_" + jointName, registry);
+         yoEncR[idx].set(encVarPerJoint[idx]); // constant: the wired measurement variance (rad^2)
+         yoQdNIS[idx] = new YoDouble("jointKF_qdNIS_" + jointName, registry);
+         yoQdNIS[idx].set(Double.NaN); // no direct-velocity update has run yet
+         yoQdR[idx] = new YoDouble("jointKF_qdR_" + jointName, registry);
+         yoQdR[idx].set(qdMeasVarPerJoint[idx]); // per-tick: floor + adaptive lag inflation (see refreshDirectVelocityNoise)
       }
 
       // Per-IMU gyro-bias diagnostics (IMU frame), named by sensor. imusByOrdinal is populated by allocate(),
@@ -876,6 +1040,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                                        stateEstimatorParameters.getIMUBasedJointStateEstimatorParameters(),
                                        feet,
                                        estimatorRootBody,
+                                       stateEstimatorParameters::getEncoderPositionMeasurementStandardDeviation,
+                                       stateEstimatorParameters::getEncoderVelocityMeasurementStandardDeviation,
+                                       stateEstimatorParameters::getJointVelocityMeasurementBreakFrequency,
+                                       stateEstimatorParameters.useDirectJointVelocityMeasurementInJointKF(),
                                        estimatorDT,
                                        parentRegistry);
    }
@@ -941,6 +1109,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       Henc = new DMatrixRMaj(n,dim);
       Renc = new DMatrixRMaj(n,n);
       zEnc = new DMatrixRMaj(n,1);
+      zqd = new DMatrixRMaj(n, 1);
 
       // Stacked gyro measurement scratch, pre-sized at the max (K = K_max active anchors); each tick reshapes
       // DOWN to the current 3(E+K) within this capacity, so no per-tick allocation. Lmix/Sigma/LSigma feed the
@@ -1010,6 +1179,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       buildConstantTransition();
       buildProcessNoise();
       buildEncoderModel();
+      buildDirectVelocityModel();
       validateConstantModel();
    }
 
@@ -1324,7 +1494,55 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          Henc.set(i, i, 1.0);
       Renc.zero();
       for (int i = 0; i < n; i++)
-         Renc.set(i, i, ENCODER_VAR);
+         Renc.set(i, i, encVarPerJoint[i]);
+   }
+
+   /**
+    * Direct-velocity measurement model: H_qd = [0 | I_n | 0] observes the q̇ block, R_qd starts at the
+    * measured per-joint floor. Unlike Renc, R_qd is NOT constant — {@link #refreshDirectVelocityNoise()}
+    * re-diagonals it every tick with the adaptive lag inflation before the update is applied.
+    */
+   private void buildDirectVelocityModel()
+   {
+      Hqd = new DMatrixRMaj(n, dim);
+      for (int i = 0; i < n; i++)
+         Hqd.set(i, n + i, 1.0);
+      Rqd = new DMatrixRMaj(n, n);
+      for (int i = 0; i < n; i++)
+         Rqd.set(i, i, qdMeasVarPerJoint[i]);
+   }
+
+   /**
+    * Adaptive measurement covariance for the direct-velocity channel. The measured q̇ is the output of a
+    * first-order low-pass cascade (drive-side LPF, then the sensor-processing alpha filter), and for a
+    * first-order filter y = LPF_{ω}(u) the identity u − y = ẏ/ω is exact — the instantaneous lag error IS the
+    * measured signal's own slope over the corner; stages cascade as 1/ω_eff = Σ 1/ω_stage. So per joint:
+    *
+    *    R_ii(t) = σ_i² + (d̂_i(t) / ω_eff,i)² ,   d̂ = LAG_SLEW_SMOOTHING_HZ-low-passed  (z_k − z_{k−1})/dt
+    *
+    * (smoothing rationale on the constant). Behavior: at quiet stance d̂ → 0 and the channel runs at the
+    * measured noise floor — full sharpness exactly in the quasi-static regime the gyro-bias split needs it —
+    * while during fast swings each joint softens by its own instantaneous lag error (a 9 Hz forearm inflates
+    * hard, a 50 Hz hip barely moves). A static inflation would instead detune the channel permanently.
+    * Package-private so the lag-inflation property test can drive it via setDirectVelocityMeasurementForTest.
+    */
+   void refreshDirectVelocityNoise()
+   {
+      for (int i = 0; i < n; i++)
+      {
+         double z = zqd.get(i, 0);
+         if (Double.isFinite(prevZqd[i]))
+         {
+            double slew = (z - prevZqd[i]) / dt;
+            qdSlewSmoothed[i] = lagSlewSmoothingAlpha * qdSlewSmoothed[i] + (1.0 - lagSlewSmoothingAlpha) * slew;
+         }
+         prevZqd[i] = z;
+         double lagError = qdSlewSmoothed[i] * invOmegaEffPerJoint[i];
+         double variance = qdMeasVarPerJoint[i] + lagError * lagError;
+         Rqd.set(i, i, variance);
+         if (yoQdR != null)
+            yoQdR[i].set(variance);
+      }
    }
 
    /**
@@ -1430,6 +1648,32 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       {
          josephUpdate(Henc, zEnc, Renc, "encoder");
          warnIfNonFiniteState("encoderUpdate", -1);
+      }
+
+      // Direct-velocity update: the firmware-reported joint velocity as a measurement of the q̇ states, with
+      // the per-tick adaptive lag inflation on R (see refreshDirectVelocityNoise). Skipped wholesale on any
+      // non-finite velocity, like the encoder block.
+      if (yoUseDirectVelocity != null && yoUseDirectVelocity.getValue())
+      {
+         int qdRow = 0;
+         boolean velocitiesValid = true;
+         for (OneDoFJointBasics j : jointToIndex.keySet())
+         {
+            double qd = sensorMap.getOneDoFJointOutput(j).getVelocity();
+            if (!Double.isFinite(qd))
+            {
+               velocitiesValid = false;
+               if (!warnedNonFiniteInput)
+                  warnNonFiniteInputOnce("joint velocity of " + j.getName());
+            }
+            zqd.set(qdRow++, 0, qd);
+         }
+         if (velocitiesValid)
+         {
+            refreshDirectVelocityNoise();
+            josephUpdate(Hqd, zqd, Rqd, "encoderVelocity");
+            warnIfNonFiniteState("encoderVelocityUpdate", -1);
+         }
       }
 
       // Single stacked gyro update (SPEC §5-§6): all pair rows plus the active stance-anchor rows in ONE Joseph
@@ -1606,10 +1850,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                for (int r = 0; r < 3; r++)
                   zg.add(arow + r, 0, fa.Jang.get(r, c) * qdMeasured); // z' = z + J_U qd_U^meas
 
-               // Rank-1 congruence: J_U(:,c) sigma^2 J_U(:,c)^T.
+               // Rank-1 congruence: J_U(:,c) sigma_c^2 J_U(:,c)^T, per-joint sigma (measured; SIGMA_QD_UNFILTERED fallback).
                for (int r = 0; r < 3; r++)
                   for (int cc = 0; cc < 3; cc++)
-                     fa.R.add(r, cc, SIGMA_QD_UNFILTERED * SIGMA_QD_UNFILTERED * fa.Jang.get(r, c) * fa.Jang.get(cc, c));
+                     fa.R.add(r, cc, fa.qdVar[c] * fa.Jang.get(r, c) * fa.Jang.get(cc, c));
             }
          }
 
@@ -1727,6 +1971,25 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       // below half the applicable measurement-noise floor (ENCODER_VAR / SIGMA_GYRO_FLOOR) is algebraically
       // impossible for a healthy S = H P H^T + R and signals a collapsed (zero-Sigma) row.
       symmetrize(S);
+      // Innovation nu = z - H x, computed BEFORE the Cholesky/conditioning gates: it depends on neither the
+      // factorization nor the gain, and S's diagonal must be read here anyway (setA may decompose in place).
+      CommonOps_DDRM.mult(Hm, x, nu);
+      CommonOps_DDRM.changeSign(nu);
+      CommonOps_DDRM.addEquals(nu, zm);
+      // Per-joint NIS nu_i^2 / S_ii for the two identity-block channels (row i IS joint i in state order).
+      // Published pre-gate so a gated tick still shows the innovation that tripped it; E[NIS] = 1 for a
+      // consistent filter. EXACT label match: "encoder" and "encoderVelocity" are distinct channels and a
+      // startsWith would cross-publish the velocity innovations into the position NIS.
+      if (yoEncNIS != null && "encoder".equals(label))
+      {
+         for (int i = 0; i < k; i++)
+            yoEncNIS[i].set(nu.get(i, 0) * nu.get(i, 0) / S.get(i, i));
+      }
+      else if (yoQdNIS != null && "encoderVelocity".equals(label))
+      {
+         for (int i = 0; i < k; i++)
+            yoQdNIS[i].set(nu.get(i, 0) * nu.get(i, 0) / S.get(i, i));
+      }
       if (!innovationSolver.setA(S))
       {
          warnSingularInnovationOnce(label, "S is not positive definite (Cholesky factorization rejected it)", Hm, Rm);
@@ -1756,7 +2019,15 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          warnSingularInnovationOnce(label, String.format("cond(S) proxy %.3e exceeds COND_S_MAX %.1e; whole block gated", condProxy, COND_S_MAX), Hm, Rm);
          return;
       }
-      double rFloor = (label != null && label.startsWith("encoder")) ? ENCODER_VAR : SIGMA_GYRO_FLOOR;
+      // Channel-specific S-pivot floor: min wired R_ii of the block (lag inflation only raises the velocity
+      // rows' R, so the boot-time min stays a valid lower bound). Exact label match — see the NIS dispatch.
+      double rFloor;
+      if ("encoder".equals(label))
+         rFloor = encVarFloorMin;
+      else if ("encoderVelocity".equals(label))
+         rFloor = qdVarFloorMin;
+      else
+         rFloor = SIGMA_GYRO_FLOOR;
       if (minPivot < 0.5 * rFloor)
       {
          yoInnovationGateSkipCount.increment();
@@ -1777,10 +2048,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 
       K.reshape(dim, k);
       CommonOps_DDRM.mult(PHt, Sinv, K);
-      CommonOps_DDRM.mult(Hm, x, nu);
-      CommonOps_DDRM.changeSign(nu);
-      CommonOps_DDRM.addEquals(nu, zm);
-      CommonOps_DDRM.multAdd(K, nu, x);
+      CommonOps_DDRM.multAdd(K, nu, x); // nu = z - H x was computed above, before the gates
 
       // Full Joseph form update
       CommonOps_DDRM.setIdentity(IKH);
@@ -2207,6 +2475,15 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    void updateProcessNoiseFromMassMatrixForTest() { updateProcessNoiseFromMassMatrix(); }
    DMatrixRMaj getEncoderJacobian()  { return Henc.copy(); }
    DMatrixRMaj getEncoderNoise()     { return Renc.copy(); }
+   DMatrixRMaj getVelocityMeasurementJacobian() { return Hqd.copy(); }
+   /** This tick's APPLIED velocity R (floor + lag inflation); call refreshDirectVelocityNoise()/update() first. */
+   DMatrixRMaj getVelocityMeasurementNoise()    { return Rqd.copy(); }
+   /** Loads a measured q̇ vector (filter state order) into zqd so tests can drive refreshDirectVelocityNoise(). */
+   void setDirectVelocityMeasurementForTest(double[] qdMeasured)
+   {
+      for (int i = 0; i < n; i++)
+         zqd.set(i, 0, qdMeasured[i]);
+   }
 
    /** Overwrites the mean and covariance (and marks initialized) so tests can drive predict()/josephUpdate() from a known prior. */
    void setStateForTest(DMatrixRMaj xPrior, DMatrixRMaj pPrior)
@@ -2269,6 +2546,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       OneDoFJointBasics[] legJoints;
       /** Filter qd column per chain joint, or -1 if that joint is NOT a filter state (folded into z' instead). */
       int[] qdCols;
+      /** Encoder velocity variance per chain joint ((rad/s)^2), consumed only for the unfiltered (-1) columns. */
+      double[] qdVar;
       boolean usable; // false only for a degenerate (jointless) base->foot chain
       boolean active; // true this tick: usable AND trusted last tick (SPEC §6); set in buildStackedMeasurement
       final DMatrixRMaj Jang = new DMatrixRMaj(3,1);
