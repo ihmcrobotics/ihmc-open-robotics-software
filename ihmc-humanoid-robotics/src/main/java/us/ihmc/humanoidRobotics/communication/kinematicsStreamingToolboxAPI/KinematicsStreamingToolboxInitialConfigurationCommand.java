@@ -1,15 +1,14 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.list.array.TIntArrayList;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
+import toolbox_msgs.KinematicsStreamingToolboxInitialConfigurationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.JointHashCodeResolver;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class KinematicsStreamingToolboxInitialConfigurationCommand implements Command<KinematicsStreamingToolboxInitialConfigurationCommand, KinematicsStreamingToolboxInitialConfigurationMessage>
 {
@@ -52,8 +51,8 @@ public class KinematicsStreamingToolboxInitialConfigurationCommand implements Co
 
       sequenceId = message.getSequenceId();
 
-      TIntArrayList messageHashCodes = message.getInitialJointHashCodes();
-      TFloatArrayList messageJointAngles = message.getInitialJointAngles();
+      var messageHashCodes = message.getInitialJointHashCodes();
+      var messageJointAngles = message.getInitialJointAngles();
       for (int i = 0; i < messageHashCodes.size(); i++)
       {
          try

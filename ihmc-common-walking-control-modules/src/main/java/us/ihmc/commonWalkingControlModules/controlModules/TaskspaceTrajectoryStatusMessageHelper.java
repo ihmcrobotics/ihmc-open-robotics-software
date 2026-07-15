@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import controller_msgs.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -44,10 +44,10 @@ public class TaskspaceTrajectoryStatusMessageHelper extends TrajectoryStatusMess
 
       controlFramePose.setToNaN();
       desiredPose.setToNaN();
-      statusMessage.getActualEndEffectorOrientation().setToNaN();
-      statusMessage.getActualEndEffectorPosition().setToNaN();
-      statusMessage.getDesiredEndEffectorOrientation().setToNaN();
-      statusMessage.getDesiredEndEffectorPosition().setToNaN();
+      statusMessage.getActualEndEffectorOrientation().getQuaternion().setToNaN();
+      statusMessage.getActualEndEffectorPosition().getPoint().setToNaN();
+      statusMessage.getDesiredEndEffectorOrientation().getQuaternion().setToNaN();
+      statusMessage.getDesiredEndEffectorPosition().getPoint().setToNaN();
    }
 
    public void registerNewTrajectory(SE3TrajectoryControllerCommand command)
@@ -198,17 +198,17 @@ public class TaskspaceTrajectoryStatusMessageHelper extends TrajectoryStatusMess
 
    private void updateStatusInfo(Point2DReadOnly desiredPosition, Point2DReadOnly actualPosition)
    {
-      statusMessage.getDesiredEndEffectorOrientation().setToNaN();
-      statusMessage.getDesiredEndEffectorPosition().set(desiredPosition, Double.NaN);
-      statusMessage.getActualEndEffectorOrientation().setToNaN();
-      statusMessage.getActualEndEffectorPosition().set(actualPosition, Double.NaN);
+      statusMessage.getDesiredEndEffectorOrientation().getQuaternion().setToNaN();
+      statusMessage.getDesiredEndEffectorPosition().getPoint().set(desiredPosition, Double.NaN);
+      statusMessage.getActualEndEffectorOrientation().getQuaternion().setToNaN();
+      statusMessage.getActualEndEffectorPosition().getPoint().set(actualPosition, Double.NaN);
    }
 
    private void updateStatusInfo(Point3DReadOnly desiredPosition, Point3DReadOnly actualPosition)
    {
-      statusMessage.getDesiredEndEffectorOrientation().setToNaN();
+      statusMessage.getDesiredEndEffectorOrientation().getQuaternion().setToNaN();
       statusMessage.getDesiredEndEffectorPosition().set(desiredPosition);
-      statusMessage.getActualEndEffectorOrientation().setToNaN();
+      statusMessage.getActualEndEffectorOrientation().getQuaternion().setToNaN();
       statusMessage.getActualEndEffectorPosition().set(actualPosition);
    }
 

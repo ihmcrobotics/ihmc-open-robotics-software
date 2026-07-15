@@ -6,16 +6,16 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.ImageMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.cuda.CUDATools;
+import us.ihmc.sensors.CameraIntrinsics;
 
 import java.time.Instant;
 
@@ -47,7 +47,9 @@ public class ImageMessageDecoder
       intrinsics.setCy(messageToDecode.getPrincipalPointYPixels());
 
       CameraModel cameraModel = CameraModel.fromByte(messageToDecode.getCameraModel());
-      FramePose3D sensorPose = new FramePose3D(ReferenceFrame.getWorldFrame(), messageToDecode.getPosition(), messageToDecode.getOrientation());
+      FramePose3D sensorPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                               messageToDecode.getPosition().getPoint(),
+                                               messageToDecode.getOrientation().getQuaternion());
       Instant acquisitionTime = MessageTools.toInstant(messageToDecode.getAcquisitionTime());
       long sequenceNumber = messageToDecode.getSequenceNumber();
       float depthDiscretization = messageToDecode.getDepthDiscretization();
@@ -63,6 +65,9 @@ public class ImageMessageDecoder
     */
    public void decodeMessage(ImageMessage messageToDecode, Mat imageToPack)
    {
+      if (!hasValidMessageMetadata(messageToDecode))
+         return;
+
       resizeToMessageDimensions(messageToDecode, imageToPack);
       messageDataExtractor.extract(messageToDecode);
 
@@ -100,6 +105,7 @@ public class ImageMessageDecoder
             }
             imageToPack.data(messageDataExtractor.getInputPointer().position(0));
          }
+         case UNKNOWN -> LogTools.warn("Skipping ImageMessage decode with unknown compression type.");
       }
    }
 
@@ -111,6 +117,9 @@ public class ImageMessageDecoder
     */
    public void decodeMessage(ImageMessage messageToDecode, GpuMat imageToPack)
    {
+      if (!hasValidMessageMetadata(messageToDecode))
+         return;
+
       resizeToMessageDimensions(messageToDecode, imageToPack);
       messageDataExtractor.extract(messageToDecode);
 
@@ -151,6 +160,7 @@ public class ImageMessageDecoder
             imageToPack.upload(cpuImage);
             cpuImage.close();
          }
+         case UNKNOWN -> LogTools.warn("Skipping ImageMessage decode with unknown compression type.");
       }
    }
 
@@ -202,11 +212,30 @@ public class ImageMessageDecoder
 
    private void resizeToMessageDimensions(ImageMessage imageMessage, Mat imageToResize)
    {
-      imageToResize.create(imageMessage.getImageHeight(), imageMessage.getImageWidth(), PixelFormat.fromByte(imageMessage.getPixelFormat()).toOpenCVType());
+      PixelFormat pixelFormat = PixelFormat.fromByte(imageMessage.getPixelFormat());
+      imageToResize.create(imageMessage.getImageHeight(), imageMessage.getImageWidth(), pixelFormat.toOpenCVType());
    }
 
    private void resizeToMessageDimensions(ImageMessage imageMessage, GpuMat imageToResize)
    {
-      imageToResize.create(imageMessage.getImageHeight(), imageMessage.getImageWidth(), PixelFormat.fromByte(imageMessage.getPixelFormat()).toOpenCVType());
+      PixelFormat pixelFormat = PixelFormat.fromByte(imageMessage.getPixelFormat());
+      imageToResize.create(imageMessage.getImageHeight(), imageMessage.getImageWidth(), pixelFormat.toOpenCVType());
+   }
+
+   private static boolean hasValidMessageMetadata(ImageMessage imageMessage)
+   {
+      if (PixelFormat.fromByte(imageMessage.getPixelFormat()) == PixelFormat.UNKNOWN)
+      {
+         LogTools.warn("ImageMessage has invalid pixel_format byte: {}", imageMessage.getPixelFormat() & 0xFF);
+         return false;
+      }
+
+      if (CompressionType.fromByte(imageMessage.getCompressionType()) == CompressionType.UNKNOWN)
+      {
+         LogTools.warn("ImageMessage has invalid compression_type byte: {}", imageMessage.getCompressionType() & 0xFF);
+         return false;
+      }
+
+      return true;
    }
 }

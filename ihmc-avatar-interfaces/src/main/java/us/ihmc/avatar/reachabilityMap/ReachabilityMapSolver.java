@@ -1,8 +1,8 @@
 package us.ihmc.avatar.reachabilityMap;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import controller_msgs.RobotConfigurationData;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
@@ -205,7 +205,7 @@ public class ReachabilityMapSolver implements SCS2YoGraphicHolder
 
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
       message.setEndEffectorHashCode(endEffector.hashCode());
-      pose.get(message.getDesiredPositionInWorld(), message.getDesiredOrientationInWorld());
+      pose.get(message.getDesiredPositionInWorld().getPoint(), message.getDesiredOrientationInWorld().getQuaternion());
 
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1.0));
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1.0));

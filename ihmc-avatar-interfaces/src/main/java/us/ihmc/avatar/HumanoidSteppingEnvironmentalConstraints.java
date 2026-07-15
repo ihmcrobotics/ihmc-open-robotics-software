@@ -1,6 +1,6 @@
 package us.ihmc.avatar;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.FootstepDataListMessage;
 import us.ihmc.avatar.stepAdjustment.HeightMapFootstepSnapper;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;

@@ -1,32 +1,31 @@
 package us.ihmc.perception;
 
-import controller_msgs.msg.dds.HighLevelStateMessage;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
-import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.HighLevelStateMessage;
+import controller_msgs.WalkingControllerFailureStatusMessage;
+import perception_msgs.FramePlanarRegionsListMessage;
+import perception_msgs.ImageMessage;
+import perception_msgs.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
-import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.perception.rapidRegions.PolygonizerParameters;
+import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -53,7 +52,6 @@ public class LocalizationAndMappingTask
 
    private static final double maxAngleFromNormalToFilterAsShadow = 10.0;
 
-   protected ROS2Helper ros2Helper;
    protected ROS2Node ros2Node;
    protected PlanarRegionMap planarRegionMap;
 
@@ -107,7 +105,6 @@ public class LocalizationAndMappingTask
       planarRegionMap.setInitialSupportSquareEnabled(configurationParameters.getSupportSquareEnabled());
 
       this.ros2Node = ros2Node;
-      this.ros2Helper = new ROS2Helper(ros2Node);
 
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Node);
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_PLANAR_REGION_MAPPING_PARAMETERS, planarRegionMap.getParameters());
@@ -115,15 +112,25 @@ public class LocalizationAndMappingTask
 
       controllerRegionsPublisher = ros2Node.createPublisher(StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, simpleRobotName));
       slamOutputRegionsPublisher = ros2Node.createPublisher(PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS);
-      ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
+      ros2Node.createSubscriptionSampler(terrainRegionsTopic, sample ->
+      {
+         FramePlanarRegionsListMessage copy = new FramePlanarRegionsListMessage();
+         copy.set(sample);
+         onPlanarRegionsReceived(copy);
+      });
 
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), message ->
+      ros2Node.createSubscriptionSampler(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), sample ->
       {
          LogTools.warn("Resetting Map (Walking Failure Detected)");
          setEnableLiveMode(false);
       });
 
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(HighLevelStateMessage.class, simpleRobotName), highLevelState::set);
+      ros2Node.createSubscriptionSampler(HumanoidControllerAPI.getTopic(HighLevelStateMessage.class, simpleRobotName), sample ->
+      {
+         HighLevelStateMessage copy = new HighLevelStateMessage();
+         copy.set(sample);
+         highLevelState.set(copy);
+      });
 
       updateMapFuture = executorService.scheduleAtFixedRate(this::scheduledUpdate, 0, SCHEDULED_UPDATE_PERIOD_MS, TimeUnit.MILLISECONDS);
    }

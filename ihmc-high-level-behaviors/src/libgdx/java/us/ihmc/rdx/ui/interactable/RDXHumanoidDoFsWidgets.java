@@ -1,10 +1,10 @@
 package us.ihmc.rdx.ui.interactable;
 
 import com.badlogic.gdx.graphics.Color;
-import controller_msgs.msg.dds.*;
-import ihmc_common_msgs.msg.dds.QueueableMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.*;
+import ihmc_common_msgs.QueueableMessage;
+import ihmc_common_msgs.SO3TrajectoryMessage;
+import ihmc_common_msgs.TrajectoryPoint1DMessage;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.mutable.MutableObject;

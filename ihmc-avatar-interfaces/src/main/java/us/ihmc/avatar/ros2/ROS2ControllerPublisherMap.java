@@ -2,8 +2,9 @@ package us.ihmc.avatar.ros2;
 
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.HashMap;
 
@@ -11,7 +12,7 @@ public class ROS2ControllerPublisherMap
 {
    private final String robotName;
    private final ROS2PublisherMap publisherMap;
-   private final HashMap<Class, ROS2Topic> topicMap = new HashMap<>();
+   private final HashMap<Class<?>, ROS2Topic<?>> topicMap = new HashMap<>();
 
    public ROS2ControllerPublisherMap(ROS2Node ros2Node, String robotName)
    {
@@ -24,13 +25,16 @@ public class ROS2ControllerPublisherMap
       this.publisherMap = ros2PublisherMap;
    }
 
-   public void publish(Object message)
+   public <T extends ROS2Message<T>> void publish(T message)
    {
-      ROS2Topic topic = topicMap.get(message.getClass());
+      @SuppressWarnings("unchecked")
+      Class<T> messageClass = (Class<T>) message.getClass();
+      @SuppressWarnings("unchecked")
+      ROS2Topic<T> topic = (ROS2Topic<T>) topicMap.get(messageClass);
       if (topic == null)
       {
-         topic = HumanoidControllerAPI.getTopic(message.getClass(), robotName);
-         topicMap.put(message.getClass(), topic);
+         topic = HumanoidControllerAPI.getTopic(messageClass, robotName);
+         topicMap.put(messageClass, topic);
       }
       publisherMap.publish(topic, message);
    }

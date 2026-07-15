@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import perception_msgs.msg.dds.YOLOv8ModelInfo;
+import perception_msgs.YOLOv8ModelInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.perception.detections.yolo.SyncedYOLOv8ModelParameters;
 

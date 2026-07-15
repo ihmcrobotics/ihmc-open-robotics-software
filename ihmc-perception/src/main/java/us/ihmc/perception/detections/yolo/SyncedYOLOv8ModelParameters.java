@@ -1,7 +1,7 @@
 package us.ihmc.perception.detections.yolo;
 
-import perception_msgs.msg.dds.YOLOv8ModelInfo;
-import perception_msgs.msg.dds.YOLOv8ModelParameters;
+import perception_msgs.YOLOv8ModelInfo;
+import perception_msgs.YOLOv8ModelParameters;
 import us.ihmc.communication.crdt.CRDTBidirectionalBooleanArray;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloat;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloatArray;
