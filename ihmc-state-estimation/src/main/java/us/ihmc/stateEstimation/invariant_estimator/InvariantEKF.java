@@ -148,6 +148,64 @@ public class InvariantEKF
       updater.update(state, contactIndex, bodyMeasurement, bodyMeasurementCovariance, false); // learned module not wired yet
    }
 
+   private final us.ihmc.euclid.matrix.RotationMatrix reseedRotation = new us.ihmc.euclid.matrix.RotationMatrix();
+   private final us.ihmc.euclid.tuple3D.Vector3D reseedPosition = new us.ihmc.euclid.tuple3D.Vector3D();
+   private final us.ihmc.euclid.tuple3D.Vector3D reseedContactPosition = new us.ihmc.euclid.tuple3D.Vector3D();
+   private final us.ihmc.euclid.matrix.Matrix3D reseedRotatedCovariance = new us.ihmc.euclid.matrix.Matrix3D();
+
+   /**
+    * Touchdown anchor re-seed (H4 Phase 2, 2026-07-16 derivation note): redefines contact i in the
+    * estimator's current gauge, d̂ᵢ ← p̂ + R̂·y, and makes P consistent by cloning the base-position
+    * row/column into the contact block and adding the FK measurement covariance on its diagonal:
+    * P_{dᵢ·} ← P_{p·}, P_{dᵢdᵢ} ← P_{pp} + R̂·Nᵢ·R̂ᵀ. This zeroes the contact residual and the
+    * rotation/velocity gain rows (K_θ = (P_{θp}−P_{θdᵢ})S⁻¹ = 0), so the incoming foot releases none
+    * of the swing-accumulated geometric discrepancy into the base. PSD-preserving by construction
+    * (congruence + PSD addition). PLACEHOLDER for a learned contact model (ContactNet) which will
+    * replace the binary full-trust with a learned blend at this same seam.
+    *
+    * @return the pre-reseed residual norm |R̂·y − (d̂ᵢ − p̂)| — the geometric discrepancy absorbed
+    *         (snap avoided), for logging.
+    */
+   public double reseedContact(int contactIndex, Tuple3DReadOnly bodyMeasurement, Matrix3DReadOnly bodyMeasurementCovariance)
+   {
+      state.getRotation(reseedRotation);
+      state.getBasePosition(reseedPosition);
+      state.getContactPosition(contactIndex, reseedContactPosition);
+
+      // pre-reseed residual r = R*y - (d - p), world frame
+      us.ihmc.euclid.tuple3D.Vector3D rotated = new us.ihmc.euclid.tuple3D.Vector3D();
+      reseedRotation.transform(bodyMeasurement, rotated);
+      double rx = rotated.getX() - (reseedContactPosition.getX() - reseedPosition.getX());
+      double ry = rotated.getY() - (reseedContactPosition.getY() - reseedPosition.getY());
+      double rz = rotated.getZ() - (reseedContactPosition.getZ() - reseedPosition.getZ());
+      double residualNorm = Math.sqrt(rx * rx + ry * ry + rz * rz);
+
+      // d_i <- p + R*y
+      rotated.add(reseedPosition);
+      state.setContactPosition(contactIndex, rotated);
+
+      // P: clone base-position row then column into the contact block (after both, P[d,d] = P[p,p]
+      // and the block stays symmetric), then add the rotated measurement covariance on the diagonal.
+      DMatrixRMaj covariance = state.getCovariance();
+      int m = covariance.getNumRows();
+      int pIdx = state.basePositionTangentIndex();
+      int dIdx = state.contactTangentIndex(contactIndex);
+      for (int a = 0; a < 3; a++)
+         for (int col = 0; col < m; col++)
+            covariance.set(dIdx + a, col, covariance.get(pIdx + a, col));
+      for (int row = 0; row < m; row++)
+         for (int a = 0; a < 3; a++)
+            covariance.set(row, dIdx + a, covariance.get(row, pIdx + a));
+
+      reseedRotatedCovariance.set(bodyMeasurementCovariance);
+      reseedRotation.transform(reseedRotatedCovariance); // R * N * R^T
+      for (int a = 0; a < 3; a++)
+         for (int b = 0; b < 3; b++)
+            covariance.add(dIdx + a, dIdx + b, reseedRotatedCovariance.getElement(a, b));
+
+      return residualNorm;
+   }
+
    /**
     * @return the Normalized Innovation Squared rᵀ·S⁻¹·r from the most recent {@link #update} call, or
     *         {@code NaN} if none has run. Read immediately after an {@code update} to get that
@@ -224,6 +282,12 @@ public class InvariantEKF
    public double getLastHPHtTrace()      { return updater.getLastHPHtTrace(); }
    /** trace(R) of the most recent update's S — the measurement-noise share (post-inflation). */
    public double getLastMeasurementNoiseTrace() { return updater.getLastMeasurementNoiseTrace(); }
+   /** |δθ| (rad) of the most recent applied correction — H4 anchor-transient diagnostic. */
+   public double getLastCorrectionRotationNorm() { return updater.getLastCorrectionRotationNorm(); }
+   /** |δv| (m/s) of the most recent applied correction. */
+   public double getLastCorrectionVelocityNorm() { return updater.getLastCorrectionVelocityNorm(); }
+   /** |δp| (m) of the most recent applied correction. */
+   public double getLastCorrectionPositionNorm() { return updater.getLastCorrectionPositionNorm(); }
 
    /** @return the number of contact columns N. */
    public int getNumberOfContacts()

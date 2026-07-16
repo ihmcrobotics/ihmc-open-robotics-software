@@ -177,6 +177,25 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final SideDependentList<YoDouble> yoContactPContactTrace;
    private final YoDouble yoContactPBaseTrace = new YoDouble("invariantContactPBaseTrace", registry);
 
+   // H4 (anchor-switch transient) diagnostics: the applied state correction K·r per contact update,
+   // split by tangent block. If intra-stance error is released as a pulse when the anchor set
+   // changes, these spike at jointKFActiveAnchorCount transitions relative to mid-stance.
+   private final SideDependentList<YoDouble> yoContactCorrectionRotNorm;
+   private final SideDependentList<YoDouble> yoContactCorrectionVelNorm;
+   private final SideDependentList<YoDouble> yoContactCorrectionPosNorm;
+
+   // H4 Phase 2: touchdown anchor re-seed (see InvariantEKF.reseedContact and the 2026-07-16
+   // derivation note). Kill switch defaults ON for replay evaluation; one-shot-per-cycle hysteresis
+   // guards edge chatter: re-seed fires once on the rising probability crossing and re-arms only
+   // after probability drops below the (lower) re-arm threshold — a chattering edge cannot re-zero
+   // the residual repeatedly (which would silently degenerate into DRC-style permanent foothold trust).
+   private static final double RESEED_TRIGGER_PROBABILITY = 0.5;
+   private static final double RESEED_REARM_PROBABILITY = 0.1;
+   private final YoBoolean yoReseedEnabled = new YoBoolean("invariantContactReseedEnabled", registry);
+   private final SideDependentList<YoBoolean> yoReseedArmed;
+   private final SideDependentList<YoInteger> yoReseedCount;
+   private final SideDependentList<YoDouble> yoReseedResidual;
+
    // Gravity-leveling (tilt) diagnostics — the hardware-available "is pitch/roll wrong" signal (no ground truth
    // needed): the angle/roll/pitch between the measured gravity direction and the filter's estimate, computed
    // EVERY tick even when the update is gated off. yoGravityUpdateActive flags the ticks the tilt update fired.
@@ -387,6 +406,21 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
                                                     new YoDouble("invariantContactRInflationRight", registry));
       yoContactPContactTrace = new SideDependentList<>(new YoDouble("invariantContactPContactTraceLeft", registry),
                                                        new YoDouble("invariantContactPContactTraceRight", registry));
+      yoContactCorrectionRotNorm = new SideDependentList<>(new YoDouble("invariantContactCorrectionRotNormLeft", registry),
+                                                           new YoDouble("invariantContactCorrectionRotNormRight", registry));
+      yoContactCorrectionVelNorm = new SideDependentList<>(new YoDouble("invariantContactCorrectionVelNormLeft", registry),
+                                                           new YoDouble("invariantContactCorrectionVelNormRight", registry));
+      yoContactCorrectionPosNorm = new SideDependentList<>(new YoDouble("invariantContactCorrectionPosNormLeft", registry),
+                                                           new YoDouble("invariantContactCorrectionPosNormRight", registry));
+      yoReseedArmed = new SideDependentList<>(new YoBoolean("invariantContactReseedArmedLeft", registry),
+                                              new YoBoolean("invariantContactReseedArmedRight", registry));
+      yoReseedCount = new SideDependentList<>(new YoInteger("invariantContactReseedCountLeft", registry),
+                                              new YoInteger("invariantContactReseedCountRight", registry));
+      yoReseedResidual = new SideDependentList<>(new YoDouble("invariantContactReseedResidualLeft", registry),
+                                                 new YoDouble("invariantContactReseedResidualRight", registry));
+      yoReseedEnabled.set(true);
+      for (RobotSide side : RobotSide.values)
+         yoReseedArmed.get(side).set(false); // arm only after a clean swing (prob < re-arm threshold)
       // Two-sided χ² acceptance band for the contact-update NIS (constant: fixed DOF and confidence).
       ChiSquaredDistribution contactNISDistribution = new ChiSquaredDistribution(CONTACT_MEASUREMENT_DOF);
       double lowerTail = 0.5 * (1.0 - CONSISTENCY_CONFIDENCE);
@@ -553,6 +587,21 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          contactInBody.setToZero(soleFrames.get(side));
          contactInBody.changeFrame(pelvisFrame);
          contactMeasurementNoiseProvider.packContactCovariance(side, inflatedContactCovariance);
+
+         // H4 Phase 2: one-shot touchdown re-seed, BEFORE this side's update consumes the residual.
+         // Uses the UN-inflated FK covariance (the re-seeded anchor is as good as the FK that placed it).
+         if (yoReseedEnabled.getBooleanValue())
+         {
+            if (contactProbability < RESEED_REARM_PROBABILITY)
+               yoReseedArmed.get(side).set(true);
+            else if (yoReseedArmed.get(side).getBooleanValue() && contactProbability >= RESEED_TRIGGER_PROBABILITY)
+            {
+               yoReseedResidual.get(side).set(ekf.reseedContact(CONTACT_INDICES.get(side), contactInBody, inflatedContactCovariance));
+               yoReseedCount.get(side).increment();
+               yoReseedArmed.get(side).set(false);
+            }
+         }
+
          double inflation = measurementInflation(contactProbability);
          inflatedContactCovariance.scale(inflation);
          yoContactRInflation.get(side).set(inflation);
@@ -564,6 +613,9 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          yoContactUpdateApplied.get(side).set(ekf.wasLastUpdateApplied());
          yoContactSHPHtTrace.get(side).set(ekf.getLastHPHtTrace());
          yoContactSRTrace.get(side).set(ekf.getLastMeasurementNoiseTrace());
+         yoContactCorrectionRotNorm.get(side).set(ekf.getLastCorrectionRotationNorm());
+         yoContactCorrectionVelNorm.get(side).set(ekf.getLastCorrectionVelocityNorm());
+         yoContactCorrectionPosNorm.get(side).set(ekf.getLastCorrectionPositionNorm());
       }
       yoInvariantUpdateGateSkipCount.set(ekf.getUpdateGateSkipCount());
 

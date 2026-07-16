@@ -74,6 +74,9 @@ public class InvariantUpdater
    private int gateSkipCount = 0;                // running count of gate-skipped updates
    private double lastHPHtTrace = Double.NaN;             // trace(H·P·Hᵀ) of the most recent S assembly
    private double lastMeasurementNoiseTrace = Double.NaN; // trace(R) of the most recent S assembly
+   private double lastCorrectionRotationNorm = Double.NaN; // |δθ| (rad) of the most recent applied correction
+   private double lastCorrectionVelocityNorm = Double.NaN; // |δv| (m/s)
+   private double lastCorrectionPositionNorm = Double.NaN; // |δp| (m)
 
    /** Optional contact measurement subpiece, owned and called by this updater (see {@link #updateContact}). */
    private ContactUpdater contactUpdater = null;
@@ -205,6 +208,11 @@ public class InvariantUpdater
       for (int i = 0; i < m; i++)
          correctionArray[i] = -correctionColumn.get(i, 0); // negative: error convention X̂ = exp(ξ)·X
 
+      // H4 diagnostics (2026-07-16): per-update correction split by tangent block, |δθ|/|δv|/|δp|.
+      lastCorrectionRotationNorm = blockNorm(correctionArray, state.rotationTangentIndex());
+      lastCorrectionVelocityNorm = blockNorm(correctionArray, state.baseVelocityTangentIndex());
+      lastCorrectionPositionNorm = blockNorm(correctionArray, state.basePositionTangentIndex());
+
       SEK3_Utils.exp(correctionArray, expDelta, expPhi, expRotation, expJacobian);
       newGroupElement.reshape(expDelta.getNumRows(), expDelta.getNumCols());
       CommonOps_DDRM.mult(expDelta, state.getGroupElement(), newGroupElement);
@@ -252,6 +260,20 @@ public class InvariantUpdater
    public boolean wasLastUpdateApplied()        { return lastUpdateApplied; }
    /** Running count of updates skipped by the conditioning gate. */
    public int getGateSkipCount()                { return gateSkipCount; }
+   /** |δθ| (rad) of the most recent applied correction — H4 anchor-transient diagnostic. */
+   public double getLastCorrectionRotationNorm() { return lastCorrectionRotationNorm; }
+   /** |δv| (m/s) of the most recent applied correction. */
+   public double getLastCorrectionVelocityNorm() { return lastCorrectionVelocityNorm; }
+   /** |δp| (m) of the most recent applied correction. */
+   public double getLastCorrectionPositionNorm() { return lastCorrectionPositionNorm; }
+
+   private static double blockNorm(double[] tangent, int startIndex)
+   {
+      return Math.sqrt(tangent[startIndex] * tangent[startIndex]
+                     + tangent[startIndex + 1] * tangent[startIndex + 1]
+                     + tangent[startIndex + 2] * tangent[startIndex + 2]);
+   }
+
    /** trace(H·P·Hᵀ) of the most recent S assembly — the state-covariance share of S. */
    public double getLastHPHtTrace()             { return lastHPHtTrace; }
    /** trace(R) of the most recent S assembly — the measurement-noise share of S (post-inflation). */
