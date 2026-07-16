@@ -127,8 +127,8 @@ public class StepReachabilityIOHelper
             assert(rightFoot.getRigidBodyName().equals(fullRobotModel.getFoot(RobotSide.RIGHT).getName()));
 
             // Right foot is at origin. Back out lattice point of left foot
-            Point3D leftFootDesiredPosition = leftFoot.getInputMessage().getDesiredPositionInWorld();
-            Quaternion leftFootDesiredOrientation = leftFoot.getInputMessage().getDesiredOrientationInWorld();
+            Point3D leftFootDesiredPosition = leftFoot.getInputMessage().getDesiredPositionInWorld().getPoint();
+            Quaternion leftFootDesiredOrientation = leftFoot.getInputMessage().getDesiredOrientationInWorld().getQuaternion();
             StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(leftFootDesiredPosition.getX(),
                                                                                          leftFootDesiredPosition.getY(),
                                                                                          leftFootDesiredPosition.getZ(),

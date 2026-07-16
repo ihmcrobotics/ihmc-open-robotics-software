@@ -1,9 +1,9 @@
 package us.ihmc.rdx.behaviorTree.actions;
 
+import imgui.ImGui;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
-import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
 import us.ihmc.commons.thread.ThreadTools;

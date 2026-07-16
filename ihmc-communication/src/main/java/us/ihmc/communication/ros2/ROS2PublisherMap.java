@@ -1,12 +1,12 @@
 package us.ihmc.communication.ros2;
 
-import std_msgs.msg.dds.Bool;
-import std_msgs.msg.dds.Empty;
+import std_msgs.Bool;
+import std_msgs.Empty;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.HashMap;
 
@@ -24,7 +24,7 @@ public class ROS2PublisherMap
       this.ros2Node = ros2Node;
    }
 
-   public <T> ROS2Publisher getOrCreatePublisher(ROS2Topic<T> topic)
+   public <T extends ROS2Message<T>> ROS2Publisher getOrCreatePublisher(ROS2Topic<T> topic)
    {
       ROS2Publisher publisher = map.get(topic);
       if (publisher == null)
@@ -36,15 +36,12 @@ public class ROS2PublisherMap
       return publisher;
    }
 
-   public <T> void publish(ROS2Topic<T> topic, T message)
+   public <T extends ROS2Message<T>> void publish(ROS2Topic<T> topic, T message)
    {
       getOrCreatePublisher(topic).publish(message);
    }
 
-   public void publish(ROS2Topic<Pose3D> topic, Pose3D message)
-   {
-      getOrCreatePublisher(topic).publish(message);
-   }
+   // Pose3D publishing requires a custom ROS2Message wrapper (see jros2 examples/custom-message-class).
 
    public void publish(ROS2Topic<Empty> topic)
    {

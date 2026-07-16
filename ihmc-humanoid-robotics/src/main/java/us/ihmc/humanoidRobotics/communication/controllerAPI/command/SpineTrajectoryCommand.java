@@ -1,11 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import controller_msgs.SpineTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 import java.util.Random;
-
-import controller_msgs.msg.dds.SpineTrajectoryMessage;
 
 public class SpineTrajectoryCommand implements Command<SpineTrajectoryCommand, SpineTrajectoryMessage>, EpsilonComparable<SpineTrajectoryCommand>
 {

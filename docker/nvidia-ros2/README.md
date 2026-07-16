@@ -1,6 +1,6 @@
 # Building IHMC ROS 2 Messages
 
-The messages are in [ihmc-interfaces/src/main/messages/ihmc_interfaces](../../ihmc-interfaces/src/main/messages/ihmc_interfaces)
+The messages are in [ihmc-interfaces-jros2/messages/ihmc_interfaces](../../ihmc-interfaces-jros2/messages/ihmc_interfaces)
 
 Run the `buildImage.sh` to build the image with the messages.
 

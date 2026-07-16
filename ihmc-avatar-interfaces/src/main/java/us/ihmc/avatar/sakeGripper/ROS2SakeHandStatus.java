@@ -1,10 +1,9 @@
 package us.ihmc.avatar.sakeGripper;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.SakeHandAPI;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
 
 public class ROS2SakeHandStatus
 {
@@ -31,31 +30,34 @@ public class ROS2SakeHandStatus
 
    public ROS2SakeHandStatus(ROS2Node ros2Node, String robotName, RobotSide handSide)
    {
-      ROS2Tools.createVolatileCallbackSubscription(ros2Node, SakeHandAPI.getHandSakeStatusTopic(robotName, handSide), sakeHandStatusMessage ->
+      var sakeHandStatusTopic = SakeHandAPI.getHandSakeStatusTopic(robotName, handSide);
+      ros2Node.createSubscriptionSampler(sakeHandStatusTopic, sample ->
       {
-         isCalibrated = sakeHandStatusMessage.getIsCalibrated();
-         needsReset = sakeHandStatusMessage.getNeedsReset();
-         isCalibrating = sakeHandStatusMessage.getIsCalibrating();
-         isCoolingDown = sakeHandStatusMessage.getIsCoolingDown();
-         automaticCooldownEnabled = sakeHandStatusMessage.getAutomaticCooldownEnabled();
+         if (sample == null)
+            return;
+         isCalibrated = sample.getIsCalibrated();
+         needsReset = sample.getNeedsReset();
+         isCalibrating = sample.getIsCalibrating();
+         isCoolingDown = sample.getIsCoolingDown();
+         automaticCooldownEnabled = sample.getAutomaticCooldownEnabled();
 
-         positionUpperLimit = sakeHandStatusMessage.getPositionUpperLimit();
-         positionLowerLimit = sakeHandStatusMessage.getPositionLowerLimit();
+         positionUpperLimit = sample.getPositionUpperLimit();
+         positionLowerLimit = sample.getPositionLowerLimit();
 
-         isTorqueOn = sakeHandStatusMessage.getTorqueOnStatus();
-         currentTemperature = sakeHandStatusMessage.getTemperature();
-         currentHandOpenAngle = SakeHandParameters.handPositionToOpenAngle(sakeHandStatusMessage.getCurrentPosition(),
+         isTorqueOn = sample.getTorqueOnStatus();
+         currentTemperature = sample.getTemperature();
+         currentHandOpenAngle = SakeHandParameters.handPositionToOpenAngle(sample.getCurrentPosition(),
                                                                            positionLowerLimit,
                                                                            positionUpperLimit);
-         commandedHandOpenAngle = SakeHandParameters.handPositionToOpenAngle(sakeHandStatusMessage.getDesiredPositionStatus(),
+         commandedHandOpenAngle = SakeHandParameters.handPositionToOpenAngle(sample.getDesiredPositionStatus(),
                                                                              positionLowerLimit,
                                                                              positionUpperLimit);
          commandedHandOpenAngle = MathTools.clamp(commandedHandOpenAngle, 0.0, SakeHandParameters.MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES);
-         currentFingertipGripForce = sakeHandStatusMessage.getRawCurrentTorque() * SakeHandParameters.RAW_SAKE_TORQUE_TO_GRIP_FORCE;
-         commandedFingertipGripForceLimit = sakeHandStatusMessage.getRawTorqueLimitStatus() * SakeHandParameters.RAW_SAKE_TORQUE_TO_GRIP_FORCE;
-         currentVelocity = sakeHandStatusMessage.getCurrentVelocity();
-         errorCodes = sakeHandStatusMessage.getErrorCodes();
-         handRealtimeTick = sakeHandStatusMessage.getRealtimeTick();
+         currentFingertipGripForce = sample.getRawCurrentTorque() * SakeHandParameters.RAW_SAKE_TORQUE_TO_GRIP_FORCE;
+         commandedFingertipGripForceLimit = sample.getRawTorqueLimitStatus() * SakeHandParameters.RAW_SAKE_TORQUE_TO_GRIP_FORCE;
+         currentVelocity = sample.getCurrentVelocity();
+         errorCodes = sample.getErrorCodes();
+         handRealtimeTick = sample.getRealtimeTick();
       });
    }
 

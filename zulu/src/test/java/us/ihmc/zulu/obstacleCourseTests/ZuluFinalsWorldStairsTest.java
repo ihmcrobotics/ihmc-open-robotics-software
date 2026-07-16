@@ -1,19 +1,17 @@
 package us.ihmc.zulu.obstacleCourseTests;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import static us.ihmc.robotics.Assert.assertTrue;
+
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.PelvisHeightTrajectoryMessage;
 import org.junit.jupiter.api.*;
-import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
-import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
-import us.ihmc.zulu.ZuluVersion;
-import us.ihmc.zulu.ZuluRobotModel;
-import us.ihmc.zulu.parameters.controller.ZuluContactPointParameters;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.environments.DRCFinalsEnvironment;
 import us.ihmc.avatar.simulationStarter.DRCSCStartingLocations;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -27,14 +25,16 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
+import us.ihmc.zulu.ZuluRobotModel;
+import us.ihmc.zulu.ZuluVersion;
+import us.ihmc.zulu.parameters.controller.ZuluContactPointParameters;
 
 import java.util.ArrayList;
-
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public class ZuluFinalsWorldStairsTest
 {

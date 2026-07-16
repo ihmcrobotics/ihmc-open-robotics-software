@@ -1,9 +1,9 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.WalkActionFootstepStateMessage;
+import behavior_msgs.WalkActionFootstepStateMessage;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
-import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
+import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 
 public class WalkActionFootstepState
 {

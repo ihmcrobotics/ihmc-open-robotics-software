@@ -2,19 +2,18 @@ package us.ihmc.sensors;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.ImageMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Subscription;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.realsense.RealSenseImageSensor;
 
 import java.time.Instant;
@@ -40,7 +39,7 @@ public class ROS2RelayImageSensor extends ImageSensor
    {
       super(sensorName);
 
-      ros2Node = new ROS2NodeBuilder().build("ros2_" + sensorName.toLowerCase().replaceAll(" ", "_") + "_image_sensor_node");
+      ros2Node = new ROS2Node("ros2_" + sensorName.toLowerCase().replaceAll(" ", "_") + "_image_sensor_node");
       receivers = new HashMap<>();
 
       imageKeys = new int[imageTopics.size()];
@@ -154,7 +153,7 @@ public class ROS2RelayImageSensor extends ImageSensor
       for (ImageReceiver receiver : receivers.values())
          receiver.close();
 
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    private void resetCountDown()
@@ -171,6 +170,7 @@ public class ROS2RelayImageSensor extends ImageSensor
       private RawImage receivedImage;
       private final Mat decodeMat;
 
+      private final ROS2Node ros2Node;
       private final ROS2Subscription<ImageMessage> subscription;
       private final ImageMessageDecoder decoder;
 
@@ -178,10 +178,11 @@ public class ROS2RelayImageSensor extends ImageSensor
 
       private ImageReceiver(ROS2Node ros2Node, ROS2Topic<ImageMessage> imageTopic)
       {
+         this.ros2Node = ros2Node;
          decodeMat = new Mat(1, 1, opencv_core.CV_8UC1);
          decoder = new ImageMessageDecoder();
 
-         subscription = ros2Node.createSubscription2(imageTopic, this::receiveImage);
+         subscription = ros2Node.createSubscriptionSampler(imageTopic, this::receiveImage);
       }
 
       private void receiveImage(ImageMessage imageMessage)
@@ -199,7 +200,7 @@ public class ROS2RelayImageSensor extends ImageSensor
 
          CameraModel cameraModel = CameraModel.fromByte(imageMessage.getCameraModel());
 
-         RigidBodyTransform transformToWorld = new RigidBodyTransform(imageMessage.getOrientation(), imageMessage.getPosition());
+         RigidBodyTransform transformToWorld = new RigidBodyTransform(imageMessage.getOrientation().getQuaternion(), imageMessage.getPosition().getPoint());
 
          Instant imageAcquisitionTime = MessageTools.toInstant(imageMessage.getAcquisitionTime());
 
@@ -254,7 +255,7 @@ public class ROS2RelayImageSensor extends ImageSensor
       public void close()
       {
          running = false;
-         subscription.remove();
+         ros2Node.destroySubscription(subscription);
          decodeMat.release();
       }
    }

@@ -1,5 +1,7 @@
 package us.ihmc.rdx.behaviorTree.actions;
 
+import static us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition.MAX_NUMBER_OF_JOINTS;
+
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -8,6 +10,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition;
@@ -41,7 +44,6 @@ import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXArmMultiBodyGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXIKSolverColors;
 import us.ihmc.rdx.ui.widgets.ImGuiArmIconWidget;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -55,8 +57,6 @@ import us.ihmc.wholeBodyController.HandTransformTools;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition.MAX_NUMBER_OF_JOINTS;
 
 public class RDXArmAction extends RDXActionNode<ArmActionState, ArmActionDefinition>
 {

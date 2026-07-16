@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
+import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.BehaviorTreeSceneObjectStateMessage;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -35,7 +35,7 @@ public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinit
    public void toMessage(BehaviorTreeSceneObjectStateMessage message)
    {
       super.toMessage(message.getLatestModificationToData());
-      message.setId(id);
+      message.setId((int) id);
       super.toMessage(message.getDefinition());
       transform.toMessage(message.getTransformToWorld());
       message.setValid(valid.toMessage());
@@ -45,12 +45,12 @@ public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinit
    public void fromMessage(BehaviorTreeSceneObjectStateMessage message)
    {
       // Needs to be done first to detect incoming modification
-      fromMessage(message.getLatestModificationToData());
+      super.fromMessage(message.getLatestModificationToData());
 
       if (id != message.getId())
          LogTools.error("IDs should match! {} != {}", id, message.getId());
 
-      fromMessage(message.getDefinition());
+      super.fromMessage(message.getDefinition());
 
       transform.fromMessage(message.getTransformToWorld());
       referenceFrame.update();

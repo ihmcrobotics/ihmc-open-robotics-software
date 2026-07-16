@@ -4,31 +4,33 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
-import perception_msgs.msg.dds.ImageMessage;
-import sensor_msgs.msg.dds.CameraInfo;
-import sensor_msgs.msg.dds.Image;
+import perception_msgs.FramePlanarRegionsListMessage;
+import perception_msgs.ImageMessage;
+import sensor_msgs.CameraInfo;
+import sensor_msgs.Image;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.RawImage;
-import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.sensors.CameraIntrinsics;
 
-import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import java.time.Instant;
+import javax.annotation.Nullable;
 
 public class PerceptionMessageTools
 {
@@ -38,8 +40,8 @@ public class PerceptionMessageTools
       imageMessageToPack.setFocalLengthYPixels((float) cameraIntrinsics.getFy());
       imageMessageToPack.setPrincipalPointXPixels((float) cameraIntrinsics.getCx());
       imageMessageToPack.setPrincipalPointYPixels((float) cameraIntrinsics.getCy());
-      imageMessageToPack.setImageWidth(cameraIntrinsics.getWidth());
-      imageMessageToPack.setImageHeight(cameraIntrinsics.getHeight());
+      imageMessageToPack.setImageWidth((short) cameraIntrinsics.getWidth());
+      imageMessageToPack.setImageHeight((short) cameraIntrinsics.getHeight());
    }
 
    public static void publishCompressedDepthImage(BytePointer compressedDepthPointer,
@@ -59,7 +61,7 @@ public class PerceptionMessageTools
    public static void publishJPGCompressedColorImage(BytePointer compressedColorPointer,
                                                      ROS2Topic<ImageMessage> topic,
                                                      ImageMessage colorImageMessage,
-                                                     ROS2Helper helper,
+                                                     ROS2PublisherMap publisherMap,
                                                      Pose3DReadOnly cameraPose,
                                                      Instant acquisitionTime,
                                                      long sequenceNumber,
@@ -68,14 +70,14 @@ public class PerceptionMessageTools
                                                      float depthToMetersRatio)
    {
       packJPGCompressedColorImage(compressedColorPointer, colorImageMessage, cameraPose, acquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
-      helper.publish(topic, colorImageMessage);
+      publisherMap.publish(topic, colorImageMessage);
    }
 
    public static void publishFramePlanarRegionsList(FramePlanarRegionsList framePlanarRegionsList,
                                                     ROS2Topic<FramePlanarRegionsListMessage> topic,
-                                                    ROS2Helper ros2)
+                                                    ROS2PublisherMap publisherMap)
    {
-      ros2.publish(topic, PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
+      publisherMap.publish(topic, PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
    }
 
    public static void packImageMessageData(ImageMessage imageMessage, ByteBuffer dataBuffer)
@@ -83,15 +85,35 @@ public class PerceptionMessageTools
       packDataArray(imageMessage.getData(), dataBuffer);
    }
 
-   public static void packDataArray(IDLSequence.Byte dataToPack, ByteBuffer dataBuffer)
+   public static void packDataArray(IDLByteSequence dataToPack, ByteBuffer dataBuffer)
    {
-      dataToPack.resetQuick();
-      dataToPack.getBuffer().put(dataBuffer);
+      ByteBuffer source = dataBuffer.duplicate();
+      int byteCount = source.remaining();
+
+      dataToPack.clear();
+      if (byteCount <= 0)
+         return;
+
+      dataToPack.ensureMinCapacity(byteCount);
+      dataToPack.getBuffer().put(source);
    }
 
-   public static void packDataArray(IDLSequence.Byte dataToPack, BytePointer dataPointer)
+   public static void packDataArray(IDLByteSequence dataToPack, BytePointer dataPointer)
    {
-      packDataArray(dataToPack, dataPointer.asBuffer());
+      int start = (int) dataPointer.position();
+      int end = (int) dataPointer.limit();
+      int byteCount = end - start;
+
+      dataToPack.clear();
+      if (byteCount <= 0)
+         return;
+
+      dataToPack.ensureMinCapacity(byteCount);
+
+      ByteBuffer source = dataPointer.asBuffer().duplicate();
+      source.position(start);
+      source.limit(end);
+      dataToPack.getBuffer().put(source);
    }
 
    public static void packImageMessageData(ImageMessage imageMessage, Mat mat)
@@ -99,13 +121,13 @@ public class PerceptionMessageTools
       packDataArray(imageMessage.getData(), mat);
    }
 
-   public static void packDataArray(IDLSequence.Byte dataToPack, Mat mat)
+   public static void packDataArray(IDLByteSequence dataToPack, Mat mat)
    {
       long size = mat.step() * mat.rows();
       packDataArray(dataToPack, mat.data().limit(size).asBuffer());
    }
 
-   public static void packShortDataArray(IDLSequence.Byte dataToPack, Mat mat)
+   public static void packShortDataArray(IDLByteSequence dataToPack, Mat mat)
    {
       if (mat.type() != opencv_core.CV_16UC1)
          throw new IllegalArgumentException("Expected CV_16UC1 Mat");
@@ -130,7 +152,7 @@ public class PerceptionMessageTools
 
    public static void packImageMessageData(ImageMessage imageMessage, BytePointer dataPointer)
    {
-      packImageMessageData(imageMessage, dataPointer.asBuffer());
+      packDataArray(imageMessage.getData(), dataPointer);
    }
 
    /**
@@ -153,7 +175,7 @@ public class PerceptionMessageTools
       messageToPack.setPixelFormat(image.getPixelFormat().toByte());
       messageToPack.setCameraModel(image.getCameraModel().toByte());
       messageToPack.setDepthDiscretization(image.getDepthDiscretization());
-      messageToPack.setSequenceNumber(image.getSequenceNumber());
+      messageToPack.setSequenceNumber((int) image.getSequenceNumber());
       MessageTools.toMessage(image.getAcquisitionTime(), messageToPack.getAcquisitionTime());
       messageToPack.getPosition().set(image.getTranslation());
       messageToPack.getOrientation().set(image.getRotation());
@@ -197,11 +219,11 @@ public class PerceptionMessageTools
                                        float depthToMetersRatio)
    {
       packImageMessageData(imageMessage, dataBytePointer);
-      imageMessage.setImageHeight(height);
-      imageMessage.setImageWidth(width);
+      imageMessage.setImageHeight((short) height);
+      imageMessage.setImageWidth((short) width);
       imageMessage.getPosition().set(cameraPose.getPosition());
       imageMessage.getOrientation().set(cameraPose.getOrientation());
-      imageMessage.setSequenceNumber(sequenceNumber);
+      imageMessage.setSequenceNumber((int) sequenceNumber);
       MessageTools.toMessage(acquisitionTime, imageMessage.getAcquisitionTime());
       imageMessage.setDepthDiscretization(depthToMetersRatio);
    }
@@ -223,8 +245,12 @@ public class PerceptionMessageTools
       imageMessageToPack.setCompressionType(compressionType.toByte());
       if (ousterBeamAltitudeAngles != null)
          MessageTools.packIDLSequence(ousterBeamAltitudeAngles, imageMessageToPack.getOusterBeamAltitudeAngles());
+      else
+         imageMessageToPack.getOusterBeamAltitudeAngles().clear();
       if (ousterBeamAzimuthAngles != null)
          MessageTools.packIDLSequence(ousterBeamAzimuthAngles, imageMessageToPack.getOusterBeamAzimuthAngles());
+      else
+         imageMessageToPack.getOusterBeamAzimuthAngles().clear();
    }
 
    public static void packImageMessage(RawImage image, String cameraFrameId, Image messageToPack)
@@ -249,19 +275,15 @@ public class PerceptionMessageTools
       };
       messageToPack.setEncoding(encoding);
 
-      // Get the message's internal buffer
-      ByteBuffer dataBuffer = messageToPack.getData().getBuffer();
-
       // Set byte order
       messageToPack.setIsBigendian((byte) 0);
 
       // Set step
       Mat cpuImage = image.getCpuImageMat();
-      messageToPack.setStep(cpuImage.step());
+      messageToPack.setStep((int) cpuImage.step());
 
       // Set data
-      int memorySize = (int) OpenCVTools.memorySize(cpuImage);
-      dataBuffer.position(0).put(cpuImage.data().limit(memorySize).asByteBuffer());
+      packDataArray(messageToPack.getData(), cpuImage);
    }
 
    private static String getOpenCVTypeString(int openCVType)
@@ -311,8 +333,8 @@ public class PerceptionMessageTools
 
       // Distortion model
       cameraInfoToPack.setDistortionModel("plumb_bob");
-      cameraInfoToPack.getD().clear(5);
-      cameraInfoToPack.getD().add(new double[]{0.0, 0.0, 0.0, 0.0, 0.0}); // We (mostly) work with rectified images, so assume no distortion
+      cameraInfoToPack.getD().clear();
+      cameraInfoToPack.getD().addAll(new double[]{0.0, 0.0, 0.0, 0.0, 0.0}); // We (mostly) work with rectified images, so assume no distortion
 
       /*
        * Set the intrinsics matrix
@@ -375,7 +397,7 @@ public class PerceptionMessageTools
       cameraInfoToPack.getRoi().setDoRectify(false);
    }
 
-   public static void copyToFloatPointer(IDLSequence.Float sourceIDLSequence, FloatPointer floatPointerToPack, int startIndex)
+   public static void copyToFloatPointer(IDLFloatSequence sourceIDLSequence, FloatPointer floatPointerToPack, int startIndex)
    {
       for (int i = 0; i < sourceIDLSequence.size(); i++)
       {

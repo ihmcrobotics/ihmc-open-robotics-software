@@ -1,11 +1,8 @@
 package us.ihmc.avatar.multiContact;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
+import controller_msgs.RobotConfigurationData;
+import ihmc_common_msgs.SelectionMatrix3DMessage;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.multiContact.RobotTransformOptimizer.RigidBodyPairAngularErrorCalculator;
 import us.ihmc.avatar.multiContact.RobotTransformOptimizer.RigidBodyPairLinearErrorCalculator;
 import us.ihmc.avatar.multiContact.RobotTransformOptimizer.RigidBodyPairSpatialErrorCalculator;
@@ -20,6 +17,9 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class MultiContactScriptMatcher
 {
@@ -65,8 +65,8 @@ public class MultiContactScriptMatcher
             KinematicsToolboxRigidBodyMessage inputMessage = anchorDescription.getInputMessage();
             SelectionMatrix3DMessage linearSelection = inputMessage.getLinearSelectionMatrix();
             SelectionMatrix3DMessage angularSelection = inputMessage.getAngularSelectionMatrix();
-            RigidBodyTransform controlFramePose = new RigidBodyTransform(inputMessage.getControlFrameOrientationInEndEffector(),
-                                                                         inputMessage.getControlFramePositionInEndEffector());
+            RigidBodyTransform controlFramePose = new RigidBodyTransform(inputMessage.getControlFrameOrientationInEndEffector().getQuaternion(),
+                                                                         inputMessage.getControlFramePositionInEndEffector().getPoint());
 
             double weight = 1.0;
             if (anchorDescription.isContactState())
@@ -115,7 +115,9 @@ public class MultiContactScriptMatcher
    {
 //      if (configuration.getJointNameHash() != jointNameHash)
 //         throw new RuntimeException("Hashes are different.");
-      scriptFullRobotModel.getRootJoint().getJointPose().set(configuration.getRootPosition(), configuration.getRootOrientation());
+      scriptFullRobotModel.getRootJoint()
+                          .getJointPose()
+                          .set(configuration.getRootPosition().getPoint(), configuration.getRootOrientation().getQuaternion());
       for (int i = 0; i < configuration.getJointAngles().size(); i++)
          allScriptJoints[i].setQ(configuration.getJointAngles().get(i));
       scriptFullRobotModel.updateFrames();

@@ -1,6 +1,6 @@
 package us.ihmc.perception;
 
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.ImageMessage;
 
 /**
  * Used with the ImageMessage camera model field.

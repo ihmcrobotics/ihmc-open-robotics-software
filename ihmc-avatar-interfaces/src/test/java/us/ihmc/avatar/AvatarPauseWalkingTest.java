@@ -1,12 +1,13 @@
 package us.ihmc.avatar;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import controller_msgs.PauseWalkingMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
@@ -25,8 +26,6 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 {
@@ -265,7 +264,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    private void addFootstep(Point3D stepLocation, Quaternion orient, RobotSide robotSide, FootstepDataListMessage message)
    {
       FootstepDataMessage footstepData = new FootstepDataMessage();
-      footstepData.getLocation().set(stepLocation);
+      footstepData.getLocation().getPoint().set(stepLocation);
       footstepData.getOrientation().set(orient);
       footstepData.setRobotSide(robotSide.toByte());
       message.getFootstepDataList().add().set(footstepData);
