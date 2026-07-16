@@ -157,6 +157,12 @@ class JointLevelKFEncoderNISConsistencyTest
             assertTrue(Double.isFinite(nis) && nis >= 0.0, "NIS must be finite and non-negative");
             sumNIS[i] += nis;
          }
+         // Signed innovation publishes: nu_i = z_i - (H x^-)_i = z_i - xPrior_i (H is identity on the q block).
+         if (t == 0)
+            for (int i = 0; i < n; i++)
+               assertEquals(z.get(i, 0) - xPrior.get(i, 0),
+                            ((YoDouble) fixture.registry.findVariable("jointKF_encInnov_" + fixture.filteredJoints.get(i).getName())).getValue(),
+                            1.0e-15, "signed encoder innovation must equal z - Hx");
       }
 
       double[] mean = new double[n];

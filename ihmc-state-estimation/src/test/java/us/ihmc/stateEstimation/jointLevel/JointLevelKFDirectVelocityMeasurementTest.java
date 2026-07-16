@@ -221,6 +221,12 @@ class JointLevelKFDirectVelocityMeasurementTest
             assertTrue(Double.isFinite(nis) && nis >= 0.0, "qd NIS must be finite and non-negative");
             sumNIS[i] += nis;
          }
+         // Signed innovation publishes: nu_i = z_i - (H x^-)_i = z_i - xPrior_{n+i} (H_qd = [0 | I_n | 0]).
+         if (t == 0)
+            for (int i = 0; i < n; i++)
+               assertEquals(z.get(i, 0) - xPrior.get(n + i, 0),
+                            ((YoDouble) fixture.registry.findVariable("jointKF_qdInnov_" + fixture.filteredJoints.get(i).getName())).getValue(),
+                            1.0e-15, "signed qd innovation must equal z - Hx");
       }
 
       // Cross-talk guard: an "encoderVelocity" update must never publish into the position NIS (regression
