@@ -220,6 +220,10 @@ public class InvariantEKF
    public double getLastResidualNorm()   { return updater.getResidualNorm(); }
    public boolean wasLastUpdateApplied() { return updater.wasLastUpdateApplied(); }
    public int getUpdateGateSkipCount()   { return updater.getGateSkipCount(); }
+   /** trace(H·P·Hᵀ) of the most recent update's S — the state-covariance share. */
+   public double getLastHPHtTrace()      { return updater.getLastHPHtTrace(); }
+   /** trace(R) of the most recent update's S — the measurement-noise share (post-inflation). */
+   public double getLastMeasurementNoiseTrace() { return updater.getLastMeasurementNoiseTrace(); }
 
    /** @return the number of contact columns N. */
    public int getNumberOfContacts()

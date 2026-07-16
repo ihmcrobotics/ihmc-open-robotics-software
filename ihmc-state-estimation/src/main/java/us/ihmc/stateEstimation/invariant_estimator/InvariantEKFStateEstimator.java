@@ -166,6 +166,17 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final YoDouble yoContactNISLowerBound = new YoDouble("invariantContactNISLowerBound", registry);
    private final YoDouble yoContactNISUpperBound = new YoDouble("invariantContactNISUpperBound", registry);
 
+   // S-decomposition diagnostics (2026-07-16, NIS-miscalibration investigation): S = H·P·Hᵀ + R per contact
+   // update. The constant-R sweeps moved NIS only ~3x at R/70 (replay A/B), so these attribute the S trace to
+   // its three inputs: the state-covariance share (HPHᵀ), the applied measurement noise AFTER the swing-foot
+   // probability inflation (R), and the inflation factor itself. P-block traces attribute HPHᵀ further:
+   // trace(HPHᵀ) = tr(P_base) + tr(P_contact) − 2·tr(P_cross) for this H (±I blocks).
+   private final SideDependentList<YoDouble> yoContactSHPHtTrace;
+   private final SideDependentList<YoDouble> yoContactSRTrace;
+   private final SideDependentList<YoDouble> yoContactRInflation;
+   private final SideDependentList<YoDouble> yoContactPContactTrace;
+   private final YoDouble yoContactPBaseTrace = new YoDouble("invariantContactPBaseTrace", registry);
+
    // Gravity-leveling (tilt) diagnostics — the hardware-available "is pitch/roll wrong" signal (no ground truth
    // needed): the angle/roll/pitch between the measured gravity direction and the filter's estimate, computed
    // EVERY tick even when the update is gated off. yoGravityUpdateActive flags the ticks the tilt update fired.
@@ -368,6 +379,14 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
                                                       new YoDouble("invariantContactResidualNormRight", registry));
       yoContactUpdateApplied = new SideDependentList<>(new YoBoolean("invariantContactUpdateAppliedLeft", registry),
                                                        new YoBoolean("invariantContactUpdateAppliedRight", registry));
+      yoContactSHPHtTrace = new SideDependentList<>(new YoDouble("invariantContactSHPHtTraceLeft", registry),
+                                                    new YoDouble("invariantContactSHPHtTraceRight", registry));
+      yoContactSRTrace = new SideDependentList<>(new YoDouble("invariantContactSRTraceLeft", registry),
+                                                 new YoDouble("invariantContactSRTraceRight", registry));
+      yoContactRInflation = new SideDependentList<>(new YoDouble("invariantContactRInflationLeft", registry),
+                                                    new YoDouble("invariantContactRInflationRight", registry));
+      yoContactPContactTrace = new SideDependentList<>(new YoDouble("invariantContactPContactTraceLeft", registry),
+                                                       new YoDouble("invariantContactPContactTraceRight", registry));
       // Two-sided χ² acceptance band for the contact-update NIS (constant: fixed DOF and confidence).
       ChiSquaredDistribution contactNISDistribution = new ChiSquaredDistribution(CONTACT_MEASUREMENT_DOF);
       double lowerTail = 0.5 * (1.0 - CONSISTENCY_CONFIDENCE);
@@ -527,22 +546,37 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
 
       // Knob 1 (measurement covariance): inflate a swing foot's contact FK noise so it stops dragging the
       // base velocity, while a stance foot keeps constraining it.
+      yoContactPBaseTrace.set(covarianceBlockTrace(ekf.getState().basePositionTangentIndex()));
       for (RobotSide side : RobotSide.values)
       {
          double contactProbability = yoContactProbability.get(side).getDoubleValue();
          contactInBody.setToZero(soleFrames.get(side));
          contactInBody.changeFrame(pelvisFrame);
          contactMeasurementNoiseProvider.packContactCovariance(side, inflatedContactCovariance);
-         inflatedContactCovariance.scale(measurementInflation(contactProbability));
+         double inflation = measurementInflation(contactProbability);
+         inflatedContactCovariance.scale(inflation);
+         yoContactRInflation.get(side).set(inflation);
+         yoContactPContactTrace.get(side).set(covarianceBlockTrace(ekf.getState().contactTangentIndex(CONTACT_INDICES.get(side))));
          ekf.update(CONTACT_INDICES.get(side), contactInBody, inflatedContactCovariance);
          yoContactNIS.get(side).set(ekf.getLastNormalizedInnovationSquared());
          yoContactCondSProxyLog10.get(side).set(Math.log10(ekf.getLastConditionProxy()));
          yoContactResidualNorm.get(side).set(ekf.getLastResidualNorm());
          yoContactUpdateApplied.get(side).set(ekf.wasLastUpdateApplied());
+         yoContactSHPHtTrace.get(side).set(ekf.getLastHPHtTrace());
+         yoContactSRTrace.get(side).set(ekf.getLastMeasurementNoiseTrace());
       }
       yoInvariantUpdateGateSkipCount.set(ekf.getUpdateGateSkipCount());
 
       updateYoVariables();
+   }
+
+   /** Trace of the 3×3 diagonal block of the EKF covariance starting at {@code tangentIndex}. */
+   private double covarianceBlockTrace(int tangentIndex)
+   {
+      org.ejml.data.DMatrixRMaj covariance = ekf.getState().getCovariance();
+      return covariance.get(tangentIndex, tangentIndex)
+           + covariance.get(tangentIndex + 1, tangentIndex + 1)
+           + covariance.get(tangentIndex + 2, tangentIndex + 2);
    }
 
    /**

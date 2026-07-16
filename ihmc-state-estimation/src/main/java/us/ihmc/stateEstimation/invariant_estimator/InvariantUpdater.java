@@ -72,6 +72,8 @@ public class InvariantUpdater
    private double residualNorm = Double.NaN;     // ‖residual‖ of the most recent update (contact or gravity)
    private boolean lastUpdateApplied = false;    // false when the conditioning gate skipped the last update
    private int gateSkipCount = 0;                // running count of gate-skipped updates
+   private double lastHPHtTrace = Double.NaN;             // trace(H·P·Hᵀ) of the most recent S assembly
+   private double lastMeasurementNoiseTrace = Double.NaN; // trace(R) of the most recent S assembly
 
    /** Optional contact measurement subpiece, owned and called by this updater (see {@link #updateContact}). */
    private ContactUpdater contactUpdater = null;
@@ -144,6 +146,8 @@ public class InvariantUpdater
       CommonOps_DDRM.mult(H, covariance, hTimesCovariance);
       innovationCovariance.reshape(z,z);
       CommonOps_DDRM.multTransB(hTimesCovariance, H, innovationCovariance);
+      lastHPHtTrace = CommonOps_DDRM.trace(innovationCovariance);
+      lastMeasurementNoiseTrace = CommonOps_DDRM.trace(measurementCovariance);
       CommonOps_DDRM.addEquals(innovationCovariance, measurementCovariance);
 
       // Conditioning gate + diagnostics (cheap Cholesky, no eigendecomposition). Compute BEFORE touching x/P so
@@ -248,6 +252,10 @@ public class InvariantUpdater
    public boolean wasLastUpdateApplied()        { return lastUpdateApplied; }
    /** Running count of updates skipped by the conditioning gate. */
    public int getGateSkipCount()                { return gateSkipCount; }
+   /** trace(H·P·Hᵀ) of the most recent S assembly — the state-covariance share of S. */
+   public double getLastHPHtTrace()             { return lastHPHtTrace; }
+   /** trace(R) of the most recent S assembly — the measurement-noise share of S (post-inflation). */
+   public double getLastMeasurementNoiseTrace() { return lastMeasurementNoiseTrace; }
 
    /**
     * @return the Normalized Innovation Squared rᵀ·S⁻¹·r from the most recent {@link #update} call, or
