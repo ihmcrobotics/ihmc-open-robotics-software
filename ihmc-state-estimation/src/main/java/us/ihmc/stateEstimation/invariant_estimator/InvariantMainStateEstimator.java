@@ -84,10 +84,16 @@ public class InvariantMainStateEstimator implements StateEstimatorController
 
    public enum ControllerFacingQdFilterType { NONE, NOTCH, LOW_PASS }
 
+   /** Which controller-facing joint quantities the selected filter applies to (live-switchable). */
+   public enum ControllerFacingFilteredQuantity { JOINT_VELOCITIES, JOINT_POSITIONS, BOTH }
+
    private final YoBoolean yoControllerFacingNotchEnabled;
    private final us.ihmc.yoVariables.variable.YoEnum<ControllerFacingQdFilterType> yoControllerFacingQdFilterType;
+   private final us.ihmc.yoVariables.variable.YoEnum<ControllerFacingFilteredQuantity> yoControllerFacingFilteredQuantity;
    private final Map<String, Biquad> controllerFacingNotches = new HashMap<>();
    private final Map<String, Biquad> controllerFacingLowPasses = new HashMap<>();
+   private final Map<String, Biquad> controllerFacingNotchesQ = new HashMap<>();
+   private final Map<String, Biquad> controllerFacingLowPassesQ = new HashMap<>();
    /** Supplies "high-level controller is in WALKING" (not RL_CONTROL); null = ungated. */
    private BooleanSupplier walkingGate = null;
 
@@ -227,6 +233,8 @@ public class InvariantMainStateEstimator implements StateEstimatorController
       yoControllerFacingNotchEnabled.set(true);
       yoControllerFacingQdFilterType = new us.ihmc.yoVariables.variable.YoEnum<>("controllerFacingQdFilterType", registry, ControllerFacingQdFilterType.class);
       yoControllerFacingQdFilterType.set(ControllerFacingQdFilterType.LOW_PASS);
+      yoControllerFacingFilteredQuantity = new us.ihmc.yoVariables.variable.YoEnum<>("controllerFacingFilteredQuantity", registry, ControllerFacingFilteredQuantity.class);
+      yoControllerFacingFilteredQuantity.set(ControllerFacingFilteredQuantity.JOINT_VELOCITIES);
       for (OneDoFJointBasics joint : oneDoFJoints)
       {
          String name = joint.getName();
@@ -234,6 +242,8 @@ public class InvariantMainStateEstimator implements StateEstimatorController
          {
             controllerFacingNotches.put(name, Biquad.notch(NOTCH_CENTER_HZ, NOTCH_Q, dt));
             controllerFacingLowPasses.put(name, Biquad.lowPass(LOW_PASS_CORNER_HZ, dt));
+            controllerFacingNotchesQ.put(name, Biquad.notch(NOTCH_CENTER_HZ, NOTCH_Q, dt));
+            controllerFacingLowPassesQ.put(name, Biquad.lowPass(LOW_PASS_CORNER_HZ, dt));
          }
       }
 
@@ -338,14 +348,27 @@ public class InvariantMainStateEstimator implements StateEstimatorController
          Biquad notch = controllerFacingNotches.get(joint.getName());
          if (notch != null)
          {
-            double notched = notch.update(velocity);
-            double lowPassed = controllerFacingLowPasses.get(joint.getName()).update(velocity);
+            double notchedQd = notch.update(velocity);
+            double lowPassedQd = controllerFacingLowPasses.get(joint.getName()).update(velocity);
+            double notchedQ = controllerFacingNotchesQ.get(joint.getName()).update(position);
+            double lowPassedQ = controllerFacingLowPassesQ.get(joint.getName()).update(position);
             if (yoControllerFacingNotchEnabled.getBooleanValue() && (walkingGate == null || walkingGate.getAsBoolean()))
             {
+               ControllerFacingFilteredQuantity quantity = yoControllerFacingFilteredQuantity.getEnumValue();
+               boolean applyVelocity = quantity != ControllerFacingFilteredQuantity.JOINT_POSITIONS;
+               boolean applyPosition = quantity != ControllerFacingFilteredQuantity.JOINT_VELOCITIES;
                switch (yoControllerFacingQdFilterType.getEnumValue())
                {
-                  case NOTCH -> velocity = notched;
-                  case LOW_PASS -> velocity = lowPassed;
+                  case NOTCH ->
+                  {
+                     if (applyVelocity) velocity = notchedQd;
+                     if (applyPosition) position = notchedQ;
+                  }
+                  case LOW_PASS ->
+                  {
+                     if (applyVelocity) velocity = lowPassedQd;
+                     if (applyPosition) position = lowPassedQ;
+                  }
                   case NONE -> { }
                }
             }
