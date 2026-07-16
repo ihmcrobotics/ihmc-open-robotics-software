@@ -25,6 +25,11 @@ import us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter;
 import us.ihmc.stateEstimation.jointLevel.ProprioceptivePreFilter;
 import us.ihmc.stateEstimation.jointLevel.ZeroIMUBiasProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BooleanSupplier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +71,48 @@ public class InvariantMainStateEstimator implements StateEstimatorController
    private final SensorOutputMapReadOnly processedSensorOutput;
    private final OneDoFJointBasics[] oneDoFJoints;
    private final FloatingJointBasics rootJoint;
+
+   // Anti-damping notch (2026-07-16): center at the measured mode, Q=2 → ~6 Hz-wide stopband,
+   // <5° phase at 3 Hz. Applied to controller-facing hip/knee pitch qd only, gated on WALKING.
+   private static final double NOTCH_CENTER_HZ = 11.8;
+   private static final double NOTCH_Q = 2.0;
+   private final YoBoolean yoControllerFacingNotchEnabled;
+   private final Map<String, JointVelocityNotch> controllerFacingNotches = new HashMap<>();
+   /** Supplies "high-level controller is in WALKING" (not RL_CONTROL); null = ungated. */
+   private BooleanSupplier walkingGate = null;
+
+   /** Wire to the high-level controller state: gate closes the notch outside WALKING (e.g. RL_CONTROL). */
+   public void setControllerFacingNotchGate(BooleanSupplier walkingGate)
+   {
+      this.walkingGate = walkingGate;
+   }
+
+   /** RBJ biquad notch, direct form 1; fixed coefficients (f0, Q, dt known at construction). */
+   private static final class JointVelocityNotch
+   {
+      private final double b0, b1, b2, a1, a2;
+      private double x1, x2, y1, y2;
+
+      JointVelocityNotch(double centerHz, double q, double dt)
+      {
+         double w0 = 2.0 * Math.PI * centerHz * dt;
+         double alpha = Math.sin(w0) / (2.0 * q);
+         double a0 = 1.0 + alpha;
+         b0 = 1.0 / a0;
+         b1 = -2.0 * Math.cos(w0) / a0;
+         b2 = 1.0 / a0;
+         a1 = -2.0 * Math.cos(w0) / a0;
+         a2 = (1.0 - alpha) / a0;
+      }
+
+      double update(double x)
+      {
+         double y = b0 * x + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
+         x2 = x1; x1 = x;
+         y2 = y1; y1 = y;
+         return y;
+      }
+   }
 
    private final HumanoidReferenceFrames referenceFrames;
 
@@ -148,6 +195,22 @@ public class InvariantMainStateEstimator implements StateEstimatorController
                                                           initialCovariance);
       invariantEstimator.setRunningAsMain(true); // disables the invariantMinusMain* self-comparisons
       registry.addChild(invariantEstimator.getYoRegistry());
+
+      // 2026-07-16 anti-damping fix: notch the CONTROLLER-FACING qd of the pitch-plane leg joints
+      // (hips + knees — the two measured energy injectors) around the measured 11.8 Hz mode. With
+      // the measured ~19 ms loop delay, velocity feedback near f = 1/(4·τ_d) ≈ 13 Hz injects energy
+      // (+2.7 W measured, L knee, log jointKF_Osc_0716). The old ALPHA_COMPLEMENTARY chain
+      // attenuated this band implicitly; the JointKF passes it at unity gain. Estimator-internal
+      // consumers (InEKF, anchors, biases) keep the full-bandwidth signal — only the hand-off to
+      // the shared model the WBC reads is filtered, and only when the walking gate is active.
+      yoControllerFacingNotchEnabled = new YoBoolean("controllerFacingQdNotchEnabled", registry);
+      yoControllerFacingNotchEnabled.set(true);
+      for (OneDoFJointBasics joint : oneDoFJoints)
+      {
+         String name = joint.getName();
+         if (name.contains("HIP_Y") || name.contains("KNEE_Y"))
+            controllerFacingNotches.put(name, new JointVelocityNotch(NOTCH_CENTER_HZ, NOTCH_Q, dt));
+      }
 
       // Defer the joint-level KF's initialization until both feet are firmly in contact. Seeding it while the
       // robot hangs leaves the exported base-IMU gyro bias unobservable (its only anchor is the phase-2 stance
@@ -241,6 +304,17 @@ public class InvariantMainStateEstimator implements StateEstimatorController
             double estimatedVelocity = preFilter.getEstimatedJointVelocity(joint);
             if (!Double.isNaN(estimatedVelocity))
                velocity = estimatedVelocity;
+         }
+
+         // Anti-damping notch on the WBC-facing qd (see constructor comment). The filter always
+         // runs so its state stays warm (bumpless engage); the output is only USED when the master
+         // switch is on AND the walking gate reports the WALKING high-level state (not RL_CONTROL).
+         JointVelocityNotch notch = controllerFacingNotches.get(joint.getName());
+         if (notch != null)
+         {
+            double filtered = notch.update(velocity);
+            if (yoControllerFacingNotchEnabled.getBooleanValue() && (walkingGate == null || walkingGate.getAsBoolean()))
+               velocity = filtered;
          }
 
          joint.setQ(position);
