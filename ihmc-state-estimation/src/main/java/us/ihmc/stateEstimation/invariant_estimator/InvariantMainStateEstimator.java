@@ -72,37 +72,57 @@ public class InvariantMainStateEstimator implements StateEstimatorController
    private final OneDoFJointBasics[] oneDoFJoints;
    private final FloatingJointBasics rootJoint;
 
-   // Anti-damping notch (2026-07-16): center at the measured mode, Q=2 → ~6 Hz-wide stopband,
-   // <5° phase at 3 Hz. Applied to controller-facing hip/knee pitch qd only, gated on WALKING.
+   // Anti-damping filter on the controller-facing hip/knee pitch qd (2026-07-16), gated on WALKING.
+   // NOTCH (11.8 Hz, Q=2): surgical, <5° phase at 3 Hz — hardware showed the mode slides to the
+   // notch shoulder (13.8 Hz, injection 2.7 -> 0.096 W): a 19 ms loop delay anti-damps a BAND, not
+   // a line. LOW_PASS (2nd-order Butterworth, 7 Hz): rolls off the whole harmful band — what the
+   // old ALPHA_COMPLEMENTARY chain did implicitly — at ~15-20° phase cost at 3 Hz. Selectable LIVE
+   // via the controllerFacingQdFilterType YoEnum.
    private static final double NOTCH_CENTER_HZ = 11.8;
    private static final double NOTCH_Q = 2.0;
+   private static final double LOW_PASS_CORNER_HZ = 7.0;
+
+   public enum ControllerFacingQdFilterType { NONE, NOTCH, LOW_PASS }
+
    private final YoBoolean yoControllerFacingNotchEnabled;
-   private final Map<String, JointVelocityNotch> controllerFacingNotches = new HashMap<>();
+   private final us.ihmc.yoVariables.variable.YoEnum<ControllerFacingQdFilterType> yoControllerFacingQdFilterType;
+   private final Map<String, Biquad> controllerFacingNotches = new HashMap<>();
+   private final Map<String, Biquad> controllerFacingLowPasses = new HashMap<>();
    /** Supplies "high-level controller is in WALKING" (not RL_CONTROL); null = ungated. */
    private BooleanSupplier walkingGate = null;
 
-   /** Wire to the high-level controller state: gate closes the notch outside WALKING (e.g. RL_CONTROL). */
+   /** Wire to the high-level controller state: gate closes the filter outside WALKING (e.g. RL_CONTROL). */
    public void setControllerFacingNotchGate(BooleanSupplier walkingGate)
    {
       this.walkingGate = walkingGate;
    }
 
-   /** RBJ biquad notch, direct form 1; fixed coefficients (f0, Q, dt known at construction). */
-   private static final class JointVelocityNotch
+   /** RBJ biquad, direct form 1; fixed coefficients (shape, f0, Q, dt known at construction). */
+   private static final class Biquad
    {
       private final double b0, b1, b2, a1, a2;
       private double x1, x2, y1, y2;
 
-      JointVelocityNotch(double centerHz, double q, double dt)
+      private Biquad(double b0, double b1, double b2, double a1, double a2)
+      {
+         this.b0 = b0; this.b1 = b1; this.b2 = b2; this.a1 = a1; this.a2 = a2;
+      }
+
+      static Biquad notch(double centerHz, double q, double dt)
       {
          double w0 = 2.0 * Math.PI * centerHz * dt;
          double alpha = Math.sin(w0) / (2.0 * q);
          double a0 = 1.0 + alpha;
-         b0 = 1.0 / a0;
-         b1 = -2.0 * Math.cos(w0) / a0;
-         b2 = 1.0 / a0;
-         a1 = -2.0 * Math.cos(w0) / a0;
-         a2 = (1.0 - alpha) / a0;
+         return new Biquad(1.0 / a0, -2.0 * Math.cos(w0) / a0, 1.0 / a0, -2.0 * Math.cos(w0) / a0, (1.0 - alpha) / a0);
+      }
+
+      static Biquad lowPass(double cornerHz, double dt)
+      {
+         double w0 = 2.0 * Math.PI * cornerHz * dt;
+         double alpha = Math.sin(w0) / (2.0 * Math.sqrt(0.5)); // Q = 1/sqrt(2): Butterworth
+         double a0 = 1.0 + alpha;
+         double c = 1.0 - Math.cos(w0);
+         return new Biquad(0.5 * c / a0, c / a0, 0.5 * c / a0, -2.0 * Math.cos(w0) / a0, (1.0 - alpha) / a0);
       }
 
       double update(double x)
@@ -205,11 +225,16 @@ public class InvariantMainStateEstimator implements StateEstimatorController
       // the shared model the WBC reads is filtered, and only when the walking gate is active.
       yoControllerFacingNotchEnabled = new YoBoolean("controllerFacingQdNotchEnabled", registry);
       yoControllerFacingNotchEnabled.set(true);
+      yoControllerFacingQdFilterType = new us.ihmc.yoVariables.variable.YoEnum<>("controllerFacingQdFilterType", registry, ControllerFacingQdFilterType.class);
+      yoControllerFacingQdFilterType.set(ControllerFacingQdFilterType.LOW_PASS);
       for (OneDoFJointBasics joint : oneDoFJoints)
       {
          String name = joint.getName();
          if (name.contains("HIP_Y") || name.contains("KNEE_Y"))
-            controllerFacingNotches.put(name, new JointVelocityNotch(NOTCH_CENTER_HZ, NOTCH_Q, dt));
+         {
+            controllerFacingNotches.put(name, Biquad.notch(NOTCH_CENTER_HZ, NOTCH_Q, dt));
+            controllerFacingLowPasses.put(name, Biquad.lowPass(LOW_PASS_CORNER_HZ, dt));
+         }
       }
 
       // Defer the joint-level KF's initialization until both feet are firmly in contact. Seeding it while the
@@ -306,15 +331,24 @@ public class InvariantMainStateEstimator implements StateEstimatorController
                velocity = estimatedVelocity;
          }
 
-         // Anti-damping notch on the WBC-facing qd (see constructor comment). The filter always
-         // runs so its state stays warm (bumpless engage); the output is only USED when the master
-         // switch is on AND the walking gate reports the WALKING high-level state (not RL_CONTROL).
-         JointVelocityNotch notch = controllerFacingNotches.get(joint.getName());
+         // Anti-damping filter on the WBC-facing qd (see field comments). BOTH filters always run
+         // so their state stays warm (bumpless live switching via the YoEnum); the selected output
+         // is only USED when the master switch is on AND the walking gate reports the WALKING
+         // high-level state (not RL_CONTROL).
+         Biquad notch = controllerFacingNotches.get(joint.getName());
          if (notch != null)
          {
-            double filtered = notch.update(velocity);
+            double notched = notch.update(velocity);
+            double lowPassed = controllerFacingLowPasses.get(joint.getName()).update(velocity);
             if (yoControllerFacingNotchEnabled.getBooleanValue() && (walkingGate == null || walkingGate.getAsBoolean()))
-               velocity = filtered;
+            {
+               switch (yoControllerFacingQdFilterType.getEnumValue())
+               {
+                  case NOTCH -> velocity = notched;
+                  case LOW_PASS -> velocity = lowPassed;
+                  case NONE -> { }
+               }
+            }
          }
 
          joint.setQ(position);
