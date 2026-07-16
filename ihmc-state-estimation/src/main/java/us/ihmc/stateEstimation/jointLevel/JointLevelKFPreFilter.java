@@ -277,6 +277,13 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    // joint that silently fell back to ENCODER_VAR is visible). Indexed by joint state index.
    private YoDouble[] yoEncNIS;
    private YoDouble[] yoEncR;
+   // Signed pre-update innovations nu_i = z_i - (H x)_i for the same two channels (rad / rad/s). NIS squares
+   // away the sign; these keep it — the DISCRIMINATOR for lag-shaped vs impact-shaped encoder innovations:
+   // during walking, corr(encInnov, qd_meas/(2*pi*25)) near +1 with slope near 1 implicates the 25 Hz
+   // drive-side position filter lag (nu tracks the first-order lag error qd/omega_c); innovation instead
+   // concentrated in <100 ms bursts at contact transitions implicates unmodeled impact acceleration vs Qa.
+   private YoDouble[] yoEncInnov;
+   private YoDouble[] yoQdInnov;
    // Direct-velocity channel diagnostics, same semantics as the encoder pair: yoQdNIS[i] = nu_i^2/S_ii of
    // velocity row i (E[NIS] = 1 when R is honest), yoQdR[i] = this tick's APPLIED variance — measured floor
    // plus the adaptive lag inflation, so the inflation itself is visible in the log. yoUseDirectVelocity is
@@ -934,8 +941,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       yoQaCapBindCount = new YoInteger[n];
       yoEncNIS = new YoDouble[n];
       yoEncR = new YoDouble[n];
+      yoEncInnov = new YoDouble[n];
       yoQdNIS = new YoDouble[n];
       yoQdR = new YoDouble[n];
+      yoQdInnov = new YoDouble[n];
       yoUseDirectVelocity = new YoBoolean("jointKFUseDirectVelocityMeasurement", registry);
       yoUseDirectVelocity.set(useDirectVelocityMeasurement);
       for (var e : jointToIndex.entrySet())
@@ -952,10 +961,14 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          yoQaCapBindCount[idx] = new YoInteger("jointKF_QaCapBind_" + jointName + "_count", registry);
          yoEncNIS[idx] = new YoDouble("jointKF_encNIS_" + jointName, registry);
          yoEncNIS[idx].set(Double.NaN); // no encoder update has run yet
+         yoEncInnov[idx] = new YoDouble("jointKF_encInnov_" + jointName, registry);
+         yoEncInnov[idx].set(Double.NaN); // signed innovation (rad); no encoder update has run yet
          yoEncR[idx] = new YoDouble("jointKF_encR_" + jointName, registry);
          yoEncR[idx].set(encVarPerJoint[idx]); // constant: the wired measurement variance (rad^2)
          yoQdNIS[idx] = new YoDouble("jointKF_qdNIS_" + jointName, registry);
          yoQdNIS[idx].set(Double.NaN); // no direct-velocity update has run yet
+         yoQdInnov[idx] = new YoDouble("jointKF_qdInnov_" + jointName, registry);
+         yoQdInnov[idx].set(Double.NaN); // signed innovation (rad/s); no direct-velocity update has run yet
          yoQdR[idx] = new YoDouble("jointKF_qdR_" + jointName, registry);
          yoQdR[idx].set(qdMeasVarPerJoint[idx]); // per-tick: floor + adaptive lag inflation (see refreshDirectVelocityNoise)
       }
@@ -1980,15 +1993,24 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       // Published pre-gate so a gated tick still shows the innovation that tripped it; E[NIS] = 1 for a
       // consistent filter. EXACT label match: "encoder" and "encoderVelocity" are distinct channels and a
       // startsWith would cross-publish the velocity innovations into the position NIS.
+      // The SIGNED innovation is published alongside the NIS: it is the lag-vs-impact discriminator
+      // (corr(encInnov, qd_meas/(2*pi*25)) ~ +1, slope ~1 => 25 Hz drive-side position filter lag;
+      // <100 ms bursts at contact transitions => unmodeled impact acceleration vs Qa). See the field doc.
       if (yoEncNIS != null && "encoder".equals(label))
       {
          for (int i = 0; i < k; i++)
+         {
             yoEncNIS[i].set(nu.get(i, 0) * nu.get(i, 0) / S.get(i, i));
+            yoEncInnov[i].set(nu.get(i, 0)); // rad
+         }
       }
       else if (yoQdNIS != null && "encoderVelocity".equals(label))
       {
          for (int i = 0; i < k; i++)
+         {
             yoQdNIS[i].set(nu.get(i, 0) * nu.get(i, 0) / S.get(i, i));
+            yoQdInnov[i].set(nu.get(i, 0)); // rad/s
+         }
       }
       if (!innovationSolver.setA(S))
       {
