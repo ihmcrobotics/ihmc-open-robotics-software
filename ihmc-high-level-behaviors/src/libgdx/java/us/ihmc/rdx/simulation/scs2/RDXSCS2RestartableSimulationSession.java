@@ -74,10 +74,6 @@ public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSessio
       finishBuildSimulation();
    }
 
-   /**
-    * Builds the MuJoCo/RL session off the render thread, then starts the RDX session on the GL thread.
-    * With a simple flat-ground visual, startSession is short; the long part is session construction.
-    */
    public void buildSimulationAsync()
    {
       starting = true;
@@ -106,9 +102,7 @@ public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSessio
    private void finishBuildSimulation()
    {
       for (String yoVariableName : variableWidgets)
-      {
          getPlottingManager().addVariableWidget(yoVariableName);
-      }
 
       starting = false;
    }
