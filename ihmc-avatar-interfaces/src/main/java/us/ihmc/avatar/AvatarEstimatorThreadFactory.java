@@ -660,7 +660,7 @@ public class AvatarEstimatorThreadFactory
          footSwitches.put(robotSide, footSwitch);
       }
 
-      return new FootSwitchContactProbabilityProvider(footSwitches);
+      return new FootSwitchContactProbabilityProvider(footSwitches, getStateEstimatorParameters().getEstimatorDT(), getEstimatorRegistry());
    }
 
    /**

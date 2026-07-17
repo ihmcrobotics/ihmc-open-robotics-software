@@ -187,10 +187,14 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    // H4 Phase 2: touchdown anchor re-seed (see InvariantEKF.reseedContact and the 2026-07-16
    // derivation note). Kill switch defaults ON for replay evaluation; one-shot-per-cycle hysteresis
    // guards edge chatter: re-seed fires once on the rising probability crossing and re-arms only
-   // after probability drops below the (lower) re-arm threshold — a chattering edge cannot re-zero
-   // the residual repeatedly (which would silently degenerate into DRC-style permanent foothold trust).
+   // after probability stays below the (lower) re-arm threshold for a sustained dwell — a chattering
+   // edge cannot re-zero the residual repeatedly (which would silently degenerate into DRC-style
+   // permanent foothold trust), and a mid-strike probability collapse (the joint-torque switch's
+   // CoP-under-ankle dropout, log 20260717_112516) cannot re-arm and double-fire within one touchdown.
    private static final double RESEED_TRIGGER_PROBABILITY = 0.5;
    private static final double RESEED_REARM_PROBABILITY = 0.1;
+   private static final double RESEED_REARM_DWELL_SECONDS = 0.1; // genuine swing, not a mid-strike dropout
+   private final SideDependentList<TouchdownReseedLatch> reseedLatches;
    private final YoBoolean yoReseedEnabled = new YoBoolean("invariantContactReseedEnabled", registry);
    private final SideDependentList<YoBoolean> yoReseedArmed;
    private final SideDependentList<YoInteger> yoReseedCount;
@@ -419,8 +423,11 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoReseedResidual = new SideDependentList<>(new YoDouble("invariantContactReseedResidualLeft", registry),
                                                  new YoDouble("invariantContactReseedResidualRight", registry));
       yoReseedEnabled.set(true);
+      int rearmDwellTicks = Math.max(1, (int) Math.round(RESEED_REARM_DWELL_SECONDS / dt));
+      reseedLatches = new SideDependentList<>(new TouchdownReseedLatch(RESEED_TRIGGER_PROBABILITY, RESEED_REARM_PROBABILITY, rearmDwellTicks, false),
+                                              new TouchdownReseedLatch(RESEED_TRIGGER_PROBABILITY, RESEED_REARM_PROBABILITY, rearmDwellTicks, false));
       for (RobotSide side : RobotSide.values)
-         yoReseedArmed.get(side).set(false); // arm only after a clean swing (prob < re-arm threshold)
+         yoReseedArmed.get(side).set(false); // arm only after a clean sustained swing (prob < re-arm threshold for the dwell)
       // Two-sided χ² acceptance band for the contact-update NIS (constant: fixed DOF and confidence).
       ChiSquaredDistribution contactNISDistribution = new ChiSquaredDistribution(CONTACT_MEASUREMENT_DOF);
       double lowerTail = 0.5 * (1.0 - CONSISTENCY_CONFIDENCE);
@@ -592,14 +599,12 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          // Uses the UN-inflated FK covariance (the re-seeded anchor is as good as the FK that placed it).
          if (yoReseedEnabled.getBooleanValue())
          {
-            if (contactProbability < RESEED_REARM_PROBABILITY)
-               yoReseedArmed.get(side).set(true);
-            else if (yoReseedArmed.get(side).getBooleanValue() && contactProbability >= RESEED_TRIGGER_PROBABILITY)
+            if (reseedLatches.get(side).advance(contactProbability))
             {
                yoReseedResidual.get(side).set(ekf.reseedContact(CONTACT_INDICES.get(side), contactInBody, inflatedContactCovariance));
                yoReseedCount.get(side).increment();
-               yoReseedArmed.get(side).set(false);
             }
+            yoReseedArmed.get(side).set(reseedLatches.get(side).isArmed());
          }
 
          double inflation = measurementInflation(contactProbability);
