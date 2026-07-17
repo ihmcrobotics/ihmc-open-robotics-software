@@ -24,4 +24,14 @@ testDependencies {
    api("us.ihmc:ihmc-sensor-processing-test:source")
    api("us.ihmc:ihmc-simulation-toolkit-test:source")
    api("us.ihmc:ihmc-high-level-behaviors-test:source")
+   api(allocation.instrumenter())
+}
+
+categories {
+   configure("allocation-slow") {
+      jvmArguments += "allocationAgent"
+   }
+   configure("allocation-slow-2") {
+      jvmArguments += "allocationAgent"
+   }
 }

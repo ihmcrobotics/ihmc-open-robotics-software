@@ -403,10 +403,11 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       int numberOfJoints = MultiBodySystemTools.computeDegreesOfFreedom(MultiBodySystemTools.createOneDoFJointPath(chest, hand));
 
       {
-         int numberOfPoints = RigidBodyJointspaceControlState.maxPoints;
          ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
          for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
             message.getJointspaceTrajectory().getJointTrajectoryMessages().add();
+         // IDL sequence capacity; controller maxPoints is larger and no longer reachable via the message.
+         int numberOfPoints = message.getJointspaceTrajectory().getJointTrajectoryMessages().get(0).getTrajectoryPoints().getMaxSize();
          double time = 0.05 + RigidBodyTaskspaceControlState.timeEpsilonForInitialPoint;
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
          {
@@ -423,15 +424,16 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          assertTrue(success);
 
          String bodyName = fullRobotModel.getHand(robotSide).getName();
-         EndToEndTestTools.assertTotalNumberOfWaypointsInJointspaceManager(1, bodyName, armJointNames, simulationTestHelper);
-         assertEquals(0, statusMessages.size(), "Did not expect a status, but got: " + statusMessages.toString());
+         EndToEndTestTools.assertTotalNumberOfWaypointsInJointspaceManager(numberOfPoints + 1, bodyName, armJointNames, simulationTestHelper);
+         assertEquals(1, statusMessages.size());
+         statusMessages.clear();
       }
 
       {
-         int numberOfPoints = RigidBodyJointspaceControlState.maxPoints - 1;
          ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
          for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
             message.getJointspaceTrajectory().getJointTrajectoryMessages().add();
+         int numberOfPoints = message.getJointspaceTrajectory().getJointTrajectoryMessages().get(0).getTrajectoryPoints().getMaxSize() - 1;
          double time = 0.05 + RigidBodyTaskspaceControlState.timeEpsilonForInitialPoint;
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
          {
@@ -449,7 +451,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          assertTrue(success);
 
          String bodyName = fullRobotModel.getHand(robotSide).getName();
-         EndToEndTestTools.assertTotalNumberOfWaypointsInJointspaceManager(RigidBodyJointspaceControlState.maxPoints,
+         EndToEndTestTools.assertTotalNumberOfWaypointsInJointspaceManager(numberOfPoints + 1,
                                                                            bodyName,
                                                                            armJointNames,
                                                                            simulationTestHelper);
@@ -742,12 +744,11 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
             OneDoFJointBasics armJoint = armJoints[jointIndex];
 
             String jointName = armJoints[jointIndex].getName();
-            String namespace = jointName + "PDController";
             assertEquals(1,
                          EndToEndTestTools.findTotalNumberOfWaypointsInJointspaceManager(fullRobotModel.getHand(robotSide).getName(),
                                                                                          armJoint.getName(),
                                                                                          simulationTestHelper));
-            desiredJointPositions[jointIndex] = EndToEndTestTools.findYoDouble(namespace, "q_" + jointName, simulationTestHelper).getValue();
+            desiredJointPositions[jointIndex] = EndToEndTestTools.findOneDoFJointFeedbackControllerDesiredPosition(jointName, simulationTestHelper).getValue();
          }
 
          EndToEndTestTools.assertTotalNumberOfWaypointsInJointspaceManager(1, fullRobotModel.getHand(robotSide).getName(), armJointNames, simulationTestHelper);
