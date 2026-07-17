@@ -398,12 +398,6 @@ public class JointspacePositionControllerState extends HighLevelControllerState
 
       private boolean validateQueueableProperties(QueueableCommand<?, ?> queueingProperties)
       {
-         if (queueingProperties.getCommandId() == QueueableCommand.INVALID_MESSAGE_ID)
-         {
-            LogTools.warn(warningPrefix + "Recieved packet with invalid ID.");
-            return false;
-         }
-
          boolean wantToQueue = queueingProperties.getExecutionMode() == ExecutionMode.QUEUE;
          boolean previousIdMatch = queueingProperties.getPreviousCommandId() == lastCommandId.getLongValue();
 

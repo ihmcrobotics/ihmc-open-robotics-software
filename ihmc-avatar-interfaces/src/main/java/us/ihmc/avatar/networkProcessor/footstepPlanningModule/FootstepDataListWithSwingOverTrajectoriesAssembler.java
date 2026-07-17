@@ -24,7 +24,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import static us.ihmc.communication.controllerAPI.command.QueueableCommand.VALID_MESSAGE_DEFAULT_ID;
+import static us.ihmc.communication.controllerAPI.command.QueueableCommand.INVALID_MESSAGE_ID;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -119,7 +119,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
       }
 
       footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
-      footstepDataListMessage.getQueueingProperties().setPreviousMessageId(VALID_MESSAGE_DEFAULT_ID);
+      footstepDataListMessage.getQueueingProperties().setPreviousMessageId(INVALID_MESSAGE_ID);
       return footstepDataListMessage;
    }
 
@@ -178,7 +178,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
       }
 
       footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
-      footstepDataListMessage.getQueueingProperties().setPreviousMessageId(VALID_MESSAGE_DEFAULT_ID);
+      footstepDataListMessage.getQueueingProperties().setPreviousMessageId(INVALID_MESSAGE_ID);
       return footstepDataListMessage;
    }
 }
