@@ -576,6 +576,23 @@ public class AvatarEstimatorThreadFactory
                                                                                 estimatorDT,
                                                                                 preFilterRegistry);
 
+      // 2026-07-16 (12 Hz investigation): when the JointKF is selected, ALSO build the alpha-
+      // complementary filter and wrap both in a live-switchable source (jointLevelSourceSelection
+      // YoEnum). Same InEKF base, joint q/qd source swappable mid-session; biases stay pinned to
+      // the JointKF inside the wrapper so the switch is bumpless for the base state.
+      if (preFilter instanceof us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter)
+      {
+         ProprioceptivePreFilter alpha = us.ihmc.stateEstimation.jointLevel.AlphaComplementaryPreFilter.createForKinematicsEstimator(getProcessedSensorOutputMap(),
+                                                                                                                                     getStateEstimatorParameters(),
+                                                                                                                                     imuProcessedOutputs,
+                                                                                                                                     feet,
+                                                                                                                                     getGravity(),
+                                                                                                                                     () -> cancelGravityFromAccelerationMeasurement,
+                                                                                                                                     estimatorDT,
+                                                                                                                                     preFilterRegistry);
+         preFilter = new us.ihmc.stateEstimation.jointLevel.SwitchableJointLevelSource(preFilter, alpha, preFilterRegistry);
+      }
+
       InvariantMainStateEstimator mainStateEstimator = new InvariantMainStateEstimator(fullRobotModel,
                                                                                        getProcessedSensorOutputMap(),
                                                                                        primaryImuName,

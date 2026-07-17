@@ -81,8 +81,15 @@ public class InvariantMainStateEstimator implements StateEstimatorController
    private static final double NOTCH_CENTER_HZ = 11.8;
    private static final double NOTCH_Q = 2.0;
    private static final double LOW_PASS_CORNER_HZ = 7.0;
+   // BAND_STOP: wide notch covering the whole delay-induced anti-damping band. f0 = 13.5 Hz,
+   // Q = 1.2 gives a -3 dB stopband of exactly 9.0-20.25 Hz (BW = f0/Q = 11.25 Hz, geometric
+   // symmetry: 9.0 * 20.25 = 13.5^2) at only ~-11 deg phase at 3 Hz — the middle ground between
+   // NOTCH (too narrow, mode slides to 13.8 Hz) and LOW_PASS (kills balance, -37 deg at 3 Hz).
+   // Design math: .claude-reports/2026-07-16-filter-theory.md §5.
+   private static final double BAND_STOP_CENTER_HZ = 13.5;
+   private static final double BAND_STOP_Q = 1.2;
 
-   public enum ControllerFacingQdFilterType { NONE, NOTCH, LOW_PASS }
+   public enum ControllerFacingQdFilterType { NONE, NOTCH, LOW_PASS, BAND_STOP }
 
    /** Which controller-facing joint quantities the selected filter applies to (live-switchable). */
    public enum ControllerFacingFilteredQuantity { JOINT_VELOCITIES, JOINT_POSITIONS, BOTH }
@@ -94,6 +101,8 @@ public class InvariantMainStateEstimator implements StateEstimatorController
    private final Map<String, Biquad> controllerFacingLowPasses = new HashMap<>();
    private final Map<String, Biquad> controllerFacingNotchesQ = new HashMap<>();
    private final Map<String, Biquad> controllerFacingLowPassesQ = new HashMap<>();
+   private final Map<String, Biquad> controllerFacingBandStops = new HashMap<>();
+   private final Map<String, Biquad> controllerFacingBandStopsQ = new HashMap<>();
    /** Supplies "high-level controller is in WALKING" (not RL_CONTROL); null = ungated. */
    private BooleanSupplier walkingGate = null;
 
@@ -232,7 +241,9 @@ public class InvariantMainStateEstimator implements StateEstimatorController
       yoControllerFacingNotchEnabled = new YoBoolean("controllerFacingQdNotchEnabled", registry);
       yoControllerFacingNotchEnabled.set(true);
       yoControllerFacingQdFilterType = new us.ihmc.yoVariables.variable.YoEnum<>("controllerFacingQdFilterType", registry, ControllerFacingQdFilterType.class);
-      yoControllerFacingQdFilterType.set(ControllerFacingQdFilterType.LOW_PASS);
+      // Default BAND_STOP (2026-07-16): LOW_PASS broke balance on hardware (-37 deg phase at 3 Hz);
+      // the wide notch covers the whole 9-20.25 Hz anti-damping band at only ~-11 deg. Live-switchable.
+      yoControllerFacingQdFilterType.set(ControllerFacingQdFilterType.BAND_STOP);
       yoControllerFacingFilteredQuantity = new us.ihmc.yoVariables.variable.YoEnum<>("controllerFacingFilteredQuantity", registry, ControllerFacingFilteredQuantity.class);
       yoControllerFacingFilteredQuantity.set(ControllerFacingFilteredQuantity.JOINT_VELOCITIES);
       for (OneDoFJointBasics joint : oneDoFJoints)
@@ -244,6 +255,8 @@ public class InvariantMainStateEstimator implements StateEstimatorController
             controllerFacingLowPasses.put(name, Biquad.lowPass(LOW_PASS_CORNER_HZ, dt));
             controllerFacingNotchesQ.put(name, Biquad.notch(NOTCH_CENTER_HZ, NOTCH_Q, dt));
             controllerFacingLowPassesQ.put(name, Biquad.lowPass(LOW_PASS_CORNER_HZ, dt));
+            controllerFacingBandStops.put(name, Biquad.notch(BAND_STOP_CENTER_HZ, BAND_STOP_Q, dt));
+            controllerFacingBandStopsQ.put(name, Biquad.notch(BAND_STOP_CENTER_HZ, BAND_STOP_Q, dt));
          }
       }
 
@@ -252,7 +265,9 @@ public class InvariantMainStateEstimator implements StateEstimatorController
       // update, which is off with no trusted foot), so the bias wanders and this estimator integrates it into a
       // rotating base. The gate reads the same contact probability the trust decision uses; other pre-filter
       // types ignore setInitializationGate (default no-op), so only the JOINT_KF path is affected.
-      if (preFilter instanceof JointLevelKFPreFilter jointLevelKF)
+      ProprioceptivePreFilter unwrappedPreFilter =
+            preFilter instanceof us.ihmc.stateEstimation.jointLevel.SwitchableJointLevelSource switchable ? switchable.getJointKF() : preFilter;
+      if (unwrappedPreFilter instanceof JointLevelKFPreFilter jointLevelKF)
       {
          jointLevelKF.setInitializationGate(() ->
                   invariantEstimator.getContactProbability(RobotSide.LEFT) >= ON_GROUND_INIT_CONTACT_PROBABILITY_THRESHOLD
@@ -341,7 +356,7 @@ public class InvariantMainStateEstimator implements StateEstimatorController
                velocity = estimatedVelocity;
          }
 
-         // Anti-damping filter on the WBC-facing qd (see field comments). BOTH filters always run
+         // Anti-damping filter on the WBC-facing qd (see field comments). ALL filters always run
          // so their state stays warm (bumpless live switching via the YoEnum); the selected output
          // is only USED when the master switch is on AND the walking gate reports the WALKING
          // high-level state (not RL_CONTROL).
@@ -352,6 +367,8 @@ public class InvariantMainStateEstimator implements StateEstimatorController
             double lowPassedQd = controllerFacingLowPasses.get(joint.getName()).update(velocity);
             double notchedQ = controllerFacingNotchesQ.get(joint.getName()).update(position);
             double lowPassedQ = controllerFacingLowPassesQ.get(joint.getName()).update(position);
+            double bandStoppedQd = controllerFacingBandStops.get(joint.getName()).update(velocity);
+            double bandStoppedQ = controllerFacingBandStopsQ.get(joint.getName()).update(position);
             if (yoControllerFacingNotchEnabled.getBooleanValue() && (walkingGate == null || walkingGate.getAsBoolean()))
             {
                ControllerFacingFilteredQuantity quantity = yoControllerFacingFilteredQuantity.getEnumValue();
@@ -368,6 +385,11 @@ public class InvariantMainStateEstimator implements StateEstimatorController
                   {
                      if (applyVelocity) velocity = lowPassedQd;
                      if (applyPosition) position = lowPassedQ;
+                  }
+                  case BAND_STOP ->
+                  {
+                     if (applyVelocity) velocity = bandStoppedQd;
+                     if (applyPosition) position = bandStoppedQ;
                   }
                   case NONE -> { }
                }
