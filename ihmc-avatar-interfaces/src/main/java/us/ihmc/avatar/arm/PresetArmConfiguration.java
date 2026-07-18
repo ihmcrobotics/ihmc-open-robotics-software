@@ -20,6 +20,8 @@ public enum PresetArmConfiguration
    DOOR_AVOIDANCE,
    /** Arms in, elbows deeply flexed. Implemented for Alex only. */
    PRAY,
+   /** Arms out front, forearms up to cradle a payload (the "static hold" load-carrying pose). Alex only. */
+   STATIC_HOLD,
    ;
 
    public static final PresetArmConfiguration[] values = values();
