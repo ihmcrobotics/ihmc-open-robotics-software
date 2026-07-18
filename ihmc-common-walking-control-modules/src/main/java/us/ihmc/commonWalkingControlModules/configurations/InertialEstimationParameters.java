@@ -66,6 +66,31 @@ public interface InertialEstimationParameters
    }
 
    /**
+    * Optional constant additive bias on the estimator's torque measurement, one entry per measured DoF in
+    * {@link #getMeasurementNames()} order (length = number of measured DoFs). Added to the observed torque each tick.
+    * <p>
+    * This is a SIM-ONLY test hook to emulate the persistent model/sensor bias present on real hardware (imperfect
+    * torque sensing, contact-wrench estimation error, un-modeled friction) that the estimator cannot null and that
+    * corrupts the weakly-observed mass-SUM channel -- the driver of the cross-limb "leech". A clean simulation has
+    * no such bias, so the leech does not appear unless it is injected here. Return {@code null} (default) for none.
+    * </p>
+    */
+   default double[] getMeasurementBiasInjection()
+   {
+      return null;
+   }
+
+   /**
+    * Whether the estimator should subscribe to the VR grasp-intent stream that drives the per-limb adaptation gate
+    * (and, when enabled, switch the gate on). Default false so tests/sim create no ROS2 node; a robot-specific
+    * implementation enables it for VR deployment. See {@code InertialParameterManager.INERTIAL_ADAPTATION_TOPIC}.
+    */
+   default boolean subscribeToGraspIntent()
+   {
+      return false;
+   }
+
+   /**
     * Attachment-point prior: override the reference-body CoM offset (a point in the body-fixed frame) for the
     * named estimated body. In the generalized parameterization the strongly-observable mass (alpha) channel
     * scales mass while leaving the CoM at the reference body's CoM, so anchoring the reference CoM at a KNOWN

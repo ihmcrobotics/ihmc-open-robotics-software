@@ -29,12 +29,23 @@ public class HumanoidModelCovarianceHelper
    private final Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets;
 
    /**
-    * YoDoubles for the process covariances. The same covariances are used for each rigid body being estimated, so this YoDouble is 10-dimensional
-    * (the size of the inertial parameter vector for one rigid body).
+    * YoDoubles for the process covariances, one per estimated parameter across ALL estimated bodies (i.e. this array
+    * is {@code numberOfParameters}-dimensional: 10 per estimated body, laid out body-major in the same order the state
+    * is stacked). Each body therefore has its own tunable process-noise block.
     */
    private final YoDouble[] processCovariances;
    /** Final container for the process covariances, which can be used elsewhere. */
    private final DMatrixRMaj processCovariance;
+
+   /**
+    * Per-estimated-body runtime multiplier on that body's process-noise (Q) block, default 1.0. Lowering a body's
+    * scale toward 0 freezes its estimate (no random walk); this is the knob an operator-intent gate drives to stop a
+    * non-adapting limb's parameters from moving. Indexed by estimated-body order (non-empty basis sets, body-major),
+    * matching {@link #estimatedBodyNames}. Re-read every tick in {@link #getProcessCovariance()}.
+    */
+   private final YoDouble[] qBodyScale;
+   /** Names of the estimated bodies, in estimated-body order, so callers can map a side/name to a block index. */
+   private final String[] estimatedBodyNames;
 
    private final int[] floatingBaseJointIndices;
    private final SideDependentList<int[]> legJointIndices;
@@ -66,20 +77,38 @@ public class HumanoidModelCovarianceHelper
       processCovariances = new YoDouble[parameters.getNumberOfParameters()];
       if (basisSets.length != bodies.length)
          throw new RuntimeException("The number of basis sets does not match the number of bodies in the robot model.");
+      // Body-major fill with a GLOBAL parameter index p (0..numberOfParameters-1). Previously the write index was
+      // reset per body while the read index (getProcessCovariance) used option.ordinal(), so every body's block
+      // aliased the LAST body's 10 YoDoubles -- Q was silently global. Now each estimated body owns its own block.
+      int nEstimatedBodies = 0;
+      for (Set<SpatialInertiaBasisOption> set : basisSets)
+         if (!set.isEmpty())
+            nEstimatedBodies++;
+      qBodyScale = new YoDouble[nEstimatedBodies];
+      estimatedBodyNames = new String[nEstimatedBodies];
+      int p = 0;
+      int b = 0;
       for (int i = 0; i < bodies.length; i++)
       {
          RigidBodyReadOnly body = bodies[i];
          Set<SpatialInertiaBasisOption> set = basisSets[i];
-         int j = 0;
+         if (set.isEmpty())
+            continue;
+
          for (SpatialInertiaBasisOption option : SpatialInertiaBasisOption.values)
          {
             if (!set.contains(option))
                continue;
 
-            processCovariances[j] = new YoDouble(body.getName() + "_processCovariance_" + basisNames[option.ordinal()], registry);
-            processCovariances[j].set(defaultProcessCovariance[j]);
-            j++;
+            processCovariances[p] = new YoDouble(body.getName() + "_processCovariance_" + basisNames[option.ordinal()], registry);
+            processCovariances[p].set(defaultProcessCovariance[option.ordinal()]);
+            p++;
          }
+
+         estimatedBodyNames[b] = body.getName();
+         qBodyScale[b] = new YoDouble(body.getName() + "_processScale", registry);
+         qBodyScale[b].set(1.0);
+         b++;
       }
       processCovariance = new DMatrixRMaj(parameters.getNumberOfParameters(), parameters.getNumberOfParameters());
 
@@ -117,22 +146,43 @@ public class HumanoidModelCovarianceHelper
     */
    public DMatrixRMaj getProcessCovariance()
    {
-      int i = 0;
+      int i = 0;  // global parameter/state index
+      int b = 0;  // estimated-body index
       for (Set<SpatialInertiaBasisOption> set : basisSets)
       {
          if (set.isEmpty())
             continue;
 
+         double scale = qBodyScale[b].getValue();
          for (SpatialInertiaBasisOption option : JointTorqueRegressorCalculator.SpatialInertiaBasisOption.values)
          {
             if (set.contains(option))
             {
-               processCovariance.set(i, i, processCovariances[option.ordinal()].getValue());
+               processCovariance.set(i, i, scale * processCovariances[i].getValue());
                i++;
             }
          }
+         b++;
       }
       return processCovariance;
+   }
+
+   /** Number of estimated bodies (non-empty basis sets), i.e. the length of the per-body scale/name arrays. */
+   public int getNumberOfEstimatedBodies()
+   {
+      return estimatedBodyNames.length;
+   }
+
+   /** Name of the estimated body at block index {@code b} (estimated-body order), for mapping a side/name to a block. */
+   public String getEstimatedBodyName(int b)
+   {
+      return estimatedBodyNames[b];
+   }
+
+   /** Set the runtime process-noise (Q) multiplier for estimated body {@code b}. 1.0 = nominal, ~0 = frozen. */
+   public void setProcessScaleForBody(int b, double scale)
+   {
+      qBodyScale[b].set(scale);
    }
 
    /**

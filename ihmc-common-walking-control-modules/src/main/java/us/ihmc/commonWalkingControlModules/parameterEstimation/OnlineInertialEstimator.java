@@ -26,6 +26,13 @@ public interface OnlineInertialEstimator
 
    boolean isParametersHeld();
 
+   /**
+    * Runtime multiplier on estimated body {@code bodyIndex}'s Tikhonov prior variances (generalized estimators only):
+    * {@code < 1} pins that body's estimate to nominal, {@code > 1} removes the pull. Used by the per-limb
+    * operator-intent adaptation gate. Default no-op for estimators without a nominal prior.
+    */
+   default void setPriorScaleForBody(int bodyIndex, double scale) { }
+
    /** The current estimate, in the Pi basis. */
    DMatrix getState();
 

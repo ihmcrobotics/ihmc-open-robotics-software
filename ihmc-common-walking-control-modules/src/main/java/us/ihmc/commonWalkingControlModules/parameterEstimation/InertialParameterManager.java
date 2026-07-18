@@ -1,6 +1,13 @@
 package us.ihmc.commonWalkingControlModules.parameterEstimation;
 
+import controller_msgs.InertialAdaptationCommandMessage;
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.communication.HumanoidROS2Topic;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
@@ -39,6 +46,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.*;
 
@@ -60,6 +68,45 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final MultipleHumanoidModelHandler<RobotModelTask> modelHandler;
    private final HumanoidModelCovarianceHelper covarianceHelper;
    private final InertialBaselineCalculator baselineCalculator;
+
+   // --- Per-limb operator-intent adaptation gate -----------------------------------------------------------------
+   // Both forearms are always estimated (always physically consistent), but each limb's process noise Q and its
+   // nominal (Tikhonov) prior are scaled at runtime according to which limb the operator is actually adapting
+   // (grasping). This resolves the cross-limb identifiability failure where a one-sided load "leeches" mass off the
+   // untouched arm: whole-body torque estimation sees the mass DIFFERENCE between the two forearms well (each arm's
+   // own joint rows) but the SUM only weakly (distrusted floating-base rows), so a one-sided load is mis-split as
+   // load-up / other-arm-down. Pinning the idle limb to nominal removes the free variable it was being dumped into.
+   // Behind an enable flag; default OFF keeps every limb ACTIVE (scales 1.0) == legacy behavior.
+   public enum AdaptationState { ACTIVE, IDLE_NOMINAL, IDLE_HOLD }
+   private final YoBoolean intentGatedAdaptation;
+   /** Liveness of the grasp signal (Phase 2 heartbeat). True by default; when false, a limb that WAS grasping holds. */
+   private final YoBoolean adaptationSignalAlive;
+   /** Per-side grasp input: true while the operator is grasping with that hand (set from SCS2 now, VR trigger later). */
+   private final SideDependentList<YoBoolean> armGrasping = new SideDependentList<>();
+   private final YoEnum<AdaptationState>[] bodyAdaptationState;   // computed per estimated body
+   private final RobotSide[] bodyAdaptationSide;                  // estimated body -> side (null if not an arm)
+   private final boolean[] bodyWasGrasping;                       // latch for IDLE_HOLD on signal loss
+   private final YoDouble adaptationQScaleActive;
+   private final YoDouble adaptationQScaleIdle;
+   private final YoDouble adaptationPriorScaleActive;
+   private final YoDouble adaptationPriorScaleIdleNominal;
+   private final YoDouble adaptationPriorScaleIdleHold;
+
+   /**
+    * Phase 2 transport: the VR teleop interface streams per-hand grasp intent (joystick trigger held) over ROS2 to
+    * drive the gate. Opened only when the estimation parameters request it
+    * ({@link InertialEstimationParameters#subscribeToGraspIntent()}); the VR side publishes on the identical topic.
+    * A dedicated {@link InertialAdaptationCommandMessage} (no hand-command semantics). Fixed topic = single robot
+    * per network. If the stream goes stale (link lost), the gate treats a still-grasping limb as IDLE_HOLD.
+    */
+   public static final ROS2Topic<InertialAdaptationCommandMessage> INERTIAL_ADAPTATION_TOPIC =
+         new HumanoidROS2Topic<>().withPrefix("ihmc").withModule("inertial_adaptation").withType(InertialAdaptationCommandMessage.class);
+   private final ROS2Node graspROS2Node;
+   private final ROS2Subscription<InertialAdaptationCommandMessage> graspSubscriber;
+   private final InertialAdaptationCommandMessage latestGraspMessage;
+   private final double dtSeconds;
+   private double secondsSinceGraspMessage;
+   private static final double GRASP_SIGNAL_TIMEOUT_SECONDS = 0.5;  // stream stale beyond this -> signal lost
 
    private final ArrayList<YoInertiaEllipsoid> yoInertiaEllipsoids;
    private final YoGraphicDefinition ellipsoidGraphicGroup;
@@ -90,6 +137,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoDouble graspNubDistance;
 
    private final DMatrixRMaj wholeSystemTorques;
+   /** SIM-ONLY constant measurement bias added to {@link #wholeSystemTorques} each tick, or null. See constructor. */
+   private final DMatrixRMaj measurementBiasInjection;
 
    private final DMatrixRMaj jointVelocitiesContainer;
    private final FilteredFiniteDifferenceYoVariable[] jointAccelerations;
@@ -165,6 +214,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       REGRESSOR
    }
 
+   @SuppressWarnings("unchecked")  // generic YoEnum[] for the per-body adaptation state
    public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, DoubleProvider dt, YoRegistry parentRegistry)
    {
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -297,6 +347,22 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       wholeSystemTorques = new DMatrixRMaj(nDoFs, 1);
 
+      // SIM-ONLY: optional constant bias added to the torque measurement each tick, to emulate the persistent
+      // hardware model/sensor bias the estimator cannot null (see getMeasurementBiasInjection). Null -> no bias.
+      double[] biasInjection = inertialEstimationParameters.getMeasurementBiasInjection();
+      if (biasInjection != null)
+      {
+         if (biasInjection.length != nDoFs)
+            throw new RuntimeException("getMeasurementBiasInjection() length " + biasInjection.length + " != nDoFs " + nDoFs);
+         measurementBiasInjection = new DMatrixRMaj(nDoFs, 1, true, biasInjection);
+         LogTools.warn("InertialParameterManager: SIM measurement-bias injection ACTIVE (||bias|| = "
+                       + String.format("%.2f", org.ejml.dense.row.NormOps_DDRM.normF(measurementBiasInjection)) + " Nm).");
+      }
+      else
+      {
+         measurementBiasInjection = null;
+      }
+
       String[] measurementNames = inertialEstimationParameters.getMeasurementNames();
       residual = new YoMatrix("residual_", nDoFs, 1, measurementNames, registry);
 
@@ -337,6 +403,60 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          case KF -> filter = new InertialKalmanFilter(modelHandler.getRobotModel(RobotModelTask.ESTIMATE), inertialEstimationParameters, dt, registry);
          case PHYSICALLY_CONSISTENT_EKF -> filter = new InertialPhysicallyConsistentKalmanFilter(modelHandler.getRobotModel(RobotModelTask.ESTIMATE),
                                                                                                  inertialEstimationParameters, dt, registry);
+      }
+
+      // Per-limb operator-intent adaptation gate (see field block). covarianceHelper and filter now both exist and
+      // share the estimated-body order, so a single block index b maps to both the Q scale and the prior scale.
+      intentGatedAdaptation = new YoBoolean("intentGatedAdaptation", registry);
+      intentGatedAdaptation.set(false);
+      adaptationSignalAlive = new YoBoolean("adaptationSignalAlive", registry);
+      adaptationSignalAlive.set(true);
+      for (RobotSide side : RobotSide.values)
+      {
+         YoBoolean grasping = new YoBoolean(side.getCamelCaseNameForStartOfExpression() + "ArmGrasping", registry);
+         grasping.set(false);
+         armGrasping.put(side, grasping);
+      }
+      adaptationQScaleActive = new YoDouble("adaptationQScaleActive", registry);
+      adaptationQScaleActive.set(1.0);
+      adaptationQScaleIdle = new YoDouble("adaptationQScaleIdle", registry);
+      adaptationQScaleIdle.set(1.0e-3);
+      adaptationPriorScaleActive = new YoDouble("adaptationPriorScaleActive", registry);
+      adaptationPriorScaleActive.set(1.0);
+      adaptationPriorScaleIdleNominal = new YoDouble("adaptationPriorScaleIdleNominal", registry);
+      adaptationPriorScaleIdleNominal.set(1.0e-6);   // tight -> pins the idle limb to nominal
+      adaptationPriorScaleIdleHold = new YoDouble("adaptationPriorScaleIdleHold", registry);
+      adaptationPriorScaleIdleHold.set(1.0e6);       // no pull -> freeze in place (with low Q)
+      int nEstimatedBodies = covarianceHelper.getNumberOfEstimatedBodies();
+      bodyAdaptationState = new YoEnum[nEstimatedBodies];
+      bodyAdaptationSide = new RobotSide[nEstimatedBodies];
+      bodyWasGrasping = new boolean[nEstimatedBodies];
+      for (int b = 0; b < nEstimatedBodies; b++)
+      {
+         String bodyName = covarianceHelper.getEstimatedBodyName(b);
+         bodyAdaptationState[b] = new YoEnum<>(bodyName + "_adaptationState", registry, AdaptationState.class, false);
+         bodyAdaptationState[b].set(AdaptationState.ACTIVE);
+         bodyAdaptationSide[b] = bodyName.contains("LEFT") ? RobotSide.LEFT : (bodyName.contains("RIGHT") ? RobotSide.RIGHT : null);
+      }
+
+      // Phase 2 transport: subscribe to the VR grasp-intent stream when requested (default off -> no ROS2 in
+      // sim/tests). When enabled, the gate is switched on too, so a grasping hand drives its forearm's adaptation
+      // and idle hands pin to nominal out of the box.
+      dtSeconds = dt.getValue();
+      secondsSinceGraspMessage = Double.POSITIVE_INFINITY;
+      if (inertialEstimationParameters.subscribeToGraspIntent())
+      {
+         graspROS2Node = new AsyncROS2Node("inertial_adaptation_grasp");
+         latestGraspMessage = new InertialAdaptationCommandMessage();
+         graspSubscriber = graspROS2Node.createSubscription(INERTIAL_ADAPTATION_TOPIC, message -> { });
+         intentGatedAdaptation.set(true);
+         LogTools.info("InertialParameterManager: grasp-intent gate subscribed on " + INERTIAL_ADAPTATION_TOPIC.getName());
+      }
+      else
+      {
+         graspROS2Node = null;
+         latestGraspMessage = null;
+         graspSubscriber = null;
       }
 
       passThroughEstimatesToController = new YoBoolean("passThroughEstimatesToController", registry);
@@ -390,11 +510,16 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          // chase it. Without this the filter would absorb the very mismatch we are trying to measure.
          filter.setParametersHeld(holdParametersAtNominal.getValue());
 
+         // Per-limb intent gate: push this tick's Q/prior scales before the covariances are read below.
+         updateAdaptationGate();
+
          updateFilterCovariances();
 
          updateContactJacobians();
          updateContactWrenches();
          updateWholeSystemTorques();
+         if (measurementBiasInjection != null)  // SIM-ONLY: emulate persistent hardware measurement bias
+            CommonOps_DDRM.addEquals(wholeSystemTorques, measurementBiasInjection);
 
          updateRegressorAndInverseDynamicsModels();
          inverseDynamicsCalculator.compute();
@@ -559,10 +684,121 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                     + "released. Deviations from here on are the added payload.");
    }
 
+   /**
+    * Operator-intent input to the per-limb adaptation gate: whether the given hand is currently grasping. Set from
+    * the VR grasp trigger (Phase 2 transport) or by hand from SCS2. Only has effect while {@code intentGatedAdaptation}
+    * is enabled. See {@link #updateAdaptationGate()}.
+    */
+   public void setArmGrasping(RobotSide side, boolean grasping)
+   {
+      armGrasping.get(side).set(grasping);
+   }
+
+   /**
+    * Liveness of the grasp-intent signal (a heartbeat from the operator side). When set false, a limb that was
+    * grasping switches to IDLE_HOLD (freezes) rather than relaxing to nominal, so a still-held load's gravity
+    * compensation does not collapse if the operator link drops. See {@link #updateAdaptationGate()}.
+    */
+   public void setAdaptationSignalAlive(boolean alive)
+   {
+      adaptationSignalAlive.set(alive);
+   }
+
    private void updateFilterCovariances()
    {
       filter.setProcessCovariance(covarianceHelper.getProcessCovariance());
       filter.setMeasurementCovariance(covarianceHelper.getMeasurementCovariance());
+   }
+
+   /**
+    * Per-limb operator-intent adaptation gate. Each estimated limb is placed in one of three regimes and the
+    * matching process-noise (Q) and prior scales are pushed to the covariance helper and the filter. Disabled
+    * ({@code intentGatedAdaptation} false) -> every limb ACTIVE with scales 1.0, i.e. legacy behavior. See
+    * {@link AdaptationState}. Runs each tick just before the covariances are read.
+    * <ul>
+    * <li>ACTIVE (grasping): base Q, base (loose) prior -> the limb tracks its payload.</li>
+    * <li>IDLE_NOMINAL (not grasping, signal alive): low Q, tight prior -> pinned to nominal (prevents the leech
+    *     and returns to nominal on release).</li>
+    * <li>IDLE_HOLD (was grasping, signal lost): low Q, no prior pull -> frozen at the last estimate, so gravity
+    *     compensation does not collapse under a still-held load.</li>
+    * </ul>
+    */
+   private void updateAdaptationGate()
+   {
+      // Phase 2: pull the latest per-hand grasp intent from the VR stream, and track liveness. A fresh message sets
+      // the per-hand grasping booleans and marks the signal alive; if no message arrives within the timeout the
+      // signal is marked lost, so a still-grasping limb switches to IDLE_HOLD (freeze) rather than relaxing.
+      if (graspSubscriber != null)
+      {
+         if (graspSubscriber.readLatest(latestGraspMessage) > 0)
+         {
+            armGrasping.get(RobotSide.LEFT).set(latestGraspMessage.getLeftHandGrasping());
+            armGrasping.get(RobotSide.RIGHT).set(latestGraspMessage.getRightHandGrasping());
+            secondsSinceGraspMessage = 0.0;
+         }
+         else
+         {
+            secondsSinceGraspMessage += dtSeconds;
+         }
+         adaptationSignalAlive.set(secondsSinceGraspMessage < GRASP_SIGNAL_TIMEOUT_SECONDS);
+      }
+
+      boolean gated = intentGatedAdaptation.getValue();
+      boolean alive = adaptationSignalAlive.getValue();
+      for (int b = 0; b < bodyAdaptationState.length; b++)
+      {
+         AdaptationState state;
+         if (!gated)
+         {
+            state = AdaptationState.ACTIVE;
+         }
+         else if (!alive)
+         {
+            // Signal lost: the grasp state can no longer be trusted, so freeze if we were mid-grasp (don't let a
+            // held load's estimate collapse), otherwise relaxing to nominal is safe. Checked BEFORE grasping so a
+            // stale-true grasp flag cannot keep an arm ACTIVE on dead data.
+            state = bodyWasGrasping[b] ? AdaptationState.IDLE_HOLD : AdaptationState.IDLE_NOMINAL;
+         }
+         else
+         {
+            RobotSide side = bodyAdaptationSide[b];
+            boolean grasping = side != null && armGrasping.get(side).getValue();
+            if (grasping)
+            {
+               state = AdaptationState.ACTIVE;
+               bodyWasGrasping[b] = true;
+            }
+            else
+            {
+               state = AdaptationState.IDLE_NOMINAL;
+               bodyWasGrasping[b] = false;
+            }
+         }
+         bodyAdaptationState[b].set(state);
+
+         double qScale;
+         double priorScale;
+         switch (state)
+         {
+            case IDLE_NOMINAL ->
+            {
+               qScale = adaptationQScaleIdle.getValue();
+               priorScale = adaptationPriorScaleIdleNominal.getValue();
+            }
+            case IDLE_HOLD ->
+            {
+               qScale = adaptationQScaleIdle.getValue();
+               priorScale = adaptationPriorScaleIdleHold.getValue();
+            }
+            default ->
+            {
+               qScale = adaptationQScaleActive.getValue();
+               priorScale = adaptationPriorScaleActive.getValue();
+            }
+         }
+         covarianceHelper.setProcessScaleForBody(b, qScale);
+         filter.setPriorScaleForBody(b, priorScale);
+      }
    }
 
    private void updateWholeSystemTorques()

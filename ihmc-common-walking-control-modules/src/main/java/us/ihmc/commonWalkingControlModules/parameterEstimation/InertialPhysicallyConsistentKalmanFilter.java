@@ -61,6 +61,14 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
    private final YoDouble tikhonovPriorVarianceS;     // inertia off-diagonal
    private final YoDouble tikhonovPriorVarianceT;     // first moment / CoM t1,t2 (tight -> held near nominal)
    private final YoDouble tikhonovPriorVarianceT3;    // t3 (down-axis CoM) override; index 9, defaults to varT
+   /**
+    * Per-body runtime multiplier on that body's prior variances, default 1.0. Since a SMALLER variance means a
+    * STRONGER pull toward nominal, scaling a body's variances DOWN pins its estimate at nominal, and scaling them UP
+    * removes the pull (freeze in place). This is the knob an operator-intent gate drives: a non-adapting limb gets a
+    * small scale (pinned to nominal); a limb whose grasp signal dropped mid-carry gets a large scale (held in place,
+    * combined with a low process-noise scale). Indexed by body (same order as {@link #inertialParameters}).
+    */
+   private final YoDouble[] priorBodyScale;
    private final DMatrixRMaj priorCovarianceDiag;   // R_prior (full state size, block-diagonal per body)
    private final DMatrixRMaj priorInnovationCovariance; // S = P + R_prior
    private final DMatrixRMaj priorInnovationCovarianceInv;
@@ -146,6 +154,7 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
       }
 
       java.util.List<double[]> comCouplingList = new java.util.ArrayList<>();
+      java.util.List<String> estimatedBodyNames = new java.util.ArrayList<>();
       nBodies = 0;
       RigidBodyReadOnly[] modelBodies = model.getRootBody().subtreeArray();
       for (int i = 0; i < modelBodies.length; ++i)
@@ -168,6 +177,7 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
             comCouplingList.add(parameters.getCoMLoadCouplingPoint(modelBodies[i].getName()));
             inertialParametersPiBasisWatchers.add(new YoMatrix("pi_" + modelBodies[i].getName() + "_", 10, 1, RigidBodyInertialParametersTools.getNamesForPiBasis(), null, registry));
             inertialParametersThetaBasisWatchers.add(new YoMatrix("theta_" + modelBodies[i].getName() + "_", 10, 1, RigidBodyInertialParametersTools.getNamesForThetaBasis(), null, registry));
+            estimatedBodyNames.add(modelBodies[i].getName());
             nBodies++;
          }
       }
@@ -204,6 +214,12 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
          tikhonovPriorVarianceT.set(perBodyPriorVariance != null ? perBodyPriorVariance[7] : 1.0e-2);
          tikhonovPriorVarianceT3.set(perBodyPriorVariance != null ? perBodyPriorVariance[9] : 1.0e-2);
          priorCovarianceDiag = new DMatrixRMaj(stateSize, stateSize);
+         priorBodyScale = new YoDouble[nBodies];
+         for (int b = 0; b < nBodies; ++b)
+         {
+            priorBodyScale[b] = new YoDouble(estimatedBodyNames.get(b) + "_priorScale", registry);
+            priorBodyScale[b].set(1.0);
+         }
          LogTools.info("InertialPhysicallyConsistentKalmanFilter: Tikhonov prior available (live YoVariables); enabled="
                        + tikhonovPriorEnabled.getValue());
       }
@@ -215,6 +231,7 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
          tikhonovPriorVarianceS = null;
          tikhonovPriorVarianceT = null;
          tikhonovPriorVarianceT3 = null;
+         priorBodyScale = null;
          priorCovarianceDiag = new DMatrixRMaj(0, 0);
       }
       priorInnovationCovariance = new DMatrixRMaj(stateSize, stateSize);
@@ -464,14 +481,17 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
       for (int b = 0; b < nBodies; ++b)
       {
          int base = b * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY;
-         priorCovarianceDiag.set(base, base, varAlpha);
+         // Per-body scale on the variances: <1 tightens (pins to nominal), >1 loosens (removes the pull). This is
+         // how an idle limb is pinned at nominal while an actively-adapting limb keeps the base (loose) prior.
+         double sb = priorBodyScale[b].getValue();
+         priorCovarianceDiag.set(base, base, sb * varAlpha);
          for (int p = 1; p <= 3; ++p)
-            priorCovarianceDiag.set(base + p, base + p, varD);
+            priorCovarianceDiag.set(base + p, base + p, sb * varD);
          for (int p = 4; p <= 6; ++p)
-            priorCovarianceDiag.set(base + p, base + p, varS);
-         priorCovarianceDiag.set(base + 7, base + 7, varT);
-         priorCovarianceDiag.set(base + 8, base + 8, varT);
-         priorCovarianceDiag.set(base + 9, base + 9, varT3);
+            priorCovarianceDiag.set(base + p, base + p, sb * varS);
+         priorCovarianceDiag.set(base + 7, base + 7, sb * varT);
+         priorCovarianceDiag.set(base + 8, base + 8, sb * varT);
+         priorCovarianceDiag.set(base + 9, base + 9, sb * varT3);
       }
 
       for (int i = 0; i < nBodies; ++i)
@@ -536,6 +556,18 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
                                           0,
                                           RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
       }
+   }
+
+   /**
+    * Set the runtime prior-variance multiplier for estimated body {@code b} (see {@link #priorBodyScale}). No-op if
+    * the generalized prior is unavailable. {@code scale < 1} pins the body to nominal; {@code scale > 1} removes the
+    * pull (freeze in place, when combined with a low process-noise scale).
+    */
+   @Override
+   public void setPriorScaleForBody(int bodyIndex, double scale)
+   {
+      if (priorBodyScale != null && bodyIndex >= 0 && bodyIndex < priorBodyScale.length)
+         priorBodyScale[bodyIndex].set(scale);
    }
 
    @Override
