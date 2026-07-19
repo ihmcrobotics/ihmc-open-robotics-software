@@ -81,8 +81,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoBoolean intentGatedAdaptation;
    /** Liveness of the grasp signal (Phase 2 heartbeat). True by default; when false, a limb that WAS grasping holds. */
    private final YoBoolean adaptationSignalAlive;
-   /** Per-side grasp input: true while the operator is grasping with that hand (set from SCS2 now, VR trigger later). */
+   /** Per-side grasp input the gate reads: true while that hand is grasping. Driven from the VR/ROS2 grasp stream
+    * when subscribed, or by hand from SCS2 (directly when not subscribed, or via {@link #armGraspingScsOverride}). */
    private final SideDependentList<YoBoolean> armGrasping = new SideDependentList<>();
+   /** Per-side SCS override: when true, that side's {@link #armGrasping} is owned by SCS and the incoming VR/ROS2
+    * grasp stream is IGNORED for that side (SCS wins the tick instead of RDX). An overridden side is also treated as a
+    * local, always-live source, so the grasp-signal timeout cannot force it idle. No effect when not subscribed --
+    * {@code armGrasping} is already directly SCS-settable then. See {@link #updateAdaptationGate()}. */
+   private final SideDependentList<YoBoolean> armGraspingScsOverride = new SideDependentList<>();
    private final YoEnum<AdaptationState>[] bodyAdaptationState;   // computed per estimated body
    private final RobotSide[] bodyAdaptationSide;                  // estimated body -> side (null if not an arm)
    private final boolean[] bodyWasGrasping;                       // latch for IDLE_HOLD on signal loss
@@ -459,6 +465,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          YoBoolean grasping = new YoBoolean(side.getCamelCaseNameForStartOfExpression() + "ArmGrasping", registry);
          grasping.set(false);
          armGrasping.put(side, grasping);
+
+         YoBoolean scsOverride = new YoBoolean(side.getCamelCaseNameForStartOfExpression() + "ArmGraspingScsOverride", registry);
+         scsOverride.set(false);
+         armGraspingScsOverride.put(side, scsOverride);
       }
       adaptationQScaleActive = new YoDouble("adaptationQScaleActive", registry);
       adaptationQScaleActive.set(1.0);
@@ -797,7 +807,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    /**
     * Operator-intent input to the per-limb adaptation gate: whether the given hand is currently grasping. Set from
     * the VR grasp trigger (Phase 2 transport) or by hand from SCS2. Only has effect while {@code intentGatedAdaptation}
-    * is enabled. See {@link #updateAdaptationGate()}.
+    * is enabled. While subscribed, the VR/ROS2 stream overwrites this each tick unless {@code armGraspingScsOverride}
+    * is set for that side (then SCS owns it). See {@link #updateAdaptationGate()}.
     */
    public void setArmGrasping(RobotSide side, boolean grasping)
    {
@@ -842,8 +853,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          if (graspSubscriber.readLatest(latestGraspMessage) > 0)
          {
-            armGrasping.get(RobotSide.LEFT).set(latestGraspMessage.getLeftHandGrasping());
-            armGrasping.get(RobotSide.RIGHT).set(latestGraspMessage.getRightHandGrasping());
+            // SCS override wins: only accept the VR/ROS2 grasp for a side that SCS is not currently overriding.
+            if (!armGraspingScsOverride.get(RobotSide.LEFT).getValue())
+               armGrasping.get(RobotSide.LEFT).set(latestGraspMessage.getLeftHandGrasping());
+            if (!armGraspingScsOverride.get(RobotSide.RIGHT).getValue())
+               armGrasping.get(RobotSide.RIGHT).set(latestGraspMessage.getRightHandGrasping());
             secondsSinceGraspMessage = 0.0;
          }
          else
@@ -857,21 +871,23 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       boolean alive = adaptationSignalAlive.getValue();
       for (int b = 0; b < bodyAdaptationState.length; b++)
       {
+         RobotSide side = bodyAdaptationSide[b];
+         boolean scsOverridden = side != null && armGraspingScsOverride.get(side).getValue();
          AdaptationState state;
          if (!gated)
          {
             state = AdaptationState.ACTIVE;
          }
-         else if (!alive)
+         else if (!alive && !scsOverridden)
          {
             // Signal lost: the grasp state can no longer be trusted, so freeze if we were mid-grasp (don't let a
             // held load's estimate collapse), otherwise relaxing to nominal is safe. Checked BEFORE grasping so a
-            // stale-true grasp flag cannot keep an arm ACTIVE on dead data.
+            // stale-true grasp flag cannot keep an arm ACTIVE on dead data. An SCS-overridden side is exempt -- SCS
+            // is a local, always-live source, so the ROS heartbeat cannot force it idle.
             state = bodyWasGrasping[b] ? AdaptationState.IDLE_HOLD : AdaptationState.IDLE_NOMINAL;
          }
          else
          {
-            RobotSide side = bodyAdaptationSide[b];
             boolean grasping = side != null && armGrasping.get(side).getValue();
             if (grasping)
             {
