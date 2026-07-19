@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.parameterEstimation;
 
+import java.util.Arrays;
+
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
@@ -37,6 +39,13 @@ public class InertialBiasWindowFilter
    /** If we choose to temporarily exclude the bias, but not overwrite its value, we need an appropriately sized zero matrix as a placeholder. */
    private final DMatrixRMaj ZERO_MATRIX;
 
+   /**
+    * Per-row mask controlling which degrees of freedom {@link #calculateBias()} actually updates. Defaults to all
+    * rows. A masked tare (for example the pose-independent floating-base-linear tare) narrows this so that only the
+    * chosen rows move on the next window fill, leaving the rest of the bias exactly as it was.
+    */
+   private final boolean[] rowActive;
+
    public InertialBiasWindowFilter(int nDoFs, int windowSize, String[] rowNames, YoRegistry parentRegistry)
    {
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -49,6 +58,27 @@ public class InertialBiasWindowFilter
       bias = new YoMatrix("bias_", nDoFs, 1, rowNames, null, registry);
 
       ZERO_MATRIX = new DMatrixRMaj(nDoFs, 1);
+
+      rowActive = new boolean[nDoFs];
+      Arrays.fill(rowActive, true);
+   }
+
+   /** Restores the default: {@link #calculateBias()} updates every degree of freedom. */
+   public void setAllRowsActive()
+   {
+      Arrays.fill(rowActive, true);
+   }
+
+   /**
+    * Restricts {@link #calculateBias()} to the given measurement rows: on the next window fill only those rows of the
+    * bias are updated, and every other row keeps its current value. Used for a masked tare (for example taring only the
+    * floating base's linear force rows). Reset with {@link #setAllRowsActive()}.
+    */
+   public void setActiveRows(int... rows)
+   {
+      Arrays.fill(rowActive, false);
+      for (int row : rows)
+         rowActive[row] = true;
    }
 
    /**
@@ -89,7 +119,8 @@ public class InertialBiasWindowFilter
       CommonOps_DDRM.scale(1.0 / windowSize, biasContainer);
 
       for (int i = 0; i < biasContainer.getNumRows(); i++)
-         bias.set(i, 0, bias.get(i, 0) + biasContainer.get(i, 0));
+         if (rowActive[i])
+            bias.set(i, 0, bias.get(i, 0) + biasContainer.get(i, 0));
    }
 
    /** Clears the measurement window so a fresh set of residuals can be collected. The bias itself is KEPT. */

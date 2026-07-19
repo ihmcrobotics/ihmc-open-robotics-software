@@ -162,6 +162,22 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final YoMatrix residual;
 
+   /**
+    * Debug split of the six FLOATING-BASE measurement rows into their two contributions, so the base residual can be
+    * attributed to the model side vs the contact side. The base residual is
+    * {@code residual_base = -torqueFromNominal_base - (Y*pi)_base + (J_contact^T w)_base - bias_base}, so if the deep
+    * squat's ~200 N horizontal base residual lives on {@link #contactWrenchTermBase} it is a foot-switch decode issue,
+    * and if it lives on {@link #torqueFromNominalBase} it is the whole-body inverse dynamics (base accel/frame). Both
+    * are logged raw (no sign flip); {@link #receivedContactWrench} logs the exact wrench the estimator consumed, to
+    * cross-check against the foot switch's own JTrans YoVariables.
+    */
+   private final YoMatrix torqueFromNominalBase;
+   private final YoMatrix contactWrenchTermBase;
+   private final SideDependentList<YoMatrix> receivedContactWrench;
+   private final DMatrixRMaj baseRowScratch = new DMatrixRMaj(Wrench.SIZE, 1);
+   private final DMatrixRMaj contactGeneralizedForce;      // sum_side J_side^T w_side, full nDoFs
+   private final DMatrixRMaj contactGeneralizedForceSide;  // per-side scratch
+
    private final InertialBiasWindowFilter biasWindowFilter;
    private final YoBoolean excludeBias;
    private final YoBoolean eraseBias;
@@ -183,6 +199,18 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
     * residual can be watched at nominal without the filter chasing it.
     */
    private final YoBoolean holdParametersAtNominal;
+
+   /**
+    * Operator request to tare ONLY the pose-independent floating-base LINEAR force rows (x, y, z) of the bias, leaving
+    * every other measurement DoF untouched. Same mechanism as {@link #tareProcess()}, but the standing mismatch it
+    * captures -- the net vertical/horizontal force offset, e.g. leg-torque calibration or a real-vs-model total-mass
+    * gap -- is configuration-independent, so unlike a full tare it stays valid as the robot changes pose. The base
+    * ANGULAR (moment) rows are deliberately excluded because those ARE pose-dependent (they scale with the CoM moment
+    * arm). See {@link #startTareProcessFloatingBaseLinear()}.
+    */
+   private final YoBoolean tareProcessFloatingBaseLinear;
+   /** Measurement-row indices of the floating base's LINEAR force DoFs (x, y, z); the target of the masked tare above. */
+   private final int[] floatingBaseLinearForceRows;
 
    private final DoubleProvider accelerationCalculationAlpha;  // useful to have a master setting, we want to filter all DoFs equally
 
@@ -366,6 +394,18 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       String[] measurementNames = inertialEstimationParameters.getMeasurementNames();
       residual = new YoMatrix("residual_", nDoFs, 1, measurementNames, registry);
 
+      String[] baseRowNames = new String[Wrench.SIZE];
+      System.arraycopy(measurementNames, 0, baseRowNames, 0, Wrench.SIZE);
+      torqueFromNominalBase = new YoMatrix("torqueFromNominalBase_", Wrench.SIZE, 1, baseRowNames, registry);
+      contactWrenchTermBase = new YoMatrix("contactWrenchTermBase_", Wrench.SIZE, 1, baseRowNames, registry);
+      String[] wrenchRowNames = {"angularX", "angularY", "angularZ", "linearX", "linearY", "linearZ"};
+      receivedContactWrench = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+         receivedContactWrench.put(side, new YoMatrix("receivedContactWrench_" + side.getCamelCaseNameForStartOfExpression() + "_",
+                                                      Wrench.SIZE, 1, wrenchRowNames, registry));
+      contactGeneralizedForce = new DMatrixRMaj(nDoFs, 1);
+      contactGeneralizedForceSide = new DMatrixRMaj(nDoFs, 1);
+
       accelerationCalculationAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(inertialEstimationParameters.getBreakFrequencyForAccelerationCalculation(), dt.getValue());
       jointVelocitiesContainer = new DMatrixRMaj(nDoFs, 1);
       jointAccelerations = new FilteredFiniteDifferenceYoVariable[nDoFs];
@@ -391,6 +431,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       tareProcessInProgress.set(false);
       holdParametersAtNominal = new YoBoolean("holdParametersAtNominal", registry);
       holdParametersAtNominal.set(false);
+      tareProcessFloatingBaseLinear = new YoBoolean("tareProcessFloatingBaseLinear", registry);
+      tareProcessFloatingBaseLinear.set(false);
+      floatingBaseLinearForceRows = findFloatingBaseLinearForceRows(measurementNames);
 
       normalizedInnovation = new YoDouble("normalizedInnovation", registry);
       normalizedInnovation.set(0.0);
@@ -492,6 +535,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          tareProcess.set(false);
       }
 
+      // A masked tare that captures ONLY the pose-independent floating-base linear force offset. Same flow as the full
+      // tare, but the bias update is restricted to the base x/y/z rows so the result stays valid as the robot re-poses.
+      if (tareProcessFloatingBaseLinear.getValue())
+      {
+         startTareProcessFloatingBaseLinear();
+         tareProcessFloatingBaseLinear.set(false);
+      }
+
       // Handle a requested reset of the estimator. Outside the enableFilter check, so that a diverged estimator can
       // also be cleaned up with the filter switched off. We skip the filter for this tick and pick it up again on the
       // next one, so that the nominal re-seed is actually what the estimate holds for a tick -- running the update
@@ -533,6 +584,21 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          filter.setRegressor(regressor);
          filter.setContactJacobians(fullContactJacobians);
          filter.setContactWrenches(contactWrenches);
+
+         // Base-residual debug: split the six floating-base rows into their model term (torqueFromNominal_base) and
+         // their contact term ((sum_side J_contact^T w_contact)_base), and log the raw wrench the estimator received.
+         // See the field docs on torqueFromNominalBase. Logged raw (no residual sign flip).
+         CommonOps_DDRM.extract(inverseDynamicsCalculator.getJointTauMatrix(), 0, Wrench.SIZE, 0, 1, baseRowScratch, 0, 0);
+         torqueFromNominalBase.set(baseRowScratch);
+         contactGeneralizedForce.zero();
+         for (RobotSide side : RobotSide.values)
+         {
+            CommonOps_DDRM.multTransA(fullContactJacobians.get(side), contactWrenches.get(side), contactGeneralizedForceSide);
+            CommonOps_DDRM.addEquals(contactGeneralizedForce, contactGeneralizedForceSide);
+            receivedContactWrench.get(side).set(contactWrenches.get(side));
+         }
+         CommonOps_DDRM.extract(contactGeneralizedForce, 0, Wrench.SIZE, 0, 1, baseRowScratch, 0, 0);
+         contactWrenchTermBase.set(baseRowScratch);
 
          if (graspRejectionEnabled)
          {
@@ -651,6 +717,28 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
     */
    private void startTareProcess()
    {
+      // Full tare: every measurement DoF participates.
+      biasWindowFilter.setAllRowsActive();
+      startTareProcess("all measurement DoFs");
+   }
+
+   /**
+    * Masked tare that folds ONLY the floating base's linear force rows (x, y, z) into the bias; all other rows keep
+    * their current value. See {@link #tareProcessFloatingBaseLinear}. Run this UNLOADED like a normal tare, but because
+    * the linear force offset is configuration-independent the result can be reused across poses.
+    */
+   private void startTareProcessFloatingBaseLinear()
+   {
+      biasWindowFilter.setActiveRows(floatingBaseLinearForceRows);
+      startTareProcess("floating-base linear force DoFs only (pose-independent)");
+   }
+
+   /**
+    * Common body of the tare requests: re-seed the parameters to nominal, hold them there, and arm the bias window.
+    * The active-row mask on the window filter (set by the caller) decides which rows the accumulated bias will touch.
+    */
+   private void startTareProcess(String modeDescription)
+   {
       if (!enableFilter.getValue())
       {
          LogTools.warn("InertialParameterManager: tareProcess requested but the filter is disabled -- no residual is "
@@ -669,8 +757,30 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       holdParametersAtNominal.set(true);
       tareProcessInProgress.set(true);
 
-      LogTools.info("InertialParameterManager: process tare STARTED -- parameters re-seeded to nominal and held; "
-                    + "collecting the residual over the bias window.");
+      LogTools.info("InertialParameterManager: process tare STARTED [" + modeDescription + "] -- parameters re-seeded "
+                    + "to nominal and held; collecting the residual over the bias window.");
+   }
+
+   /**
+    * Finds the measurement-row indices of the floating base's linear force DoFs. The base is serialized as a 6-DoF
+    * block with suffixes {@code {wX, wY, wZ, x, y, z}} (see the model's {@code getMeasurementNames()}), so the linear
+    * force rows are the three whose name ends in a lowercase {@code _x}/{@code _y}/{@code _z}. One-DoF joint rows end in
+    * an uppercase axis (e.g. {@code _Y}) and so never match. Deriving the indices by name avoids hard-coding the layout.
+    */
+   private static int[] findFloatingBaseLinearForceRows(String[] measurementNames)
+   {
+      int[] rows = new int[3];  // a floating base contributes exactly three linear force rows (x, y, z)
+      int found = 0;
+      for (int i = 0; i < measurementNames.length && found < rows.length; i++)
+      {
+         String name = measurementNames[i];
+         if (name.endsWith("_x") || name.endsWith("_y") || name.endsWith("_z"))
+            rows[found++] = i;
+      }
+      if (found != rows.length)
+         throw new RuntimeException("InertialParameterManager: expected 3 floating-base linear force measurement rows "
+                                    + "(names ending _x/_y/_z), but found " + found + ".");
+      return rows;
    }
 
    /** Completes a process tare: the bias has just been accumulated, so release the parameters. */
