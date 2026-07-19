@@ -91,7 +91,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final SideDependentList<YoBoolean> armGraspingScsOverride = new SideDependentList<>();
    private final YoEnum<AdaptationState>[] bodyAdaptationState;   // computed per estimated body
    private final RobotSide[] bodyAdaptationSide;                  // estimated body -> side (null if not an arm)
-   private final boolean[] bodyWasGrasping;                       // latch for IDLE_HOLD on signal loss
+   /** Latch: has this body ever grasped since the last reset/tare. Set true on the first ACTIVE tick, and NOT cleared
+    * on release -- so once a limb has grasped, releasing FREEZES the learned estimate (IDLE_HOLD) instead of pulling
+    * it back to unloaded nominal. IDLE_NOMINAL is therefore only the pre-first-grasp state. Cleared by resetEstimator(). */
+   private final boolean[] bodyHasGrasped;
    private final YoDouble adaptationQScaleActive;
    private final YoDouble adaptationQScaleIdle;
    private final YoDouble adaptationPriorScaleActive;
@@ -112,6 +115,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final InertialAdaptationCommandMessage latestGraspMessage;
    private final double dtSeconds;
    private double secondsSinceGraspMessage;
+   // Previous streamed tare-request levels, for rising-edge detection (fire the tare once per grip squeeze / button click).
+   private boolean tareRequestWasActive = false;
+   private boolean tareLinearRequestWasActive = false;
    private static final double GRASP_SIGNAL_TIMEOUT_SECONDS = 0.5;  // stream stale beyond this -> signal lost
 
    private final ArrayList<YoInertiaEllipsoid> yoInertiaEllipsoids;
@@ -472,8 +478,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       }
       adaptationQScaleActive = new YoDouble("adaptationQScaleActive", registry);
       adaptationQScaleActive.set(1.0);
+      // Process-noise (Q) scale for BOTH idle states (nominal + hold share this). Live YoDouble: lower it in SCS mid-sim
+      // to make an idle limb more stationary -- less covariance grows per tick -> smaller Kalman gain -> the estimate
+      // barely drifts. Drive toward 0 to effectively freeze it. Default stiffer than before per tuning.
       adaptationQScaleIdle = new YoDouble("adaptationQScaleIdle", registry);
-      adaptationQScaleIdle.set(1.0e-3);
+      adaptationQScaleIdle.set(1.0e-6);
       adaptationPriorScaleActive = new YoDouble("adaptationPriorScaleActive", registry);
       adaptationPriorScaleActive.set(1.0);
       adaptationPriorScaleIdleNominal = new YoDouble("adaptationPriorScaleIdleNominal", registry);
@@ -483,7 +492,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       int nEstimatedBodies = covarianceHelper.getNumberOfEstimatedBodies();
       bodyAdaptationState = new YoEnum[nEstimatedBodies];
       bodyAdaptationSide = new RobotSide[nEstimatedBodies];
-      bodyWasGrasping = new boolean[nEstimatedBodies];
+      bodyHasGrasped = new boolean[nEstimatedBodies];
       for (int b = 0; b < nEstimatedBodies; b++)
       {
          String bodyName = covarianceHelper.getEstimatedBodyName(b);
@@ -688,6 +697,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       physicalConsistencyWarningCount = 0;
       areParametersPhysicallyConsistent.set(true);
 
+      // Re-arm the grasp latch: the estimate is back at nominal, so an ungrasped limb should sit in IDLE_NOMINAL
+      // (pinned to unloaded) until it is grasped again, not IDLE_HOLD. startTareProcess() calls this too, so a fresh
+      // tare also re-arms it -- exactly the "IDLE_NOMINAL is the post-tare, pre-grasp state" behaviour.
+      Arrays.fill(bodyHasGrasped, false);
+
       // Abort any in-flight process tare. Note this is safe to run during startTareProcess()'s own call to this
       // method, which re-arms these flags immediately afterwards -- but if an operator resets MID-tare, the filter
       // must not be left held forever with a half-filled bias window.
@@ -838,10 +852,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
     * {@link AdaptationState}. Runs each tick just before the covariances are read.
     * <ul>
     * <li>ACTIVE (grasping): base Q, base (loose) prior -> the limb tracks its payload.</li>
-    * <li>IDLE_NOMINAL (not grasping, signal alive): low Q, tight prior -> pinned to nominal (prevents the leech
-    *     and returns to nominal on release).</li>
-    * <li>IDLE_HOLD (was grasping, signal lost): low Q, no prior pull -> frozen at the last estimate, so gravity
-    *     compensation does not collapse under a still-held load.</li>
+    * <li>IDLE_NOMINAL (has NEVER grasped since the last reset/tare): low Q, tight prior -> pinned to nominal
+    *     (prevents the leech). This is the pre-first-grasp / post-tare state only.</li>
+    * <li>IDLE_HOLD (released, or signal lost, AFTER having grasped): low Q, no prior pull -> frozen at the last
+    *     estimate, so a still-held load's gravity compensation persists (the estimate is NOT thrown away on release).</li>
     * </ul>
     */
    private void updateAdaptationGate()
@@ -859,6 +873,19 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
             if (!armGraspingScsOverride.get(RobotSide.RIGHT).getValue())
                armGrasping.get(RobotSide.RIGHT).set(latestGraspMessage.getRightHandGrasping());
             secondsSinceGraspMessage = 0.0;
+
+            // Tare requests are edge-triggered: fire the tare once on the false->true transition of the streamed
+            // request (grip squeezed / RDX button). The tareProcess YoBooleans are polled and self-cleared at the top
+            // of update(), so setting them here fires on the next tick -- same as an operator toggling them in SCS.
+            boolean tareRequest = latestGraspMessage.getTareProcessRequested();
+            if (tareRequest && !tareRequestWasActive)
+               tareProcess.set(true);
+            tareRequestWasActive = tareRequest;
+
+            boolean tareLinearRequest = latestGraspMessage.getTareProcessFloatingBaseLinearRequested();
+            if (tareLinearRequest && !tareLinearRequestWasActive)
+               tareProcessFloatingBaseLinear.set(true);
+            tareLinearRequestWasActive = tareLinearRequest;
          }
          else
          {
@@ -873,31 +900,29 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          RobotSide side = bodyAdaptationSide[b];
          boolean scsOverridden = side != null && armGraspingScsOverride.get(side).getValue();
+         AdaptationState previousState = bodyAdaptationState[b].getEnumValue();
          AdaptationState state;
          if (!gated)
          {
             state = AdaptationState.ACTIVE;
          }
-         else if (!alive && !scsOverridden)
-         {
-            // Signal lost: the grasp state can no longer be trusted, so freeze if we were mid-grasp (don't let a
-            // held load's estimate collapse), otherwise relaxing to nominal is safe. Checked BEFORE grasping so a
-            // stale-true grasp flag cannot keep an arm ACTIVE on dead data. An SCS-overridden side is exempt -- SCS
-            // is a local, always-live source, so the ROS heartbeat cannot force it idle.
-            state = bodyWasGrasping[b] ? AdaptationState.IDLE_HOLD : AdaptationState.IDLE_NOMINAL;
-         }
          else
          {
-            boolean grasping = side != null && armGrasping.get(side).getValue();
+            // Effective grasp for this tick. A lost grasp signal (heartbeat timeout) cannot be trusted, so it reads as
+            // NOT grasping -- which sends an already-grasped limb to IDLE_HOLD (freeze) below rather than keeping it
+            // ACTIVE on dead data. An SCS-overridden side is a local, always-live source, so the timeout is ignored.
+            boolean grasping = (alive || scsOverridden) && side != null && armGrasping.get(side).getValue();
             if (grasping)
             {
                state = AdaptationState.ACTIVE;
-               bodyWasGrasping[b] = true;
+               bodyHasGrasped[b] = true;
             }
             else
             {
-               state = AdaptationState.IDLE_NOMINAL;
-               bodyWasGrasping[b] = false;
+               // Releasing (or losing the signal) after a grasp FREEZES the learned estimate (IDLE_HOLD): the payload
+               // is still on the arm, so its gravity comp must persist. IDLE_NOMINAL -- the tight prior that pulls the
+               // estimate back to unloaded nominal -- is ONLY the pre-first-grasp state (fresh after a tare/reset).
+               state = bodyHasGrasped[b] ? AdaptationState.IDLE_HOLD : AdaptationState.IDLE_NOMINAL;
             }
          }
          bodyAdaptationState[b].set(state);
@@ -924,6 +949,22 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          }
          covarianceHelper.setProcessScaleForBody(b, qScale);
          filter.setPriorScaleForBody(b, priorScale);
+
+         // Log every gate transition for a link (adaptation ON = ACTIVE, OFF = pinned/frozen). Only on change, so no
+         // per-tick spam. Reports the link, the state change, and the covariances now in effect: the process-noise (Q)
+         // scale and Tikhonov prior scale the gate just applied to this body, plus the side's arm measurement (R) cov.
+         if (state != previousState)
+         {
+            String linkMeasurementCovariance = side != null ? String.format("%.3e", covarianceHelper.getArmMeasurementCovariance(side)) : "n/a";
+            LogTools.info(String.format("Inertial adaptation gate: %s  %s -> %s  (adaptation %s)  |  Q scale = %.3e  prior scale = %.3e  arm measurement cov (R) = %s",
+                                        covarianceHelper.getEstimatedBodyName(b),
+                                        previousState,
+                                        state,
+                                        state == AdaptationState.ACTIVE ? "ON" : "OFF",
+                                        qScale,
+                                        priorScale,
+                                        linkMeasurementCovariance));
+         }
       }
    }
 

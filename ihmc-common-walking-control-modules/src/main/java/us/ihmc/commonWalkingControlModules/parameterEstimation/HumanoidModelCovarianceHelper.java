@@ -185,6 +185,12 @@ public class HumanoidModelCovarianceHelper
       qBodyScale[b].set(scale);
    }
 
+   /** Current measurement-noise (R) diagonal value applied to the given side's arm joints. */
+   public double getArmMeasurementCovariance(RobotSide robotSide)
+   {
+      return armMeasurementCovariances.get(robotSide).getValue();
+   }
+
    /**
     * Pack and return the measurement covariance matrix from the associated YoVariables.
     *

@@ -29,6 +29,13 @@ as "signal lost" and freezes a still-grasping forearm rather than letting it rel
 bool left_hand_grasping
 
 bool right_hand_grasping
+
+# Operator tare requests, edge-triggered on the controller (a false->true transition fires the tare once). Mapped to
+# the controller grip buttons in VR (left grip = full process tare, right grip = floating-base-linear tare), and also
+# fired from the RDX VR panel. Held true while the grip is squeezed; the controller only acts on the rising edge.
+bool tare_process_requested
+
+bool tare_process_floating_base_linear_requested
 }</pre>
 */
 public class InertialAdaptationCommandMessage implements ROS2Message<InertialAdaptationCommandMessage>
@@ -37,11 +44,15 @@ public class InertialAdaptationCommandMessage implements ROS2Message<InertialAda
 
    private boolean left_hand_grasping_;
    private boolean right_hand_grasping_;
+   private boolean tare_process_requested_;
+   private boolean tare_process_floating_base_linear_requested_;
 
    public InertialAdaptationCommandMessage()
    {
       left_hand_grasping_ = (boolean) false;
       right_hand_grasping_ = (boolean) false;
+      tare_process_requested_ = (boolean) false;
+      tare_process_floating_base_linear_requested_ = (boolean) false;
 
    }
 
@@ -58,6 +69,8 @@ public class InertialAdaptationCommandMessage implements ROS2Message<InertialAda
 
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // left_hand_grasping_
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // right_hand_grasping_
+      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // tare_process_requested_
+      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // tare_process_floating_base_linear_requested_
 
       return currentAlignment - initialAlignment;
    }
@@ -67,6 +80,8 @@ public class InertialAdaptationCommandMessage implements ROS2Message<InertialAda
    {
       buffer.writeBoolean(left_hand_grasping_);
       buffer.writeBoolean(right_hand_grasping_);
+      buffer.writeBoolean(tare_process_requested_);
+      buffer.writeBoolean(tare_process_floating_base_linear_requested_);
 
    }
 
@@ -75,6 +90,8 @@ public class InertialAdaptationCommandMessage implements ROS2Message<InertialAda
    {
       left_hand_grasping_ = buffer.readBoolean();
       right_hand_grasping_ = buffer.readBoolean();
+      tare_process_requested_ = buffer.readBoolean();
+      tare_process_floating_base_linear_requested_ = buffer.readBoolean();
 
    }
 
@@ -83,6 +100,8 @@ public class InertialAdaptationCommandMessage implements ROS2Message<InertialAda
    {
       left_hand_grasping_ = from.left_hand_grasping_;
       right_hand_grasping_ = from.right_hand_grasping_;
+      tare_process_requested_ = from.tare_process_requested_;
+      tare_process_floating_base_linear_requested_ = from.tare_process_floating_base_linear_requested_;
 
    }
 
@@ -106,6 +125,26 @@ public class InertialAdaptationCommandMessage implements ROS2Message<InertialAda
       this.right_hand_grasping_ = right_hand_grasping_;
    }
 
+   public boolean getTareProcessRequested()
+   {
+      return tare_process_requested_;
+   }
+
+   public void setTareProcessRequested(boolean tare_process_requested_)
+   {
+      this.tare_process_requested_ = tare_process_requested_;
+   }
+
+   public boolean getTareProcessFloatingBaseLinearRequested()
+   {
+      return tare_process_floating_base_linear_requested_;
+   }
+
+   public void setTareProcessFloatingBaseLinearRequested(boolean tare_process_floating_base_linear_requested_)
+   {
+      this.tare_process_floating_base_linear_requested_ = tare_process_floating_base_linear_requested_;
+   }
+
 
    @Override
    public java.lang.String toString()
@@ -116,6 +155,10 @@ public class InertialAdaptationCommandMessage implements ROS2Message<InertialAda
       builder.append(left_hand_grasping_);
       builder.append("right_hand_grasping_=");
       builder.append(right_hand_grasping_);
+      builder.append("tare_process_requested_=");
+      builder.append(tare_process_requested_);
+      builder.append("tare_process_floating_base_linear_requested_=");
+      builder.append(tare_process_floating_base_linear_requested_);
 
       builder.append("}");
       return builder.toString();

@@ -9,3 +9,10 @@
 bool left_hand_grasping
 
 bool right_hand_grasping
+
+# Operator tare requests, edge-triggered on the controller (a false->true transition fires the tare once). Mapped to
+# the controller grip buttons in VR (left grip = full process tare, right grip = floating-base-linear tare), and also
+# fired from the RDX VR panel. Held true while the grip is squeezed; the controller only acts on the rising edge.
+bool tare_process_requested
+
+bool tare_process_floating_base_linear_requested
