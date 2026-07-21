@@ -29,7 +29,7 @@ public class FallingControllerState extends HighLevelControllerState
    private final YoPolynomial loweringTrajectory = new YoPolynomial("fallingLoweringTrajectory", 4, registry);
    private final YoDouble fallingLoweringAlpha = new YoDouble("fallingLoweringAlpha", registry);
    private final YoDouble fallingConfigurationAlpha = new YoDouble("fallingConfigurationAlpha", registry);
-   private final YoBoolean enableStagedFallingConfiguration = new YoBoolean("enableStagedFallingConfiguration", registry);
+   private final YoEnum<FallingTrajectoryMode> fallingTrajectoryMode = new YoEnum<>("fallingTrajectoryMode", registry, FallingTrajectoryMode.class, false);
    private final YoBoolean enableFallingDampingMode = new YoBoolean("enableFallingDampingMode", registry);
    private final YoBoolean fallingDampingModeActive = new YoBoolean("fallingDampingModeActive", registry);
    private final YoEnum<FallingTrialConfiguration> fallingTrialConfiguration = new YoEnum<>("fallingTrialConfiguration",
@@ -73,7 +73,7 @@ public class FallingControllerState extends HighLevelControllerState
       fallTransitionDuration.set(0.5);
       fallVerticalLoweringDuration = new YoDouble("fallVerticalLoweringDuration", registry);
       fallVerticalLoweringDuration.set(0.25);
-      enableStagedFallingConfiguration.set(true);
+      fallingTrajectoryMode.set(FallingTrajectoryMode.LOWER_BODY_PITCH_THEN_CONFIGURATION);
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controlledJoints.length);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
@@ -96,7 +96,7 @@ public class FallingControllerState extends HighLevelControllerState
       double totalTransitionDuration = getTotalTransitionDuration();
       double loweringDuration = getLoweringDuration();
       double configurationDuration = totalTransitionDuration - loweringDuration;
-      boolean useStagedTrajectory = enableStagedFallingConfiguration.getBooleanValue() && loweringDuration > 1.0e-3 && configurationDuration > 1.0e-3;
+      boolean useStagedTrajectory = isStagedFallingMode() && loweringDuration > 1.0e-3 && configurationDuration > 1.0e-3;
       boolean useDampingMode = enableFallingDampingMode.getBooleanValue() && timeInState >= totalTransitionDuration;
       fallingDampingModeActive.set(useDampingMode);
 
@@ -231,6 +231,11 @@ public class FallingControllerState extends HighLevelControllerState
    private double getLoweringDuration()
    {
       return MathTools.clamp(fallVerticalLoweringDuration.getDoubleValue(), 0.0, getTotalTransitionDuration());
+   }
+
+   private boolean isStagedFallingMode()
+   {
+      return fallingTrajectoryMode.getEnumValue() == FallingTrajectoryMode.LOWER_BODY_PITCH_THEN_CONFIGURATION;
    }
 
    private static double interpolate(double start, double end, double alpha)
