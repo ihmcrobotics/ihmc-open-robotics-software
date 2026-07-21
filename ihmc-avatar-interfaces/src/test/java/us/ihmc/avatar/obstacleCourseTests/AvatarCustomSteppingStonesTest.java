@@ -1,11 +1,12 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -23,8 +24,6 @@ import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestInterface
 {

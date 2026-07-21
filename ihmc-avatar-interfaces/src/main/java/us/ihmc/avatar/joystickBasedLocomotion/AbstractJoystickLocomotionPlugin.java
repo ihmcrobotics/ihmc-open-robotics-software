@@ -1,24 +1,24 @@
 package us.ihmc.avatar.joystickBasedLocomotion;
 
-import controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage;
-import controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage;
-import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
-import controller_msgs.msg.dds.VelocityBasedWalkingInputMessage;
+import controller_msgs.ContinuousStepGeneratorInputMessage;
+import controller_msgs.ContinuousStepGeneratorParametersMessage;
+import controller_msgs.ContinuousStepGeneratorStatusMessage;
+import controller_msgs.VelocityBasedWalkingInputMessage;
+import us.ihmc.avatar.AvatarControllerThread;
+import us.ihmc.avatar.AvatarStepGeneratorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorParametersCommand;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.StepGeneratorNetworkSubscriber;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.tools.Timer;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.avatar.AvatarControllerThread;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorParametersCommand;
-import us.ihmc.avatar.AvatarStepGeneratorThread;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.StepGeneratorNetworkSubscriber;
 
 /**
  * Abstract plugin for using any handheld RC controller to send velocity-based walking commands using:

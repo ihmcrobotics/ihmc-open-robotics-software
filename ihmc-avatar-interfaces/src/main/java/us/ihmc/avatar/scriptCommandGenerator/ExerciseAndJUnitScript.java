@@ -1,0 +1,22 @@
+package us.ihmc.avatar.scriptCommandGenerator;
+
+
+/**
+ * Exercise and JUnit scripts originally loaded from XStream XML under
+ * {@code src/main/resources/scripts/ExerciseAndJUnitScripts/} on {@code develop}.
+ * Each enum constant corresponds to one XML file; see {@link ExerciseAndJUnitScriptCommands}.
+ */
+public enum ExerciseAndJUnitScript
+{
+   DRC_TRIALS_SLOPE_LEFT_FOOT_POSE,
+   DRC_TRIALS_ZIGZAG_HURDLES_LEFT_FOOT_POSE,
+   LONG_SIDE_STEPS_LEFT,
+   LONG_STEPS_MAX_HEIGHT_PAUSE_AND_RESTART_LEFT_FOOT_TEST,
+   SIMPLE_FLAT_GROUND_SCRIPT,
+   SIMPLE_SINGLE_FOOT_TRAJECTORY_SCRIPT,
+   SIMPLE_SINGLE_HAND_TRAJECTORY_SCRIPT,
+   SIMPLE_SINGLE_PELVIS_HEIGHT_SCRIPT,
+   SIMPLE_SINGLE_STEP_SCRIPT,
+   TWO_CINDER_BLOCKS_STEP_ON_LEFT_FOOT_TEST,
+   TWO_CINDER_BLOCKS_STEP_ON_LEFT_FOOT_TEST_SLOW
+}

@@ -1,7 +1,10 @@
 package us.ihmc.behaviors.behaviorTree.control.door;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import static behavior_msgs.BehaviorTreeSceneObjectStateMessage.*;
+import static us.ihmc.behaviors.behaviorTree.BehaviorTreeTools.*;
+
+import controller_msgs.RobotConfigurationData;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
@@ -18,15 +21,12 @@ import us.ihmc.communication.ros2log.ROS2LogSerialization;
 import us.ihmc.communication.ros2log.ROS2LogTimeSource;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
 
 import java.util.List;
-
-import static behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage.*;
-import static us.ihmc.behaviors.behaviorTree.BehaviorTreeTools.*;
 
 public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversalState, DoorTraversalDefinition>
 {
@@ -56,7 +56,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
             RobotConfigurationData rcd = syncedRobot.getLatestRobotConfigurationData();
             status.setSequenceId(rcd.getSequenceId());
 
-            relativePelvisPose.set(rcd.getRootOrientation(), rcd.getRootPosition());
+            relativePelvisPose.set(rcd.getRootOrientation().getQuaternion(), rcd.getRootPosition().getPoint());
             initialWalkingPose.inverseTransform(relativePelvisPose);
 
             status.getDesiredRootPosition().set(relativePelvisPose.getTranslation());
@@ -67,11 +67,13 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
             for (int i = 0; i < nonFingerValues.length; i++)
                nonFingerValues[i] = rcd.getJointAngles().get(nonFingerIndices.get(i));
             status.getDesiredJointAngles().clear();
-            status.getDesiredJointAngles().add(nonFingerValues);
+            for (float jointAngle : nonFingerValues)
+               status.getDesiredJointAngles().add(jointAngle);
             for (int i = 0; i < nonFingerValues.length; i++)
                nonFingerValues[i] = rcd.getJointVelocities().get(nonFingerIndices.get(i));
             status.getDesiredJointVelocities().clear();
-            status.getDesiredJointVelocities().add(nonFingerValues);
+            for (float jointVelocity : nonFingerValues)
+               status.getDesiredJointVelocities().add(jointVelocity);
 
             fullRobotModel.getRootJoint().setJointPosition(relativePelvisPose.getTranslation());
             fullRobotModel.getRootJoint().setJointOrientation(relativePelvisPose.getRotation());

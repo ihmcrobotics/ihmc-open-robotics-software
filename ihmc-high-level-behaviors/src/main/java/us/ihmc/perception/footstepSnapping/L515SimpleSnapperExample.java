@@ -3,15 +3,10 @@ package us.ihmc.perception.footstepSnapping;
 import static org.bytedeco.librealsense2.global.realsense2.RS2_EXTENSION_DEPTH_FRAME;
 import static org.bytedeco.librealsense2.global.realsense2.rs2_is_frame_extendable_to;
 
-import java.nio.ShortBuffer;
-import java.util.ArrayList;
-import java.util.Random;
-
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataMessage;
+import org.bytedeco.librealsense2.global.realsense2;
 import org.bytedeco.librealsense2.rs2_error;
 import org.bytedeco.librealsense2.rs2_frame;
-import org.bytedeco.librealsense2.global.realsense2;
-
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentCopier;
@@ -33,6 +28,10 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.nio.ShortBuffer;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class L515SimpleSnapperExample implements FootstepAdjustment, L515DepthImageReceiver
 {
@@ -246,7 +245,7 @@ public class L515SimpleSnapperExample implements FootstepAdjustment, L515DepthIm
          return false;
       }
         
-      if(highestPoint.getZ() < adjustedFootstep.getLocation().getZ() + 0.3)
+        if(highestPoint.getZ() < adjustedFootstep.getLocation().getPoint().getZ() + 0.3)
       {
          //just update the Z height
          updatedFootStepPose.setIncludingFrame(footstepPose);

@@ -1,15 +1,16 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
-
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 
 public abstract class ToolboxController
 {
@@ -129,7 +130,7 @@ public abstract class ToolboxController
     * 
     * @param statusMessage the message to publish.
     */
-   public <S extends Settable<S>> void reportMessage(S statusMessage)
+   public <S extends ROS2Message<S>> void reportMessage(S statusMessage)
    {
       statusOutputManager.reportStatusMessage(statusMessage);
    }

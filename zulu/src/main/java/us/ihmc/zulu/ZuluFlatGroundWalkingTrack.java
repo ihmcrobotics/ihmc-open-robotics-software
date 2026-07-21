@@ -6,8 +6,7 @@ import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -18,8 +17,7 @@ public class ZuluFlatGroundWalkingTrack
    private static final boolean createYoVariableServer = Boolean.parseBoolean(System.getProperty("create.yovariable.server", "true"));
    private static final boolean kinematicsSimulation = Boolean.parseBoolean(System.getProperty("kinematics.simulation", "false"));
 
-   private final RealtimeROS2Node realtimeROS2Node = new ROS2NodeBuilder().specialTransportMode(ROS2NodeBuilder.SpecialTransportMode.INTRAPROCESS_ONLY)
-                                                                          .buildRealtime("flat_ground_walking_track_simulation");
+   private final AsyncROS2Node asyncROS2Node = new AsyncROS2Node("flat_ground_walking_track_simulation");
 
    public ZuluFlatGroundWalkingTrack()
    {
@@ -36,7 +34,7 @@ public class ZuluFlatGroundWalkingTrack
 
       SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(robotModel);
-      avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
+      avatarSimulationFactory.setAsyncROS2Node(asyncROS2Node);
       avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
       avatarSimulationFactory.setCommonAvatarEnvrionmentInterface(environment);
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);

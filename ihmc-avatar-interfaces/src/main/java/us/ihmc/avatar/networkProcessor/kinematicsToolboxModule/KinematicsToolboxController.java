@@ -1,10 +1,15 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
+import static toolbox_msgs.KinematicsToolboxOutputStatus.*;
+import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint3D;
+
+import controller_msgs.RobotConfigurationData;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.HumanoidKinematicsToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
@@ -101,11 +106,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.*;
-import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint3D;
 
 /**
  * {@code KinematicsToolboxController} is used as a whole-body inverse kinematics solver.
@@ -484,7 +484,7 @@ public class KinematicsToolboxController extends ToolboxController implements SC
       feedbackControllerDataHolder = controllerCore.getWholeBodyFeedbackControllerDataHolder();
 
       inverseKinematicsSolution = MessageTools.createKinematicsToolboxOutputStatus(desiredOneDoFJoints);
-      inverseKinematicsSolution.setDestination(-1);
+      // jros2 messages no longer expose QueueableMessage destination; controller routing uses topics only.
 
       robotMass = MultiBodySystemMissingTools.computeSubTreeMass(rootBody);
       centerOfMassSafeMargin.set(0.04); // Same as the walking controller.

@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.bipedSupportPolygons;
 
-import controller_msgs.msg.dds.StepConstraintsListMessage;
+import controller_msgs.StepConstraintsListMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintRegionCommand;
@@ -68,14 +68,14 @@ public class StepConstraintRegionsList
       {
          StepConstraintRegion stepConstraintRegion = stepConstraintRegions.get(regionIndex);
 
-         message.getRegionOrigin().add().set(stepConstraintRegion.getPoint());
-         message.getRegionOrientation().add().set(stepConstraintRegion.getTransformToWorld().getRotation()); // TODO check this
-         message.getRegionNormal().add().set(stepConstraintRegion.getNormal()); // TODO check this
+         message.getRegionOrigin().add().getPoint().set(stepConstraintRegion.getPoint());
+         message.getRegionOrientation().add().getQuaternion().set(stepConstraintRegion.getTransformToWorld().getRotation()); // TODO check this
+         message.getRegionNormal().add().getVector().set(stepConstraintRegion.getNormal()); // TODO check this
 
          int concaveHullSize = stepConstraintRegion.getConcaveHullSize();
          message.getConcaveHullsSize().add(concaveHullSize);
          for (int vertexIndex = 0; vertexIndex < concaveHullSize; vertexIndex++)
-            message.getVertexBuffer().add().set(stepConstraintRegion.getConcaveHullVertices().get(vertexIndex));
+            message.getVertexBuffer().add().getPoint().set(stepConstraintRegion.getConcaveHullVertices().get(vertexIndex));
 
          int numberOfHoles = stepConstraintRegion.getNumberOfHolesInRegion();
          message.getNumberOfHolesInRegion().add(numberOfHoles);
@@ -85,7 +85,7 @@ public class StepConstraintRegionsList
             int holeVertices = hole.getNumberOfVertices();
             message.getHolePolygonsSize().add(holeVertices);
             for (int holeVertexIndex = 0; holeVertexIndex < holeVertices; holeVertexIndex++)
-               message.getVertexBuffer().add().set(hole.getVertex(holeVertexIndex));
+               message.getVertexBuffer().add().getPoint().set(hole.getVertex(holeVertexIndex));
          }
       }
    }

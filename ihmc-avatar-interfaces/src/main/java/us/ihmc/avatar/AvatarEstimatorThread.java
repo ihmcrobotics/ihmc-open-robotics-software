@@ -1,6 +1,6 @@
 package us.ihmc.avatar;
 
-import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.ControllerCrashNotificationPacket;
 import gnu.trove.map.TObjectDoubleMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
@@ -14,13 +14,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
@@ -44,9 +43,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
    private final PairList<BooleanSupplier, StateEstimatorController> secondaryStateEstimators;
 
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
-   private final RigidBodyTransform frozenRootJointTransform = new RigidBodyTransform();
-
-   private StateEstimatorMode requestedStateEstimatorMode = StateEstimatorMode.NORMAL;
 
    private final HumanoidRobotContextData humanoidRobotContextData;
 
@@ -98,8 +94,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
       {
          // In the case the SensorReader.compute() does fill the sensor data, it has to be called before initialize of the state estimator.
          sensorReader.compute(humanoidRobotContextData.getTimestamp(), humanoidRobotContextData.getSensorDataContext());
-
-         applyRequestedStateEstimatorModeForPerfectSensors();
 
          if (firstTick.getBooleanValue())
          {
@@ -171,35 +165,9 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
          {
             StateEstimatorMode requestedMode = stateModeMap.get(newState);
             if (requestedMode != null)
-               requestStateEstimatorMode(requestedMode);
+               mainStateEstimator.requestStateEstimatorMode(requestedMode);
          }
       });
-   }
-
-   public void requestStateEstimatorMode(StateEstimatorMode mode)
-   {
-      if (mainStateEstimator != null)
-      {
-         mainStateEstimator.requestStateEstimatorMode(mode);
-         return;
-      }
-
-      if (mode == StateEstimatorMode.FROZEN)
-         estimatorFullRobotModel.getRootJoint().getJointConfiguration(frozenRootJointTransform);
-
-      requestedStateEstimatorMode = mode;
-   }
-
-   private void applyRequestedStateEstimatorModeForPerfectSensors()
-   {
-      if (mainStateEstimator != null || requestedStateEstimatorMode != StateEstimatorMode.FROZEN)
-         return;
-
-      FloatingJointBasics rootJoint = estimatorFullRobotModel.getRootJoint();
-      rootJoint.setJointConfiguration(frozenRootJointTransform);
-      rootJoint.getJointTwist().setToZero();
-      rootJoint.getJointAcceleration().setToZero();
-      rootJoint.updateFramesRecursively();
    }
 
    public void addEstimatorRunnable(Runnable runnable)
@@ -245,8 +213,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
 
    public ForceSensorCalibrationModule getForceSensorCalibrationModule()
    {
-      if (mainStateEstimator == null)
-         return null;
       return mainStateEstimator.getForceSensorCalibrationModule();
    }
 }

@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import behavior_msgs.msg.dds.LeafNodeDefinitionMessage;
+import behavior_msgs.LeafNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.crdt.CRDTBidirectionalLong;

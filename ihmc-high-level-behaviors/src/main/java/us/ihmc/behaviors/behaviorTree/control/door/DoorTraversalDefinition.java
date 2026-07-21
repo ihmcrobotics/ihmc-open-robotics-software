@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.control.door;
 
-import behavior_msgs.msg.dds.DoorTraversalDefinitionMessage;
+import behavior_msgs.DoorTraversalDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 

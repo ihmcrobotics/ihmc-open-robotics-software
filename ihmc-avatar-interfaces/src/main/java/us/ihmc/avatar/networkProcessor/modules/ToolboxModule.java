@@ -1,7 +1,7 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
 import com.google.common.base.CaseFormat;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
 import us.ihmc.commons.Conversions;
@@ -16,20 +16,17 @@ import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -114,7 +111,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       // We're creating the ROS2 node here, so we need to manage it.
       manageROS2Node = ros2Node == null;
       if (ros2Node == null)
-         ros2Node = new ROS2NodeBuilder().build("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
+         ros2Node = new ROS2Node("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       this.ros2Node = ros2Node;
       // Disable the comms to prevent message recival while creating the toolbox.
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
@@ -142,21 +139,8 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
       controllerNetworkSubscriber.addMessageFilter(createMessageFilter());
 
-      ros2Node.createSubscription(getInputTopic().withTypeName(ToolboxStateMessage.class), new NewMessageListener<ToolboxStateMessage>()
-      {
-         private final ToolboxStateMessage message = new ToolboxStateMessage();
-
-         @Override
-         public void onNewDataMessage(Subscriber<ToolboxStateMessage> s)
-         {
-            s.takeNextData(message, null);
-            receivedPacket(message);
-         }
-      });
+      ros2Node.createSubscriptionSampler(getInputTopic().withType(ToolboxStateMessage.class), sample -> receivedPacket(sample));
       registerExtraPuSubs(ros2Node);
-
-      if (manageROS2Node && ros2Node instanceof RealtimeROS2Node rtNode)
-         rtNode.spin();
    }
 
    public void setRootRegistry(YoRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
@@ -280,7 +264,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    {
       return new MessageFilter()
       {
-         private final Set<Class<? extends Settable<?>>> exceptions = filterExceptions();
+         private final Set<Class<? extends ROS2Message<?>>> exceptions = filterExceptions();
 
          @Override
          public boolean isMessageValid(Object message)
@@ -315,7 +299,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
             //            {
             //               if (DEBUG)
             //                  PrintTools.error(ToolboxModule.this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: "
-            //                        + PacketDestination.values[message.getSource()]);
+            //                        + message.getSource());
             //               return false;
             //            }
 
@@ -458,7 +442,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       }
 
       if (manageROS2Node)
-         ((ROS2Node) ros2Node).destroy();
+         ros2Node.close();
 
       if (DEBUG)
          LogTools.debug("Destroyed");
@@ -524,7 +508,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    /**
     * @return used to create the {@link StatusMessageOutputManager} and to defines the output API.
     */
-   abstract public List<Class<? extends Settable<?>>> createListOfSupportedStatus();
+   abstract public List<Class<? extends ROS2Message<?>>> createListOfSupportedStatus();
 
    public YoRegistry getRegistry()
    {
@@ -542,7 +526,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    /**
     * @return the collection of messages that are allowed to go through the message filter.
     */
-   public Set<Class<? extends Settable<?>>> filterExceptions()
+   public Set<Class<? extends ROS2Message<?>>> filterExceptions()
    {
       return Collections.emptySet();
    }
