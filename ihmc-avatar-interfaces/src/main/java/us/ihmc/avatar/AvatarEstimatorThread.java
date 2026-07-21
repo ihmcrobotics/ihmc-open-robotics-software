@@ -22,10 +22,12 @@ import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,7 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
 {
    private final YoRegistry estimatorRegistry;
    private final YoBoolean firstTick;
+   private final YoBoolean enableMainStateEstimator;
 
    private final SensorReader sensorReader;
    private final FullHumanoidRobotModel estimatorFullRobotModel;
@@ -84,6 +87,8 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
 
       firstTick = new YoBoolean("firstTick", estimatorRegistry);
       firstTick.set(true);
+      enableMainStateEstimator = new YoBoolean("enableMainStateEstimator", estimatorRegistry);
+      enableMainStateEstimator.set(mainStateEstimator != null);
    }
 
    public void run()
@@ -131,6 +136,78 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
       estimatorThreadTimer.stopMeasurement();
    }
 
+   /**
+    * When false, the main state estimator is kept constructed but not executed (e.g. while perfect
+    * sensors are driving the floating-base / joint state from simulation).
+    */
+   public void setEnableMainStateEstimator(boolean enable)
+   {
+      if (mainStateEstimator == null)
+      {
+         enableMainStateEstimator.set(false);
+         return;
+      }
+
+      boolean wasEnabled = enableMainStateEstimator.getBooleanValue();
+      enableMainStateEstimator.set(enable);
+
+      if (enable && !wasEnabled)
+      {
+         // Re-seed from the current (perfect-sensor) pose so enabling does not snap back to a stale estimate.
+         estimatorFullRobotModel.getRootJoint().getJointConfiguration(rootToWorldTransform);
+         mainStateEstimator.initializeEstimator(rootToWorldTransform);
+      }
+   }
+
+   public boolean isMainStateEstimatorEnabled()
+   {
+      return enableMainStateEstimator.getBooleanValue();
+   }
+
+   @Override
+   public void doControl()
+   {
+      if (rawSensorReader != null)
+         rawSensorReader.read();
+      if (sensorProcessor != null)
+         sensorProcessor.update();
+
+      for (int i = 0; i < robotControllers.size(); i++)
+      {
+         RobotController controller = robotControllers.get(i);
+         if (controller == mainStateEstimator && !enableMainStateEstimator.getBooleanValue())
+            continue;
+         controller.doControl();
+      }
+
+      if (outputProcessor != null)
+         outputProcessor.update();
+      if (rawOutputWriter != null)
+         rawOutputWriter.write();
+   }
+
+   @Override
+   public void initialize()
+   {
+      if (rawSensorReader != null)
+         rawSensorReader.initialize();
+      if (sensorProcessor != null)
+         sensorProcessor.initialize();
+
+      for (int i = 0; i < robotControllers.size(); i++)
+      {
+         RobotController controller = robotControllers.get(i);
+         if (controller == mainStateEstimator && !enableMainStateEstimator.getBooleanValue())
+            continue;
+         controller.initialize();
+      }
+
+      if (outputProcessor != null)
+         outputProcessor.initialize();
+      if (rawOutputWriter != null)
+         rawOutputWriter.initialize();
+   }
+
    public void initializeStateEstimators(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
       sensorReader.initialize();
@@ -163,11 +240,20 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
          @Override
          public void controllerStateHasChanged(Enum<?> oldState, Enum<?> newState)
          {
+            if (mainStateEstimator == null)
+               return;
+
             StateEstimatorMode requestedMode = stateModeMap.get(newState);
             if (requestedMode != null)
                mainStateEstimator.requestStateEstimatorMode(requestedMode);
          }
       });
+   }
+
+   public void requestStateEstimatorMode(StateEstimatorMode stateEstimatorMode)
+   {
+      if (mainStateEstimator != null)
+         mainStateEstimator.requestStateEstimatorMode(stateEstimatorMode);
    }
 
    public void addEstimatorRunnable(Runnable runnable)
