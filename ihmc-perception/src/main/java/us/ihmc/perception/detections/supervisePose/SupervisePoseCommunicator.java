@@ -6,6 +6,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.javacpp.BytePointer;
 import sensor_msgs.msg.dds.CameraInfo;
 import sensor_msgs.msg.dds.Image;
 import std_msgs.msg.dds.Byte;
@@ -30,7 +31,9 @@ import us.ihmc.perception.RawImagePublisher;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
+import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.perception.tools.RawImageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -40,6 +43,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.CameraIntrinsics;
 import vision_msgs.msg.dds.Detection3D;
 import vision_msgs.msg.dds.Detection3DArray;
+import perception_msgs.msg.dds.ImageMessage;
 
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -65,6 +69,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
    private final ROS2Publisher<Empty> resetRequestPublisher;
    private final ROS2Publisher<Box3DMessage> resultRelayPublisher;
    private final ROS2Publisher<Byte> statePublisher;
+   private final ROS2Publisher<ImageMessage> overlayImagePublisher;
 
    private final ROS2Subscription<Detection3DArray> poseEstimationResultSubscription;
    private final ROS2Subscription<Detection3DArray> trackingResultSubscription;
@@ -80,9 +85,15 @@ public class SupervisePoseCommunicator implements AutoCloseable
    private final TypedNotification<Point3DReadOnly> newTargetPoint = new TypedNotification<>();
 
    private volatile SupervisePoseInstantDetection latestResult;
+   private volatile boolean internallyPublishingReset = false;
    private final List<Consumer<SupervisePoseInstantDetection>> resultCallbacks = new ArrayList<>();
 
    private volatile Pose3D rawSupervisePose = null;
+
+   private final SupervisePoseMeshOverlayRenderer meshOverlayRenderer;
+
+   private final Object latestRGBImageLock = new Object();
+   private RawImage latestRGBImage = null;
 
    private State state;
    private State previousState;
@@ -104,18 +115,34 @@ public class SupervisePoseCommunicator implements AutoCloseable
       resetRequestPublisher = ros2Node.createPublisher(topics.reset());
       resultRelayPublisher = ros2Node.createPublisher(topics.ihmcResult());
       statePublisher = ros2Node.createPublisher(topics.ihmcState());
+      overlayImagePublisher = ros2Node.createPublisher(topics.overlayedImage());
 
-      poseEstimationResultSubscription =
-            ros2Node.createSubscription2(topics.poseEstimationOutput(), this::updateLatestResult);
+      poseEstimationResultSubscription = ros2Node.createSubscription2(topics.poseEstimationOutput(), this::updateLatestResult);
 
-      trackingResultSubscription =
-            ros2Node.createSubscription2(topics.trackingOutput(), this::updateLatestResult);
+      trackingResultSubscription = ros2Node.createSubscription2(topics.trackingOutput(), this::updateLatestResult);
 
       resetRequestSubscription =
-            ros2Node.createSubscription2(topics.reset(), message -> changeState(State.ESTIMATING_POSE));
+            ros2Node.createSubscription2(topics.reset(), message ->
+            {
+               if (internallyPublishingReset)
+               {
+                  internallyPublishingReset = false;
+                  return;
+               }
 
-      SupervisePoseObject object =
-            SupervisePoseObject.fromCategoryAndInstance(target.category(), target.instance());
+               LogTools.info(String.format(
+                     "Resetting SupervisePose for %s/%s. Source=UI_OR_EXTERNAL",
+                     target.category(),
+                     target.instance()));
+
+               changeState(State.ESTIMATING_POSE);
+            });
+
+      SupervisePoseObject object = SupervisePoseObject.fromCategoryAndInstance(target.category(), target.instance());
+
+      Path meshPath = object.getMeshPath();
+
+      meshOverlayRenderer = new SupervisePoseMeshOverlayRenderer(meshPath);
 
       parameters = new SyncedSupervisePoseParameters(ros2Node, crdtInfo, object);
       parameters.getEnabled().setValue(false);
@@ -123,8 +150,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
       state = State.DISABLED;
       previousState = state;
 
-      sensorFrame =
-            new ROS2MutableFrame(target.instance() + "_ImageFrame", ReferenceFrame.getWorldFrame());
+      sensorFrame = new ROS2MutableFrame(target.instance() + "_ImageFrame", ReferenceFrame.getWorldFrame());
    }
 
    private static String sanitize(String value)
@@ -135,6 +161,14 @@ public class SupervisePoseCommunicator implements AutoCloseable
    public SupervisePoseTarget getTarget()
    {
       return target;
+   }
+
+   public enum ResetReason
+   {
+      UI,
+      YOLO_POSITION,
+      ENABLED,
+      UNKNOWN
    }
 
    public SupervisePoseAPI.SupervisePoseTopics getTopics()
@@ -154,7 +188,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
       }
       else if (enabled && state == State.DISABLED)
       {
-         resetTracking();
+         resetTracking(ResetReason.ENABLED);
       }
    }
 
@@ -167,10 +201,11 @@ public class SupervisePoseCommunicator implements AutoCloseable
       if (result == null)
          return;
 
-      FramePose3D poseInWorld =
-            new FramePose3D(sensorFrame, result.getBbox().getCenter());
+      FramePose3D poseInWorld = new FramePose3D(sensorFrame, result.getBbox().getCenter());
 
-      rawSupervisePose = new Pose3D(result.getBbox().getCenter());
+      Pose3D poseSnapshot = new Pose3D(result.getBbox().getCenter());
+
+      rawSupervisePose = poseSnapshot;
 
       poseInWorld.prependRotation(SUPERVISE_POSE_TO_IHMC_ROTATION);
 
@@ -179,17 +214,12 @@ public class SupervisePoseCommunicator implements AutoCloseable
          poseInWorld.changeFrame(ReferenceFrame.getWorldFrame());
       }
 
-      latestResult =
-            new SupervisePoseInstantDetection(target,
-                                              new Box3D(poseInWorld, result.getBbox().getSize()),
-                                              Instant.now());
+      latestResult = new SupervisePoseInstantDetection(target, new Box3D(poseInWorld, result.getBbox().getSize()), Instant.now());
 
       if (state != State.TRACKING)
          changeState(State.TRACKING);
 
-      LogTools.info("Received SupervisePose result for {}/{}",
-                    target.category(),
-                    target.instance());
+      // LogTools.info("Received SupervisePose result for {}/{}", target.category(), target.instance());
 
       Box3DMessage resultRelayMessage = new Box3DMessage();
       resultRelayMessage.getPose().set(poseInWorld);
@@ -198,6 +228,77 @@ public class SupervisePoseCommunicator implements AutoCloseable
 
       for (Consumer<SupervisePoseInstantDetection> resultCallback : resultCallbacks)
          resultCallback.accept(latestResult);
+
+      publishPoseDrivenOverlay(poseSnapshot);
+   }
+
+   private void publishPoseDrivenOverlay(Pose3D poseSnapshot)
+   {
+      RawImage imageSnapshot;
+
+      synchronized (latestRGBImageLock)
+      {
+         if (latestRGBImage == null)
+            return;
+
+         /*
+          * Retain a local reference so the cache can safely be replaced by the
+          * camera thread while this method renders and publishes.
+          */
+         imageSnapshot = latestRGBImage.get();
+      }
+
+      try
+      {
+         Mat sourceImage = imageSnapshot.getCpuImageMat();
+
+         if (sourceImage == null || sourceImage.isNull())
+            return;
+
+         try (Mat overlayImage = sourceImage.clone();
+              BytePointer encodedImage = new BytePointer())
+         {
+            CameraIntrinsics cameraIntrinsics =
+                  imageSnapshot.getIntrinsicsCopy();
+
+            meshOverlayRenderer.renderWireframe(overlayImage,
+                                                poseSnapshot,
+                                                cameraIntrinsics);
+
+            boolean encoded =
+                  opencv_imgcodecs.imencode(".jpg",
+                                            overlayImage,
+                                            encodedImage);
+
+            if (!encoded)
+            {
+               LogTools.error("Failed to encode mesh overlay for {}/{}",
+                              target.category(),
+                              target.instance());
+               return;
+            }
+
+            ImageMessage imageMessage = new ImageMessage();
+
+            PerceptionMessageTools.packImageMessage(imageSnapshot,
+                                                    encodedImage,
+                                                    CompressionType.JPEG,
+                                                    imageMessage);
+
+            overlayImagePublisher.publish(imageMessage);
+         }
+      }
+      catch (Exception exception)
+      {
+         LogTools.error("Failed to publish mesh overlay for {}/{}: {}",
+                        target.category(),
+                        target.instance(),
+                        exception.getMessage());
+      }
+      finally
+      {
+         imageSnapshot.release();
+      }
    }
 
    private synchronized void changeState(State newState)
@@ -267,56 +368,46 @@ public class SupervisePoseCommunicator implements AutoCloseable
          targetPoint.set(sensorFrame.getTransformToRoot().getTranslation());
       }
 
-      double resetDistance = parameters.getResetDistance().getValue();
-
-      if (parameters.getAutoResetEnabled().getValue()
-          && latestResult != null
-          && state == State.TRACKING
-          && yoloDetection.getPose()
-                          .getPosition()
-                          .distanceSquared(latestResult.getPose().getPosition())
-             > resetDistance * resetDistance)
-      {
-         LogTools.info("Auto reset triggered for {}/{}: YOLO detection too far from latest SupervisePose result. resetDistance={}",
-                       target.category(),
-                       target.instance(),
-                       resetDistance);
-
-         resetTracking();
-      }
-
       updatePoseEstimation(yoloDetection.getColorImage(),
                            yoloDetection.getDepthImage(),
                            yoloDetection.getObjectMask());
    }
 
-   public void updatePoseEstimation(RawImage colorImage,
-                                    RawImage depthImage,
-                                    RawImage segmentation)
+   private void cacheLatestRGBImage(RawImage rgbImage)
+   {
+      synchronized (latestRGBImageLock)
+      {
+         if (latestRGBImage != null)
+            latestRGBImage.release();
+
+         /*
+          * Retain a separate reference because the local rgbImage reference is
+          * released at the end of updatePoseEstimation(...).
+          */
+         latestRGBImage = rgbImage.get();
+      }
+   }
+
+   public void updatePoseEstimation(RawImage colorImage, RawImage depthImage, RawImage segmentation)
    {
       colorImage.get();
       depthImage.get();
       segmentation.get();
 
-      RawImage rgbImage =
-            RawImageTools.convertColor(colorImage, PixelFormat.RGB8);
+      cacheLatestRGBImage(colorImage);
+
+      RawImage rgbImage = RawImageTools.convertColor(colorImage, PixelFormat.RGB8);
 
       GpuMat depth32Mat = new GpuMat();
-      depthImage.getGpuImageMat()
-                .convertTo(depth32Mat,
-                           opencv_core.CV_32FC1,
-                           depthImage.getDepthDiscretization());
 
-      RawImage depth32FImage =
-            depthImage.replaceImage(depth32Mat, PixelFormat.GRAY_F32);
+      depthImage.getGpuImageMat().convertTo(depth32Mat, opencv_core.CV_32FC1, depthImage.getDepthDiscretization());
+
+      RawImage depth32FImage = depthImage.replaceImage(depth32Mat, PixelFormat.GRAY_F32);
 
       GpuMat resizedSegmentationMat = new GpuMat();
-      YOLOv8Tools.resizeWithCrop(segmentation.getGpuImageMat(),
-                                 resizedSegmentationMat,
-                                 depth32Mat.size());
+      YOLOv8Tools.resizeWithCrop(segmentation.getGpuImageMat(), resizedSegmentationMat, depth32Mat.size());
 
-      RawImage resizedSegmentation =
-            depthImage.replaceImage(resizedSegmentationMat, PixelFormat.GRAY8);
+      RawImage resizedSegmentation = depthImage.replaceImage(resizedSegmentationMat, PixelFormat.GRAY8);
 
       synchronized (sensorFrame)
       {
@@ -345,14 +436,90 @@ public class SupervisePoseCommunicator implements AutoCloseable
       colorImage.release();
    }
 
-   public void resetTracking()
+   public void updateTrackingInputs(RawImage colorImage, RawImage depthImage)
    {
-      LogTools.info("Publishing reset for {}/{} on {}",
-                    target.category(),
-                    target.instance(),
-                    topics.reset());
+      colorImage.get();
+      depthImage.get();
+
+      RawImage rgbImage = null;
+      RawImage depth32FImage = null;
+      GpuMat depth32Mat = null;
+
+      try
+      {
+         cacheLatestRGBImage(colorImage);
+
+         rgbImage = RawImageTools.convertColor(colorImage, PixelFormat.RGB8);
+
+         depth32Mat = new GpuMat();
+         depthImage.getGpuImageMat().convertTo(depth32Mat, opencv_core.CV_32FC1, depthImage.getDepthDiscretization());
+
+         depth32FImage = depthImage.replaceImage(depth32Mat, PixelFormat.GRAY_F32);
+
+         synchronized (sensorFrame)
+         {
+            sensorFrame.setNewTransformToParent(colorImage.getTransformToWorld());
+            sensorFrame.update();
+         }
+
+         imagePublisher.publishImage(topics.rgbImage(), rgbImage, sensorFrame);
+         imagePublisher.publishImage(topics.depthImage(), depth32FImage, sensorFrame);
+         imagePublisher.publishImage(topics.cameraInfo(), rgbImage, sensorFrame);
+      }
+      finally
+      {
+         if (depth32FImage != null)
+            depth32FImage.release();
+
+         if (rgbImage != null)
+            rgbImage.release();
+
+         depthImage.release();
+         colorImage.release();
+      }
+   }
+
+   public boolean checkTrackingReset(YOLOv8InstantDetection yoloDetection)
+   {
+      if (state != State.TRACKING)
+         return false;
+
+      if (!parameters.getAutoResetEnabled().getValue())
+         return false;
+
+      if (latestResult == null)
+         return false;
+
+      double resetDistance = parameters.getResetDistance().getValue();
+
+      double distanceSquared =
+            yoloDetection.getPose()
+                         .getPosition()
+                         .distanceSquared(
+                               latestResult.getPose().getPosition());
+
+      if (distanceSquared <= resetDistance * resetDistance)
+         return false;
+
+      LogTools.info(String.format(
+            "Auto reset triggered for %s/%s: "
+            + "YOLO detection differs from the tracked pose. "
+            + "distance=%.4f, resetDistance=%.4f",
+            target.category(),
+            target.instance(),
+            Math.sqrt(distanceSquared),
+            resetDistance));
+
+      resetTracking(ResetReason.YOLO_POSITION);
+      return true;
+   }
+
+   public void resetTracking(ResetReason reason)
+   {
+      LogTools.info(String.format("Resetting SupervisePose for %s/%s. Source=%s", target.category(), target.instance(), reason));
 
       changeState(State.ESTIMATING_POSE);
+      internallyPublishingReset = true;
       resetRequestPublisher.publish(new Empty());
    }
 
@@ -401,9 +568,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
       return parameters;
    }
 
-   private void exportSupervisePoseInputs(RawImage rgbImage,
-                                          RawImage depthImage,
-                                          RawImage maskImage)
+   private void exportSupervisePoseInputs(RawImage rgbImage, RawImage depthImage, RawImage maskImage)
    {
       if (!EXPORT_SUPERVISEPOSE_INPUTS)
          return;
@@ -437,9 +602,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
          Files.createDirectories(maskDirectory);
          Files.createDirectories(poseDirectory);
 
-         long timestampNs =
-               rgbExport.getAcquisitionTime().getEpochSecond() * 1_000_000_000L
-               + rgbExport.getAcquisitionTime().getNano();
+         long timestampNs = rgbExport.getAcquisitionTime().getEpochSecond() * 1_000_000_000L + rgbExport.getAcquisitionTime().getNano();
 
          String frameName = String.valueOf(timestampNs);
 
@@ -518,12 +681,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
       }
    }
 
-   private void writePoseJson(Path jsonPath,
-                              Pose3DReadOnly pose,
-                              Vector3D size,
-                              CameraIntrinsics intrinsics,
-                              int width,
-                              int height) throws Exception
+   private void writePoseJson(Path jsonPath, Pose3DReadOnly pose, Vector3D size, CameraIntrinsics intrinsics, int width, int height) throws Exception
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.set(pose);
@@ -607,6 +765,29 @@ public class SupervisePoseCommunicator implements AutoCloseable
       }
    }
 
+   public void renderMeshOverlay(Mat image,
+                                 CameraIntrinsics cameraIntrinsics)
+   {
+      if (image == null || image.isNull())
+         return;
+
+      if (cameraIntrinsics == null)
+         return;
+
+      if (!isEnabled() || state != State.TRACKING)
+         return;
+
+      Pose3D poseSnapshot = rawSupervisePose;
+
+      if (poseSnapshot == null)
+         return;
+
+      meshOverlayRenderer.renderWireframe(
+            image,
+            new Pose3D(poseSnapshot),
+            cameraIntrinsics);
+   }
+
    @Override
    public void close()
    {
@@ -619,6 +800,18 @@ public class SupervisePoseCommunicator implements AutoCloseable
       resetRequestPublisher.remove();
       resultRelayPublisher.remove();
       statePublisher.remove();
+      overlayImagePublisher.remove();
+
+      synchronized (latestRGBImageLock)
+      {
+         if (latestRGBImage != null)
+         {
+            latestRGBImage.release();
+            latestRGBImage = null;
+         }
+      }
+
+      meshOverlayRenderer.destroy();
 
       imagePublisher.close();
       ros2Node.destroy();

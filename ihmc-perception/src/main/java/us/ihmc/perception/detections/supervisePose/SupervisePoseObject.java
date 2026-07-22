@@ -1,5 +1,8 @@
 package us.ihmc.perception.detections.supervisePose;
 
+import java.nio.file.Path;
+import java.nio.file.Files;
+
 public enum SupervisePoseObject
 {
    TRAFFIC_BARRIER_1("Traffic Barrier 1", "traffic_barrier", "traffic_barrier_1", "traffic_barrier"),
@@ -28,6 +31,7 @@ public enum SupervisePoseObject
    public final String instance;
    public final String yoloClass;
    public final SupervisePoseAPI.SupervisePoseTopics topics;
+   private final Path meshPath;
 
    SupervisePoseObject(String titleCaseName, String category, String instance, String yoloClass)
    {
@@ -35,18 +39,54 @@ public enum SupervisePoseObject
       this.category = category;
       this.instance = instance;
       this.yoloClass = yoloClass;
-      this.topics = SupervisePoseAPI.topics(category, instance);
+      topics = SupervisePoseAPI.topics(category, instance);
+      meshPath = createMeshPath(category, instance);
+   }
+
+   /**
+    * Builds the mesh path using the directory organization:
+    *
+    * meshes/
+    * └── category/
+    *     └── instance/
+    *         └── instance.obj
+    *
+    * Example:
+    *
+    * sparse_meshes/bottle/bottle_1/bottle_1.obj
+    */
+   private static Path createMeshPath(String category, String instance)
+   {
+      Path meshRoot = Path.of(System.getProperty("user.home"), "alexander", "repository-group", "ihmc-isaac-ros", "isaac_ros_assets", "sparse_meshes");
+
+      Path resolvedMeshPath = meshRoot.resolve(category).resolve(instance).resolve(instance + ".obj");
+
+      if (!Files.isRegularFile(resolvedMeshPath))
+      {
+         throw new IllegalArgumentException("SupervisePose mesh file does not exist: " + resolvedMeshPath.toAbsolutePath());
+      }
+
+      return resolvedMeshPath;
+   }
+
+   public Path getMeshPath()
+   {
+      return meshPath;
    }
 
    public static SupervisePoseObject fromCategoryAndInstance(String category, String instance)
    {
       for (SupervisePoseObject object : VALUES)
       {
-         if (object.category.equals(category) && object.instance.equals(instance))
+         if (object.category.equals(category)
+             && object.instance.equals(instance))
+         {
             return object;
+         }
       }
 
-      throw new IllegalArgumentException("No SupervisePoseObject for " + category + "/" + instance);
+      throw new IllegalArgumentException(
+            "No SupervisePoseObject for " + category + "/" + instance);
    }
 
    public String key()
