@@ -29,7 +29,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    private final List<? extends IMUSensorReadOnly> imuSensorData;
    private final List<? extends ForceSensorDataReadOnly> forceSensorData;
 
-   private List<RobotFrameDataPublisher> robotFrameDataPublishers = new ArrayList<>();
+   private final List<RobotFrameDataPublisher> robotFrameDataPublishers = new ArrayList<>();
    private final SensorTimestampHolder timestampHolder;
    private final RobotMotionStatusHolder robotMotionStatusHolder;
 
