@@ -90,6 +90,14 @@ public class ZuluAllocationTest
       allocationProfiler.excludeAllocationsInsideMethod(LUDecompositionBase_DDRM.class.getName() + ".decomposeCommonInit");
       allocationProfiler.excludeAllocationsInsideMethod(CholeskyDecompositionCommon_DDRM.class.getName() + ".decompose");
       allocationProfiler.excludeAllocationsInsideMethod(BidiagonalDecompositionRow_DDRM.class.getName() + ".init");
+      allocationProfiler.excludeAllocationsInsideMethod("org.ejml.sparse.csc.decomposition.lu.LuUpLooking_DSCC.initialize");
+      // AsyncROS2Publisher queue slots grow IDL sequences once on first use of each slot.
+      allocationProfiler.excludeAllocationsInsideMethod("us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence.ensureMinCapacity");
+      allocationProfiler.excludeAllocationsInsideMethod("us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence.ensureMinCapacity");
+      allocationProfiler.excludeAllocationsInsideMethod("us.ihmc.fastddsjava.cdr.idl.IDLDoubleSequence.ensureMinCapacity");
+      allocationProfiler.excludeAllocationsInsideMethod("us.ihmc.fastddsjava.cdr.idl.IDLLongSequence.ensureMinCapacity");
+      allocationProfiler.excludeAllocationsInsideMethod("us.ihmc.fastddsjava.cdr.idl.IDLShortSequence.ensureMinCapacity");
+      allocationProfiler.excludeAllocationsInsideMethod("us.ihmc.fastddsjava.cdr.idl.IDLStringSequence.ensureMinCapacity");
 
       // Ignore the following methods as they are related to printouts.
       allocationProfiler.excludeAllocationsInsideMethod(Throwable.class.getName() + ".printStackTrace");

@@ -167,6 +167,13 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
 
+      // Pre-create queued status messages (IDL max size) so queue status updates stay allocation-free.
+      int queuedStatusCapacity = footstepQueueStatusMessage.getQueuedFootstepList().getMaxSize();
+      footstepQueueStatusMessage.getQueuedFootstepList().ensureMinCapacity(queuedStatusCapacity);
+      for (int i = 0; i < queuedStatusCapacity; i++)
+         footstepQueueStatusMessage.getQueuedFootstepList().add();
+      footstepQueueStatusMessage.getQueuedFootstepList().clear();
+
       parentRegistry.addChild(registry);
    }
 

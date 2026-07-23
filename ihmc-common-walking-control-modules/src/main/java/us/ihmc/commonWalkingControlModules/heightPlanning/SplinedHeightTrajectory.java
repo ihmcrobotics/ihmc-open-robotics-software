@@ -45,7 +45,7 @@ public class SplinedHeightTrajectory implements SCS2YoGraphicHolder
    private final CoMHeightPartialDerivativesData comHeightPartialDerivativesData = new CoMHeightPartialDerivativesData();
 
    private final StringStretcher2d stringStretcher = new StringStretcher2d();
-   private final List<Point2DBasics> stretchedStringWaypoints = new ArrayList<>();
+   private final List<Point2DBasics> stretchedStringWaypoints = new ArrayList<>(20);
 
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final FramePoint3D tempFramePoint2 = new FramePoint3D();

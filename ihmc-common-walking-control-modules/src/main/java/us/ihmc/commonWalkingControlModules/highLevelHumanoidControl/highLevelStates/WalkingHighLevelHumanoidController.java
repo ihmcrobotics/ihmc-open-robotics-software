@@ -156,6 +156,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private final YoBoolean isUpperBodyLoadBearing = new YoBoolean("isUpperBodyLoadBearing", registry);
    private final FrameConvexPolygon2D zeroRegion = new FrameConvexPolygon2D();
+   private final RecyclingArrayList<Point3D> tempHandContactPoints = new RecyclingArrayList<>(4, Point3D.class);
+   private final Vector3D tempHandContactNormal = new Vector3D();
 
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
@@ -873,20 +875,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private void packHandLoadBearingStatuses(CapturabilityBasedStatus capturabilityBasedStatus)
    {
-      RecyclingArrayList<Point3D> tempContactPoints = new RecyclingArrayList<>(4, Point3D.class);
-      Vector3D tempContactNormal = new Vector3D();
-
       if (fullRobotModel.getHand(RobotSide.LEFT) != null)
       {
-         packBodyLoadStatus(fullRobotModel.getHand(RobotSide.LEFT), tempContactPoints, tempContactNormal);
-         fillContactPoints(capturabilityBasedStatus.getLeftHandContactPoints(), tempContactPoints);
-         capturabilityBasedStatus.getLeftHandContactNormal().getVector().set(tempContactNormal);
+         packBodyLoadStatus(fullRobotModel.getHand(RobotSide.LEFT), tempHandContactPoints, tempHandContactNormal);
+         fillContactPoints(capturabilityBasedStatus.getLeftHandContactPoints(), tempHandContactPoints);
+         capturabilityBasedStatus.getLeftHandContactNormal().getVector().set(tempHandContactNormal);
       }
       if (fullRobotModel.getHand(RobotSide.RIGHT) != null)
       {
-         packBodyLoadStatus(fullRobotModel.getHand(RobotSide.RIGHT), tempContactPoints, tempContactNormal);
-         fillContactPoints(capturabilityBasedStatus.getRightHandContactPoints(), tempContactPoints);
-         capturabilityBasedStatus.getRightHandContactNormal().getVector().set(tempContactNormal);
+         packBodyLoadStatus(fullRobotModel.getHand(RobotSide.RIGHT), tempHandContactPoints, tempHandContactNormal);
+         fillContactPoints(capturabilityBasedStatus.getRightHandContactPoints(), tempHandContactPoints);
+         capturabilityBasedStatus.getRightHandContactNormal().getVector().set(tempHandContactNormal);
       }
    }
 

@@ -169,9 +169,9 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       robotConfigurationDataPublisher.publish(robotConfigurationData);
 
       // publish robot frame data
-      for (RobotFrameDataPublisher robotFrameDataPublisher : robotFrameDataPublishers)
+      for (int i = 0; i < robotFrameDataPublishers.size(); i++)
       {
-         robotFrameDataPublisher.publish();
+         robotFrameDataPublishers.get(i).publish();
       }
    }
 

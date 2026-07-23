@@ -19,9 +19,9 @@ public class StringStretcher2d
    private final RecyclingArrayList<MinMaxPointHolder> minMaxPool = new RecyclingArrayList<>(20, MinMaxPointHolder.class);
    private final RecyclingArrayList<Point2D> waypointPool = new RecyclingArrayList<>(20, Point2D.class);
 
-   private final List<MinMaxPointHolder> minMaxPoints = new ArrayList<>();
-   private final List<Point2DBasics> waypoints = new ArrayList<>();
-   private final List<MinMaxPointHolder> pointsToInterpolate = new ArrayList<MinMaxPointHolder>();
+   private final List<MinMaxPointHolder> minMaxPoints = new ArrayList<>(20);
+   private final List<Point2DBasics> waypoints = new ArrayList<>(20);
+   private final List<MinMaxPointHolder> pointsToInterpolate = new ArrayList<>(20);
 
    public void setStartPoint(Point2D startPoint)
    {
