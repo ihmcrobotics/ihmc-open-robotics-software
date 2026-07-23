@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class ToolboxModule implements CloseableAndDisposable
 {
-   protected static final boolean DEBUG = false;
+   protected static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("toolbox.debug", "false"));
    protected static final double YO_VARIABLE_SERVER_DT = 0.01;
    protected static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 1;
 
@@ -346,19 +346,18 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
       if (toolboxTaskScheduled != null)
       {
-         if (DEBUG)
-            LogTools.error("This toolbox is already running.");
+         LogTools.warn("{}: WAKE_UP ignored because toolbox task is already scheduled.", name);
          return;
       }
 
-      if (DEBUG)
-         LogTools.debug("Waking up");
+      LogTools.info("{}: Waking up toolbox task at {} ms period.", name, updatePeriodMilliseconds);
 
       reinitialize();
       receivedInput.set(true);
       getToolboxController().setFutureToListenTo(toolboxTaskScheduled);
       createToolboxRunnable();
       toolboxTaskScheduled = executorService.scheduleAtFixedRate(toolboxRunnable, 0, updatePeriodMilliseconds, TimeUnit.MILLISECONDS);
+      LogTools.info("{}: Toolbox task scheduled.", name);
    }
 
    private void reinitialize()
@@ -376,8 +375,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    public void sleep()
    {
 
-      if (DEBUG)
-         LogTools.debug("Going to sleep");
+      LogTools.info("{}: Going to sleep.", name);
 
       getToolboxController().notifyToolboxStateChange(ToolboxState.SLEEP);
 

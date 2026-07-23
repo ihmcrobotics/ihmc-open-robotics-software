@@ -13,7 +13,8 @@ public class RDXCustomSceneLoader
       DISPOSE_BOTTLE,
       ROOM_WITH_OBJECTS,
       MANIPULATION_2X4,
-      NAVIGATION_BARRIER;
+      NAVIGATION_BARRIER,
+      COSMOS_LEVER_TEST;
    }
 
    public static String getEnvironmentName(RDXDemoScene demoScene)
@@ -24,6 +25,7 @@ public class RDXCustomSceneLoader
          case DISPOSE_BOTTLE -> "DisposeBottle.json";
          case ROOM_WITH_OBJECTS -> "RoomWithObjects.json";
          case ROUGH_TERRAIN -> "HarderTerrain.json";
+         case COSMOS_LEVER_TEST -> "CosmosLeverTest.json";
          default -> "FlatGround.json";
       };
    }
