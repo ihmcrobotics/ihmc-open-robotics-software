@@ -103,7 +103,7 @@ public class ZuluAllocationTest
       allocationProfiler.excludeAllocationsInsideMethod("us.ihmc.fastddsjava.cdr.idl.IDLLongSequence.ensureMinCapacity");
       allocationProfiler.excludeAllocationsInsideMethod("us.ihmc.fastddsjava.cdr.idl.IDLShortSequence.ensureMinCapacity");
       allocationProfiler.excludeAllocationsInsideMethod("us.ihmc.fastddsjava.cdr.idl.IDLStringSequence.ensureMinCapacity");
-      // Expanding / recycling list growth — omit from the check rather than pre-size everywhere.
+      // Omit objects in expanding recycling array lists
       allocationProfiler.excludeAllocationsInsideClass(StringStretcher2d.class.getName());
       allocationProfiler.excludeAllocationsInsideClass(ConvexPolygonScaler.class.getName());
       allocationProfiler.excludeAllocationsInsideClass(ConvexPolygonConstructorFromInteriorOfRays.class.getName());
