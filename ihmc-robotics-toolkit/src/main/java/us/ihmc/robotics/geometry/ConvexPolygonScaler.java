@@ -22,7 +22,7 @@ public class ConvexPolygonScaler
    private final LineSegment2D polygonAsLineSegment = new LineSegment2D();
    private final Point2D newVertex0 = new Point2D();
    private final Point2D newVertex1 = new Point2D();
-   private final ArrayList<Line2D> rays = new ArrayList<Line2D>(16);
+   private final ArrayList<Line2D> rays = new ArrayList<Line2D>();
 
    private final Line2D edgeOnQ = new Line2D();
    private final Vector2D vectorPerpendicularToEdgeOnQ = new Vector2D();
@@ -31,7 +31,7 @@ public class ConvexPolygonScaler
    private final Vector2D normalizedVector = new Vector2D();
    private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
 
-   private final ArrayList<Line2D> edgePool = new ArrayList<Line2D>(16);
+   private final ArrayList<Line2D> edgePool = new ArrayList<Line2D>();
 
    private final ConvexPolygonConstructorFromInteriorOfRays convexPolygonConstructorFromInteriorOfRays = new ConvexPolygonConstructorFromInteriorOfRays();
 
@@ -142,7 +142,6 @@ public class ConvexPolygonScaler
       }
 
       rays.clear();
-      rays.ensureCapacity(polygonQ.getNumberOfVertices());
 
       int leftMostIndexOnPolygonQ = EuclidGeometryPolygonTools.findVertexIndex(polygonQ, true, Bound.MIN, Bound.MIN);
       Point2DReadOnly vertexQ = polygonQ.getVertex(leftMostIndexOnPolygonQ);

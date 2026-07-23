@@ -12,11 +12,11 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 
 public class ConvexPolygonConstructorFromInteriorOfRays
 {
-   private static final int POINT_POOL_INITIAL_SIZE = 16;
-   private final ArrayList<Point2D> pointPool = new ArrayList<Point2D>(POINT_POOL_INITIAL_SIZE);
+   private static final int POINT_POOL_INITIAL_SIZE = 10;
+   private final ArrayList<Point2D> pointPool = new ArrayList<Point2D>();
    
-   private final ArrayList<Point2D> intersectionArrayList = new ArrayList<Point2D>(POINT_POOL_INITIAL_SIZE);
-   private final ArrayList<Point2D> intersectionPoints = new ArrayList<Point2D>(POINT_POOL_INITIAL_SIZE);
+   private final ArrayList<Point2D> intersectionArrayList = new ArrayList<Point2D>();
+   private final ArrayList<Point2D> intersectionPoints = new ArrayList<Point2D>();
    private final RecyclingArrayList<MutableBoolean> removeRay = new RecyclingArrayList<MutableBoolean>(MutableBoolean.class);
    
    public ConvexPolygonConstructorFromInteriorOfRays()
@@ -32,8 +32,6 @@ public class ConvexPolygonConstructorFromInteriorOfRays
       removeRay.clear();
       
       intersectionPoints.clear();
-      intersectionPoints.ensureCapacity(rays.size());
-      intersectionArrayList.ensureCapacity(rays.size());
       for (int i=0; i<rays.size(); i++)
       {
          intersectionPoints.add(null);
