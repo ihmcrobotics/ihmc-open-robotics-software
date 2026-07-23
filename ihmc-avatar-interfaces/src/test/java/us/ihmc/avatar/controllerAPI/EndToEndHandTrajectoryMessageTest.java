@@ -669,36 +669,13 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       String handName = fullRobotModel.getHand(robotSide).getName();
 
       {
-         int numberOfPoints = RigidBodyTaskspaceControlState.maxPoints;
          HandTrajectoryMessage message = new HandTrajectoryMessage();
          message.setRobotSide(robotSide.toByte());
          ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
          message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
-         double time = 0.05 + RigidBodyTaskspaceControlState.timeEpsilonForInitialPoint;
-         for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
-         {
-            message.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
-                   .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
-            time = time + 0.05;
-         }
-         simulationTestHelper.publishToController(message);
-
-         success = simulationTestHelper.simulateNow(4.0 * simulationTestHelper.getCurrentControlDT());
-         assertTrue(success);
-
-         RigidBodyControlMode controllerState = EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper);
-         assertEquals(RigidBodyControlMode.JOINTSPACE, controllerState);
-         EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(handName, 0, simulationTestHelper);
-      }
-
-      {
-         int numberOfPoints = RigidBodyTaskspaceControlState.maxPoints - 1;
-         HandTrajectoryMessage message = new HandTrajectoryMessage();
-         message.setRobotSide(robotSide.toByte());
-         ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
-         message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
-         message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
+         // IDL sequence capacity; controller maxPoints is larger and no longer reachable via the message.
+         int numberOfPoints = message.getSe3Trajectory().getTaskspaceTrajectoryPoints().getMaxSize();
          double time = 0.05 + RigidBodyTaskspaceControlState.timeEpsilonForInitialPoint;
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
          {
@@ -713,7 +690,31 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          RigidBodyControlMode controllerState = EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper);
          assertEquals(RigidBodyControlMode.TASKSPACE, controllerState);
-         EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(handName, RigidBodyTaskspaceControlState.maxPoints, simulationTestHelper);
+         EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(handName, numberOfPoints + 1, simulationTestHelper);
+      }
+
+      {
+         HandTrajectoryMessage message = new HandTrajectoryMessage();
+         message.setRobotSide(robotSide.toByte());
+         ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+         message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
+         message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
+         int numberOfPoints = message.getSe3Trajectory().getTaskspaceTrajectoryPoints().getMaxSize() - 1;
+         double time = 0.05 + RigidBodyTaskspaceControlState.timeEpsilonForInitialPoint;
+         for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
+         {
+            message.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
+                   .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
+            time = time + 0.05;
+         }
+         simulationTestHelper.publishToController(message);
+
+         success = simulationTestHelper.simulateNow(50.0 * simulationTestHelper.getCurrentControlDT());
+         assertTrue(success);
+
+         RigidBodyControlMode controllerState = EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper);
+         assertEquals(RigidBodyControlMode.TASKSPACE, controllerState);
+         EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(handName, numberOfPoints + 1, simulationTestHelper);
       }
    }
 

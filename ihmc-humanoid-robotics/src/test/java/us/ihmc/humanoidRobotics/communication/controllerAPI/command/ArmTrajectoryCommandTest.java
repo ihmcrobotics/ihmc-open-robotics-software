@@ -27,7 +27,7 @@ public class ArmTrajectoryCommandTest
       ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand();
       armTrajectoryCommand.clear();
       assertNull(armTrajectoryCommand.getRobotSide());
-      assertEquals(QueueableCommand.VALID_MESSAGE_DEFAULT_ID, armTrajectoryCommand.getJointspaceTrajectory().getCommandId());
+      assertEquals(QueueableCommand.INVALID_MESSAGE_ID, armTrajectoryCommand.getJointspaceTrajectory().getCommandId());
       assertEquals(0.0, armTrajectoryCommand.getExecutionDelayTime(), 1e-9);
       assertEquals(ExecutionMode.OVERRIDE, armTrajectoryCommand.getJointspaceTrajectory().getExecutionMode());
       assertEquals(0.0, armTrajectoryCommand.getExecutionTime(), 1e-9);
@@ -60,7 +60,7 @@ public class ArmTrajectoryCommandTest
       armTrajectoryCommand.clear(RobotSide.LEFT);
       assertEquals(RobotSide.LEFT, armTrajectoryCommand.getRobotSide());
 
-      assertEquals(QueueableCommand.VALID_MESSAGE_DEFAULT_ID, armTrajectoryCommand.getJointspaceTrajectory().getCommandId());
+      assertEquals(QueueableCommand.INVALID_MESSAGE_ID, armTrajectoryCommand.getJointspaceTrajectory().getCommandId());
       assertEquals(0.0, armTrajectoryCommand.getExecutionDelayTime(), 1e-9);
       assertEquals(ExecutionMode.OVERRIDE, armTrajectoryCommand.getJointspaceTrajectory().getExecutionMode());
       assertEquals(0.0, armTrajectoryCommand.getExecutionTime(), 1e-9);

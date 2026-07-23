@@ -67,12 +67,6 @@ public abstract class RigidBodyControlState implements State, SCS2YoGraphicHolde
       {
          QueueableCommand<?, ?> queueableCommand = (QueueableCommand<?, ?>) command;
 
-         if (queueableCommand.getCommandId() == QueueableCommand.INVALID_MESSAGE_ID)
-         {
-            LogTools.warn(warningPrefix + "Recieved packet with invalid ID.");
-            return false;
-         }
-
          boolean wantToQueue = queueableCommand.getExecutionMode() == ExecutionMode.QUEUE;
          boolean previousIdMatch = queueableCommand.getPreviousCommandId() == lastCommandId.getLongValue();
 

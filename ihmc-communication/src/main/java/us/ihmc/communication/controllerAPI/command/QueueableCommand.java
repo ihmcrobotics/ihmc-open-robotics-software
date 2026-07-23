@@ -14,13 +14,17 @@ import us.ihmc.jros2.ROS2Message;
  */
 public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M extends ROS2Message<M>> implements Command<C, M>
 {
-   /** Matches the IDL default for {@code ihmc_common_msgs/QueueableMessage.message_id} ({@code -1}). */
+   /**
+    * Matches the IDL default for {@code ihmc_common_msgs/QueueableMessage.message_id} ({@code -1}).
+    * This is a valid unspecified id used for queueing onto default-id messages; it is not rejected by
+    * the controller.
+    */
    public static final long INVALID_MESSAGE_ID = -1L;
-   /** Default command / message id after {@link #clearQueuableCommandVariables()}. */
+   /** Explicit valid message id historically used by Packet-era code ({@code 0}). */
    public static final long VALID_MESSAGE_DEFAULT_ID = 0L;
 
    /** The ID of this command. Used to make sure only consecutive commands are queued. */
-   private long commandId = VALID_MESSAGE_DEFAULT_ID;
+   private long commandId = INVALID_MESSAGE_ID;
    /** The {@link ExecutionMode} of this command. */
    private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
    /** The ID of the previous command. Used to make sure only consecutive commands are queued. */
@@ -48,7 +52,9 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
     */
    public void clearQueuableCommandVariables()
    {
+      commandId = INVALID_MESSAGE_ID;
       executionMode = ExecutionMode.OVERRIDE;
+      previousCommandId = INVALID_MESSAGE_ID;
       executionDelayTime = 0.0;
       adjustedExecutionTime = 0.0;
       streamIntegrationDuration = 0.0;
@@ -78,8 +84,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    {
       if (messageQueueingProperties == null)
          return;
-      long messageId = messageQueueingProperties.getMessageId();
-      commandId = messageId == INVALID_MESSAGE_ID ? VALID_MESSAGE_DEFAULT_ID : messageId;
+      commandId = messageQueueingProperties.getMessageId();
       executionMode = ExecutionMode.fromByte(messageQueueingProperties.getExecutionMode());
       previousCommandId = messageQueueingProperties.getPreviousMessageId();
       executionDelayTime = messageQueueingProperties.getExecutionDelayTime();

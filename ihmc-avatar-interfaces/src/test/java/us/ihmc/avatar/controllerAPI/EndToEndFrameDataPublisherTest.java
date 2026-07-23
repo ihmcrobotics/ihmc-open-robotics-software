@@ -131,12 +131,12 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
             stepsPackedInMessage++;
          }
          message.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
-         message.getQueueingProperties().setPreviousMessageId(QueueableCommand.VALID_MESSAGE_DEFAULT_ID);
+         message.getQueueingProperties().setPreviousMessageId(QueueableCommand.INVALID_MESSAGE_ID);
          messages.add(message);
       }
       FootstepDataListMessage r = messages.get(0);
       r.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      r.getQueueingProperties().setPreviousMessageId(QueueableCommand.VALID_MESSAGE_DEFAULT_ID);
+      r.getQueueingProperties().setPreviousMessageId(QueueableCommand.INVALID_MESSAGE_ID);
 
       YoVariable numberOfStepsInController = simulationTestHelper.findVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
       int expectedNumberOfSteps = 0;

@@ -210,13 +210,11 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
 
-      magnitude1 = 80; //TODO: overwritten
       LogTools.info("Force magnitude = " + magnitude1 + "N along " + forceDirection1.toString());
       pushRobotController.applyForceDelayed(firstPushCondition, delay1, forceDirection1, magnitude1, duration1);
       success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
 
-      magnitude2 = 80; //TODO:overwritten
       LogTools.info("Force magnitude = " + magnitude2 + "N along " + forceDirection2.toString());
       pushRobotController.applyForceDelayed(secondPushCondition, delay2, forceDirection2, magnitude2, duration2);
       success = simulationTestHelper.simulateNow(2.0);

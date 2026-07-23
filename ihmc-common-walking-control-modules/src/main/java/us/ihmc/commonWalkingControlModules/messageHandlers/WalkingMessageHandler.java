@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -95,6 +96,10 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
    private final YoDouble defaultFinalTransferTime = new YoDouble("defaultFinalTransferTime", registry);
    private final YoLong lastCommandID = new YoLong("lastFootStepDataListCommandID", registry);
+   {
+      // Match QueueableCommand / RigidBodyControlState: IDL default message_id is -1, not 0.
+      lastCommandID.set(QueueableCommand.INVALID_MESSAGE_ID);
+   }
 
    private final YoBoolean isWalking = new YoBoolean("isWalking", registry);
 
