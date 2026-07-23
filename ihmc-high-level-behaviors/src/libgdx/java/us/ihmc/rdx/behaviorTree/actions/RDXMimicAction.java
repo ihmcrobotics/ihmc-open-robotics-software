@@ -182,7 +182,9 @@ public class RDXMimicAction extends RDXActionNode<MimicActionState, MimicActionD
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (getState().getIsExecuting() && hasKinematicsStatus)
+      // Show the paused first-frame preview when next, the live replay while executing,
+      // and keep the last held frame visible if this node is selected.
+      if (hasKinematicsStatus && (getState().getIsNextForExecution() || getState().getIsExecuting() || getSelected()))
          ghostRobotGraphic.getRenderables(renderables, pool, baseUI.getPrimaryScene().getSceneLevelsToRender());
    }
 

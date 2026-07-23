@@ -214,6 +214,61 @@ public class ROS2LogReplay
       }
    }
 
+   public boolean isPaused()
+   {
+      return paused;
+   }
+
+   /**
+    * Publish the first logged message and keep replaying that frame while {@link #doIncrementalReplay()}
+    * is called (paused mode).
+    */
+   public void holdFirstFrame()
+   {
+      if (!isReady())
+         return;
+
+      long heldTimestamp = -1L;
+      for (ReplayTopicManager<?> topicManager : topicManagers)
+      {
+         long timestamp = topicManager.seekAndPublish(0);
+         heldTimestamp = Math.max(heldTimestamp, timestamp);
+      }
+      enterHoldMode(heldTimestamp);
+   }
+
+   /**
+    * Publish the last logged message and keep replaying that frame while {@link #doIncrementalReplay()}
+    * is called (paused mode).
+    */
+   public void holdLastFrame()
+   {
+      if (!isReady())
+         return;
+
+      long heldTimestamp = -1L;
+      for (ReplayTopicManager<?> topicManager : topicManagers)
+      {
+         int lastIndex = topicManager.getMessageCount() - 1;
+         if (lastIndex < 0)
+            continue;
+         long timestamp = topicManager.seekAndPublish(lastIndex);
+         heldTimestamp = Math.max(heldTimestamp, timestamp);
+      }
+      enterHoldMode(heldTimestamp);
+   }
+
+   private void enterHoldMode(long heldTimestamp)
+   {
+      firstUpdate = false;
+      startTime = timestampSupplier.getAsLong();
+      totalPausedDuration = 0L;
+      lastReplayTime = Math.max(1L, heldTimestamp);
+      paused = true;
+      pauseStartTime = timestampSupplier.getAsLong();
+      pendingPause = false;
+   }
+
    public void reset()
    {
       if (isReady())

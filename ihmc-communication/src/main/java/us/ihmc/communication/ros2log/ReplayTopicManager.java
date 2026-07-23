@@ -64,6 +64,32 @@ class ReplayTopicManager<T extends ROS2Message<T>>
    }
 
    /**
+    * Seek to a message index, publish it, and mark completion state accordingly.
+    *
+    * @return timestamp of the published message, or {@code -1} if nothing was published
+    */
+   long seekAndPublish(int index)
+   {
+      if (messages.isEmpty() || index < 0 || index >= messages.size())
+      {
+         isDone = messages.isEmpty();
+         return -1L;
+      }
+
+      lastSentIndex = index;
+      isDone = index == messages.size() - 1;
+      long timestamp = timestamps.get(index);
+      mutator.accept(messages.get(index), timestamp);
+      messageConsumer.accept(messages.get(index));
+      return timestamp;
+   }
+
+   int getMessageCount()
+   {
+      return messages.size();
+   }
+
+   /**
     * Highest index timestamp less than the current time
     */
    private int getLatestIndex(long currentTime)
