@@ -166,19 +166,13 @@ public class RDXHardwareControlStateManager
          RDXBaseUI.pushNotification("Commanding ground prep...");
          sendGroundPrepRequest();
       }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Stand Prep Transition")))
-      {
-         RDXBaseUI.pushNotification("Commanding stand prep transition...");
-         sendStandPrepTransitionRequest();
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Exit Walking")))
-      {
-         RDXBaseUI.pushNotification("Commanding EXIT_WALKING...");
-         sendExitWalkingRequest();
-      }
       ImGui.setCursorPosX(widgetStartX);
+      if (ImGui.button(labels.get("Walking")))
+      {
+         RDXBaseUI.pushNotification("Commanding Walking Control...");
+         sendWalkingRequest();
+      }
+      ImGui.sameLine();
       if (ImGui.button(labels.get("RL Control")))
       {
          RDXBaseUI.pushNotification("Commanding RL Control...");
