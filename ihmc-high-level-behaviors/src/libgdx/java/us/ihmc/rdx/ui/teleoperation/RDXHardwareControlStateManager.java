@@ -41,7 +41,6 @@ public class RDXHardwareControlStateManager
    protected final EStopMasterGainStatusMessage hardwareStatusMessage = new EStopMasterGainStatusMessage();
    protected final ImInt desiredRLModel = new ImInt();
    protected String[] rlModelNames = new String[0];
-   private boolean hasReceivedRLPolicyState = false;
    protected HighLevelControllerName currentHighLevelState = null;
 
    public RDXHardwareControlStateManager(ROS2ControllerHelper controllerHelper)
@@ -80,27 +79,15 @@ public class RDXHardwareControlStateManager
          String modelName = rlPolicyState.getAvailableModels().get(i).toString();
          modelNames[i] = (modelName == null || modelName.isEmpty()) ? "Model %d".formatted(i) : modelName;
       }
-      boolean modelListChanged = rlModelNames.length != modelNames.length;
-      if (!modelListChanged)
-      {
-         for (int i = 0; i < modelNames.length; i++)
-         {
-            if (!rlModelNames[i].equals(modelNames[i]))
-            {
-               modelListChanged = true;
-               break;
-            }
-         }
-      }
       rlModelNames = modelNames;
 
+      // Always mirror the controller's active model so UI stays correct after controller-side switches
+      // (e.g. standup → walking handoff), not only on first receive / catalog changes.
       int currentModel = Byte.toUnsignedInt(rlPolicyState.getCurrentModel());
-      if ((!hasReceivedRLPolicyState || modelListChanged) && currentModel >= 0 && currentModel < rlModelNames.length)
+      if (currentModel >= 0 && currentModel < rlModelNames.length)
          desiredRLModel.set(currentModel);
       else if (desiredRLModel.get() >= rlModelNames.length)
          desiredRLModel.set(rlModelNames.length - 1);
-
-      hasReceivedRLPolicyState = true;
    }
 
    protected void consumeHardwareStatusMessage(EStopMasterGainStatusMessage hardwareStatusMessage)
