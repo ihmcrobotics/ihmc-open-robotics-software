@@ -2,7 +2,6 @@ package us.ihmc.avatar.drcRobot;
 
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
-import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
@@ -42,25 +41,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    public abstract HumanoidJointNameMap getJointMap();
 
    public abstract RobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup();
-
-   /**
-    * Returns an initial setup for the given {@link HumanoidRobotInitialSetup.PoseType}. The default implementation
-    * starts from {@link #getDefaultRobotInitialSetup()} and, if it is a {@link HumanoidRobotInitialSetup}, re-configures
-    * it for the requested pose. Subclasses with pose-specific configuration (e.g. different joint set points per pose)
-    * should override this method.
-    */
-   default RobotInitialSetup<HumanoidFloatingRootJointRobot> getRobotInitialSetup(HumanoidRobotInitialSetup.PoseType poseType)
-   {
-      RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = getDefaultRobotInitialSetup();
-
-      if (poseType != HumanoidRobotInitialSetup.PoseType.STANDING && initialSetup instanceof HumanoidRobotInitialSetup humanoidInitialSetup)
-      {
-         humanoidInitialSetup.setPoseType(poseType);
-         humanoidInitialSetup.configureInitialSetup(getRobotDefinition());
-      }
-
-      return initialSetup;
-   }
 
    default RobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
