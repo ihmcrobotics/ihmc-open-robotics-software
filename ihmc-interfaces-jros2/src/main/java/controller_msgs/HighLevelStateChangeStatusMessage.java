@@ -55,6 +55,9 @@ public class HighLevelStateChangeStatusMessage implements ROS2Message<HighLevelS
    public static final byte CUSTOM1 = 9;
    public static final byte FALLING_STATE = 10;
    public static final byte PUSH_RECOVERY = 11;
+   public static final byte RL_CONTROL = 14;
+   public static final byte EXIT_RL = 15;
+   public static final byte RL_TRANSITION_STATE = 16;
    /**
       Unique ID used to identify this message, should preferably be consecutively increasing.
    */
