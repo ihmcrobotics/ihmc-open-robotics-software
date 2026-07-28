@@ -37,7 +37,6 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoLong;
 
 public class SCS2SensorReader implements SensorReader
@@ -72,17 +71,7 @@ public class SCS2SensorReader implements SensorReader
    private final SensorProcessing sensorProcessing;
    private final SensorOutputMapReadOnly perfectSensorOutputMap;
 
-   /**
-    * Legacy always-on perfect sensor mode (no state estimator). Mutually exclusive with
-    * {@link #usePerfectRootJointSensors}.
-    */
    private final boolean usePerfectSensor;
-   /**
-    * When the state estimator is present, this toggles copying the simulated floating-base pose onto the
-    * estimator model. Must be applied after the estimator runs so FROZEN/NORMAL updates do not overwrite it.
-    */
-   private final YoBoolean usePerfectRootJointSensors;
-   private final SixDoFJointSensorReader perfectRootJointSensorReader;
 
    public static SCS2SensorReader newSensorReader(SimControllerInput controllerInput,
                                                   FloatingJointBasics rootJoint,
@@ -137,8 +126,6 @@ public class SCS2SensorReader implements SensorReader
       if (usePerfectSensor)
       {
          sensorProcessing = null;
-         usePerfectRootJointSensors = null;
-         perfectRootJointSensorReader = null;
 
          controllerIMUSensors = new ArrayList<>();
          controllerWrenchSensors = new ArrayList<>();
@@ -199,21 +186,6 @@ public class SCS2SensorReader implements SensorReader
          addIMUSensors(imuDefinitions);
          addWrenchSensors(forceSensorDataHolder);
          sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
-         perfectSensorOutputMap = null;
-         usePerfectRootJointSensors = new YoBoolean("usePerfectRootJointSensors", registry);
-         usePerfectRootJointSensors.set(false);
-
-         JointBasics controllerRootJoint = controllerJointList.get(0);
-         JointReadOnly simRootJoint = simJointList.get(0);
-         if (controllerRootJoint instanceof SixDoFJointBasics && simRootJoint instanceof SixDoFJointReadOnly)
-         {
-            perfectRootJointSensorReader = new SixDoFJointSensorReader((SixDoFJointBasics) controllerRootJoint, (SixDoFJointReadOnly) simRootJoint);
-         }
-         else
-         {
-            perfectRootJointSensorReader = null;
-         }
-
          simJointList.remove(0);
          controllerJointList.remove(0);
          controllerIMUSensors = null;
@@ -221,6 +193,7 @@ public class SCS2SensorReader implements SensorReader
          timestamp = null;
          controllerTimestamp = null;
          sensorHeadPPSTimetamp = null;
+         perfectSensorOutputMap = null;
       }
 
       for (JointBasics controllerJoint : controllerJointList)
@@ -240,10 +213,7 @@ public class SCS2SensorReader implements SensorReader
 
             if (controllerInput.getInput().findJoint(controllerCrossFourBarJoint.getName()) != null)
             {
-               jointSensorReaders.add(new OneDoFJointSensorReader((OneDoFJointBasics) controllerJoint,
-                                                                  (OneDoFJointReadOnly) simJoint,
-                                                                  sensorProcessing,
-                                                                  usePerfectRootJointSensors));
+               jointSensorReaders.add(new OneDoFJointSensorReader((OneDoFJointBasics) controllerJoint, (OneDoFJointReadOnly) simJoint, sensorProcessing));
             }
             else
             {
@@ -252,15 +222,12 @@ public class SCS2SensorReader implements SensorReader
                simJoints[1] = (OneDoFJointReadOnly) controllerInput.getInput().findJoint(controllerCrossFourBarJoint.getJointB().getName());
                simJoints[2] = (OneDoFJointReadOnly) controllerInput.getInput().findJoint(controllerCrossFourBarJoint.getJointC().getName());
                simJoints[3] = (OneDoFJointReadOnly) controllerInput.getInput().findJoint(controllerCrossFourBarJoint.getJointD().getName());
-               jointSensorReaders.add(new CrossFourBarJointSensorReader(controllerCrossFourBarJoint, simJoints, sensorProcessing, usePerfectRootJointSensors));
+               jointSensorReaders.add(new CrossFourBarJointSensorReader(controllerCrossFourBarJoint, simJoints, sensorProcessing));
             }
          }
          else if (controllerJoint instanceof OneDoFJointBasics)
          {
-            jointSensorReaders.add(new OneDoFJointSensorReader((OneDoFJointBasics) controllerJoint,
-                                                               (OneDoFJointReadOnly) simJoint,
-                                                               sensorProcessing,
-                                                               usePerfectRootJointSensors));
+            jointSensorReaders.add(new OneDoFJointSensorReader((OneDoFJointBasics) controllerJoint, (OneDoFJointReadOnly) simJoint, sensorProcessing));
          }
       }
 
@@ -392,10 +359,6 @@ public class SCS2SensorReader implements SensorReader
          }
 
          sensorProcessing.startComputation(timestamp, timestamp, timestamp);
-
-         // Perfect-sensor runtime mode: copy sim floating-base (and 1-DoF joints via readers) onto the
-         // controller model while the state estimator is disabled.
-         applyPerfectRootJointState();
       }
 
       return timestamp;
@@ -467,44 +430,6 @@ public class SCS2SensorReader implements SensorReader
       return registry;
    }
 
-   /**
-    * Enable/disable perfect sensors: copy simulated root and 1-DoF joint state onto the controller
-    * model. Only available on the state-estimator build path. Pair with disabling the main state
-    * estimator so it does not overwrite this state.
-    */
-   public void setUsePerfectSensors(boolean usePerfectSensors)
-   {
-      if (usePerfectRootJointSensors == null)
-      {
-         if (usePerfectSensors != usePerfectSensor)
-            LogTools.error("Cannot change legacy perfect-sensor mode at runtime.");
-         return;
-      }
-
-      usePerfectRootJointSensors.set(usePerfectSensors);
-   }
-
-   public boolean isUsePerfectSensors()
-   {
-      if (usePerfectRootJointSensors != null)
-         return usePerfectRootJointSensors.getBooleanValue();
-      return usePerfectSensor;
-   }
-
-   /**
-    * Copies the simulated root joint state onto the controller model when perfect sensors are enabled.
-    */
-   public void applyPerfectRootJointState()
-   {
-      if (usePerfectRootJointSensors == null || !usePerfectRootJointSensors.getBooleanValue())
-         return;
-      if (perfectRootJointSensorReader == null)
-         return;
-
-      perfectRootJointSensorReader.read();
-      rootBody.updateFramesRecursively();
-   }
-
    private static interface JointSensorReader
    {
       void read();
@@ -536,21 +461,16 @@ public class SCS2SensorReader implements SensorReader
       private final OneDoFJointBasics controllerJoint;
       private final OneDoFJointReadOnly simJoint;
       private final SensorProcessing sensorProcessing;
-      private final YoBoolean applyPerfectJointStateToController;
       private OneDoFJointStateCorruptor jointConfigurationCorruptor = null;
       private OneDoFJointStateCorruptor jointVelocityCorruptor = null;
       private OneDoFJointStateCorruptor jointAccelerationCorruptor = null;
       private OneDoFJointStateCorruptor jointEffortCorruptor = null;
 
-      public OneDoFJointSensorReader(OneDoFJointBasics controllerJoint,
-                                     OneDoFJointReadOnly simJoint,
-                                     SensorProcessing sensorProcessing,
-                                     YoBoolean applyPerfectJointStateToController)
+      public OneDoFJointSensorReader(OneDoFJointBasics controllerJoint, OneDoFJointReadOnly simJoint, SensorProcessing sensorProcessing)
       {
          this.controllerJoint = controllerJoint;
          this.simJoint = simJoint;
          this.sensorProcessing = sensorProcessing;
-         this.applyPerfectJointStateToController = applyPerfectJointStateToController;
       }
 
       @Override
@@ -570,15 +490,14 @@ public class SCS2SensorReader implements SensorReader
          if (jointEffortCorruptor != null)
             tau = jointEffortCorruptor.corruptState(tau, simJoint);
 
-         if (sensorProcessing == null || (applyPerfectJointStateToController != null && applyPerfectJointStateToController.getBooleanValue()))
+         if (sensorProcessing == null)
          {
             controllerJoint.setQ(q);
             controllerJoint.setQd(qd);
             controllerJoint.setQdd(qdd);
             controllerJoint.setTau(tau);
          }
-
-         if (sensorProcessing != null)
+         else
          {
             sensorProcessing.setJointPositionSensorValue(controllerJoint, q);
             sensorProcessing.setJointVelocitySensorValue(controllerJoint, qd);
@@ -615,15 +534,11 @@ public class SCS2SensorReader implements SensorReader
       private final CrossFourBarJoint localFourBarJoint;
       private final int[] activeJointIndices;
 
-      public CrossFourBarJointSensorReader(CrossFourBarJointBasics controllerJoint,
-                                           OneDoFJointReadOnly[] simJoints,
-                                           SensorProcessing sensorProcessing,
-                                           YoBoolean applyPerfectJointStateToController)
+      public CrossFourBarJointSensorReader(CrossFourBarJointBasics controllerJoint, OneDoFJointReadOnly[] simJoints, SensorProcessing sensorProcessing)
       {
          super(controllerJoint,
                CrossFourBarJoint.cloneCrossFourBarJoint(controllerJoint, ReferenceFrameTools.constructARootFrame("dummy"), ""),
-               sensorProcessing,
-               applyPerfectJointStateToController);
+               sensorProcessing);
          this.simJoints = simJoints;
 
          localFourBarJoint = (CrossFourBarJoint) super.simJoint;
