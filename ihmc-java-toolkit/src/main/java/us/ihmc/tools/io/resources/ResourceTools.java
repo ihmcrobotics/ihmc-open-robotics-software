@@ -61,7 +61,7 @@ public class ResourceTools
     */
    public static InputStream openStreamSystem(Path path)
    {
-      return ClassLoader.getSystemResourceAsStream(toResourceAccessStringWithCorrectSeparators(path));
+      return ClassLoader.getSystemResourceAsStream(path.toString());
    }
    
    /**
@@ -69,7 +69,7 @@ public class ResourceTools
     */
    public static URL getResourceAbsolute(Class<?> clazz, Path path)
    {
-      return clazz.getClassLoader().getResource(toResourceAccessStringWithCorrectSeparators(path));
+      return clazz.getClassLoader().getResource(path.toString());
    }
    
    /**
@@ -77,7 +77,7 @@ public class ResourceTools
     */
    public static URL getResourceRelative(Class<?> clazz, Path path)
    {
-      return clazz.getResource(toResourceAccessStringWithCorrectSeparators(path));
+      return clazz.getResource(path.toString());
    }
    
    /**
@@ -85,7 +85,7 @@ public class ResourceTools
     */
    public static URL getResourceSystem(Path path)
    {
-      return ClassLoader.getSystemResource(toResourceAccessStringWithCorrectSeparators(path));
+      return ClassLoader.getSystemResource(path.toString());
    }
 
    public static String readResourceToString(InputStream inputStream)
