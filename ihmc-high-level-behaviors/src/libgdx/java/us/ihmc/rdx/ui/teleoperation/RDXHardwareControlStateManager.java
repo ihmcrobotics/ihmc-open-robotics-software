@@ -154,12 +154,6 @@ public class RDXHardwareControlStateManager
          sendGroundPrepRequest();
       }
       ImGui.setCursorPosX(widgetStartX);
-      if (ImGui.button(labels.get("RL Control")))
-      {
-         RDXBaseUI.pushNotification("Commanding RL_CONTROL...");
-         sendRLRequest();
-      }
-      ImGui.sameLine();
       if (ImGui.button(labels.get("Stand Prep Transition")))
       {
          RDXBaseUI.pushNotification("Commanding stand prep transition...");
@@ -178,6 +172,11 @@ public class RDXHardwareControlStateManager
          sendExitWalkingRequest();
       }
       ImGui.setCursorPosX(widgetStartX);
+      if (ImGui.button(labels.get("RL Control")))
+      {
+         RDXBaseUI.pushNotification("Commanding RL Control...");
+         sendRLRequest();
+      }
       ImGui.text("RL Model:");
       ImGui.sameLine();
       ImGui.setCursorPosX(widgetStartX);
