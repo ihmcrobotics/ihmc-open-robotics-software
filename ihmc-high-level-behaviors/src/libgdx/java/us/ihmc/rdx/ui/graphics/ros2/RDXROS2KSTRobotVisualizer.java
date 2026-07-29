@@ -38,6 +38,21 @@ public class RDXROS2KSTRobotVisualizer extends RDXROS2SingleTopicVisualizer<Kine
    private ROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private RDXMultiBodyGraphic multiBodyGraphic;
    private String text;
+   /**
+    * {@link #ghostFullRobotModel} starts at its raw post-construction pose (root joint at literal
+    * (0,0,0), every joint at 0) and is only ever written to below once a status with a real
+    * {@code jointNameHash} arrives. Before that first message, rendering it anyway shows that
+    * all-zero pose - which for a floating-base humanoid is not a neutral/standing configuration,
+    * it reads as the robot having collapsed at the origin. Every caller (Cosmos/GR00T/AlexRollout
+    * operations) calls {@code setActive(true)} once, unconditionally, at startup and leaves it
+    * active regardless of whether the toolbox has ever woken up, so without this guard that
+    * collapsed pose is visible continuously from app launch. The lever episode panel instead
+    * toggles {@code setActive} to track toolbox wake state, which narrows but doesn't close the
+    * window: activation and the first real status message are two independent network events, so
+    * the collapsed pose still flashes in between - confirmed live, this is what reads as "the ghost
+    * falls over the moment I click WAKE_UP."
+    */
+   private boolean hasReceivedValidStatus = false;
 
    public RDXROS2KSTRobotVisualizer(ROS2Node ros2Node, DRCRobotModel robotModel)
    {
@@ -102,6 +117,7 @@ public class RDXROS2KSTRobotVisualizer extends RDXROS2SingleTopicVisualizer<Kine
                for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
                   ghostOneDoFJointsExcludingHands[i].setQ(status.getDesiredJointAngles().get(i));
                ghostFullRobotModel.getElevator().updateFramesRecursively();
+               hasReceivedValidStatus = true;
             }
          }
 
@@ -147,7 +163,7 @@ public class RDXROS2KSTRobotVisualizer extends RDXROS2SingleTopicVisualizer<Kine
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      multiBodyGraphic.setActive(isActive());
+      multiBodyGraphic.setActive(isActive() && hasReceivedValidStatus);
       multiBodyGraphic.getRenderables(renderables, pool, sceneLevels);
    }
 
