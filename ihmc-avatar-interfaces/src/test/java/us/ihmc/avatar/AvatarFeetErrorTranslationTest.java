@@ -2,14 +2,11 @@ package us.ihmc.avatar;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.ArrayList;
-
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
@@ -29,6 +26,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
 
 public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestInterface
 {
@@ -93,14 +92,14 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
       for (int currentStep = 0; currentStep < numberOfSteps; currentStep++)
       {
          FootstepDataMessage footstepData = new FootstepDataMessage();
-         footstepData.getLocation().set(stepLength * currentStep, side.negateIfRightSide(stepWidth / 2), 0.0);
+         footstepData.getLocation().getPoint().set(stepLength * currentStep, side.negateIfRightSide(stepWidth / 2), 0.0);
          footstepData.setRobotSide(side.toByte());
          footMessage.getFootstepDataList().add().set(footstepData);
 
          side = side.getOppositeSide();
       }
       FootstepDataMessage footstepData = new FootstepDataMessage();
-      footstepData.getLocation().set(stepLength * (numberOfSteps - 1), side.negateIfRightSide(stepWidth / 2), 0.0);
+      footstepData.getLocation().getPoint().set(stepLength * (numberOfSteps - 1), side.negateIfRightSide(stepWidth / 2), 0.0);
       footstepData.setRobotSide(side.toByte());
       footMessage.getFootstepDataList().add().set(footstepData);
 

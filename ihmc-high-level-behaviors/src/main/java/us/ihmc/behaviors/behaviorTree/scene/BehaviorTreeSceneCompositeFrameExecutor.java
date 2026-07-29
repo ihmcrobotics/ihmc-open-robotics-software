@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
+import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.BehaviorTreeSceneObjectStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -60,6 +60,7 @@ public class BehaviorTreeSceneCompositeFrameExecutor extends BehaviorTreeSceneOb
       }
 
       referenceFrame.update();
+      setValid(true);
    }
 
    @Override

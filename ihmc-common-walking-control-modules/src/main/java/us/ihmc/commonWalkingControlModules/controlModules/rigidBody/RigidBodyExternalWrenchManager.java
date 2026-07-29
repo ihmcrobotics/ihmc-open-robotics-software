@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import controller_msgs.msg.dds.WrenchTrajectoryStatusMessage;
+import controller_msgs.WrenchTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.WrenchTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;

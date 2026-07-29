@@ -1,16 +1,13 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import static org.junit.jupiter.api.Assertions.*;
 
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -48,7 +45,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInterface
 {
@@ -339,7 +338,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          footstepMessage.setRobotSide(side.toByte());
          footstepMessage.setTransferDuration(transferDuration);
          footstepMessage.setSwingDuration(swingDuration);
-         footstepMessage.getLocation().set(footstepPose.getPosition());
+         footstepMessage.getLocation().getPoint().set(footstepPose.getPosition());
          footstepMessage.getOrientation().set(footstepPose.getOrientation());
 
          expectPause.add(transferDuration > transferSwitchDuration);

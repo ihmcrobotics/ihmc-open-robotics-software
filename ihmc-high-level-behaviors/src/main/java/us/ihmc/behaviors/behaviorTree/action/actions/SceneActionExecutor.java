@@ -1,9 +1,10 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionDefinition.SceneActionType;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneApproachTableExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneCompositeFrameExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorPanelExecutor;
@@ -31,6 +32,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
    private final Point3D cameraPosition = new Point3D();
    private final Vector3D detectionToCamera = new Vector3D();
    private boolean printDebug = false;
+   private BehaviorTreeSceneObjectState setupTarget;
 
    public SceneActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
@@ -51,6 +53,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       state.getLogger().info("Executing scene action for object type: {}", definition.getName());
 
       timer.reset();
+      setupTarget = null;
    }
 
    @Override
@@ -103,18 +106,21 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       BehaviorTreeSceneObjectState matchedObject = null;
       for (BehaviorTreeSceneObjectState object : scene.getObjects())
       {
-         if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL
-             && object instanceof BehaviorTreeSceneDoorPanelExecutor)
-            matchedObject = object;
-         else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_FRAME
-                  && object instanceof BehaviorTreeSceneDoorFrameExecutor)
+         if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY
+             && object.getYoloClassName().equals(definition.getSceneObjectDefinition().getYoloClassName()))
             matchedObject = object;
          else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
                   && object.getObjectType() == BehaviorTreeSceneObjectType.FOUNDATION_POSE
                   && object.getFoundationPoseObjectType() == definition.getSceneObjectDefinition().getFoundationPoseObjectType())
             matchedObject = object;
-         else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.YOLO_ONLY
-                  && object.getYoloClassName().equals(definition.getSceneObjectDefinition().getYoloClassName()))
+         else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_PANEL
+                  && object instanceof BehaviorTreeSceneDoorPanelExecutor)
+            matchedObject = object;
+         else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.DOOR_FRAME
+                  && object instanceof BehaviorTreeSceneDoorFrameExecutor)
+            matchedObject = object;
+         else if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.APPROACH_TABLE
+                  && object instanceof BehaviorTreeSceneApproachTableExecutor)
             matchedObject = object;
       }
 
@@ -145,11 +151,32 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
 
    private void setupObject()
    {
+      double timeout = definition.getTimeout();
+      if (!timer.isRunning(timeout))
+      {
+         state.getLogger().error("Timed out after %.1f s without finding a suitable detection.".formatted(timeout));
+         state.setFailed(true);
+         state.setIsExecuting(false);
+         return;
+      }
+
+      if (setupTarget != null)
+      {
+         state.setIsExecuting(!setupTarget.isValid());
+         return;
+      }
+
       if (rootNode.getState().getPreviewModeEnabled())
       {
+         if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.COMPOSITE_FRAME)
+         {
+            setupCompositeFrameDetection();
+            return;
+         }
+
          state.getLogger().info("Preview mode enabled. Adding nominal object pose for: {}", definition.getSceneObjectDefinition().getName());
 
-         BehaviorTreeSceneObjectState existingObject = null;
+         BehaviorTreeSceneObjectState target = null;
          for (BehaviorTreeSceneObjectState object : scene.getObjects())
             if (object.getObjectType() == definition.getSceneObjectDefinition().getObjectType())
             {
@@ -161,7 +188,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
                         && definition.getSceneObjectDefinition().getObjectType() != BehaviorTreeSceneObjectType.FOUNDATION_POSE;
                if (match)
                {
-                  existingObject = object;
+                  target = object;
                   break;
                }
             }
@@ -170,45 +197,34 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
          nominalWorldPose.set(scene.findFrameByName("Walking").getTransformToRoot());
          nominalWorldPose.multiply(definition.getNominalObjectPose().getValueReadOnly());
 
-         if (existingObject != null)
-            existingObject.setTransformToWorld(nominalWorldPose);
+         if (target != null)
+            target.setTransformToWorld(nominalWorldPose);
          else
          {
             BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
             definition.getSceneObjectDefinition().toMessage(message);
-            BehaviorTreeSceneObjectState nominalObject = scene.createObject(message);
-            nominalObject.setTransformToWorld(nominalWorldPose);
-            scene.addObject(nominalObject);
+            target = scene.createObject(message);
+            target.setTransformToWorld(nominalWorldPose);
+            scene.addObject(target);
          }
-         state.setIsExecuting(false);
-         return;
-      }
-
-      double timeout = definition.getTimeout();
-      if (!timer.isRunning(timeout))
-      {
-         state.getLogger().error("Timed out after %.1f s without finding a suitable detection.".formatted(timeout));
-         state.setFailed(true);
-         state.setIsExecuting(false);
+         setupTarget = target;
          return;
       }
 
       printDebug = throttler.run();
       cameraPosition.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getExperimentalCameraFrame).getTranslation());
 
-      boolean success = switch (definition.getSceneObjectDefinition().getObjectType())
+      switch (definition.getSceneObjectDefinition().getObjectType())
       {
+         case YOLO_ONLY, FOUNDATION_POSE -> setupSinglePersistentDetection();
          case COMPOSITE_FRAME -> setupCompositeFrameDetection();
          case DOOR_PANEL -> setupDoorPanelDetection();
          case DOOR_FRAME -> setupDoorFrameDetection();
-         default -> setupSinglePersistentDetection();
+         case APPROACH_TABLE -> setupApproachTableDetection();
       };
-
-      if (success)
-         state.setIsExecuting(false);
    }
 
-   private boolean setupCompositeFrameDetection()
+   private void setupCompositeFrameDetection()
    {
       ReferenceFrame frameA = scene.findFrameByName(definition.getSceneObjectDefinition().getCompositeFrameA());
       ReferenceFrame frameB = scene.findFrameByName(definition.getSceneObjectDefinition().getCompositeFrameB());
@@ -219,7 +235,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
                  .warn("Failed to find frames: %s = %s and %s = %s".formatted(
                        definition.getSceneObjectDefinition().getCompositeFrameA(), frameA,
                        definition.getSceneObjectDefinition().getCompositeFrameB(), frameB));
-         return false;
+         return;
       }
 
       BehaviorTreeSceneCompositeFrameExecutor target = null;
@@ -236,11 +252,13 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       if (target != null)
       {
          state.getLogger().info("Updating existing composite frame: {}", definition.getSceneObjectDefinition().getCompositeFrameName());
+         target.setValid(false);
          target.setCompositeFrameA(definition.getSceneObjectDefinition().getCompositeFrameA());
          target.setCompositeFrameB(definition.getSceneObjectDefinition().getCompositeFrameB());
          target.setCompositeFrameType(definition.getSceneObjectDefinition().getCompositeFrameType());
          target.setCompositeDistance(definition.getSceneObjectDefinition().getCompositeDistance());
          target.unfreeze();
+         target.update();
       }
       else
       {
@@ -253,10 +271,10 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
          scene.addObject(target);
       }
 
-      return true;
+      setupTarget = target;
    }
 
-   private boolean setupDoorPanelDetection()
+   private void setupDoorPanelDetection()
    {
       // First, find the closest door opening mechanism (lever, knob, push bar, or pull handle)
       PersistentDetection openingMechanismDetection = null;
@@ -301,7 +319,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       {
          if (printDebug)
             state.getLogger().warn("No suitable door opening mechanism found (door_lever, door_knob, door_push_bar, or door_pull_handle).");
-         return false;
+         return;
       }
 
       state.getLogger().info("Found door opening mechanism: {} with history size: {}",
@@ -349,7 +367,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       {
          if (printDebug)
             state.getLogger().warn("No suitable door_panel found.");
-         return false;
+         return;
       }
 
       // Check that the closest panel is within 2 meters of the opening mechanism
@@ -358,7 +376,7 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       {
          if (printDebug)
             state.getLogger().warn("Closest door_panel is %.2f m from opening mechanism, must be within 2.0 m".formatted(distanceToMechanism));
-         return false;
+         return;
       }
 
       state.getLogger().info("Found door_panel with history size: %d at distance %.2f m from opening mechanism".formatted(
@@ -366,22 +384,24 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
                              distanceToMechanism));
 
       // Check if a door panel scene object already exists
-      BehaviorTreeSceneDoorPanelExecutor targetSceneObject = null;
+      BehaviorTreeSceneDoorPanelExecutor target = null;
       for (BehaviorTreeSceneObjectState object : scene.getObjects())
       {
          if (object instanceof BehaviorTreeSceneDoorPanelExecutor doorPanelExecutor)
          {
-            targetSceneObject = doorPanelExecutor;
+            target = doorPanelExecutor;
             break;
          }
       }
 
-      if (targetSceneObject != null)
+      if (target != null)
       {
          state.getLogger().info("Updating existing door panel scene object");
-         targetSceneObject.setPersistentDetection(openingMechanismDetection);
-         targetSceneObject.setDoorPanelPersistentDetection(doorPanelDetection);
-         targetSceneObject.unfreeze();
+         target.setValid(false);
+         target.setPersistentDetection(openingMechanismDetection);
+         target.setDoorPanelPersistentDetection(doorPanelDetection);
+         target.unfreeze();
+         target.update();
       }
       else
       {
@@ -389,17 +409,17 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
 
          BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
          definition.getSceneObjectDefinition().toMessage(message);
-         targetSceneObject = (BehaviorTreeSceneDoorPanelExecutor) scene.createObject(message);
-         targetSceneObject.setPersistentDetection(openingMechanismDetection);
-         targetSceneObject.setDoorPanelPersistentDetection(doorPanelDetection);
-         targetSceneObject.update();
-         scene.addObject(targetSceneObject);
+         target = (BehaviorTreeSceneDoorPanelExecutor) scene.createObject(message);
+         target.setPersistentDetection(openingMechanismDetection);
+         target.setDoorPanelPersistentDetection(doorPanelDetection);
+         target.update();
+         scene.addObject(target);
       }
 
-      return true;
+      setupTarget = target;
    }
 
-   private boolean setupDoorFrameDetection()
+   private void setupDoorFrameDetection()
    {
       // First, find a stable door panel
       BehaviorTreeSceneDoorPanelExecutor doorPanelSceneObject = null;
@@ -416,30 +436,32 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
       {
          if (printDebug)
             state.getLogger().warn("No suitable door panel scene object found.");
-         return false;
+         return;
       }
 
       state.getLogger().info("Found door panel scene object: {} ({})", doorPanelSceneObject.getName(), doorPanelSceneObject.getID());
 
       // Check if a frame scene object already exists
-      BehaviorTreeSceneDoorFrameExecutor frameSceneObject = null;
+      BehaviorTreeSceneDoorFrameExecutor target = null;
       for (BehaviorTreeSceneObjectState object : scene.getObjects())
       {
          if (object instanceof BehaviorTreeSceneDoorFrameExecutor doorPanelExecutor)
          {
-            frameSceneObject = doorPanelExecutor;
+            target = doorPanelExecutor;
             break;
          }
       }
 
       // add object
-      if (frameSceneObject != null)
+      if (target != null)
       {
          state.getLogger().info("Updating existing door frame scene object");
-         frameSceneObject.setPersistentDetection(doorPanelSceneObject.getDoorPanelPersistentDetection());
-         frameSceneObject.setMinPostPoints(definition.getSceneObjectDefinition().getMinPostPoints());
-         frameSceneObject.setMinRecessPoints(definition.getSceneObjectDefinition().getMinRecessPoints());
-         frameSceneObject.unfreeze();
+         target.setValid(false);
+         target.setPersistentDetection(doorPanelSceneObject.getDoorPanelPersistentDetection());
+         target.setMinPostPoints(definition.getSceneObjectDefinition().getMinPostPoints());
+         target.setMinRecessPoints(definition.getSceneObjectDefinition().getMinRecessPoints());
+         target.unfreeze();
+         target.update();
       }
       else
       {
@@ -447,16 +469,51 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
 
          BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
          definition.getSceneObjectDefinition().toMessage(message);
-         frameSceneObject = (BehaviorTreeSceneDoorFrameExecutor) scene.createObject(message);
-         frameSceneObject.setDoorPanel(doorPanelSceneObject);
-         frameSceneObject.update();
-         scene.addObject(frameSceneObject);
+         target = (BehaviorTreeSceneDoorFrameExecutor) scene.createObject(message);
+         target.setDoorPanel(doorPanelSceneObject);
+         target.update();
+         scene.addObject(target);
       }
 
-      return true;
+      setupTarget = target;
    }
 
-   private boolean setupSinglePersistentDetection()
+   private void setupApproachTableDetection()
+   {
+      BehaviorTreeSceneApproachTableExecutor target = null;
+      for (BehaviorTreeSceneObjectState object : scene.getObjects())
+      {
+         if (object instanceof BehaviorTreeSceneApproachTableExecutor approachTableExecutor)
+         {
+            target = approachTableExecutor;
+            break;
+         }
+      }
+
+      if (target != null)
+      {
+         state.getLogger().info("Updating existing approach table scene object");
+         target.setValid(false);
+         target.setMinCapsulePoints(definition.getSceneObjectDefinition().getMinCapsulePoints());
+         target.setSearchStartX(definition.getSceneObjectDefinition().getSearchStartX());
+         target.unfreeze();
+         target.update();
+      }
+      else
+      {
+         state.getLogger().info("Creating new approach table scene object");
+
+         BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
+         definition.getSceneObjectDefinition().toMessage(message);
+         target = (BehaviorTreeSceneApproachTableExecutor) scene.createObject(message);
+         target.update();
+         scene.addObject(target);
+      }
+
+      setupTarget = target;
+   }
+
+   private void setupSinglePersistentDetection()
    {
       // Find a close stable detection
       PersistentDetection bestDetection = null;
@@ -531,13 +588,13 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
          if (printDebug)
             state.getLogger().warn("No suitable persistent detection found. There are currently {} persistent detections.",
                                    scene.getPersistentDetections().size());
-         return false;
+         return;
       }
 
       state.getLogger().info("Found persistent detection with history size: {}", bestDetection.getHistorySize());
 
       // Check if a scene object of this type already exists
-      BehaviorTreeSceneObjectExecutor targetSceneObject = null;
+      BehaviorTreeSceneObjectExecutor target = null;
       for (BehaviorTreeSceneObjectState object : scene.getObjects())
       {
          if (object.getObjectType() == definition.getSceneObjectDefinition().getObjectType())
@@ -548,17 +605,19 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
                      && object.getFoundationPoseObjectType() == definition.getSceneObjectDefinition().getFoundationPoseObjectType();
             if (match)
             {
-               targetSceneObject = (BehaviorTreeSceneObjectExecutor) object;
+               target = (BehaviorTreeSceneObjectExecutor) object;
                break;
             }
          }
       }
 
-      if (targetSceneObject != null)
+      if (target != null)
       {
          state.getLogger().info("Updating existing scene object for type: {}", definition.getSceneObjectDefinition().getName());
-         targetSceneObject.unfreeze();
-         targetSceneObject.setPersistentDetection(bestDetection);
+         target.setValid(false);
+         target.setPersistentDetection(bestDetection);
+         target.unfreeze();
+         target.update();
       }
       else
       {
@@ -566,12 +625,12 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
 
          BehaviorTreeSceneObjectDefinitionMessage message = new BehaviorTreeSceneObjectDefinitionMessage();
          definition.getSceneObjectDefinition().toMessage(message);
-         targetSceneObject = (BehaviorTreeSceneObjectExecutor) scene.createObject(message);
-         targetSceneObject.setPersistentDetection(bestDetection);
-         targetSceneObject.update();
-         scene.addObject(targetSceneObject);
+         target = (BehaviorTreeSceneObjectExecutor) scene.createObject(message);
+         target.setPersistentDetection(bestDetection);
+         target.update();
+         scene.addObject(target);
       }
 
-      return true;
+      setupTarget = target;
    }
 }

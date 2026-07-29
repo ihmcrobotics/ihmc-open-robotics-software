@@ -1,7 +1,7 @@
 package us.ihmc.rdx.behaviorTree;
 
 import com.badlogic.gdx.math.Matrix4;
-import controller_msgs.msg.dds.RigidBodyTransformMessage;
+import controller_msgs.RigidBodyTransformMessage;
 import us.ihmc.communication.crdt.CRDTBidirectionalPoint3D;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;

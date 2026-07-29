@@ -1,49 +1,57 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import controller_msgs.msg.dds.HighLevelStateMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.HighLevelStateMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.MimicActionDefinition.MimicActionType;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ros2log.ROS2LogReplay;
 import us.ihmc.communication.ros2log.ROS2LogTimeSource;
-import us.ihmc.commons.Conversions;
-import us.ihmc.tools.NonWallTimer;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.tools.IHMCCommonPaths;
+import us.ihmc.tools.NonWallTimer;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, MimicActionDefinition>
 {
-   private static final File DEFAULT_ROS2_LOG_DIRECTORY = new File(System.getProperty("user.home"), ".ihmc/logs/ros2");
+   private static final File DEFAULT_ROS2_LOG_DIRECTORY = IHMCCommonPaths.LOGS_DIRECTORY.resolve("ros2").toFile();
+   private static final String ROS2_LOG_DIRECTORY_MARKER = "/.ihmc/logs/ros2/";
 
    private final ROS2LogReplay ros2Replayer;
    private final ROS2Topic<KinematicsToolboxOutputStatus> kstOutputTopic;
    private final NonWallTimer transitionTimer = new NonWallTimer();
+   private final FullHumanoidRobotModel ghostFullRobotModel;
+   private final OneDoFJointBasics[] ghostOneDoFJoints;
+   private final HumanoidReferenceFrames ghostReferenceFrames;
    private String loadedMimicFileName = "";
    private volatile boolean replayThreadRunning = false;
    private volatile boolean replayCompleted = false;
    private volatile boolean replayFailed = false;
    private Thread replayThread;
    private boolean transitionRequestSent = false;
+   private boolean replayAlignmentCaptured = false;
    private final Object replayAlignmentLock = new Object();
    private boolean replayAlignmentInitialized = false;
-   private final Point2D actionStartPelvisPosition = new Point2D();
-   private final Point2D actionStartTorsoPosition = new Point2D();
-   private double actionStartPelvisYaw = 0.0;
-   private double actionStartTorsoYaw = 0.0;
-   private final Vector2D replayPelvisPositionOffset = new Vector2D();
-   private final Vector2D replayTorsoPositionOffset = new Vector2D();
-   private double replayPelvisYawOffset = 0.0;
-   private double replayTorsoYawOffset = 0.0;
+   private final Point2D actionStartMidFeetPosition = new Point2D();
+   private double actionStartMidFeetYaw = 0.0;
+   private final Vector2D replayWorldPositionOffset = new Vector2D();
+   private double replayWorldYawOffset = 0.0;
+   private final Map<KinematicsToolboxOutputStatus, ReplayStatusBaseline> replayStatusBaselines = new IdentityHashMap<>();
 
    public MimicActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
@@ -56,6 +64,10 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
       }
       ROS2LogTimeSource timeSource = ROS2LogTimeSource.SYSTEM;
       ros2Replayer = new ROS2LogReplay(robotModel.getSimpleRobotName(), topics, timeSource);
+
+      ghostFullRobotModel = robotModel.createFullRobotModel();
+      ghostOneDoFJoints = ghostFullRobotModel.getOneDoFJoints();
+      ghostReferenceFrames = new HumanoidReferenceFrames(ghostFullRobotModel, robotModel.getSensorInformation());
    }
 
    @Override
@@ -76,15 +88,20 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
       replayCompleted = false;
       replayFailed = false;
       transitionRequestSent = false;
+      replayAlignmentCaptured = false;
       stopReplayThread();
+      synchronized (replayAlignmentLock)
+      {
+         replayAlignmentInitialized = false;
+         replayStatusBaselines.clear();
+      }
 
       if (definition.getMimicActionType().getValue() == MimicActionType.EXECUTE_POLICY)
       {
-         captureActionStartAlignment();
          String mimicFileName = definition.getMimicFileName();
          if (!mimicFileName.equals(loadedMimicFileName))
          {
-            ros2Replayer.load(new File(DEFAULT_ROS2_LOG_DIRECTORY, mimicFileName));
+            ros2Replayer.load(resolveMimicLogFile(mimicFileName));
             loadedMimicFileName = mimicFileName;
             LogTools.info("Loaded mimic file: {}", mimicFileName);
          }
@@ -106,18 +123,12 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
    {
       synchronized (replayAlignmentLock)
       {
-         var pelvisPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisFrame);
-         actionStartPelvisPosition.set(pelvisPose.getPosition().getX(), pelvisPose.getPosition().getY());
-         actionStartPelvisYaw = pelvisPose.getYaw();
+         var midFeetPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
+         actionStartMidFeetPosition.set(midFeetPose.getPosition().getX(), midFeetPose.getPosition().getY());
+         actionStartMidFeetYaw = midFeetPose.getYaw();
 
-         var torsoPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getChestFrame);
-         actionStartTorsoPosition.set(torsoPose.getPosition().getX(), torsoPose.getPosition().getY());
-         actionStartTorsoYaw = torsoPose.getYaw();
-
-         replayPelvisPositionOffset.setToZero();
-         replayTorsoPositionOffset.setToZero();
-         replayPelvisYawOffset = 0.0;
-         replayTorsoYawOffset = 0.0;
+         replayWorldPositionOffset.setToZero();
+         replayWorldYawOffset = 0.0;
          replayAlignmentInitialized = false;
       }
    }
@@ -126,29 +137,51 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
    {
       synchronized (replayAlignmentLock)
       {
+         ReplayStatusBaseline baseline = replayStatusBaselines.get(status);
+         if (baseline == null)
+         {
+            baseline = new ReplayStatusBaseline(status);
+            replayStatusBaselines.put(status, baseline);
+         }
+
          if (!replayAlignmentInitialized)
          {
-            replayPelvisPositionOffset.set(actionStartPelvisPosition.getX() - status.getDesiredRootPosition().getX(),
-                                           actionStartPelvisPosition.getY() - status.getDesiredRootPosition().getY());
-            replayTorsoPositionOffset.set(actionStartTorsoPosition.getX() - status.getDesiredTorsoPosition().getX(),
-                                          actionStartTorsoPosition.getY() - status.getDesiredTorsoPosition().getY());
-            replayPelvisYawOffset = actionStartPelvisYaw - status.getDesiredRootOrientation().getYaw();
-            replayTorsoYawOffset = actionStartTorsoYaw - status.getDesiredTorsoOrientation().getYaw();
+            updateGhostFromStatus(status);
+
+            FramePose3D ghostMidFeetPose = new FramePose3D();
+            ghostMidFeetPose.setFromReferenceFrame(ghostReferenceFrames.getMidFeetZUpFrame());
+
+            replayWorldPositionOffset.set(actionStartMidFeetPosition.getX() - ghostMidFeetPose.getPosition().getX(),
+                                          actionStartMidFeetPosition.getY() - ghostMidFeetPose.getPosition().getY());
+            replayWorldYawOffset = actionStartMidFeetYaw - ghostMidFeetPose.getYaw();
             replayAlignmentInitialized = true;
          }
 
-         status.getDesiredRootPosition().setX(status.getDesiredRootPosition().getX() + replayPelvisPositionOffset.getX());
-         status.getDesiredRootPosition().setY(status.getDesiredRootPosition().getY() + replayPelvisPositionOffset.getY());
-         status.getDesiredTorsoPosition().setX(status.getDesiredTorsoPosition().getX() + replayTorsoPositionOffset.getX());
-         status.getDesiredTorsoPosition().setY(status.getDesiredTorsoPosition().getY() + replayTorsoPositionOffset.getY());
+         status.getDesiredRootPosition().getPoint().setX(baseline.pelvisX + replayWorldPositionOffset.getX());
+         status.getDesiredRootPosition().getPoint().setY(baseline.pelvisY + replayWorldPositionOffset.getY());
+         status.getDesiredTorsoPosition().getPoint().setX(baseline.torsoX + replayWorldPositionOffset.getX());
+         status.getDesiredTorsoPosition().getPoint().setY(baseline.torsoY + replayWorldPositionOffset.getY());
 
-         status.getDesiredRootOrientation().setYawPitchRoll(status.getDesiredRootOrientation().getYaw() + replayPelvisYawOffset,
-                                                            status.getDesiredRootOrientation().getPitch(),
-                                                            status.getDesiredRootOrientation().getRoll());
-         status.getDesiredTorsoOrientation().setYawPitchRoll(status.getDesiredTorsoOrientation().getYaw() + replayTorsoYawOffset,
-                                                             status.getDesiredTorsoOrientation().getPitch(),
-                                                             status.getDesiredTorsoOrientation().getRoll());
+         status.getDesiredRootOrientation().getQuaternion().setYawPitchRoll(baseline.pelvisYaw + replayWorldYawOffset,
+                                                                            status.getDesiredRootOrientation().getQuaternion().getPitch(),
+                                                                            status.getDesiredRootOrientation().getQuaternion().getRoll());
+         status.getDesiredTorsoOrientation().getQuaternion().setYawPitchRoll(baseline.torsoYaw + replayWorldYawOffset,
+                                                                               status.getDesiredTorsoOrientation().getQuaternion().getPitch(),
+                                                                               status.getDesiredTorsoOrientation().getQuaternion().getRoll());
       }
+   }
+
+   private void updateGhostFromStatus(KinematicsToolboxOutputStatus status)
+   {
+      ghostFullRobotModel.getRootJoint().setJointPosition(status.getDesiredRootPosition().getPoint());
+      ghostFullRobotModel.getRootJoint().setJointOrientation(status.getDesiredRootOrientation().getQuaternion());
+
+      int numberOfJoints = Math.min(ghostOneDoFJoints.length, status.getDesiredJointAngles().size());
+      for (int i = 0; i < numberOfJoints; i++)
+         ghostOneDoFJoints[i].setQ(status.getDesiredJointAngles().get(i));
+
+      ghostFullRobotModel.getElevator().updateFramesRecursively();
+      ghostReferenceFrames.updateFrames();
    }
 
    @Override
@@ -170,6 +203,12 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
                   transitionRequestSent = true;
                }
                return;
+            }
+
+            if (!replayAlignmentCaptured)
+            {
+               captureActionStartAlignment();
+               replayAlignmentCaptured = true;
             }
 
             if (!ros2Replayer.isReady())
@@ -289,5 +328,42 @@ public class MimicActionExecutor extends ActionNodeExecutor<MimicActionState, Mi
       else
          highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.WALKING.toByte());
       ros2ControllerHelper.publishToController(highLevelStateMessage);
+   }
+
+   private File resolveMimicLogFile(String storedPath)
+   {
+      File asFile = new File(storedPath);
+      if (!asFile.isAbsolute())
+         return new File(DEFAULT_ROS2_LOG_DIRECTORY, storedPath);
+
+      String normalized = storedPath.replace('\\', '/');
+      int markerIndex = normalized.indexOf(ROS2_LOG_DIRECTORY_MARKER);
+      if (markerIndex >= 0)
+      {
+         String suffix = normalized.substring(markerIndex + ROS2_LOG_DIRECTORY_MARKER.length());
+         return new File(DEFAULT_ROS2_LOG_DIRECTORY, suffix);
+      }
+
+      return asFile;
+   }
+
+   private static class ReplayStatusBaseline
+   {
+      private final double pelvisX;
+      private final double pelvisY;
+      private final double torsoX;
+      private final double torsoY;
+      private final double pelvisYaw;
+      private final double torsoYaw;
+
+      private ReplayStatusBaseline(KinematicsToolboxOutputStatus status)
+      {
+         pelvisX = status.getDesiredRootPosition().getPoint().getX();
+         pelvisY = status.getDesiredRootPosition().getPoint().getY();
+         torsoX = status.getDesiredTorsoPosition().getPoint().getX();
+         torsoY = status.getDesiredTorsoPosition().getPoint().getY();
+         pelvisYaw = status.getDesiredRootOrientation().getQuaternion().getYaw();
+         torsoYaw = status.getDesiredTorsoOrientation().getQuaternion().getYaw();
+      }
    }
 }

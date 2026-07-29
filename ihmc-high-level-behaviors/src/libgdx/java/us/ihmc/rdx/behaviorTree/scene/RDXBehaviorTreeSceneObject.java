@@ -1,8 +1,8 @@
 package us.ihmc.rdx.behaviorTree.scene;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
-import behavior_msgs.msg.dds.PersistentDetectionStatusMessage;
+import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.BehaviorTreeSceneObjectStateMessage;
+import behavior_msgs.PersistentDetectionStatusMessage;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -80,7 +80,7 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
    {
       boolean remove = false;
 
-      ImGui.text("%s %d%s".formatted(getName(), getID(), isFrozen() ? " (FROZEN)" : ""));
+      ImGui.text("%s %d%s%s".formatted(getName(), getID(), isValid() ? "" : " (INVALID)", isFrozen() ? " (FROZEN)" : ""));
       ImGui.sameLine();
       if (ImGuiTools.smallCheckbox(labels.getHidden("Select%s%d".formatted(getName(), getID())), getGizmo().isSelected()))
          getGizmo().setSelected(!getGizmo().isSelected());

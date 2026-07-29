@@ -2,17 +2,17 @@ package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
 import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.*;
+import controller_msgs.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import toolbox_msgs.msg.dds.ExternalForceEstimationOutputStatus;
+import toolbox_msgs.ExternalForceEstimationOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.contact.particleFilter.ContactParticleFilter;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
+import us.ihmc.commonWalkingControlModules.contact.particleFilter.ContactParticleFilter;
 import us.ihmc.commonWalkingControlModules.contact.particleFilter.ForceEstimatorDynamicMatrixUpdater;
 import us.ihmc.commonWalkingControlModules.contact.particleFilter.PredefinedContactExternalForceSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -269,13 +269,13 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          if (estimatedContactingBody == null)
          {
             outputStatus.setRigidBodyHashCode(-1);
-            outputStatus.getContactPoint().setToNaN();
+            outputStatus.getContactPoint().getPoint().setToNaN();
          }
          else
          {
             outputStatus.setRigidBodyHashCode(estimatedContactingBody.hashCode());
             contactParticleFilter.getEstimatedContactPosition().changeFrame(estimatedContactingBody.getParentJoint().getFrameAfterJoint());
-            outputStatus.getContactPoint().set(contactParticleFilter.getEstimatedContactPosition());
+            outputStatus.getContactPoint().getPoint().set(contactParticleFilter.getEstimatedContactPosition());
          }
       }
       else
@@ -288,19 +288,32 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          int numberOfContactPoints = predefinedContactForceSolver.getNumberOfContactPoints() - (calculateRootJointWrench.getValue() ? 1 : 0);
          for (int i = 0; i < numberOfContactPoints; i++)
          {
-            outputStatus.getEstimatedExternalForces().add().set(estimatedExternalWrenches[i].getLinearPart());
+            outputStatus.getEstimatedExternalForces().add().getVector().set(estimatedExternalWrenches[i].getLinearPart());
          }
 
          if(calculateRootJointWrench.getValue())
          {
             int lastIndex = predefinedContactForceSolver.getNumberOfContactPoints() - 1;
-            outputStatus.getEstimatedRootJointWrench().getTorque().set(predefinedContactForceSolver.getEstimatedExternalWrenches()[lastIndex].getAngularPart());
-            outputStatus.getEstimatedRootJointWrench().getForce().set(predefinedContactForceSolver.getEstimatedExternalWrenches()[lastIndex].getLinearPart());
+            YoFixedFrameSpatialVector rootWrench = predefinedContactForceSolver.getEstimatedExternalWrenches()[lastIndex];
+            geometry_msgs.Vector3 torque = outputStatus.getEstimatedRootJointWrench().getTorque();
+            torque.setX(rootWrench.getAngularPart().getX());
+            torque.setY(rootWrench.getAngularPart().getY());
+            torque.setZ(rootWrench.getAngularPart().getZ());
+            geometry_msgs.Vector3 force = outputStatus.getEstimatedRootJointWrench().getForce();
+            force.setX(rootWrench.getLinearPart().getX());
+            force.setY(rootWrench.getLinearPart().getY());
+            force.setZ(rootWrench.getLinearPart().getZ());
          }
          else
          {
-            outputStatus.getEstimatedRootJointWrench().getTorque().setToNaN();
-            outputStatus.getEstimatedRootJointWrench().getForce().setToNaN();
+            geometry_msgs.Vector3 torque = outputStatus.getEstimatedRootJointWrench().getTorque();
+            torque.setX(Double.NaN);
+            torque.setY(Double.NaN);
+            torque.setZ(Double.NaN);
+            geometry_msgs.Vector3 force = outputStatus.getEstimatedRootJointWrench().getForce();
+            force.setX(Double.NaN);
+            force.setY(Double.NaN);
+            force.setZ(Double.NaN);
          }
       }
 
@@ -361,23 +374,21 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
    private static void updateRobotState(RobotConfigurationData robotConfigurationData, FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints)
    {
-      TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
-      TFloatArrayList newJointVelocities = robotConfigurationData.getJointVelocities();
-
-      if(newJointAngles.size() != oneDoFJoints.length)
+      if (robotConfigurationData.getJointAngles().size() != oneDoFJoints.length)
       {
-         throw new RuntimeException("Received RobotConfigurationData packet with " + newJointAngles.size() + "joints, expected " + oneDoFJoints.length);
+         throw new RuntimeException("Received RobotConfigurationData packet with " + robotConfigurationData.getJointAngles().size() + "joints, expected "
+               + oneDoFJoints.length);
       }
 
-      for (int i = 0; i < newJointAngles.size(); i++)
+      for (int i = 0; i < robotConfigurationData.getJointAngles().size(); i++)
       {
-         oneDoFJoints[i].setQ(newJointAngles.get(i));
-         oneDoFJoints[i].setQd(newJointVelocities.get(i));
+         oneDoFJoints[i].setQ(robotConfigurationData.getJointAngles().get(i));
+         oneDoFJoints[i].setQd(robotConfigurationData.getJointVelocities().get(i));
       }
 
-      rootJoint.setJointConfiguration(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootPosition());
-      rootJoint.setJointLinearVelocity(robotConfigurationData.getPelvisLinearVelocity());
-      rootJoint.setJointAngularVelocity(robotConfigurationData.getPelvisAngularVelocity());
+      rootJoint.setJointConfiguration(robotConfigurationData.getRootOrientation().getQuaternion(), robotConfigurationData.getRootPosition().getPoint());
+      rootJoint.setJointLinearVelocity(robotConfigurationData.getPelvisLinearVelocity().getVector());
+      rootJoint.setJointAngularVelocity(robotConfigurationData.getPelvisAngularVelocity().getVector());
 
       rootJoint.getPredecessor().updateFramesRecursively();
    }
@@ -385,16 +396,16 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
    private static void updateRobotDesiredState(RobotDesiredConfigurationData desiredConfigurationData, DMatrixRMaj controllerDesiredQdd, ToIntFunction<String> jointNameToMatrixIndex)
    {
       CommonOps_DDRM.fill(controllerDesiredQdd, 0.0);
-      desiredConfigurationData.getDesiredRootJointAngularAcceleration().get(0, controllerDesiredQdd);
-      desiredConfigurationData.getDesiredRootJointLinearAcceleration().get(3, controllerDesiredQdd);
+      desiredConfigurationData.getDesiredRootJointAngularAcceleration().getVector().get(0, controllerDesiredQdd);
+      desiredConfigurationData.getDesiredRootJointLinearAcceleration().getVector().get(3, controllerDesiredQdd);
 
-      RecyclingArrayList<JointDesiredOutputMessage> jointDesiredOutputList = desiredConfigurationData.getJointDesiredOutputList();
-      for (int i = 0; i < jointDesiredOutputList.size(); i++)
+      for (int i = 0; i < desiredConfigurationData.getJointDesiredOutputList().size(); i++)
       {
-         String jointName = jointDesiredOutputList.get(i).getJointName().toString();
+         JointDesiredOutputMessage jointDesiredOutput = desiredConfigurationData.getJointDesiredOutputList().get(i);
+         String jointName = jointDesiredOutput.getJointName().toString();
          int matrixIndex = jointNameToMatrixIndex.applyAsInt(jointName);
 
-         controllerDesiredQdd.set(matrixIndex, 0, jointDesiredOutputList.get(i).getDesiredAcceleration());
+         controllerDesiredQdd.set(matrixIndex, 0, jointDesiredOutput.getDesiredAcceleration());
       }
    }
 }

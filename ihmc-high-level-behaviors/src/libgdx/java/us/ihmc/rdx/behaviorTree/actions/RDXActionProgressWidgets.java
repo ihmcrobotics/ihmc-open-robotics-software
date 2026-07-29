@@ -1,9 +1,9 @@
 package us.ihmc.rdx.behaviorTree.actions;
 
+import imgui.ImGui;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
-import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
 import us.ihmc.commons.thread.ThreadTools;
@@ -336,8 +336,6 @@ public class RDXActionProgressWidgets
       CRDTStatusVector3D forceCRDT = null;
       if (action instanceof RDXArmAction armAction)
          forceCRDT = armAction.getState().getForce();
-      else if (action instanceof RDXScrewPrimitiveAction screwPrimitiveAction)
-         forceCRDT = screwPrimitiveAction.getState().getForce();
 
       if (forceCRDT != null)
       {
@@ -373,8 +371,6 @@ public class RDXActionProgressWidgets
       CRDTStatusVector3D torqueCRDT = null;
       if (action instanceof RDXArmAction armAction)
          torqueCRDT = armAction.getState().getTorque();
-      else if (action instanceof RDXScrewPrimitiveAction screwPrimitiveAction)
-         torqueCRDT = screwPrimitiveAction.getState().getTorque();
 
       if (torqueCRDT != null)
       {

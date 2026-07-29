@@ -12,9 +12,11 @@ import imgui.flag.ImGuiMouseCursor;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.rdx.behaviorTree.actions.RDXActionProgressWidgetsManager.Type;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -22,7 +24,6 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.behaviorTree.actions.RDXActionProgressWidgetsManager.Type;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -38,6 +39,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
    private transient final TLongObjectMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
    private final RDXPanel scenePanel = new RDXPanel("Scene", this::renderScenePanel);
+   private final RDXBehaviorTreeTimeline timeline = new RDXBehaviorTreeTimeline();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXBehaviorTreeNodeCreationMenu nodeCreationMenu;
    private final RDXBehaviorTreeWidgetsVerticalLayout treeWidgetsVerticalLayout;
@@ -75,10 +77,13 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
       baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
+      panel.addChild(timeline);
    }
 
    public void update()
    {
+      timeline.setRootNode(rootNode);
+
       idToNodeMap.clear();
 
       if (rootNode != null)
@@ -176,6 +181,9 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
       }
       if (ImGui.beginMenu(labels.get("View")))
       {
+         RDXBehaviorTreeTimeline.renderIcon();
+         ImGui.sameLine();
+         ImGui.menuItem(labels.get("Show Timeline"), null, timeline.getIsShowing());
          if (rootNode != null)
          {
             ImGui.text("Progress Widgets:");
@@ -390,6 +398,8 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
 
    public void destroy()
    {
+      modifyTreeTopology(BehaviorTreeTopologyOperationQueue::queueDestroyEntireTree);
+
       RDXBaseUI.getInstance().getPrimaryScene().removeRenderable(this);
       RDXBaseUI.getInstance().getVRManager().getContext().removeVRPickCalculator(this);
       RDXBaseUI.getInstance().getVRManager().getContext().removeVRInputProcessor(this);

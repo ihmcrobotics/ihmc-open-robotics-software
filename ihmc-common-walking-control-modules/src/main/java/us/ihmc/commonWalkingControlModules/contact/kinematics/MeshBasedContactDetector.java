@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.contact.kinematics;
 
-import controller_msgs.msg.dds.MultiContactBalanceStatus;
+import controller_msgs.MultiContactBalanceStatus;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;

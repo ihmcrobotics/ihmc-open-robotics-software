@@ -1,15 +1,15 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage;
+import behavior_msgs.BehaviorTreeNodeStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * A behavior tree node layer that sits over the Definition layer.
@@ -82,7 +82,7 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
 
    public void toMessage(BehaviorTreeNodeStateMessage message)
    {
-      message.setId(id);
+      message.setId((int) id);
       message.setIsActive(isActive);
 
       logger.toMessage(message.getRecentLogMessages());
@@ -103,11 +103,6 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
    {
       definition.checkModified();
       definition.updateName();
-   }
-
-   public void drawToSVG()
-   {
-      new BehaviorTreeSVGWriter(this);
    }
 
    public void destroy()

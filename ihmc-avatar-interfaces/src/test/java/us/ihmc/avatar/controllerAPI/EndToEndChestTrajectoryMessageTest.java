@@ -3,22 +3,16 @@ package us.ihmc.avatar.controllerAPI;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-
+import controller_msgs.ChestTrajectoryMessage;
+import controller_msgs.StopAllTrajectoryMessage;
+import controller_msgs.TaskspaceTrajectoryStatusMessage;
+import ihmc_common_msgs.SO3TrajectoryMessage;
+import ihmc_common_msgs.SO3TrajectoryPointMessage;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
-import controller_msgs.msg.dds.StopAllTrajectoryMessage;
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
@@ -44,9 +38,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
@@ -74,6 +68,11 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -546,11 +545,14 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       List<FramePose3D> pelvisPosesAtTime = new ArrayList<>();
       simulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, message ->
                                                           {
-                                                             statusMessages.add(message);
-                                                             humanoidReferenceFrames.updateFrames();
-                                                             FramePose3D pose = new FramePose3D(pelvisZUpFrame);
-                                                             pose.changeFrame(ReferenceFrame.getWorldFrame());
-                                                             pelvisPosesAtTime.add(pose);
+                                                             synchronized (statusMessages)
+                                                             {
+                                                                humanoidReferenceFrames.updateFrames();
+                                                                FramePose3D pose = new FramePose3D(pelvisZUpFrame);
+                                                                pose.changeFrame(ReferenceFrame.getWorldFrame());
+                                                                pelvisPosesAtTime.add(pose);
+                                                                statusMessages.add(message);
+                                                             }
                                                           });
       double controllerDT = simulationTestHelper.getCurrentControlDT();
 
@@ -620,14 +622,17 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       // Give a little time for the message to make it through.
       ThreadTools.sleep(10);
 
-      assertEquals(1, statusMessages.size());
-      EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(),
-                                                        TrajectoryExecutionStatus.STARTED,
-                                                        0.0,
-                                                        chest.getName(),
-                                                        statusMessages.remove(0),
-                                                        controllerDT);
-      pelvisPosesAtTime.remove(0);
+      synchronized (statusMessages)
+      {
+         assertEquals(1, statusMessages.size());
+         EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(),
+                                                           TrajectoryExecutionStatus.STARTED,
+                                                           0.0,
+                                                           chest.getName(),
+                                                           statusMessages.remove(0),
+                                                           controllerDT);
+         pelvisPosesAtTime.remove(0);
+      }
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
@@ -660,24 +665,27 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertTrue(success);
       assertControlErrorIsLow(simulationTestHelper, chest, 1.0e-2, getRobotModel().getJointMap().getSpineJointNames());
 
-      assertEquals(1, statusMessages.size());
-      humanoidReferenceFrames.updateFrames();
+      synchronized (statusMessages)
+      {
+         assertEquals(1, statusMessages.size());
+         humanoidReferenceFrames.updateFrames();
 
-      // We have to do this transformation to account for the fact that the pelvis pose at the tiem the status message was broadcast was not necessarily
-      // aligned with world. The desired trajectory sent down was in the pelivs pose, but the status message is broadcast in world frame.
-      PoseReferenceFrame pelvisPoseFrame = new PoseReferenceFrame("PelvisPoseFrame", ReferenceFrame.getWorldFrame());
-      pelvisPoseFrame.setPoseAndUpdate(pelvisPosesAtTime.get(0));
+         // We have to do this transformation to account for the fact that the pelvis pose at the tiem the status message was broadcast was not necessarily
+         // aligned with world. The desired trajectory sent down was in the pelivs pose, but the status message is broadcast in world frame.
+         PoseReferenceFrame pelvisPoseFrame = new PoseReferenceFrame("PelvisPoseFrame", ReferenceFrame.getWorldFrame());
+         pelvisPoseFrame.setPoseAndUpdate(pelvisPosesAtTime.get(0));
 
-      EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(),
-                                                        TrajectoryExecutionStatus.COMPLETED,
-                                                        trajectoryTime,
-                                                        null,
-                                                        desiredChestOrientations[desiredChestOrientations.length - 1],
-                                                        chest.getName(),
-                                                        statusMessages.remove(0),
-                                                        pelvisPoseFrame,
-                                                        1.0e-3,
-                                                        controllerDT);
+         EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(),
+                                                           TrajectoryExecutionStatus.COMPLETED,
+                                                           trajectoryTime,
+                                                           null,
+                                                           desiredChestOrientations[desiredChestOrientations.length - 1],
+                                                           chest.getName(),
+                                                           statusMessages.remove(0),
+                                                           pelvisPoseFrame,
+                                                           1.0e-3,
+                                                           controllerDT);
+      }
    }
 
    public void testMessageWithALotOfTrajectoryPoints() throws Exception
@@ -1107,11 +1115,11 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       for (int inputIndex = 0; inputIndex < messageList.size(); inputIndex++)
       {
          ChestTrajectoryMessage chestTrajectoryMessage = messageList.get(inputIndex);
-         Object<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = chestTrajectoryMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints();
+         IDLObjectSequence<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = chestTrajectoryMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints();
 
          double endTime = startTime + taskspaceTrajectoryPoints.getLast().getTime();
          if (inputIndex > 0)
-            startTime += taskspaceTrajectoryPoints.getFirst().getTime();
+            startTime += taskspaceTrajectoryPoints.get(0).getTime();
 
          TaskspaceTrajectoryStatusMessage startedStatus = statusMessages.remove(0);
          TaskspaceTrajectoryStatusMessage completedStatus = statusMessages.remove(0);

@@ -1,9 +1,8 @@
 package us.ihmc.communication.controllerAPI.command;
 
-import ihmc_common_msgs.msg.dds.QueueableMessage;
+import ihmc_common_msgs.QueueableMessage;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.jros2.ROS2Message;
 
 /**
  * A QueueableCommand is a {@link Command} that can be queued for execution inside the controller.
@@ -13,14 +12,19 @@ import us.ihmc.euclid.interfaces.Settable;
  * @param <C> Type of the final implementation of this command (see {@link Command}).
  * @param <M> Type of the network message associated with this command (see {@link Command}).
  */
-public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M extends Settable<M>> implements Command<C, M>
+public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M extends ROS2Message<M>> implements Command<C, M>
 {
+   /** Matches the IDL default for {@code ihmc_common_msgs/QueueableMessage.message_id} ({@code -1}). */
+   public static final long INVALID_MESSAGE_ID = -1L;
+   /** Default command / message id after {@link #clearQueuableCommandVariables()}. */
+   public static final long VALID_MESSAGE_DEFAULT_ID = 0L;
+
    /** The ID of this command. Used to make sure only consecutive commands are queued. */
-   private long commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
+   private long commandId = VALID_MESSAGE_DEFAULT_ID;
    /** The {@link ExecutionMode} of this command. */
    private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
    /** The ID of the previous command. Used to make sure only consecutive commands are queued. */
-   private long previousCommandId = Packet.INVALID_MESSAGE_ID;
+   private long previousCommandId = INVALID_MESSAGE_ID;
    /** the time to delay this command on the controller side before being executed **/
    private double executionDelayTime;
    /** the execution time. This number is set if the execution delay is non zero **/
@@ -44,9 +48,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
     */
    public void clearQueuableCommandVariables()
    {
-      commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
       executionMode = ExecutionMode.OVERRIDE;
-      previousCommandId = Packet.INVALID_MESSAGE_ID;
       executionDelayTime = 0.0;
       adjustedExecutionTime = 0.0;
       streamIntegrationDuration = 0.0;
@@ -76,7 +78,8 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    {
       if (messageQueueingProperties == null)
          return;
-      commandId = messageQueueingProperties.getMessageId();
+      long messageId = messageQueueingProperties.getMessageId();
+      commandId = messageId == INVALID_MESSAGE_ID ? VALID_MESSAGE_DEFAULT_ID : messageId;
       executionMode = ExecutionMode.fromByte(messageQueueingProperties.getExecutionMode());
       previousCommandId = messageQueueingProperties.getPreviousMessageId();
       executionDelayTime = messageQueueingProperties.getExecutionDelayTime();

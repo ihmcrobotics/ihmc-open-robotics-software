@@ -1,15 +1,15 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionTaskspaceTrajectoryMode;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2NodeBuilder.SpecialTransportMode;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -33,7 +33,7 @@ public class BehaviorTreeJSONSanitizer
    {
       this.robotModel = robotModel;
 
-      ROS2Node ros2Node = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY).build("json_sanitizer");
+      ROS2Node ros2Node = new ROS2Node("json_sanitizer");
       ROS2PeerClockOffsetEstimator peerClockEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
       crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, peerClockEstimator);
 
@@ -42,7 +42,7 @@ public class BehaviorTreeJSONSanitizer
       processDirectory(treeFilesDirectory);
 
       peerClockEstimator.destroy();
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    private void processDirectory(WorkspaceResourceDirectory directory)
@@ -102,6 +102,12 @@ public class BehaviorTreeJSONSanitizer
       {
          String typeName = jsonNode.get("type").textValue();
 
+         if ("ScrewPrimitiveActionDefinition".equals(typeName))
+         {
+            jsonNode = convertScrewPrimitiveToArmAction(jsonNode);
+            typeName = "ArmActionDefinition";
+         }
+
          Class<?> definitionType = BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName);
 
          if (parentNode == null)
@@ -158,5 +164,19 @@ public class BehaviorTreeJSONSanitizer
       }
 
       return loadedNode.getValue();
+   }
+
+   private static ObjectNode convertScrewPrimitiveToArmAction(JsonNode source)
+   {
+      ObjectNode jsonNode = (ObjectNode) source.deepCopy();
+      jsonNode.put("type", "ArmActionDefinition");
+      jsonNode.put("definedInJointspace", false);
+      jsonNode.put("taskspaceTrajectoryMode", ArmActionTaskspaceTrajectoryMode.SCREW_PRIMITIVE.name());
+      if (jsonNode.has("objectFrame"))
+      {
+         jsonNode.put("parentFrame", jsonNode.get("objectFrame").asText());
+         jsonNode.remove("objectFrame");
+      }
+      return jsonNode;
    }
 }

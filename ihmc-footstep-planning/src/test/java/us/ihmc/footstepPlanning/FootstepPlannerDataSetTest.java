@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.TerrainMapMessage;
+import perception_msgs.TerrainMapMessage;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;

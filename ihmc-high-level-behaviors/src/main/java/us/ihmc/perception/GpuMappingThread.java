@@ -3,7 +3,7 @@ package us.ihmc.perception;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.ImageMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ActiveMappingParameterToolBox;
 import us.ihmc.commons.thread.RepeatingTaskThread;
@@ -13,8 +13,9 @@ import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.log.LogTools;
-import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.filters.DepthImageBodyCollisionFilter;
 import us.ihmc.perception.filters.DepthImageFlyingPointsFilter;
 import us.ihmc.perception.gpuMapping.GpuMappingManager;
@@ -27,8 +28,7 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.sensors.CameraIntrinsics;
 
 import java.util.concurrent.BlockingQueue;
 
@@ -42,6 +42,7 @@ public class GpuMappingThread extends RepeatingTaskThread
    private final HeightMapParameters heightMapParameters;
    private final ROS2Publisher<ImageMessage> filteredDepthPublisher;
    private final BlockingQueue<RawImage> rawImageCollection;
+   private final ImageMessage filteredDepthImageMessage = new ImageMessage();
 
    private final ROS2DemandGraphNode publishChunkMap;
    private final ROS2DemandGraphNode publishHeightMap;
@@ -123,7 +124,8 @@ public class GpuMappingThread extends RepeatingTaskThread
             OpenCVTools.compressImagePNG(cpuDepthImage, bytePointer);
             cpuDepthImage.close();
 
-            ImageMessage imageMessage = new ImageMessage();
+            ImageMessage imageMessage = filteredDepthImageMessage;
+            imageMessage.getData().clear();
             PerceptionMessageTools.packImageMessage(depthImage, bytePointer, compressionType, imageMessage);
             filteredDepthPublisher.publish(imageMessage);
 

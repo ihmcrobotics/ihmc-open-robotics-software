@@ -1,15 +1,16 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.SceneActionDefinitionMessage;
+import behavior_msgs.SceneActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import gnu.trove.list.array.TIntArrayList;
 import org.yaml.snakeyaml.Yaml;
-import perception_msgs.msg.dds.YOLOv8ModelInfo;
+import perception_msgs.YOLOv8ModelInfo;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTBidirectionalFloat;
@@ -131,7 +132,8 @@ public class SceneActionDefinition extends ActionNodeDefinition
             {
                jsonNode.put("timeout", timeout.getValue());
                jsonNode.put("minimumHistorySize", minimumHistorySize.getValue());
-               JSONTools.toJSON(jsonNode.putObject("nominalObjectPose"), nominalObjectPose.getValueReadOnly());
+               if (usesNominalObjectPose())
+                  JSONTools.toJSON(jsonNode.putObject("nominalObjectPose"), nominalObjectPose.getValueReadOnly());
             }
          }
          case CONFIGURE_PERSISTENT_DETECTIONS ->
@@ -176,7 +178,7 @@ public class SceneActionDefinition extends ActionNodeDefinition
             {
                timeout.setValue((float) jsonNode.get("timeout").asDouble());
                minimumHistorySize.setValue(jsonNode.get("minimumHistorySize").asInt());
-               if (jsonNode.get("nominalObjectPose") instanceof ObjectNode nominalObjectPoseNode)
+               if (usesNominalObjectPose() && jsonNode.get("nominalObjectPose") instanceof ObjectNode nominalObjectPoseNode)
                   JSONTools.toEuclid(nominalObjectPoseNode, nominalObjectPose.getValueAndModify());
             }
          }
@@ -307,7 +309,7 @@ public class SceneActionDefinition extends ActionNodeDefinition
       message.setSceneActionType(sceneActionType.toMessageOrdinal());
       sceneObjectDefinition.toMessage(message.getSceneObjectDefinition());
       message.setTimeout(timeout.toMessage());
-      message.setMinimumHistorySize(minimumHistorySize.toMessage());
+      message.setMinimumHistorySize((short) minimumHistorySize.toMessage());
       nominalObjectPose.toMessage(message.getNominalObjectPose());
       message.setPoseFilterAlpha(poseFilterAlpha.toMessage());
       message.setAcceptanceConfidence(acceptanceConfidence.toMessage());
@@ -382,6 +384,12 @@ public class SceneActionDefinition extends ActionNodeDefinition
    public CRDTBidirectionalRigidBodyTransform getNominalObjectPose()
    {
       return nominalObjectPose;
+   }
+
+   public boolean usesNominalObjectPose()
+   {
+      return sceneActionType.getValue() == SceneActionType.SETUP_OBJECT
+             && sceneObjectDefinition.getObjectType() != BehaviorTreeSceneObjectType.COMPOSITE_FRAME;
    }
 
    public float getPoseFilterAlpha()

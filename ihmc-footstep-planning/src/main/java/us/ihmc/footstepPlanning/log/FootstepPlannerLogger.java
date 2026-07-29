@@ -2,18 +2,14 @@ package us.ihmc.footstepPlanning.log;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket;
-import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacketPubSubType;
-import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
-import toolbox_msgs.msg.dds.FootstepPlannerParametersPacketPubSubType;
-import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
-import toolbox_msgs.msg.dds.FootstepPlanningRequestPacketPubSubType;
-import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatusPubSubType;
-import toolbox_msgs.msg.dds.SwingPlannerParametersPacket;
-import toolbox_msgs.msg.dds.SwingPlannerParametersPacketPubSubType;
+import toolbox_msgs.AStarBodyPathPlannerParametersPacket;
+import toolbox_msgs.FootstepPlannerParametersPacket;
+import toolbox_msgs.FootstepPlanningRequestPacket;
+import toolbox_msgs.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.SwingPlannerParametersPacket;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -28,7 +24,6 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
@@ -114,13 +109,6 @@ public class FootstepPlannerLogger
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
    private final AStarBodyPathPlannerParametersPacket bodyPathParametersPacket = new AStarBodyPathPlannerParametersPacket();
    private final SwingPlannerParametersPacket swingPlannerParametersPacket = new SwingPlannerParametersPacket();
-   private final FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
-
-   private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
-   private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersPacketSerializer = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
-   private final JSONSerializer<AStarBodyPathPlannerParametersPacket> bodyPathParametersPacketSerializer = new JSONSerializer<>(new AStarBodyPathPlannerParametersPacketPubSubType());
-   private final JSONSerializer<SwingPlannerParametersPacket> swingPlannerParametersPacketSerializer = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
-   private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
    public FootstepPlannerLogger(FootstepPlanningModule planner)
    {
@@ -240,31 +228,32 @@ public class FootstepPlannerLogger
          // log request packet
          String requestPacketFile = sessionDirectory + requestPacketFileName;
          planner.getRequest().setPacket(requestPacket);
-         byte[] serializedRequest = requestPacketSerializer.serializeToBytes(requestPacket);
+         byte[] serializedRequest = ROS2MessageCdrFileTools.serializeToBytes(requestPacket);
          writeToFile(requestPacketFile, serializedRequest);
 
          // log footstep planner parameters packet
          String footstepParametersPacketFile = sessionDirectory + footstepParametersFileName;
          footstepParametersPacket.set(planner.getFootstepPlannerParameters().getAsPacket());
-         byte[] serializedFootstepParameters = footstepParametersPacketSerializer.serializeToBytes(footstepParametersPacket);
+         byte[] serializedFootstepParameters = ROS2MessageCdrFileTools.serializeToBytes(footstepParametersPacket);
          writeToFile(footstepParametersPacketFile, serializedFootstepParameters);
 
          // log body path planner parameters packet
          String bodyPathParametersPacketFile = sessionDirectory + bodyPathParametersFileName;
          bodyPathParametersPacket.set(planner.getAStarBodyPathPlannerParameters().getAsPacket());
-         byte[] serializedBodyPathParameters = bodyPathParametersPacketSerializer.serializeToBytes(bodyPathParametersPacket);
+         byte[] serializedBodyPathParameters = ROS2MessageCdrFileTools.serializeToBytes(bodyPathParametersPacket);
          writeToFile(bodyPathParametersPacketFile, serializedBodyPathParameters);
 
          // log swing parameters packet
          String swingParametersPacketFile = sessionDirectory + swingParametersFileName;
          swingPlannerParametersPacket.set(planner.getSwingPlannerParameters().getAsPacket());
-         byte[] serializedSwingParameters = swingPlannerParametersPacketSerializer.serializeToBytes(swingPlannerParametersPacket);
+         byte[] serializedSwingParameters = ROS2MessageCdrFileTools.serializeToBytes(swingPlannerParametersPacket);
          writeToFile(swingParametersPacketFile, serializedSwingParameters);
 
          // log status packet
          String statusPacketFile = sessionDirectory + outputStatusPacketFileName;
-         planner.getOutput().setPacket(outputStatus);
-         byte[] serializedStatus = statusPacketSerializer.serializeToBytes(outputStatus);
+         FootstepPlanningToolboxOutputStatus outputStatusToLog = new FootstepPlanningToolboxOutputStatus();
+         planner.getOutput().setPacket(outputStatusToLog);
+         byte[] serializedStatus = ROS2MessageCdrFileTools.serializeToBytes(outputStatusToLog);
          writeToFile(statusPacketFile, serializedStatus);
       }
       catch (Exception e)

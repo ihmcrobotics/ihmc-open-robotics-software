@@ -1,9 +1,8 @@
 package us.ihmc.perception.streaming;
 
 import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.perception.imageMessage.CompressionType;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,7 +10,7 @@ import java.util.Set;
 public class ROS2SRTVideoStreamImageMessageRelay
 {
    private final Set<ROS2SRTVideoStreamImageMessageRelayWorker> workers = new HashSet<>();
-   private final ROS2Node relayNode = new ROS2NodeBuilder().build("srt_relay_node");
+   private final ROS2Node relayNode = new ROS2Node("srt_relay_node");
 
    public ROS2SRTVideoStreamImageMessageRelay(Set<ROS2SRTStreamTopicPair> topicsToRelay, ROS2Node ros2Node, CompressionType compressionType)
    {
@@ -24,6 +23,6 @@ public class ROS2SRTVideoStreamImageMessageRelay
       for (ROS2SRTVideoStreamImageMessageRelayWorker worker : workers)
          worker.destroy();
 
-      relayNode.destroy();
+      relayNode.close();
    }
 }

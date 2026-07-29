@@ -23,4 +23,15 @@ testDependencies {
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
    api("us.ihmc:ihmc-sensor-processing-test:source")
    api("us.ihmc:ihmc-simulation-toolkit-test:source")
+   api("us.ihmc:ihmc-high-level-behaviors-test:source")
+   api("com.google.code.java-allocation-instrumenter:java-allocation-instrumenter:3.3.5")
+}
+
+categories {
+   configure("allocation-slow") {
+      jvmArguments += "allocationAgent"
+   }
+   configure("allocation-slow-2") {
+      jvmArguments += "allocationAgent"
+   }
 }

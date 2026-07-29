@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.condition;
 
-import behavior_msgs.msg.dds.ConditionNodeStateMessage;
+import behavior_msgs.ConditionNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.communication.crdt.CRDTStatusBoolean;
