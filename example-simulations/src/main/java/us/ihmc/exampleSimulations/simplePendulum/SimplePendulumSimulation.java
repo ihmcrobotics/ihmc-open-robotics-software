@@ -1,35 +1,38 @@
 package us.ihmc.exampleSimulations.simplePendulum;
 
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
+import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.SimulationSessionControls;
 
-/**
- * Created by amoucheboeuf on 2/11/16.
- */
 public class SimplePendulumSimulation
 {
 
    public static final double DT = 0.001;
-   private SimulationConstructionSet sim;
+   public static final int BUFFER_SIZE = 12000;
 
    public SimplePendulumSimulation()
    {
-      SimplePendulumRobot robot = new SimplePendulumRobot();
-      robot.setController(new SimplePendulumController(robot));
+      SimplePendulumRobotDefinition robotDefinition = new SimplePendulumRobotDefinition();
 
-      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
-      parameters.setDataBufferSize(32000);
+      SimulationSession simulationSession = new SimulationSession();
+      simulationSession.addRobot(robotDefinition);
 
-      sim = new SimulationConstructionSet(robot, parameters);
-      sim.setDT(DT, 20);
-      sim.setGroundVisible(true);
-      sim.setCameraPosition(0, -9.0, 0.6);
-      sim.setCameraFix(0.0, 0.0, 0.70);
+      SimulationSessionControls simulationSessionControls = simulationSession.getSimulationSessionControls();
+      simulationSessionControls.initializeBufferSize(BUFFER_SIZE);
 
-      sim.setSimulateDuration(60.0); // sets the simulation duration to 60 seconds
+      // Stop simulating once the buffer has been filled up once, instead of wrapping around and overwriting old data.
+      // NOTE: addExternalTerminalCondition() only takes effect for simulate() calls made through this
+      // SimulationSessionControls object - the visualizer's own Play/Simulate button bypasses it entirely
+      // (it sets the session mode directly through the messager, with no terminal-condition awareness).
+      // addAfterPhysicsCallback() runs on every tick regardless of what triggered the run, so it works
+      // whether the simulation was started from the GUI or from code.
+      simulationSessionControls.addAfterPhysicsCallback(time ->
+                                                        {
+                                                           if (simulationSessionControls.getBufferOutPoint() >= simulationSessionControls.getBufferSize() - 1)
+                                                              simulationSessionControls.pause();
+                                                        });
 
-      Thread myThread = new Thread(sim);
-      myThread.start();
+      SessionVisualizer.startSessionVisualizer(simulationSession);
    }
 
    public static void main(String[] args)
