@@ -313,6 +313,11 @@ public class RDX3DScene
       ambientLight.color.b = ambientLightIntensity;
    }
 
+   public void setAmbientLightColor(float red, float green, float blue)
+   {
+      ambientLight.color.set(red, green, blue, 1.0f);
+   }
+
    public float getAmbientLightIntensity()
    {
       return ambientLight.color.r;
