@@ -202,8 +202,25 @@ public class CUDAGPUVoxelGrid implements AutoCloseable
    /**
     * Free-space carving: decrements log-odds along rays from {@code sensorOrigin} to each point.
     * Removes ghost obstacles from reflections and motion blur, at ~5× the cost of hits-only.
+    * Every point contributes a full-strength miss along its ray.
     */
    public void updateMisses(FloatPointer gpuPoints, int numPoints,
+                             float sensorOriginX, float sensorOriginY, float sensorOriginZ)
+   {
+      updateMisses(gpuPoints, NULL_POINTER, numPoints, sensorOriginX, sensorOriginY, sensorOriginZ);
+   }
+
+   /**
+    * Confidence-weighted free-space carving: as {@link #updateMisses(FloatPointer, int, float, float, float)},
+    * but each ray's miss log-odds is scaled by {@code gpuPointWeights} (0-1], matching the same
+    * per-point confidence used for that point's hit. Without this, a weak/distant hit (already
+    * discounted for range) gets out-voted by full-strength misses from nearer, unrelated rays
+    * crossing the same voxel, systematically eroding legitimate far-away detections.
+    *
+    * @param gpuPointWeights GPU float buffer of per-point weights parallel to {@code gpuPoints};
+    *                        pass a null pointer for full-strength misses.
+    */
+   public void updateMisses(FloatPointer gpuPoints, FloatPointer gpuPointWeights, int numPoints,
                              float sensorOriginX, float sensorOriginY, float sensorOriginZ)
    {
       if (numPoints <= 0 || gpuPoints.isNull())
@@ -219,6 +236,7 @@ public class CUDAGPUVoxelGrid implements AutoCloseable
             .withFloat(resolution)
             .withFloat(anchorX).withFloat(anchorY).withFloat(anchorZ)
             .withPointer(gpuPoints)
+            .withPointer(gpuPointWeights == null ? NULL_POINTER : gpuPointWeights)
             .withInt(numPoints)
             .withFloat(sensorOriginX).withFloat(sensorOriginY).withFloat(sensorOriginZ)
             .run(stream, grid, block, 0);
@@ -234,7 +252,9 @@ public class CUDAGPUVoxelGrid implements AutoCloseable
     *
     * The persistent grid is world-anchored (it remembers geometry mapped before a fall); this samples a
     * {@link #CROP_NX}×{@link #CROP_NY}×{@link #CROP_NZ} box centred on the robot, rotated by yaw only so
-    * the crop stays gravity-aligned even when the robot is prone. Occupied = 1.0, unknown/free = 0.0.
+    * the crop stays gravity-aligned even when the robot is prone. Each voxel is a continuous occupancy
+    * probability (sigmoid of log-odds): confidently occupied → 1.0, confidently free → 0.0, unknown/
+    * no-evidence/out-of-bounds → 0.5 (see {@code extractVoxelOccupancyCrop} in GPUVoxelGrid.cu).
     *
     * @param baseToWorld   Current robot base pose in world frame.
     * @param occupancyToPack Target float[] — the RL observation vector.

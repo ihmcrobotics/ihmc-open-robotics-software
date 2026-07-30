@@ -1,18 +1,24 @@
 package us.ihmc.perception;
 
-import perception_msgs.msg.dds.Float32MultiArrayHack;
+import org.bytedeco.opencv.opencv_core.GpuMat;
+import perception_msgs.Float32MultiArrayHack;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.VoxelOccupancyPacking;
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.perception.cuda.CUDAGPUVoxelGrid;
 import us.ihmc.perception.cuda.CUDAPointCloudExtractor;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.perception.filters.DepthImageBodyCollisionFilter;
+import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.sensors.CameraIntrinsics;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +43,10 @@ public class DualCameraVoxelGridThread extends RepeatingTaskThread
    private static final int    DILATION_MIN_NEIGHBOURS  = 2;
    private static final int    DILATION_FILL_LOG_ODDS   = 300;
    private static final double PUBLISH_FREQUENCY_HZ     = 30.0;
+   // Log-odds fixed-point scale is 1000/1.0 (GPUVoxelGrid.cu). At 30 Hz, 5/frame pulls a
+   // saturated hit (2000) back to neutral (0) in ~13 s if never reinforced — long enough to
+   // survive a fall/getup sequence, short enough that stale/ghost detections eventually fade.
+   private static final int    DECAY_LOG_ODDS_PER_FRAME = 5;
 
    // Distance-dependent measurement-confidence model (see depthConfidenceWeight in PerceptionUtils.cu).
    // ZED X Mini depth accuracy degrades with range, so each hit's log-odds is weighted by
@@ -61,6 +71,11 @@ public class DualCameraVoxelGridThread extends RepeatingTaskThread
    private final CUDAPointCloudExtractor experimentalDepthExtractor = new CUDAPointCloudExtractor();
    private final CUDAGPUVoxelGrid voxelGrid;
 
+   // Strips points that fall on the robot's own body (same mechanism GpuMappingThread uses for the
+   // height map) BEFORE point-cloud extraction, so self-hits never enter the grid in the first place
+   // rather than relying on updateMisses/decay to erode them out after the fact.
+   private final DepthImageBodyCollisionFilter bodyCollisionFilter;
+
    private final ROS2SyncedRobotModel syncedRobot;
    private final RigidBodyTransform pelvisToWorld = new RigidBodyTransform();
 
@@ -75,18 +90,21 @@ public class DualCameraVoxelGridThread extends RepeatingTaskThread
    private volatile CUDAGPUVoxelGrid.OccupiedVoxels latestOccupiedVoxels =
          new CUDAGPUVoxelGrid.OccupiedVoxels(new float[0], new float[0], 0);
 
-   public DualCameraVoxelGridThread(ROS2Node ros2Node, ROS2SyncedRobotModel syncedRobot)
+   public DualCameraVoxelGridThread(ROS2Node ros2Node, ROS2SyncedRobotModel syncedRobot,
+                                    RobotCollisionModel robotCollisionModel, RigidBodyBasics rootBody)
    {
-      this(ros2Node, syncedRobot, 200, 200, 100, 0.05f);
+      this(ros2Node, syncedRobot, robotCollisionModel, rootBody, 200, 200, 100, 0.05f);
    }
 
    public DualCameraVoxelGridThread(ROS2Node ros2Node, ROS2SyncedRobotModel syncedRobot,
+                                    RobotCollisionModel robotCollisionModel, RigidBodyBasics rootBody,
                                     int nx, int ny, int nz, float resolution)
    {
       super(DualCameraVoxelGridThread.class.getSimpleName());
 
       this.syncedRobot = syncedRobot;
       this.voxelGrid   = new CUDAGPUVoxelGrid(nx, ny, nz, resolution);
+      this.bodyCollisionFilter = new DepthImageBodyCollisionFilter(robotCollisionModel, rootBody);
 
       steppingDepthExtractor.setConfidenceModel(CONFIDENCE_REFERENCE_RANGE_M, CONFIDENCE_FALLOFF_EXPONENT, STEPPING_CAMERA_TRUST);
       experimentalDepthExtractor.setConfidenceModel(CONFIDENCE_REFERENCE_RANGE_M, CONFIDENCE_FALLOFF_EXPONENT, EXPERIMENTAL_CAMERA_TRUST);
@@ -94,6 +112,22 @@ public class DualCameraVoxelGridThread extends RepeatingTaskThread
       voxelOccupancyPublisher = ros2Node.createPublisher(PerceptionAPI.VOXEL_OCCUPANCY);
 
       setFrequencyLimit(PUBLISH_FREQUENCY_HZ);
+   }
+
+   /**
+    * Zeroes out depth pixels that fall on the robot's own collision geometry (see
+    * {@link DepthImageBodyCollisionFilter}), matching how {@code GpuMappingThread} keeps self-hits
+    * out of the height map. Returns a new {@link RawImage} sharing the source's metadata (transform,
+    * intrinsics) but with the filtered depth data.
+    */
+   private RawImage filterSelfHits(RawImage depthImage)
+   {
+      GpuMat rawGpuMat = depthImage.getGpuImageMat();
+      CameraIntrinsics intrinsics = depthImage.getIntrinsicsCopy();
+      GpuMat filteredGpuMat = new GpuMat(rawGpuMat.size(), rawGpuMat.type());
+      ReferenceFrame cameraFrameInWorld = new FixedReferenceFrame("VoxelGridCameraFrame", ReferenceFrame.getWorldFrame(), depthImage.getTransformToWorld());
+      bodyCollisionFilter.process(rawGpuMat, filteredGpuMat, intrinsics, cameraFrameInWorld);
+      return depthImage.replaceImage(filteredGpuMat);
    }
 
    @Override
@@ -110,25 +144,46 @@ public class DualCameraVoxelGridThread extends RepeatingTaskThread
          if (!anyFrame)
             return;
 
+         // Pull every voxel's log-odds toward neutral before integrating this frame's evidence, so
+         // detections not reinforced by either camera eventually fade back to unknown.
+         voxelGrid.decay(DECAY_LOG_ODDS_PER_FRAME);
+
          if (steppingDepth != null)
          {
             // Confidence map for this grab (if the stream is registered) rides a parallel queue.
             RawImage steppingConfidence = steppingConfidenceQueue.poll();
-            int count = steppingDepthExtractor.extractToGpu(steppingDepth, steppingConfidence, STEPPING_DEPTH_MIN_M, STEPPING_DEPTH_MAX_M);
+            RawImage steppingDepthFiltered = filterSelfHits(steppingDepth);
+            int count = steppingDepthExtractor.extractToGpu(steppingDepthFiltered, steppingConfidence, STEPPING_DEPTH_MIN_M, STEPPING_DEPTH_MAX_M);
             cudaStreamSynchronize(steppingDepthExtractor.getStream());
             if (count > 0)
+            {
                voxelGrid.updateHits(steppingDepthExtractor.getGpuPointCloud(),
                                     steppingDepthExtractor.getGpuPointConfidence(), count);
+               // Free-space carving: ray-cast from the camera's own position (this frame's grab)
+               // through each hit, so reflections/motion-blur ghosts get actively carved away
+               // instead of only fading via decay(). Self-hits are already stripped above by
+               // filterSelfHits, so this no longer erodes legitimate distant terrain to compensate
+               // for self-hit accumulation.
+               var origin = steppingDepthFiltered.getTranslation();
+               voxelGrid.updateMisses(steppingDepthExtractor.getGpuPointCloud(), steppingDepthExtractor.getGpuPointConfidence(), count,
+                                       origin.getX32(), origin.getY32(), origin.getZ32());
+            }
          }
 
          if (experimentalDepth != null)
          {
             RawImage experimentalConfidence = experimentalConfidenceQueue.poll();
-            int count = experimentalDepthExtractor.extractToGpu(experimentalDepth, experimentalConfidence, EXPERIMENTAL_DEPTH_MIN_M, EXPERIMENTAL_DEPTH_MAX_M);
+            RawImage experimentalDepthFiltered = filterSelfHits(experimentalDepth);
+            int count = experimentalDepthExtractor.extractToGpu(experimentalDepthFiltered, experimentalConfidence, EXPERIMENTAL_DEPTH_MIN_M, EXPERIMENTAL_DEPTH_MAX_M);
             cudaStreamSynchronize(experimentalDepthExtractor.getStream());
             if (count > 0)
+            {
                voxelGrid.updateHits(experimentalDepthExtractor.getGpuPointCloud(),
                                     experimentalDepthExtractor.getGpuPointConfidence(), count);
+               var origin = experimentalDepthFiltered.getTranslation();
+               voxelGrid.updateMisses(experimentalDepthExtractor.getGpuPointCloud(), experimentalDepthExtractor.getGpuPointConfidence(), count,
+                                       origin.getX32(), origin.getY32(), origin.getZ32());
+            }
          }
 
          voxelGrid.dilate(DILATION_MIN_NEIGHBOURS, DILATION_FILL_LOG_ODDS);
@@ -195,6 +250,7 @@ public class DualCameraVoxelGridThread extends RepeatingTaskThread
       interrupt();
       steppingDepthExtractor.close();
       experimentalDepthExtractor.close();
+      bodyCollisionFilter.close();
       voxelGrid.close();
    }
 }

@@ -179,8 +179,8 @@ public final class PerceptionAPI
     * dual-camera persistent GPU log-odds voxel grid. Used as the terrain observation by the
     * fall-recovery RL controller (Gallant-style voxel input, arXiv:2511.14625).
     */
-   public static final ROS2Topic<perception_msgs.msg.dds.Float32MultiArrayHack> VOXEL_OCCUPANCY =
-         PERCEPTION_MODULE.withSuffix("voxel_occupancy").withOutput().withType(perception_msgs.msg.dds.Float32MultiArrayHack.class);
+   public static final ROS2Topic<perception_msgs.Float32MultiArrayHack> VOXEL_OCCUPANCY =
+         PERCEPTION_MODULE.withSuffix("voxel_occupancy").withOutput().withType(perception_msgs.Float32MultiArrayHack.class);
 
    /*
     * SLAM (old, not used)

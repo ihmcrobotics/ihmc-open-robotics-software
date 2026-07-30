@@ -80,6 +80,7 @@ __global__ void updateLogOddsMisses(
     float   resolution,
     float   anchorX, float anchorY, float anchorZ,
     float3* points,
+    float*  pointWeights,   // per-point confidence in (0, 1]; may be null for full-strength misses
     int     numPoints,
     float   sensorOriginX, float sensorOriginY, float sensorOriginZ)
 {
@@ -88,6 +89,16 @@ __global__ void updateLogOddsMisses(
 
     for (; i < numPoints; i += stride)
     {
+        // Scale the miss log-odds by the same per-point confidence used for the hit at this
+        // point's endpoint, so a weak/distant detection doesn't get out-voted by full-strength
+        // misses along its own ray (hits were already discounted by range; misses weren't, which
+        // let unweighted erosion dominate weak-but-legitimate distant hits).
+        int missLogOdds = (pointWeights == nullptr)
+                         ? LOG_ODDS_MISS
+                         : (int)lroundf(LOG_ODDS_MISS * pointWeights[i]);
+        if (missLogOdds <= 0)
+            continue;
+
         float3 ep = points[i];
 
         float dx = ep.x - sensorOriginX;
@@ -137,7 +148,7 @@ __global__ void updateLogOddsMisses(
             if (ix < 0 || ix >= NX || iy < 0 || iy >= NY || iz < 0 || iz >= NZ) break;
 
             clampedAtomicAdd(&grid[flatVoxelIndex(ix, iy, iz, NY, NZ)],
-                             -LOG_ODDS_MISS, LOG_ODDS_MIN, LOG_ODDS_MAX);
+                             -missLogOdds, LOG_ODDS_MIN, LOG_ODDS_MAX);
         }
     }
 }

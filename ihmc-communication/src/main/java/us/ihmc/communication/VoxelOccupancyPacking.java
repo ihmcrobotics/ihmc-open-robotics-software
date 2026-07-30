@@ -2,7 +2,7 @@ package us.ihmc.communication;
 
 /**
  * Bit-packs the robot-centric 3-D voxel occupancy observation so it fits the 1024-float bound of
- * {@link perception_msgs.msg.dds.Float32MultiArrayHack}, which carries it on
+ * {@link perception_msgs.Float32MultiArrayHack}, which carries it on
  * {@link PerceptionAPI#VOXEL_OCCUPANCY}.
  *
  * <p>The observation is a 32×32×32 binary occupancy crop = {@value #VOXEL_COUNT} voxels. Packing 32
