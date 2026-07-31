@@ -160,9 +160,7 @@ public class LeRobotDataset
             {
                int epIdx = (int) pr.episodeIndex();
                if (epIdx >= 0 && epIdx < episodes.size())
-                  episodes.get(epIdx).getRecords().add(
-                        new LeRobotEpisodeRecord(pr.state(), pr.action(), pr.episodeIndex(), pr.frameIndex(),
-                                                 pr.timestamp(), 0, "", pr.nextDone(), pr.index(), pr.taskIndex()));
+                  episodes.get(epIdx).getRecords().add(pr.toEpisodeRecord());
             }
             for (LeRobotDatasetEpisode episode : episodes)
                episode.recomputeStatistics();
@@ -419,15 +417,8 @@ public class LeRobotDataset
 
       try
       {
-         Path tempScript = Files.createTempFile("lerobot_fix_", ".py");
-         Files.writeString(tempScript, pythonCode);
-
          LogTools.info("Fixing parquet array types via Python ({})...", python);
-         ProcessBuilder pb = new ProcessBuilder(python, tempScript.toString());
-         pb.inheritIO();
-         int exitCode = pb.start().waitFor();
-         Files.deleteIfExists(tempScript);
-
+         int exitCode = new ProcessBuilder(python, "-c", pythonCode).inheritIO().start().waitFor();
          if (exitCode != 0)
             throw new IllegalStateException("Parquet array type fix failed with exit " + exitCode);
       }
@@ -442,30 +433,28 @@ public class LeRobotDataset
       String[] candidates = {System.getProperty("user.home") + "/miniconda3/envs/lerobot/bin/python3", "python3", "python"};
       for (String candidate : candidates)
       {
-         try
-         {
-            Process process = new ProcessBuilder(candidate, "-c", "import numpy, pandas, pyarrow").redirectErrorStream(true).start();
-            if (process.waitFor() == 0)
-               return candidate;
-         }
-         catch (Exception ignored)
-         {
-         }
+         if (commandSucceeds(candidate, "-c", "import numpy, pandas, pyarrow"))
+            return candidate;
       }
       throw new IllegalStateException("Finalization requires Python with numpy, pandas, and pyarrow");
    }
 
    private static void requireCommand(String... command)
    {
+      if (!commandSucceeds(command))
+         throw new IllegalStateException("Required command is unavailable: " + command[0]);
+   }
+
+   private static boolean commandSucceeds(String... command)
+   {
       try
       {
-         if (new ProcessBuilder(command).redirectErrorStream(true).start().waitFor() == 0)
-            return;
+         return new ProcessBuilder(command).redirectErrorStream(true).start().waitFor() == 0;
       }
       catch (Exception ignored)
       {
+         return false;
       }
-      throw new IllegalStateException("Required command is unavailable: " + command[0]);
    }
 
    private void concatenateEpisodeVideos()
@@ -616,6 +605,7 @@ public class LeRobotDataset
          }
 
          // Rename temp videos to match new contiguous indices, then reindex
+         int datasetIndexOffset = 0;
          for (int newIdx = 0; newIdx < remaining.size(); newIdx++)
          {
             LeRobotDatasetEpisode episode = remaining.get(newIdx);
@@ -630,7 +620,8 @@ public class LeRobotDataset
                      Files.move(oldVideo, newVideo);
                }
             }
-            episode.reindex(newIdx);
+            episode.reindex(newIdx, datasetIndexOffset);
+            datasetIndexOffset += episode.getLength();
          }
 
          episodes.clear();
@@ -692,23 +683,8 @@ public class LeRobotDataset
             }
          }
 
-         List<String> stateFeatureNames = LeRobotDatasetDataVariables.getStateFeatureNames();
-         ObjectNode state = features.putObject("observation.state");
-         state.put("dtype", "float32");
-         state.putArray("shape").add(RECORDED_STATE_SIZE);
-         ArrayNode stateMotors = state.putObject("names").putArray("motors");
-         for (String featureName : stateFeatureNames)
-            stateMotors.add(featureName);
-         state.put("fps", fps);
-
-         List<String> actionFeatureNames = LeRobotDatasetDataVariables.getActionFeatureNames();
-         ObjectNode action = features.putObject("action");
-         action.put("dtype", "float32");
-         action.putArray("shape").add(ACTION_SIZE);
-         ArrayNode actionMotors = action.putObject("names").putArray("motors");
-         for (String featureName : actionFeatureNames)
-            actionMotors.add(featureName);
-         action.put("fps", fps);
+         addVectorFeature(features, "observation.state", RECORDED_STATE_SIZE, LeRobotDatasetDataVariables.getStateFeatureNames(), fps);
+         addVectorFeature(features, "action", ACTION_SIZE, LeRobotDatasetDataVariables.getActionFeatureNames(), fps);
 
          addScalarFeature(features, "episode_index", "int64", fps);
          addScalarFeature(features, "frame_index", "int64", fps);
@@ -717,6 +693,16 @@ public class LeRobotDataset
          addScalarFeature(features, "index", "int64", fps);
          addScalarFeature(features, "task_index", "int64", fps);
       });
+   }
+
+   private static void addVectorFeature(ObjectNode features, String name, int size, List<String> featureNames, float fps)
+   {
+      ObjectNode node = features.putObject(name);
+      node.put("dtype", "float32");
+      node.putArray("shape").add(size);
+      ArrayNode motors = node.putObject("names").putArray("motors");
+      featureNames.forEach(motors::add);
+      node.put("fps", fps);
    }
 
    private static void addScalarFeature(ObjectNode features, String name, String dtype, float fps)

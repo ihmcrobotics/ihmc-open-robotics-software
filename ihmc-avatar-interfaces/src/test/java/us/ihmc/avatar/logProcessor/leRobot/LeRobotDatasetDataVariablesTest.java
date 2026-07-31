@@ -64,6 +64,9 @@ class LeRobotDatasetDataVariablesTest
       List<Float> ones = Collections.nCopies(28, 1.0f);
       episode.getRecords().add(new LeRobotEpisodeRecord(zeros, ones, 0, 0, 0.0f, 1, "log", false, 0, 0));
       episode.getRecords().add(new LeRobotEpisodeRecord(ones, zeros, 0, 1, 0.1f, 2, "log", true, 1, 0));
+      episode.reindex(1, 10);
+      assertEquals(10, episode.getRecords().get(0).index());
+      assertEquals(11, episode.getRecords().get(1).index());
 
       episode.recomputeStatistics();
       JsonNode stats = new ObjectMapper().createObjectNode();

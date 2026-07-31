@@ -23,5 +23,13 @@ public record LeRobotEpisodeRecord
        long taskIndex // probably 0 mostly, since we only train one task at a time
       )
 {
+   public LeRobotEpisodeRecord reindex(long episodeIndex, long index)
+   {
+      return new LeRobotEpisodeRecord(state, action, episodeIndex, frameIndex, timestamp, logPosition, logName, nextDone, index, taskIndex);
+   }
 
+   public LeRobotEpisodeRecord markDone()
+   {
+      return new LeRobotEpisodeRecord(state, action, episodeIndex, frameIndex, timestamp, logPosition, logName, true, index, taskIndex);
+   }
 }

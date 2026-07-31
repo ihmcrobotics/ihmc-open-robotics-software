@@ -19,4 +19,14 @@ public record LeRobotParquetRecord(
       @Alias("next.done") boolean nextDone,
       long index,
       long taskIndex)
-{}
+{
+   public LeRobotParquetRecord(LeRobotEpisodeRecord record)
+   {
+      this(record.state(), record.action(), record.episodeIndex(), record.frameIndex(), record.timestamp(), record.nextDone(), record.index(), record.taskIndex());
+   }
+
+   public LeRobotEpisodeRecord toEpisodeRecord()
+   {
+      return new LeRobotEpisodeRecord(state, action, episodeIndex, frameIndex, timestamp, 0, "", nextDone, index, taskIndex);
+   }
+}
