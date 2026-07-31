@@ -8,7 +8,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -121,6 +120,8 @@ public class LeRobotDatasetEpisodeStatistics
          RGBL sumSq = sumSquares.get(side);
          RGB mean = means.get(side);
          RGB std = stds.get(side);
+         if (totalPixels == 0)
+            continue;
          
          // Calculate averages and normalize to 0.0-1.0
          mean.r = (float) sum.r / (totalPixels * 255.0f);
@@ -157,15 +158,24 @@ public class LeRobotDatasetEpisodeStatistics
       taskIndexStats.calculate();
    }
 
-   public void writeJson(ObjectNode stats, SideDependentList<Path> zedVideoDirs)
+   /**
+    * @param videoFeatureKeys  feature name for each side, e.g. "observation.images.cam_zed_left"
+    */
+   public void writeJson(ObjectNode stats, SideDependentList<String> videoFeatureKeys)
    {
       for (RobotSide side : RobotSide.values)
       {
+         String featureKey = videoFeatureKeys.get(side);
+         if (featureKey == null)
+            continue;
+
+         // Always write the camera key so lerobot's dataset.meta.stats lookup never KeyErrors.
+         // If no frames were processed the pixel stats default to 0 (safe since pi0_fast uses VISUAL: IDENTITY).
          RGB mean = means.get(side);
          RGB std = stds.get(side);
-   
+
          // RGB
-         ObjectNode video = stats.putObject(zedVideoDirs.get(side).getFileName().toString());
+         ObjectNode video = stats.putObject(featureKey);
          ArrayNode min = video.putArray("min"); // Looks like we can leave 0.0
          min.addArray().addArray().add(0.0f);
          min.addArray().addArray().add(0.0f);
@@ -256,6 +266,41 @@ public class LeRobotDatasetEpisodeStatistics
       fieldStats.putArray("mean").add(taskIndexStats.getMean());
       fieldStats.putArray("std").add(taskIndexStats.getStddev());
       fieldStats.putArray("count").add(length);
+   }
+
+   public void mergeFrom(LeRobotDatasetEpisodeStatistics other)
+   {
+      length += other.length;
+      for (RobotSide side : RobotSide.values)
+      {
+         sizes[side.ordinal()] += other.sizes[side.ordinal()];
+         RGBL mySum = sums.get(side);
+         RGBL otherSum = other.sums.get(side);
+         mySum.r += otherSum.r;
+         mySum.g += otherSum.g;
+         mySum.b += otherSum.b;
+         RGBL mySumSq = sumSquares.get(side);
+         RGBL otherSumSq = other.sumSquares.get(side);
+         mySumSq.r += otherSumSq.r;
+         mySumSq.g += otherSumSq.g;
+         mySumSq.b += otherSumSq.b;
+      }
+      if (stateStats.isEmpty() && !other.stateStats.isEmpty())
+         for (int i = 0; i < other.stateStats.size(); i++)
+            stateStats.add(new LeRobotFloatStatisticsCalculator());
+      for (int i = 0; i < Math.min(stateStats.size(), other.stateStats.size()); i++)
+         stateStats.get(i).mergeFrom(other.stateStats.get(i));
+      if (actionStats.isEmpty() && !other.actionStats.isEmpty())
+         for (int i = 0; i < other.actionStats.size(); i++)
+            actionStats.add(new LeRobotFloatStatisticsCalculator());
+      for (int i = 0; i < Math.min(actionStats.size(), other.actionStats.size()); i++)
+         actionStats.get(i).mergeFrom(other.actionStats.get(i));
+      episodeIndexStats.mergeFrom(other.episodeIndexStats);
+      frameIndexStats.mergeFrom(other.frameIndexStats);
+      timestampStats.mergeFrom(other.timestampStats);
+      nextDoneStats.mergeFrom(other.nextDoneStats);
+      indexStats.mergeFrom(other.indexStats);
+      taskIndexStats.mergeFrom(other.taskIndexStats);
    }
 
    public void loadJSON(JsonNode lineRoot)
