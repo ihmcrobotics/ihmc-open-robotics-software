@@ -21,6 +21,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -29,9 +30,14 @@ public class OpenpiClient
    private final String host;
    private final int port;
    private final int stateSize;
+   private final int actionSize;
    private final int chunkLength;
    private final int imageWidth;
    private final int imageHeight;
+   private final SideDependentList<String> imageKeys;
+   private final String stateKey;
+   private final String promptKey;
+   private final String actionKey;
    private String prompt;
    private EventLoopGroup group;
    private Channel channel;
@@ -51,13 +57,47 @@ public class OpenpiClient
 
    public OpenpiClient(String host, int port, int stateSize, int chunkLength, int imageWidth, int imageHeight, String prompt)
    {
+      this(host, port, stateSize, stateSize, chunkLength, imageWidth, imageHeight, prompt,
+           new SideDependentList<>("cam_zed_left", "cam_zed_right"), "state", "prompt", "actions");
+   }
+
+   /**
+    * Creates a client with independent state/action dimensions and configurable wire keys.
+    * This keeps the historical OpenPI defaults while allowing policies whose action vector is
+    * sparse, reordered, or otherwise different from the observation state vector.
+    */
+   public OpenpiClient(String host,
+                       int port,
+                       int stateSize,
+                       int actionSize,
+                       int chunkLength,
+                       int imageWidth,
+                       int imageHeight,
+                       String prompt,
+                       SideDependentList<String> imageKeys,
+                       String stateKey,
+                       String promptKey,
+                       String actionKey)
+   {
+      if (stateSize <= 0 || actionSize <= 0 || chunkLength <= 0)
+         throw new IllegalArgumentException("State size, action size, and chunk length must be positive");
+      if (imageWidth <= 0 || imageHeight <= 0)
+         throw new IllegalArgumentException("Image dimensions must be positive");
+
       this.host = host;
       this.port = port;
       this.stateSize = stateSize;
+      this.actionSize = actionSize;
       this.chunkLength = chunkLength;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
       this.prompt = prompt;
+      this.imageKeys = new SideDependentList<>(imageKeys.get(RobotSide.LEFT), imageKeys.get(RobotSide.RIGHT));
+      this.stateKey = requireWireKey(stateKey, "state");
+      this.promptKey = requireWireKey(promptKey, "prompt");
+      this.actionKey = requireWireKey(actionKey, "action");
+      for (RobotSide side : RobotSide.values)
+         requireWireKey(this.imageKeys.get(side), side.getLowerCaseName() + " image");
 
       state = ByteBuffer.allocate(stateSize * Float.BYTES);
       state.order(ByteOrder.nativeOrder());
@@ -65,9 +105,16 @@ public class OpenpiClient
                                        ByteBuffer.allocate(3 * imageWidth * imageHeight));
       for (RobotSide side : RobotSide.values)
          images.get(side).order(ByteOrder.nativeOrder());
-      actions = ByteBuffer.allocate(chunkLength * stateSize * Double.BYTES);
+      actions = ByteBuffer.allocate(chunkLength * actionSize * Double.BYTES);
       actions.order(ByteOrder.nativeOrder());
       horizon = chunkLength;
+   }
+
+   private static String requireWireKey(String key, String description)
+   {
+      if (key == null || key.isBlank())
+         throw new IllegalArgumentException(description + " wire key must not be blank");
+      return key;
    }
 
    public void setPrompt(String prompt)
@@ -113,7 +160,7 @@ public class OpenpiClient
          packer.packMapHeader(4);
          for (RobotSide side : RobotSide.values)
          {
-            packer.packString("cam_zed_%s".formatted(side.getLowerCaseName())).packMapHeader(4);
+            packer.packString(imageKeys.get(side)).packMapHeader(4);
                packer.packString("__ndarray__").packBoolean(true);
                byte[] imgData = images.get(side).array();
                packer.packString("data").packBinaryHeader(imgData.length).writePayload(imgData);
@@ -123,12 +170,12 @@ public class OpenpiClient
                   packer.packInt(imageHeight);
                   packer.packInt(imageWidth);
          }
-            packer.packString("state").packMapHeader(4);
+            packer.packString(stateKey).packMapHeader(4);
                packer.packString("__ndarray__").packBoolean(true);
                packer.packString("data").packBinaryHeader(state.array().length).writePayload(state.array());
                packer.packString("dtype").packString("float32");
                packer.packString("shape").packArrayHeader(1).packInt(stateSize);
-            packer.packString("prompt").packString(prompt);
+            packer.packString(promptKey).packString(prompt);
 
          return handler.sendAndAwaitResponse(packer.toByteArray());
       }
@@ -138,44 +185,104 @@ public class OpenpiClient
       }
    }
 
-   public void unpack(CompletableFuture<byte[]> response)
+   /** Returns false and clears the action buffer when any response field is malformed. */
+   public boolean unpack(CompletableFuture<byte[]> response)
    {
       try
       {
          MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(response.get());
          int responseFieldCount = unpacker.unpackMapHeader();
-            unpacker.unpackString(); // actions
-            unpacker.unpackMapHeader(); // 4
-               unpacker.unpackString();  // __ndarray__
-               unpacker.unpackBoolean(); // true
-               unpacker.unpackString(); // data
-               unpacker.unpackBinaryHeader(); // 50 * STATE_SIZE * 8
-               unpacker.readPayload(actions.array());
-               unpacker.unpackString(); // dtype
-               unpacker.unpackString(); // <f8 (double)
-               unpacker.unpackString(); // shape
-               unpacker.unpackArrayHeader(); // 2
-                  unpacker.unpackInt(); // 50
-                  unpacker.unpackInt(); // STATE_SIZE
-            unpacker.unpackString(); // policy_timing
-            unpacker.unpackMapHeader();
-               unpacker.unpackString(); // infer_ms
-               policyTimingMs = unpacker.unpackFloat();
-            unpacker.unpackString(); // server_timing
-            unpacker.unpackMapHeader();
-               unpacker.unpackString(); // infer_ms
-               serverTimingMs = unpacker.unpackFloat(); // policy_timing
-            if (responseFieldCount > 3)
+         boolean receivedActions = false;
+         for (int field = 0; field < responseFieldCount; field++)
+         {
+            String key = unpacker.unpackString();
+            if (actionKey.equals(key))
             {
-               unpacker.unpackString(); // horizon
-               horizon = Math.max(1, Math.min(chunkLength, unpacker.unpackInt()));
+               unpackActions(unpacker);
+               receivedActions = true;
             }
+            else
+            {
+               switch (key)
+               {
+                  case "policy_timing" -> policyTimingMs = unpackTiming(unpacker);
+                  case "server_timing" -> serverTimingMs = unpackTiming(unpacker);
+                  case "horizon" -> horizon = Math.max(1, Math.min(chunkLength, unpacker.unpackInt()));
+                  default -> unpacker.skipValue();
+               }
+            }
+         }
+         if (!receivedActions)
+            throw new IllegalArgumentException("GR00T response did not contain " + actionKey);
          unpacker.close();
+         return true;
       }
       catch (Exception e)
       {
+         actions.clear();
+         while (actions.hasRemaining())
+            actions.put((byte) 0);
+         actions.clear();
+         horizon = 0;
          DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(e);
+         return false;
       }
+   }
+
+   private void unpackActions(MessageUnpacker unpacker) throws Exception
+   {
+      int ndarrayFieldCount = unpacker.unpackMapHeader();
+      byte[] payload = null;
+      String dtype = null;
+      int[] shape = null;
+      for (int field = 0; field < ndarrayFieldCount; field++)
+      {
+         String key = unpacker.unpackString();
+         switch (key)
+         {
+            case "__ndarray__" ->
+            {
+               if (!unpacker.unpackBoolean())
+                  throw new IllegalArgumentException("actions is not an ndarray");
+            }
+            case "data" -> payload = unpacker.readPayload(unpacker.unpackBinaryHeader());
+            case "dtype" -> dtype = unpacker.unpackString();
+            case "shape" ->
+            {
+               int dimensions = unpacker.unpackArrayHeader();
+               shape = new int[dimensions];
+               for (int dimension = 0; dimension < dimensions; dimension++)
+                  shape[dimension] = unpacker.unpackInt();
+            }
+            default -> unpacker.skipValue();
+         }
+      }
+
+      int[] expectedShape = {chunkLength, actionSize};
+      if (!Arrays.equals(shape, expectedShape))
+         throw new IllegalArgumentException("Expected action shape " + Arrays.toString(expectedShape) + ", got " + Arrays.toString(shape));
+      if (!"<f8".equals(dtype) && !"float64".equals(dtype))
+         throw new IllegalArgumentException("Expected float64 actions, got " + dtype);
+      if (payload == null || payload.length != actions.capacity())
+         throw new IllegalArgumentException("Expected " + actions.capacity() + " action bytes, got " + (payload == null ? 0 : payload.length));
+      actions.clear();
+      actions.put(payload);
+      actions.clear();
+   }
+
+   private static float unpackTiming(MessageUnpacker unpacker) throws Exception
+   {
+      int timingFieldCount = unpacker.unpackMapHeader();
+      float inferenceMilliseconds = Float.NaN;
+      for (int field = 0; field < timingFieldCount; field++)
+      {
+         String key = unpacker.unpackString();
+         if ("infer_ms".equals(key))
+            inferenceMilliseconds = (float) unpacker.unpackDouble();
+         else
+            unpacker.skipValue();
+      }
+      return inferenceMilliseconds;
    }
 
    public ByteBuffer getState()
@@ -242,6 +349,11 @@ public class OpenpiClient
    public int getChunkLength()
    {
       return chunkLength;
+   }
+
+   public int getActionSize()
+   {
+      return actionSize;
    }
 
    public int getImageWidth()
