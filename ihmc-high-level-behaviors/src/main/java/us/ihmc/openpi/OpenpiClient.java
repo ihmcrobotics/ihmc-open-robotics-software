@@ -27,30 +27,52 @@ import java.util.concurrent.TimeUnit;
 public class OpenpiClient
 {
    private final String host;
-   private final int port = 8000;
+   private final int port;
    private final int stateSize;
+   private final int chunkLength;
+   private final int imageWidth;
+   private final int imageHeight;
+   private String prompt;
    private EventLoopGroup group;
    private Channel channel;
    private OpenpiNettyWebSocketHandler handler;
    private final MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
    private final ByteBuffer state;
-   private final SideDependentList<ByteBuffer> images = new SideDependentList<>(ByteBuffer.allocate(3 * 224 * 224), // uint8 rgb Channel - Height - Width
-                                                                                ByteBuffer.allocate(3 * 224 * 224));
+   private final SideDependentList<ByteBuffer> images;
    private final ByteBuffer actions;
    private float policyTimingMs;
    private float serverTimingMs;
+   private int horizon;
 
    public OpenpiClient(String host, int stateSize)
    {
+      this(host, 8000, stateSize, 50, 224, 224, "touch door handle");
+   }
+
+   public OpenpiClient(String host, int port, int stateSize, int chunkLength, int imageWidth, int imageHeight, String prompt)
+   {
       this.host = host;
+      this.port = port;
       this.stateSize = stateSize;
+      this.chunkLength = chunkLength;
+      this.imageWidth = imageWidth;
+      this.imageHeight = imageHeight;
+      this.prompt = prompt;
 
       state = ByteBuffer.allocate(stateSize * Float.BYTES);
       state.order(ByteOrder.nativeOrder());
+      images = new SideDependentList<>(ByteBuffer.allocate(3 * imageWidth * imageHeight), // uint8 rgb Channel - Height - Width
+                                       ByteBuffer.allocate(3 * imageWidth * imageHeight));
       for (RobotSide side : RobotSide.values)
          images.get(side).order(ByteOrder.nativeOrder());
-      actions = ByteBuffer.allocate(50 * stateSize * Double.BYTES);
+      actions = ByteBuffer.allocate(chunkLength * stateSize * Double.BYTES);
       actions.order(ByteOrder.nativeOrder());
+      horizon = chunkLength;
+   }
+
+   public void setPrompt(String prompt)
+   {
+      this.prompt = prompt;
    }
 
    public CompletableFuture<byte[]> request()
@@ -98,15 +120,15 @@ public class OpenpiClient
                packer.packString("dtype").packString("uint8");
                packer.packString("shape").packArrayHeader(3);
                   packer.packInt(3); // channels, rgb
-                  packer.packInt(224); // height
-                  packer.packInt(224); // width
+                  packer.packInt(imageHeight);
+                  packer.packInt(imageWidth);
          }
             packer.packString("state").packMapHeader(4);
                packer.packString("__ndarray__").packBoolean(true);
                packer.packString("data").packBinaryHeader(state.array().length).writePayload(state.array());
                packer.packString("dtype").packString("float32");
                packer.packString("shape").packArrayHeader(1).packInt(stateSize);
-            packer.packString("prompt").packString("touch door handle"); // TODO
+            packer.packString("prompt").packString(prompt);
 
          return handler.sendAndAwaitResponse(packer.toByteArray());
       }
@@ -121,7 +143,7 @@ public class OpenpiClient
       try
       {
          MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(response.get());
-         unpacker.unpackMapHeader(); // 3
+         int responseFieldCount = unpacker.unpackMapHeader();
             unpacker.unpackString(); // actions
             unpacker.unpackMapHeader(); // 4
                unpacker.unpackString();  // __ndarray__
@@ -143,6 +165,11 @@ public class OpenpiClient
             unpacker.unpackMapHeader();
                unpacker.unpackString(); // infer_ms
                serverTimingMs = unpacker.unpackFloat(); // policy_timing
+            if (responseFieldCount > 3)
+            {
+               unpacker.unpackString(); // horizon
+               horizon = Math.max(1, Math.min(chunkLength, unpacker.unpackInt()));
+            }
          unpacker.close();
       }
       catch (Exception e)
@@ -176,6 +203,11 @@ public class OpenpiClient
       return serverTimingMs;
    }
 
+   public int getHorizon()
+   {
+      return horizon;
+   }
+
    public void destroy()
    {
       if (channel != null)
@@ -202,6 +234,26 @@ public class OpenpiClient
       return port;
    }
 
+   public int getStateSize()
+   {
+      return stateSize;
+   }
+
+   public int getChunkLength()
+   {
+      return chunkLength;
+   }
+
+   public int getImageWidth()
+   {
+      return imageWidth;
+   }
+
+   public int getImageHeight()
+   {
+      return imageHeight;
+   }
+
    public static void main(String[] args)
    {
       int stateSize = 3;
@@ -226,4 +278,3 @@ public class OpenpiClient
       client.destroy();
    }
 }
-
