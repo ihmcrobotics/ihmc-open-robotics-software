@@ -82,6 +82,8 @@ class OpenpiClientTest
       assertFalse(client.unpack(CompletableFuture.completedFuture(packer.toByteArray())));
       assertEquals(0, client.getHorizon());
       assertEquals(0.0, client.getActionChunk().asDoubleBuffer().get(0));
+      assertTrue(Float.isNaN(client.getPolicyTimingMs()));
+      assertTrue(Float.isNaN(client.getServerTimingMs()));
    }
 
    @Test
@@ -100,5 +102,63 @@ class OpenpiClientTest
                                           "observation",
                                           "instruction",
                                           "trajectory"));
+   }
+
+   @Test
+   void rejectsDuplicateRequestWireKeys()
+   {
+      assertThrows(IllegalArgumentException.class,
+                   () -> new OpenpiClient("localhost",
+                                          8000,
+                                          4,
+                                          2,
+                                          3,
+                                          8,
+                                          6,
+                                          "go",
+                                          new SideDependentList<>("rgb", "rgb"),
+                                          "observation",
+                                          "instruction",
+                                          "trajectory"));
+      assertThrows(IllegalArgumentException.class,
+                   () -> new OpenpiClient("localhost",
+                                          8000,
+                                          4,
+                                          2,
+                                          3,
+                                          8,
+                                          6,
+                                          "go",
+                                          new SideDependentList<>("left_rgb", "observation"),
+                                          "observation",
+                                          "instruction",
+                                          "trajectory"));
+   }
+
+   @Test
+   void numericWireBuffersAreAlwaysLittleEndian()
+   {
+      OpenpiClient client = new OpenpiClient("localhost", 4);
+      assertEquals(ByteOrder.LITTLE_ENDIAN, client.getState().order());
+      assertEquals(ByteOrder.LITTLE_ENDIAN, client.getActionChunk().order());
+   }
+
+   @Test
+   void rejectsActionPayloadWithoutNdarrayMarker() throws Exception
+   {
+      OpenpiClient client = new OpenpiClient("localhost", 8000, 4, 2, 3, 8, 6, "go",
+                                             new SideDependentList<>("left_rgb", "right_rgb"),
+                                             "observation", "instruction", "trajectory");
+      byte[] payload = new byte[3 * 2 * Double.BYTES];
+      MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+      packer.packMapHeader(1);
+      packer.packString("trajectory").packMapHeader(3);
+      packer.packString("shape").packArrayHeader(2).packInt(3).packInt(2);
+      packer.packString("dtype").packString("<f8");
+      packer.packString("data").packBinaryHeader(payload.length).writePayload(payload);
+      packer.close();
+
+      assertFalse(client.unpack(CompletableFuture.completedFuture(packer.toByteArray())));
+      assertEquals(0, client.getHorizon());
    }
 }

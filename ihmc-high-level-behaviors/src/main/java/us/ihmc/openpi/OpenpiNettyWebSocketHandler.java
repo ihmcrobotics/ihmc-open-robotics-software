@@ -19,9 +19,9 @@ import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import us.ihmc.log.LogTools;
 
 import java.net.URI;
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -31,9 +31,10 @@ class OpenpiNettyWebSocketHandler extends SimpleChannelInboundHandler<Object>
    private final WebSocketClientHandshaker handshaker;
    private ChannelPromise handshakeFuture;
 
-   private final Queue<CompletableFuture<byte[]>> pendingResponses = new LinkedList<>();
+   private final Queue<CompletableFuture<byte[]>> pendingResponses = new ConcurrentLinkedQueue<>();
    private final CountDownLatch firstMessageLatch = new CountDownLatch(1);
    private byte[] firstMessage;
+   private volatile RuntimeException firstMessageFailure;
 
    public OpenpiNettyWebSocketHandler(URI uri)
    {
@@ -86,16 +87,14 @@ class OpenpiNettyWebSocketHandler extends SimpleChannelInboundHandler<Object>
 
       if (msg instanceof TextWebSocketFrame textFrame)
       {
-         // Server error path - convert to exception like Python client
          String errorMsg = textFrame.text();
          LogTools.error("Error from server: " + errorMsg);
+         RuntimeException failure = new RuntimeException("Server error: " + errorMsg);
 
-         // Complete any pending futures with exception
-         CompletableFuture<byte[]> pending = pendingResponses.poll();
-         if (pending != null)
-         {
-            pending.completeExceptionally(new RuntimeException("Server error: " + errorMsg));
-         }
+         if (firstMessage == null)
+            failFirstMessage(failure);
+         else
+            completeNextResponseExceptionally(failure);
       }
       else if (msg instanceof BinaryWebSocketFrame binaryFrame)
       {
@@ -122,19 +121,52 @@ class OpenpiNettyWebSocketHandler extends SimpleChannelInboundHandler<Object>
       else if (msg instanceof CloseWebSocketFrame)
       {
          LogTools.warn("WebSocket connection closed");
+         failConnection(new RuntimeException("WebSocket connection closed before the server responded"));
          ch.close();
       }
    }
 
    @Override
+   public void channelInactive(ChannelHandlerContext ctx)
+   {
+      failConnection(new RuntimeException("WebSocket connection became inactive before the server responded"));
+      ctx.fireChannelInactive();
+   }
+
+   @Override
    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
    {
-      cause.printStackTrace();
-      if (!handshakeFuture.isDone())
+      LogTools.error("OpenPI websocket failed: " + cause.getMessage());
+      if (handshakeFuture != null && !handshakeFuture.isDone())
       {
          handshakeFuture.setFailure(cause);
       }
+      failConnection(new RuntimeException("OpenPI websocket failed", cause));
       ctx.close();
+   }
+
+   private void completeNextResponseExceptionally(RuntimeException failure)
+   {
+      CompletableFuture<byte[]> pending = pendingResponses.poll();
+      if (pending != null)
+         pending.completeExceptionally(failure);
+   }
+
+   private void failFirstMessage(RuntimeException failure)
+   {
+      if (firstMessage == null && firstMessageFailure == null)
+      {
+         firstMessageFailure = failure;
+         firstMessageLatch.countDown();
+      }
+   }
+
+   private void failConnection(RuntimeException failure)
+   {
+      failFirstMessage(failure);
+      CompletableFuture<byte[]> pending;
+      while ((pending = pendingResponses.poll()) != null)
+         pending.completeExceptionally(failure);
    }
 
    public CompletableFuture<byte[]> sendAndAwaitResponse(byte[] data)
@@ -149,6 +181,7 @@ class OpenpiNettyWebSocketHandler extends SimpleChannelInboundHandler<Object>
       {
          if (!channelFuture.isSuccess())
          {
+            pendingResponses.remove(future);
             future.completeExceptionally(channelFuture.cause());
          }
       });
@@ -160,6 +193,8 @@ class OpenpiNettyWebSocketHandler extends SimpleChannelInboundHandler<Object>
    {
       if (firstMessageLatch.await(timeout, unit))
       {
+         if (firstMessageFailure != null)
+            throw firstMessageFailure;
          return firstMessage;
       }
       else

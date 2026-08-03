@@ -22,6 +22,8 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -49,6 +51,7 @@ public class OpenpiClient
    private float policyTimingMs;
    private float serverTimingMs;
    private int horizon;
+   private volatile String lastConnectionError;
 
    public OpenpiClient(String host, int stateSize)
    {
@@ -83,6 +86,12 @@ public class OpenpiClient
          throw new IllegalArgumentException("State size, action size, and chunk length must be positive");
       if (imageWidth <= 0 || imageHeight <= 0)
          throw new IllegalArgumentException("Image dimensions must be positive");
+      if (host == null || host.isBlank())
+         throw new IllegalArgumentException("Host must not be blank");
+      if (port <= 0 || port > 65535)
+         throw new IllegalArgumentException("Port must be in [1, 65535]");
+      if (imageKeys == null)
+         throw new IllegalArgumentException("Image wire keys must not be null");
 
       this.host = host;
       this.port = port;
@@ -96,17 +105,26 @@ public class OpenpiClient
       this.stateKey = requireWireKey(stateKey, "state");
       this.promptKey = requireWireKey(promptKey, "prompt");
       this.actionKey = requireWireKey(actionKey, "action");
+      Set<String> requestKeys = new HashSet<>();
       for (RobotSide side : RobotSide.values)
-         requireWireKey(this.imageKeys.get(side), side.getLowerCaseName() + " image");
+      {
+         String imageKey = requireWireKey(this.imageKeys.get(side), side.getLowerCaseName() + " image");
+         if (!requestKeys.add(imageKey))
+            throw new IllegalArgumentException("Request wire keys must be unique; duplicate key: " + imageKey);
+      }
+      if (!requestKeys.add(this.stateKey))
+         throw new IllegalArgumentException("Request wire keys must be unique; duplicate key: " + this.stateKey);
+      if (!requestKeys.add(this.promptKey))
+         throw new IllegalArgumentException("Request wire keys must be unique; duplicate key: " + this.promptKey);
 
       state = ByteBuffer.allocate(stateSize * Float.BYTES);
-      state.order(ByteOrder.nativeOrder());
+      state.order(ByteOrder.LITTLE_ENDIAN);
       images = new SideDependentList<>(ByteBuffer.allocate(3 * imageWidth * imageHeight), // uint8 rgb Channel - Height - Width
                                        ByteBuffer.allocate(3 * imageWidth * imageHeight));
       for (RobotSide side : RobotSide.values)
-         images.get(side).order(ByteOrder.nativeOrder());
+         images.get(side).order(ByteOrder.LITTLE_ENDIAN);
       actions = ByteBuffer.allocate(chunkLength * actionSize * Double.BYTES);
-      actions.order(ByteOrder.nativeOrder());
+      actions.order(ByteOrder.LITTLE_ENDIAN);
       horizon = chunkLength;
    }
 
@@ -148,10 +166,13 @@ public class OpenpiClient
                });
                channel = bootstrap.connect(host, port).sync().channel();
                handler.handshakeFuture().sync();
-               handler.awaitFirstMessage(10, TimeUnit.SECONDS);
+               validateServerMetadata(handler.awaitFirstMessage(10, TimeUnit.SECONDS));
+               lastConnectionError = null;
             }
             catch (Exception exception)
             {
+               lastConnectionError = exception.getMessage() == null ? exception.getClass().getSimpleName() : exception.getMessage();
+               destroy();
                return null;
             }
          }
@@ -185,9 +206,17 @@ public class OpenpiClient
       }
    }
 
+   /** Hook for policy-specific clients to reject an incompatible server before sending observations. */
+   protected void validateServerMetadata(byte[] metadata) throws Exception
+   {
+   }
+
    /** Returns false and clears the action buffer when any response field is malformed. */
    public boolean unpack(CompletableFuture<byte[]> response)
    {
+      policyTimingMs = Float.NaN;
+      serverTimingMs = Float.NaN;
+      horizon = chunkLength;
       try
       {
          MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(response.get());
@@ -224,6 +253,8 @@ public class OpenpiClient
             actions.put((byte) 0);
          actions.clear();
          horizon = 0;
+         policyTimingMs = Float.NaN;
+         serverTimingMs = Float.NaN;
          DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(e);
          return false;
       }
@@ -235,6 +266,7 @@ public class OpenpiClient
       byte[] payload = null;
       String dtype = null;
       int[] shape = null;
+      boolean ndarray = false;
       for (int field = 0; field < ndarrayFieldCount; field++)
       {
          String key = unpacker.unpackString();
@@ -244,6 +276,7 @@ public class OpenpiClient
             {
                if (!unpacker.unpackBoolean())
                   throw new IllegalArgumentException("actions is not an ndarray");
+               ndarray = true;
             }
             case "data" -> payload = unpacker.readPayload(unpacker.unpackBinaryHeader());
             case "dtype" -> dtype = unpacker.unpackString();
@@ -259,6 +292,8 @@ public class OpenpiClient
       }
 
       int[] expectedShape = {chunkLength, actionSize};
+      if (!ndarray)
+         throw new IllegalArgumentException("actions is missing the ndarray marker");
       if (!Arrays.equals(shape, expectedShape))
          throw new IllegalArgumentException("Expected action shape " + Arrays.toString(expectedShape) + ", got " + Arrays.toString(shape));
       if (!"<f8".equals(dtype) && !"float64".equals(dtype))
@@ -324,6 +359,7 @@ public class OpenpiClient
 
       channel = null;
       group = null;
+      handler = null;
    }
 
    public boolean hasBeenStarted()
@@ -364,6 +400,11 @@ public class OpenpiClient
    public int getImageHeight()
    {
       return imageHeight;
+   }
+
+   public String getLastConnectionError()
+   {
+      return lastConnectionError;
    }
 
    public static void main(String[] args)
