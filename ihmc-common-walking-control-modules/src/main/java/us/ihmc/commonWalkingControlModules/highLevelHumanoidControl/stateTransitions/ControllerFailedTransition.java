@@ -10,12 +10,22 @@ public class ControllerFailedTransition implements StateTransitionCondition
    private final YoBoolean controllerFailed;
    private final BooleanProvider isRobotOffSupport;
    private final HighLevelControllerName nextStateEnum;
+   private final boolean transitionToFallingWhenSupported;
 
    public ControllerFailedTransition(YoBoolean controllerFailed, BooleanProvider isRobotOffSupport, HighLevelControllerName nextStateEnum)
+   {
+      this(controllerFailed, isRobotOffSupport, nextStateEnum, false);
+   }
+
+   public ControllerFailedTransition(YoBoolean controllerFailed,
+                                     BooleanProvider isRobotOffSupport,
+                                     HighLevelControllerName nextStateEnum,
+                                     boolean transitionToFallingWhenSupported)
    {
       this.controllerFailed = controllerFailed;
       this.isRobotOffSupport = isRobotOffSupport;
       this.nextStateEnum = nextStateEnum;
+      this.transitionToFallingWhenSupported = transitionToFallingWhenSupported;
    }
 
    private boolean pollControllerFailed()
@@ -29,7 +39,7 @@ public class ControllerFailedTransition implements StateTransitionCondition
    public boolean testCondition(double timeInState)
    {
       boolean controllerFailed = this.controllerFailed.getBooleanValue();
-      boolean shouldTransition = (isRobotOffSupport.getValue() && nextStateEnum.equals(HighLevelControllerName.FALLING_STATE)) ||
+      boolean shouldTransition = ((isRobotOffSupport.getValue() || transitionToFallingWhenSupported) && nextStateEnum.equals(HighLevelControllerName.FALLING_STATE)) ||
                                  (!isRobotOffSupport.getValue() && !nextStateEnum.equals(HighLevelControllerName.FALLING_STATE));
 
       if (controllerFailed && shouldTransition)
