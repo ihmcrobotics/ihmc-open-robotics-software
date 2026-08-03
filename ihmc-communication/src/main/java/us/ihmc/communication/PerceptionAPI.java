@@ -149,15 +149,15 @@ public final class PerceptionAPI
     * Intrinsics and camera pose are embedded in each ImageMessage (no separate camera_info topic).
     * Consumed by AlexRDXIsaacSimUI via RDXROS2ColoredPointCloudVisualizer.
     */
-   private static final ROS2Topic<?> ISAAC_SIM = new ROS2Topic<>().withPrefix("isaac_sim").withQoS(ROS2QosProfile.BEST_EFFORT());
-   public static final ROS2Topic<ImageMessage> ISAAC_SIM_OVERVIEW_COLOR = ISAAC_SIM.withSuffix("overview/color").withType(ImageMessage.class);
-   public static final ROS2Topic<ImageMessage> ISAAC_SIM_OVERVIEW_DEPTH = ISAAC_SIM.withSuffix("overview/depth").withType(ImageMessage.class);
-   public static final ROS2Topic<ImageMessage> ISAAC_SIM_FOLLOW_COLOR   = ISAAC_SIM.withSuffix("follow/color").withType(ImageMessage.class);
-   public static final ROS2Topic<ImageMessage> ISAAC_SIM_FOLLOW_DEPTH   = ISAAC_SIM.withSuffix("follow/depth").withType(ImageMessage.class);
-   public static final ROS2Topic<ImageMessage> ISAAC_SIM_HEAD_COLOR     = ISAAC_SIM.withSuffix("head/color").withType(ImageMessage.class);
-   public static final ROS2Topic<ImageMessage> ISAAC_SIM_HEAD_DEPTH     = ISAAC_SIM.withSuffix("head/depth").withType(ImageMessage.class);
+   private static final ROS2Topic<?> ISAAC_SIM = new ROS2Topic<>().appendedWith("isaac_sim").withQoS(ROS2QoSProfile.BEST_EFFORT);
+   public static final ROS2Topic<ImageMessage> ISAAC_SIM_OVERVIEW_COLOR = ISAAC_SIM.appendedWith("overview/color").withType(ImageMessage.class);
+   public static final ROS2Topic<ImageMessage> ISAAC_SIM_OVERVIEW_DEPTH = ISAAC_SIM.appendedWith("overview/depth").withType(ImageMessage.class);
+   public static final ROS2Topic<ImageMessage> ISAAC_SIM_FOLLOW_COLOR   = ISAAC_SIM.appendedWith("follow/color").withType(ImageMessage.class);
+   public static final ROS2Topic<ImageMessage> ISAAC_SIM_FOLLOW_DEPTH   = ISAAC_SIM.appendedWith("follow/depth").withType(ImageMessage.class);
+   public static final ROS2Topic<ImageMessage> ISAAC_SIM_HEAD_COLOR     = ISAAC_SIM.appendedWith("head/color").withType(ImageMessage.class);
+   public static final ROS2Topic<ImageMessage> ISAAC_SIM_HEAD_DEPTH     = ISAAC_SIM.appendedWith("head/depth").withType(ImageMessage.class);
    // Ground-truth robot root pose + joint angles (control rate) for RDX to pin the mesh to Isaac truth.
-   public static final ROS2Topic<RobotPose> ISAAC_SIM_ROBOT_POSE        = ISAAC_SIM.withSuffix("robot_pose").withType(RobotPose.class);
+   public static final ROS2Topic<RobotPose> ISAAC_SIM_ROBOT_POSE        = ISAAC_SIM.appendedWith("robot_pose").withType(RobotPose.class);
 
    /*
     * Planar regions
