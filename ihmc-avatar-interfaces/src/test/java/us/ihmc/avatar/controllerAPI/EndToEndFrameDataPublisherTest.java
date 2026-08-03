@@ -3,18 +3,13 @@ package us.ihmc.avatar.controllerAPI;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import ihmc_common_msgs.RobotFrameData;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import ihmc_common_msgs.msg.dds.RobotFrameData;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -27,16 +22,17 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -44,6 +40,10 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoVariable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestInterface
 {
@@ -131,12 +131,12 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
             stepsPackedInMessage++;
          }
          message.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
-         message.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
+         message.getQueueingProperties().setPreviousMessageId(QueueableCommand.VALID_MESSAGE_DEFAULT_ID);
          messages.add(message);
       }
       FootstepDataListMessage r = messages.get(0);
       r.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      r.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
+      r.getQueueingProperties().setPreviousMessageId(QueueableCommand.VALID_MESSAGE_DEFAULT_ID);
 
       YoVariable numberOfStepsInController = simulationTestHelper.findVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
       int expectedNumberOfSteps = 0;
@@ -279,9 +279,9 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
       for (int i = 0; i < steps; i++)
       {
          FootstepDataMessage footstep = message.getFootstepDataList().get(i);
-         stepPose.setIncludingFrame(messageFrame, footstep.getLocation(), footstep.getOrientation());
+         stepPose.setIncludingFrame(messageFrame, footstep.getLocation().getPoint(), footstep.getOrientation().getQuaternion());
          stepPose.changeFrame(ReferenceFrame.getWorldFrame());
-         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getLocation().getPoint().set(stepPose.getPosition());
          footstep.getOrientation().set(stepPose.getOrientation());
       }
    }

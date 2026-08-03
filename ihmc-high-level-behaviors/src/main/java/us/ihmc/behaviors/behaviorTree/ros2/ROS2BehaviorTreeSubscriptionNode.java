@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import behavior_msgs.msg.dds.*;
+import behavior_msgs.*;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 
 import java.util.ArrayList;
@@ -33,7 +33,6 @@ public class ROS2BehaviorTreeSubscriptionNode
    private EZGripperActionStateMessage ezGripperActionStateMessage;
    private ArmActionStateMessage armActionStateMessage;
    private HandWrenchActionStateMessage handWrenchActionStateMessage;
-   private ScrewPrimitiveActionStateMessage screwPrimitiveActionStateMessage;
    private PelvisActionStateMessage pelvisActionStateMessage;
    private WaitActionStateMessage waitActionStateMessage;
    private LegActionStateMessage legActionStateMessage;
@@ -66,7 +65,6 @@ public class ROS2BehaviorTreeSubscriptionNode
       ezGripperActionStateMessage = null;
       armActionStateMessage = null;
       handWrenchActionStateMessage = null;
-      screwPrimitiveActionStateMessage = null;
       pelvisActionStateMessage = null;
       waitActionStateMessage = null;
       legActionStateMessage = null;
@@ -317,16 +315,6 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setHandWrenchActionStateMessage(HandWrenchActionStateMessage handWrenchActionStateMessage)
    {
       this.handWrenchActionStateMessage = handWrenchActionStateMessage;
-   }
-
-   public ScrewPrimitiveActionStateMessage getScrewPrimitiveActionStateMessage()
-   {
-      return screwPrimitiveActionStateMessage;
-   }
-
-   public void setScrewPrimitiveActionStateMessage(ScrewPrimitiveActionStateMessage screwPrimitiveActionStateMessage)
-   {
-      this.screwPrimitiveActionStateMessage = screwPrimitiveActionStateMessage;
    }
 
    public PelvisActionStateMessage getPelvisActionStateMessage()

@@ -4,23 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
-import java.util.Random;
-import java.util.stream.Stream;
-
+import controller_msgs.ArmTrajectoryMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import controller_msgs.NeckTrajectoryMessage;
+import controller_msgs.RobotConfigurationData;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.NeckTrajectoryMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import toolbox_msgs.msg.dds.WalkingControllerPreviewInputMessage;
-import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
+import toolbox_msgs.WalkingControllerPreviewInputMessage;
+import toolbox_msgs.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -40,10 +35,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -75,6 +70,10 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.Arrays;
+import java.util.Random;
+import java.util.stream.Stream;
 
 @Tag("humanoid-toolbox")
 public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implements MultiRobotTestInterface
@@ -176,7 +175,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       }
 
       WalkingControllerPreviewInputMessage input = new WalkingControllerPreviewInputMessage();
-      Object<FootstepDataMessage> footstepDataList = input.getFootsteps().getFootstepDataList();
+      IDLObjectSequence<FootstepDataMessage> footstepDataList = input.getFootsteps().getFootstepDataList();
       int numberOfFootsteps = 10;
 
       for (int i = 0; i < numberOfFootsteps; i++)
@@ -288,7 +287,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       }
 
       WalkingControllerPreviewInputMessage input = new WalkingControllerPreviewInputMessage();
-      Object<FootstepDataMessage> footstepDataList = input.getFootsteps().getFootstepDataList();
+      IDLObjectSequence<FootstepDataMessage> footstepDataList = input.getFootsteps().getFootstepDataList();
       int numberOfFootsteps = 10;
 
       for (int i = 0; i < numberOfFootsteps; i++)
@@ -298,7 +297,9 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(side, footPose.getPosition(), footPose.getOrientation()));
       }
 
-      simulationTestHelper.publishToController(new FootstepDataListMessage(input.getFootsteps()));
+      FootstepDataListMessage footstepsToPublish = new FootstepDataListMessage();
+      footstepsToPublish.set(input.getFootsteps());
+      simulationTestHelper.publishToController(footstepsToPublish);
       toolboxInputManager.submitMessage(input);
 
       enableToolboxUpdater.set(true);
@@ -468,7 +469,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       }
 
       WalkingControllerPreviewInputMessage input = new WalkingControllerPreviewInputMessage();
-      Object<FootstepDataMessage> footstepDataList = input.getFootsteps().getFootstepDataList();
+      IDLObjectSequence<FootstepDataMessage> footstepDataList = input.getFootsteps().getFootstepDataList();
       int numberOfFootsteps = 2;
 
       for (int i = 0; i < numberOfFootsteps; i++)
@@ -479,7 +480,9 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(side, footPose));
       }
 
-      simulationTestHelper.publishToController(new FootstepDataListMessage(input.getFootsteps()));
+      FootstepDataListMessage footstepsToPublish = new FootstepDataListMessage();
+      footstepsToPublish.set(input.getFootsteps());
+      simulationTestHelper.publishToController(footstepsToPublish);
       toolboxInputManager.submitMessage(input);
 
       enableToolboxUpdater.set(true);

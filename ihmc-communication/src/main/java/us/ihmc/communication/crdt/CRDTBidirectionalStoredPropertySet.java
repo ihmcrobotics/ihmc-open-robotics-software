@@ -1,6 +1,6 @@
 package us.ihmc.communication.crdt;
 
-import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
+import ihmc_common_msgs.PrimitiveDataVectorMessage;
 import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;

@@ -1,8 +1,10 @@
 package us.ihmc.communication.property;
 
-import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
-import us.ihmc.idl.IDLSequence.Boolean;
+import ihmc_common_msgs.PrimitiveDataVectorMessage;
+
+// Removed old IDL import - jros2 IDLBoolSequence returns boolean directly
 import us.ihmc.tools.property.BooleanStoredPropertyKey;
+import us.ihmc.fastddsjava.cdr.idl.IDLBoolSequence;
 import us.ihmc.tools.property.DoubleStoredPropertyKey;
 import us.ihmc.tools.property.IntegerStoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertyKey;
@@ -46,7 +48,7 @@ public class StoredPropertySetMessageTools
          }
          else if (key instanceof BooleanStoredPropertyKey booleanKey)
          {
-            if (storedPropertySet.get(booleanKey) != (message.getBooleanValues().get(booleanIndex) == Boolean.True))
+            if (storedPropertySet.get(booleanKey) != message.getBooleanValues().get(booleanIndex))
                return false;
             ++booleanIndex;
          }
@@ -64,9 +66,9 @@ public class StoredPropertySetMessageTools
 
    public static void toMessage(PrimitiveDataVectorMessage message, StoredPropertySetReadOnly storedPropertySet)
    {
-      message.getDoubleValues().resetQuick();
-      message.getIntegerValues().resetQuick();
-      message.getBooleanValues().resetQuick();
+      message.getDoubleValues().clear();
+      message.getIntegerValues().clear();
+      message.getBooleanValues().clear();
 
       for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
       {
@@ -105,7 +107,7 @@ public class StoredPropertySetMessageTools
          }
          else if (key instanceof BooleanStoredPropertyKey booleanKey)
          {
-            storedPropertySet.set(booleanKey, message.getBooleanValues().get(booleanIndex) == Boolean.True);
+            storedPropertySet.set(booleanKey, message.getBooleanValues().get(booleanIndex));
             ++booleanIndex;
          }
       }

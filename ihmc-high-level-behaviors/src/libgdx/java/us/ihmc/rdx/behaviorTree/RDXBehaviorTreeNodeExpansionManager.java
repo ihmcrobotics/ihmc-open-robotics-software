@@ -21,6 +21,7 @@ public class RDXBehaviorTreeNodeExpansionManager
    private static final Path EXPANSION_SETTINGS_PATH = IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("configurations/BehaviorTreeNodeExpansions.ini");
 
    private final Map<String, Boolean> expansionStates = new HashMap<>();
+   private final Object expansionStatesLock = new Object();
    private static int deleteRetries = 0;
 
    public RDXBehaviorTreeNodeExpansionManager()
@@ -30,12 +31,18 @@ public class RDXBehaviorTreeNodeExpansionManager
 
    public boolean isExpanded(String nodeName)
    {
-      return expansionStates.getOrDefault(nodeName, true);
+      synchronized (expansionStatesLock)
+      {
+         return expansionStates.getOrDefault(nodeName, true);
+      }
    }
 
    public void setExpanded(String nodeName, boolean expanded)
    {
-      expansionStates.put(nodeName, expanded);
+      synchronized (expansionStatesLock)
+      {
+         expansionStates.put(nodeName, expanded);
+      }
       saveAsync();
    }
 
@@ -50,8 +57,14 @@ public class RDXBehaviorTreeNodeExpansionManager
          if (!file.exists())
             file.createNewFile();
 
+         Map<String, Boolean> expansionStatesSnapshot;
+         synchronized (expansionStatesLock)
+         {
+            expansionStatesSnapshot = new HashMap<>(expansionStates);
+         }
+
          Properties properties = new Properties();
-         for (Map.Entry<String, Boolean> entry : expansionStates.entrySet())
+         for (Map.Entry<String, Boolean> entry : expansionStatesSnapshot.entrySet())
             properties.setProperty(entry.getKey(), String.valueOf(entry.getValue()));
 
          try (FileOutputStream output = new FileOutputStream(file))
@@ -86,9 +99,12 @@ public class RDXBehaviorTreeNodeExpansionManager
             properties.load(input);
          }
 
-         expansionStates.clear();
-         for (String key : properties.stringPropertyNames())
-            expansionStates.put(key, Boolean.parseBoolean(properties.getProperty(key)));
+         synchronized (expansionStatesLock)
+         {
+            expansionStates.clear();
+            for (String key : properties.stringPropertyNames())
+               expansionStates.put(key, Boolean.parseBoolean(properties.getProperty(key)));
+         }
       }
       catch (Exception e)
       {

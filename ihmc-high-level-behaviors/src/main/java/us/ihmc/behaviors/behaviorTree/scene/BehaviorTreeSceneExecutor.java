@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
-import behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage;
+import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.BehaviorTreeSceneStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.detections.InstantDetection;
@@ -160,10 +160,11 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    {
       return switch (BehaviorTreeSceneObjectType.values()[definition.getObjectType()])
       {
+         case YOLO_ONLY, FOUNDATION_POSE -> new BehaviorTreeSceneObjectExecutor(id, crdtInfo, syncedRobot, definition);
+         case COMPOSITE_FRAME -> new BehaviorTreeSceneCompositeFrameExecutor(id, crdtInfo, syncedRobot, definition, this);
          case DOOR_PANEL -> new BehaviorTreeSceneDoorPanelExecutor(id, crdtInfo, syncedRobot, definition);
          case DOOR_FRAME -> new BehaviorTreeSceneDoorFrameExecutor(id, crdtInfo, syncedRobot, definition, this);
-         case COMPOSITE_FRAME -> new BehaviorTreeSceneCompositeFrameExecutor(id, crdtInfo, syncedRobot, definition, this);
-         default -> new BehaviorTreeSceneObjectExecutor(id, crdtInfo, syncedRobot, definition);
+         case APPROACH_TABLE -> new BehaviorTreeSceneApproachTableExecutor(id, crdtInfo, syncedRobot, definition, this);
       };
    }
 

@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
+import toolbox_msgs.KinematicsToolboxCenterOfMassMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -52,9 +52,9 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
          return;
       }
       sequenceId = message.getSequenceId();
-      desiredPosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredPositionInWorld());
+      desiredPosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredPositionInWorld().getPoint());
       hasDesiredVelocity = message.getHasDesiredLinearVelocity();
-      desiredVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredLinearVelocityInWorld());
+      desiredVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredLinearVelocityInWorld().getVector());
       selectionMatrix.clearSelection();
       selectionMatrix.clearSelection();
       selectionMatrix.selectXAxis(message.getSelectionMatrix().getXSelected());

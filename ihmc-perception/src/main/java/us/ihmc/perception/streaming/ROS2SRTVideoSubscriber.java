@@ -1,18 +1,24 @@
 package us.ihmc.perception.streaming;
 
+import static org.bytedeco.ffmpeg.global.avutil.AV_LOG_FATAL;
+import static org.bytedeco.ffmpeg.global.avutil.av_log_set_level;
+import static us.ihmc.perception.streaming.StreamingTools.CONNECTION_TIMEOUT;
+
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.SRTStreamStatus;
-import perception_msgs.msg.dds.VideoFrameExtraData;
+import perception_msgs.SRTStreamStatus;
+import perception_msgs.VideoFrameExtraData;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.fastddsjava.cdr.CDRBuffer;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.ros2.ROS2Topic;
 
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -20,10 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-
-import static org.bytedeco.ffmpeg.global.avutil.AV_LOG_FATAL;
-import static org.bytedeco.ffmpeg.global.avutil.av_log_set_level;
-import static us.ihmc.perception.streaming.StreamingTools.CONNECTION_TIMEOUT;
 
 public class ROS2SRTVideoSubscriber
 {
@@ -42,13 +44,13 @@ public class ROS2SRTVideoSubscriber
 
    private final VideoFrameExtraData frameDataMessage = new VideoFrameExtraData();
 
-   public ROS2SRTVideoSubscriber(ROS2Helper ros2, ROS2Topic<SRTStreamStatus> streamTopic, PixelFormat outputPixelFormat)
+   public ROS2SRTVideoSubscriber(ROS2Node ros2Node, ROS2Topic<SRTStreamStatus> streamTopic, PixelFormat outputPixelFormat)
    {
       av_log_set_level(AV_LOG_FATAL); // silences no key frame errors which are 99% safe to ignore
 
       this.outputPixelFormat = outputPixelFormat;
 
-      streamStatusMonitor = new ROS2StreamStatusMonitor(ros2, streamTopic);
+      streamStatusMonitor = new ROS2StreamStatusMonitor(ros2Node, streamTopic);
       videoReceiver = new SRTVideoReceiver(outputPixelFormat.toFFmpegPixelFormat());
       subscriptionThread = ThreadTools.startAThread(this::subscriptionUpdate, "ROS2SRTVideoSubscription");
       
@@ -147,10 +149,15 @@ public class ROS2SRTVideoSubscriber
                else
                {
                   BytePointer serializedFrameDataMessage = videoReceiver.getLastFrameSideData();
-                  MessageTools.deserialize(serializedFrameDataMessage.asByteBuffer(), frameDataMessage);
+                  CDRBuffer cdrBuffer = new CDRBuffer();
+                  cdrBuffer.ensureRemainingCapacity(serializedFrameDataMessage.asByteBuffer().remaining());
+                  cdrBuffer.getBufferUnsafe().put(serializedFrameDataMessage.asByteBuffer());
+                  cdrBuffer.getBufferUnsafe().flip();
+                  cdrBuffer.readPayloadHeader();
+                  frameDataMessage.deserialize(cdrBuffer);
                }
 
-               FramePose3D frameSensorPose = new FramePose3D(frameDataMessage.getSensorPose());
+               FramePose3D frameSensorPose = new FramePose3D(ReferenceFrame.getWorldFrame(), frameDataMessage.getSensorPose().getPose());
 
                Instant frameAcquisitionTime;
                try
@@ -160,8 +167,8 @@ public class ROS2SRTVideoSubscriber
                catch (DateTimeException exception)
                {
                   LogTools.error("Invalid frameAcquisitionTime received: {}S{}",
-                                 frameDataMessage.getAcquisitionTime().seconds_since_epoch_,
-                                 frameDataMessage.getAcquisitionTime().additional_nanos_);
+                                 frameDataMessage.getAcquisitionTime().getSecondsSinceEpoch(),
+                                 frameDataMessage.getAcquisitionTime().getAdditionalNanos());
                   continue;
                }
 

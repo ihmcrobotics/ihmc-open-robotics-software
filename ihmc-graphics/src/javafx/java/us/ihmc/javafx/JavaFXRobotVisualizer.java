@@ -1,10 +1,6 @@
 package us.ihmc.javafx;
 
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.ToDoubleFunction;
-import java.util.zip.CRC32;
-
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -23,6 +19,10 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
+
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.ToDoubleFunction;
+import java.util.zip.CRC32;
 
 public class JavaFXRobotVisualizer
 {
@@ -190,8 +190,9 @@ public class JavaFXRobotVisualizer
 
       public Configuration(RobotConfigurationData robotConfigurationData)
       {
-         rootJointPose = new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootPosition());
-         jointAngles = robotConfigurationData.getJointAngles().toArray();
+         rootJointPose = new RigidBodyTransform(robotConfigurationData.getRootOrientation().getQuaternion(), robotConfigurationData.getRootPosition().getPoint());
+         jointAngles = new float[robotConfigurationData.getJointAngles().size()];
+         robotConfigurationData.getJointAngles().getBuffer().get(0, jointAngles, 0, jointAngles.length);
       }
 
       public Configuration(OneDoFJointBasics[] allJoints, RigidBodyTransform rootJointTransform, ToDoubleFunction<String> jointNameToAngleFunction)

@@ -1,20 +1,21 @@
 package us.ihmc.footstepPlanning.communication;
 
-import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
-import behavior_msgs.msg.dds.ContinuousWalkingStatusMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import ihmc_common_msgs.msg.dds.PoseListMessage;
-import perception_msgs.msg.dds.TerrainMapMessage;
-import std_msgs.msg.dds.Float32;
-import std_msgs.msg.dds.Empty;
+import behavior_msgs.ContinuousHikingCommandMessage;
+import behavior_msgs.ContinuousWalkingStatusMessage;
+import controller_msgs.FootstepDataListMessage;
+import ihmc_common_msgs.PoseListMessage;
+import perception_msgs.TerrainMapMessage;
+import std_msgs.Empty;
+import std_msgs.Float32;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Topic;
 
 public class ContinuousHikingAPI
 {
    public static final String IHMC_TOPIC_PREFIX = "ihmc";
    private static final String moduleName =  "continuous_hiking";
-   public static final ROS2Topic<?> IHMC_ROOT = new ROS2Topic<>().withPrefix(IHMC_TOPIC_PREFIX);
+   public static final HumanoidROS2Topic<?> IHMC_ROOT = new HumanoidROS2Topic<>().withPrefix(IHMC_TOPIC_PREFIX);
    private static final String ACTIVE_MODULE_NAME = "active_perception";
 
    // Commands supported for the Continuous Hiking Process

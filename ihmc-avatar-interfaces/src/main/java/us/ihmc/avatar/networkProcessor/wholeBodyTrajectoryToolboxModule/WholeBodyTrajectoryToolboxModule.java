@@ -1,8 +1,8 @@
 package us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
-import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
-import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
+import controller_msgs.RobotConfigurationData;
+import toolbox_msgs.WholeBodyTrajectoryToolboxMessage;
+import toolbox_msgs.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -15,8 +15,9 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Reac
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,14 +70,14 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    }
 
    @Override
-   public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
+   public List<Class<? extends ROS2Message<?>>> createListOfSupportedStatus()
    {
       return supportedStatus();
    }
 
-   static List<Class<? extends Settable<?>>> supportedStatus()
+   static List<Class<? extends ROS2Message<?>>> supportedStatus()
    {
-      List<Class<? extends Settable<?>>> status = new ArrayList<>();
+      List<Class<? extends ROS2Message<?>>> status = new ArrayList<>();
       status.add(WholeBodyTrajectoryToolboxOutputStatus.class);
       return status;
    }
@@ -119,9 +120,10 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    {
       ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 
-      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class), s -> {
+      ros2Node.createSubscriptionSampler(controllerOutputTopic.withType(RobotConfigurationData.class), sample ->
+      {
          if (wholeBodyTrajectoryToolboxController != null)
-            wholeBodyTrajectoryToolboxController.updateRobotConfigurationData(s.takeNextData());
+            wholeBodyTrajectoryToolboxController.updateRobotConfigurationData(sample);
       });
    }
 }

@@ -1,8 +1,8 @@
 package us.ihmc.rdx.ui.teleoperation;
 
-import controller_msgs.msg.dds.*;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
+import controller_msgs.*;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.SO3TrajectoryPointMessage;
 import imgui.ImGui;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -683,7 +683,7 @@ public class RDXHumanoidDemoPoses extends RDXPanel
          SO3TrajectoryPointMessage point = chestTrajectoryMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast();
          SO3TrajectoryPointMessage newPoint = chestTrajectoryMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints().add();
          newPoint.getOrientation().set(desiredChestOrientation);
-         newPoint.getAngularVelocity().setToZero();
+         newPoint.getAngularVelocity().getVector().setToZero();
          newPoint.setTime(point.getTime() + trajectoryDuration);
       }
 

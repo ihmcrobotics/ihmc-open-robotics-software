@@ -1,6 +1,6 @@
 package us.ihmc.avatar;
 
-import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.ControllerCrashNotificationPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
@@ -20,6 +20,8 @@ import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
@@ -29,8 +31,6 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -102,7 +102,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                  HighLevelHumanoidControllerFactory controllerFactory,
                                  HumanoidRobotContextDataFactory contextDataFactory,
                                  DRCOutputProcessor outputProcessor,
-                                 RealtimeROS2Node realtimeROS2Node,
+                                 AsyncROS2Node asyncROS2Node,
                                  double gravity,
                                  boolean kinematicsSimulation)
    {
@@ -129,9 +129,9 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
       currentRobotMotionStatus.set(robotMotionStatusHolder.getCurrentRobotMotionStatus());
 
-      if (realtimeROS2Node != null)
+      if (asyncROS2Node != null)
       {
-         crashNotificationPublisher = realtimeROS2Node.createPublisher(HumanoidControllerAPI.getTopic(ControllerCrashNotificationPacket.class, robotName));
+         crashNotificationPublisher = asyncROS2Node.createPublisher(HumanoidControllerAPI.getTopic(ControllerCrashNotificationPacket.class, robotName));
       }
       else
       {

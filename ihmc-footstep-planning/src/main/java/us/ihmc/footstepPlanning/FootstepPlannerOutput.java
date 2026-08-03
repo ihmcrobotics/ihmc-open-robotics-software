@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning;
 
-import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -219,6 +219,8 @@ public class FootstepPlannerOutput
     */
    public void setPacket(FootstepPlanningToolboxOutputStatus outputStatusToPack)
    {
+      outputStatusToPack.getStacktrace().clear();
+      outputStatusToPack.setExceptionMessage("");
       outputStatusToPack.setPlanId(getRequestId());
       outputStatusToPack.getFootstepDataList().set(FootstepDataMessageConverter.createFootstepDataListFromPlan(getFootstepPlan(), -1.0, -1.0));
       outputStatusToPack.getBodyPath().clear();
@@ -242,10 +244,10 @@ public class FootstepPlannerOutput
          StackTraceElement[] stackTrace = getException().getStackTrace();
          if(stackTrace != null)
          {
-            int numberOfElements = Math.min(exception.getStackTrace().length, 20);
+            int numberOfElements = Math.min(stackTrace.length, 20);
             for (int i = 0; i < numberOfElements; i++)
             {
-               outputStatusToPack.getStacktrace().add(exception.getStackTrace()[i].toString());
+               outputStatusToPack.getStacktrace().add(stackTrace[i].toString());
             }
          }
       }

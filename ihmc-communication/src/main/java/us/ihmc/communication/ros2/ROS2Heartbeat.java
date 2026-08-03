@@ -1,11 +1,11 @@
 package us.ihmc.communication.ros2;
 
-import std_msgs.msg.dds.Empty;
+import std_msgs.Empty;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.thread.RepeatingTaskThread;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 
 /**
  * Use this class to indicate to other things on the network that something is active.
@@ -65,6 +65,7 @@ public class ROS2Heartbeat
    public void destroy()
    {
       publishThread.blockingKill(); // Important to use blockingKill() - we don't want the publisher to get removed before this finishes
-      heartbeatPublisher.remove();
+      // TODO: Need ros2Node reference to call destroyPublisher
+      // ros2Node.destroyPublisher(heartbeatPublisher);
    }
 }

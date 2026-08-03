@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
+import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.BehaviorTreeSceneObjectStateMessage;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -13,6 +13,7 @@ import us.ihmc.log.LogTools;
 public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinition
 {
    private final long id;
+   protected final CRDTBidirectionalBoolean valid;
    protected final CRDTBidirectionalBoolean frozen;
    protected final CRDTBidirectionalRigidBodyTransform transform;
    protected final ReferenceFrame referenceFrame;
@@ -27,30 +28,33 @@ public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinit
       referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("%s_%d".formatted(getName(), id),
                                                                                        ReferenceFrame.getWorldFrame(),
                                                                                        transform.getValueReadOnly());
+      valid = new CRDTBidirectionalBoolean(this, false);
       frozen = new CRDTBidirectionalBoolean(this, false);
    }
 
    public void toMessage(BehaviorTreeSceneObjectStateMessage message)
    {
       super.toMessage(message.getLatestModificationToData());
-      message.setId(id);
+      message.setId((int) id);
       super.toMessage(message.getDefinition());
       transform.toMessage(message.getTransformToWorld());
+      message.setValid(valid.toMessage());
       message.setFrozen(frozen.toMessage());
    }
 
    public void fromMessage(BehaviorTreeSceneObjectStateMessage message)
    {
       // Needs to be done first to detect incoming modification
-      fromMessage(message.getLatestModificationToData());
+      super.fromMessage(message.getLatestModificationToData());
 
       if (id != message.getId())
          LogTools.error("IDs should match! {} != {}", id, message.getId());
 
-      fromMessage(message.getDefinition());
+      super.fromMessage(message.getDefinition());
 
       transform.fromMessage(message.getTransformToWorld());
       referenceFrame.update();
+      valid.fromMessage(message.getValid());
       frozen.fromMessage(message.getFrozen());
    }
 
@@ -74,6 +78,16 @@ public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinit
       return frozen.getValue();
    }
 
+   public void setValid(boolean valid)
+   {
+      this.valid.setValue(valid);
+   }
+
+   public boolean isValid()
+   {
+      return valid.getValue();
+   }
+
    public long getID()
    {
       return id;
@@ -93,5 +107,6 @@ public class BehaviorTreeSceneObjectState extends BehaviorTreeSceneObjectDefinit
    {
       transform.getValueAndModify().set(transformToWorld);
       referenceFrame.update();
+      valid.setValue(true);
    }
 }

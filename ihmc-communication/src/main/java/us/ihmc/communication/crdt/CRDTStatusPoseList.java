@@ -4,7 +4,8 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.euclid.jros2.messages.EuclidPose3DMessage;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 
 /**
  * Represents a list of  that should only be modified by one actor type
@@ -28,25 +29,26 @@ public class CRDTStatusPoseList extends CRDTStatusMutableField<RecyclingArrayLis
       return getValueInternal().size();
    }
 
-   public void toMessage(IDLSequence.Object<Pose3D> message)
+   public void toMessage(IDLObjectSequence<EuclidPose3DMessage> messages)
    {
-      message.clear();
+      messages.clear();
 
       for (Pose3D pose3D : getValueInternal())
       {
-         message.add().set(pose3D);
+         messages.add().set(pose3D);
       }
    }
 
-   public void fromMessage(IDLSequence.Object<Pose3D> message)
+   public void fromMessage(IDLObjectSequence<EuclidPose3DMessage> messages)
    {
       if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
       {
          getValueInternal().clear();
 
-         for (Pose3D pose3D : message)
+         for (EuclidPose3DMessage message : messages)
          {
-            getValueInternal().add().set(pose3D);
+            Pose3D pose = message.getPose();
+            getValueInternal().add().set(pose);
          }
       }
    }

@@ -8,8 +8,8 @@ import imgui.type.ImInt;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionDefinition.SceneActionType;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionState;
-import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition.CompositeFrameType;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectDefinition.CompositeFrameType;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectType;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.perception.detections.yolo.SyncedYOLOv8ModelParameters;
@@ -21,9 +21,9 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.imgui.ImStringWrapper;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8ModelSettings;
 import us.ihmc.rdx.ui.widgets.ImGuiSceneActionWidget;
-import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 
 public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionDefinition>
 {
@@ -48,6 +48,8 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
    private final ImFloatWrapper historyDurationWidget;
    private final ImIntegerWrapper minPostPointsWidget;
    private final ImIntegerWrapper minRecessPointsWidget;
+   private final ImIntegerWrapper minCapsulePointsWidget;
+   private final ImFloatWrapper searchStartXWidget;
    private final ImStringWrapper compositeFrameNameWidget;
    private final ImGuiReferenceFrameLibraryCombo compositeFrameAComboBox;
    private final ImGuiReferenceFrameLibraryCombo compositeFrameBComboBox;
@@ -112,6 +114,12 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
       minRecessPointsWidget = new ImIntegerWrapper(() -> definition.getSceneObjectDefinition().getMinRecessPoints(),
                                                    value -> definition.getSceneObjectDefinition().setMinRecessPoints(value),
                                                    imInteger -> ImGui.inputInt(labels.get("Min Recess Points"), imInteger));
+      minCapsulePointsWidget = new ImIntegerWrapper(() -> definition.getSceneObjectDefinition().getMinCapsulePoints(),
+                                                    value -> definition.getSceneObjectDefinition().setMinCapsulePoints(value),
+                                                    imInteger -> ImGui.inputInt(labels.get("Min Capsule Points"), imInteger));
+      searchStartXWidget = new ImFloatWrapper(() -> definition.getSceneObjectDefinition().getSearchStartX(),
+                                              value -> definition.getSceneObjectDefinition().setSearchStartX(value),
+                                              imFloat -> ImGui.inputFloat(labels.get("Search Start X"), imFloat, 0.01f, 0.1f));
       compositeFrameNameWidget = new ImStringWrapper(() -> definition.getSceneObjectDefinition().getCompositeFrameName(),
                                                      value -> definition.getSceneObjectDefinition().setCompositeFrameName(value),
                                                      imString -> ImGui.inputText(labels.get("Composite Frame Name"), imString));
@@ -133,9 +141,11 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
    {
       super.update();
 
-      nominalObjectPoseGizmo.getPoseGizmo().setParentFrame(scene.findFrameByName("Walking"));
-
-      RDXCRDTTools.syncGizmoWithBidirectionalField(nominalObjectPoseGizmo.getPoseGizmo(), definition.getNominalObjectPose(), definition);
+      if (definition.usesNominalObjectPose())
+      {
+         nominalObjectPoseGizmo.getPoseGizmo().setParentFrame(scene.findFrameByName("Walking"));
+         RDXCRDTTools.syncGizmoWithBidirectionalField(nominalObjectPoseGizmo.getPoseGizmo(), definition.getNominalObjectPose(), definition);
+      }
 
       for (RDXROS2YOLOv8ModelSettings settings : yoloModelSettings)
          settings.update(definition);
@@ -205,13 +215,6 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
                   objectDefinition.setFoundationPoseObjectType(IsaacROSFoundationPoseObject.values()[imFPType.get()]);
                ImGui.popItemWidth();
             }
-            else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.DOOR_FRAME)
-            {
-               ImGui.pushItemWidth(100.0f);
-               minPostPointsWidget.renderImGuiWidget();
-               minRecessPointsWidget.renderImGuiWidget();
-               ImGui.popItemWidth();
-            }
             else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.COMPOSITE_FRAME)
             {
                ImGui.pushItemWidth(200.0f);
@@ -236,11 +239,26 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
                   compositeFrameDistanceWidget.renderImGuiWidget();
                ImGui.popItemWidth();
             }
+            else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.DOOR_FRAME)
+            {
+               ImGui.pushItemWidth(100.0f);
+               minPostPointsWidget.renderImGuiWidget();
+               minRecessPointsWidget.renderImGuiWidget();
+               ImGui.popItemWidth();
+            }
+            else if (objectDefinition.getObjectType() == BehaviorTreeSceneObjectType.APPROACH_TABLE)
+            {
+               ImGui.pushItemWidth(100.0f);
+               minCapsulePointsWidget.renderImGuiWidget();
+               searchStartXWidget.renderImGuiWidget();
+               ImGui.popItemWidth();
+            }
 
             ImGui.pushItemWidth(100.0f);
             timeoutWidget.renderImGuiWidget();
             minHistorySizeWidget.renderImGuiWidget();
-            ImGui.checkbox(labels.get("Adjust Nominal Object Pose"), nominalObjectPoseGizmo.getSelected());
+            if (definition.usesNominalObjectPose())
+               ImGui.checkbox(labels.get("Adjust Nominal Object Pose"), nominalObjectPoseGizmo.getSelected());
             ImGui.popItemWidth();
 
          }
@@ -331,24 +349,22 @@ public class RDXSceneAction extends RDXActionNode<SceneActionState, SceneActionD
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (getSelected())
+      if (getSelected() && definition.usesNominalObjectPose())
          nominalObjectPoseGizmo.calculate3DViewPick(input);
    }
 
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (getSelected())
+      if (getSelected() && definition.usesNominalObjectPose())
          nominalObjectPoseGizmo.process3DViewInput(input);
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (getSelected())
-      {
+      if (getSelected() && definition.usesNominalObjectPose())
          nominalObjectPoseGizmo.getVirtualRenderables(renderables, pool);
-      }
    }
 
    @Override

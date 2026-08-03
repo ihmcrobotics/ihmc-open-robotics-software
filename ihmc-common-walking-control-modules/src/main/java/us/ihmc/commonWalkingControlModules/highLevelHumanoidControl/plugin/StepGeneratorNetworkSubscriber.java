@@ -6,8 +6,12 @@ import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2QoSProfile;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,25 +34,24 @@ public class StepGeneratorNetworkSubscriber
    private final AtomicReference<ControllerNetworkSubscriber.MessageValidator> messageValidator;
 
    /** All the possible messages that can be sent to the communicator. */
-   private final List<Class<? extends Settable<?>>> listOfSupportedControlMessages;
-   private final List<Class<? extends Settable<?>>> listOfSupportedStatusMessages;
+   private final List<Class<? extends ROS2Message<?>>> listOfSupportedControlMessages;
+   private final List<Class<? extends ROS2Message<?>>> listOfSupportedStatusMessages;
 
-   //
-   private final Map<Class<? extends Settable<?>>, ROS2Publisher<?>> statusMessagePublisherMap = new HashMap<>();
+   private final Map<Class<? extends ROS2Message<?>>, ROS2Publisher<?>> statusMessagePublisherMap = new HashMap<>();
 
-   private final RealtimeROS2Node realtimeROS2Node;
+   private final AsyncROS2Node asyncROS2Node;
 
    private final ROS2Topic<?> baseTopic;
 
    public StepGeneratorNetworkSubscriber(ROS2Topic<?> baseTopic,
                                          CommandInputManager csgCommandInputManager,
                                          StatusMessageOutputManager csgStatusMessageOutputManager,
-                                         RealtimeROS2Node realtimeROS2Node)
+                                         AsyncROS2Node asyncROS2Node)
    {
       this.baseTopic = baseTopic;
       this.commandInputManager = csgCommandInputManager;
       this.statusMessageOutputManager = csgStatusMessageOutputManager;
-      this.realtimeROS2Node = realtimeROS2Node;
+      this.asyncROS2Node = asyncROS2Node;
 
       listOfSupportedControlMessages = csgCommandInputManager.getListOfSupportedMessages();
       listOfSupportedStatusMessages = csgStatusMessageOutputManager.getListOfSupportedMessages();
@@ -56,60 +59,60 @@ public class StepGeneratorNetworkSubscriber
       messageFilter = new AtomicReference<>(message -> true);
       messageValidator = new AtomicReference<>(message -> null);
 
-      if (realtimeROS2Node == null)
+      if (asyncROS2Node == null)
          LogTools.error("No ROS2 node, {} cannot be created.", getClass().getSimpleName());
 
       createSubscribersForSupportedMessages();
       createPublishersForSupportedMessages();
    }
 
-   public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
-                                                                            int expectedMessageSize,
-                                                                            MessageUnpackingTools.MessageUnpacker<T> messageUnpacker)
+   public <T extends ROS2Message<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
+                                                                             int expectedMessageSize,
+                                                                             MessageUnpackingTools.MessageUnpacker<T> messageUnpacker)
    {
       registerSubcriberWithMessageUnpacker(multipleMessageType, baseTopic, expectedMessageSize, messageUnpacker);
    }
 
-   public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
-                                                                            ROS2Topic<?> inputTopic,
-                                                                            int expectedMessageSize,
-                                                                            MessageUnpackingTools.MessageUnpacker<T> messageUnpacker)
+   public <T extends ROS2Message<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
+                                                                             ROS2Topic<?> inputTopic,
+                                                                             int expectedMessageSize,
+                                                                             MessageUnpackingTools.MessageUnpacker<T> messageUnpacker)
    {
       registerSubcriberWithMessageUnpacker(multipleMessageType, inputTopic, null, expectedMessageSize, messageUnpacker);
    }
 
-   public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
-                                                                            ROS2Topic<?> inputTopic,
-                                                                            ROS2QosProfile qosProfile,
-                                                                            int expectedMessageSize,
-                                                                            MessageUnpackingTools.MessageUnpacker<T> messageUnpacker)
+   public <T extends ROS2Message<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
+                                                                             ROS2Topic<?> inputTopic,
+                                                                             ROS2QoSProfile qosProfile,
+                                                                             int expectedMessageSize,
+                                                                             MessageUnpackingTools.MessageUnpacker<T> messageUnpacker)
    {
-      final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
+      final List<ROS2Message<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
-      ROS2Topic<T> topicName = inputTopic.withTypeName(multipleMessageType);
-      try
+      ROS2Topic<T> topic = ControllerAPI.getTopic(inputTopic, multipleMessageType);
+      T localInstance = ROS2Message.createInstance(multipleMessageType);
+
+      if (qosProfile != null)
       {
-         T localInstance = multipleMessageType.newInstance();
-         NewMessageListener<T> messageListener = s ->
+         asyncROS2Node.createSubscription(topic, reader ->
          {
-            s.takeNextData(localInstance, null);
+            reader.read(localInstance);
             unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, localInstance);
-         };
-
-         if (qosProfile != null)
-            topicName = topicName.withQoS(qosProfile);
-
-         realtimeROS2Node.createSubscription(topicName, messageListener);
+         }, qosProfile);
       }
-      catch (InstantiationException | IllegalAccessException e)
+      else
       {
-         throw new RuntimeException(e);
+         asyncROS2Node.createSubscription(topic, reader ->
+         {
+            reader.read(localInstance);
+            unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, localInstance);
+         });
       }
    }
 
-   private <T extends Settable<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass,
+   private <T extends ROS2Message<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass,
                                                            MessageUnpackingTools.MessageUnpacker<T> messageUnpacker,
-                                                           List<Settable<?>> unpackedMessages,
+                                                           List<ROS2Message<?>> unpackedMessages,
                                                            T multipleMessageHolder)
    {
       if (DEBUG)
@@ -154,45 +157,50 @@ public class StepGeneratorNetworkSubscriber
    }
 
    @SuppressWarnings("unchecked")
-   private <T extends Settable<T>> void createSubscribersForSupportedMessages()
+   private void createSubscribersForSupportedMessages()
    {
       for (int i = 0; i < listOfSupportedControlMessages.size(); i++)
       { // Creating the subscribers
-         Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
-         T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
+         Class<? extends ROS2Message<?>> messageClass = (Class<? extends ROS2Message<?>>) listOfSupportedControlMessages.get(i);
+         @SuppressWarnings({"unchecked", "rawtypes"})
+         Class messageClassRaw = messageClass;
 
-         realtimeROS2Node.createSubscription(ControllerAPI.getTopic(baseTopic, messageClass), s ->
+         asyncROS2Node.createSubscription(ControllerAPI.getTopic(baseTopic, messageClassRaw), reader ->
          {
-            s.takeNextData(messageLocalInstance, null);
-            receivedMessage(messageLocalInstance);
+            ROS2Message<?> message = reader.read();
+            if (message != null)
+               receivedMessage(message);
          });
       }
    }
 
-   private <T extends Settable<T>> void createPublishersForSupportedMessages()
+   @SuppressWarnings("unchecked")
+   private void createPublishersForSupportedMessages()
    {
       for (int i = 0; i < listOfSupportedStatusMessages.size(); i++)
       {
-         Class<T> messageClass = (Class<T>) listOfSupportedStatusMessages.get(i);
+         Class<? extends ROS2Message<?>> messageClass = (Class<? extends ROS2Message<?>>) listOfSupportedStatusMessages.get(i);
          statusMessagePublisherMap.put(messageClass, createPublisher(messageClass));
       }
 
       statusMessageOutputManager.attachGlobalStatusMessageListener(statusMessage -> publishStatusMessage(statusMessage));
    }
 
-   private <T> void publishStatusMessage(T message)
+   @SuppressWarnings({"unchecked", "rawtypes"})
+   private void publishStatusMessage(ROS2Message<?> message)
    {
-      ROS2Publisher<T> publisher = (ROS2Publisher<T>) statusMessagePublisherMap.get(message.getClass());
-      publisher.publish(message);
+      ROS2Publisher publisher = (ROS2Publisher) statusMessagePublisherMap.get(message.getClass());
+      publisher.publish((ROS2Message) message);
    }
 
-   private <T extends Settable<T>> ROS2Publisher<T> createPublisher(Class<T> messageClass)
+   @SuppressWarnings({"unchecked", "rawtypes"})
+   private ROS2Publisher<?> createPublisher(Class<? extends ROS2Message<?>> messageClass)
    {
-      return realtimeROS2Node.createPublisher(ControllerAPI.getTopic(baseTopic, messageClass));
+      return asyncROS2Node.createPublisher(ControllerAPI.getTopic(baseTopic, (Class) messageClass));
    }
 
    @SuppressWarnings("unchecked")
-   private <T extends Settable<T>> void receivedMessage(Settable<?> message)
+   private <T extends ROS2Message<T>> void receivedMessage(ROS2Message<?> message)
    {
       if (DEBUG)
          LogTools.debug("Received message: {}, {}", message.getClass().getSimpleName(), message);
@@ -204,12 +212,12 @@ public class StepGeneratorNetworkSubscriber
          commandInputManager.submitMessage((T) message);
    }
 
-   private boolean testMessageWithMessageFilter(Settable<?> messageToTest)
+   private boolean testMessageWithMessageFilter(ROS2Message<?> messageToTest)
    {
       if (!messageFilter.get().isMessageValid(messageToTest))
       {
          if (DEBUG)
-            LogTools.error("Packet failed to validate filter! Filter class: {}, rejected message: {}",
+            LogTools.error("Message failed to validate filter! Filter class: {}, rejected message: {}",
                            messageFilter.get().getClass().getSimpleName(),
                            messageToTest.getClass().getSimpleName());
          return false;

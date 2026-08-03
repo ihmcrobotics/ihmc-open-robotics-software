@@ -5,12 +5,13 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ArUcoMarkerPoses;
-import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.filters.DetectionFilter;
+import perception_msgs.ArUcoMarkerPoses;
 import us.ihmc.commons.time.FrequencyCalculator;
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.perception.filters.DetectionFilter;
 
 import java.util.function.Function;
 
@@ -31,7 +32,7 @@ public class OpenCVArUcoMarkerROS2Publisher
 {
    private final OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults;
    private final ArUcoMarkerPoses arUcoMarkerPoses = new ArUcoMarkerPoses();
-   private final ROS2Helper ros2;
+   private final ROS2PublisherMap publisherMap;
    private final Function<Integer, Double> markerSizes;
    private final ReferenceFrame sensorFrame;
    private final TIntObjectMap<DetectionFilter> detectionFilters = new TIntObjectHashMap<>();
@@ -39,12 +40,12 @@ public class OpenCVArUcoMarkerROS2Publisher
    private final FrequencyCalculator updateFrequencyCalculator = new FrequencyCalculator();
 
    public OpenCVArUcoMarkerROS2Publisher(OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults,
-                                         ROS2Helper ros2,
+                                         ROS2Node ros2Node,
                                          Function<Integer, Double> markerSizes,
                                          ReferenceFrame sensorFrame)
    {
       this.arUcoMarkerDetectionResults = arUcoMarkerDetectionResults;
-      this.ros2 = ros2;
+      this.publisherMap = new ROS2PublisherMap(ros2Node);
       this.markerSizes = markerSizes;
       this.sensorFrame = sensorFrame;
    }
@@ -87,11 +88,11 @@ public class OpenCVArUcoMarkerROS2Publisher
                                                 markerSize,
                                                 sensorFrame,
                                                 ReferenceFrame.getWorldFrame(),
-                                                arUcoMarkerPoses.getPosition().add(),
-                                                arUcoMarkerPoses.getOrientation().add());
+                                                arUcoMarkerPoses.getPosition().add().getPoint(),
+                                                arUcoMarkerPoses.getOrientation().add().getQuaternion());
          }
       }
-      ros2.publish(PerceptionAPI.ARUCO_MARKER_POSES, arUcoMarkerPoses);
+      publisherMap.publish(PerceptionAPI.ARUCO_MARKER_POSES, arUcoMarkerPoses);
 
       // Update detection filters
       for (TIntObjectIterator<DetectionFilter> iterator = detectionFilters.iterator(); iterator.hasNext(); )

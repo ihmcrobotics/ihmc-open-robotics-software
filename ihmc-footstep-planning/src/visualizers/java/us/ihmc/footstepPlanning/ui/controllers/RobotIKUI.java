@@ -1,25 +1,19 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.apache.commons.lang3.tuple.Pair;
-
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.NeckTrajectoryMessage;
-import controller_msgs.msg.dds.SpineTrajectoryMessage;
+import controller_msgs.ArmTrajectoryMessage;
+import controller_msgs.ChestTrajectoryMessage;
+import controller_msgs.FootTrajectoryMessage;
+import controller_msgs.HandTrajectoryMessage;
+import controller_msgs.HeadTrajectoryMessage;
+import controller_msgs.NeckTrajectoryMessage;
+import controller_msgs.SpineTrajectoryMessage;
 import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -37,6 +31,11 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RobotIKUI
 {

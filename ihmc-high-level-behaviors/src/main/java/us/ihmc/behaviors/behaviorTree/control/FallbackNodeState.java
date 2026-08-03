@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.control;
 
-import behavior_msgs.msg.dds.FallbackNodeStateMessage;
+import behavior_msgs.FallbackNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;

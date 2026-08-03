@@ -1,8 +1,11 @@
 package us.ihmc.avatar.scs2;
 
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
+
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import ihmc_common_msgs.msg.dds.StampedPosePacket;
+import ihmc_common_msgs.StampedPosePacket;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarEstimatorThreadFactory;
@@ -49,6 +52,7 @@ import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -63,7 +67,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
@@ -76,6 +79,9 @@ import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
+import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoPhysicsEngine;
+import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParameters;
+import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
@@ -110,9 +116,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
-
 public class SCS2AvatarSimulationFactory
 {
    protected final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
@@ -120,8 +123,8 @@ public class SCS2AvatarSimulationFactory
          "highLevelHumanoidControllerFactory");
    protected final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
 
-   protected final OptionalFactoryField<RealtimeROS2Node> realtimeROS2Node = new OptionalFactoryField<>(
-         "realtimeROS2Node");
+   protected final OptionalFactoryField<AsyncROS2Node> asyncROS2Node = new OptionalFactoryField<>(
+         "asyncROS2Node");
    protected final OptionalFactoryField<Double> simulationDT = new OptionalFactoryField<>("simulationDT");
    protected final OptionalFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>(
          "robotInitialSetup");
@@ -171,6 +174,11 @@ public class SCS2AvatarSimulationFactory
          false);
    protected final OptionalFactoryField<Consumer<RobotDefinition>> bulletCollisionMutator = new OptionalFactoryField<>(
          "bulletCollisionMutator");
+   protected final OptionalFactoryField<Boolean> useMujocoPhysicsEngine = new OptionalFactoryField<>(
+         "useMujocoPhysicsEngine",
+         false);
+   protected final OptionalFactoryField<MujocoSimulationParametersReadOnly> mujocoSimulationParameters = new OptionalFactoryField<>(
+         "mujocoSimulationParameters");
    protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>(
          "impulseBasedPhysicsEngineParameters");
    protected final OptionalFactoryField<GroundContactModelParameters> groundContactModelParameters = new OptionalFactoryField<>(
@@ -269,9 +277,9 @@ public class SCS2AvatarSimulationFactory
       avatarSimulation.setShowGUI(showGUI.get());
       avatarSimulation.setAutomaticallyStartSimulation(automaticallyStartSimulation.get());
 
-      if (realtimeROS2Node.hasBeenSet())
+      if (asyncROS2Node.hasBeenSet())
       {
-         avatarSimulation.setRealTimeROS2Node(realtimeROS2Node.get());
+         avatarSimulation.setAsyncROS2Node(asyncROS2Node.get());
       }
 
       FactoryTools.disposeFactory(this);
@@ -342,6 +350,20 @@ public class SCS2AvatarSimulationFactory
       {
          physicsEngineFactory = (inertialFrame, rootRegistry) -> new BulletPhysicsEngine(inertialFrame, rootRegistry);
       }
+      else if (useMujocoPhysicsEngine.hasValue() && useMujocoPhysicsEngine.get())
+      {
+         // MuJoCo requires its internal timestep to match the SCS2 session DT, otherwise sim time
+         // diverges from wall time. Start from caller-supplied parameters if present, then
+         // override timestep so ordering of setSimulationDT vs setMujocoSimulationParameters
+         // doesn't matter.
+         // Copy into a mutable instance so we can override the timestep without mutating the
+         // caller-supplied (read-only) parameters.
+         MujocoSimulationParameters mujocoParameters = new MujocoSimulationParameters();
+         if (mujocoSimulationParameters.hasValue())
+            mujocoParameters.set(mujocoSimulationParameters.get());
+         mujocoParameters.setTimestep(simulationDT.get());
+         physicsEngineFactory = (inertialFrame, rootRegistry) -> new MujocoPhysicsEngine(inertialFrame, rootRegistry, mujocoParameters);
+      }
       else
       {
          physicsEngineFactory = (inertialFrame, rootRegistry) ->
@@ -376,12 +398,16 @@ public class SCS2AvatarSimulationFactory
          simulationConstructionSet.addTerrainObject(terrainObjectDefinition);
       }
       robot = simulationConstructionSet.addRobot(robotDefinition);
-      robot.addThrottledController(new SCS2StateEstimatorDebugVariables(simulationConstructionSet.getInertialFrame(),
-                                                                        gravity.get(),
-                                                                        robotModel.getEstimatorDT(),
-                                                                        robot.getControllerManager()
-                                                                             .getControllerInput()),
-                                   robotModel.getEstimatorDT());
+
+      // The debug variables don't need to be updated when the GUI isn't shown as users won't have a way of debugging
+      if (showGUI.get())
+      {
+         robot.addThrottledController(new SCS2StateEstimatorDebugVariables(simulationConstructionSet.getInertialFrame(),
+                                                                           gravity.get(),
+                                                                           robotModel.getEstimatorDT(),
+                                                                           robot.getControllerManager().getControllerInput()), robotModel.getEstimatorDT());
+      }
+
       if (createRigidBodyMutators.hasValue() && createRigidBodyMutators.get())
       {
          robot.addThrottledController(new SCS2RobotRigidBodyMutator(robot,
@@ -469,21 +495,21 @@ public class SCS2AvatarSimulationFactory
       }
       else
       {
-         if (realtimeROS2Node.hasBeenSet())
+         if (asyncROS2Node.hasBeenSet())
          {
-            pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeROS2Node.get(), robotName);
-            realtimeROS2Node.get()
-                            .createSubscription(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName),
-                                                s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
+            pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(asyncROS2Node.get(), robotName);
+            asyncROS2Node.get()
+                            .createSubscriptionSampler(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName),
+                                                       sample -> pelvisPoseCorrectionCommunicator.receivedPacket(sample));
          }
       }
 
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
       AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
 
-      if (realtimeROS2Node.hasBeenSet())
+      if (asyncROS2Node.hasBeenSet())
       {
-         avatarEstimatorThreadFactory.setROS2Info(realtimeROS2Node.get(), robotName);
+         avatarEstimatorThreadFactory.setROS2Info(asyncROS2Node.get(), robotName);
       }
       avatarEstimatorThreadFactory.configureWithDRCRobotModel(robotModel.get(), robotInitialSetup.get());
       avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
@@ -502,10 +528,10 @@ public class SCS2AvatarSimulationFactory
       String robotName = robotModel.get().getSimpleRobotName();
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
 
-      RealtimeROS2Node ros2Node = null;
-      if (realtimeROS2Node.hasBeenSet())
+      AsyncROS2Node ros2Node = null;
+      if (asyncROS2Node.hasBeenSet())
       {
-         ros2Node = realtimeROS2Node.get();
+         ros2Node = asyncROS2Node.get();
       }
 
       controllerThread = new AvatarControllerThread(robotName,
@@ -538,9 +564,9 @@ public class SCS2AvatarSimulationFactory
          footstepAdjustment = new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get());
       }
 
-      RealtimeROS2Node ros2Node = null;
-      if (realtimeROS2Node.hasBeenSet())
-         ros2Node = realtimeROS2Node.get();
+      AsyncROS2Node ros2Node = null;
+      if (asyncROS2Node.hasBeenSet())
+         ros2Node = asyncROS2Node.get();
       stepGeneratorThread = new AvatarStepGeneratorThread(contextDataFactory,
                                                           highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
                                                           highLevelHumanoidControllerFactory.get().getCommandInputManager(),
@@ -570,7 +596,7 @@ public class SCS2AvatarSimulationFactory
 
       ikStreamingRealTimePluginFactory = new IKStreamingRTPluginFactory();
       ikStreamingRTThread = ikStreamingRealTimePluginFactory.createRTThread(robotModel.get().getSimpleRobotName(),
-                                                                            realtimeROS2Node.get(),
+                                                                            asyncROS2Node.get(),
                                                                             highLevelHumanoidControllerFactory.get()
                                                                                                               .getCommandInputManager(),
                                                                             highLevelHumanoidControllerFactory.get()
@@ -617,9 +643,9 @@ public class SCS2AvatarSimulationFactory
       SimulatedHandControlTask handControlTask = null;
       AvatarSimulatedHandControlThread handControlThread = null;
 
-      if (realtimeROS2Node.hasBeenSet())
+      if (asyncROS2Node.hasBeenSet())
       {
-         handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get(),
+         handControlThread = robotModel.createSimulatedHandController(asyncROS2Node.get(),
                                                                       kinematicsSimulation.get());
 
          if (handControlThread != null)
@@ -947,9 +973,9 @@ public class SCS2AvatarSimulationFactory
       else
          controllerFactory.setInitialState(initialState.get());
 
-      if (realtimeROS2Node.hasBeenSet())
+      if (asyncROS2Node.hasBeenSet())
       {
-         controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node.get());
+         controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), asyncROS2Node.get());
       }
 
       setHighLevelHumanoidControllerFactory(controllerFactory);
@@ -1083,9 +1109,9 @@ public class SCS2AvatarSimulationFactory
       this.showGUI.set(showGUI);
    }
 
-   public void setRealtimeROS2Node(RealtimeROS2Node realtimeROS2Node)
+   public void setAsyncROS2Node(AsyncROS2Node asyncROS2Node)
    {
-      this.realtimeROS2Node.set(realtimeROS2Node);
+      this.asyncROS2Node.set(asyncROS2Node);
    }
 
    public void setCreateYoVariableServer(boolean createYoVariableServer)
@@ -1136,6 +1162,16 @@ public class SCS2AvatarSimulationFactory
    public void setBulletCollisionMutator(Consumer<RobotDefinition> bulletCollisionMutator)
    {
       this.bulletCollisionMutator.set(bulletCollisionMutator);
+   }
+
+   public void setUseMujocoPhysicsEngine(boolean useMujocoPhysicsEngine)
+   {
+      this.useMujocoPhysicsEngine.set(useMujocoPhysicsEngine);
+   }
+
+   public void setMujocoSimulationParameters(MujocoSimulationParametersReadOnly mujocoSimulationParameters)
+   {
+      this.mujocoSimulationParameters.set(mujocoSimulationParameters);
    }
 
    public void setEnableSimulatedRobotDamping(boolean enableSimulatedRobotDamping)

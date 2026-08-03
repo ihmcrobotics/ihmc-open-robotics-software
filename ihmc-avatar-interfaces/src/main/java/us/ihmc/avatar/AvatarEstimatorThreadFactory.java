@@ -1,9 +1,9 @@
 package us.ihmc.avatar;
 
-import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
-import controller_msgs.msg.dds.ReinitializeStateEstimatorMessage;
-import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.ControllerCrashNotificationPacket;
+import controller_msgs.ReinitializeStateEstimatorMessage;
+import controller_msgs.RequestWristForceSensorCalibrationPacket;
+import controller_msgs.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
@@ -22,6 +22,9 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -33,9 +36,6 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -96,7 +96,7 @@ public class AvatarEstimatorThreadFactory
 
    private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisPoseSubscriberField = new OptionalFactoryField<>("externalPelvisPoseSubscriberField");
 
-   private final OptionalFactoryField<RealtimeROS2Node> realtimeROS2NodeField = new OptionalFactoryField<>("realtimeROS2Node");
+   private final OptionalFactoryField<AsyncROS2Node> asyncROS2NodeField = new OptionalFactoryField<>("asyncROS2Node");
    private final OptionalFactoryField<ROS2Topic<?>> outputTopicField = new OptionalFactoryField<>("outputTopic");
    private final OptionalFactoryField<ROS2Topic<?>> inputTopicField = new OptionalFactoryField<>("inputTopic");
 
@@ -131,7 +131,7 @@ public class AvatarEstimatorThreadFactory
     *
     * <pre>
     * AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
-    * avatarEstimatorThreadFactory.setROS2Info(realtimeROS2Node, robotName);
+    * avatarEstimatorThreadFactory.setROS2Info(asyncROS2Node, robotName);
     * avatarEstimatorThreadFactory.configureWithDRCRobotModel(robotModel);
     * avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
     * avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(contextDataFactory);
@@ -218,7 +218,7 @@ public class AvatarEstimatorThreadFactory
     *                  {@link HumanoidControllerAPI#getOutputTopic(String)} and
     *                  {@link HumanoidControllerAPI#getInputTopic(String)}.
     */
-   public void setROS2Info(RealtimeROS2Node ros2Node, String robotName)
+   public void setROS2Info(AsyncROS2Node ros2Node, String robotName)
    {
       setROS2Info(ros2Node, HumanoidControllerAPI.getOutputTopic(robotName), HumanoidControllerAPI.getInputTopic(robotName));
    }
@@ -230,9 +230,9 @@ public class AvatarEstimatorThreadFactory
     * @param outputTopic the generator to use for creating the topic name for publishers.
     * @param inputTopic  the generator to use for creating the topic name for subscribers.
     */
-   public void setROS2Info(RealtimeROS2Node ros2Node, ROS2Topic<?> outputTopic, ROS2Topic<?> inputTopic)
+   public void setROS2Info(AsyncROS2Node ros2Node, ROS2Topic<?> outputTopic, ROS2Topic<?> inputTopic)
    {
-      realtimeROS2NodeField.set(ros2Node);
+      asyncROS2NodeField.set(ros2Node);
       outputTopicField.set(outputTopic);
       inputTopicField.set(inputTopic);
    }
@@ -481,17 +481,17 @@ public class AvatarEstimatorThreadFactory
       estimatorFactory.setExternalPelvisCorrectorSubscriber(getExternalPelvisPoseSubscriberField());
       DRCKinematicsBasedStateEstimator stateEstimator = estimatorFactory.createStateEstimator(getEstimatorRegistry(), getStateEstimatorParameters()::getEstimatorDT);
 
-      if (realtimeROS2NodeField.hasValue())
+      if (asyncROS2NodeField.hasValue())
       {
          ForceSensorStateUpdater forceSensorStateUpdater = stateEstimator.getForceSensorStateUpdater();
-         realtimeROS2NodeField.get().createSubscription(inputTopicField.get().withTypeName(RequestWristForceSensorCalibrationPacket.class),
+         asyncROS2NodeField.get().createSubscription(inputTopicField.get().withType(RequestWristForceSensorCalibrationPacket.class),
                                      subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
-         realtimeROS2NodeField.get().createSubscription(inputTopicField.get().withTypeName(ReinitializeStateEstimatorMessage.class),
-                                     subscriber ->
-                                     {
-                                        if (subscriber.takeNextData().getRequestReinitialize())
-                                           stateEstimator.requestReinitializeEstimator();
-                                     });
+         asyncROS2NodeField.get().createSubscriptionSampler(inputTopicField.get().withType(ReinitializeStateEstimatorMessage.class),
+                                                            sample ->
+                                                            {
+                                                               if (sample.getRequestReinitialize())
+                                                                  stateEstimator.requestReinitializeEstimator();
+                                                            });
       }
 
       return stateEstimator;
@@ -526,10 +526,10 @@ public class AvatarEstimatorThreadFactory
       return ekfStateEstimator;
    }
 
-   public RealtimeROS2Node getRealtimeROS2Node()
+   public AsyncROS2Node getAsyncROS2Node()
    {
-      if (realtimeROS2NodeField.hasValue())
-         return realtimeROS2NodeField.get();
+      if (asyncROS2NodeField.hasValue())
+         return asyncROS2NodeField.get();
       else
          return null;
    }
@@ -552,8 +552,8 @@ public class AvatarEstimatorThreadFactory
 
    private ROS2Publisher<ControllerCrashNotificationPacket> createControllerCrashPublisher()
    {
-      if (realtimeROS2NodeField.hasValue())
-         return realtimeROS2NodeField.get().createPublisher(ControllerAPI.getTopic(outputTopicField.get(), ControllerCrashNotificationPacket.class));
+      if (asyncROS2NodeField.hasValue())
+         return asyncROS2NodeField.get().createPublisher(ControllerAPI.getTopic(outputTopicField.get(), ControllerCrashNotificationPacket.class));
       else
          return null;
    }
@@ -788,7 +788,7 @@ public class AvatarEstimatorThreadFactory
 
    public RobotConfigurationDataPublisher getRobotConfigurationDataPublisher()
    {
-      if (!realtimeROS2NodeField.hasValue())
+      if (!asyncROS2NodeField.hasValue())
          return null;
 
       if (!robotConfigurationDataPublisherField.hasValue())
@@ -801,7 +801,7 @@ public class AvatarEstimatorThreadFactory
          factory.setDefinitionsToPublish(getEstimatorFullRobotModel());
          factory.setSensorSource(getEstimatorFullRobotModel(), forceSensorDataHolderToSend, getRawSensorOutputMap());
          factory.setRobotMotionStatusHolder(getRobotMotionStatusFromController());
-         factory.setROS2Info(realtimeROS2NodeField.get(), outputTopicField.get());
+         factory.setROS2Info(asyncROS2NodeField.get(), outputTopicField.get());
          factory.setPublishPeriod(Conversions.secondsToNanoseconds(StateEstimatorParameters.ROBOT_CONFIGURATION_DATA_PUBLISH_DT));
          robotConfigurationDataPublisherField.set(factory.createRobotConfigurationDataPublisher());
       }
