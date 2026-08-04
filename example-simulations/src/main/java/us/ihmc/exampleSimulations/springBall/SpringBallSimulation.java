@@ -1,49 +1,58 @@
 package us.ihmc.exampleSimulations.springBall;
 
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
+import us.ihmc.scs2.definition.geometry.Box3DDefinition;
+import us.ihmc.scs2.definition.geometry.GeometryDefinition;
+import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
+import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.SimulationSessionControls;
+import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
+import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
 
 public class SpringBallSimulation
 {
-   private SimulationConstructionSet sim;
-
    public SpringBallSimulation()
    {
-      SpringBallRobot springBall = new SpringBallRobot();
+      SpringBallRobotDefinition springBall = new SpringBallRobotDefinition();
 
+      // Same stiffness/damping values as the original SCS1 LinearGroundContactModel(springBall, 400.0, 10.0, 80.0, 100.0, ...).
+      ContactPointBasedContactParameters contactParameters = new ContactPointBasedContactParameters();
+      contactParameters.setKxy(400.0);
+      contactParameters.setBxy(10.0);
+      contactParameters.setKz(80.0);
+      contactParameters.setBz(100.0);
 
-      // sim.setGroundVisible(false);
-      springBall.setGroundContactModel(new LinearGroundContactModel(springBall, 400.0, 10.0, 80.0, 100.0, springBall.getRobotsYoRegistry()));
+      SimulationSession simulationSession = new SimulationSession(PhysicsEngineFactory.newContactPointBasedPhysicsEngineFactory(contactParameters));
+      simulationSession.addRobot(springBall);
+      simulationSession.addTerrainObject(flatGround());
 
-      SpringBallController controller = new SpringBallController(springBall, "springBallController");
-      springBall.setController(controller);
+      SimulationSessionControls simulationSessionControls = simulationSession.getSimulationSessionControls();
+      simulationSessionControls.setDT(0.002);
+      simulationSessionControls.setBufferRecordTickPeriod(5);
 
-      sim = new SimulationConstructionSet(springBall);
+      SessionVisualizer.startSessionVisualizer(simulationSession);
+   }
 
-      sim.setCameraTracking(false, false, false, false);
-      sim.setCameraDolly(false, false, false, false);
+   private static TerrainObjectDefinition flatGround()
+   {
+      RigidBodyTransform originPose = new RigidBodyTransform();
+      originPose.appendTranslation(0.0, 0.0, -0.25);
 
-      // sim.setCameraPosition(1.0,1.0,0.5);
-      // sim.setCameraFix(0.0,0.0,0.8);
+      GeometryDefinition groundGeometry = new Box3DDefinition(10000.0, 10000.0, 0.50);
 
-      // sim.setCameraTrackingVars("ef_track00_x", "ef_track00_y", "ef_track00_z");
-
-      sim.setupEntryBox("offset_spike");
-      sim.setupEntryBox("amp_spike");
-      sim.setupEntryBox("freq_spike");
-      sim.setupEntryBox("k_spike");
-      sim.setupEntryBox("b_spike");
-
-      sim.setDT(0.002, 5);
-      sim.setFastSimulate(true);
-      Thread myThread = new Thread(sim);
-      myThread.start();
+      TerrainObjectDefinition terrain = new TerrainObjectDefinition();
+      terrain.addVisualDefinition(new VisualDefinition(originPose, groundGeometry, new MaterialDefinition(ColorDefinitions.DarkGray())));
+      terrain.addCollisionShapeDefinition(new CollisionShapeDefinition(originPose, groundGeometry));
+      return terrain;
    }
 
    public static void main(String[] args)
    {
-	   
       new SpringBallSimulation();
-   
    }
 }

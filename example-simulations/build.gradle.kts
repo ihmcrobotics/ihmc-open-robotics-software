@@ -17,6 +17,13 @@ mainDependencies {
    api("us.ihmc:scs2-examples:17-0.33.2")
 
    api("us.ihmc:ihmc-simulation-toolkit:source")
+
+   var javaFXVersion = "17.0.8"
+   api(ihmc.javaFXModule("base", javaFXVersion))
+   api(ihmc.javaFXModule("controls", javaFXVersion))
+   api(ihmc.javaFXModule("graphics", javaFXVersion))
+   api(ihmc.javaFXModule("fxml", javaFXVersion))
+   api(ihmc.javaFXModule("swing", javaFXVersion))
 }
 
 testDependencies {
