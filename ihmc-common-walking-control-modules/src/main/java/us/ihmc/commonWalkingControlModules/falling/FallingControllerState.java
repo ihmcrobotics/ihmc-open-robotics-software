@@ -49,7 +49,7 @@ public class FallingControllerState extends HighLevelControllerState
    private final double[] capturedJointVelocities;
    private final double[] initialJointStiffnesses;
    private final double[] initialJointDampings;
-   private final boolean[] verticalLoweringJoints;
+   private final boolean[] firstStageJoints;
    private final WholeBodySetpointParameters fallingSetpoints;
 
    public FallingControllerState(CommandInputManager commandInputManager,
@@ -116,10 +116,10 @@ public class FallingControllerState extends HighLevelControllerState
       capturedJointVelocities = new double[controlledJoints.length];
       initialJointStiffnesses = new double[controlledJoints.length];
       initialJointDampings = new double[controlledJoints.length];
-      verticalLoweringJoints = new boolean[controlledJoints.length];
+      firstStageJoints = new boolean[controlledJoints.length];
       for (int i = 0; i < controlledJoints.length; i++)
       {
-         verticalLoweringJoints[i] = isVerticalLoweringJoint(controlledJoints[i].getName());
+         firstStageJoints[i] = isFirstStageJoint(controlledJoints[i].getName());
       }
       this.fallingSetpoints = fallingSetpoints;
       fallingTrialConfiguration.set(FallingTrialConfiguration.DEFAULT);
@@ -263,7 +263,7 @@ public class FallingControllerState extends HighLevelControllerState
             capturedJointVelocities[i] = controlledJoints[i].getQd();
          }
 
-         loweringJointPositions[i] = verticalLoweringJoints[i] ? capturedJointPositions[i] : initialJointPositions[i];
+         loweringJointPositions[i] = firstStageJoints[i] ? capturedJointPositions[i] : initialJointPositions[i];
 
          JointDesiredOutputReadOnly previousJointData = highLevelControllerOutput != null ? highLevelControllerOutput.getJointDesiredOutput(controlledJoints[i]) : null;
          JointDesiredOutputReadOnly fallingJointData = fallingJointSettings.getJointDesiredOutput(controlledJoints[i]);
@@ -312,14 +312,25 @@ public class FallingControllerState extends HighLevelControllerState
       return (1.0 - alpha) * start + alpha * end;
    }
 
-   private static boolean isVerticalLoweringJoint(String jointName)
+   private static boolean isFirstStageJoint(String jointName)
    {
       String lowerCaseJointName = jointName.toLowerCase();
+      return isVerticalLoweringJoint(lowerCaseJointName) || isArmOrHeadJoint(lowerCaseJointName);
+   }
+
+   private static boolean isVerticalLoweringJoint(String lowerCaseJointName)
+   {
       boolean legJoint = lowerCaseJointName.contains("hip") || lowerCaseJointName.contains("knee") || lowerCaseJointName.contains("ankle");
       boolean pitchJoint = lowerCaseJointName.contains("pitch") || lowerCaseJointName.endsWith("_y") || lowerCaseJointName.endsWith("y");
       boolean yawOrRollJoint = lowerCaseJointName.contains("yaw") || lowerCaseJointName.contains("roll") || lowerCaseJointName.endsWith("_x")
                                || lowerCaseJointName.endsWith("_z");
 
       return legJoint && pitchJoint && !yawOrRollJoint;
+   }
+
+   private static boolean isArmOrHeadJoint(String lowerCaseJointName)
+   {
+      return lowerCaseJointName.contains("shoulder") || lowerCaseJointName.contains("elbow") || lowerCaseJointName.contains("wrist")
+             || lowerCaseJointName.contains("neck") || lowerCaseJointName.contains("head");
    }
 }
