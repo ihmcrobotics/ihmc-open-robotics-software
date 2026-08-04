@@ -25,6 +25,7 @@ public class FallingControllerState extends HighLevelControllerState
    private static final HighLevelControllerName controllerState = HighLevelControllerName.FALLING_STATE;
    private final YoDouble fallTransitionDuration;
    private final YoDouble fallVerticalLoweringDuration;
+   private final YoDouble fallArmConfigurationDuration;
    private final YoDouble fallGainInterpolationDuration;
    private final YoDouble fallGainInterpolationAlpha;
    private final YoBoolean fallGainInterpolationActive;
@@ -33,8 +34,10 @@ public class FallingControllerState extends HighLevelControllerState
    private final JointDesiredOutputListReadOnly highLevelControllerOutput;
    private final YoPolynomial trajectory = new YoPolynomial("fallingTrajectory", 4, registry);
    private final YoPolynomial loweringTrajectory = new YoPolynomial("fallingLoweringTrajectory", 4, registry);
+   private final YoPolynomial armConfigurationTrajectory = new YoPolynomial("fallingArmConfigurationTrajectory", 4, registry);
    private final YoDouble fallingLoweringAlpha = new YoDouble("fallingLoweringAlpha", registry);
    private final YoDouble fallingConfigurationAlpha = new YoDouble("fallingConfigurationAlpha", registry);
+   private final YoDouble fallingArmConfigurationAlpha = new YoDouble("fallingArmConfigurationAlpha", registry);
    private final YoEnum<FallingTrajectoryMode> fallingTrajectoryMode = new YoEnum<>("fallingTrajectoryMode", registry, FallingTrajectoryMode.class, false);
    private final YoBoolean enableFallingDampingMode = new YoBoolean("enableFallingDampingMode", registry);
    private final YoBoolean fallingDampingModeActive = new YoBoolean("fallingDampingModeActive", registry);
@@ -49,7 +52,8 @@ public class FallingControllerState extends HighLevelControllerState
    private final double[] capturedJointVelocities;
    private final double[] initialJointStiffnesses;
    private final double[] initialJointDampings;
-   private final boolean[] firstStageJoints;
+   private final boolean[] verticalLoweringJoints;
+   private final boolean[] armOrHeadJoints;
    private final WholeBodySetpointParameters fallingSetpoints;
 
    public FallingControllerState(CommandInputManager commandInputManager,
@@ -101,6 +105,8 @@ public class FallingControllerState extends HighLevelControllerState
       fallTransitionDuration.set(0.75);
       fallVerticalLoweringDuration = new YoDouble("fallVerticalLoweringDuration", registry);
       fallVerticalLoweringDuration.set(0.5);
+      fallArmConfigurationDuration = new YoDouble("fallArmConfigurationDuration", registry);
+      fallArmConfigurationDuration.set(0.25);
       fallGainInterpolationDuration = new YoDouble("fallGainInterpolationDuration", registry);
       fallGainInterpolationDuration.set(0.5);
       fallGainInterpolationAlpha = new YoDouble("fallGainInterpolationAlpha", registry);
@@ -116,10 +122,13 @@ public class FallingControllerState extends HighLevelControllerState
       capturedJointVelocities = new double[controlledJoints.length];
       initialJointStiffnesses = new double[controlledJoints.length];
       initialJointDampings = new double[controlledJoints.length];
-      firstStageJoints = new boolean[controlledJoints.length];
+      verticalLoweringJoints = new boolean[controlledJoints.length];
+      armOrHeadJoints = new boolean[controlledJoints.length];
       for (int i = 0; i < controlledJoints.length; i++)
       {
-         firstStageJoints[i] = isFirstStageJoint(controlledJoints[i].getName());
+         String lowerCaseJointName = controlledJoints[i].getName().toLowerCase();
+         verticalLoweringJoints[i] = isVerticalLoweringJoint(lowerCaseJointName);
+         armOrHeadJoints[i] = isArmOrHeadJoint(lowerCaseJointName);
       }
       this.fallingSetpoints = fallingSetpoints;
       fallingTrialConfiguration.set(FallingTrialConfiguration.DEFAULT);
@@ -139,6 +148,8 @@ public class FallingControllerState extends HighLevelControllerState
       double loweringAlphaVelocity = 0.0;
       double configurationAlphaPosition = 1.0;
       double configurationAlphaVelocity = 0.0;
+      double armConfigurationAlphaPosition = 1.0;
+      double armConfigurationAlphaVelocity = 0.0;
 
       if (useStagedTrajectory && timeInState < loweringDuration)
       {
@@ -168,8 +179,26 @@ public class FallingControllerState extends HighLevelControllerState
          configurationAlphaVelocity = loweringAlphaVelocity;
       }
 
+      if (useStagedTrajectory)
+      {
+         double armConfigurationDuration = getArmConfigurationDuration();
+         if (armConfigurationDuration > 1.0e-3)
+         {
+            double timeInArmConfiguration = MathTools.clamp(timeInState, 0.0, armConfigurationDuration);
+            armConfigurationTrajectory.compute(timeInArmConfiguration);
+            armConfigurationAlphaPosition = armConfigurationTrajectory.getValue();
+            armConfigurationAlphaVelocity = armConfigurationTrajectory.getVelocity();
+         }
+      }
+      else
+      {
+         armConfigurationAlphaPosition = configurationAlphaPosition;
+         armConfigurationAlphaVelocity = configurationAlphaVelocity;
+      }
+
       fallingLoweringAlpha.set(loweringAlphaPosition);
       fallingConfigurationAlpha.set(configurationAlphaPosition);
+      fallingArmConfigurationAlpha.set(armConfigurationAlphaPosition);
 
       for (int i = 0; i < controlledJoints.length; i++)
       {
@@ -187,7 +216,12 @@ public class FallingControllerState extends HighLevelControllerState
             double desiredPosition;
             double desiredVelocity;
 
-            if (useStagedTrajectory && timeInState < loweringDuration)
+            if (useStagedTrajectory && armOrHeadJoints[i])
+            {
+               desiredPosition = interpolate(initialJointPositions[i], capturedJointPositions[i], armConfigurationAlphaPosition);
+               desiredVelocity = armConfigurationAlphaVelocity * (capturedJointPositions[i] - initialJointPositions[i]);
+            }
+            else if (useStagedTrajectory && timeInState < loweringDuration)
             {
                desiredPosition = interpolate(initialJointPositions[i], loweringJointPositions[i], loweringAlphaPosition);
                desiredVelocity = loweringAlphaVelocity * (loweringJointPositions[i] - initialJointPositions[i]);
@@ -234,10 +268,13 @@ public class FallingControllerState extends HighLevelControllerState
       double totalTransitionDuration = getTotalTransitionDuration();
       double loweringDuration = getLoweringDuration();
       double configurationDuration = totalTransitionDuration - loweringDuration;
+      double armConfigurationDuration = getArmConfigurationDuration();
       loweringTrajectory.setCubic(0.0, Math.max(1.0e-3, loweringDuration), 0.0, 0.0, 1.0, 0.0);
       trajectory.setCubic(0.0, Math.max(1.0e-3, configurationDuration), 0.0, 0.0, 1.0, 0.0);
+      armConfigurationTrajectory.setCubic(0.0, Math.max(1.0e-3, armConfigurationDuration), 0.0, 0.0, 1.0, 0.0);
       fallingLoweringAlpha.set(0.0);
       fallingConfigurationAlpha.set(0.0);
+      fallingArmConfigurationAlpha.set(0.0);
       fallingDampingModeActive.set(false);
       fallGainInterpolationActive.set(getPreviousHighLevelControllerName() == HighLevelControllerName.WALKING && highLevelControllerOutput != null);
       fallGainInterpolationAlpha.set(fallGainInterpolationActive.getBooleanValue() ? 0.0 : 1.0);
@@ -263,7 +300,7 @@ public class FallingControllerState extends HighLevelControllerState
             capturedJointVelocities[i] = controlledJoints[i].getQd();
          }
 
-         loweringJointPositions[i] = firstStageJoints[i] ? capturedJointPositions[i] : initialJointPositions[i];
+         loweringJointPositions[i] = verticalLoweringJoints[i] ? capturedJointPositions[i] : initialJointPositions[i];
 
          JointDesiredOutputReadOnly previousJointData = highLevelControllerOutput != null ? highLevelControllerOutput.getJointDesiredOutput(controlledJoints[i]) : null;
          JointDesiredOutputReadOnly fallingJointData = fallingJointSettings.getJointDesiredOutput(controlledJoints[i]);
@@ -293,6 +330,11 @@ public class FallingControllerState extends HighLevelControllerState
       return MathTools.clamp(fallVerticalLoweringDuration.getDoubleValue(), 0.0, getTotalTransitionDuration());
    }
 
+   private double getArmConfigurationDuration()
+   {
+      return MathTools.clamp(fallArmConfigurationDuration.getDoubleValue(), 0.0, getTotalTransitionDuration());
+   }
+
    private boolean isStagedFallingMode()
    {
       return fallingTrajectoryMode.getEnumValue() == FallingTrajectoryMode.LOWER_BODY_PITCH_THEN_CONFIGURATION;
@@ -310,12 +352,6 @@ public class FallingControllerState extends HighLevelControllerState
    private static double interpolate(double start, double end, double alpha)
    {
       return (1.0 - alpha) * start + alpha * end;
-   }
-
-   private static boolean isFirstStageJoint(String jointName)
-   {
-      String lowerCaseJointName = jointName.toLowerCase();
-      return isVerticalLoweringJoint(lowerCaseJointName) || isArmOrHeadJoint(lowerCaseJointName);
    }
 
    private static boolean isVerticalLoweringJoint(String lowerCaseJointName)
