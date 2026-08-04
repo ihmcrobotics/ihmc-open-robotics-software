@@ -98,9 +98,9 @@ public class FallingControllerState extends HighLevelControllerState
    {
       super(controllerState, highLevelControllerParameters, controllerToolbox.getControlledOneDoFJoints());
       fallTransitionDuration = new YoDouble("fallTransitionDuration", registry);
-      fallTransitionDuration.set(0.5);
+      fallTransitionDuration.set(0.75);
       fallVerticalLoweringDuration = new YoDouble("fallVerticalLoweringDuration", registry);
-      fallVerticalLoweringDuration.set(0.25);
+      fallVerticalLoweringDuration.set(0.5);
       fallGainInterpolationDuration = new YoDouble("fallGainInterpolationDuration", registry);
       fallGainInterpolationDuration.set(0.5);
       fallGainInterpolationAlpha = new YoDouble("fallGainInterpolationAlpha", registry);
