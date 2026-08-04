@@ -8,13 +8,45 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.Objects;
 
-/** Client for a GR00T server using the configurable OpenPI websocket/msgpack protocol. */
+/**
+ * GR00T-specific adapter around {@link OpenpiClient}'s websocket and MessagePack transport.
+ * <p>
+ * The base client owns connection setup, observation serialization, and action-tensor decoding.
+ * This class adds the part that is unique to a trained GR00T deployment: before the first
+ * observation is sent, the server must advertise a contract describing the embodiment layout,
+ * tensor sizes, action horizon, and sampling rate. Treating that metadata as a required handshake
+ * prevents a visually plausible but incompatible checkpoint from commanding the robot with a
+ * different joint order or time base.
+ * <p>
+ * Connection sequence:
+ * <ol>
+ *    <li>The websocket connects and receives the bridge's initial metadata message.</li>
+ *    <li>{@link #validateServerMetadata(byte[])} extracts the nested {@code contract} map.</li>
+ *    <li>Every required value is compared with the client configuration.</li>
+ *    <li>Only an exact match allows {@link OpenpiClient} to begin sending observations.</li>
+ * </ol>
+ */
 public class Gr00tClient extends OpenpiClient
 {
+   /** Semantic identifier for the exact ordering and meaning of every state/action element. */
    private final String expectedLayoutId;
+   /** Number of action rows the deployed policy promises to make meaningful in each response. */
    private final int expectedActionHorizon;
+   /** Dataset sampling rate used to interpret spacing between consecutive policy rows. */
    private final double expectedActionRateHz;
 
+   /**
+    * Configures both the generic wire representation and the GR00T embodiment contract.
+    *
+    * @param chunkLength allocated rows in the action tensor; may exceed the meaningful horizon
+    * @param imageKeys left/right names expected by the deployed bridge
+    * @param stateKey MessagePack key for the robot-state tensor
+    * @param promptKey MessagePack key for the language instruction
+    * @param actionKey MessagePack key containing the returned action tensor
+    * @param expectedLayoutId versioned semantic layout identifier advertised by the bridge
+    * @param expectedActionHorizon meaningful action rows returned per inference
+    * @param expectedActionRateHz time base of consecutive action rows
+    */
    public Gr00tClient(String host,
                       int port,
                       int stateSize,
@@ -45,6 +77,8 @@ public class Gr00tClient extends OpenpiClient
    @Override
    protected void validateServerMetadata(byte[] metadata) throws Exception
    {
+      // Use boxed values initialized to null so an omitted field fails the same exact-match check
+      // as an incorrect field. Missing metadata must never silently fall back to local defaults.
       String layoutId = null;
       Integer stateSize = null;
       Integer actionSize = null;
@@ -52,6 +86,8 @@ public class Gr00tClient extends OpenpiClient
       Double actionRateHz = null;
       try (MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(metadata))
       {
+         // The bridge may publish unrelated metadata alongside the contract. MessagePack values
+         // are explicitly skipped so adding a server diagnostic does not break older clients.
          int metadataFields = unpacker.unpackMapHeader();
          for (int field = 0; field < metadataFields; field++)
          {
@@ -65,6 +101,8 @@ public class Gr00tClient extends OpenpiClient
             int contractFields = unpacker.unpackMapHeader();
             for (int contractField = 0; contractField < contractFields; contractField++)
             {
+               // Field order is intentionally irrelevant; MessagePack maps are not ordered wire
+               // structs, and Python bridge implementations may emit keys in a different order.
                String contractKey = unpacker.unpackString();
                switch (contractKey)
                {
@@ -74,6 +112,8 @@ public class Gr00tClient extends OpenpiClient
                   case "action_horizon" -> actionHorizon = unpacker.unpackInt();
                   case "action_rate_hz" ->
                   {
+                     // Python MessagePack encoders may choose an integer or floating-point number
+                     // for values such as 10 Hz, so accept either numeric representation.
                      Value value = unpacker.unpackValue();
                      if (!value.isNumberValue())
                         throw new IllegalArgumentException("GR00T action_rate_hz is not numeric");
@@ -85,6 +125,8 @@ public class Gr00tClient extends OpenpiClient
          }
       }
 
+      // Tensor dimensions alone are insufficient: two 28-element layouts can assign completely
+      // different meanings to the same offsets. Require both shape and semantic identity.
       requireMetadata("layout_id", expectedLayoutId, layoutId);
       requireMetadata("state_size", getStateSize(), stateSize);
       requireMetadata("action_size", getActionSize(), actionSize);
@@ -94,6 +136,8 @@ public class Gr00tClient extends OpenpiClient
 
    private static void requireMetadata(String field, Object expected, Object actual)
    {
+      // Objects.equals deliberately makes a missing value (null) fail with the same actionable
+      // error message as a value supplied by the wrong checkpoint.
       if (!Objects.equals(expected, actual))
          throw new IllegalArgumentException("Incompatible GR00T bridge " + field + ": expected " + expected + ", got " + actual);
    }
