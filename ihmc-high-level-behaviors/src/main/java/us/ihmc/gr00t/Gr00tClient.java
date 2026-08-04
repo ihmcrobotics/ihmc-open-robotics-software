@@ -15,32 +15,6 @@ public class Gr00tClient extends OpenpiClient
    private final int expectedActionHorizon;
    private final double expectedActionRateHz;
 
-   public Gr00tClient(String host, int port, int stateSize, int chunkLength, int imageWidth, int imageHeight)
-   {
-      super(host, port, stateSize, chunkLength, imageWidth, imageHeight, "");
-      expectedLayoutId = null;
-      expectedActionHorizon = 0;
-      expectedActionRateHz = Double.NaN;
-   }
-
-   public Gr00tClient(String host,
-                      int port,
-                      int stateSize,
-                      int actionSize,
-                      int chunkLength,
-                      int imageWidth,
-                      int imageHeight,
-                      SideDependentList<String> imageKeys,
-                      String stateKey,
-                      String promptKey,
-                      String actionKey)
-   {
-      super(host, port, stateSize, actionSize, chunkLength, imageWidth, imageHeight, "", imageKeys, stateKey, promptKey, actionKey);
-      expectedLayoutId = null;
-      expectedActionHorizon = 0;
-      expectedActionRateHz = Double.NaN;
-   }
-
    public Gr00tClient(String host,
                       int port,
                       int stateSize,
@@ -71,9 +45,6 @@ public class Gr00tClient extends OpenpiClient
    @Override
    protected void validateServerMetadata(byte[] metadata) throws Exception
    {
-      if (expectedLayoutId == null)
-         return;
-
       String layoutId = null;
       Integer stateSize = null;
       Integer actionSize = null;

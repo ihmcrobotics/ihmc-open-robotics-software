@@ -34,7 +34,7 @@ class OpenpiNettyWebSocketHandler extends SimpleChannelInboundHandler<Object>
    private final Queue<CompletableFuture<byte[]>> pendingResponses = new ConcurrentLinkedQueue<>();
    private final CountDownLatch firstMessageLatch = new CountDownLatch(1);
    private byte[] firstMessage;
-   private volatile RuntimeException firstMessageFailure;
+   private RuntimeException firstMessageFailure;
 
    public OpenpiNettyWebSocketHandler(URI uri)
    {
