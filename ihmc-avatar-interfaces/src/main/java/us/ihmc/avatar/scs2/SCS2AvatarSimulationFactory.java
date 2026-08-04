@@ -326,6 +326,32 @@ public class SCS2AvatarSimulationFactory
                                                                 robotDefinition);
          }
       }
+      else
+      {
+         // useRobotDefinitionCollisions=true keeps whatever is already on the RobotDefinition.
+         // Many robot models strip URDF collisions at load time (removeURDFCollisions=true), which
+         // leaves MuJoCo with no robot geoms and no ground contact. Fall back to the simulation
+         // collision model in that case so the robot does not free-fall.
+         int collisionShapeCount = 0;
+         for (RigidBodyDefinition rigidBody : robotDefinition.getAllRigidBodies())
+            collisionShapeCount += rigidBody.getCollisionShapeDefinitions().size();
+
+         if (collisionShapeCount == 0)
+         {
+            LogTools.warn("useRobotDefinitionCollisions=true but RobotDefinition has no collision shapes; "
+                          + "falling back to getSimulationRobotCollisionModel(). "
+                          + "If you intended to use URDF collisions, construct the robot model with removeURDFCollisions=false.");
+            RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper,
+                                                                                             robotCollisionName,
+                                                                                             terrainCollisionName);
+            if (collisionModel != null)
+            {
+               RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel()
+                                                                                                                .getElevator()),
+                                                                   robotDefinition);
+            }
+         }
+      }
 
       if (useBulletPhysicsEngine.get() && bulletCollisionMutator.hasValue())
       {
