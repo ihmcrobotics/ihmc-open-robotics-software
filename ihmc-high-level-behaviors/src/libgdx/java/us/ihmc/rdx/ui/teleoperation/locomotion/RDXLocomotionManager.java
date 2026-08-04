@@ -11,10 +11,12 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.subscribers.FilteredNotification;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.LocomotionParameters;
@@ -24,7 +26,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.jros2.ROS2Publisher;
-import us.ihmc.jros2.ROS2Subscription;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
@@ -32,17 +33,23 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.mesh.RDXMutableMultiLineModel;
 import us.ihmc.rdx.ui.*;
 import us.ihmc.rdx.ui.affordances.*;
 import us.ihmc.rdx.ui.footstepPlanner.RDXFootstepPlanning;
 import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
+import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
+import us.ihmc.rdx.visualizers.RDXLineGraphic;
 import us.ihmc.rdx.visualizers.RDXSphereAndArrowGraphic;
+import us.ihmc.rdx.visualizers.RDXSplineGraphic;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
+
+import java.util.List;
 
 /**
  * This class provides easy access to everything that involves mobility for the robot's legs.
@@ -112,11 +119,15 @@ public class RDXLocomotionManager
    private final ControllerWaypointGoalMessage goalMessage = new ControllerWaypointGoalMessage();
    private final ControllerWaypointGoalListMessage goalListMessage = new ControllerWaypointGoalListMessage();
    private static final int maxWaypoints = 10;
-   private final ControllerWaypointGoalMessage[] goalMessageArray = new ControllerWaypointGoalMessage[maxWaypoints];
-   private final RDXSphereAndArrowGraphic[] waypoints = new RDXSphereAndArrowGraphic[maxWaypoints];
+   private final RecyclingArrayList<ControllerWaypointGoalMessage> goalMessageArrayList = new RecyclingArrayList<>(ControllerWaypointGoalMessage::new);
+   private final RecyclingArrayList<Pose3D> goalPoseArrayList = new RecyclingArrayList<>(Pose3D::new);
+   private final RecyclingArrayList<RDXSphereAndArrowGraphic> waypoints = new RecyclingArrayList<>(RDXSphereAndArrowGraphic::new);
+   private RDXSplineGraphic trajectoryGraphic;
    private int numWaypoints = 0;
    private boolean waypointsSent = false;
    private boolean waypointsReceived = false;
+   private int waypointsCompleted = 0;
+   private int lastWaypointsRemaining = 0;
 
    // Used for UI logic
    private boolean wasPlanning = false;
@@ -154,11 +165,6 @@ public class RDXLocomotionManager
       controllerFootstepQueueGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
 
       goalListMessagePublisher = controllerHelper.getROS2Node().createPublisher(HumanoidControllerAPI.getTopic(ControllerWaypointGoalListMessage.class, robotModel.getSimpleRobotName()));
-      for (int i = 0; i < maxWaypoints; i++)
-      {
-         goalMessageArray[i] = new ControllerWaypointGoalMessage();
-         waypoints[i] = new RDXSphereAndArrowGraphic();
-      }
       controllerHelper.getROS2Node().createSubscriptionSampler(HumanoidControllerAPI.getTopic(ControllerWaypointStatusMessage.class, robotModel.getSimpleRobotName()),
                                                                waypointStatusMessage::set);
    }
@@ -194,12 +200,6 @@ public class RDXLocomotionManager
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW, syncedRobot);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
 
-      for (int i = 0; i < maxWaypoints; i++)
-      {
-         waypoints[i].create(0.05, 0.2, Color.BLUE);
-//         baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(waypoints[i]::processImGui3DViewInput);
-      }
-
       interactableFootstepPlan.create(baseUI,
                                       controllerHelper,
                                       syncedRobot,
@@ -216,6 +216,11 @@ public class RDXLocomotionManager
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 
       walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, footstepPlannerParametersToUse);
+
+
+      trajectoryGraphic = new RDXSplineGraphic();
+      trajectoryGraphic.createStart(walkPathControlRing.getGoalPose().getPosition(), Color.BLACK);
+//      trajectoryGraphic.createEnd(Color.BLACK);
 
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() -> renderOverlayElements(baseUI.getPrimary3DPanel()));
    }
@@ -239,8 +244,6 @@ public class RDXLocomotionManager
             goalMessage.setYaw(goalPose.getYaw());
             goalMessage.setPositionProximity(0.1);
          }
-         if (controllerStatusTracker.getFinishedWalkingNotification().poll())
-            System.out.println("Walking complete");
       }
       else
       {
@@ -460,24 +463,53 @@ public class RDXLocomotionManager
          walkPathControlRing.renderImGuiWidgets(widgetStartX);
       }
 
-      if (waypointStatusMessage.getWaypointsRemaining() == 0 && !waypointStatusMessage.getIsStarted() && waypointsSent && waypointsReceived)
+      int currentWaypointsRemaining = waypointStatusMessage.getWaypointsRemaining();
+      boolean waypointsStarted = waypointStatusMessage.getIsStarted();
+
+      if (currentWaypointsRemaining == 0 && !waypointsStarted && waypointsSent && waypointsReceived)
       {
          System.out.println("RL walking complete");
+         trajectoryGraphic.clear();
+         trajectoryGraphic.createStart(goalPoseArrayList.get(numWaypoints-1).getPosition(), Color.BLACK);
+//         trajectoryGraphic.createEnd(Color.BLACK);
+         goalPoseArrayList.clear();
+         goalMessageArrayList.clear();
+         waypoints.clear();
+
          numWaypoints = 0;
+         waypointsCompleted = 0;
          waypointsSent = false;
       }
-      else if ((waypointStatusMessage.getIsStarted() || waypointStatusMessage.getWaypointsRemaining() > 0) && waypointsSent)
+      else if ((waypointsStarted || currentWaypointsRemaining > 0) && waypointsSent)
       {
          waypointsReceived = true;
       }
+//      System.out.println(waypointsStarted + " " + currentWaypointsRemaining);
+      if (currentWaypointsRemaining != lastWaypointsRemaining)
+      {
+         System.out.println("Waypoint completed");
+         waypoints.get(waypointsCompleted).create(0.05, 0.2, Color.GREEN);
+         waypoints.get(waypointsCompleted).setToPose(goalPoseArrayList.get(waypointsCompleted));
+         waypointsCompleted++;
+         if (waypointsCompleted < numWaypoints)
+         {
+            waypoints.get(waypointsCompleted).create(0.05, 0.2, Color.RED);
+            waypoints.get(waypointsCompleted).setToPose(goalPoseArrayList.get(waypointsCompleted));
+         }
+      }
+      lastWaypointsRemaining = currentWaypointsRemaining;
 
       if (ImGui.isKeyReleased(ImGuiTools.getEnterKey()) && !ImGui.getIO().getWantCaptureKeyboard() &&
           controllerStatusTracker.getLatestKnownState() == HighLevelControllerName.RL_CONTROL)
       {
          if (numWaypoints < maxWaypoints)
          {
-            goalMessageArray[numWaypoints].set(goalMessage);
-            waypoints[numWaypoints].setToPose(goalPose);
+            goalPoseArrayList.add().set(goalPose);
+            goalMessageArrayList.add().set(goalMessage);
+            RDXSphereAndArrowGraphic newWaypoint = waypoints.add();
+            newWaypoint.create(0.05, 0.2, Color.BLUE);
+            newWaypoint.setToPose(goalPose);
+            trajectoryGraphic.createAdditionalPoint(goalPoseArrayList.get(numWaypoints).getPosition(), Color.BLUE);
             numWaypoints++;
          }
          else
@@ -489,9 +521,23 @@ public class RDXLocomotionManager
       {
          if (controllerStatusTracker.getLatestKnownState() == HighLevelControllerName.RL_CONTROL)
          {
-            for(int i = numWaypoints; i < maxWaypoints; i++)
-               goalMessageArray[i].set(goalMessage);
-            goalListMessage.getWaypoints().addAll(goalMessageArray);
+
+            if (numWaypoints < maxWaypoints)
+            {
+               goalPoseArrayList.add().set(goalPose);
+               goalMessageArrayList.add().set(goalMessage);
+               RDXSphereAndArrowGraphic newWaypoint = waypoints.add();
+               newWaypoint.create(0.05, 0.2, Color.BLUE);
+               newWaypoint.setToPose(goalPoseArrayList.get(numWaypoints));
+               trajectoryGraphic.createAdditionalPoint(goalPoseArrayList.get(numWaypoints).getPosition(), Color.BLUE);
+               numWaypoints++;
+               trajectoryGraphic.createEnd(Color.BLACK);
+            }
+
+            waypoints.get(0).create(0.05, 0.2, Color.RED);
+            waypoints.get(0).setToPose(goalPoseArrayList.get(0));
+
+            goalListMessage.getWaypoints().addAll(goalMessageArrayList);
             goalListMessagePublisher.publish(goalListMessage);
             goalListMessage.getWaypoints().clear();
             waypointsSent = true;
@@ -623,8 +669,10 @@ public class RDXLocomotionManager
       interactableFootstepPlan.getRenderables(renderables, pool);
       for (int i = 0; i < numWaypoints; i++)
       {
-         waypoints[i].getRenderables(renderables, pool);
+         waypoints.get(i).getRenderables(renderables, pool);
       }
+
+      trajectoryGraphic.getRenderables(renderables, pool);
 
       // Only render when planning with body path
       if (locomotionParameters.getPlanWithBodyPath())
