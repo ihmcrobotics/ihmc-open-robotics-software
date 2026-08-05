@@ -82,6 +82,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final List<FootSwitchInterface> footSwitchList;
 
    private final YoBoolean reinitializeStateEstimator = new YoBoolean("reinitializeStateEstimator", registry);
+   private final YoBoolean reinitializeStateEstimatorToWorldOrigin = new YoBoolean("reinitializeStateEstimatorToWorldOrigin", registry);
 
    private final FloatingJointBasics rootJoint;
    private final YoFixedFrameTwist yoRootTwist;
@@ -303,7 +304,13 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    @Override
    public void doControl()
    {
-      if (reinitializeStateEstimator.getBooleanValue())
+      if (reinitializeStateEstimatorToWorldOrigin.getBooleanValue())
+      {
+         reinitializeStateEstimatorToWorldOrigin.set(false);
+         pelvisLinearStateUpdater.requestInitializeToMidFeetOrigin();
+         initialize();
+      }
+      else if (reinitializeStateEstimator.getBooleanValue())
       {
          reinitializeStateEstimator.set(false);
          initialize();
@@ -400,9 +407,16 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
    }
 
+   @Override
    public void requestReinitializeEstimator()
    {
       reinitializeStateEstimator.set(true);
+   }
+
+   @Override
+   public void requestReinitializeEstimatorToWorldOrigin()
+   {
+      reinitializeStateEstimatorToWorldOrigin.set(true);
    }
 
    @Override
