@@ -3,12 +3,14 @@ package us.ihmc.stateEstimation.invariant_estimator;
 import gnu.trove.map.TObjectDoubleMap;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -175,6 +177,17 @@ public class InvariantMainStateEstimator implements StateEstimatorController
    private final Vector3D angularVelocityBody = new Vector3D();
    private final FrameVector3D rootLinearVelocityWorld = new FrameVector3D();
 
+   // Operator-requested one-shot reinitializations, consumed at the top of doControl(). Same names and
+   // semantics as the DRC estimator's, so the shared ReinitializeStateEstimatorMessage plumbing and the
+   // SCS2 buttons drive whichever estimator is running.
+   private final YoBoolean reinitializeStateEstimator = new YoBoolean("reinitializeStateEstimator", registry);
+   private final YoBoolean reinitializeStateEstimatorToWorldOrigin = new YoBoolean("reinitializeStateEstimatorToWorldOrigin", registry);
+
+   // Mid-feet reinit temporaries (deliberately separate scratch from writeRootJoint's rootPosition).
+   private final FramePoint3D footPositionInWorld = new FramePoint3D();
+   private final FramePoint3D midFeetPositionInWorld = new FramePoint3D();
+   private final Vector3D reinitRootPosition = new Vector3D();
+
    /**
     * @param fullRobotModel             the estimator's full robot model (joints set here, root written here).
     * @param processedSensorOutput      processed sensor outputs (IMU + joints).
@@ -303,6 +316,21 @@ public class InvariantMainStateEstimator implements StateEstimatorController
 
       updateJoints();
       referenceFrames.updateFrames();
+
+      // One-shot operator reinits, consumed BEFORE the filter runs so the whole tick sees the new gauge.
+      // The model frames were just refreshed from the previous tick's writeRootJoint(), so the sole FK the
+      // reinit reads is the current estimate.
+      if (reinitializeStateEstimatorToWorldOrigin.getBooleanValue())
+      {
+         reinitializeStateEstimatorToWorldOrigin.set(false);
+         reinitializeStateEstimator.set(false); // world-origin subsumes the plain reinit
+         reinitializeToMidFeetOrigin();
+      }
+      else if (reinitializeStateEstimator.getBooleanValue())
+      {
+         reinitializeStateEstimator.set(false);
+         reinitializeAtCurrentPose();
+      }
 
       invariantEstimator.doControl();
 
@@ -456,6 +484,80 @@ public class InvariantMainStateEstimator implements StateEstimatorController
          yawCorrector.reset();
 
       centerOfMassUpdater.initialize();
+   }
+
+   @Override
+   public void requestReinitializeEstimator()
+   {
+      reinitializeStateEstimator.set(true);
+   }
+
+   @Override
+   public void requestReinitializeEstimatorToWorldOrigin()
+   {
+      reinitializeStateEstimatorToWorldOrigin.set(true);
+   }
+
+   /**
+    * Re-seeds the filter in place: base pose from the model's current pelvis frame, contact anchors from
+    * current sole FK, zero velocity, P = initialCovariance * I. The estimate does not move; only the
+    * accumulated covariance and the (possibly stale) contact anchors are discarded.
+    */
+   private void reinitializeAtCurrentPose()
+   {
+      invariantEstimator.reinitializeAtCurrentModelPose();
+
+      if (yawCorrector != null)
+         yawCorrector.reset();
+      centerOfMassUpdater.initialize();
+   }
+
+   /**
+    * Operator gauge reset: translates the estimated base so the average sole position lands on the world
+    * origin, leaving orientation -- and therefore yaw -- untouched.
+    *
+    * <p><b>Why this is written as a translate-then-re-seed and not as a base-position write.</b> The InEKF
+    * state carries the base position p AND every contact anchor p_c,i as absolute world positions, and the
+    * contact residual is</p>
+    *
+    * <pre>    y_i = R^T (p_c,i - p)</pre>
+    *
+    * <p>Moving p by delta without moving each p_c,i by the SAME delta injects a residual of exactly
+    * -R^T delta on both feet on the very next tick; the filter would then "correct" that by snapping the
+    * base back, and would corrupt velocity and orientation through the cross-covariance on the way. The
+    * reset must therefore be a <em>gauge shift</em>: p and every p_c,i move together.</p>
+    *
+    * <p>That is what this does. The root joint is translated on the shared model, the frames are refreshed,
+    * and the filter is re-seeded from that model -- {@link InvariantEKFStateEstimator#reAnchor()} re-derives
+    * the base from the pelvis frame and the anchors from the now-translated sole FK, so the two land in a
+    * consistent gauge by construction. Do not "simplify" this into a direct write of the base position.</p>
+    *
+    * <p>Velocity is zeroed and P is reset to initialCovariance * I, mirroring the DRC estimator's mid-feet
+    * reinit (which likewise zeroes its rate estimate).</p>
+    *
+    * <p>Assumes the caller has already refreshed the model frames for this tick.</p>
+    */
+   private void reinitializeToMidFeetOrigin()
+   {
+      midFeetPositionInWorld.setToZero(ReferenceFrame.getWorldFrame());
+      for (RobotSide side : RobotSide.values)
+      {
+         footPositionInWorld.setToZero(referenceFrames.getSoleFrame(side));
+         footPositionInWorld.changeFrame(ReferenceFrame.getWorldFrame());
+         midFeetPositionInWorld.add(footPositionInWorld);
+      }
+      midFeetPositionInWorld.scale(1.0 / RobotSide.values.length);
+
+      reinitRootPosition.set(rootJoint.getJointPose().getPosition());
+      reinitRootPosition.sub(midFeetPositionInWorld); // translation only: the orientation is left alone
+      rootJoint.setJointPosition(reinitRootPosition);
+      rootJoint.updateFramesRecursively();
+      referenceFrames.updateFrames();
+
+      reinitializeAtCurrentPose(); // p and every p_c,i now move together, off the translated model
+
+      LogTools.info("InEKF state estimator reinitialized to mid-feet origin.%nmidFeet = %s%nroot = %s".formatted(midFeetPositionInWorld,
+                                                                                                                reinitRootPosition));
    }
 
    @Override
