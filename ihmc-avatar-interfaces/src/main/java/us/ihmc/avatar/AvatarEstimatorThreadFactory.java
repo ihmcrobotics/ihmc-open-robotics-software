@@ -516,7 +516,11 @@ public class AvatarEstimatorThreadFactory
          asyncROS2NodeField.get().createSubscriptionSampler(inputTopicField.get().withType(ReinitializeStateEstimatorMessage.class),
                                                             sample ->
                                                             {
-                                                               if (sample.getRequestReinitialize())
+                                                               if (!sample.getRequestReinitialize())
+                                                                  return;
+                                                               if (sample.getReinitializeToWorldOrigin())
+                                                                  stateEstimator.requestReinitializeEstimatorToWorldOrigin();
+                                                               else
                                                                   stateEstimator.requestReinitializeEstimator();
                                                             });
       }
