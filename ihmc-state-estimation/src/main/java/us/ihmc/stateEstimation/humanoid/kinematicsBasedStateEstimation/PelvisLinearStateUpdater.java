@@ -135,10 +135,13 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    private final FloatingJointBasics rootJoint;
 
    private boolean initializeToActual = false;
+   private boolean useProvidedRootPositionOnNextInit = false;
+   private boolean initializeToMidFeetOrigin = false;
    private final FramePoint3D initialRootJointPosition = new FramePoint3D(worldFrame);
 
    // Temporary variables
    private final FramePoint3D footPositionInWorld = new FramePoint3D();
+   private final FramePoint3D midFeetPositionInWorld = new FramePoint3D();
 
    private final BooleanProvider trustOnlyLowestFoot = new BooleanParameter("TrustOnlyLowestFoot", registry, false);
    private final IntegerProvider lowestFootWindowSize = new IntegerParameter("LowestFootWindowSize", registry, 0);
@@ -299,7 +302,18 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
    private void initializeRobotState()
    {
-      if (!initializeToActual)
+      if (useProvidedRootPositionOnNextInit)
+      {
+         useProvidedRootPositionOnNextInit = false;
+         initializeToMidFeetOrigin = false;
+         rootJointPosition.set(initialRootJointPosition);
+      }
+      else if (initializeToMidFeetOrigin)
+      {
+         initializeToMidFeetOrigin = false;
+         initializeRootJointPositionToMidFeetOrigin();
+      }
+      else if (!initializeToActual)
       {
          rootJointPosition.set(worldFrame, rootJoint.getJointPose().getPosition());
 
@@ -336,9 +350,47 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       rootJointPositionEstimate.getRateEstimation().setToZero();
    }
 
+   /**
+    * Translates the estimated root so the average foot contact frame (mid-feet) is at world origin.
+    * Orientation / yaw is left unchanged.
+    */
+   private void initializeRootJointPositionToMidFeetOrigin()
+   {
+      rootJoint.updateFramesRecursively();
+
+      midFeetPositionInWorld.setToZero(worldFrame);
+      for (int i = 0; i < feet.size(); i++)
+      {
+         footPositionInWorld.setToZero(footFrames.get(feet.get(i)));
+         footPositionInWorld.changeFrame(worldFrame);
+         midFeetPositionInWorld.add(footPositionInWorld);
+      }
+      midFeetPositionInWorld.scale(1.0 / feet.size());
+
+      rootJointPosition.set(worldFrame, rootJoint.getJointPose().getPosition());
+      rootJointPosition.sub(midFeetPositionInWorld);
+
+      initialRootJointPosition.setIncludingFrame(rootJointPosition);
+      initializeToActual = true;
+
+      LogTools.info("State estimator reinitialized to mid-feet origin.%nmidFeet = %s%nroot = %s".formatted(midFeetPositionInWorld, rootJointPosition));
+   }
+
+   public void requestInitializeToMidFeetOrigin()
+   {
+      initializeToMidFeetOrigin = true;
+   }
+
+   public boolean isProvidedRootPositionPending()
+   {
+      return useProvidedRootPositionOnNextInit;
+   }
+
    public void initializeRootJointPosition(Tuple3DReadOnly rootJointPosition)
    {
       initializeToActual = true;
+      useProvidedRootPositionOnNextInit = true;
+      initializeToMidFeetOrigin = false;
       initialRootJointPosition.setIncludingFrame(worldFrame, rootJointPosition);
    }
 

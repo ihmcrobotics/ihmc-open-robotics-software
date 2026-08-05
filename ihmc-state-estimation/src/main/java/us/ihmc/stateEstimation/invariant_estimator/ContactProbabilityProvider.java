@@ -38,4 +38,20 @@ public interface ContactProbabilityProvider
     *         contact, 0 = treat as not in contact (fully muted).
     */
    double getContactProbability(RobotSide side);
+
+   /**
+    * Discards whatever history this provider carries across ticks (finite-difference state, filters).
+    *
+    * <p>Call this after a <em>one-shot jump</em> of the estimated base pose — a gauge reset, not motion —
+    * where a tick-to-tick difference taken across the jump is meaningless. Without it, a detector that
+    * finite-differences sole position reads the jump as a velocity of {@code Δ/dt} and mistakes the reset
+    * for a foot leaving the ground.</p>
+    *
+    * <p>The default is a no-op, which is correct for stateless and force-based providers (e.g.
+    * {@link FootSwitchContactProbabilityProvider}): they read the sensors afresh each tick and never see
+    * the estimated base pose at all.</p>
+    */
+   default void reset()
+   {
+   }
 }

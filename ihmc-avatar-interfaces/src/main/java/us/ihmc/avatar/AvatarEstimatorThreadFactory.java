@@ -510,18 +510,41 @@ public class AvatarEstimatorThreadFactory
 
       if (asyncROS2NodeField.hasValue())
       {
+         // Wrist force-sensor calibration is DRC-specific, so it stays here. The reinitialize subscription
+         // is NOT: it is registered in getMainStateEstimator() so the invariant estimator gets it too.
          ForceSensorStateUpdater forceSensorStateUpdater = stateEstimator.getForceSensorStateUpdater();
          asyncROS2NodeField.get().createSubscription(inputTopicField.get().withType(RequestWristForceSensorCalibrationPacket.class),
                                      subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
-         asyncROS2NodeField.get().createSubscriptionSampler(inputTopicField.get().withType(ReinitializeStateEstimatorMessage.class),
-                                                            sample ->
-                                                            {
-                                                               if (sample.getRequestReinitialize())
-                                                                  stateEstimator.requestReinitializeEstimator();
-                                                            });
       }
 
       return stateEstimator;
+   }
+
+   /**
+    * Subscribes the given main estimator to {@link ReinitializeStateEstimatorMessage}.
+    *
+    * <p>This lives here, on the {@link StateEstimatorController} interface, rather than inside
+    * {@link #createDRCKinematicsStateEstimator()} where it used to: otherwise the message is a silent no-op
+    * whenever the invariant estimator is the main one.</p>
+    *
+    * <p>Known gap (pre-existing): an estimator injected via {@link #setMainStateEstimator} bypasses
+    * {@link #getMainStateEstimator()}'s create path and so is not subscribed.</p>
+    */
+   private void registerReinitializeStateEstimatorSubscription(StateEstimatorController stateEstimator)
+   {
+      if (stateEstimator == null || !asyncROS2NodeField.hasValue())
+         return;
+
+      asyncROS2NodeField.get().createSubscriptionSampler(inputTopicField.get().withType(ReinitializeStateEstimatorMessage.class),
+                                                         sample ->
+                                                         {
+                                                            if (!sample.getRequestReinitialize())
+                                                               return;
+                                                            if (sample.getReinitializeToWorldOrigin())
+                                                               stateEstimator.requestReinitializeEstimatorToWorldOrigin();
+                                                            else
+                                                               stateEstimator.requestReinitializeEstimator();
+                                                         });
    }
 
    /** Selects the invariant InEKF as the main estimator (built by {@link #createInvariantStateEstimator()}). */
@@ -949,6 +972,8 @@ public class AvatarEstimatorThreadFactory
             mainStateEstimatorField.set(createInvariantStateEstimator());
          else
             mainStateEstimatorField.set(createDRCKinematicsStateEstimator());
+
+         registerReinitializeStateEstimatorSubscription(mainStateEstimatorField.get());
       }
       return mainStateEstimatorField.get();
    }

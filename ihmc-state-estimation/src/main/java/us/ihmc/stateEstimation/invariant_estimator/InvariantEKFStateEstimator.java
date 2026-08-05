@@ -459,11 +459,6 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    }
 
    /**
-    * Re-seed the flter when resuming from a held state: base pose from the current (gyro-tracked) pelvis frame,
-    * contact anchors from current sole FK, zero velocity, covariance reset to P = initialCovariance * I.
-    * Runs only on the hold->active transition, so the allication here is not when the estimator is actively running yet.
-    */
-   /**
     * Replaces the contact FK measurement noise source (default: the constant isotropic diagonal).
     * This is the step-8 injection point for a covariance-routing provider (J Sigma_q J^T from a
     * joint-level pre-filter with {@code hasCovariance()}).
@@ -473,6 +468,18 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       this.contactMeasurementNoiseProvider = Objects.requireNonNull(contactMeasurementNoiseProvider);
    }
 
+   /**
+    * Re-seed the filter from the shared robot model: base pose from the current (gyro-tracked) pelvis frame,
+    * contact anchors from current sole FK, zero velocity, covariance reset to P = initialCovariance * I.
+    *
+    * <p>Because the base pose and every contact anchor are re-derived from the SAME model frames, the two
+    * always land in a consistent gauge -- the contact residual R^T (p_c,i - p) is preserved by construction,
+    * whatever the caller did to the root joint beforehand. That is what makes this safe to use as the
+    * back end of a base-pose reset; see {@code InvariantMainStateEstimator.reinitializeToMidFeetOrigin()}.</p>
+    *
+    * <p>Runs only on the hold->active transition (and from the one-shot
+    * {@link #reinitializeAtCurrentModelPose()}), so the allocation here is not on the running hot path.</p>
+    */
    public void reAnchor()
    {
       referenceFrames.updateFrames();
@@ -492,6 +499,21 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
 
       ekf.initialize(tempRotation, new Vector3D(), basePosition, contactPositions, scaledIdentity(initialCovariance));
       updateYoVariables();
+   }
+
+   /**
+    * One-shot re-seed at the model's current base pose: {@link #reAnchor()} plus a clear of the contact
+    * provider's cross-tick history.
+    *
+    * <p>Use this (not {@code reAnchor()} directly) when the caller has just <em>translated</em> the root
+    * joint on the shared model. A provider that finite-differences sole position -- {@link
+    * KinematicContactDetector} -- would otherwise read the jump as a vertical speed of dz/dt and mute both
+    * feet for a few ticks.</p>
+    */
+   public void reinitializeAtCurrentModelPose()
+   {
+      contactProbabilityProvider.reset();
+      reAnchor();
    }
 
    @Override

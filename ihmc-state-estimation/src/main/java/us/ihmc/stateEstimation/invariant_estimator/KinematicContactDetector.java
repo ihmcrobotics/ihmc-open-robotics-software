@@ -124,6 +124,22 @@ public class KinematicContactDetector implements ContactProbabilityProvider
       return probability[side.ordinal()];
    }
 
+   /**
+    * Clears the finite-difference history, so the next {@link #update()} reports {@code ż = 0} instead of
+    * differencing across a discontinuity. {@code NaN} is already the "no previous sample" sentinel handled
+    * in {@link #update()}.
+    *
+    * <p>The smoothed probabilities are deliberately <em>not</em> cleared: they are still the best estimate
+    * of who is on the ground, and zeroing them would drop both feet below the estimator's contact-hold
+    * threshold for several ticks — precisely the drop-out this reset exists to prevent.</p>
+    */
+   @Override
+   public void reset()
+   {
+      for (RobotSide side : RobotSide.values)
+         previousHeight[side.ordinal()] = Double.NaN;
+   }
+
    /** @return the sole-origin height above the support plane (m), in world. */
    private double soleHeightAboveGround(RobotSide side)
    {
