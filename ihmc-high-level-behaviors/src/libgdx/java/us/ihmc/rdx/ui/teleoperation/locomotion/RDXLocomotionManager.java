@@ -72,10 +72,10 @@ public class RDXLocomotionManager
    private final Notification turnAggressivenessChanged = new Notification();
    private final Notification stepAggressivenessChanged = new Notification();
    private final RDXStoredPropertySetTuner locomotionParametersTuner = new RDXStoredPropertySetTuner("Locomotion Parameters");
-   private final RDXStoredPropertySetTuner aStartFootstepPlanningParametersTuner
-         = new RDXStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation A*)");
-   private final RDXStoredPropertySetTuner turnWalkTurnFootstepPlanningParametersTuner
-         = new RDXStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation Turn Walk Turn)");
+   private final RDXStoredPropertySetTuner aStartFootstepPlanningParametersTuner = new RDXStoredPropertySetTuner(
+         "Footstep Planner Parameters (Teleoperation A*)");
+   private final RDXStoredPropertySetTuner turnWalkTurnFootstepPlanningParametersTuner = new RDXStoredPropertySetTuner(
+         "Footstep Planner Parameters (Teleoperation Turn Walk Turn)");
    private final RDXStoredPropertySetTuner bodyPathPlanningParametersTuner = new RDXStoredPropertySetTuner("Body Path Planner Parameters (Teleoperation)");
    private final RDXStoredPropertySetTuner swingFootPlanningParametersTuner = new RDXStoredPropertySetTuner("Swing Foot Planning Parameters (Teleoperation)");
    private ImGuiStoredPropertySetBooleanWidget areFootstepsAdjustableCheckbox;
@@ -96,6 +96,7 @@ public class RDXLocomotionManager
 
    private final SideDependentList<RDXInteractableFoot> interactableFeet = new SideDependentList<>();
    private final RDXBallAndArrowGoalFootstepPlacement ballAndArrowMidFeetPosePlacement = new RDXBallAndArrowGoalFootstepPlacement();
+   private final RDXBallAndArrowPosePlacement posePlacement = new RDXBallAndArrowPosePlacement();
    private final RDXInteractableFootstepPlan interactableFootstepPlan;
    private final RDXFootstepPlanning footstepPlanning;
    private final RDXManualFootstepPlacement manualFootstepPlacement = new RDXManualFootstepPlacement();
@@ -109,9 +110,10 @@ public class RDXLocomotionManager
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
    private final Notification abortedNotification = new Notification();
-   private final FilteredNotification<FootstepQueueStatusMessage> footstepQueueNotification
-         = new FilteredNotification<>(new FootstepQueueAcceptanceFunction());
+   private final FilteredNotification<FootstepQueueStatusMessage> footstepQueueNotification = new FilteredNotification<>(new FootstepQueueAcceptanceFunction());
    private final Timer footstepPlanningCompleteTimer = new Timer();
+
+   //   private final RDXWaypointPlacement waypointPlacement;
 
    private final ROS2Publisher<ControllerWaypointGoalListMessage> goalListMessagePublisher;
    private final ControllerWaypointStatusMessage waypointStatusMessage = new ControllerWaypointStatusMessage();
@@ -164,9 +166,13 @@ public class RDXLocomotionManager
       interactableFootstepPlan = new RDXInteractableFootstepPlan(controllerStatusTracker);
       controllerFootstepQueueGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
 
-      goalListMessagePublisher = controllerHelper.getROS2Node().createPublisher(HumanoidControllerAPI.getTopic(ControllerWaypointGoalListMessage.class, robotModel.getSimpleRobotName()));
-      controllerHelper.getROS2Node().createSubscriptionSampler(HumanoidControllerAPI.getTopic(ControllerWaypointStatusMessage.class, robotModel.getSimpleRobotName()),
-                                                               waypointStatusMessage::set);
+      //      waypointPlacement = new RDXWaypointPlacement(controllerHelper, syncedRobot);
+      goalListMessagePublisher = controllerHelper.getROS2Node()
+                                                 .createPublisher(HumanoidControllerAPI.getTopic(ControllerWaypointGoalListMessage.class,
+                                                                                                 robotModel.getSimpleRobotName()));
+      controllerHelper.getROS2Node()
+                      .createSubscriptionSampler(HumanoidControllerAPI.getTopic(ControllerWaypointStatusMessage.class, robotModel.getSimpleRobotName()),
+                                                 waypointStatusMessage::set);
    }
 
    public void create(RDXBaseUI baseUI)
@@ -192,20 +198,19 @@ public class RDXLocomotionManager
       swingTimeSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.swingTime, "s", 0.3, 1.5, "%.2f", true);
       transferTimeSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.transferTime, "s", 0.1, 1.5, "%.2f", true);
       swingHeightSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.swingHeight, "m", 0.1, 1.5, "%.2f", true);
-      stepAggressivenessSlider = new ImGuiSliderDouble("Step Aggressiveness", "%.2f",aStarFootstepPlannerParameters.getIdealFootstepLength()
-                                                                                     / aStarFootstepPlannerParameters.getMaxStepReach());
+      stepAggressivenessSlider = new ImGuiSliderDouble("Step Aggressiveness",
+                                                       "%.2f",
+                                                       aStarFootstepPlannerParameters.getIdealFootstepLength()
+                                                       / aStarFootstepPlannerParameters.getMaxStepReach());
       turnAggressivenessSlider = new ImGuiSliderDouble("Turn Aggressiveness", "%.2f", 0.5);
       initialStanceSideRadioButtons = locomotionParametersTuner.createEnumRadioButtons(LocomotionParameters.initialStanceSide, InitialStanceSide.values());
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW, syncedRobot);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
+      posePlacement.create(Color.BLUE, "Place Waypoint", "Placing", "Clear Waypoint");
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(posePlacement::processImGui3DViewInput);
 
-      interactableFootstepPlan.create(baseUI,
-                                      controllerHelper,
-                                      syncedRobot,
-                                      locomotionParameters,
-                                      footstepPlannerParametersToUse,
-                                      swingFootPlannerParameters);
+      interactableFootstepPlan.create(baseUI, controllerHelper, syncedRobot, locomotionParameters, footstepPlannerParametersToUse, swingFootPlannerParameters);
       baseUI.getVRManager().getContext().addVRPickCalculator(interactableFootstepPlan::calculateVRPick);
       baseUI.getVRManager().getContext().addVRInputProcessor(interactableFootstepPlan::processVRInput);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableFootstepPlan::processImGui3DViewInput);
@@ -217,10 +222,8 @@ public class RDXLocomotionManager
 
       walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, footstepPlannerParametersToUse);
 
-
       trajectoryGraphic = new RDXSplineGraphic();
       trajectoryGraphic.createStart(walkPathControlRing.getGoalPose().getPosition(), Color.BLACK);
-//      trajectoryGraphic.createEnd(Color.BLACK);
 
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() -> renderOverlayElements(baseUI.getPrimary3DPanel()));
    }
@@ -234,115 +237,101 @@ public class RDXLocomotionManager
          deleteAll();
       }
 
-      if (controllerStatusTracker.getLatestKnownState() == HighLevelControllerName.RL_CONTROL)
+      if (footstepQueueNotification.pollFiltered())
       {
-         if (walkPathControlRing.getGoalUpdatedNotification().poll())
-         {
-            goalPose.set(walkPathControlRing.getGoalPose());
-            goalMessage.setXPosition(goalPose.getX());
-            goalMessage.setYPosition(goalPose.getY());
-            goalMessage.setYaw(goalPose.getYaw());
-            goalMessage.setPositionProximity(0.1);
-         }
+         controllerFootstepQueueGraphic.generateMeshesAsync(footstepQueueNotification.read(), "Controller Queue");
       }
-      else
+      controllerFootstepQueueGraphic.update(); // Will happen once the async mesh generation has completed on a later tick
+
+      footstepPlannerParametersToUse.set(aStarFootstepPlannerParameters);
+
+      footstepPlannerParametersToUse.setIdealFootstepLength(stepAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMaxStepReach());
+      footstepPlannerParametersToUse.setIdealBackStepLength(stepAggressivenessSlider.getDoubleValue() * -aStarFootstepPlannerParameters.getMinStepLength());
+      footstepPlannerParametersToUse.setIdealSideStepWidth(stepAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMaxStepWidth());
+
+      if (!locomotionParameters.getPerformAStarSearch())
       {
-         if (footstepQueueNotification.pollFiltered())
-         {
-            controllerFootstepQueueGraphic.generateMeshesAsync(footstepQueueNotification.read(), "Controller Queue");
-         }
-         controllerFootstepQueueGraphic.update(); // Will happen once the async mesh generation has completed on a later tick
+         footstepPlannerParametersToUse.setMaxStepYaw(turnAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMaxStepYaw());
+         footstepPlannerParametersToUse.setMinStepYaw(turnAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMinStepYaw());
+      }
 
-         footstepPlannerParametersToUse.set(aStarFootstepPlannerParameters);
+      swingFootPlannerParameters.setMinimumSwingTime(locomotionParameters.getSwingTime());
 
-         footstepPlannerParametersToUse.setIdealFootstepLength(stepAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMaxStepReach());
-         footstepPlannerParametersToUse.setIdealBackStepLength(stepAggressivenessSlider.getDoubleValue() * -aStarFootstepPlannerParameters.getMinStepLength());
-         footstepPlannerParametersToUse.setIdealSideStepWidth(stepAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMaxStepWidth());
+      boolean parametersChanged = locomotionParametersChanged.poll();
+      parametersChanged |= footstepPlanningParametersChanged.poll();
+      parametersChanged |= turnAggressivenessChanged.poll();
+      parametersChanged |= stepAggressivenessChanged.poll();
 
-         if (!locomotionParameters.getPerformAStarSearch())
-         {
-            footstepPlannerParametersToUse.setMaxStepYaw(turnAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMaxStepYaw());
-            footstepPlannerParametersToUse.setMinStepYaw(turnAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMinStepYaw());
-         }
+      if (parametersChanged)
+      {
+         footstepPlannerParametersToUse.setEnableExpansionMask(locomotionParameters.getAssumeFlatGround());
+      }
 
-         swingFootPlannerParameters.setMinimumSwingTime(locomotionParameters.getSwingTime());
+      if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll() || (parametersChanged && ballAndArrowMidFeetPosePlacement.isPlaced()))
+      {
+         footstepPlanning.queueAsynchronousPlanning(ballAndArrowMidFeetPosePlacement.getGoalPose());
+      }
 
-         boolean parametersChanged = locomotionParametersChanged.poll();
-         parametersChanged |= footstepPlanningParametersChanged.poll();
-         parametersChanged |= turnAggressivenessChanged.poll();
-         parametersChanged |= stepAggressivenessChanged.poll();
+      if (walkPathControlRing.getGoalUpdatedNotification().poll() || (parametersChanged && walkPathControlRing.isSelected()))
+      {
+         footstepPlanning.queueAsynchronousPlanning(walkPathControlRing.getGoalPose());
+      }
 
-         if (parametersChanged)
-         {
-            footstepPlannerParametersToUse.setEnableExpansionMask(locomotionParameters.getAssumeFlatGround());
-         }
+      footstepPlanning.update();
 
-         if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll() || (parametersChanged && ballAndArrowMidFeetPosePlacement.isPlaced()))
-         {
-            footstepPlanning.queueAsynchronousPlanning(ballAndArrowMidFeetPosePlacement.getGoalPose());
-         }
-
-         if (walkPathControlRing.getGoalUpdatedNotification().poll() || (parametersChanged && walkPathControlRing.isSelected()))
-         {
-            footstepPlanning.queueAsynchronousPlanning(walkPathControlRing.getGoalPose());
-         }
-
-         footstepPlanning.update();
-
-         if (footstepPlanning.getPlannerOutputNotification().poll())
-         {
-            FootstepPlannerOutput output = footstepPlanning.getPlannerOutputNotification().read();
-            interactableFootstepPlan.updateFromPlan(output.getFootstepPlan(), output.getSwingTrajectories());
-            if (output.getBodyPath().size() > 0)
-               bodyPathPlanGraphic.generateMeshesAsync(output.getBodyPath());
-            else
-               bodyPathPlanGraphic.clear();
-         }
-
-         if (walkPathControlRing.getBecomesModifiedNotification().poll())
-         {
-            legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
-         }
-
-         if (manualFootstepPlacement.pollIsModeNewlyActivated())
-         {
-            legControlMode = RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
-         }
-
-         if (legControlMode != RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING)
-         {
-            for (RobotSide side : interactableFeet.sides())
-            {
-               interactableFeet.get(side).delete();
-            }
-         }
-
-         if (legControlMode != RDXLegControlMode.PATH_CONTROL_RING)
-         {
-            walkPathControlRing.delete();
-         }
-
-         if (legControlMode != RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT)
-         {
-            manualFootstepPlacement.exitPlacement();
-         }
-
-         if (legControlMode == RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING || legControlMode == RDXLegControlMode.DISABLED)
-         {
-            interactableFootstepPlan.clear();
+      if (footstepPlanning.getPlannerOutputNotification().poll())
+      {
+         FootstepPlannerOutput output = footstepPlanning.getPlannerOutputNotification().read();
+         interactableFootstepPlan.updateFromPlan(output.getFootstepPlan(), output.getSwingTrajectories());
+         if (output.getBodyPath().size() > 0)
+            bodyPathPlanGraphic.generateMeshesAsync(output.getBodyPath());
+         else
             bodyPathPlanGraphic.clear();
-         }
-
-         manualFootstepPlacement.update();
-         bodyPathPlanGraphic.update();
-         interactableFootstepPlan.update();
-
-         boolean isCurrentlyPlacingFootstep =
-               getManualFootstepPlacement().isPlacingFootstep() || ballAndArrowMidFeetPosePlacement.isPlacingGoal() || walkPathControlRing.isSelected();
-         if (isPlacingFootstep != isCurrentlyPlacingFootstep)
-            baseUI.setModelSceneMouseCollisionEnabled(isCurrentlyPlacingFootstep);
-         isPlacingFootstep = isCurrentlyPlacingFootstep;
       }
+
+      if (walkPathControlRing.getBecomesModifiedNotification().poll())
+      {
+         legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
+      }
+
+      if (manualFootstepPlacement.pollIsModeNewlyActivated())
+      {
+         legControlMode = RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
+      }
+
+      if (legControlMode != RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING)
+      {
+         for (RobotSide side : interactableFeet.sides())
+         {
+            interactableFeet.get(side).delete();
+         }
+      }
+
+      if (legControlMode != RDXLegControlMode.PATH_CONTROL_RING)
+      {
+         walkPathControlRing.delete();
+      }
+
+      if (legControlMode != RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT)
+      {
+         manualFootstepPlacement.exitPlacement();
+      }
+
+      if (legControlMode == RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING || legControlMode == RDXLegControlMode.DISABLED)
+      {
+         interactableFootstepPlan.clear();
+         bodyPathPlanGraphic.clear();
+      }
+
+      manualFootstepPlacement.update();
+      bodyPathPlanGraphic.update();
+      interactableFootstepPlan.update();
+
+      boolean isCurrentlyPlacingFootstep =
+            getManualFootstepPlacement().isPlacingFootstep() || ballAndArrowMidFeetPosePlacement.isPlacingGoal() || walkPathControlRing.isSelected();
+      if (isPlacingFootstep != isCurrentlyPlacingFootstep)
+         baseUI.setModelSceneMouseCollisionEnabled(isCurrentlyPlacingFootstep);
+      isPlacingFootstep = isCurrentlyPlacingFootstep;
    }
 
    public void renderImGuiWidgets()
@@ -352,8 +341,9 @@ public class RDXLocomotionManager
       boolean pauseAvailable = controllerStatusTracker.isWalking();
       boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
       boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
-      
-      if(ImGui.collapsingHeader(labels.get("Locomotion")))
+      boolean waypointsAvailable = numWaypoints > 0;
+
+      if (ImGui.collapsingHeader(labels.get("Locomotion")))
       {
          float widgetStartX = 125.0f;
 
@@ -391,6 +381,24 @@ public class RDXLocomotionManager
          }
          ImGuiTools.previousWidgetTooltip("Space");
          ImGui.endDisabled();
+         ImGui.separator();
+
+         ImGui.text("Waypoint Placement:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         ImGui.beginDisabled(numWaypoints == maxWaypoints);
+         if (posePlacement.renderPlaceGoalButton())
+            legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
+         ImGui.endDisabled();
+
+         ImGui.beginDisabled(!waypointsAvailable);
+         if (ImGui.button(labels.get("Clear all waypoints")))
+            clearWaypoints();
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Send Waypoints")))
+            sendWaypoints();
+         ImGui.endDisabled();
+         ImGui.text("Waypoints: " + numWaypoints);
          ImGui.separator();
 
          ImGui.text("Footstep Placement:");
@@ -469,22 +477,13 @@ public class RDXLocomotionManager
       if (currentWaypointsRemaining == 0 && !waypointsStarted && waypointsSent && waypointsReceived)
       {
          System.out.println("RL walking complete");
-         trajectoryGraphic.clear();
-         trajectoryGraphic.createStart(goalPoseArrayList.get(numWaypoints-1).getPosition(), Color.BLACK);
-//         trajectoryGraphic.createEnd(Color.BLACK);
-         goalPoseArrayList.clear();
-         goalMessageArrayList.clear();
-         waypoints.clear();
-
-         numWaypoints = 0;
-         waypointsCompleted = 0;
-         waypointsSent = false;
+         clearWaypoints();
       }
       else if ((waypointsStarted || currentWaypointsRemaining > 0) && waypointsSent)
       {
          waypointsReceived = true;
       }
-//      System.out.println(waypointsStarted + " " + currentWaypointsRemaining);
+      //      System.out.println(waypointsStarted + " " + currentWaypointsRemaining);
       if (currentWaypointsRemaining != lastWaypointsRemaining)
       {
          System.out.println("Waypoint completed");
@@ -499,49 +498,30 @@ public class RDXLocomotionManager
       }
       lastWaypointsRemaining = currentWaypointsRemaining;
 
-      if (ImGui.isKeyReleased(ImGuiTools.getEnterKey()) && !ImGui.getIO().getWantCaptureKeyboard() &&
-          controllerStatusTracker.getLatestKnownState() == HighLevelControllerName.RL_CONTROL)
+      if (posePlacement.getPlacedNotification().poll() && posePlacement.isPlaced())
       {
-         if (numWaypoints < maxWaypoints)
-         {
-            goalPoseArrayList.add().set(goalPose);
-            goalMessageArrayList.add().set(goalMessage);
-            RDXSphereAndArrowGraphic newWaypoint = waypoints.add();
-            newWaypoint.create(0.05, 0.2, Color.BLUE);
-            newWaypoint.setToPose(goalPose);
-            trajectoryGraphic.createAdditionalPoint(goalPoseArrayList.get(numWaypoints).getPosition(), Color.BLUE);
-            numWaypoints++;
-         }
-         else
-            LogTools.warn("You have already reached the max number of waypoints, can't add any more");
+         goalPose.set(posePlacement.getGoalPose());
+         goalMessage.setXPosition(goalPose.getX());
+         goalMessage.setYPosition(goalPose.getY());
+         goalMessage.setYaw(goalPose.getYaw());
+         goalMessage.setPositionProximity(0.1);
+
+         goalPoseArrayList.add().set(goalPose);
+         goalMessageArrayList.add().set(goalMessage);
+         RDXSphereAndArrowGraphic newWaypoint = waypoints.add();
+         newWaypoint.create(0.05, 0.2, Color.BLUE);
+         newWaypoint.setToPose(goalPose);
+         trajectoryGraphic.createAdditionalPoint(goalPoseArrayList.get(numWaypoints).getPosition(), Color.BLUE);
+         numWaypoints++;
+         posePlacement.clear();
       }
 
       // Handles all shortcuts for when the spacebar key is pressed
       if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()) && !ImGui.getIO().getWantCaptureKeyboard())
       {
-         if (controllerStatusTracker.getLatestKnownState() == HighLevelControllerName.RL_CONTROL)
+         if (waypointsAvailable)
          {
-
-            if (numWaypoints < maxWaypoints)
-            {
-               goalPoseArrayList.add().set(goalPose);
-               goalMessageArrayList.add().set(goalMessage);
-               RDXSphereAndArrowGraphic newWaypoint = waypoints.add();
-               newWaypoint.create(0.05, 0.2, Color.BLUE);
-               newWaypoint.setToPose(goalPoseArrayList.get(numWaypoints));
-               trajectoryGraphic.createAdditionalPoint(goalPoseArrayList.get(numWaypoints).getPosition(), Color.BLUE);
-               numWaypoints++;
-               trajectoryGraphic.createEnd(Color.BLACK);
-            }
-
-            waypoints.get(0).create(0.05, 0.2, Color.RED);
-            waypoints.get(0).setToPose(goalPoseArrayList.get(0));
-
-            goalListMessage.getWaypoints().addAll(goalMessageArrayList);
-            goalListMessagePublisher.publish(goalListMessage);
-            goalListMessage.getWaypoints().clear();
-            waypointsSent = true;
-            waypointsReceived = false;
+            sendWaypoints();
          }
          else if (walkAvailable)
          {
@@ -558,11 +538,36 @@ public class RDXLocomotionManager
       }
    }
 
+   private void clearWaypoints()
+   {
+      trajectoryGraphic.clear();
+      trajectoryGraphic.createStart(walkPathControlRing.getGoalPose().getPosition(), Color.BLACK);
+      goalPoseArrayList.clear();
+      goalMessageArrayList.clear();
+      waypoints.clear();
+
+      numWaypoints = 0;
+      waypointsCompleted = 0;
+      waypointsSent = false;
+   }
+
+   private void sendWaypoints()
+   {
+      waypoints.get(0).create(0.05, 0.2, Color.RED);
+      waypoints.get(0).setToPose(goalPoseArrayList.get(0));
+
+      goalListMessage.getWaypoints().addAll(goalMessageArrayList);
+      goalListMessagePublisher.publish(goalListMessage);
+      goalListMessage.getWaypoints().clear();
+      waypointsSent = true;
+      waypointsReceived = false;
+   }
+
    public void updateWalkPathControlRing()
    {
       walkPathControlRing.update();
    }
-   
+
    public void calculateWalkPathControlRingVRPick(RDXVRContext vrContext)
    {
       if (!manualFootstepPlacement.isPlacingFootstep())
@@ -576,18 +581,20 @@ public class RDXLocomotionManager
          if (walkPathControlRing.getFootstepPlannerGoalGizmo().getPathControlRingGizmo().getIsGizmoHoveredVR().get(RobotSide.RIGHT))
          {
             vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
-            {
-               controller.setBButtonText("Delete all");
-               if (controller.getBButtonActionData().bChanged() && controller.getBButtonActionData().bState())
-               {
-                  deleteAll();
-               }
-               controller.setAButtonText("Walk");
-               if (controller.getAButtonActionData().bChanged() && controller.getAButtonActionData().bState())
-               {
-                  interactableFootstepPlan.walkFromSteps();
-               }
-            });
+                                                                    {
+                                                                       controller.setBButtonText("Delete all");
+                                                                       if (controller.getBButtonActionData().bChanged() && controller.getBButtonActionData()
+                                                                                                                                     .bState())
+                                                                       {
+                                                                          deleteAll();
+                                                                       }
+                                                                       controller.setAButtonText("Walk");
+                                                                       if (controller.getAButtonActionData().bChanged() && controller.getAButtonActionData()
+                                                                                                                                     .bState())
+                                                                       {
+                                                                          interactableFootstepPlan.walkFromSteps();
+                                                                       }
+                                                                    });
          }
 
          walkPathControlRing.processVRInput(vrContext);
@@ -617,11 +624,13 @@ public class RDXLocomotionManager
    public void deleteAll()
    {
       ballAndArrowMidFeetPosePlacement.clear();
+      posePlacement.clear();
       manualFootstepPlacement.exitPlacement();
       interactableFootstepPlan.clear();
       bodyPathPlanGraphic.clear();
       walkPathControlRing.delete();
-      numWaypoints = 0;
+      if (!waypointsSent && numWaypoints > 0)
+         clearWaypoints();
 
       legControlMode = RDXLegControlMode.DISABLED;
    }
@@ -665,6 +674,7 @@ public class RDXLocomotionManager
    {
       controllerFootstepQueueGraphic.getRenderables(renderables, pool);
       ballAndArrowMidFeetPosePlacement.getRenderables(renderables, pool);
+      posePlacement.getRenderables(renderables, pool);
       manualFootstepPlacement.getRenderables(renderables, pool);
       interactableFootstepPlan.getRenderables(renderables, pool);
       for (int i = 0; i < numWaypoints; i++)
