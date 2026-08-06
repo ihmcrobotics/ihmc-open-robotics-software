@@ -132,8 +132,9 @@ public class FootSwitchContactProbabilityProvider implements ContactProbabilityP
       this.loadEnterThreshold = loadEnterThreshold;
       this.loadStayThreshold = loadStayThreshold;
       this.trustDwellTicks = Math.max(1, (int) Math.round(trustDwellSeconds / estimatorDT));
-      this.trustMode = new YoEnum<>("invariantContactTrustMode", registry, TrustMode.class); // defaults to SCHMITT (ordinal 0)
-      this.trustMode.set(TrustMode.LEGACY); // Legacy foot touch detector as DEFAULT setting.
+      // Defaults to SCHMITT (ordinal 0), the production default. LEGACY/NONE remain reachable as A/B arms
+      // by writing this YoEnum live, without a rebuild.
+      this.trustMode = new YoEnum<>("invariantContactTrustMode", registry, TrustMode.class);
    }
 
    @Override
