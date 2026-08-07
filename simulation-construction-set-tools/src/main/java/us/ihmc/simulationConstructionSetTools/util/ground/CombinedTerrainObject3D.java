@@ -113,6 +113,12 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       addTerrainObject(cone);
    }
 
+   public void addPyramid(RigidBodyTransformReadOnly transform, double slope, double baseWidth, double topWidth, AppearanceDefinition appearance)
+   {
+      PyramidTerrainObject pyramid = new PyramidTerrainObject(transform, slope, baseWidth, topWidth, appearance);
+      addTerrainObject(pyramid);
+   }
+
    public void addRotatedRamp(double xCenter, double yCenter, double xRun, double yWidth, double height, double yawDegrees, AppearanceDefinition appearance)
    {
       RotatableRampTerrainObject ramp = new RotatableRampTerrainObject(xCenter, yCenter, xRun, yWidth, height, yawDegrees, appearance);
