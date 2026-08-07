@@ -102,7 +102,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvi
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorControllerFactory;
-import us.ihmc.stateEstimation.invariant_estimator.InvariantContactSource;
+import us.ihmc.stateEstimation.invariantEstimator.InvariantContactSource;
 import us.ihmc.tools.factories.FactoryFieldNotSetException;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;

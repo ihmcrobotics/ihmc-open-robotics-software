@@ -52,6 +52,7 @@ public final class ProprioceptivePreFilterFactory
                                                                                               cancelGravityFromAccelerationMeasurement,
                                                                                               estimatorDT,
                                                                                               parentRegistry);
+         //TODO: Robert wants to move away from factories, might be worth just wiring this into ProprioceptivePrefilter anyways...
          case JOINT_KF -> JointLevelKFPreFilter.createForKinematicsEstimator(sensorOutputMap,
                                                                              stateEstimatorParameters,
                                                                              imuProcessedOutputs,

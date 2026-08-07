@@ -50,7 +50,7 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
-import us.ihmc.stateEstimation.invariant_estimator.InvariantContactSource;
+import us.ihmc.stateEstimation.invariantEstimator.InvariantContactSource;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;

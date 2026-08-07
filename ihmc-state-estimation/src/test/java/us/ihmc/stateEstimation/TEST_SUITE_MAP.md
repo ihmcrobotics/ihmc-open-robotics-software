@@ -1,18 +1,18 @@
-# Estimator test-suite map — `jointLevel` + `invariant_estimator`
+# Estimator test-suite map — `jointLevel` + `invariantEstimator`
 
 Complete map of the JUnit 5 test suite for the two estimator packages in `ihmc-state-estimation`,
 written to support a 1:1 port of the suite to Python (so a Python re-implementation of the
 estimator can be validated against the same properties, scenarios, and tolerances).
 
 - Source root: `ihmc-state-estimation/src/test/java/us/ihmc/stateEstimation/`
-- **176 test methods across 28 test classes** (92 in `jointLevel`, 84 in `invariant_estimator`),
+- **176 test methods across 28 test classes** (92 in `jointLevel`, 84 in `invariantEstimator`),
   plus 4 test-support classes with no tests (`JointLevelKFTestFixture`, `JointLevelKFTestSupport`,
   `SettableTestIMU`, `SettableTestSensorMap`).
 - Run the Java suite (JDK 17, from the workspace root):
   ```
   ./gradlew -p ihmc-open-robotics-software :ihmc-state-estimation:ihmc-state-estimation-test:test \
     --tests "us.ihmc.stateEstimation.jointLevel.*" \
-    --tests "us.ihmc.stateEstimation.invariant_estimator.*" --rerun-tasks
+    --tests "us.ihmc.stateEstimation.invariantEstimator.*" --rerun-tasks
   ```
 - Mapped as of 2026-07-21 on branch `new-estimator/joint-debug`.
 
@@ -39,7 +39,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 | `JointLevelKFSingularInnovationDiagnosticTest` | 2 | Near-singular S diagnostic names the physical measurement | Adapt (message text) |
 | `JointLevelKFPreFilterAllocationTest` | 3 | Hot-path allocation-free guard (JVM) + finiteness smoke | Only `testHotPathStaysFinite` |
 
-### `us.ihmc.stateEstimation.invariant_estimator` (right-invariant EKF on SE_k(3))
+### `us.ihmc.stateEstimation.invariantEstimator` (right-invariant EKF on SE_k(3))
 
 | Class | Tests | Focus | Python portability |
 |---|---|---|---|
@@ -633,7 +633,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 
 ### SEK3UtilsTest.java
 
-- **Purpose**: Tests `SEK3_Utils`, the SE_k(3) matrix-Lie-group exp/log/adjoint utilities: exp/log round-trip for k=1,2,3, agreement with trusted SE(3) tooling at k=1, and adjoint algebraic identities (homomorphism, conjugation).
+- **Purpose**: Tests `SEK3Utils`, the SE_k(3) matrix-Lie-group exp/log/adjoint utilities: exp/log round-trip for k=1,2,3, agreement with trusted SE(3) tooling at k=1, and adjoint algebraic identities (homomorphism, conjugation).
 - **Shared setup**: No `@BeforeEach`. Constants: `EPSILON = 1.0e-10`, `ITERATIONS = 1000`. Each test builds its own `Random` with a fixed seed. The algebra vector layout is ξ = [φ (3, rotation part); then k blocks of 3 (translation/velocity/contact parts)], length `3 + 3k`. The group element X is an `(3+k)×(3+k)` matrix (top-left 3×3 rotation R; k columns of length 3 to the right of it; bottom rows form the SE_k(3) structured identity). Adjoint size is `(3+3k)×(3+3k)`. Ordering convention is [φ; ρ] (rotation-first).
 
 #### testExpLogRoundTrip

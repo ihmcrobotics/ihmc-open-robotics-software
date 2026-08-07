@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Test-only bridge that exposes the package-private {@link JointLevelKFPreFilter} constructor to tests in
- * other packages (e.g. the combined estimator test in {@code us.ihmc.stateEstimation.invariant_estimator}).
+ * other packages (e.g. the combined estimator test in {@code us.ihmc.stateEstimation.invariantEstimator}).
  * This lives in the {@code jointLevel} package so it can reach the constructor without going through
  * {@link JointLevelKFPreFilter#createForKinematicsEstimator} (which needs a full {@code StateEstimatorParameters}).
  * Not for production use.

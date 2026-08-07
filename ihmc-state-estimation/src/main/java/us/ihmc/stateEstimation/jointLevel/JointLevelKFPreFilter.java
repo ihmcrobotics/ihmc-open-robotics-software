@@ -140,6 +140,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          "SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW",
          "WRIST_Z", "WRIST_X", "GRIPPER_Z", "NECK_Z", "NECK_Y"};
    private static final double[] ROTOR_INERTIA_VALUES = {
+         //TODO: needs to be moved to use the calibrated inertia values either from alex-sdk or alex-hardware
          0.062, 0.02, 0.167, 0.167, 0.07, 0.05, 0.062,
          0.067, 0.067, 0.022, 0.022,
          0.005, 0.005, 0.005, 0.005, 0.005};
@@ -162,6 +163,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    // factor diagonal ((max L_ii / min L_ii)^2 — no eigendecomposition); above this the whole stacked update is
    // skipped, because a finite-but-ill-conditioned S inverts to a huge gain that the Joseph K R K^T loop squares
    // each tick (the P divergence mechanism the LU/isFinite guards were blind to).
+   //TODO: these need to be YoVariable-ized so that these can be tuned on the fly while the filter is running live.
    private static final double COND_S_MAX = 1.0e9;
    private static final double INIT_POS_VAR = 1.0e-6; // encoders trusted at initialization
    private static final double INIT_VEL_VAR = 1.0; // velocity unknown at initialization
@@ -401,7 +403,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    // identical M(q) — switching changes nothing numerically. Process-noise magnitude is governed by SIGMA_TAU
    // and the QA_MAX conditioning cap in updateProcessNoiseFromMassMatrix, not by the choice of calculator.
    private CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
-   private int numNuisanceDoF;          // 6 (base) + number of gap joints; the marginalized block width N
+   private int numberOfNuisanceDOF;          // 6 (base) + number of gap joints; the marginalized block width N
    private int[] massMatrixNuisanceColumns; // nuisance DoF columns of the full mass matrix (length N)
    private int[] massMatrixColumn;      // filter joint state index -> DoF column in the calculator's mass matrix
    private final DMatrixRMaj MNN = new DMatrixRMaj(0, 0);       // nuisance block, N x N
@@ -697,10 +699,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                massMatrixNuisanceColumns[i] = nuisanceColumns.get(i);
                nuisanceRotorInertiaDiag[i] = nuisanceRotor.get(i);
             }
-            numNuisanceDoF = massMatrixNuisanceColumns.length; // 6 + gap joints
+            numberOfNuisanceDOF = massMatrixNuisanceColumns.length; // 6 + gap joints
 
             LogTools.info("Joint-level KF process noise: Schur-complement path (sigma_tau = " + SIGMA_TAU + " N*m) over "
-                          + n + " joints, marginalizing a " + numNuisanceDoF + "-DoF nuisance block (6-DoF floating base"
+                          + n + " joints, marginalizing a " + numberOfNuisanceDOF + "-DoF nuisance block (6-DoF floating base"
                           + (gapJoints > 0 ? " + " + gapJoints + " unfiltered gap joint(s))." : ")."));
          }
       }
@@ -1168,7 +1170,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       // setA and the previous Q is kept instead of a garbage inverse entering the filter.
       if (massMatrixCalculator != null)
       {
-         int nN = numNuisanceDoF;
+         int nN = numberOfNuisanceDOF;
          MNN.reshape(nN, nN);
          MNf.reshape(nN, n);
          Mff.reshape(n, n);
@@ -1301,7 +1303,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       // Extract the blocks by resolved column index (never assume ordering — SPEC §3.2). M is symmetric, so
       // M_jN = M_Nj^T and we only need M_NN, M_Nf, M_ff. M_ff is read in filter joint state order (row i =
       // filtered joint i), so Lambda and Lambda^-2 come out already in state order — no permutation in the fill.
-      int nN = numNuisanceDoF;
+      int nN = numberOfNuisanceDOF;
       for (int a = 0; a < nN; a++)
       {
          int ca = massMatrixNuisanceColumns[a];
