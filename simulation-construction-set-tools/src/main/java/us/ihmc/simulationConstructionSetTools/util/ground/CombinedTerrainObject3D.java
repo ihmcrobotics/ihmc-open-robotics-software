@@ -119,6 +119,59 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       addTerrainObject(pyramid);
    }
 
+   public void addInvertedPyramid(RigidBodyTransformReadOnly transform, double slope, double baseWidth, double topWidth, AppearanceDefinition appearance)
+   {
+      InvertedPyramidTerrainObject invertedPyramid = new InvertedPyramidTerrainObject(transform, slope, baseWidth, topWidth, appearance);
+      addTerrainObject(invertedPyramid);
+   }
+
+   public void addPyramidStairs(String name, RigidBodyTransformReadOnly transform, double sizeX, double sizeY, double stepHeight, double stepWidth,
+                                 double platformWidth, double borderWidth, boolean holes, AppearanceDefinition appearance)
+   {
+      PyramidStairsTerrainObject pyramidStairs = new PyramidStairsTerrainObject(name, transform, sizeX, sizeY, stepHeight, stepWidth, platformWidth,
+                                                                                 borderWidth, holes, appearance);
+      addTerrainObject(pyramidStairs);
+   }
+
+   public void addInvertedPyramidStairs(String name, RigidBodyTransformReadOnly transform, double sizeX, double sizeY, double stepHeight, double stepWidth,
+                                         double platformWidth, double borderWidth, boolean holes, AppearanceDefinition appearance)
+   {
+      InvertedPyramidStairsTerrainObject invertedPyramidStairs = new InvertedPyramidStairsTerrainObject(name,
+                                                                                                          transform,
+                                                                                                          sizeX,
+                                                                                                          sizeY,
+                                                                                                          stepHeight,
+                                                                                                          stepWidth,
+                                                                                                          platformWidth,
+                                                                                                          borderWidth,
+                                                                                                          holes,
+                                                                                                          appearance);
+      addTerrainObject(invertedPyramidStairs);
+   }
+
+   public void addRandomGrid(String name, RigidBodyTransformReadOnly transform, long seed, double size, double gridWidth, double gridHeight,
+                              double platformWidth, boolean holes, AppearanceDefinition appearance)
+   {
+      RandomGridTerrainObject randomGrid = new RandomGridTerrainObject(name, transform, seed, size, gridWidth, gridHeight, platformWidth, holes, appearance);
+      addTerrainObject(randomGrid);
+   }
+
+   public void addRandomUniformHeightField(RigidBodyTransformReadOnly transform, long seed, double sizeX, double sizeY, double noiseMin, double noiseMax,
+                                            double controlPointSpacing, double meshResolution, double borderWidth, AppearanceDefinition appearance)
+   {
+      RandomUniformHeightFieldTerrainObject heightField = new RandomUniformHeightFieldTerrainObject(transform,
+                                                                                                      seed,
+                                                                                                      sizeX,
+                                                                                                      sizeY,
+                                                                                                      noiseMin,
+                                                                                                      noiseMax,
+                                                                                                      controlPointSpacing,
+                                                                                                      meshResolution,
+                                                                                                      borderWidth,
+                                                                                                      appearance);
+      addTerrainObject(heightField);
+   }
+
    public void addRotatedRamp(double xCenter, double yCenter, double xRun, double yWidth, double height, double yawDegrees, AppearanceDefinition appearance)
    {
       RotatableRampTerrainObject ramp = new RotatableRampTerrainObject(xCenter, yCenter, xRun, yWidth, height, yawDegrees, appearance);
