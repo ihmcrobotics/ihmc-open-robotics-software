@@ -9,8 +9,11 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelWrapper;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 public class RhinoBeetleModelFactory implements FullRobotModelFactory
 {
@@ -31,12 +34,19 @@ public class RhinoBeetleModelFactory implements FullRobotModelFactory
                                                            jointMapAndContactInfo,
                                                            jointMapAndContactInfo,
                                                            true);
-   }
 
-   public FloatingRootJointRobot createSdfRobot()
-   {
+      new RhinoBeetleSimInitialSetup().initializeRobotDefinition(robotDefinition, jointMapAndContactInfo);
 
-      return new FloatingRootJointRobot(robotDefinition);
+      // The robot's OBJ/MTL mesh files bake in a near-black "skin" material (Kd ~0.05,0,0.01), and the
+      // SDF has no <material> override, so the meshes render almost black. Override with a plain gray
+      // material so the robot is actually visible in the SCS2 viewer.
+      for (RigidBodyDefinition rigidBody : robotDefinition.getAllRigidBodies())
+      {
+         for (VisualDefinition visual : rigidBody.getVisualDefinitions())
+         {
+            visual.setMaterialDefinition(new MaterialDefinition(ColorDefinitions.Gray()));
+         }
+      }
    }
 
    @Override
