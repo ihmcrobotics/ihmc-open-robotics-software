@@ -12,4 +12,4 @@ newmtl skin
 	Kd 0.0471 0.0000 0.0118
 	Ks 0.8190 0.8190 0.8190
 	Ke 0.0000 0.0000 0.0000
-	map_refl /Users/steel/OneDrive - Georgia Institute of Technology/ihmc/WDI/beetle/meshes/Map__4_Raytrace.tga
+	map_refl Map__4_Raytrace.tga

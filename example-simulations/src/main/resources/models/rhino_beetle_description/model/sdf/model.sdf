@@ -42,15 +42,6 @@
           <izz>0.0002</izz>
         </inertia>
       </inertial>
-      <visual name='FRONT_LEFT_UPPER_YAW_LIMB_visual'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://rhino_beetle_description/model/meshes/none.obj</uri>
-          </mesh>
-        </geometry>
-      </visual>
       <velocity_decay>
         <linear>0</linear>
         <angular>0</angular>
@@ -174,15 +165,6 @@
           <izz>0.0002</izz>
         </inertia>
       </inertial>
-      <visual name='FRONT_RIGHT_UPPER_YAW_LIMB_visual'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://rhino_beetle_description/model/meshes/none.obj</uri>
-          </mesh>
-        </geometry>
-      </visual>
       <velocity_decay>
         <linear>0</linear>
         <angular>0</angular>
@@ -306,15 +288,6 @@
           <izz>0.0002</izz>
         </inertia>
       </inertial>
-      <visual name='HIND_LEFT_UPPER_YAW_LIMB_visual'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://rhino_beetle_description/model/meshes/none.obj</uri>
-          </mesh>
-        </geometry>
-      </visual>
       <velocity_decay>
         <linear>0</linear>
         <angular>0</angular>
@@ -438,15 +411,6 @@
           <izz>0.0002</izz>
         </inertia>
       </inertial>
-      <visual name='HIND_RIGHT_UPPER_YAW_LIMB_visual'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://rhino_beetle_description/model/meshes/none.obj</uri>
-          </mesh>
-        </geometry>
-      </visual>
       <velocity_decay>
         <linear>0</linear>
         <angular>0</angular>
@@ -570,15 +534,6 @@
           <izz>0.0002</izz>
         </inertia>
       </inertial>
-      <visual name='MIDDLE_LEFT_UPPER_YAW_LIMB_visual'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://rhino_beetle_description/model/meshes/none.obj</uri>
-          </mesh>
-        </geometry>
-      </visual>
       <velocity_decay>
         <linear>0</linear>
         <angular>0</angular>
@@ -702,15 +657,6 @@
           <izz>0.0002</izz>
         </inertia>
       </inertial>
-      <visual name='MIDDLE_RIGHT_UPPER_YAW_LIMB_visual'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://rhino_beetle_description/model/meshes/none.obj</uri>
-          </mesh>
-        </geometry>
-      </visual>
       <velocity_decay>
         <linear>0</linear>
         <angular>0</angular>
