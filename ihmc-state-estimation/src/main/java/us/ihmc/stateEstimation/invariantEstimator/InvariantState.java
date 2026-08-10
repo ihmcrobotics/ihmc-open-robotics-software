@@ -69,7 +69,7 @@ public class InvariantState
       return numberOfContacts;
    }
 
-   /** @return the group-element size n = 5 + N. */
+   /** @return the group-element size n = 5 + #getNumberOfContacts. */
    public int getGroupSize()
    {
       return groupElement.getNumRows();
@@ -106,9 +106,10 @@ public class InvariantState
     */
    public void getRotation(RotationMatrixBasics rotationToPack)
    {
-      rotationToPack.set(groupElement.get(0,0),groupElement.get(0,1),groupElement.get(0,2),
-                         groupElement.get(1,0),groupElement.get(1,1),groupElement.get(1,2),
-                         groupElement.get(2,0),groupElement.get(2,1),groupElement.get(2,2));
+//      rotationToPack.set(groupElement.get(0,0),groupElement.get(0,1),groupElement.get(0,2),
+//                         groupElement.get(1,0),groupElement.get(1,1),groupElement.get(1,2),
+//                         groupElement.get(2,0),groupElement.get(2,1),groupElement.get(2,2));
+      rotationToPack.set(groupElement);
    }
 
    /**

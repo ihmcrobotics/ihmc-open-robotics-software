@@ -2,6 +2,7 @@ package us.ihmc.stateEstimation.invariantEstimator;
 
 import org.ejml.data.DMatrixRMaj;
 
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -120,9 +121,9 @@ public class GravityLevelingUpdater
    private final Vector3D referenceRate = new Vector3D();         // ω × ĝ_ref
    private boolean gravityReferenceInitialized = false;
 
-   private static final Vector3D E_X = new Vector3D(1.0, 0.0, 0.0);
-   private static final Vector3D E_Y = new Vector3D(0.0, 1.0, 0.0);
-   private static final Vector3D E_Z = new Vector3D(0.0, 0.0, 1.0);
+   private static final Axis3D E_X = Axis3D.X;
+   private static final Axis3D E_Y = Axis3D.Y;
+   private static final Axis3D E_Z = Axis3D.Z;
 
    /**
     * Isotropic convenience: σ_roll² = σ_pitch² = {@code tiltMeasurementVariance}.
