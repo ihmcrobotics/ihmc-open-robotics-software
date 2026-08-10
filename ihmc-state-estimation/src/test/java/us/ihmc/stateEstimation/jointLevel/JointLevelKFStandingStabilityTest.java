@@ -25,7 +25,7 @@ public class JointLevelKFStandingStabilityTest
    private static final double DT = JointLevelKFTestFixture.DT;
    private static final double SIGMA_TAU = 5.0; // matches the (fixed) filter; CHECK #3 uses explicit 50/5/1 literals
    // Physical cap on the joint-acceleration process-noise variance (σ_qdd_max = 30 rad/s²)² — mirrors the filter's
-   // JointLevelKFPreFilter.QA_MAX after the fix, used to validate the conditioning cap independently.
+   // JointKFParameters.QA_MAX after the fix, used to validate the conditioning cap independently.
    private static final double QA_MAX = 900.0;
 
    /** Λ = M_ff − M_jN M_NN⁻¹ M_Nf and M_ff, in filter state order — independent EJML/LU reference (copied from
@@ -121,7 +121,7 @@ public class JointLevelKFStandingStabilityTest
       return m;
    }
 
-   private static final double ROTOR_DEFAULT = 0.005; // JointLevelKFPreFilter.ROTOR_INERTIA_DEFAULT (synthetic joints match no table key)
+   private static final double ROTOR_DEFAULT = 0.005; // JointKFParameters.ROTOR_INERTIA_DEFAULT (synthetic joints match no table key)
 
    /** New-model reference Qa (Part B items 1 &amp; 3, replacing the old QA_MAX-capped σ_τ² Λ⁻²): Lambda_eff =
     *  Λ + rotorDefault·I, then Qa = σ_τ² Lambda_eff⁻². The synthetic chain's joints match no rotor-table key (so
@@ -132,7 +132,7 @@ public class JointLevelKFStandingStabilityTest
    {
       DMatrixRMaj lambdaEff = lambda.copy();
       for (int i = 0; i < lambdaEff.numRows; i++) // per-joint rotor via the filter's own seam (exact match)
-         lambdaEff.add(i, i, JointLevelKFPreFilter.reflectedRotorInertiaForNameOrDefault(f.filteredJoints.get(i).getName()));
+         lambdaEff.add(i, i, JointKFParameters.reflectedRotorInertiaForNameOrDefault(f.filteredJoints.get(i).getName()));
       return qaFromLambda(lambdaEff, sigmaTau);
    }
 
@@ -234,7 +234,7 @@ public class JointLevelKFStandingStabilityTest
 
    // ============================ CHECK #5: the per-joint ALPHA acceleration-equalization principle ============================
 
-   private static final double TARGET_QDD_STD = 20.0; // rad/s², mirrors JointLevelKFPreFilter.TARGET_QDD_STD
+   private static final double TARGET_QDD_STD = 20.0; // rad/s², mirrors JointKFParameters.TARGET_QDD_STD
 
    @Test
    public void testAccelerationEqualizedSigmaTauFloorsAtTargetAndEqualizesDominantTerm()
@@ -256,7 +256,7 @@ public class JointLevelKFStandingStabilityTest
          int n = f.n;
          DMatrixRMaj lambdaEff = referenceSchur(f)[0].copy();
          for (int i = 0; i < n; i++) // Λ_eff = Λ + diag(reflected rotor inertia), the filter's own seam (exact match)
-            lambdaEff.add(i, i, JointLevelKFPreFilter.reflectedRotorInertiaForNameOrDefault(f.filteredJoints.get(i).getName()));
+            lambdaEff.add(i, i, JointKFParameters.reflectedRotorInertiaForNameOrDefault(f.filteredJoints.get(i).getName()));
          DMatrixRMaj inv = new DMatrixRMaj(n, n);
          CommonOps_DDRM.invert(lambdaEff, inv);
 

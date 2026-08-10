@@ -576,7 +576,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 - **Checks**: `Qa_gram[i,j] == Qa_ref[i,j]` within `1e-10·max(1,maxAbs(Qa_ref))`; exact symmetry `Qa_gram[i,j]==Qa_gram[j,i]` (tol 0.0); PSD `minEig(Qa_gram) >= -1e-12`.
 
 #### testRotorInertiaTableLookup
-- **Scenario**: Direct calls to `JointLevelKFPreFilter.reflectedRotorInertiaForNameOrDefault(name)`.
+- **Scenario**: Direct calls to `JointKFParameters.reflectedRotorInertiaForNameOrDefault(name)`.
 - **Checks** (all tol 0.0): `LEFT_HIP_X`→0.062; `RIGHT_HIP_Y`→0.167; `left_knee_y`→0.167 (case-insensitive, KNEE); `LEFT_ANKLE_Y`→0.070; `LEFT_ANKLE_X`→0.050; `SPINE_Z`→0.062; `SOME_UNKNOWN_JOINT`→0.005 (default floor).
 - **Port notes**: Rotor-inertia name→value table is a filter constant the port must replicate exactly (substring, case-insensitive matching).
 

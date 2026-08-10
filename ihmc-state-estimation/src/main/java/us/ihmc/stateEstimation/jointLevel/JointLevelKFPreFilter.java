@@ -429,18 +429,6 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       return false;
    }
 
-   /** Test seam retained on this class: delegates to {@link JointKFParameters}, where the table now lives. */
-   static double reflectedRotorInertiaForNameOrDefault(String jointName)
-   {
-      return JointKFParameters.reflectedRotorInertiaForNameOrDefault(jointName);
-   }
-
-   /** Test seam retained on this class: delegates to {@link JointKFParameters}, where the table now lives. */
-   static double alphaForName(String jointName)
-   {
-      return JointKFParameters.alphaForName(jointName);
-   }
-
    // ================================ Consumed state ================================
 
    @Override

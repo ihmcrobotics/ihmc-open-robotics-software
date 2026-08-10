@@ -33,7 +33,7 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
  */
 public class JointLevelKFStackedOracleTest
 {
-   private static final double ANCHOR_VAR = 4.0e-4; // must match JointLevelKFPreFilter.ANCHOR_VAR (Sigma_eps)
+   private static final double ANCHOR_VAR = 4.0e-4; // must match JointKFParameters.ANCHOR_VAR (Sigma_eps)
 
    @Test
    public void testStackedUpdateMatchesNuisanceMarginalizedReference()

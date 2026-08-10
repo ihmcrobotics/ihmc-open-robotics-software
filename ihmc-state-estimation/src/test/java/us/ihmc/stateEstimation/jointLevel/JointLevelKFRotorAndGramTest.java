@@ -108,13 +108,13 @@ public class JointLevelKFRotorAndGramTest
    @Test
    public void testRotorInertiaTableLookup()
    {
-      assertEquals(0.062, JointLevelKFPreFilter.reflectedRotorInertiaForNameOrDefault("LEFT_HIP_X"), 0.0, "HIP_X");
-      assertEquals(0.167, JointLevelKFPreFilter.reflectedRotorInertiaForNameOrDefault("RIGHT_HIP_Y"), 0.0, "HIP_Y");
-      assertEquals(0.167, JointLevelKFPreFilter.reflectedRotorInertiaForNameOrDefault("left_knee_y"), 0.0, "KNEE (case-insensitive)");
-      assertEquals(0.070, JointLevelKFPreFilter.reflectedRotorInertiaForNameOrDefault("LEFT_ANKLE_Y"), 0.0, "ANKLE_Y");
-      assertEquals(0.050, JointLevelKFPreFilter.reflectedRotorInertiaForNameOrDefault("LEFT_ANKLE_X"), 0.0, "ANKLE_X");
-      assertEquals(0.062, JointLevelKFPreFilter.reflectedRotorInertiaForNameOrDefault("SPINE_Z"), 0.0, "SPINE");
-      assertEquals(0.005, JointLevelKFPreFilter.reflectedRotorInertiaForNameOrDefault("SOME_UNKNOWN_JOINT"), 0.0, "unmatched -> default floor");
+      assertEquals(0.062, JointKFParameters.reflectedRotorInertiaForNameOrDefault("LEFT_HIP_X"), 0.0, "HIP_X");
+      assertEquals(0.167, JointKFParameters.reflectedRotorInertiaForNameOrDefault("RIGHT_HIP_Y"), 0.0, "HIP_Y");
+      assertEquals(0.167, JointKFParameters.reflectedRotorInertiaForNameOrDefault("left_knee_y"), 0.0, "KNEE (case-insensitive)");
+      assertEquals(0.070, JointKFParameters.reflectedRotorInertiaForNameOrDefault("LEFT_ANKLE_Y"), 0.0, "ANKLE_Y");
+      assertEquals(0.050, JointKFParameters.reflectedRotorInertiaForNameOrDefault("LEFT_ANKLE_X"), 0.0, "ANKLE_X");
+      assertEquals(0.062, JointKFParameters.reflectedRotorInertiaForNameOrDefault("SPINE_Z"), 0.0, "SPINE");
+      assertEquals(0.005, JointKFParameters.reflectedRotorInertiaForNameOrDefault("SOME_UNKNOWN_JOINT"), 0.0, "unmatched -> default floor");
    }
 
    private static double minEig(DMatrixRMaj a)

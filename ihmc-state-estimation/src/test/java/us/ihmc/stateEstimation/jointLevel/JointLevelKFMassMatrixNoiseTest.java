@@ -42,9 +42,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 public class JointLevelKFMassMatrixNoiseTest
 {
    private static final double DT = JointLevelKFTestFixture.DT;
-   private static final double SIGMA_TAU = 5.0;    // matches JointLevelKFPreFilter.SIGMA_TAU (retuned after Schur switch)
-   private static final double QA_MAX = 900.0;     // matches JointLevelKFPreFilter.QA_MAX (Qa conditioning cap)
-   private static final double SIGMA_ACCEL = 50.0; // matches JointLevelKFPreFilter.SIGMA_ACCEL (fallback path)
+   private static final double SIGMA_TAU = 5.0;    // matches JointKFParameters.SIGMA_TAU (retuned after Schur switch)
+   private static final double QA_MAX = 900.0;     // matches JointKFParameters.QA_MAX (Qa conditioning cap)
+   private static final double SIGMA_ACCEL = 50.0; // matches JointKFParameters.SIGMA_ACCEL (fallback path)
 
    /**
     * Relative tolerance for comparisons against the reference Qa: the filter inverts by Cholesky, the
@@ -140,7 +140,7 @@ public class JointLevelKFMassMatrixNoiseTest
       return new DMatrixRMaj[] {lambda, mff};
    }
 
-   private static final double ROTOR_DEFAULT = 0.005; // JointLevelKFPreFilter.ROTOR_INERTIA_DEFAULT (synthetic joints match no table key)
+   private static final double ROTOR_DEFAULT = 0.005; // JointKFParameters.ROTOR_INERTIA_DEFAULT (synthetic joints match no table key)
 
    /**
     * Independent reference for the Rev.2 process noise, UPDATED for Part B items 1 &amp; 3 (was Qa = σ_τ² Λ⁻²
@@ -155,7 +155,7 @@ public class JointLevelKFMassMatrixNoiseTest
       int n = f.n;
       DMatrixRMaj lambdaEff = referenceSchur(f)[0].copy();
       for (int i = 0; i < n; i++) // Lambda_eff = Λ + diag(rotor); read rotor per joint via the filter's own seam
-         lambdaEff.add(i, i, JointLevelKFPreFilter.reflectedRotorInertiaForNameOrDefault(f.filteredJoints.get(i).getName()));
+         lambdaEff.add(i, i, JointKFParameters.reflectedRotorInertiaForNameOrDefault(f.filteredJoints.get(i).getName()));
       DMatrixRMaj lambdaInv = new DMatrixRMaj(n, n);
       assertTrue(CommonOps_DDRM.invert(lambdaEff, lambdaInv), "reference Lambda_eff inverts");
 
@@ -174,7 +174,7 @@ public class JointLevelKFMassMatrixNoiseTest
    {
       double tauMax = f.filteredJoints.get(stateIndex).getEffortLimitUpper();
       String name = f.filteredJoints.get(stateIndex).getName();
-      return (Double.isFinite(tauMax) && tauMax > 0.0) ? JointLevelKFPreFilter.alphaForName(name) * tauMax : SIGMA_TAU;
+      return (Double.isFinite(tauMax) && tauMax > 0.0) ? JointKFParameters.alphaForName(name) * tauMax : SIGMA_TAU;
    }
 
    @Test

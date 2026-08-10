@@ -26,8 +26,8 @@ import org.junit.jupiter.api.Test;
 public class JointLevelKFTransitionNoiseTest
 {
    private static final double DT = JointLevelKFTestFixture.DT;
-   private static final double SIGMA_ACCEL = 50.0;   // matches JointLevelKFPreFilter.SIGMA_ACCEL
-   // Mirrors JointLevelKFPreFilter.ENCODER_VAR — the scalar FALLBACK used when no per-joint encoder noise is
+   private static final double SIGMA_ACCEL = 50.0;   // matches JointKFParameters.SIGMA_ACCEL
+   // Mirrors JointKFParameters.ENCODER_VAR — the scalar FALLBACK used when no per-joint encoder noise is
    // wired (these fixtures wire none). Was 1e-6, stale: the filter constant was retuned to 5e-5 without this
    // mirror, so testEncoderMeasurementModel was red before the per-joint R wiring existed.
    private static final double ENCODER_VAR = 5.0e-5;
