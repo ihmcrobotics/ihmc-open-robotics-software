@@ -32,10 +32,11 @@ public class InvariantEKFReseedTest
    private static final int N_CONTACTS = 2;
    private static final int M = 9 + 3 * N_CONTACTS;
    private static final double EPS = 1.0e-10;
+   private static final double GRAVITY = -9.81;
 
    private static InvariantEKF randomlyInitializedEKF(Random random, DMatrixRMaj covarianceToUse)
    {
-      InvariantEKF ekf = new InvariantEKF(N_CONTACTS, 1.0e-4, 1.0e-3, 1.0e-6);
+      InvariantEKF ekf = new InvariantEKF(N_CONTACTS, 1.0e-4, 1.0e-3, 1.0e-6, GRAVITY);
       RotationMatrix rotation = new RotationMatrix();
       rotation.setYawPitchRoll(random.nextDouble() - 0.5, 0.4 * (random.nextDouble() - 0.5), 0.4 * (random.nextDouble() - 0.5));
       Point3D basePosition = new Point3D(random.nextDouble(), random.nextDouble(), 0.9 + 0.1 * random.nextDouble());

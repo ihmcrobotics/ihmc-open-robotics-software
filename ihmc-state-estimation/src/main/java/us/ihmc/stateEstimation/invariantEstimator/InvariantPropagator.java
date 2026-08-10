@@ -33,10 +33,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
  */
 public class InvariantPropagator
 {
-   private static final double GRAVITY_Z = -9.81;
-
    private final int numberOfContacts;
-   private final Vector3D gravity = new Vector3D(0.0, 0.0, GRAVITY_Z);
+   /** World-frame gravity g = (0, 0, -|g|). Set from the robot process's gravity, never hard-coded here. */
+   private final Vector3D gravity = new Vector3D();
 
    /** Continuous process-noise covariance Q_c (m×m); the contact-slip blocks may be retuned per tick. */
    private final DMatrixRMaj processNoise;
@@ -74,13 +73,15 @@ public class InvariantPropagator
     * @param gyroVariance     continuous angular-velocity noise variance σ_ω² (rad²/s).
     * @param accelVariance    continuous specific-force noise variance σ_a² (m²/s³).
     * @param contactVariance  continuous contact-slip noise variance σ_c² (m²/s).
+    * @param gravitationalAcceleration the process gravity (m/s²); sign not considered, g is always (0, 0, −|g|).
     */
-   public InvariantPropagator(int numberOfContacts, double gyroVariance, double accelVariance, double contactVariance)
+   public InvariantPropagator(int numberOfContacts, double gyroVariance, double accelVariance, double contactVariance, double gravitationalAcceleration)
    {
       if (numberOfContacts < 0)
          throw new IllegalArgumentException("numberOfContacts must be >= 0, was " + numberOfContacts);
 
       this.numberOfContacts = numberOfContacts;
+      gravity.set(0.0, 0.0, -Math.abs(gravitationalAcceleration));
 
       int m = 3 + 3 * (2 + numberOfContacts); // tangent size = 9 + 3N
 
