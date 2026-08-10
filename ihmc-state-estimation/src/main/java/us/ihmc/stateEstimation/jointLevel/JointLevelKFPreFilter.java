@@ -67,140 +67,12 @@ import java.util.function.ToDoubleFunction;
  */
 public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 {
-   //TUNING VARIABLES
-   // Fallback encoder position variance (rad^2), used for any joint the per-joint lookup does not cover
-   // (encoderPositionNoiseStd == null or returns NaN). sigma ~ 7.1e-3 rad. Hardware-measured per-joint values
-   // (walking-run FFT/PSD noise floor, 2026-07-15) run sigma 5.6e-5..7.5e-4 rad — variances 2-4 ORDERS OF
-   // MAGNITUDE below this fallback — so an Alex joint silently on the fallback badly under-trusts its encoder;
-   // watch jointKF_encR_<joint> at boot.
-   private static final double ENCODER_VAR = 5.0e-5;
-   private static final double SIGMA_ACCEL = 50.0; // rad/s^2 CWNA process-noise STD (scalar fallback when no robot model is provided)
-   // N*m unmodeled-torque STD for the mass-matrix path: Qa = Lambda_eff^-1 diag(sigma_tau,i^2) Lambda_eff^-T.
-   // SIGMA_TAU is now only the FALLBACK STD used for a joint whose effort limit is absent/non-finite; the live
-   // per-joint STD is sigma_tau,i = ALPHA * tau_max,i (see ALPHA and sigmaTauPerJoint). Kept at 5 N*m as the
-   // Rev.2 interim (Lambda^-2 ⪰ M_jj^-2 inflated Qa vs. the Rev.1 locked-base map). TODO(retune) with ALPHA.
-   private static final double SIGMA_TAU = 5.0;
-   // Per-joint unmodeled-torque STD as a fraction of the joint's effort limit: sigma_tau,i = alpha_i * tau_max,i
-   // (Part B item 3), tau_max,i from OneDoFJointReadOnly.getEffortLimitUpper(). Two levels of per-joint scaling:
-   // tau_max,i already scales by each actuator's torque capacity (a hip 217 N*m vs a wrist a few), and alpha_i is
-   // the dimensionless "fraction of capacity that is unmodeled". alpha_i is a scalar default with per-joint
-   // OVERRIDES (below), matched by case-insensitive name substring exactly like the rotor table — so a joint the
-   // QA_MAX tripwire flags can be knocked down without touching the rest of the robot.
-   //
-   // RETUNE PRINCIPLE (2026-07-10, hardware log 20260710_135507): a uniform ALPHA fixes the unmodeled torque at a
-   // fixed FRACTION OF TORQUE CAPACITY, but the torque->acceleration map Lambda_eff^-1 varies by orders of
-   // magnitude across joints, so sqrt(diag(Qa)_i) = |Lambda_eff^-1|_ii * alpha_i * tau_max,i spans orders of
-   // magnitude and joints trip QA_MAX one after another (knee was knocked to 0.03; a hip/spine_Z is the new argmax
-   // binding EVERY tick in that log). The physically-motivated fix is to equalize the unmodeled-ACCELERATION STD
-   // (the CWNA quantity for a (q,qd) filter) across joints at a common target TARGET_QDD_STD:
-   //     alpha_i = TARGET_QDD_STD / (|Lambda_eff^-1|_ii * tau_max,i)   ==>   alpha_i = alpha_old_i * sqrt(TARGET_QDD_STD^2 / diag(Qa)_i)
-   // The second form is how to CALIBRATE from a run: read the per-joint yoQaDiag (jointKF_QaDiag_<joint>) at the
-   // current alpha and rescale (iterate 2-3x; off-diagonal Lambda_eff^-1 coupling makes it not one-shot).
-   // TARGET_QDD_STD = 20 rad/s^2 (var 400) gives a 2.25x variance margin under QA_MAX = 900, so quiet standing
-   // sits below the cap and only genuine walking transients trip it (a tripwire, not a per-tick clamp).
-   //
-   // CALIBRATED 2026-07-10 from a live STAND_PREP read of jointKF_QaDiag_<joint> on the instrumented build:
-   // ALPHA_VALUES below are the equalized set alpha_i = alpha_old_i * sqrt(400 / diag(Qa)_i), one per filtered
-   // joint. Cross-check: the LEFT/RIGHT pairs agree to ~0.2% (HIP_X 0.0874 vs 0.0875, HIP_Z/HIP_Y/KNEE likewise)
-   // — the legs are physically identical, so that symmetry validates the measurement. The knee RAISED from the
-   // old reactive 0.03 to ~0.071: in quiet STAND_PREP its diag(Qa) ~ 72 = (8.5 rad/s^2)^2 sat well UNDER target,
-   // i.e. it was over-damped there (0.03 had been set against a more dynamic config that logged diag(Qa)=14842 at
-   // alpha=0.15). diag(Qa) is CONFIGURATION-DEPENDENT, so re-read jointKF_QaDiag_<joint> after a gait change and
-   // iterate until every sqrt(diag(Qa)) ~ 20 and the jointKF_QaCapBind_<joint>_count counters stay flat. All 9
-   // currently-filtered joints are listed; ALPHA_DEFAULT is the fallback for any future unlisted filtered joint.
-   private static final double TARGET_QDD_STD = 20.0; // rad/s^2, common unmodeled-acceleration STD target for the ALPHA equalization
-   private static final double ALPHA_DEFAULT = 0.15;  // fallback only (surfaces an unlisted filtered joint via the QA_MAX tripwire)
-   private static final String[] ALPHA_JOINT_KEYS = {
-         "SPINE_Z",
-         "LEFT_HIP_X",  "LEFT_HIP_Z",  "LEFT_HIP_Y",  "LEFT_KNEE_Y",
-         "RIGHT_HIP_X", "RIGHT_HIP_Z", "RIGHT_HIP_Y", "RIGHT_KNEE_Y"};
-   private static final double[] ALPHA_VALUES = {
-         5.61133e-2,
-         6.01544e-2, 2.94985e-2, 2.82043e-2, 2.47925e-2,
-         5.52493e-2, 3.34146e-2, 2.56966e-2, 2.49771e-2
-   };
-   // TRIPWIRE ONLY (Part B item 2 — no longer a scaler). Physical ceiling on the per-joint acceleration
-   // process-noise VARIANCE (~ (30 rad/s^2)^2). With the reflected-rotor-inertia floor on Lambda_eff (item 1),
-   // max diag(Qa) must sit far below this; if it ever would not, that is a model/config regression to SURFACE,
-   // not to hide. When max diag(Qa) > QA_MAX we warn once (naming the argmax joint) and count it in
-   // jointKFQaCapWouldBindCount, but we DO NOT rescale — the old uniform CommonOps_DDRM.scale coupled one
-   // joint's outlier into GLOBAL Q starvation (hips down ~6 orders), which collapsed P onto the measurement
-   // floors and CAUSED the min-side S singularity. A cap that silently rescales the whole robot is worse than
-   // the disease.
-   private static final double QA_MAX = 900.0;
-   // Reflected rotor inertia n^2 * J_rotor (kg*m^2) per joint, matched by case-insensitive joint-name substring
-   // (Part B item 1). Added as a diagonal term to the Schur complement Lambda BEFORE inversion:
-   // Lambda_eff = Lambda + diag(n_i^2 J_rotor,i). Physics: the rotor spins behind the gearbox about its own
-   // axis and does not couple through the floating base, so the post-Schur diagonal add is simultaneously the
-   // EXACT drivetrain term and a principled regularizer (it floors lambda_min(Lambda_eff) by Weyl). Distal
-   // joints' link-side apparent inertia is as low as ~8e-4 kg*m^2 while their drivetrains reflect 0.05-0.07 —
-   // without this term Lambda^-2 has diagonal outliers up to ~1.6e6 and Qa blows up for proximal/light joints.
-   private static final String[] ROTOR_INERTIA_JOINT_KEYS = {
-         "HIP_X", "HIP_Z", "HIP_Y", "KNEE", "ANKLE_Y", "ANKLE_X", "SPINE",
-         "SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW",
-         "WRIST_Z", "WRIST_X", "GRIPPER_Z", "NECK_Z", "NECK_Y"};
-   private static final double[] ROTOR_INERTIA_VALUES = {
-         //TODO: needs to be moved to use the calibrated inertia values either from alex-sdk or alex-hardware
-         0.062, 0.02, 0.167, 0.167, 0.07, 0.05, 0.062,
-         0.067, 0.067, 0.022, 0.022,
-         0.005, 0.005, 0.005, 0.005, 0.005};
-   private static final double ROTOR_INERTIA_DEFAULT = 0.005; // conservative floor for an unmatched filtered joint
-   // Gyro measurement-noise floor (Part B item 4). getAngularVelocityNoiseCovariance is zero on hardware whenever
-   // the IMU's SensorNoiseParameters are unset (Alex historically ran with a null SensorNoiseParameters => all
-   // covariances 0). A zero Sigma removes the innovation-covariance floor on the pure-bias rows of every 1-DoF
-   // chain, collapsing lambda_min(S) (the logged 2.155e-12) and, via the Joseph K R K^T squaring loop, diverging
-   // P. Any IMU whose gyro-noise trace is below SIGMA_GYRO_FLOOR_TRACE is floored to SIGMA_GYRO_FLOOR * I3.
-   //
-   // 2026-07-10: lowered 1e-4 -> 1e-6 (sigma 0.01 -> 0.001 rad/s). This is a SAFETY NET only — the real gyro
-   // Sigma is now wired via AlexSensorNoiseParameters and sits above it, so the floor should not normally engage.
-   // The old 1e-4 was ~2500x the wired value; because the JointKF uses Sigma to weight the gyro in BOTH the
-   // joint-velocity and the base-bias estimate, that over-inflation lazily degraded the base gyro-bias estimate
-   // the downstream InEKF relies on. 1e-6 keeps lambda_min(S) ~6 orders above the 2e-12 collapse (the COND_S_MAX
-   // gate backstops), while no longer over-inflating the gyro when a real (small) Sigma is present.
-   private static final double SIGMA_GYRO_FLOOR = 1.0e-6;        // (0.001 rad/s)^2 per axis (safety net)
-   private static final double SIGMA_GYRO_FLOOR_TRACE = 3.0e-6;  // 3 * (0.001 rad/s)^2
-   // Active innovation-covariance conditioning gate (Part B item 5). cond(S) is estimated from the Cholesky
-   // factor diagonal ((max L_ii / min L_ii)^2 — no eigendecomposition); above this the whole stacked update is
-   // skipped, because a finite-but-ill-conditioned S inverts to a huge gain that the Joseph K R K^T loop squares
-   // each tick (the P divergence mechanism the LU/isFinite guards were blind to).
-   //TODO: these need to be YoVariable-ized so that these can be tuned on the fly while the filter is running live.
-   private static final double COND_S_MAX = 1.0e9;
-   private static final double INIT_POS_VAR = 1.0e-6; // encoders trusted at initialization
-   private static final double INIT_VEL_VAR = 1.0; // velocity unknown at initialization
-   private static final double INIT_BIAS_VAR = 2.5e-3; // (0.05 rad/s)^2
-   private static final double ANCHOR_VAR = 4.0e-4; // stance FK slip variance (Sigma_eps)
-   /**
-    * Encoder joint-VELOCITY noise STD (rad/s) for leg joints on a base->foot chain that are NOT filter states
-    * (on Alex: the ankles, because there are no foot IMUs). Their measured velocity enters the stance-anchor row
-    * as a known input, so by the standard input-noise congruence its covariance must be propagated into the
-    * anchor's measurement covariance:  R_anchor = Sigma_eps + J_U diag(SIGMA_QD_UNFILTERED^2) J_U^T.
-    * <p>
-    * Conservative placeholder: MEASURE the actual qd noise of the ankle encoder signal and retune. Erring large
-    * is safe -- it merely weakens the anchor, which still fixes the bias gauge, just with more averaging. Erring
-    * small is NOT safe: it over-trusts a noisy input and feeds that noise into the base gyro-bias estimate.
-    */
-   private static final double SIGMA_QD_UNFILTERED = 0.1; // rad/s
-   /**
-    * Smoothing corner (Hz) for the measured-q̇ slew estimate that drives the direct-velocity channel's lag
-    * inflation. The firmware/alpha low-pass makes q̇^meas a LAGGED measurement; for a first-order filter the
-    * identity u - y = ẏ/ω_c is EXACT, so the instantaneous lag error is the measured signal's own slope over
-    * the effective corner (cascade: 1/ω_eff = Σ 1/ω_stage). The slope must be estimated from a finite
-    * difference of the NOISY measurement — raw, its variance 2σ²/dt² would inflate R by ~2 orders of magnitude
-    * at quiet standing, exactly the regime the channel exists for — so it is low-passed here. 5 Hz sits above
-    * the gait band (slew tracking stays honest through swing) while cutting the FD noise contribution to ~σ²
-    * order. See refreshDirectVelocityNoise().
-    */
-   private static final double LAG_SLEW_SMOOTHING_HZ = 5.0;
-   // On-ground initialization gate: the exported base-IMU gyro bias is only observable through the phase-2
-   // stance anchor, which runs only when a foot is trusted. If the filter is seeded while the robot hangs
-   // (feet off the ground) the base bias is unobservable, its covariance grows unbounded under the bias
-   // random-walk, and the estimate wanders — which the downstream InEKF (no gyro-bias state of its own)
-   // integrates straight into orientation. So we defer initialization until BOTH feet have been firmly in
-   // contact for a short debounce window; while uninitialized the filter exports NaN joint states and zero
-   // bias, so consumers cleanly fall back to the raw gyro/sensors. Debounced (not a single-tick check)
-   // because the foot-switch contact-probability source seeds to 1.0 on the assumption feet are planted at
-   // init, so a naive "both == 1" would false-pass on the first tick(s) precisely while hanging.
-   private static final double ON_GROUND_INIT_DEBOUNCE = 0.05; // s of continuous ground contact before seeding
+   // All tuning constants now live in JointKFParameters, published as YoVariables so the calibration
+   // procedures documented there run live in SCS instead of through a recompile. Read them through the
+   // `parameters` field below: `.getValue()` at the point of use for the LIVE ones (qaMax, condSMax,
+   // anchorVar, sigmaGyroFloor, and the per-joint alpha / rotor inertia), once at construction for the
+   // BOOT-TIME ones. JointKFParameters.<NAME> is still the compile-time default of each.
+   private final JointKFParameters parameters;
 
    // Declaration of all pre-allocated variables
    private final SensorOutputMapReadOnly sensorMap;
@@ -312,8 +184,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private double[] encVarPerJoint;
    /** min_i encVarPerJoint[i]: the encoder-block S-pivot floor. A healthy S = H P H^T + R has every pivot >= its
     *  row's R_ii, so the collapsed-row gate must threshold on the SMALLEST wired variance, not on ENCODER_VAR —
-    *  with per-joint values below the scalar fallback the old constant would false-trip the gate. */
-   private double encVarFloorMin = ENCODER_VAR;
+    *  with per-joint values below the scalar fallback the old constant would false-trip the gate. SEEDED to the
+    *  fallback and then min-reduced (not a plain min over the array): with every wired variance above the
+    *  fallback the answer must stay the fallback, and with n == 0 the loop never runs. */
+   private double encVarFloorMin;
    // Direct joint-velocity measurement channel ("encoderVelocity" update): the twitter firmware reports a
    // drive-side-filtered output velocity per joint; treating it as a measurement of the q̇ states pins the
    // J·q̇ part of every pair-gyro row, which makes the IMU bias DIFFERENCES directly inferable each tick
@@ -326,8 +200,9 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    /** Last tick's measured q̇ (NaN before the first sample) and its LAG_SLEW_SMOOTHING_HZ-smoothed slope. */
    private double[] prevZqd, qdSlewSmoothed;
    private double lagSlewSmoothingAlpha;
-   /** min_i qdMeasVarPerJoint[i]: S-pivot floor for the velocity rows (lag inflation only ever raises R). */
-   private double qdVarFloorMin = SIGMA_QD_UNFILTERED * SIGMA_QD_UNFILTERED;
+   /** min_i qdMeasVarPerJoint[i]: S-pivot floor for the velocity rows (lag inflation only ever raises R).
+    *  Seeded to the fallback then min-reduced, same shape and for the same reason as encVarFloorMin. */
+   private double qdVarFloorMin;
    private final boolean useDirectVelocityMeasurement;
 
    // Measurement model matrices
@@ -416,10 +291,19 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private final DMatrixRMaj Qa = new DMatrixRMaj(0, 0);        // Qa = Ytau Ytau^T (PSD, symmetric BY CONSTRUCTION), n x n
    private LinearSolverDense<DMatrixRMaj> nuisanceMassMatrixSolver; // Cholesky over M_NN, solves M_NN X = M_Nf
    private LinearSolverDense<DMatrixRMaj> schurSolver;          // Cholesky over Lambda_eff, inverts it
-   // Reflected rotor inertia diagonals (Part B item 1), built at construction in filter/nuisance order.
+   // Reflected rotor inertia diagonals (Part B item 1), in filter/nuisance order. The FILTERED-joint arrays are
+   // refreshed every predict from the LIVE per-joint YoVariables below (see refreshRotorInertiaAndSigmaTau); the
+   // nuisance one is fixed at construction (a gap joint has no tunable of its own — none exist on Alex).
    private double[] rotorInertiaDiag;          // length n, added to Lambda's diagonal (filter joint state order)
    private double[] nuisanceRotorInertiaDiag;  // length numNuisanceDoF: 0 on base rows, rotor inertia on gap-joint rows
-   private double[] sigmaTauPerJoint;          // length n, sigma_tau,i = ALPHA * tau_max,i (Part B item 3)
+   private double[] sigmaTauPerJoint;          // length n, sigma_tau,i = alpha_i * tau_max,i (Part B item 3)
+   // LIVE per-joint tuning, indexed by joint state index. Published as jointKFParam_alpha_<joint> and
+   // jointKFParam_rotorInertia_<joint> so the documented ALPHA equalization runs in SCS without a rebuild.
+   private YoDouble[] yoAlpha;
+   private YoDouble[] yoRotorInertia;
+   private double[] tauMaxPerJoint;            // length n, effort limit (N*m); NaN where the fallback applies
+   private boolean[] sigmaTauIsFallback;       // length n, true => no finite effort limit, use sigmaTauFallback
+   private double sigmaTauFallback;            // boot-time read of jointKFParam_sigmaTau
    private boolean warnedMassMatrixFailure = false;
    private boolean warnedMassMatrixConditioningCap = false;
    private boolean sigmaFloorInitialized = false; // Sigma validated/floored/cached on first buildStackedMeasurement
@@ -510,7 +394,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       this.sensorMap = sensorMap;
       this.dt = estimatorDT;
       this.useDirectVelocityMeasurement = useDirectVelocityMeasurement;
-      this.requiredOnGroundTicks = Math.max(1, (int) Math.round(ON_GROUND_INIT_DEBOUNCE / estimatorDT));
+      // Parameters first: everything below reads its tuning from here, and the LIVE ones keep being re-read
+      // on the hot path afterwards.
+      this.parameters = new JointKFParameters(registry);
+      this.requiredOnGroundTicks = Math.max(1, (int) Math.round(parameters.onGroundInitDebounce.getValue() / estimatorDT));
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
 
@@ -553,6 +440,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       // Per-joint encoder position variance, resolved once (lookup is by joint NAME; state order thereafter).
       // The S-pivot floor for the encoder block follows the smallest wired variance — see encVarFloorMin.
       encVarPerJoint = new double[n];
+      double encoderVarFallback = parameters.encoderVar.getValue();
       int unwiredEncoderJoints = 0;
       for (var e : jointToIndex.entrySet())
       {
@@ -561,15 +449,16 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
             encVarPerJoint[e.getValue()] = std * std;
          else
          {
-            encVarPerJoint[e.getValue()] = ENCODER_VAR;
+            encVarPerJoint[e.getValue()] = encoderVarFallback;
             unwiredEncoderJoints++;
          }
       }
+      encVarFloorMin = encoderVarFallback; // seed, then min-reduce (see the field doc)
       for (int i = 0; i < n; i++)
          encVarFloorMin = Math.min(encVarFloorMin, encVarPerJoint[i]);
       if (encoderPositionNoiseStd != null && unwiredEncoderJoints > 0)
          LogTools.warn("JointLevelKFPreFilter: " + unwiredEncoderJoints + " of " + n + " filtered joints have no wired "
-               + "encoder position noise; they fall back to ENCODER_VAR = " + ENCODER_VAR + " rad^2 — orders of magnitude "
+               + "encoder position noise; they fall back to ENCODER_VAR = " + encoderVarFallback + " rad^2 — orders of magnitude "
                + "above the measured per-joint values, so those encoders will be badly under-trusted. Check jointKF_encR_<joint>.");
 
       // Direct-velocity channel wiring: measured noise floor + effective low-pass corner per joint, resolved
@@ -579,19 +468,22 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       invOmegaEffPerJoint = new double[n];
       prevZqd = new double[n];
       qdSlewSmoothed = new double[n];
+      double sigmaQdUnfiltered = parameters.sigmaQdUnfiltered.getValue();
+      double qdVarFallback = sigmaQdUnfiltered * sigmaQdUnfiltered;
       for (var e : jointToIndex.entrySet())
       {
          int idx = e.getValue();
          String name = e.getKey().getName();
          double std = encoderVelocityNoiseStd == null ? Double.NaN : encoderVelocityNoiseStd.applyAsDouble(name);
-         qdMeasVarPerJoint[idx] = (Double.isFinite(std) && std > 0.0) ? std * std : SIGMA_QD_UNFILTERED * SIGMA_QD_UNFILTERED;
+         qdMeasVarPerJoint[idx] = (Double.isFinite(std) && std > 0.0) ? std * std : qdVarFallback;
          double fc = jointVelocityMeasurementBreakFrequencyHz == null ? Double.NaN : jointVelocityMeasurementBreakFrequencyHz.applyAsDouble(name);
          invOmegaEffPerJoint[idx] = (Double.isFinite(fc) && fc > 0.0) ? 1.0 / (2.0 * Math.PI * fc) : 0.0;
          prevZqd[idx] = Double.NaN;
       }
+      qdVarFloorMin = qdVarFallback; // seed, then min-reduce (see the field doc)
       for (int i = 0; i < n; i++)
          qdVarFloorMin = Math.min(qdVarFloorMin, qdMeasVarPerJoint[i]);
-      lagSlewSmoothingAlpha = Math.exp(-2.0 * Math.PI * LAG_SLEW_SMOOTHING_HZ * dt);
+      lagSlewSmoothingAlpha = Math.exp(-2.0 * Math.PI * parameters.lagSlewSmoothingHz.getValue() * dt);
       if (useDirectVelocityMeasurement)
          LogTools.info("JointLevelKFPreFilter: direct joint-velocity measurement channel ENABLED over " + n
                + " joints (adaptive lag inflation on " + (int) java.util.Arrays.stream(invOmegaEffPerJoint).filter(v -> v > 0.0).count()
@@ -685,10 +577,9 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                if (!jointToIndex.containsKey(spanningJoint)) // unfiltered => gap joint => marginalize it
                {
                   nuisanceColumns.add(indexProvider.getJointDoFIndices(spanningJoint)[0]);
-                  double gapRotor = lookupRotorInertia(spanningJoint.getName());
-                  if (gapRotor < 0.0)
-                     gapRotor = ROTOR_INERTIA_DEFAULT;
-                  nuisanceRotor.add(gapRotor);
+                  // Gap joints take the table value or the conservative default, silently — unlike a filtered
+                  // joint, whose unmatched case is worth a warn (see buildRotorInertiaAndSigmaTau).
+                  nuisanceRotor.add(JointKFParameters.reflectedRotorInertiaForNameOrDefault(spanningJoint.getName()));
                   gapJoints++;
                }
             }
@@ -701,7 +592,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
             }
             numberOfNuisanceDOF = massMatrixNuisanceColumns.length; // 6 + gap joints
 
-            LogTools.info("Joint-level KF process noise: Schur-complement path (sigma_tau = " + SIGMA_TAU + " N*m) over "
+            LogTools.info("Joint-level KF process noise: Schur-complement path (sigma_tau = " + parameters.sigmaTau.getValue() + " N*m) over "
                           + n + " joints, marginalizing a " + numberOfNuisanceDOF + "-DoF nuisance block (6-DoF floating base"
                           + (gapJoints > 0 ? " + " + gapJoints + " unfiltered gap joint(s))." : ")."));
          }
@@ -755,7 +646,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                // Per-joint encoder VELOCITY variance for the anchor's input-noise congruence (only the
                // unfiltered columns are ever read, but fill every slot — cheap, and no -1 bookkeeping).
                double qdStd = encoderVelocityNoiseStd == null ? Double.NaN : encoderVelocityNoiseStd.applyAsDouble(fa.legJoints[c].getName());
-               fa.qdVar[c] = (Double.isFinite(qdStd) && qdStd > 0.0) ? qdStd * qdStd : SIGMA_QD_UNFILTERED * SIGMA_QD_UNFILTERED;
+               fa.qdVar[c] = (Double.isFinite(qdStd) && qdStd > 0.0) ? qdStd * qdStd : qdVarFallback;
             }
             // A chain with no joints at all cannot anchor anything (degenerate model).
             if (fa.legJoints.length == 0)
@@ -779,8 +670,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                + "Check that the base IMU's measurement link connects to at least one foot.");
       // Per-joint reflected rotor inertia (item 1) and per-joint sigma_tau (item 3), in filter state order.
       // Built BEFORE allocate() because allocate() -> buildProcessNoise() -> updateProcessNoiseFromMassMatrix()
-      // reads both.
-      buildRotorInertiaAndSigmaTau();
+      // reads both. ORDER IS LOAD-BEARING: inverting these two lines leaves both arrays null on the first Q build.
+      createRotorInertiaAndSigmaTauParameters();
       allocate();
 
       yoStateDimension.set(dim);
@@ -833,72 +724,95 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       return i;
    }
 
-   /** Reflected rotor inertia for a joint by case-insensitive name substring (Part B item 1); -1 if unmatched. */
-   private static double lookupRotorInertia(String jointName)
-   {
-      String upper = jointName.toUpperCase();
-      for (int i = 0; i < ROTOR_INERTIA_JOINT_KEYS.length; i++)
-         if (upper.contains(ROTOR_INERTIA_JOINT_KEYS[i]))
-            return ROTOR_INERTIA_VALUES[i];
-      return -1.0;
-   }
-
-   /** Package-private test seam: the reflected rotor inertia the filter actually applies to the named joint —
-    *  the table match, or the conservative default when unmatched. Lets the mass-matrix Qa oracle reconstruct
-    *  Lambda_eff exactly (Part C), independent of whether a synthetic joint name happens to hit a table key. */
+   /** Test seam retained on this class: delegates to {@link JointKFParameters}, where the table now lives. */
    static double reflectedRotorInertiaForNameOrDefault(String jointName)
    {
-      double v = lookupRotorInertia(jointName);
-      return v < 0.0 ? ROTOR_INERTIA_DEFAULT : v;
+      return JointKFParameters.reflectedRotorInertiaForNameOrDefault(jointName);
    }
 
-   /** Per-joint alpha (fraction of tau_max used as the unmodeled-torque STD) by case-insensitive name substring;
-    *  the override table value if matched, else ALPHA_DEFAULT. Package-private so tests can mirror sigma_tau. */
+   /** Test seam retained on this class: delegates to {@link JointKFParameters}, where the table now lives. */
    static double alphaForName(String jointName)
    {
-      String upper = jointName.toUpperCase();
-      for (int i = 0; i < ALPHA_JOINT_KEYS.length; i++)
-         if (upper.contains(ALPHA_JOINT_KEYS[i]))
-            return ALPHA_VALUES[i];
-      return ALPHA_DEFAULT;
+      return JointKFParameters.alphaForName(jointName);
    }
 
    /**
-    * Builds the per-joint reflected-rotor-inertia diagonal (Part B item 1) and the per-joint unmodeled-torque
-    * STD sigma_tau,i = ALPHA * tau_max,i (Part B item 3), both in filter joint state order. Any joint with no
-    * rotor-table match gets the conservative default floor (warn); any joint with no finite positive effort
-    * limit falls back to the scalar SIGMA_TAU (warn). Construction-only; the per-tick process-noise update just
-    * reads these arrays (allocation-free).
+    * Publishes the per-joint reflected rotor inertia (Part B item 1) and the per-joint alpha that sets the
+    * unmodeled-torque STD sigma_tau,i = alpha_i * tau_max,i (Part B item 3) as LIVE YoVariables, in filter joint
+    * state order, seeded from the {@link JointKFParameters} tables. Any joint with no rotor-table match is
+    * seeded with the conservative default floor (warn); any joint with no finite positive effort limit is
+    * pinned to the scalar sigmaTau fallback (warn) and its alpha is then ignored.
+    *
+    * <p>Both are re-read every tick by {@link #refreshRotorInertiaAndSigmaTau()}, so the ALPHA equalization
+    * documented in {@link JointKFParameters} can be iterated live in SCS against jointKF_QaDiag_&lt;joint&gt;
+    * instead of through a recompile. At the seeded defaults this is numerically identical to the previous
+    * construction-time computation — the same two doubles, multiplied the same way.</p>
+    *
+    * <p>Called BEFORE the first process-noise build, so the arrays it fills are never null on the hot path.</p>
     */
-   private void buildRotorInertiaAndSigmaTau()
+   private void createRotorInertiaAndSigmaTauParameters()
    {
       rotorInertiaDiag = new double[n];
       sigmaTauPerJoint = new double[n];
+      yoRotorInertia = new YoDouble[n];
+      yoAlpha = new YoDouble[n];
+      tauMaxPerJoint = new double[n];
+      sigmaTauIsFallback = new boolean[n];
+      sigmaTauFallback = parameters.sigmaTau.getValue();
+
       for (var e : jointToIndex.entrySet())
       {
          OneDoFJointBasics joint = e.getKey();
          int idx = e.getValue();
+         String jointName = joint.getName();
 
-         double rotor = lookupRotorInertia(joint.getName());
-         if (rotor < 0.0)
-         {
-            rotor = ROTOR_INERTIA_DEFAULT;
+         if (JointKFParameters.isRotorInertiaUnmatched(jointName))
             LogTools.warn("JointLevelKFPreFilter: no reflected-rotor-inertia table entry for filtered joint '"
-                          + joint.getName() + "'; applying the conservative default floor " + ROTOR_INERTIA_DEFAULT + " kg*m^2.");
-         }
-         rotorInertiaDiag[idx] = rotor;
+                          + jointName + "'; applying the conservative default floor "
+                          + parameters.rotorInertiaDefault.getValue() + " kg*m^2.");
+         yoRotorInertia[idx] = new YoDouble("jointKFParam_rotorInertia_" + jointName,
+                                            "LIVE: reflected rotor inertia n^2 J_rotor (kg*m^2) added to Lambda's diagonal "
+                                            + "before inversion. Floors lambda_min(Lambda_eff), so lowering it inflates Qa.",
+                                            registry);
+         yoRotorInertia[idx].set(JointKFParameters.reflectedRotorInertiaForNameOrDefault(jointName));
 
          double tauMax = joint.getEffortLimitUpper();
-         if (!Double.isFinite(tauMax) || tauMax <= 0.0)
+         sigmaTauIsFallback[idx] = !Double.isFinite(tauMax) || tauMax <= 0.0;
+         if (sigmaTauIsFallback[idx])
          {
-            LogTools.warn("JointLevelKFPreFilter: filtered joint '" + joint.getName() + "' has no finite positive effort"
-                          + " limit (" + tauMax + "); falling back to the scalar SIGMA_TAU = " + SIGMA_TAU + " N*m for its sigma_tau.");
-            sigmaTauPerJoint[idx] = SIGMA_TAU;
+            LogTools.warn("JointLevelKFPreFilter: filtered joint '" + jointName + "' has no finite positive effort"
+                          + " limit (" + tauMax + "); falling back to the scalar SIGMA_TAU = " + sigmaTauFallback
+                          + " N*m for its sigma_tau.");
+            tauMaxPerJoint[idx] = Double.NaN; // unused on the fallback path; NaN so a regression is loud
          }
          else
          {
-            sigmaTauPerJoint[idx] = alphaForName(joint.getName()) * tauMax;
+            tauMaxPerJoint[idx] = tauMax;
          }
+         yoAlpha[idx] = new YoDouble("jointKFParam_alpha_" + jointName,
+                                     "LIVE: fraction of this joint's torque capacity treated as unmodeled; "
+                                     + "sigma_tau = alpha * tau_max. Retune against jointKF_QaDiag_" + jointName
+                                     + " to equalize sqrt(diag(Qa)) at jointKFParam_targetQddStd."
+                                     + (sigmaTauIsFallback[idx] ? " IGNORED for this joint: no finite effort limit, so "
+                                                                  + "jointKFParam_sigmaTau is used instead." : ""),
+                                     registry);
+         yoAlpha[idx].set(JointKFParameters.alphaForName(jointName));
+      }
+
+      refreshRotorInertiaAndSigmaTau();
+   }
+
+   /**
+    * Re-reads the LIVE per-joint rotor inertia and alpha into the flat arrays the Schur process-noise update
+    * consumes. Called at the top of every {@link #updateProcessNoiseFromMassMatrix()}; allocation-free (n
+    * primitive reads and writes into arrays allocated once at construction).
+    */
+   private void refreshRotorInertiaAndSigmaTau()
+   {
+      for (int i = 0; i < n; i++)
+      {
+         rotorInertiaDiag[i] = yoRotorInertia[i].getValue();
+         sigmaTauPerJoint[i] = sigmaTauIsFallback[i] ? sigmaTauFallback : yoAlpha[i].getValue() * tauMaxPerJoint[i];
       }
    }
 
@@ -1229,7 +1143,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private void buildProcessNoise()
    {
       Q.zero();
-      double sa2 = SIGMA_ACCEL * SIGMA_ACCEL;
+      double sigmaAccel = parameters.sigmaAccel.getValue();
+      double sa2 = sigmaAccel * sigmaAccel;
       double dt2 = dt * dt;
       double dt3 = dt2 * dt;
 
@@ -1290,6 +1205,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    {
       if (massMatrixCalculator == null)
          return;
+
+      // Pull this tick's LIVE per-joint rotor inertia and alpha into the flat arrays used below, so an SCS edit
+      // takes effect on the very next predict.
+      refreshRotorInertiaAndSigmaTau();
 
       massMatrixCalculator.reset();
       // Full mass matrix over {6-DoF base} ∪ {filtered joints}, ordered by the calculator's index provider.
@@ -1398,7 +1317,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
             argMaxJoint = i;
          }
       }
-      if (maxQaDiag > QA_MAX)
+      if (maxQaDiag > parameters.qaMax.getValue())
       {
          yoQaCapWouldBindCount.increment();
          if (yoQaCapBindCount != null) // per-joint attribution: WHICH joint's alpha needs knocking down
@@ -1458,30 +1377,38 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          return;
       warnedMassMatrixConditioningCap = true;
       LogTools.warn("Joint-level KF process noise: max diag(Qa) = " + maxQaDiag + " (rad/s^2)^2 exceeds the QA_MAX tripwire ("
-            + QA_MAX + ") at joint '" + jointNameByStateIndex(argMaxJointStateIndex) + "'. Qa is NOT rescaled (a uniform "
+            + parameters.qaMax.getValue() + ") at joint '" + jointNameByStateIndex(argMaxJointStateIndex) + "'. Qa is NOT rescaled (a uniform "
             + "scale would starve global Q, the old failure mode); this indicates a model/config regression — check the "
             + "reflected-rotor-inertia table entry and the mass matrix for this joint. Counting in jointKFQaCapWouldBindCount. Reported once.");
    }
 
    /**
-    * Validates and floors each IMU's angular-velocity MEASUREMENT-noise covariance ONCE, at construction, and
-    * fills the cached block-diagonal {@code Sigma} (Part B item 4). An IMU whose gyro-noise trace is zero /
-    * non-finite (an unset SensorNoiseParameters — Alex historically ran with a null one, so every covariance was
-    * the 3x3 zero) is an ERROR: its zero Sigma removes the innovation-covariance floor on the pure-bias rows of
-    * every 1-DoF chain, which collapses lambda_min(S) and diverges P. An IMU whose trace is positive but below
-    * the conditioning floor is a softer WARN. Either way the block is substituted with SIGMA_GYRO_FLOOR * I3. The
-    * flooring decision is made HERE, once; the per-tick build copies this cached Sigma (never re-reads a
-    * possibly-zero covariance).
+    * Validates and floors each IMU's angular-velocity MEASUREMENT-noise covariance ONCE and fills the cached
+    * block-diagonal {@code Sigma} (Part B item 4). An IMU whose gyro-noise trace is zero / non-finite (an unset
+    * SensorNoiseParameters — Alex historically ran with a null one, so every covariance was the 3x3 zero) is an
+    * ERROR: its zero Sigma removes the innovation-covariance floor on the pure-bias rows of every 1-DoF chain,
+    * which collapses lambda_min(S) and diverges P. An IMU whose trace is positive but below the conditioning
+    * floor is a softer WARN. Either way the block is substituted with the gyro floor * I3. The flooring decision
+    * is made HERE, once; the per-tick build copies this cached Sigma (never re-reads a possibly-zero covariance).
+    *
+    * <p><b>Called lazily, on the FIRST {@link #buildStackedMeasurement()} — not at construction</b>, behind the
+    * {@code sigmaFloorInitialized} latch. (This javadoc used to claim "at construction", which was wrong; the
+    * same error is repeated in AlexEstimatorLogReplay's comment.) The deferral is deliberate and load-bearing:
+    * an IMU's SensorNoiseParameters may be assigned AFTER this filter is constructed — the package tests do
+    * exactly that — so reading them at construction would see all-zero covariances, floor every IMU, and change
+    * R_g. Do not hoist this call.</p>
     */
    private void buildAndFloorSigma()
    {
+      double gyroFloor = parameters.sigmaGyroFloor.getValue();
+      double gyroFloorTrace = parameters.sigmaGyroFloorTrace.getValue();
       Sigma.zero();
       for (int o = 0; o < m; o++)
       {
          imusByOrdinal[o].getAngularVelocityNoiseCovariance(Rimu);
          boolean nonFinite = containsNonFinite(Rimu);
          double trace = nonFinite ? Double.NaN : Rimu.get(0, 0) + Rimu.get(1, 1) + Rimu.get(2, 2);
-         if (nonFinite || !(trace >= SIGMA_GYRO_FLOOR_TRACE))
+         if (nonFinite || !(trace >= gyroFloorTrace))
          {
             gyroSigmaFloored = true;
             String name = imusByOrdinal[o].getSensorName();
@@ -1489,14 +1416,14 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                LogTools.error("JointLevelKFPreFilter: IMU '" + name + "' has an unset/zero/non-finite angular-velocity "
                      + "noise covariance (trace=" + trace + "). A zero Sigma removes the innovation-covariance floor on "
                      + "the pure-bias rows of every 1-DoF chain (the min-side S collapse). Substituting the gyro floor "
-                     + SIGMA_GYRO_FLOOR + " (rad/s)^2 * I3; fix the sensor SensorNoiseParameters at the source.");
+                     + gyroFloor + " (rad/s)^2 * I3; fix the sensor SensorNoiseParameters at the source.");
             else
                LogTools.warn("JointLevelKFPreFilter: IMU '" + name + "' gyro-noise trace " + trace + " (rad/s)^2 is below "
-                     + "the conditioning floor " + SIGMA_GYRO_FLOOR_TRACE + "; substituting " + SIGMA_GYRO_FLOOR
+                     + "the conditioning floor " + gyroFloorTrace + "; substituting " + gyroFloor
                      + " * I3 for innovation-covariance conditioning.");
             Rimu.zero();
             for (int d = 0; d < 3; d++)
-               Rimu.set(d, d, SIGMA_GYRO_FLOOR);
+               Rimu.set(d, d, gyroFloor);
          }
          insertScaledInto(Rimu, 1.0, Sigma, 3 * o, 3 * o);
       }
@@ -1621,9 +1548,9 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       for (var e : jointToIndex.entrySet())
          x.set(e.getValue(), sensorMap.getOneDoFJointOutput(e.getKey()).getPosition());
       P.zero();
-      for (int i = 0; i < n; i++) P.set(i, i, INIT_POS_VAR);
-      for (int i = n; i < 2 * n; i++) P.set(i, i, INIT_VEL_VAR);
-      for (int i = 2 * n; i < dim; i++) P.set(i, i, INIT_BIAS_VAR);
+      for (int i = 0; i < n; i++) P.set(i, i, parameters.initPosVar.getValue());
+      for (int i = n; i < 2 * n; i++) P.set(i, i, parameters.initVelVar.getValue());
+      for (int i = 2 * n; i < dim; i++) P.set(i, i, parameters.initBiasVar.getValue());
       initialized = true;
       yoInitialized.set(true);
       yoWaitingForGroundContact.set(false);
@@ -1842,8 +1769,9 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 
          // Sigma_eps + J_U diag(sigma_qd^2) J_U^T, accumulated as we walk the chain.
          fa.R.zero();
+         double anchorVar = parameters.anchorVar.getValue();
          for (int r = 0; r < 3; r++)
-            fa.R.add(r, r, ANCHOR_VAR);
+            fa.R.add(r, r, anchorVar);
 
          for (int c = 0; c < fa.qdCols.length; c++)
          {
@@ -1914,11 +1842,12 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          double minPairDiag = Double.POSITIVE_INFINITY;
          for (int r = 0; r < 3 * E; r++)
             minPairDiag = Math.min(minPairDiag, Rg.get(r, r));
-         if (minPairDiag < 0.5 * SIGMA_GYRO_FLOOR)
+         double gyroFloor = parameters.sigmaGyroFloor.getValue();
+         if (minPairDiag < 0.5 * gyroFloor)
          {
             warnedGyroFloorRegression = true;
             LogTools.warn("JointLevelKFPreFilter: min R_g pair-row diagonal " + minPairDiag + " fell below half the gyro floor "
-                  + SIGMA_GYRO_FLOOR + " — the Sigma floor should make this impossible; the stacked-measurement assembly (L or "
+                  + gyroFloor + " — the Sigma floor should make this impossible; the stacked-measurement assembly (L or "
                   + "Sigma) has regressed. Reported once.");
          }
       }
@@ -2037,10 +1966,11 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          yoMinSDiag.set(minPivot);
          yoMaxSDiag.set(maxPivot);
       }
-      if (condProxy > COND_S_MAX)
+      double condSMax = parameters.condSMax.getValue();
+      if (condProxy > condSMax)
       {
          yoInnovationGateSkipCount.increment();
-         warnSingularInnovationOnce(label, String.format("cond(S) proxy %.3e exceeds COND_S_MAX %.1e; whole block gated", condProxy, COND_S_MAX), Hm, Rm);
+         warnSingularInnovationOnce(label, String.format("cond(S) proxy %.3e exceeds COND_S_MAX %.1e; whole block gated", condProxy, condSMax), Hm, Rm);
          return;
       }
       // Channel-specific S-pivot floor: min wired R_ii of the block (lag inflation only raises the velocity
@@ -2051,7 +1981,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       else if ("encoderVelocity".equals(label))
          rFloor = qdVarFloorMin;
       else
-         rFloor = SIGMA_GYRO_FLOOR;
+         rFloor = parameters.sigmaGyroFloor.getValue();
       if (minPivot < 0.5 * rFloor)
       {
          yoInnovationGateSkipCount.increment();
