@@ -112,6 +112,7 @@ public class InvariantMainStateEstimatorTest
                                                  1.0e-6, // contactVariance
                                                  1.0e-6, // contactMeasurementVariance
                                                  1.0,    // initialCovariance
+                                                 -9.81,  // gravitationalAcceleration
                                                  false,  // enableYawSeeding
                                                  rig.preFilter);
       rig.main.getInvariantEKFStateEstimator().setContactProbabilityProvider(constantContact(contactProbability));

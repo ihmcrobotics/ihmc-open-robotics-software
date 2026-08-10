@@ -465,7 +465,12 @@ public class AvatarEstimatorThreadFactory
       if (secondaryStateEstimatorFactoriesField.hasValue())
       {
          for (StateEstimatorControllerFactory stateEstimatorControllerFactory : secondaryStateEstimatorFactoriesField.get())
-            addSecondaryStateEstimator(stateEstimatorControllerFactory.createStateEstimator(getEstimatorFullRobotModel(), getSensorReader()));
+         {
+            // Same gravity the main estimator gets, so a secondary estimator never needs its own copy.
+            addSecondaryStateEstimator(stateEstimatorControllerFactory.createStateEstimator(getEstimatorFullRobotModel(),
+                                                                                            getSensorReader(),
+                                                                                            getGravity()));
+         }
       }
 
       AvatarEstimatorThread avatarEstimatorThread = new AvatarEstimatorThread(getSensorReader(),
@@ -603,6 +608,7 @@ public class AvatarEstimatorThreadFactory
                                                                                        1.0e-6, // contactVariance
                                                                                        1.0e-4, // contactMeasurementVariance
                                                                                        1.0,    // initialCovariance
+                                                                                       getGravity(),
                                                                                        invariantEstimatorYawSeeding,
                                                                                        preFilter);
       mainStateEstimator.getYoRegistry().addChild(preFilterRegistry);

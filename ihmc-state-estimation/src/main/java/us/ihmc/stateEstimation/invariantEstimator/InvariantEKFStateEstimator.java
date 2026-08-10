@@ -324,6 +324,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     * @param contactVariance            continuous contact-slip noise variance σ_c² for the propagator.
     * @param contactMeasurementVariance per-axis body-frame contact measurement variance (m²).
     * @param initialCovariance          scalar for the initial P = initialCovariance · I.
+    * @param gravitationalAcceleration  the robot process's gravitational acceleration (m/s²), i.e.
+    *                                   {@code AvatarEstimatorThreadFactory.getGravity()}. Sign not considered.
     */
    public InvariantEKFStateEstimator(FullHumanoidRobotModel fullRobotModel,
                                      SensorOutputMapReadOnly sensorOutputMap,
@@ -333,7 +335,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
                                      double accelVariance,
                                      double contactVariance,
                                      double contactMeasurementVariance,
-                                     double initialCovariance)
+                                     double initialCovariance,
+                                     double gravitationalAcceleration)
    {
       this(fullRobotModel,
            sensorOutputMap,
@@ -344,7 +347,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
            accelVariance,
            contactVariance,
            contactMeasurementVariance,
-           initialCovariance);
+           initialCovariance,
+           gravitationalAcceleration);
    }
 
    /**
@@ -362,14 +366,15 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
                                      double accelVariance,
                                      double contactVariance,
                                      double contactMeasurementVariance,
-                                     double initialCovariance)
+                                     double initialCovariance,
+                                     double gravitationalAcceleration)
    {
       this.dt = dt;
       this.initialCovariance = initialCovariance;
       this.sensorOutputMap = sensorOutputMap;
       this.imuBiasProvider = Objects.requireNonNull(imuBiasProvider, "imuBiasProvider must not be null (use ZeroIMUBiasProvider)");
 
-      ekf = new InvariantEKF(NUMBER_OF_CONTACTS, gyroVariance, accelVariance, contactVariance);
+      ekf = new InvariantEKF(NUMBER_OF_CONTACTS, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration);
 
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       pelvisFrame = referenceFrames.getPelvisFrame();

@@ -31,6 +31,8 @@ public class InvariantEKFTest
    private static final int GROUP_SIZE = 5 + CONTACTS;       // n = 6
    private static final int TANGENT_SIZE = 9 + 3 * CONTACTS; // m = 12
 
+   /** Gravity handed to the filter under test; the propagator turns it into (0, 0, −|g|). */
+   private static final double GRAVITY = -9.81;
    private static final double GYRO_VARIANCE = 1.0e-4;
    private static final double ACCEL_VARIANCE = 1.0e-3;
    private static final double CONTACT_VARIANCE = 1.0e-6;
@@ -39,7 +41,7 @@ public class InvariantEKFTest
    @Test
    public void testCreateWiresConsistentSizes()
    {
-      InvariantEKF ekf = InvariantEKF.create(2, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE);
+      InvariantEKF ekf = InvariantEKF.create(2, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE, GRAVITY);
 
       assertEquals(2, ekf.getNumberOfContacts());
       assertEquals(5 + 2, ekf.getState().getGroupSize());
@@ -57,7 +59,7 @@ public class InvariantEKFTest
    public void testInitializeSetsEstimate()
    {
       Random random = new Random(11L);
-      InvariantEKF ekf = InvariantEKF.create(CONTACTS, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE);
+      InvariantEKF ekf = InvariantEKF.create(CONTACTS, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE, GRAVITY);
 
       RotationMatrix rotation = EuclidCoreRandomTools.nextRotationMatrix(random);
       Vector3D velocity = EuclidCoreRandomTools.nextVector3D(random);
@@ -88,7 +90,7 @@ public class InvariantEKFTest
    @Test
    public void testInitializeRejectsWrongContactCount()
    {
-      InvariantEKF ekf = InvariantEKF.create(CONTACTS, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE);
+      InvariantEKF ekf = InvariantEKF.create(CONTACTS, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE, GRAVITY);
       assertThrows(IllegalArgumentException.class, () -> ekf.initialize(new RotationMatrix(), new Vector3D(), new Vector3D(), new Tuple3DReadOnly[0], scaledIdentity(TANGENT_SIZE,1.0)));
    }
 
@@ -96,7 +98,7 @@ public class InvariantEKFTest
    @Test
    public void testInitializeRejectsWrongCovarianceSize()
    {
-      InvariantEKF ekf = InvariantEKF.create(CONTACTS, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE);
+      InvariantEKF ekf = InvariantEKF.create(CONTACTS, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE, GRAVITY);
       assertThrows(IllegalArgumentException.class, () -> ekf.initialize(new RotationMatrix(), new Vector3D(), new Vector3D(), new Tuple3DReadOnly[] {new Vector3D()}, scaledIdentity(3,1.0)));
 
    }
@@ -106,11 +108,11 @@ public class InvariantEKFTest
    public void testPredictDelegatesToPropagator()
    {
       Random random = new Random(22L);
-      InvariantEKF ekf = InvariantEKF.create(CONTACTS, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE);
+      InvariantEKF ekf = InvariantEKF.create(CONTACTS, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE, GRAVITY);
       initializeRandom(ekf, random);
 
       InvariantState reference = copyOf(ekf.getState());
-      InvariantPropagator propagator = new InvariantPropagator(CONTACTS, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE);
+      InvariantPropagator propagator = new InvariantPropagator(CONTACTS, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE, GRAVITY);
 
       Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
       Vector3D linearAcceleration = EuclidCoreRandomTools.nextVector3D(random);
@@ -127,7 +129,7 @@ public class InvariantEKFTest
    public void testUpdateDelegatesToUpdater()
    {
       Random random = new Random(33L);
-      InvariantEKF ekf = InvariantEKF.create(CONTACTS, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE);
+      InvariantEKF ekf = InvariantEKF.create(CONTACTS, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE, GRAVITY);
       initializeRandom(ekf, random);
 
       InvariantState reference = copyOf(ekf.getState());
@@ -153,7 +155,7 @@ public class InvariantEKFTest
       InvariantState truth = randomState(random);
       InvariantState estimate = perturb(truth, randomError(random, 1.0e-3));
 
-      InvariantEKF ekf = InvariantEKF.create(CONTACTS, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE);
+      InvariantEKF ekf = InvariantEKF.create(CONTACTS, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE, GRAVITY);
       initializeFromState(ekf, estimate, scaledIdentity(TANGENT_SIZE,1.0));
 
       Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
@@ -161,7 +163,7 @@ public class InvariantEKFTest
       double dt = 1.0e-3;
 
       // Move truth and estimate along the same trajectory
-      new InvariantPropagator(CONTACTS, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE).predict(truth, angularVelocity, linearAcceleration, dt);
+      new InvariantPropagator(CONTACTS, GYRO_VARIANCE, ACCEL_VARIANCE, CONTACT_VARIANCE, GRAVITY).predict(truth, angularVelocity, linearAcceleration, dt);
       ekf.predict(angularVelocity, linearAcceleration, dt);
 
       Vector3D measurement = forwardKinematicsFromTruth(truth);

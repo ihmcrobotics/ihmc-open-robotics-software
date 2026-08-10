@@ -83,7 +83,7 @@ public class GravityLevelingUpdaterTest
       Vector3D trueGravity = new Vector3D(0.0, 0.0, G); // robot truly upright ⇒ static specific force = g e_z
 
       // (1) Pure pitch → levels; roll and yaw stay 0.
-      InvariantEKF ekf = new InvariantEKF(0, 1.0e-7, 1.0e-7, 1.0e-12);
+      InvariantEKF ekf = new InvariantEKF(0, 1.0e-7, 1.0e-7, 1.0e-12, G);
       int m = ekf.getState().getTangentSize(); // 9 for N = 0
       RotationMatrix pitched = new RotationMatrix();
       pitched.setYawPitchRoll(0.0, 0.20, 0.0);
@@ -105,7 +105,7 @@ public class GravityLevelingUpdaterTest
       assertEquals(0.0, finalR.getRoll(), 1.0e-9, "roll stays 0");
 
       // (2) Already level but yawed: residual ≈ 0 ⇒ the estimate (yaw included) is untouched.
-      InvariantEKF yawedEkf = new InvariantEKF(0, 1.0e-7, 1.0e-7, 1.0e-12);
+      InvariantEKF yawedEkf = new InvariantEKF(0, 1.0e-7, 1.0e-7, 1.0e-12, G);
       RotationMatrix yawed = new RotationMatrix();
       yawed.setYawPitchRoll(0.7, 0.0, 0.0);
       yawedEkf.initialize(yawed, new Vector3D(), new Vector3D(), new Vector3D[0], CommonOps_DDRM.identity(m));
@@ -175,7 +175,7 @@ public class GravityLevelingUpdaterTest
    /** Initializes upright-except-(yaw,pitch,roll) at covariance p0·I, applies ONE gravity update from true gravity, returns the residual tilt angle. */
    private static double oneStepTiltAfterCorrection(double yaw, double pitch, double roll, double p0)
    {
-      InvariantEKF ekf = new InvariantEKF(0, 1.0e-7, 1.0e-7, 1.0e-12); // default anisotropic (roll tight, pitch loose)
+      InvariantEKF ekf = new InvariantEKF(0, 1.0e-7, 1.0e-7, 1.0e-12, G); // default anisotropic (roll tight, pitch loose)
       int m = ekf.getState().getTangentSize();
       RotationMatrix r0 = new RotationMatrix();
       r0.setYawPitchRoll(yaw, pitch, roll);
@@ -194,7 +194,7 @@ public class GravityLevelingUpdaterTest
    public void testRollStillLevelsUnderAnisotropy()
    {
       Vector3D trueGravity = new Vector3D(0.0, 0.0, G);
-      InvariantEKF ekf = new InvariantEKF(0, 1.0e-7, 1.0e-7, 1.0e-12); // default anisotropic
+      InvariantEKF ekf = new InvariantEKF(0, 1.0e-7, 1.0e-7, 1.0e-12, G); // default anisotropic
       int m = ekf.getState().getTangentSize();
       RotationMatrix rolled = new RotationMatrix();
       rolled.setYawPitchRoll(0.0, 0.0, 0.20);
