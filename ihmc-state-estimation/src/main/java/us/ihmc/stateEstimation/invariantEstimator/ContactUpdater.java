@@ -188,9 +188,7 @@ public class ContactUpdater
       rotation.transform(rotatedCovariance);
 
       covarianceToPack.reshape(MEASUREMENT_SIZE, MEASUREMENT_SIZE);
-      for (int r = 0; r < 3; r++)
-         for (int c = 0; c < 3; c++)
-            covarianceToPack.set(r, c, rotatedCovariance.getElement(r,c));
+      rotatedCovariance.get(covarianceToPack);
    }
 
    /**

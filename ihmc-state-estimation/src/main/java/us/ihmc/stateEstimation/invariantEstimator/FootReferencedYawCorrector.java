@@ -2,9 +2,13 @@ package us.ihmc.stateEstimation.invariantEstimator;
 
 import java.util.function.ToDoubleFunction;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -50,6 +54,13 @@ public class FootReferencedYawCorrector
 
    private final RotationMatrix filterRotation = new RotationMatrix();
    private final RigidBodyTransform soleToPelvis = new RigidBodyTransform();
+
+   // Unit direction vectors for the AngleTools angle differences. Fields rather than locals so the
+   // correction stays allocation-free in the control loop.
+   private final Vector2D currentFootDirection = new Vector2D();
+   private final Vector2D anchorFootDirection = new Vector2D();
+   private final Vector2D pelvisDirection = new Vector2D();
+   private final Vector2D referenceDirection = new Vector2D();
 
    /** Builds a corrector with conservative defaults (gain 0.02, anchor/release at p = 0.8 / 0.3). */
    public FootReferencedYawCorrector(InvariantEKF ekf,
@@ -102,6 +113,7 @@ public class FootReferencedYawCorrector
    {
       ekf.getRotation(filterRotation);
       double pelvisYaw = filterRotation.getYaw();
+      pelvisDirection.set(Math.cos(pelvisYaw), Math.sin(pelvisYaw));
 
       double weightedDeltaSum = 0.0;
       double weightSum = 0.0;
@@ -109,7 +121,7 @@ public class FootReferencedYawCorrector
       for (RobotSide side : RobotSide.values)
       {
          double relativeFootYaw = relativeFootYaw(side);
-         double contactP = clamp(contactProbability.applyAsDouble(side));
+         double contactP = MathTools.clamp(contactProbability.applyAsDouble(side), 0.0, 1.0);
 
          boolean isAnchored = anchored.get(side).getBooleanValue();
          if (contactP >= highThreshold && !isAnchored)
@@ -127,9 +139,15 @@ public class FootReferencedYawCorrector
 
          if (isAnchored)
          {
+            double anchorFootYaw = anchorRelativeFootYaw.get(side).getDoubleValue();
+            currentFootDirection.set(Math.cos(relativeFootYaw), Math.sin(relativeFootYaw));
+            anchorFootDirection.set(Math.cos(anchorFootYaw), Math.sin(anchorFootYaw));
+
             double referenceYaw = anchorPelvisYaw.get(side).getDoubleValue()
-                                  + wrapToPi(anchorRelativeFootYaw.get(side).getDoubleValue() - relativeFootYaw);
-            weightedDeltaSum += contactP * wrapToPi(referenceYaw - pelvisYaw);
+                                  + signedAngleFromTo(currentFootDirection, anchorFootDirection);
+
+            referenceDirection.set(Math.cos(referenceYaw), Math.sin(referenceYaw));
+            weightedDeltaSum += contactP * signedAngleFromTo(pelvisDirection, referenceDirection);
             weightSum += contactP;
          }
       }
@@ -159,13 +177,25 @@ public class FootReferencedYawCorrector
       return registry;
    }
 
-   private static double wrapToPi(double angle)
+   /**
+    * Signed angle in (-pi, pi] from {@code startDirection} to {@code endDirection}, i.e. the wrapped
+    * difference {@code endYaw - startYaw}.
+    *
+    * <p>Thin guard over {@link AngleTools#angleMinusPiToPi}, which forms its magnitude as an unclamped
+    * {@code Math.acos(dot / normStart / normEnd)}. For (anti)parallel inputs round-off pushes that cosine
+    * just outside [-1, 1] and {@code acos} returns NaN — measured at 21% of angles for two unit vectors
+    * built from the cosine/sine of the <em>same</em> angle. That is not a corner case here: on the tick a
+    * foot is anchored, {@code anchorRelativeFootYaw} is assigned {@code relativeFootYaw}, so the two
+    * direction vectors are identical by construction and a NaN would propagate through
+    * {@code prependYawRotation} into the filter mean. The limiting value is exact in that case, so
+    * recover it directly: parallel gives 0, antiparallel gives pi.</p>
+    */
+   static double signedAngleFromTo(Vector2DReadOnly startDirection, Vector2DReadOnly endDirection)
    {
-      return Math.atan2(Math.sin(angle), Math.cos(angle));
+      double angle = AngleTools.angleMinusPiToPi(startDirection, endDirection);
+      if (Double.isNaN(angle))
+         return startDirection.dot(endDirection) >= 0.0 ? 0.0 : Math.PI;
+      return angle;
    }
 
-   private static double clamp(double value)
-   {
-      return value < 0.0 ? 0.0 : (value > 1.0 ? 1.0 : value);
-   }
 }
