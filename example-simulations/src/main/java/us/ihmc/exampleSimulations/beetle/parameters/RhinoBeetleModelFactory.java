@@ -36,17 +36,6 @@ public class RhinoBeetleModelFactory implements FullRobotModelFactory
                                                            true);
 
       new RhinoBeetleSimInitialSetup().initializeRobotDefinition(robotDefinition, jointMapAndContactInfo);
-
-      // The robot's OBJ/MTL mesh files bake in a near-black "skin" material (Kd ~0.05,0,0.01), and the
-      // SDF has no <material> override, so the meshes render almost black. Override with a plain gray
-      // material so the robot is actually visible in the SCS2 viewer.
-      for (RigidBodyDefinition rigidBody : robotDefinition.getAllRigidBodies())
-      {
-         for (VisualDefinition visual : rigidBody.getVisualDefinitions())
-         {
-            visual.setMaterialDefinition(new MaterialDefinition(ColorDefinitions.Gray()));
-         }
-      }
    }
 
    @Override
