@@ -21,22 +21,17 @@ import java.util.List;
 import java.util.function.ToDoubleFunction;
 
 /**
- * The joint-level KF's state layout and storage: which joints and IMUs are filtered, in what order, the mean
- * {@code x} and covariance {@code P} over them, and the structural holders ({@link Pair}, {@link FootAnchor})
- * that {@link JointKFPrediction}, {@link JointKFUpdate} and {@link JointKFBiasUpdate} all read.
- *
- * <p><b>State layout</b> (every component depends on this and none of it may be reordered):</p>
+ * The joint-level KF's state layout and storage, plus the structural holders ({@link Pair}, {@link FootAnchor})
+ * every other component reads. Layout — none of it may be reordered:
  * <pre>
  *   x = [ q(0..n-1) ; q̇(n..2n-1) ; b_omega(2n..2n+3m-1) ] ,  dim = 2n + 3m
  * </pre>
- * Joint state index {@code i} is the insertion order of {@code jointToIndex} (a LinkedHashMap filled with the
- * {@code putIfAbsent(j, size())} idiom), IMU ordinal {@code o} likewise, and IMU {@code o}'s bias occupies
- * columns {@code [2n+3o, 2n+3o+3)}. The stacked gyro measurement lays pair {@code e} on rows
- * {@code [3e, 3e+3)} with the active anchors trailing.
+ * Joint state index and IMU ordinal are the insertion orders of {@code jointToIndex} / {@code imuToOrdinal};
+ * IMU {@code o}'s bias occupies columns {@code [2n+3o, 2n+3o+3)}; the stacked gyro measurement lays pair
+ * {@code e} on rows {@code [3e, 3e+3)} with the active anchors trailing.
  *
- * <p>Fields are package-private and read directly by the other components rather than through getters: the
- * estimator hot path must stay allocation-free and monomorphic, and {@code state.x} on a final field of a final
- * field folds away entirely in the JIT.</p>
+ * <p>Fields are package-private and read directly rather than through getters, so the hot path stays
+ * allocation-free and monomorphic.</p>
  *
  * @author Lucas Libshutz
  */
@@ -70,9 +65,8 @@ final class JointKFState
 
    /**
     * ONE flag across every non-finite-input site (seeding, the encoder/velocity scans, the unfiltered anchor
-    * joints, and the Joseph rollback). Deliberately shared so the first offender in the boot sequence is the one
-    * that gets named; the near-singular-innovation diagnostic has its own separate flag precisely so the two do
-    * not swallow each other.
+    * joints, the Joseph rollback), deliberately shared so the FIRST offender in the boot sequence is the one
+    * named. The singular-innovation diagnostic keeps its own flag so the two do not swallow each other.
     */
    boolean warnedNonFiniteInput = false;
    private boolean nonFiniteStateReported = false;
@@ -81,11 +75,8 @@ final class JointKFState
    private final YoInteger yoNumberOfFilteredJoints;
    private final YoInteger yoNumberOfIMUs;
 
-   // Per-joint filtered state (q, qd) and the 1-sigma covariance envelope around each. All indexed by the
-   // joint's state index (the same index used into x and P). Allocated once in the constructor after n is
-   // known, then only .set() on the estimator thread (allocation-free). The upper/lower "bounds" are the
-   // estimate +/- one standard deviation, i.e. q +/- sqrt(P_qq) and qd +/- sqrt(P_qdqd), for plotting the
-   // filter's confidence envelope alongside the estimate in SCS.
+   // Per-joint (q, qd) and the +/- 1 sigma envelope around each, indexed by joint state index. Allocated once,
+   // then only .set() on the estimator thread.
    private YoDouble[] yoJointPosition;
    private YoDouble[] yoJointVelocity;
    private YoDouble[] yoJointPositionUpperBound;
@@ -94,10 +85,9 @@ final class JointKFState
    private YoDouble[] yoJointVelocityLowerBound;
 
    /**
-    * @param encoderVelocityNoiseStd consumed ONLY for {@link FootAnchor#qdVar}. It is measurement data on a
-    *                 structural holder, but it is computed in the same anchor-chain walk that classifies each
-    *                 leg joint as filtered or unfiltered — resolving it in {@link JointKFUpdate} instead would
-    *                 mean walking every chain twice and duplicating that classification.
+    * @param encoderVelocityNoiseStd consumed ONLY for {@link FootAnchor#qdVar}, which is resolved in the same
+    *                 anchor-chain walk that classifies each leg joint as filtered or unfiltered — doing it in
+    *                 {@link JointKFUpdate} would mean walking every chain twice.
     */
    JointKFState(SensorOutputMapReadOnly sensorMap,
                 List<IMUBasedJointStateEstimatorParameters> pairParameters,
@@ -189,19 +179,11 @@ final class JointKFState
             fa.qdVar = new double[fa.legJoints.length];
 
             // A leg joint that is NOT a filter state does not disable the anchor -- it only has to be KNOWN, not
-            // ESTIMATED. Splitting the chain into filtered F and unfiltered U, the anchor equation
-            //    omega_base = -J_F qd_F - J_U qd_U + b_base
-            // moves the unfiltered part to the measurement side (see JointKFBiasUpdate.buildStackedMeasurement):
-            //    z' = omega_base + J_U qd_U^meas = -J_F qd_F + b_base + noise'
-            // The +I3 on b_base -- the ONLY absolute bias observation in the filter, and hence the ONLY thing
-            // that fixes the 3-dim common-mode bias gauge -- is untouched by this split, so the anchor keeps its
-            // observability role for ANY subset of filtered leg joints.
-            //
-            // This used to set usable=false whenever any chain joint was unfiltered. On Alex that is ALWAYS: the
-            // robot has no foot IMUs, so the shin->foot pair is never built, so the ankles are never filtered
-            // joints -- and they sit on the pelvis->foot chain. Both anchors were therefore dead on every tick
-            // since day one, the bias gauge was never fixed, and the exported pelvis gyro bias random-walked to
-            // 0.17 rad/s and drove the base pitch drift. See FINDINGS.md Part F.
+            // ESTIMATED, so it moves to the measurement side (see JointKFBiasUpdate.buildStackedMeasurement).
+            // The +I3 on b_base, the only thing fixing the common-mode bias gauge, is untouched by that split.
+            // This used to set usable=false for ANY unfiltered chain joint, which on Alex is always (no foot
+            // IMUs => ankles never filtered => both anchors dead every tick, bias gauge never fixed, pelvis gyro
+            // bias random-walked to 0.17 rad/s and drove the pitch drift). See FINDINGS.md Part F.
             fa.usable = true;
             int unfiltered = 0;
             for (int c = 0; c < fa.legJoints.length; c++)
@@ -230,11 +212,9 @@ final class JointKFState
          }
       }
 
-      // Structural assert (gauge fixing): the pair rows see the bias ONLY as a difference, so the common-mode
-      // bias is a 3-dim nullspace of H. The anchor's +I3 on the base bias is the one row that fixes it. With no
-      // usable anchor the base-IMU gyro bias is unobservable FOREVER -- it random-walks, gets subtracted from the
-      // gyro, and integrates straight into base orientation. That is not a degraded mode, it is a broken filter,
-      // and it must never boot silently again (it did, for months). Fail loud, like the self-pair/acyclic asserts.
+      // Structural assert (gauge fixing): with no usable anchor the base-IMU gyro bias is unobservable FOREVER
+      // -- it random-walks and integrates straight into base orientation. Not a degraded mode, a broken filter,
+      // and it must never boot silently again (it did, for months). Fail loud.
       if (feet != null && !feet.isEmpty() && footAnchors.stream().noneMatch(fa -> fa.usable))
          throw new IllegalArgumentException("JointLevelKFPreFilter: no usable foot anchor. The base-IMU gyro bias is a gauge "
                + "freedom fixed ONLY by the stance-anchor rows; without one it is unobservable and will diverge. "
@@ -260,10 +240,7 @@ final class JointKFState
       createJointYoVariables(registry);
    }
 
-   /**
-    * Allocates the per-joint state / covariance-envelope YoVariables, one set per filtered joint, indexed by
-    * the joint's state index so the per-tick update is a straight array write.
-    */
+   /** One set per filtered joint, indexed by state index so the per-tick update is a straight array write. */
    private void createJointYoVariables(YoRegistry registry)
    {
       yoJointPosition = new YoDouble[n];
@@ -286,11 +263,9 @@ final class JointKFState
    }
 
    /**
-    * Seeds x and P from the current encoder readings and marks the filter initialized. Returns false (leaving
-    * the filter uninitialized, to be retried next tick) if any encoder reads non-finite: a KF permanently
-    * latches NaN — predict/Joseph spread it through x and P with no recovery when sensors come good — so this
-    * refuses to latch bad boot data. While uninitialized the consumers see NaN joint states and zero bias and
-    * cleanly fall back to the raw sensors, the same fail-soft behavior as the alpha filter.
+    * Seeds x and P from the current encoders and marks the filter initialized. Returns false (to be retried
+    * next tick) if any encoder reads non-finite: a KF permanently latches NaN, so bad boot data must not be
+    * latched. While uninitialized, consumers see NaN/zero and fall back to the raw sensors.
     */
    boolean seed()
    {
@@ -314,9 +289,8 @@ final class JointKFState
    }
 
    /**
-    * Publishes the per-joint estimate (q, qd) and its 1-sigma covariance envelope to the YoVariables. Reads
-    * straight from x and P; allocation-free (only primitive .set()). The variance diagonal is clamped at 0
-    * before the sqrt to stay finite through the numerical negatives a covariance can momentarily take.
+    * Publishes (q, qd) and their 1-sigma envelope straight from x and P; allocation-free. The variance is
+    * clamped at 0 before the sqrt, to stay finite through the numerical negatives P can momentarily take.
     */
    void updateJointYoVariables()
    {
@@ -336,9 +310,8 @@ final class JointKFState
    }
 
    /**
-    * Logs the FIRST non-finite input source ever seen, once — identifying which sensor is late in the
-    * boot sequence — then stays silent (this runs on the estimator thread; the string concat only
-    * happens on that single occurrence).
+    * Logs the FIRST non-finite input ever seen, once — naming whichever sensor is late in the boot sequence —
+    * then stays silent. Runs on the estimator thread, so the string concat happens only on that occurrence.
     */
    void warnNonFiniteInputOnce(String source)
    {
@@ -350,11 +323,9 @@ final class JointKFState
    }
 
    /**
-    * One-shot triage hook: the first time the filter's state goes non-finite, logs which stage produced it
-    * (predict / encoderUpdate / encoderVelocityUpdate / stackedGyroUpdate) and then stays quiet. Allocation-free
-    * until it fires (the message is only built on that single occurrence); the finiteness scans are O(dim^2)
-    * but run only until the first report. With the input/inverse/rollback guards elsewhere this should not fire —
-    * if it does, its stage name is the exact place NaN enters, which is what to chase next.
+    * One-shot triage: the first time x or P goes non-finite, names the stage that produced it, then stays
+    * quiet. With the input/inverse/rollback guards elsewhere this should never fire; if it does, that stage
+    * name is the exact place NaN enters.
     */
    void warnIfNonFiniteState(String stage, int index)
    {
@@ -370,10 +341,9 @@ final class JointKFState
    }
 
    /**
-    * Logs the chain-DoF census and, for each 1-DoF chain, the joint axis and its two pure-bias sentinel rows
-    * (Part B item 6). The pure-bias rows are the two gyro axes orthogonal to the single joint axis: with a zero
-    * gyro Sigma their innovation variance has no floor, so they are the min-side rows the Sigma floor (item 4)
-    * protects. Construction-only string work; never on the hot path.
+    * Logs the chain-DoF census, and for each 1-DoF chain its joint axis and the two gyro axes orthogonal to it.
+    * Those two rows observe PURE bias, so with a zero gyro Sigma their innovation variance has no floor — they
+    * are the min-side rows the Sigma floor protects. Construction-only; never on the hot path.
     */
    void logChainDoFCensus()
    {
@@ -415,12 +385,9 @@ final class JointKFState
    }
 
    /**
-    * Union-find acyclicity check on the used IMU graph (Part B item 6). Each pair is an edge between its two
-    * IMU ordinals; if an edge ever joins two already-connected IMUs the graph has a cycle, which makes the
-    * stacked S singular by construction with the exact R_g (SPEC §5.3 — the cycle's telescoping row-combination
-    * carries the identity 0 = 0: zero H, zero z, zero noise). THROW naming the redundant pair to drop (its
-    * chain joints are already covered by the rest of the spanning tree, so dropping it loses no information).
-    * Construction-only.
+    * Union-find acyclicity check on the used IMU graph. A cycle's telescoping row-combination carries the
+    * identity 0 = 0 (zero H, zero z, zero noise), so with the exact R_g it makes the stacked S singular BY
+    * CONSTRUCTION (SPEC §5.3). Throws naming the redundant pair to drop. Construction-only.
     */
    private void assertAcyclicIMUGraph()
    {
@@ -464,9 +431,8 @@ final class JointKFState
    }
 
    // ================================ Structure holders ================================
-   // Built here, but their per-tick mutable measurement fields (FootAnchor.active / .R) are written by
-   // JointKFBiasUpdate.buildStackedMeasurement, and qdVar is read there. They are shared structural holders,
-   // not private state of this class.
+   // Shared, not private state: built here, but FootAnchor.active / .R are written and .qdVar read by
+   // JointKFBiasUpdate.buildStackedMeasurement.
 
    static final class Pair
    {

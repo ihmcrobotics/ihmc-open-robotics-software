@@ -20,31 +20,22 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
- * The joint-level KF's time update: the constant transition F, the process noise Q, and the whole
- * Schur-complement mass-matrix path that makes Q configuration-dependent.
+ * The joint-level KF's time update: the constant transition F, the process noise Q, and the Schur-complement
+ * mass-matrix path that makes Q configuration-dependent.
  *
- * <p><b>Process noise (SPEC §3.2).</b> The unmodeled joint torque w_tau maps to joint acceleration through the
- * FLOATING-BASE dynamics, not the locked-base map: eliminating the (unforced) nuisance acceleration from the
- * perturbed EOM gives delta_qddot = Lambda^-1 w_tau, Lambda = M_jj - M_jN M_NN^-1 M_Nj the Schur complement of
- * the nuisance block. Hence Qa = sigma_tau^2 Lambda^-2.</p>
+ * <p>Process noise (SPEC §3.2): unmodeled joint torque maps to joint acceleration through the FLOATING-BASE
+ * dynamics, not the locked-base map, so delta_qddot = Lambda^-1 w_tau with
+ * Lambda = M_jj - M_jN M_NN^-1 M_Nj the Schur complement of the nuisance block, and Qa = sigma_tau^2 Lambda^-2.</p>
  *
- * <p>"Nuisance" = the 6-DoF floating base (SPEC §3.2) plus any UNFILTERED joints that lie on the tree path
- * between the base and a filtered joint ("gap" joints). In the real robot the base IMU is on the base link
- * and every joint on a pair/anchor path is itself filtered, so there are NO gap joints and this is exactly
- * the SPEC's Lambda = M_jj - M_jb M_bb^-1 M_bj over the plain 6-DoF base. The gap term is a topology
- * generalization (needed because the composite-rigid-body calculator prunes the subtree below any ignored
- * joint, so an unfiltered joint above a filtered one cannot be silently locked): such gap joints are
- * instead marginalized (treated as free) alongside the base — the conservative choice (more recoil => more
- * process noise, consistent with §3.2's free-flyer upper bound). Genuinely OFF-path joints stay ignored and
- * their inertia is composited into the adjacent link by the calculator (considerIgnoredSubtreesInertia).</p>
+ * <p>"Nuisance" = the 6-DoF floating base plus any UNFILTERED joints on the tree path between it and a filtered
+ * joint ("gap" joints). On the real robot there are none, so this is exactly the SPEC's 6-DoF-base Schur
+ * complement; gap joints are a topology generalization, marginalized rather than locked because the
+ * composite-rigid-body calculator prunes the subtree below any ignored joint. Marginalizing is also the
+ * conservative choice (more recoil => more process noise). Off-path joints stay ignored and their inertia is
+ * composited into the adjacent link.</p>
  *
- * <p>The mass matrix M is built over {base} ∪ {joints spanning base->filtered}. All columns (nuisance and each
- * filtered joint) are resolved through the calculator's index provider — never assume ordering. Null
- * calculator (no robot model, or no 6-DoF floating base found) => the constant scalar-CWNA diagonal fallback.
- * NOTE: CompositeRigidBodyMassMatrixCalculator is correct here. DynamicsMatrixCalculator merely wraps this
- * same calculator (it holds one internally, built over the whole-body-control toolbox) and computes the
- * identical M(q) — switching changes nothing numerically. Process-noise magnitude is governed by the per-joint
- * sigma_tau and the QA_MAX conditioning tripwire, not by the choice of calculator.</p>
+ * <p>All columns are resolved through the calculator's index provider — never assume ordering. A null
+ * calculator (no robot model, or no floating base) falls back to the scalar-CWNA diagonal.</p>
  *
  * @author Lucas Libshutz
  */
@@ -78,14 +69,11 @@ final class JointKFPrediction
    private LinearSolverDense<DMatrixRMaj> nuisanceMassMatrixSolver; // Cholesky over M_NN, solves M_NN X = M_Nf
    private LinearSolverDense<DMatrixRMaj> schurSolver;               // Cholesky over Lambda_eff, inverts it
 
-   // Reflected rotor inertia diagonals (Part B item 1), in filter/nuisance order. The FILTERED-joint arrays are
-   // refreshed every predict from the LIVE per-joint YoVariables below (see refreshRotorInertiaAndSigmaTau); the
-   // nuisance one is fixed at construction (a gap joint has no tunable of its own — none exist on Alex).
+   // Filter-order arrays refreshed every predict from the LIVE YoVariables below; the nuisance one is fixed at
+   // construction (a gap joint has no tunable of its own — none exist on Alex).
    private double[] rotorInertiaDiag;         // length n, added to Lambda's diagonal (filter joint state order)
    private double[] nuisanceRotorInertiaDiag; // length numNuisanceDoF: 0 on base rows, rotor inertia on gap-joint rows
-   private double[] sigmaTauPerJoint;         // length n, sigma_tau,i = alpha_i * tau_max,i (Part B item 3)
-   // LIVE per-joint tuning, indexed by joint state index. Published as jointKFParam_alpha_<joint> and
-   // jointKFParam_rotorInertia_<joint> so the documented ALPHA equalization runs in SCS without a rebuild.
+   private double[] sigmaTauPerJoint;         // length n, sigma_tau,i = alpha_i * tau_max,i
    private YoDouble[] yoAlpha;
    private YoDouble[] yoRotorInertia;
    private double[] tauMaxPerJoint;      // length n, effort limit (N*m); NaN where the fallback applies
@@ -95,16 +83,11 @@ final class JointKFPrediction
    private boolean warnedMassMatrixFailure = false;
    private boolean warnedMassMatrixConditioningCap = false;
 
-   /** Aggregate QA_MAX tripwire counter. Created FIRST, before the initial Q build, so it keeps the pre-split
-    *  behavior of latching a construction-time bind (the per-joint arrays below deliberately do not — see the
-    *  constructor). */
    private final YoInteger yoQaCapWouldBindCount;
-   // Per-joint process-noise diagnostics (Part B item 2, extended for the ALPHA retune). yoQaDiag[i] is
-   // diag(Qa)_i — joint i's acceleration process-noise VARIANCE ((rad/s^2)^2) this tick, the quantity the QA_MAX
-   // tripwire thresholds. yoQaCapBindCount[i] counts the ticks joint i was the argmax that exceeded QA_MAX. The
-   // aggregate jointKFQaCapWouldBindCount says the cap binds but not WHICH joint, so it cannot drive the per-joint
-   // ALPHA retune (equalize sqrt(diag(Qa)) across joints -> alpha_i = sigma*_qdd / (|Lambda_eff^-1|_ii * tau_max,i));
-   // these per-joint reads are the measurement that closes it. Indexed by joint state index.
+   // Per-joint process-noise diagnostics, indexed by joint state index. yoQaDiag[i] is this tick's diag(Qa)_i
+   // ((rad/s^2)^2) — the quantity QA_MAX thresholds, and the measurement the ALPHA equalization calibrates
+   // from. The aggregate counter says the cap binds but not WHICH joint, so it cannot drive that retune;
+   // yoQaCapBindCount closes it by counting the ticks joint i was the offending argmax.
    private YoDouble[] yoQaDiag;
    private YoInteger[] yoQaCapBindCount;
 
@@ -117,12 +100,9 @@ final class JointKFPrediction
       yoQaCapWouldBindCount = new YoInteger("jointKFQaCapWouldBindCount", registry);
 
       setupMassMatrix(rootBody, registry);
-      // ORDER IS LOAD-BEARING: these two fill rotorInertiaDiag / sigmaTauPerJoint and the Qa telemetry arrays,
-      // all of which the first buildProcessNoise below reads through updateProcessNoiseFromMassMatrix.
-      // Pre-split, the Qa YoVariables were created after that first build and the update carried null guards for
-      // them; creating them here instead means the boot-time Qa is published like every later tick's, and it
-      // makes the per-joint jointKF_QaCapBind_<joint>_count consistent with the aggregate
-      // jointKFQaCapWouldBindCount, which always latched a construction-time bind.
+      // ORDER IS LOAD-BEARING: these two fill the rotor/sigma_tau and Qa telemetry arrays that the first
+      // buildProcessNoise below reads. Creating the Qa variables here (rather than after, behind null guards)
+      // publishes the boot-time Qa like every later tick's.
       createRotorInertiaAndSigmaTauParameters(registry);
       createQaYoVariables(registry);
       allocate();
@@ -133,12 +113,9 @@ final class JointKFPrediction
    private void setupMassMatrix(RigidBodyBasics rootBody, YoRegistry registry)
    {
       int n = state.n;
-      // Schur-complement process noise (SPEC §3.2): the calculator is built over the FLOATING BASE plus the
-      // filtered joints of the LIVE estimator model (the same joint objects the Jacobians read), so its M(q)
-      // tracks the consumer-updated configuration each tick with no extra bookkeeping. Unlike Rev. 1 (joints
-      // only), the floating joint MUST be included so the 6x6 base block M_bb and the base-joint coupling M_bj
-      // are available for the Schur complement. Column mappings (base and each joint) are resolved through the
-      // index provider rather than assumed from list order.
+      // Built over the LIVE estimator model's joints (the same objects the Jacobians read), so M(q) tracks the
+      // consumer-updated configuration with no extra bookkeeping. The floating joint MUST be included, or M_bb
+      // and M_bj are unavailable for the Schur complement.
       if (rootBody != null && n > 0)
       {
          List<OneDoFJointBasics> massMatrixJoints = new ArrayList<>(state.jointToIndex.keySet());
@@ -160,11 +137,9 @@ final class JointKFPrediction
          }
          else
          {
-            // Joints to CONSIDER = base joint + the joints spanning base->filtered (every filtered joint plus any
-            // unfiltered "gap" joints above it). The gap joints MUST be considered, not ignored: the calculator
-            // prunes the whole subtree below an ignored joint, which would zero the filtered joints' inertia if an
-            // unfiltered joint sat above them. Genuinely off-path joints are neither filtered nor spanning, so they
-            // fall in getJointsToIgnore() and their inertia is composited (considerIgnoredSubtreesInertia).
+            // Consider = base + everything spanning base->filtered. Gap joints MUST be considered, not ignored:
+            // the calculator prunes the whole subtree below an ignored joint, which would zero the filtered
+            // joints' inertia if an unfiltered joint sat above them.
             LinkedHashSet<JointReadOnly> spanningJoints = collectSpanningJoints(baseJoint, massMatrixJoints);
             List<JointReadOnly> jointsToConsider = new ArrayList<>();
             jointsToConsider.add(baseJoint);
@@ -177,14 +152,11 @@ final class JointKFPrediction
             massMatrixColumn = new int[n];
             for (var e : state.jointToIndex.entrySet())
                massMatrixColumn[e.getValue()] = indexProvider.getJointDoFIndices(e.getKey())[0];
-            // Nuisance columns to marginalize = base 6-DoF columns + each gap joint's column (a gap joint is a
-            // spanning joint that is not itself filtered). These are exactly the considered DoFs that are not
-            // filtered joints.
+            // Nuisance = base 6-DoF columns + each gap joint's column, i.e. every considered DoF that is not a
+            // filtered joint. Its parallel rotor diagonal is 0 on the base rows (a free base carries no
+            // reflected rotor inertia) so a marginalized gap joint still floors M_NN.
             int[] baseColumns = indexProvider.getJointDoFIndices(baseJoint);
             List<Integer> nuisanceColumns = new ArrayList<>();
-            // Parallel rotor-inertia diagonal for the nuisance block (Part B item 1): 0 on the 6 base DoF (the
-            // free base carries no reflected rotor inertia), the joint's reflected rotor inertia on each gap
-            // joint (so a marginalized unfiltered joint still floors M_NN). None on Alex today; kept general.
             List<Double> nuisanceRotor = new ArrayList<>();
             for (int c : baseColumns)
             {
@@ -224,15 +196,10 @@ final class JointKFPrediction
    }
 
    /**
-    * Publishes the per-joint reflected rotor inertia (Part B item 1) and the per-joint alpha that sets the
-    * unmodeled-torque STD sigma_tau,i = alpha_i * tau_max,i (Part B item 3) as LIVE YoVariables, in filter joint
-    * state order, seeded from the {@link JointKFParameters} tables. Any joint with no rotor-table match is
-    * seeded with the conservative default floor (warn); any joint with no finite positive effort limit is
-    * pinned to the scalar sigmaTau fallback (warn) and its alpha is then ignored.
-    *
-    * <p>Both are re-read every tick by {@link #refreshRotorInertiaAndSigmaTau()}, so the ALPHA equalization
-    * documented in {@link JointKFParameters} can be iterated live in SCS against jointKF_QaDiag_&lt;joint&gt;
-    * instead of through a recompile.</p>
+    * Publishes the per-joint rotor inertia and alpha as LIVE YoVariables in filter state order, seeded from the
+    * {@link JointKFParameters} tables, so the ALPHA equalization can be iterated in SCS against
+    * jointKF_QaDiag_&lt;joint&gt;. A joint with no table match gets the default floor (warn); a joint with no
+    * finite effort limit is pinned to the sigmaTau fallback (warn) and its alpha is then ignored.
     */
    private void createRotorInertiaAndSigmaTauParameters(YoRegistry registry)
    {
@@ -302,9 +269,8 @@ final class JointKFPrediction
    }
 
    /**
-    * Re-reads the LIVE per-joint rotor inertia and alpha into the flat arrays the Schur process-noise update
-    * consumes. Called at the top of every {@link #updateProcessNoiseFromMassMatrix()}; allocation-free (n
-    * primitive reads and writes into arrays allocated once at construction).
+    * Re-reads the LIVE per-joint rotor inertia and alpha into the flat arrays the Schur update consumes.
+    * Allocation-free: n primitive reads into arrays allocated once at construction.
     */
    private void refreshRotorInertiaAndSigmaTau()
    {
@@ -324,10 +290,9 @@ final class JointKFPrediction
       F.reshape(dim, dim);
       Q.reshape(dim, dim);
 
-      // Schur-complement scratch + two Cholesky solvers, pre-warmed at their fixed sizes so the per-tick
-      // setA()/solve()/invert() never allocate (chol decomposes in place and reuses its internal buffers once
-      // warmed). Cholesky both exploits and enforces SPD-ness: a non-PD M_bb or Lambda (bad model state) fails
-      // setA and the previous Q is kept instead of a garbage inverse entering the filter.
+      // Scratch + both Cholesky solvers pre-warmed at their fixed sizes, so the per-tick setA/solve/invert never
+      // allocate. Cholesky also ENFORCES SPD-ness: a non-PD M_NN or Lambda fails setA and the previous Q is kept
+      // rather than a garbage inverse entering the filter.
       if (massMatrixCalculator != null)
       {
          int nN = numberOfNuisanceDOF;
@@ -418,21 +383,14 @@ final class JointKFPrediction
    }
 
    /**
-    * Rebuilds the joint-space Van Loan blocks of Q from the Schur-complement acceleration noise
-    * Qa = sigma_tau^2 Lambda(q)^-2 (SPEC §3.2). For scalar Sigma_tau = sigma_tau^2 I and symmetric Lambda this
-    * is sigma_tau^2 Lambda^-2. Called once from {@link #buildProcessNoise()} and then at the top of every
-    * {@link #predict()}, because M(q) — read from the live model joints, whose frames the estimator refreshes
-    * each tick — is configuration-dependent. Only the (q, qd) blocks are touched; the bias random-walk block and
-    * the zero joint/bias coupling are left exactly as {@link #buildProcessNoise()} made them.
+    * Rebuilds Q's joint-space Van Loan blocks from Qa = sigma_tau^2 Lambda(q)^-2. Runs at the top of every
+    * {@link #predict()} because M(q) is configuration-dependent. Only the (q, qd) blocks are touched; the bias
+    * random-walk block is left as {@link #buildProcessNoise()} made it. Any numerical failure leaves the
+    * previous Q in place (at worst the scalar-CWNA build) and warns once. Allocation-free.
     *
-    * <p>Numerical failure (non-finite M, Cholesky rejection of a non-PD M_NN or Lambda, non-finite
-    * intermediate) leaves the previous Q in place — which at worst is the scalar-CWNA build — and warns once.
-    * Allocation-free: the calculator, all scratch matrices, and both Cholesky solvers are pre-sized/warmed in
-    * {@link #allocate()}.</p>
-    *
-    * <p>TODO(retune): SPEC §8 — Lambda^-2 ⪰ M_jj^-2, so the effective Qa grows at fixed sigma_tau relative to
-    * the Rev. 1 locked-base map. sigma_tau must be retuned against quiet-standing and walking NIS by a human;
-    * do NOT carry the Rev. 1 value over as if it were still calibrated.</p>
+    * <p>TODO(retune): Lambda^-2 ⪰ M_jj^-2, so Qa grows at fixed sigma_tau relative to the Rev. 1 locked-base
+    * map. sigma_tau must be retuned against quiet-standing and walking NIS by a human — do NOT carry the Rev. 1
+    * value over as if it were still calibrated.</p>
     */
    void updateProcessNoiseFromMassMatrix()
    {
@@ -453,9 +411,9 @@ final class JointKFPrediction
          return;
       }
 
-      // Extract the blocks by resolved column index (never assume ordering — SPEC §3.2). M is symmetric, so
-      // M_jN = M_Nj^T and we only need M_NN, M_Nf, M_ff. M_ff is read in filter joint state order (row i =
-      // filtered joint i), so Lambda and Lambda^-2 come out already in state order — no permutation in the fill.
+      // Extract by resolved column index, never by assumed ordering. M is symmetric, so M_jN = M_Nf^T and only
+      // M_NN, M_Nf, M_ff are needed. M_ff is read in filter state order, so Lambda comes out already in state
+      // order — no permutation in the fill below.
       int nN = numberOfNuisanceDOF;
       for (int a = 0; a < nN; a++)
       {
@@ -472,9 +430,7 @@ final class JointKFPrediction
             Mff.set(i, j, massMatrix.get(ci, massMatrixColumn[j]));          // M_ff (nxn)
       }
 
-      // Gap-joint reflected rotor inertia on the nuisance-block diagonal (Part B item 1): 0 on the 6 base rows,
-      // the joint's reflected rotor inertia on each unfiltered gap joint (none on Alex; kept general). Floors
-      // M_NN the same way the filtered rotor diagonal floors Lambda_eff below.
+      // Floors M_NN the same way the filtered rotor diagonal floors Lambda_eff below.
       if (nuisanceRotorInertiaDiag != null)
          for (int a = 0; a < nN; a++)
             MNN.add(a, a, nuisanceRotorInertiaDiag[a]);
@@ -500,11 +456,9 @@ final class JointKFPrediction
       // Lambda symmetric only to round-off, and Cholesky assumes exact symmetry.
       JointLevelKFPreFilter.symmetrize(Lambda);
 
-      // Lambda_eff = Lambda + diag(reflected rotor inertia) (Part B item 1, the primary fix). The rotor spins
-      // behind the gearbox about its own axis and does not couple through the floating base, so this post-Schur
-      // diagonal add is the EXACT drivetrain term — and simultaneously a principled regularizer: by Weyl it
-      // floors lambda_min(Lambda_eff) >= min_i rotorInertiaDiag[i], so Lambda_eff^-1 has no proximal-joint
-      // outliers and Qa cannot blow up the way the un-floored sigma_tau^2 Lambda^-2 did on Alex002.
+      // Lambda_eff = Lambda + diag(rotor inertia). The rotor does not couple through the floating base, so this
+      // post-Schur diagonal add is the EXACT drivetrain term and simultaneously a principled regularizer: by
+      // Weyl it floors lambda_min(Lambda_eff), which is what stops Qa blowing up as it did on Alex002.
       for (int i = 0; i < n; i++)
          Lambda.add(i, i, rotorInertiaDiag[i]);
 
@@ -520,28 +474,23 @@ final class JointKFPrediction
          return;
       }
 
-      // Per-joint Sigma_tau via the Gram form (Part B item 3): Y = Lambda_eff^-1 with column j scaled by
-      // sigma_tau,j, then Qa = Y Y^T = Lambda_eff^-1 diag(sigma_tau^2) Lambda_eff^-T. Qa is PSD AND exactly
-      // symmetric by construction, so the Van Loan fill below reads it directly (no symmetrized read). This
-      // replaces the scalar Qa = sigma_tau^2 Lambda^-2; per-joint sigma_tau = alpha * tau_max,i scales the
-      // process noise with each actuator's own torque capacity instead of one number across hip and wrist.
+      // Gram form: Y = Lambda_eff^-1 with column j scaled by sigma_tau,j, so Qa = Y Y^T is PSD AND exactly
+      // symmetric by construction and the Van Loan fill below can read it directly. Per-joint sigma_tau scales
+      // the process noise with each actuator's own capacity instead of one number across hip and wrist.
       for (int i = 0; i < n; i++)
          for (int j = 0; j < n; j++)
             Ytau.set(i, j, LambdaInv.get(i, j) * sigmaTauPerJoint[j]); // scale column j by sigma_tau,j
       CommonOps_DDRM.multTransB(Ytau, Ytau, Qa); // Qa = Y Y^T
 
-      // QA_MAX tripwire (Part B item 2 — SURFACE, do not rescale). With the rotor floor on Lambda_eff, max
-      // diag(Qa) must sit far below QA_MAX; if it ever would not, that is a model/config regression. Warn once
-      // (naming the argmax joint by state index -> name) and count every tick it would bind — but keep Qa as
-      // computed. The old uniform CommonOps_DDRM.scale coupled one joint's outlier into GLOBAL Q starvation
-      // (hips down ~6 orders), which collapsed P onto the measurement floors and CAUSED the min-side S
-      // singularity; a cap that silently rescales the whole robot is worse than the disease.
+      // QA_MAX tripwire: SURFACE, do not rescale. With the rotor floor on Lambda_eff, max diag(Qa) must sit far
+      // below it, so exceeding it is a model/config regression to chase. The old uniform rescale coupled one
+      // joint's outlier into GLOBAL Q starvation (hips down ~6 orders), which collapsed P onto the measurement
+      // floors and CAUSED the min-side S singularity — a cap that rescales the whole robot is worse than the disease.
       double maxQaDiag = 0.0;
       int argMaxJoint = 0;
       for (int i = 0; i < n; i++)
       {
          double qaDiag = Qa.get(i, i);
-         // Per-joint acceleration process-noise variance, the input the ALPHA equalization is calibrated from.
          yoQaDiag[i].set(qaDiag);
          if (qaDiag > maxQaDiag)
          {
@@ -562,9 +511,7 @@ final class JointKFPrediction
       {
          for (int j = 0; j < n; j++)
          {
-            // Qa is exactly symmetric by construction (Y Y^T), so read directly (Part B item 3 removed the
-            // 0.5*(a_ij + a_ji) symmetrized read). Van Loan dt^3/3, dt^2/2, dt structure unchanged (SPEC §3.4).
-            double qa = Qa.get(i, j);
+            double qa = Qa.get(i, j); // exactly symmetric (Y Yᵀ), so no symmetrized read is needed
             Q.set(i, j, qa * dt3 / 3.0);     // q-q block
             Q.set(i, n + j, qa * dt2 / 2.0); // q-qd cross term
             Q.set(n + i, j, qa * dt2 / 2.0);
@@ -583,11 +530,9 @@ final class JointKFPrediction
             + " (scalar CWNA if this is the first computation). Reported once.");
    }
 
-   /** One-shot warning that the Qa TRIPWIRE (QA_MAX) would bind (Part B item 2): max diag(Qa) exceeded the
-    *  physical acceleration-noise ceiling. NOT rescaled — surfaced. With the reflected-rotor-inertia floor on
-    *  Lambda_eff this should never fire; if it does, the named joint is a model/config regression (a rotor-table
-    *  gap, a bad mass matrix, or a genuinely near-singular Lambda_eff) to chase, and jointKFQaCapWouldBindCount
-    *  counts every tick it binds. */
+   /** One-shot: max diag(Qa) exceeded the ceiling. With the rotor floor on Lambda_eff this should never fire;
+    *  if it does, the named joint is a regression to chase (a rotor-table gap, a bad mass matrix, or a genuinely
+    *  near-singular Lambda_eff). Surfaced, never rescaled. */
    private void warnQaCapWouldBindOnce(int argMaxJointStateIndex, double maxQaDiag)
    {
       if (warnedMassMatrixConditioningCap)
@@ -600,10 +545,8 @@ final class JointKFPrediction
    }
 
    /**
-    * Finds the 6-DoF free-flyer joint at the root of the filtered joints' tree (SPEC §3.2 partitions the mass
-    * matrix over a 6-DoF base). In an IHMC model this is the elevator's single child joint (the SixDoFJoint /
-    * root joint). Returns {@code null} if no 6-DoF joint sits directly below the tree root (fixed-base model),
-    * which drops the filter to the scalar-CWNA fallback. Construction-only; no hot-path use.
+    * The 6-DoF free-flyer at the root of the filtered joints' tree — in an IHMC model, the elevator's single
+    * child joint. Null on a fixed-base model, which drops the filter to the scalar-CWNA fallback.
     */
    private static JointReadOnly findFloatingBaseJoint(RigidBodyBasics treeRoot)
    {
@@ -616,10 +559,9 @@ final class JointKFPrediction
    }
 
    /**
-    * Collects every joint on the tree paths from {@code baseJoint} to each filtered joint: the filtered joints
-    * themselves plus any unfiltered "gap" joints above them. Walks up from each filtered joint via
-    * predecessor/parent-joint links until it reaches {@code baseJoint}. Order is insertion order (irrelevant —
-    * all columns are later resolved by index). Construction-only; no hot-path use.
+    * Every joint on the tree paths from {@code baseJoint} to each filtered joint — the filtered joints plus any
+    * unfiltered "gap" joints above them — by walking up predecessor links. Order is irrelevant; all columns are
+    * later resolved by index.
     */
    private static LinkedHashSet<JointReadOnly> collectSpanningJoints(JointReadOnly baseJoint, List<OneDoFJointBasics> filteredJoints)
    {

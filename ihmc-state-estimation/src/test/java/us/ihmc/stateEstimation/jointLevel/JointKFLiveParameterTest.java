@@ -14,30 +14,20 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
- * Property tests for the LIVE tier of {@link JointKFParameters}: the tuning that is re-read on the hot path so
- * the calibration procedures documented on those constants can be iterated in SCS instead of through a
- * recompile-reflash-rerun cycle.
- *
- * <p>A YoVariable that is published but silently ignored is worse than a compile-time constant — it invites a
- * retune that does nothing. These tests pin the three properties that make "LIVE" a real claim:</p>
- * <ol>
- *   <li><b>Liveness</b> — writing the parameter changes the filter's behavior on the very next {@code predict()},
- *   with no re-construction;</li>
- *   <li><b>Direction</b> — it moves the right way, so the knob is physically meaningful and not just wired;</li>
- *   <li><b>Exact reversibility</b> — restoring the value restores the previous numbers BIT-FOR-BIT (tolerance
- *   0.0), which is what rules out hysteresis, a latched first read, or a stale cached copy;</li>
- * </ol>
- * plus the invariant that must survive any retune: Qa stays symmetric and PSD, because it is a covariance and
- * the Joseph update's conditioning gates depend on it.
+ * Property tests for the LIVE tier of {@link JointKFParameters}. A YoVariable that is published but silently
+ * ignored is worse than a compile-time constant — it invites a retune that does nothing — so these pin the
+ * three properties that make "LIVE" a real claim: LIVENESS (a write changes behavior on the very next
+ * {@code predict()}), DIRECTION (it moves the right way), and EXACT REVERSIBILITY (restoring the value restores
+ * the previous numbers bit-for-bit, ruling out a latched read or stale cache). Plus the invariant that must
+ * survive any retune: Qa stays symmetric PSD.
  */
 public class JointKFLiveParameterTest
 {
    private static final double DT = JointLevelKFTestFixture.DT;
 
    /**
-    * The per-joint reflected rotor inertia (jointKFParam_rotorInertia_&lt;joint&gt;) is added to the Schur
-    * complement's diagonal BEFORE inversion: Lambda_eff = Lambda + diag(rotor). Raising it therefore stiffens
-    * the torque -&gt; acceleration map Lambda_eff^-1 and must LOWER every joint's process noise.
+    * Rotor inertia is added to the Schur complement's diagonal before inversion, so raising it stiffens the
+    * torque -&gt; acceleration map and must LOWER every joint's process noise.
     */
    @Test
    public void testPerJointRotorInertiaIsLiveDirectionalAndExactlyReversible()
@@ -75,8 +65,7 @@ public class JointKFLiveParameterTest
       assertSymmetric(qddStiffer, 0.0, "Qa still exactly symmetric after the live retune");
       assertPositiveSemiDefinite(qddStiffer, "Qa still PSD after the live retune");
 
-      // Liveness + direction: more reflected rotor inertia => stiffer Lambda_eff => strictly less process noise
-      // on EVERY joint. A merely-published-but-ignored parameter fails this on the first joint.
+      // A merely-published-but-ignored parameter fails this on the first joint.
       for (int i = 0; i < n; i++)
       {
          assertTrue(qddStiffer.get(i, i) < qddBaseline.get(i, i),
@@ -84,8 +73,7 @@ public class JointKFLiveParameterTest
                     + " (was " + qddBaseline.get(i, i) + ", now " + qddStiffer.get(i, i) + ")");
       }
 
-      // Exact reversibility: restoring the defaults must reproduce the baseline to the last bit. Anything that
-      // latched, cached or accumulated the parameter shows up here as a non-zero difference.
+      // Anything that latched, cached or accumulated the parameter shows up here as a non-zero difference.
       for (int i = 0; i < n; i++)
          rotor[i].set(defaults[i]);
       f.filter.predict();
@@ -97,8 +85,8 @@ public class JointKFLiveParameterTest
    }
 
    /**
-    * jointKF_QaDiag_&lt;joint&gt; is the measurement the documented ALPHA equalization is calibrated from, so it
-    * must track the Qa the filter actually applied on the last predict, not a stale or construction-time value.
+    * jointKF_QaDiag_&lt;joint&gt; is what the ALPHA equalization is calibrated from, so it must track the Qa the
+    * filter actually applied on the last predict, not a stale or construction-time value.
     */
    @Test
    public void testQaDiagTelemetryTracksTheAppliedProcessNoise()
@@ -126,9 +114,8 @@ public class JointKFLiveParameterTest
    }
 
    /**
-    * jointKFParam_qaMax is a TRIPWIRE, not a clamp: crossing it must count and warn but leave Qa untouched.
-    * Both halves matter — a live threshold that silently rescaled Q would reintroduce the global-Q-starvation
-    * failure mode the tripwire replaced.
+    * qaMax is a TRIPWIRE, not a clamp. Both halves matter: a live threshold that silently rescaled Q would
+    * reintroduce the global-Q-starvation failure mode the tripwire replaced.
     */
    @Test
    public void testQaMaxTripwireIsLiveAndDoesNotRescaleQa()
@@ -171,10 +158,8 @@ public class JointKFLiveParameterTest
                          "the QA_MAX tripwire must not rescale Qa at (" + i + "," + j + ")");
    }
 
-   /**
-    * The parameter block must be a per-filter instance, not shared state: two filters in one JVM must each own
-    * their tuning, or a retune on the dev sim would silently follow into the next pipeline.
-    */
+   /** Two filters in one JVM must each own their tuning, or a retune on the dev sim follows into the next
+    *  pipeline. */
    @Test
    public void testParametersArePerFilterInstance()
    {

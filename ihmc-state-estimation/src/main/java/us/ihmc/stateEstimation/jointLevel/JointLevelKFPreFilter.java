@@ -31,36 +31,22 @@ import java.util.function.ToDoubleFunction;
  *
  * <p><b>Do not share an instance between pipelines</b> (the filter holds its covariance).</p>
  *
- * <p><b>This class is the orchestrator.</b> It owns the tick sequence, the on-ground initialization gate and the
- * {@code OneDoFJointStateSource} / {@code IMUBiasProvider} surface the estimator consumes; the filter itself is
- * five collaborators, each with one job:</p>
- * <ul>
- *   <li>{@link JointKFParameters} — every tuning constant, published as YoVariables so the documented
- *   calibration loops run live in SCS instead of through a recompile;</li>
- *   <li>{@link JointKFState} — the state layout (which joints and IMUs, in what order), x and P, and the
- *   {@code Pair} / {@code FootAnchor} structural holders;</li>
- *   <li>{@link JointKFPrediction} — F, Q, and the Schur-complement mass-matrix process noise;</li>
- *   <li>{@link JointKFUpdate} — the encoder and direct-velocity channels plus the shared Joseph core and its
- *   conditioning gates;</li>
- *   <li>{@link JointKFBiasUpdate} — the stacked gyro measurement (pair rows + stance anchors), the only channel
- *   that observes the per-IMU gyro biases.</li>
- * </ul>
- * They are constructed in that order and depend on each other one way only
- * (BiasUpdate → Update → State), so there are no initialization cycles.
+ * <p>This class is the ORCHESTRATOR: it owns the tick sequence, the on-ground initialization gate, and the
+ * {@code OneDoFJointStateSource} / {@code IMUBiasProvider} surface the estimator consumes. The filter itself is
+ * five collaborators, constructed in this order and depending on each other one way only
+ * (BiasUpdate → Update → State), so there are no initialization cycles: {@link JointKFParameters} (the tuning,
+ * as YoVariables), {@link JointKFState} (layout, x and P, the structural holders), {@link JointKFPrediction}
+ * (F, Q, the Schur mass-matrix noise), {@link JointKFUpdate} (encoder + direct-velocity channels and the shared
+ * Joseph core), and {@link JointKFBiasUpdate} (the stacked gyro channel).</p>
  *
- * <p><b>Rev. 2 measurement model (SPEC §5-§6).</b> The gyro measurements are applied as ONE stacked Joseph
- * update per tick over z_g = [pair diffs ; active stance anchors], not the Rev. 1 per-pair sequential updates.
- * Its noise R_g = L Sigma L^T + Sigma_eps carries the exact shared-IMU cross-covariances (biases and gyro white
- * noise both enter through the same edge-incidence operator L, whose blocks also ARE the bias columns of H_g).
- * The stance anchors are merged into this phase-1 update using the previous tick's trusted-feet set;
- * {@link #computeImuBiases} is reduced to caching that set. See jointKF_derivation.md §5-§7.</p>
+ * <p>Rev. 2 measurement model (SPEC §5-§6): the gyro measurements are ONE stacked Joseph update per tick over
+ * [pair diffs ; active stance anchors], not Rev. 1's per-pair sequential updates, so R_g can carry the exact
+ * shared-IMU cross-covariances. {@link #computeImuBiases} is reduced to caching the trusted-feet set.</p>
  *
- * <p><b>Rev. 2 process noise (SPEC §3.2).</b> The joint process noise is now the floating-base Schur
- * complement Qa = sigma_tau^2 * Lambda(q)^-2, Lambda = M_jj - M_jb M_bb^-1 M_bj, rather than the Rev. 1
- * locked-base Qa = sigma_tau^2 * M_jj^-2. Because the free base recoils, the joints accelerate more per unit
- * torque, so Lambda ⪯ M_jj (PSD ordering) and Lambda^-2 ⪰ M_jj^-2: the effective process noise grows at fixed
- * sigma_tau, worst for proximal joints. See the SPEC (jointKF_derivation.md §3.2, §8) for the derivation and
- * the sigma_tau retune obligation.</p>
+ * <p>Rev. 2 process noise (SPEC §3.2): Qa is the floating-base Schur complement sigma_tau^2 Lambda(q)^-2 rather
+ * than the locked-base sigma_tau^2 M_jj^-2. Because the free base recoils, Lambda ⪯ M_jj and so Lambda^-2 ⪰
+ * M_jj^-2 — the effective process noise GROWS at fixed sigma_tau, worst for proximal joints, which is why
+ * sigma_tau carries a retune obligation.</p>
  *
  * @author Lucas Libshutz
  */
@@ -79,10 +65,9 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    private int consecutiveOnGroundTicks = 0;
    private final int requiredOnGroundTicks;
 
-   // Observability: the constructor was previously handed a parentRegistry that it dropped on the floor
-   // (so the filter published nothing on hardware). These are wired to the parent registry now. ONE flat
-   // registry is shared by every component, so YoVariable simple names stay unique and their full namespaces
-   // are unchanged by the split.
+   // ONE flat registry shared by every component, so YoVariable simple names stay unique and their full
+   // namespaces are unchanged by the split. (This was once handed a parentRegistry that it dropped on the
+   // floor, so the filter published nothing on hardware.)
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoBoolean yoInitialized = new YoBoolean("jointKFInitialized", registry);
    private final YoBoolean yoWaitingForGroundContact = new YoBoolean("jointKFWaitingForGroundContact", registry);
@@ -188,12 +173,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    }
 
    /**
-    * One-time (construction) finiteness check on the constant model matrices. These are built once and reused
-    * every tick, so a single non-finite entry here — most plausibly an IMU that returns a non-finite
-    * angular-velocity bias process-noise covariance while it is still booting — permanently poisons Q (or F)
-    * and makes P go NaN on the first predict, with no recovery. Logged as an error naming the matrix so this
-    * shows up clearly at estimator start instead of as a silent all-NaN filter. Runs at construction only; the
-    * string work here is not on the estimator hot path.
+    * The constant model matrices are built once and reused every tick, so a single non-finite entry — most
+    * plausibly an IMU returning a non-finite bias process-noise covariance while still booting — permanently
+    * poisons Q or F and makes P go NaN on the first predict, with no recovery. Naming the matrix at boot beats
+    * discovering a silent all-NaN filter later.
     */
    private void validateConstantModel()
    {
@@ -244,11 +227,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 
    /**
     * Installs the optional on-ground gate: while {@code onGround} does not read true, {@link #initialize()}
-    * stays deferred (the filter exports NaN joint states and zero bias, so consumers fall back to the raw
-    * sensors). Pass {@code null} to disable gating (the default — initialize as soon as boot data is finite).
-    * The gate is debounced internally over {@code JointKFParameters.ON_GROUND_INIT_DEBOUNCE}; see that constant
-    * for why a single-tick check is not enough. Called once at wiring time by the consumer that owns the
-    * contact-probability signal; never on the estimator hot path.
+    * stays deferred and consumers fall back to the raw sensors. Null disables gating (the default). Debounced
+    * over {@code JointKFParameters.ON_GROUND_INIT_DEBOUNCE} — see that constant for why one tick is not enough.
     */
    public void setInitializationGate(BooleanSupplier onGround)
    {
@@ -258,9 +238,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    }
 
    /**
-    * True when the filter is clear to seed this tick: no gate wired, or the gate has read true for
-    * {@link #requiredOnGroundTicks} consecutive attempts (both feet firmly in contact). Advances/resets the
-    * debounce counter as a side effect, so it is called exactly once per {@link #initialize()} attempt.
+    * True when clear to seed: no gate wired, or the gate has read true for {@link #requiredOnGroundTicks}
+    * consecutive attempts. Advances the debounce counter as a side effect, so call it exactly once per attempt.
     */
    private boolean readyToInitialize()
    {
@@ -278,11 +257,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    @Override
    public void initialize()
    {
-      // Do not seed the filter until the robot is firmly on the ground: the exported base-IMU gyro bias is
-      // unobservable while hanging (its only anchor is the stance-anchor row, gated off when no foot is
-      // trusted), so seeding then lets the bias wander and the downstream InEKF integrates that into a
-      // rotating/glitching base. Staying uninitialized exports NaN/zero, which the consumers treat as
-      // "fall back to the raw gyro/sensors". No-op when no gate is wired (unit tests / non-invariant pipelines).
+      // Do not seed until the robot is firmly on the ground: while hanging, the exported base gyro bias is
+      // unobservable (its only anchor is gated off with no trusted foot), so it wanders and the downstream InEKF
+      // integrates that into a rotating base. Staying uninitialized exports NaN/zero, which consumers treat as
+      // "fall back to the raw sensors". No-op when no gate is wired.
       if (!readyToInitialize())
          return;
 
@@ -310,11 +288,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       prediction.predict();
       state.warnIfNonFiniteState("predict", -1);
 
-      // update encoder states; skipped wholesale if any encoder reads non-finite (boot transient).
-      // The z fills stay INLINE here rather than moving behind a component call: they iterate
-      // jointToIndex.keySet(), whose iterator only fits the allocation test's 32 B/tick budget because C2
-      // scalar-replaces it, and that elimination depends on the allocation, the loop and the consumer inlining
-      // into one compilation unit. They are orchestration anyway — they drive encodersValid and the warner.
+      // Encoder update; skipped wholesale if any encoder reads non-finite (boot transient). The z fills stay
+      // INLINE rather than moving behind a component call: their keySet() iterators only fit the allocation
+      // test's 32 B/tick budget because C2 scalar-replaces them, which depends on the allocation, the loop and
+      // the consumer inlining into one compilation unit.
       int row = 0;
       boolean encodersValid = true;
       for (OneDoFJointBasics j : state.jointToIndex.keySet())
@@ -334,9 +311,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          state.warnIfNonFiniteState("encoderUpdate", -1);
       }
 
-      // Direct-velocity update: the firmware-reported joint velocity as a measurement of the q̇ states, with
-      // the per-tick adaptive lag inflation on R (see refreshDirectVelocityNoise). Skipped wholesale on any
-      // non-finite velocity, like the encoder block.
+      // Direct-velocity update: firmware-reported joint velocity as a measurement of q̇, with the per-tick
+      // adaptive lag inflation on R. Skipped wholesale on any non-finite velocity, like the encoder block.
       if (update.isDirectVelocityEnabled())
       {
          int qdRow = 0;
@@ -361,14 +337,13 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          }
       }
 
-      // Single stacked gyro update (SPEC §5-§6): all pair rows plus the active stance-anchor rows in ONE Joseph
-      // update, using the previous tick's trusted-feet set (cached in computeImuBiases).
+      // All pair rows plus the active stance-anchor rows in ONE Joseph update, using the previous tick's
+      // trusted-feet set (cached in computeImuBiases).
       biasUpdate.applyStackedUpdate();
 
-      // P hygiene (Part B item 7): re-symmetrize P once per tick. The Joseph products keep P symmetric only to
-      // round-off; a slow asymmetry drift eventually corrupts the Cholesky conditioning gate. O(dim^2),
-      // negligible next to the Joseph O(dim^3) products. Runs BEFORE the Yo publication so the confidence
-      // envelope reads the symmetrized P.
+      // The Joseph products keep P symmetric only to round-off, and a slow asymmetry drift eventually corrupts
+      // the Cholesky conditioning gate. O(dim^2), negligible next to the O(dim^3) products. Runs BEFORE the Yo
+      // publication so the confidence envelope reads the symmetrized P.
       symmetrize(state.P);
 
       state.updateJointYoVariables();
@@ -380,8 +355,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    @Override
    public void computeImuBiases(List<RigidBodyBasics> trustedFeet)
    {
-      // Phase 2 is now bookkeeping only (SPEC §6 phase note): the stance anchors have moved into the phase-1
-      // stacked update, so all this does is cache THIS tick's trusted-feet set for next tick's anchor rows.
+      // Bookkeeping only: the stance anchors moved into the phase-1 stacked update, so this just caches the set.
       biasUpdate.cacheTrustedFeet(trustedFeet);
    }
 
@@ -592,11 +566,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       state.initialized = true;
    }
 
-   /**
-    * Builds the stacked gyro measurement (H_g, z_g, R_g, L) from the current model configuration and the cached
-    * trusted-feet-from-last-tick set, WITHOUT applying the update, for inspection. Set the active anchors first
-    * with {@link #setTrustedFeetForTest} (empty => pairs-only, K = 0).
-    */
+   /** Builds the stacked measurement without applying it. Set the anchors first with
+    *  {@link #setTrustedFeetForTest} (empty => pairs-only, K = 0). */
    void buildStackedMeasurementForTest() { biasUpdate.buildStackedMeasurement(); }
    DMatrixRMaj getStackedMeasurementJacobian() { return biasUpdate.Hg.copy(); }  // H_g (3(E+K) x dim), reshaped to this tick
    DMatrixRMaj getStackedMeasurementResidual() { return biasUpdate.zg.copy(); }  // z_g (3(E+K) x 1)

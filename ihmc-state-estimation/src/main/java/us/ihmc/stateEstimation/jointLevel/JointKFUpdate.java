@@ -25,12 +25,10 @@ import java.util.function.ToDoubleFunction;
 final class JointKFUpdate
 {
    /**
-    * Identifies the calling channel through {@link #josephUpdate}. This used to be a bare {@code String} tested
-    * four DIFFERENT ways at four points (two exact matches, two prefix matches), which is precisely why it is an
-    * enum now: each rule is an explicit field, so they cannot drift apart.
-    *
-    * <p>Note {@link #TEST}: the 3-argument {@code josephUpdate} overload the unit tests drive uses it, and it
-    * takes the GYRO R-floor — every such test is gated at half the gyro floor, not at an encoder floor.</p>
+    * Identifies the calling channel through {@link #josephUpdate}. This was a bare {@code String} tested four
+    * DIFFERENT ways (two exact matches, two prefix matches), which is why it is an enum: each rule is now an
+    * explicit field, so they cannot drift apart. {@link #TEST} takes the GYRO R-floor, so every unit test
+    * driving the 3-arg overload is gated at half the gyro floor, not at an encoder floor.
     */
    enum Channel
    {
@@ -83,17 +81,15 @@ final class JointKFUpdate
    DMatrixRMaj Henc, Renc, zEnc;
    /** Wired per-joint encoder position measurement variance (rad^2), state order; the fallback where unwired. */
    private double[] encVarPerJoint;
-   /** min_i encVarPerJoint[i]: the encoder-block S-pivot floor. A healthy S = H P H^T + R has every pivot >= its
-    *  row's R_ii, so the collapsed-row gate must threshold on the SMALLEST wired variance, not on the fallback —
-    *  with per-joint values below the scalar fallback the old constant would false-trip the gate. SEEDED to the
-    *  fallback and then min-reduced (not a plain min over the array): with every wired variance above the
-    *  fallback the answer must stay the fallback, and with n == 0 the loop never runs. */
+   /** min_i encVarPerJoint[i]: the encoder-block S-pivot floor. A healthy S has every pivot >= its row's R_ii,
+    *  so the collapsed-row gate must threshold on the SMALLEST wired variance. SEEDED to the fallback then
+    *  min-reduced, not a plain min over the array: with every wired variance above the fallback the answer must
+    *  stay the fallback, and with n == 0 the loop never runs. */
    private double encVarFloorMin;
 
-   // Direct joint-velocity measurement channel ("encoderVelocity" update): the twitter firmware reports a
-   // drive-side-filtered output velocity per joint; treating it as a measurement of the q̇ states pins the
-   // J·q̇ part of every pair-gyro row, which makes the IMU bias DIFFERENCES directly inferable each tick
-   // instead of only through the process model (the anchor still fixes the common mode). H_qd = [0 | I_n | 0].
+   // Direct joint-velocity channel: the firmware reports a drive-side-filtered output velocity per joint, and
+   // treating it as a measurement of q̇ pins the J·q̇ part of every pair-gyro row, making the IMU bias
+   // DIFFERENCES inferable each tick instead of only through the process model. H_qd = [0 | I_n | 0].
    DMatrixRMaj Hqd, Rqd, zqd;
    /** Wired per-joint encoder velocity measurement variance ((rad/s)^2); the fallback where unwired. */
    private double[] qdMeasVarPerJoint;
@@ -115,16 +111,15 @@ final class JointKFUpdate
    private final DMatrixRMaj KR = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj IKH = new DMatrixRMaj(0, 0); // I-KH, dim x dim, Joseph form
    private final DMatrixRMaj Ptmp = new DMatrixRMaj(0, 0);
-   /** Reused Cholesky solver for the innovation-covariance inverse. S = H P H^T + R is symmetric PD by
-    *  construction; setA failure = non-PD => skip. Its factor L (L L^T = S) also gives the conditioning/floor
-    *  gate cheaply: S's pivots are L_ii^2, so cond(S) ~ (max L_ii / min L_ii)^2 with no eigendecomposition. */
+   /** Reused Cholesky solver for the innovation-covariance inverse. S is symmetric PD by construction, so a
+    *  setA failure means non-PD => skip. Its factor L also gives the conditioning gate cheaply: S's pivots are
+    *  L_ii^2, so cond(S) ~ (max L_ii / min L_ii)^2 with no eigendecomposition. */
    private LinearSolverChol_DDRM innovationSolver;
    private final DMatrixRMaj Lchol = new DMatrixRMaj(0, 0); // scratch for the innovation Cholesky factor L (k x k)
 
-   // Rollback backups: a KF has no recovery once x/P go non-finite (predict/Joseph spread the NaN with no
-   // way back), so a single non-finite measurement update is skipped by restoring the pre-update mean and
-   // covariance instead of latching NaN forever. Pre-sized here; .set() reuses them (no per-tick allocation).
-   // The O(dim^2) copy is negligible next to the O(dim^3) Joseph matrix products already here.
+   // Rollback backups: a KF has no recovery once x/P go non-finite, so a single bad update is undone by
+   // restoring the pre-update mean and covariance rather than latching NaN forever. The O(dim^2) copy is
+   // negligible next to the O(dim^3) Joseph products already here.
    private final DMatrixRMaj xBackup = new DMatrixRMaj(0, 1);
    private final DMatrixRMaj PBackup = new DMatrixRMaj(0, 0);
 
@@ -136,26 +131,22 @@ final class JointKFUpdate
    private final YoDouble yoCondSProxyLog10;
    private final YoDouble yoMinSDiag;
    private final YoDouble yoMaxSDiag;
-   // Per-joint encoder-update diagnostics. yoEncNIS[i] is the normalized innovation squared nu_i^2 / S_ii of
-   // encoder row i this tick — E[NIS] = 1 for a consistent filter, so a per-joint mean far from 1 reads
-   // directly as "R_i is wrong by that factor". Published BEFORE the conditioning gates so a gated tick still
-   // shows the innovation that tripped it. yoEncR[i] is the wired measurement variance (constant; logged so a
-   // joint that silently fell back to the scalar default is visible). Indexed by joint state index.
+   // Per-channel diagnostics, indexed by joint state index. NIS = nu_i^2 / S_ii; E[NIS] = 1 for a consistent
+   // filter, so a per-joint mean far from 1 reads directly as "R_i is wrong by that factor". Published BEFORE
+   // the conditioning gates, so a gated tick still shows the innovation that tripped it. encR is constant (the
+   // wired variance, logged so a joint silently on the scalar default is visible); qdR is this tick's APPLIED
+   // variance, floor plus lag inflation, so the inflation itself is visible in the log.
    private YoDouble[] yoEncNIS;
    private YoDouble[] yoEncR;
-   // Signed pre-update innovations nu_i = z_i - (H x)_i for the same two channels (rad / rad/s). NIS squares
-   // away the sign; these keep it — the DISCRIMINATOR for lag-shaped vs impact-shaped encoder innovations:
-   // during walking, corr(encInnov, qd_meas/(2*pi*25)) near +1 with slope near 1 implicates the 25 Hz
-   // drive-side position filter lag (nu tracks the first-order lag error qd/omega_c); innovation instead
-   // concentrated in <100 ms bursts at contact transitions implicates unmodeled impact acceleration vs Qa.
+   // Signed innovations nu_i = z_i - (H x)_i. NIS squares the sign away; these keep it, which is what
+   // discriminates lag-shaped from impact-shaped encoder innovations: corr(encInnov, qd_meas/(2*pi*25)) ~ +1
+   // with slope ~1 implicates the 25 Hz drive-side position filter lag, while innovation concentrated in
+   // <100 ms bursts at contact transitions implicates unmodeled impact acceleration vs Qa.
    private YoDouble[] yoEncInnov;
    private YoDouble[] yoQdInnov;
-   // Direct-velocity channel diagnostics, same semantics as the encoder pair: yoQdNIS[i] = nu_i^2/S_ii of
-   // velocity row i (E[NIS] = 1 when R is honest), yoQdR[i] = this tick's APPLIED variance — measured floor
-   // plus the adaptive lag inflation, so the inflation itself is visible in the log. yoUseDirectVelocity is
-   // the live kill switch (settable from SCS mid-run for the hardware A/B).
    private YoDouble[] yoQdNIS;
    private YoDouble[] yoQdR;
+   /** Live kill switch, settable from SCS mid-run for the hardware A/B. */
    private YoBoolean yoUseDirectVelocity;
 
    JointKFUpdate(JointKFState state,
@@ -195,9 +186,8 @@ final class JointKFUpdate
                + "encoder position noise; they fall back to ENCODER_VAR = " + encoderVarFallback + " rad^2 — orders of magnitude "
                + "above the measured per-joint values, so those encoders will be badly under-trusted. Check jointKF_encR_<joint>.");
 
-      // Direct-velocity channel wiring: measured noise floor + effective low-pass corner per joint, resolved
-      // once by name. 1/omega_eff = 0 disables the lag inflation for that joint (measurement treated as
-      // instantaneous); the smoothing alpha for the slew estimate is fixed by lagSlewSmoothingHz.
+      // Direct-velocity wiring, resolved once by name. 1/omega_eff = 0 disables the lag inflation for that
+      // joint, i.e. treats its measurement as instantaneous.
       qdMeasVarPerJoint = new double[n];
       invOmegaEffPerJoint = new double[n];
       prevZqd = new double[n];
@@ -238,10 +228,9 @@ final class JointKFUpdate
    {
       int n = state.n;
       int dim = state.dim;
-      // Widest measurement is either the n-joint encoder block or the 3(E+K_max) stacked gyro block. Size all
-      // the KF innovation scratch (PHt, S, Sinv, K, KR, nu) and the Cholesky solver at this width so a
-      // full-anchor stacked update never reallocates on the estimator thread. Both inputs come from
-      // JointKFState, which is constructed first — never from JointKFBiasUpdate, which is constructed later.
+      // Widest measurement is either the n-joint encoder block or the 3(E+K_max) stacked gyro block; size all
+      // the innovation scratch at that width so a full-anchor stacked update never reallocates on the estimator
+      // thread. Both inputs come from JointKFState, never from the later-constructed JointKFBiasUpdate.
       int maxMeas = Math.max(n, state.maxStackRows);
 
       PHt.reshape(dim, maxMeas);
@@ -255,20 +244,15 @@ final class JointKFUpdate
       zEnc = new DMatrixRMaj(n, 1);
       zqd = new DMatrixRMaj(n, 1);
 
-      // Pre-size the Joseph-form scratch. IKH in particular MUST start at dim x dim: the first josephUpdate
-      // does setIdentity(IKH) *before* multAdd reshapes it, so on a 0x0 IKH the identity is silently dropped
-      // and the first covariance update becomes -KH instead of I-KH. Sizing both here also keeps their first
-      // use from reallocating on the estimator thread.
+      // IKH MUST start at dim x dim: the first josephUpdate does setIdentity(IKH) BEFORE multAdd reshapes it, so
+      // on a 0x0 IKH the identity is silently dropped and the first covariance update becomes -KH, not I-KH.
       Ptmp.reshape(dim, dim);
       IKH.reshape(dim, dim);
       xBackup.reshape(dim, 1);
       PBackup.reshape(dim, dim);
 
-      // Reused Cholesky solver for the innovation-covariance inverse (Part B item 5), warmed at the widest
-      // measurement (maxMeas). S = H P H^T + R is symmetric PD by construction, so Cholesky is the right
-      // factorization: setA returns false on a NON-PD S (a strictly stronger, better-conditioned reject than
-      // LU's exact-singular test), and its factor L (L L^T = S) gives the conditioning/floor gate for free. The
-      // warm-up forces every internal buffer to its largest size now, so per-tick setA()/invert() never allocate.
+      // Warmed at maxMeas so per-tick setA/invert never allocate. Cholesky is the right factorization here:
+      // setA returns false on a non-PD S, a strictly stronger reject than LU's exact-singular test.
       innovationSolver = new LinearSolverChol_DDRM(new CholeskyDecompositionInner_DDRM(true)); // lower-triangular L
       innovationSolver.setA(CommonOps_DDRM.identity(maxMeas));
       Lchol.reshape(maxMeas, maxMeas);
@@ -286,9 +270,8 @@ final class JointKFUpdate
    }
 
    /**
-    * Direct-velocity measurement model: H_qd = [0 | I_n | 0] observes the q̇ block, R_qd starts at the
-    * measured per-joint floor. Unlike Renc, R_qd is NOT constant — {@link #refreshDirectVelocityNoise()}
-    * re-diagonals it every tick with the adaptive lag inflation before the update is applied.
+    * H_qd = [0 | I_n | 0] observes the q̇ block; R_qd starts at the measured per-joint floor. Unlike Renc it is
+    * NOT constant — {@link #refreshDirectVelocityNoise()} re-diagonals it every tick before the update.
     */
    private void buildDirectVelocityModel()
    {
@@ -338,18 +321,13 @@ final class JointKFUpdate
    }
 
    /**
-    * Adaptive measurement covariance for the direct-velocity channel. The measured q̇ is the output of a
-    * first-order low-pass cascade (drive-side LPF, then the sensor-processing alpha filter), and for a
-    * first-order filter y = LPF_{ω}(u) the identity u − y = ẏ/ω is exact — the instantaneous lag error IS the
-    * measured signal's own slope over the corner; stages cascade as 1/ω_eff = Σ 1/ω_stage. So per joint:
-    *
+    * Adaptive R for the direct-velocity channel. For a first-order low-pass y = LPF_ω(u) the identity
+    * u − y = ẏ/ω is EXACT, so the instantaneous lag error is the measured signal's own slope over the corner
+    * (stages cascade as 1/ω_eff = Σ 1/ω_stage), giving
     * <pre>   R_ii(t) = σ_i² + (d̂_i(t) / ω_eff,i)² ,   d̂ = low-passed (z_k − z_{k−1})/dt</pre>
-    *
-    * (smoothing rationale on {@code JointKFParameters.LAG_SLEW_SMOOTHING_HZ}). Behavior: at quiet stance d̂ → 0
-    * and the channel runs at the measured noise floor — full sharpness exactly in the quasi-static regime the
-    * gyro-bias split needs it — while during fast swings each joint softens by its own instantaneous lag error
-    * (a 9 Hz forearm inflates hard, a 50 Hz hip barely moves). A static inflation would instead detune the
-    * channel permanently.
+    * At quiet stance d̂ → 0 and the channel runs at its noise floor — full sharpness exactly in the quasi-static
+    * regime the gyro-bias split needs it — while each joint softens during fast swings by its own lag error. A
+    * static inflation would instead detune the channel permanently.
     */
    void refreshDirectVelocityNoise()
    {
@@ -392,16 +370,9 @@ final class JointKFUpdate
    }
 
    /**
-    * Joseph-form measurement update, hardened against latching NaN. {@code channel} names the calling update so
-    * a skip or rollback identifies its source in the log. Two extra guards over a textbook update:
-    * <ul>
-    *   <li>after the innovation inverse, if S^-1 is non-finite (S was only <em>near</em>-singular, so the
-    *   {@code setA} did not reject it but {@code invert} overflowed), the update is skipped <em>before</em> x
-    *   or P are touched;</li>
-    *   <li>if the completed update still leaves x or P non-finite (e.g. a finite-but-huge intermediate
-    *   overflowed to +/-Inf), the pre-update mean and covariance are restored from the backups.</li>
-    * </ul>
-    * Both leave the filter in its prior valid state rather than propagating NaN forever.
+    * Joseph-form measurement update, hardened against latching NaN with two guards over a textbook update: a
+    * non-finite S^-1 skips the update BEFORE x or P are touched, and a completed update that still leaves them
+    * non-finite is rolled back from the backups. Both leave the filter in its prior valid state.
     */
    void josephUpdate(DMatrixRMaj Hm, DMatrixRMaj zm, DMatrixRMaj Rm, Channel channel)
    {
@@ -414,29 +385,21 @@ final class JointKFUpdate
 
       CommonOps_DDRM.multTransB(state.P, Hm, PHt);
       CommonOps_DDRM.mult(Hm, PHt, S);
-      CommonOps_DDRM.addEquals(S, Rm); // innovation covariance S = H P H^T + R (the +R was previously missing,
-                                       // which made the gain over-confident and could grow the covariance)
-      // Cholesky factor + ACTIVE conditioning/floor gate (Part B item 5). symmetrize first (Cholesky assumes
-      // exact symmetry; S is symmetric only to round-off). setA returns false on a NON-PD S => skip. Then read
-      // the factor diagonal: S's pivots are L_ii^2, so cond(S) ~ (max L_ii / min L_ii)^2 and lambda_min(S) ~
-      // (min L_ii)^2 — both with NO eigendecomposition. A finite-but-ill-conditioned S (cond > condSMax)
-      // inverts to a huge gain the Joseph K R K^T loop squares each tick — the divergence the old LU/isFinite
-      // guards were blind to — so the WHOLE block is skipped. The floor gate catches the dual pathology: a pivot
-      // below half the applicable measurement-noise floor is algebraically impossible for a healthy
-      // S = H P H^T + R and signals a collapsed (zero-Sigma) row.
+      CommonOps_DDRM.addEquals(S, Rm); // S = H P H^T + R; the +R was once missing, which made the gain
+                                       // over-confident and could grow the covariance
+      // Symmetrize first: Cholesky assumes exact symmetry and S is symmetric only to round-off. The factor
+      // diagonal then gives both gates for free (pivots are L_ii^2). A finite-but-ill-conditioned S inverts to a
+      // huge gain that the Joseph K R K^T loop squares each tick — the divergence the old LU/isFinite guards
+      // were blind to. The floor gate catches the dual pathology: a pivot below half the applicable noise floor
+      // is algebraically impossible for a healthy S, so it signals a collapsed (zero-Sigma) row.
       JointLevelKFPreFilter.symmetrize(S);
-      // Innovation nu = z - H x, computed BEFORE the Cholesky/conditioning gates: it depends on neither the
-      // factorization nor the gain, and S's diagonal must be read here anyway (setA may decompose in place).
+      // nu = z - H x, computed BEFORE the gates: it depends on neither the factorization nor the gain, and S's
+      // diagonal must be read here anyway since setA may decompose in place.
       CommonOps_DDRM.mult(Hm, state.x, nu);
       CommonOps_DDRM.changeSign(nu);
       CommonOps_DDRM.addEquals(nu, zm);
-      // Per-joint NIS nu_i^2 / S_ii for the two identity-block channels (row i IS joint i in state order).
-      // Published pre-gate so a gated tick still shows the innovation that tripped it; E[NIS] = 1 for a
-      // consistent filter. The two channels are DISTINCT: the encoder and velocity innovations must never
-      // cross-publish (an enum field, not a string prefix, is what keeps that true now).
-      // The SIGNED innovation is published alongside the NIS: it is the lag-vs-impact discriminator
-      // (corr(encInnov, qd_meas/(2*pi*25)) ~ +1, slope ~1 => 25 Hz drive-side position filter lag;
-      // <100 ms bursts at contact transitions => unmodeled impact acceleration vs Qa). See the field doc.
+      // Per-joint NIS for the two identity-block channels (row i IS joint i in state order). The channels are
+      // DISTINCT and must never cross-publish — an enum field, not a string prefix, is what keeps that true.
       if (channel.nisChannel == Channel.NisChannel.ENCODER && yoEncNIS != null)
       {
          for (int i = 0; i < k; i++)
@@ -483,8 +446,8 @@ final class JointKFUpdate
          warnSingularInnovationOnce(channel, String.format("cond(S) proxy %.3e exceeds COND_S_MAX %.1e; whole block gated", condProxy, condSMax), Hm, Rm);
          return;
       }
-      // Channel-specific S-pivot floor: min wired R_ii of the block (lag inflation only raises the velocity
-      // rows' R, so the boot-time min stays a valid lower bound).
+      // Channel-specific S-pivot floor: the block's min wired R_ii. Lag inflation only ever RAISES the velocity
+      // rows' R, so the boot-time min stays a valid lower bound.
       double rFloor;
       switch (channel.rFloor)
       {
@@ -535,13 +498,10 @@ final class JointKFUpdate
    // ================================ Singular-innovation diagnostics ================================
 
    /**
-    * One-shot diagnostic for a singular / near-singular innovation covariance S = H P H^T + R, which forces the
-    * offending measurement update to be skipped — a hidden way the filter keeps diverging even after the Qa cap
-    * binds (a near-singular Lambda inflates P, which makes S ill-conditioned). Names WHICH physical measurement
-    * is degenerate: S is symmetric PSD, so the eigenvector of its smallest eigenvalue is the measurement
-    * direction with almost no innovation variance; the rows carrying the most weight in it are the pairs / stance
-    * anchors / encoder joints driving the ill-conditioning. The eigen/string work runs only on this single
-    * occurrence — never on the healthy hot path.
+    * One-shot diagnostic for a near-singular S, which forces its update to be skipped — a hidden way the filter
+    * keeps diverging even after the Qa tripwire binds. Names WHICH physical measurement is degenerate: S is
+    * symmetric PSD, so the eigenvector of its smallest eigenvalue is the direction with almost no innovation
+    * variance. The eigen/string work runs only on this occurrence, never on the healthy hot path.
     */
    private void warnSingularInnovationOnce(Channel channel, String reason, DMatrixRMaj Hm, DMatrixRMaj Rm)
    {
@@ -558,14 +518,9 @@ final class JointKFUpdate
    }
 
    /**
-    * Builds the singular-innovation diagnostic string used by {@link #warnSingularInnovationOnce}. Package-private
-    * so a test can assert the row -> physical-element mapping directly instead of scraping the log output.
-    *
-    * @param channel the update; selects the row-to-physical-element mapping.
-    * @param reason  how S was found bad (exactly singular vs inverse overflowed).
-    * @param Hm      this update's measurement Jacobian. S is recomputed from it because the solver's {@code setA}
-    *                may have overwritten the shared S buffer in place with its factors.
-    * @param Rm      this update's measurement noise.
+    * Builds the diagnostic string. Package-private so a test can assert the row -> physical-element mapping
+    * directly instead of scraping log output. S is recomputed from {@code Hm} because the solver's
+    * {@code setA} may have overwritten the shared S buffer in place with its factors.
     */
    String describeSingularInnovation(Channel channel, String reason, DMatrixRMaj Hm, DMatrixRMaj Rm)
    {
@@ -594,10 +549,8 @@ final class JointKFUpdate
             if (lambda > maxEig) { maxEig = lambda; maxIdx = i; }
          }
          double cond = minEig != 0.0 ? Math.abs(maxEig / minEig) : Double.POSITIVE_INFINITY;
-         // Report BOTH ends (Part B item 5). When the pathology is a lambda_MAX blow-up (P diverging), the
-         // SMALLEST eigenvector points at the HEALTHIEST rows — so naming only the min side (as the prior
-         // diagnostic did) mis-blames the stance-leg encoders. Compare lambda_max against a sane innovation
-         // scale to say which side is actually pathological.
+         // Report BOTH ends: when the pathology is a lambda_MAX blow-up (P diverging), the SMALLEST eigenvector
+         // points at the HEALTHIEST rows, so naming only the min side mis-blames the stance-leg encoders.
          final double SANE_INNOVATION_SCALE = 1.0e6;
          boolean maxSidePathological = maxEig > SANE_INNOVATION_SCALE;
          msg.append(String.format("cond(S)=%.3e, lambda_min=%.3e, lambda_max=%.3e — the %s side is pathological. ",
@@ -622,8 +575,7 @@ final class JointKFUpdate
       return msg.toString();
    }
 
-   /** Appends the up-to-4 rows carrying the most weight in eigenvector {@code v}, as "|weight| -> physical
-    *  element", for the both-ends singular-innovation diagnostic. Diagnostic-only; never on the hot path. */
+   /** The up-to-4 rows carrying the most weight in eigenvector {@code v}, as "|weight| -> physical element". */
    private void appendDominantRows(StringBuilder msg, DMatrixRMaj v, int k, Channel channel, DMatrixRMaj Hm)
    {
       if (v == null)
@@ -657,11 +609,9 @@ final class JointKFUpdate
    }
 
    /**
-    * Maps a measurement row to the physical element it observes, for the singular-innovation diagnostic. Encoder
-    * rows are mapped through {@code Hm} (the observed joint is the column with the unit entry), so this stays
-    * correct even if the encoder update is later gated to a joint subset. Stacked gyro rows follow the SPEC §5
-    * layout: rows [3e,3e+3) are pair e; rows [3E,...) are the active stance anchors in {@code footAnchors} order.
-    * Diagnostic-only; never on the hot path.
+    * Maps a measurement row to the physical element it observes. Encoder rows go through {@code Hm} (the
+    * observed joint is the column with the unit entry), so this stays correct even if the encoder update is
+    * later gated to a joint subset. Gyro rows follow the stacked layout: pair e, then the active anchors.
     */
    private String describeMeasurementRow(int row, Channel channel, DMatrixRMaj Hm)
    {
