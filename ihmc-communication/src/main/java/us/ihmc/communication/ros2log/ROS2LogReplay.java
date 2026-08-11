@@ -33,6 +33,7 @@ public class ROS2LogReplay
    private boolean pendingPause = false;
    private long totalPausedDuration = 0L;
    private double replaySpeed = 1.0;
+   private boolean quiet = false;
 
    public ROS2LogReplay(String robotName, List<ROS2Topic<?>> loggedTopics, ROS2LogTimeSource timeSource)
    {
@@ -187,6 +188,14 @@ public class ROS2LogReplay
       ThreadTools.sleep(Math.min(wallClockSleepMillis, 25L));
    }
 
+   /**
+    * When quiet, suppress pause/resume info logs. Useful for callers that toggle pause frequently.
+    */
+   public void setQuiet(boolean quiet)
+   {
+      this.quiet = quiet;
+   }
+
    public void pauseReplay(boolean pause)
    {
       if (pause)
@@ -195,7 +204,8 @@ public class ROS2LogReplay
          {
             this.paused = true;
             pauseStartTime = timestampSupplier.getAsLong();
-            LogTools.info("Replay paused");
+            if (!quiet)
+               LogTools.info("Replay paused");
          }
          else
          {
@@ -208,7 +218,8 @@ public class ROS2LogReplay
          {
             totalPausedDuration += timestampSupplier.getAsLong() - pauseStartTime;
             this.paused = false;
-            LogTools.info("Replay resumed");
+            if (!quiet)
+               LogTools.info("Replay resumed");
          }
          this.pendingPause = false;
       }
@@ -332,7 +343,8 @@ public class ROS2LogReplay
       paused = true;
       pauseStartTime = timestampSupplier.getAsLong();
       pendingPause = false;
-      LogTools.info("Replay paused (pending request fulfilled)");
+      if (!quiet)
+         LogTools.info("Replay paused (pending request fulfilled)");
    }
 
    private long computeReplayTime()
