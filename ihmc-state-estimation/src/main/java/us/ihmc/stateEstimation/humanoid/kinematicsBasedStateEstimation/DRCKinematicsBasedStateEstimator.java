@@ -307,11 +307,13 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       if (reinitializeStateEstimatorToWorldOrigin.getBooleanValue())
       {
          reinitializeStateEstimatorToWorldOrigin.set(false);
+         reinitializeStateEstimator.set(false);
          pelvisLinearStateUpdater.requestInitializeToMidFeetOrigin();
          initialize();
       }
       else if (reinitializeStateEstimator.getBooleanValue())
       {
+         reinitializeStateEstimatorToWorldOrigin.set(false);
          reinitializeStateEstimator.set(false);
          initialize();
       }

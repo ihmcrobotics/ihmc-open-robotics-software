@@ -135,7 +135,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    private final FloatingJointBasics rootJoint;
 
    private boolean initializeToActual = false;
-   private boolean useProvidedRootPositionOnNextInit = false;
    private boolean initializeToMidFeetOrigin = false;
    private final FramePoint3D initialRootJointPosition = new FramePoint3D(worldFrame);
 
@@ -302,13 +301,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
    private void initializeRobotState()
    {
-      if (useProvidedRootPositionOnNextInit)
-      {
-         useProvidedRootPositionOnNextInit = false;
-         initializeToMidFeetOrigin = false;
-         rootJointPosition.set(initialRootJointPosition);
-      }
-      else if (initializeToMidFeetOrigin)
+      if (initializeToMidFeetOrigin)
       {
          initializeToMidFeetOrigin = false;
          initializeRootJointPositionToMidFeetOrigin();
@@ -361,8 +354,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       midFeetPositionInWorld.setToZero(worldFrame);
       for (int i = 0; i < feet.size(); i++)
       {
-         footPositionInWorld.setToZero(footFrames.get(feet.get(i)));
-         footPositionInWorld.changeFrame(worldFrame);
+         footPositionInWorld.setFromReferenceFrame(footFrames.get(feet.get(i)));
          midFeetPositionInWorld.add(footPositionInWorld);
       }
       midFeetPositionInWorld.scale(1.0 / feet.size());
@@ -381,15 +373,9 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       initializeToMidFeetOrigin = true;
    }
 
-   public boolean isProvidedRootPositionPending()
-   {
-      return useProvidedRootPositionOnNextInit;
-   }
-
    public void initializeRootJointPosition(Tuple3DReadOnly rootJointPosition)
    {
       initializeToActual = true;
-      useProvidedRootPositionOnNextInit = true;
       initializeToMidFeetOrigin = false;
       initialRootJointPosition.setIncludingFrame(worldFrame, rootJointPosition);
    }
