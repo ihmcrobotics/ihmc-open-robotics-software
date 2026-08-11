@@ -81,7 +81,6 @@ public class RhinoBeetleSimpleSimulation
 
       HexapodSimulationController controller = controllerHolder[0];
       scs.addYoGraphic(controller.getSCS2YoGraphics());
-      scs.showOverheadPlotter2D(true);
       scs.requestPlotter2DCoordinateTracking(controller.getBodyPosition2D().getYoX().getName(),
                                               controller.getBodyPosition2D().getYoY().getName(),
                                               ReferenceFrame.getWorldFrame().getName());
@@ -91,38 +90,6 @@ public class RhinoBeetleSimpleSimulation
 
       scs.startSimulationThread();
       scs.play();
-
-      // TEMP DEBUG: inject an extra, very bright light directly into the live scene to test whether
-      // the default scene lighting is actually reaching materials. Remove before committing.
-      new java.util.Timer().schedule(new java.util.TimerTask()
-      {
-         @Override
-         public void run()
-         {
-            javafx.application.Platform.runLater(() ->
-            {
-               try
-               {
-                  javafx.scene.SubScene scene3D = scs.getSessionVisualizerToolkit().getMainScene3D();
-                  javafx.scene.Parent root = scene3D.getRoot();
-                  if (root instanceof javafx.scene.Group)
-                  {
-                     javafx.scene.AmbientLight boost = new javafx.scene.AmbientLight(javafx.scene.paint.Color.WHITE);
-                     ((javafx.scene.Group) root).getChildren().add(boost);
-                     PrintTools.info("DEBUG: injected full-white AmbientLight into scene root");
-                  }
-                  else
-                  {
-                     PrintTools.info("DEBUG: scene root is not a Group, it is " + root.getClass());
-                  }
-               }
-               catch (Exception e)
-               {
-                  e.printStackTrace();
-               }
-            });
-         }
-      }, 6000);
    }
 
    /**
