@@ -43,6 +43,7 @@ final class JointKFState
    final double dt;
 
    final LinkedHashMap<OneDoFJointBasics, Integer> jointToIndex = new LinkedHashMap<>();
+   //TODO: look at JointIndexHandler and use that here, rather than using unsafe Integer hashmap
    final LinkedHashMap<IMUSensorReadOnly, Integer> imuToOrdinal = new LinkedHashMap<>();
    final List<Pair> pairs = new ArrayList<>();
    final List<FootAnchor> footAnchors = new ArrayList<>();
@@ -51,10 +52,10 @@ final class JointKFState
    IMUSensorReadOnly baseIMU;
 
    int baseBiasCol;
-   int n;   // number of distinct joints
-   int m;   // number of IMUs
+   int numberOfJoints;   // number of distinct joints
+   int numberOfIMUs;   // number of IMUs
    int dim; // 2n + 3m
-   int E;   // number of IMU pairs (fixed at construction)
+   int numberOfIMUPairs;   // number of IMU pairs (fixed at construction)
    /** 3 * (E + K_max), K_max = number of foot anchors: the widest stacked measurement. */
    int maxStackRows;
 
@@ -133,9 +134,9 @@ final class JointKFState
          pairs.add(p);
       }
 
-      n = jointToIndex.size();
-      m = imuToOrdinal.size();
-      dim = 2 * n + 3 * m;
+      numberOfJoints = jointToIndex.size();
+      numberOfIMUs = imuToOrdinal.size();
+      dim = 2 * numberOfJoints + 3 * numberOfIMUs;
 
       // Acyclicity assert (Part B item 6): with the exact R_g, a cycle's telescoping row-combination has zero H,
       // zero z and zero noise, so S is singular BY CONSTRUCTION (SPEC §5.3). The used IMU graph MUST be a tree.
@@ -148,15 +149,15 @@ final class JointKFState
          p.Jang.reshape(3, dof); // Jang is allocated blank at construction in the chain, only reshaped once full DoF are known
          p.qdCols = new int[dof];
          for (int c = 0; c < dof; c++)
-            p.qdCols[c] = n + jointToIndex.get(p.chainJoints[c]); // this int[] is the selector matrix of the path S_ab, but in sparse form as all joints are not related directly
-         p.parentBias = 2 * n + 3 * imuToOrdinal.get(p.parent);
-         p.childBias = 2 * n + 3 * imuToOrdinal.get(p.child);
+            p.qdCols[c] = numberOfJoints + jointToIndex.get(p.chainJoints[c]); // this int[] is the selector matrix of the path S_ab, but in sparse form as all joints are not related directly
+         p.parentBias = 2 * numberOfJoints + 3 * imuToOrdinal.get(p.parent);
+         p.childBias = 2 * numberOfJoints + 3 * imuToOrdinal.get(p.child);
       }
 
       // 3) Base IMU = root of the tree + first pair parent.
       //WARNING: Need to configure if the root differs.
       baseIMU = pairs.isEmpty() ? null : pairs.get(0).parent;
-      baseBiasCol = baseIMU == null ? -1 : 2 * n + 3 * imuToOrdinal.get(baseIMU);
+      baseBiasCol = baseIMU == null ? -1 : 2 * numberOfJoints + 3 * imuToOrdinal.get(baseIMU);
       if (baseIMU == null)
          throw new RuntimeException("Base IMU is null, check the kinematic tree.");
       LogTools.info("Base IMU initialized as " + baseIMU.getSensorName());
@@ -195,7 +196,7 @@ final class JointKFState
                   unfiltered++;
                }
                else
-                  fa.qdCols[c] = n + idx;
+                  fa.qdCols[c] = numberOfJoints + idx;
                // Per-joint encoder VELOCITY variance for the anchor's input-noise congruence (only the
                // unfiltered columns are ever read, but fill every slot — cheap, and no -1 bookkeeping).
                double qdStd = encoderVelocityNoiseStd == null ? Double.NaN : encoderVelocityNoiseStd.applyAsDouble(fa.legJoints[c].getName());
@@ -222,12 +223,12 @@ final class JointKFState
 
       // Layout sizes the measurement components size themselves against. Computed HERE, once, so nothing has to
       // reach into a component constructed later.
-      E = pairs.size();
-      maxStackRows = 3 * (E + footAnchors.size());
+      numberOfIMUPairs = pairs.size();
+      maxStackRows = 3 * (numberOfIMUPairs + footAnchors.size());
 
       x.reshape(dim, 1);
       P.reshape(dim, dim);
-      imusByOrdinal = new IMUSensorReadOnly[m];
+      imusByOrdinal = new IMUSensorReadOnly[numberOfIMUs];
       for (var e : imuToOrdinal.entrySet()) // construction-time only; the hot path indexes this array
          imusByOrdinal[e.getValue()] = e.getKey();
 
@@ -235,20 +236,20 @@ final class JointKFState
       yoNumberOfFilteredJoints = new YoInteger("jointKFNumberOfFilteredJoints", registry);
       yoNumberOfIMUs = new YoInteger("jointKFNumberOfIMUs", registry);
       yoStateDimension.set(dim);
-      yoNumberOfFilteredJoints.set(n);
-      yoNumberOfIMUs.set(m);
+      yoNumberOfFilteredJoints.set(numberOfJoints);
+      yoNumberOfIMUs.set(numberOfIMUs);
       createJointYoVariables(registry);
    }
 
    /** One set per filtered joint, indexed by state index so the per-tick update is a straight array write. */
    private void createJointYoVariables(YoRegistry registry)
    {
-      yoJointPosition = new YoDouble[n];
-      yoJointVelocity = new YoDouble[n];
-      yoJointPositionUpperBound = new YoDouble[n];
-      yoJointPositionLowerBound = new YoDouble[n];
-      yoJointVelocityUpperBound = new YoDouble[n];
-      yoJointVelocityLowerBound = new YoDouble[n];
+      yoJointPosition = new YoDouble[numberOfJoints];
+      yoJointVelocity = new YoDouble[numberOfJoints];
+      yoJointPositionUpperBound = new YoDouble[numberOfJoints];
+      yoJointPositionLowerBound = new YoDouble[numberOfJoints];
+      yoJointVelocityUpperBound = new YoDouble[numberOfJoints];
+      yoJointVelocityLowerBound = new YoDouble[numberOfJoints];
       for (var e : jointToIndex.entrySet())
       {
          int idx = e.getValue();
@@ -281,9 +282,9 @@ final class JointKFState
       for (var e : jointToIndex.entrySet())
          x.set(e.getValue(), sensorMap.getOneDoFJointOutput(e.getKey()).getPosition());
       P.zero();
-      for (int i = 0; i < n; i++) P.set(i, i, parameters.initPosVar.getValue());
-      for (int i = n; i < 2 * n; i++) P.set(i, i, parameters.initVelVar.getValue());
-      for (int i = 2 * n; i < dim; i++) P.set(i, i, parameters.initBiasVar.getValue());
+      for (int i = 0; i < numberOfJoints; i++) P.set(i, i, parameters.initPosVar.getValue());
+      for (int i = numberOfJoints; i < 2 * numberOfJoints; i++) P.set(i, i, parameters.initVelVar.getValue());
+      for (int i = 2 * numberOfJoints; i < dim; i++) P.set(i, i, parameters.initBiasVar.getValue());
       initialized = true;
       return true;
    }
@@ -294,12 +295,12 @@ final class JointKFState
     */
    void updateJointYoVariables()
    {
-      for (int i = 0; i < n; i++)
+      for (int i = 0; i < numberOfJoints; i++)
       {
          double q = x.get(i);
-         double qd = x.get(n + i);
+         double qd = x.get(numberOfJoints + i);
          double sigmaQ = Math.sqrt(Math.max(0.0, P.get(i, i)));
-         double sigmaQd = Math.sqrt(Math.max(0.0, P.get(n + i, n + i)));
+         double sigmaQd = Math.sqrt(Math.max(0.0, P.get(numberOfJoints + i, numberOfJoints + i)));
          yoJointPosition[i].set(q);
          yoJointVelocity[i].set(qd);
          yoJointPositionUpperBound[i].set(q + sigmaQ);
@@ -347,7 +348,7 @@ final class JointKFState
     */
    void logChainDoFCensus()
    {
-      StringBuilder sb = new StringBuilder("JointLevelKFPreFilter chain-DoF census (" + pairs.size() + " pairs over " + m + " IMUs, tree):");
+      StringBuilder sb = new StringBuilder("JointLevelKFPreFilter chain-DoF census (" + pairs.size() + " pairs over " + numberOfIMUs + " IMUs, tree):");
       for (Pair p : pairs)
       {
          int dof = p.chainJoints.length;
@@ -391,8 +392,8 @@ final class JointKFState
     */
    private void assertAcyclicIMUGraph()
    {
-      int[] parent = new int[m];
-      for (int i = 0; i < m; i++)
+      int[] parent = new int[numberOfIMUs];
+      for (int i = 0; i < numberOfIMUs; i++)
          parent[i] = i;
       for (Pair p : pairs)
       {

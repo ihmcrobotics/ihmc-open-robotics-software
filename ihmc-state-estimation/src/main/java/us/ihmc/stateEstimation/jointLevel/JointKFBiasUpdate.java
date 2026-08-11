@@ -86,7 +86,7 @@ final class JointKFBiasUpdate
       this.update = update;
       this.parameters = parameters;
 
-      int m = state.m;
+      int m = state.numberOfIMUs;
       int dim = state.dim;
       int maxStackRows = state.maxStackRows;
 
@@ -174,10 +174,10 @@ final class JointKFBiasUpdate
     */
    void buildStackedMeasurement()
    {
-      int n = state.n;
-      int m = state.m;
+      int n = state.numberOfJoints;
+      int m = state.numberOfIMUs;
       int dim = state.dim;
-      int E = state.E;
+      int E = state.numberOfIMUPairs;
 
       // One-time; the warn/error strings build only on this first fire, and the cached Sigma is reused unchanged.
       if (!sigmaFloorInitialized)
@@ -359,7 +359,7 @@ final class JointKFBiasUpdate
       double gyroFloor = parameters.sigmaGyroFloor.getValue();
       double gyroFloorTrace = parameters.sigmaGyroFloorTrace.getValue();
       Sigma.zero();
-      for (int o = 0; o < state.m; o++)
+      for (int o = 0; o < state.numberOfIMUs; o++)
       {
          state.imusByOrdinal[o].getAngularVelocityNoiseCovariance(Rimu);
          boolean nonFinite = JointLevelKFPreFilter.containsNonFinite(Rimu);
@@ -393,8 +393,8 @@ final class JointKFBiasUpdate
     */
    void updateBiasYoVariables()
    {
-      int n = state.n;
-      for (int o = 0; o < state.m; o++)
+      int n = state.numberOfJoints;
+      for (int o = 0; o < state.numberOfIMUs; o++)
       {
          int col = 2 * n + 3 * o;
          double bx = state.x.get(col), by = state.x.get(col + 1), bz = state.x.get(col + 2);

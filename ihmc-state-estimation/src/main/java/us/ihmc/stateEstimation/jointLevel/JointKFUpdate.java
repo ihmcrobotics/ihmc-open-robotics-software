@@ -160,7 +160,7 @@ final class JointKFUpdate
       this.state = state;
       this.parameters = parameters;
       this.dt = state.dt;
-      int n = state.n;
+      int n = state.numberOfJoints;
 
       // Per-joint encoder position variance, resolved once (lookup is by joint NAME; state order thereafter).
       // The S-pivot floor for the encoder block follows the smallest wired variance — see encVarFloorMin.
@@ -226,7 +226,7 @@ final class JointKFUpdate
 
    private void allocate()
    {
-      int n = state.n;
+      int n = state.numberOfJoints;
       int dim = state.dim;
       // Widest measurement is either the n-joint encoder block or the 3(E+K_max) stacked gyro block; size all
       // the innovation scratch at that width so a full-anchor stacked update never reallocates on the estimator
@@ -260,7 +260,7 @@ final class JointKFUpdate
 
    private void buildEncoderModel()
    {
-      int n = state.n;
+      int n = state.numberOfJoints;
       Henc.zero();
       for (int i = 0; i < n; i++)
          Henc.set(i, i, 1.0);
@@ -275,7 +275,7 @@ final class JointKFUpdate
     */
    private void buildDirectVelocityModel()
    {
-      int n = state.n;
+      int n = state.numberOfJoints;
       Hqd = new DMatrixRMaj(n, state.dim);
       for (int i = 0; i < n; i++)
          Hqd.set(i, n + i, 1.0);
@@ -286,7 +286,7 @@ final class JointKFUpdate
 
    private void createMeasurementYoVariables(YoRegistry registry, boolean useDirectVelocityMeasurement)
    {
-      int n = state.n;
+      int n = state.numberOfJoints;
       yoEncNIS = new YoDouble[n];
       yoEncR = new YoDouble[n];
       yoEncInnov = new YoDouble[n];
@@ -331,7 +331,7 @@ final class JointKFUpdate
     */
    void refreshDirectVelocityNoise()
    {
-      for (int i = 0; i < state.n; i++)
+      for (int i = 0; i < state.numberOfJoints; i++)
       {
          double z = zqd.get(i, 0);
          if (Double.isFinite(prevZqd[i]))
@@ -351,7 +351,7 @@ final class JointKFUpdate
    /** Loads a measured q̇ vector (filter state order) into zqd so tests can drive refreshDirectVelocityNoise(). */
    void setDirectVelocityMeasurementForTest(double[] qdMeasured)
    {
-      for (int i = 0; i < state.n; i++)
+      for (int i = 0; i < state.numberOfJoints; i++)
          zqd.set(i, 0, qdMeasured[i]);
    }
 
@@ -620,18 +620,18 @@ final class JointKFUpdate
          int col = -1;
          for (int c = 0; c < Hm.getNumCols(); c++)
             if (Hm.get(row, c) != 0.0) { col = c; break; }
-         return "encoder q of joint " + ((col >= 0 && col < state.n) ? state.jointNameByStateIndex(col) : "?");
+         return "encoder q of joint " + ((col >= 0 && col < state.numberOfJoints) ? state.jointNameByStateIndex(col) : "?");
       }
       int block = row / 3;
       int axis = row % 3;
       char ax = axis == 0 ? 'x' : axis == 1 ? 'y' : 'z';
-      if (block < state.E)
+      if (block < state.numberOfIMUPairs)
       {
          JointKFState.Pair p = state.pairs.get(block);
          return "gyro pair " + block + " (" + p.parent.getSensorName() + "->" + p.child.getSensorName()
                 + "), axis " + ax + ", chain=[" + JointKFState.jointNamesOf(p.chainJoints) + "]";
       }
-      JointKFState.FootAnchor fa = nthActiveAnchor(block - state.E);
+      JointKFState.FootAnchor fa = nthActiveAnchor(block - state.numberOfIMUPairs);
       if (fa != null)
          return "stance anchor (foot " + fa.foot.getName() + "), axis " + ax + ", leg=[" + JointKFState.jointNamesOf(fa.legJoints) + "]";
       return "gyro row " + row + " (unmapped)";

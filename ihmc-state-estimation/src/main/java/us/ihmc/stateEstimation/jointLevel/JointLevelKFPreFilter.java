@@ -77,6 +77,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    // Package-private (not private) so the allocation/behavior tests in this package can build it directly
    // from a synthetic IMU-pair setup without standing up a full StateEstimatorParameters.
    /** Scalar-CWNA process-noise overload: no robot model, so Qa = SIGMA_ACCEL^2 I (the pre-mass-matrix behavior). */
+   //TODO: all objects passed in should be `final`, so they should either be declared in the constructor or the class definition.
    JointLevelKFPreFilter(SensorOutputMapReadOnly sensorMap,
                          List<IMUBasedJointStateEstimatorParameters> pairParameters,
                          Collection<RigidBodyBasics> feet,
@@ -365,17 +366,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 
    public static void set_matrix(DMatrixRMaj out, RotationMatrixReadOnly r)
    {
-      out.set(0, 0, r.getM00());
-      out.set(0, 1, r.getM01());
-      out.set(0, 2, r.getM02());
-
-      out.set(1, 0, r.getM10());
-      out.set(1, 1, r.getM11());
-      out.set(1, 2, r.getM12());
-
-      out.set(2, 0, r.getM20());
-      out.set(2, 1, r.getM21());
-      out.set(2, 2, r.getM22());
+      r.get(out);
    }
 
    /** In-place symmetrization A <- 0.5 (A + A^T). Allocation-free. */
@@ -422,7 +413,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    public double getEstimatedJointVelocity(OneDoFJointBasics joint)
    {
       Integer idx = state.jointToIndex.get(joint);
-      return (idx == null || !state.initialized) ? Double.NaN : state.x.get(state.n + idx);
+      return (idx == null || !state.initialized) ? Double.NaN : state.x.get(state.numberOfJoints + idx);
    }
 
    @Override
@@ -440,7 +431,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    @Override
    public void packVelocityCovariance(OneDoFJointBasics[] joints, double fallbackVariance, DMatrixRMaj toPack)
    {
-      packCov(joints, state.n, fallbackVariance, toPack);
+      packCov(joints, state.numberOfJoints, fallbackVariance, toPack);
    }
 
    private void packCov(OneDoFJointBasics[] joints, int blockOffset, double fallbackVariance, DMatrixRMaj toPack)
@@ -477,7 +468,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
          biasOut.setToZero(imu.getMeasurementFrame());
          return biasOut;
       }
-      int col = 2 * state.n + 3 * ord;
+      int col = 2 * state.numberOfJoints + 3 * ord;
       double bx = state.x.get(col);
       double by = state.x.get(col + 1);
       double bz = state.x.get(col + 2);
@@ -522,8 +513,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    // thread. Getters return fresh copies so a test cannot mutate filter internals.
 
    int getStateDimension()          { return state.dim; }
-   int getNumberOfFilteredJoints()  { return state.n; }
-   int getNumberOfIMUs()            { return state.m; }
+   int getNumberOfFilteredJoints()  { return state.numberOfJoints; }
+   int getNumberOfIMUs()            { return state.numberOfIMUs; }
    int getNumberOfPairs()           { return state.pairs.size(); }
 
    /** State index of the given joint's position entry (its velocity entry is this + n); -1 if not filtered. */
@@ -574,7 +565,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    DMatrixRMaj getStackedMeasurementNoise()    { return biasUpdate.Rg.copy(); }  // R_g (3(E+K) x 3(E+K))
    DMatrixRMaj getMixingOperator()             { return biasUpdate.Lmix.copy(); } // L (3(E+K) x 3m); H_g bias columns == this
    int getStackedRowForPair(int pairIndex)     { return 3 * pairIndex; }      // pair e occupies rows [3e, 3e+3)
-   int getBiasBlockColumn(IMUSensorReadOnly imu) { return 2 * state.n + 3 * state.imuToOrdinal.get(imu); } // state col of imu's bias
+   int getBiasBlockColumn(IMUSensorReadOnly imu) { return 2 * state.numberOfJoints + 3 * state.imuToOrdinal.get(imu); } // state col of imu's bias
    int getImuOrdinal(IMUSensorReadOnly imu)    { return state.imuToOrdinal.get(imu); }
    IMUSensorReadOnly getBaseIMU()              { return state.baseIMU; }
    /** Anchors active on the last {@link #buildStackedMeasurementForTest}. 0 => the base-bias gauge is unfixed. */

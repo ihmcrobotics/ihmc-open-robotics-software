@@ -5,6 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.log.LogTools;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
@@ -24,8 +25,8 @@ import java.util.List;
  * mass-matrix path that makes Q configuration-dependent.
  *
  * <p>Process noise (SPEC §3.2): unmodeled joint torque maps to joint acceleration through the FLOATING-BASE
- * dynamics, not the locked-base map, so delta_qddot = Lambda^-1 w_tau with
- * Lambda = M_jj - M_jN M_NN^-1 M_Nj the Schur complement of the nuisance block, and Qa = sigma_tau^2 Lambda^-2.</p>
+ * dynamics, not the locked-base map, so delta_qddot = lambda^-1 w_tau with
+ * lambda = M_jj - M_jN M_NN^-1 M_Nj the Schur complement of the nuisance block, and Qa = sigma_tau^2 lambda^-2.</p>
  *
  * <p>"Nuisance" = the 6-DoF floating base plus any UNFILTERED joints on the tree path between it and a filtered
  * joint ("gap" joints). On the real robot there are none, so this is exactly the SPEC's 6-DoF-base Schur
@@ -62,16 +63,16 @@ final class JointKFPrediction
    private final DMatrixRMaj MNf = new DMatrixRMaj(0, 0);       // nuisance-filtered coupling, N x n (= M_jN^T)
    private final DMatrixRMaj Mff = new DMatrixRMaj(0, 0);       // filtered block, n x n
    private final DMatrixRMaj MNNInvMNf = new DMatrixRMaj(0, 0); // X = M_NN^-1 M_Nf, N x n
-   private final DMatrixRMaj Lambda = new DMatrixRMaj(0, 0);    // Schur complement Lambda_eff (rotor diag added in place), n x n
-   private final DMatrixRMaj LambdaInv = new DMatrixRMaj(0, 0); // Lambda_eff^-1, n x n
-   private final DMatrixRMaj Ytau = new DMatrixRMaj(0, 0);      // Lambda_eff^-1 with column j scaled by sigma_tau,j, n x n
+   private final DMatrixRMaj lambda = new DMatrixRMaj(0, 0);    // Schur complement lambda_eff (rotor diag added in place), n x n
+   private final DMatrixRMaj lambdaInv = new DMatrixRMaj(0, 0); // lambda_eff^-1, n x n
+   private final DMatrixRMaj Ytau = new DMatrixRMaj(0, 0);      // lambda_eff^-1 with column j scaled by sigma_tau,j, n x n
    private final DMatrixRMaj Qa = new DMatrixRMaj(0, 0);        // Qa = Ytau Ytau^T (PSD, symmetric BY CONSTRUCTION), n x n
    private LinearSolverDense<DMatrixRMaj> nuisanceMassMatrixSolver; // Cholesky over M_NN, solves M_NN X = M_Nf
-   private LinearSolverDense<DMatrixRMaj> schurSolver;               // Cholesky over Lambda_eff, inverts it
+   private LinearSolverDense<DMatrixRMaj> schurSolver;               // Cholesky over lambda_eff, inverts it
 
    // Filter-order arrays refreshed every predict from the LIVE YoVariables below; the nuisance one is fixed at
    // construction (a gap joint has no tunable of its own — none exist on Alex).
-   private double[] rotorInertiaDiag;         // length n, added to Lambda's diagonal (filter joint state order)
+   private double[] rotorInertiaDiag;         // length n, added to lambda's diagonal (filter joint state order)
    private double[] nuisanceRotorInertiaDiag; // length numNuisanceDoF: 0 on base rows, rotor inertia on gap-joint rows
    private double[] sigmaTauPerJoint;         // length n, sigma_tau,i = alpha_i * tau_max,i
    private YoDouble[] yoAlpha;
@@ -112,7 +113,7 @@ final class JointKFPrediction
 
    private void setupMassMatrix(RigidBodyBasics rootBody, YoRegistry registry)
    {
-      int n = state.n;
+      int n = state.numberOfJoints;
       // Built over the LIVE estimator model's joints (the same objects the Jacobians read), so M(q) tracks the
       // consumer-updated configuration with no extra bookkeeping. The floating joint MUST be included, or M_bb
       // and M_bj are unavailable for the Schur complement.
@@ -203,7 +204,7 @@ final class JointKFPrediction
     */
    private void createRotorInertiaAndSigmaTauParameters(YoRegistry registry)
    {
-      int n = state.n;
+      int n = state.numberOfJoints;
       rotorInertiaDiag = new double[n];
       sigmaTauPerJoint = new double[n];
       yoRotorInertia = new YoDouble[n];
@@ -223,8 +224,8 @@ final class JointKFPrediction
                           + jointName + "'; applying the conservative default floor "
                           + parameters.rotorInertiaDefault.getValue() + " kg*m^2.");
          yoRotorInertia[idx] = new YoDouble("jointKFParam_rotorInertia_" + jointName,
-                                            "LIVE: reflected rotor inertia n^2 J_rotor (kg*m^2) added to Lambda's diagonal "
-                                            + "before inversion. Floors lambda_min(Lambda_eff), so lowering it inflates Qa.",
+                                            "LIVE: reflected rotor inertia n^2 J_rotor (kg*m^2) added to lambda's diagonal "
+                                            + "before inversion. Floors lambda_min(lambda_eff), so lowering it inflates Qa.",
                                             registry);
          yoRotorInertia[idx].set(JointKFParameters.reflectedRotorInertiaForNameOrDefault(jointName));
 
@@ -256,7 +257,7 @@ final class JointKFPrediction
 
    private void createQaYoVariables(YoRegistry registry)
    {
-      int n = state.n;
+      int n = state.numberOfJoints;
       yoQaDiag = new YoDouble[n];
       yoQaCapBindCount = new YoInteger[n];
       for (var e : state.jointToIndex.entrySet())
@@ -274,7 +275,7 @@ final class JointKFPrediction
     */
    private void refreshRotorInertiaAndSigmaTau()
    {
-      for (int i = 0; i < state.n; i++)
+      for (int i = 0; i < state.numberOfJoints; i++)
       {
          rotorInertiaDiag[i] = yoRotorInertia[i].getValue();
          sigmaTauPerJoint[i] = sigmaTauIsFallback[i] ? sigmaTauFallback : yoAlpha[i].getValue() * tauMaxPerJoint[i];
@@ -283,7 +284,7 @@ final class JointKFPrediction
 
    private void allocate()
    {
-      int n = state.n;
+      int n = state.numberOfJoints;
       int dim = state.dim;
       xtmp.reshape(dim, 1);
       Ptmp.reshape(dim, dim);
@@ -291,7 +292,7 @@ final class JointKFPrediction
       Q.reshape(dim, dim);
 
       // Scratch + both Cholesky solvers pre-warmed at their fixed sizes, so the per-tick setA/solve/invert never
-      // allocate. Cholesky also ENFORCES SPD-ness: a non-PD M_NN or Lambda fails setA and the previous Q is kept
+      // allocate. Cholesky also ENFORCES SPD-ness: a non-PD M_NN or lambda fails setA and the previous Q is kept
       // rather than a garbage inverse entering the filter.
       if (massMatrixCalculator != null)
       {
@@ -300,8 +301,8 @@ final class JointKFPrediction
          MNf.reshape(nN, n);
          Mff.reshape(n, n);
          MNNInvMNf.reshape(nN, n);
-         Lambda.reshape(n, n);
-         LambdaInv.reshape(n, n);
+         lambda.reshape(n, n);
+         lambdaInv.reshape(n, n);
          Ytau.reshape(n, n);
          Qa.reshape(n, n);
 
@@ -319,13 +320,13 @@ final class JointKFPrediction
    private void buildConstantTransition()
    {
       CommonOps_DDRM.setIdentity(F);
-      for (int i = 0; i < state.n; i++)
-         F.set(i, state.n + i, dt); // q_{k+1} = q_k + dt * qd_k ; qd and bias are constant with noise
+      for (int i = 0; i < state.numberOfJoints; i++)
+         F.set(i, state.numberOfJoints + i, dt); // q_{k+1} = q_k + dt * qd_k ; qd and bias are constant with noise
    }
 
    private void buildProcessNoise()
    {
-      int n = state.n;
+      int n = state.numberOfJoints;
       Q.zero();
       double sigmaAccel = parameters.sigmaAccel.getValue();
       double sa2 = sigmaAccel * sigmaAccel;
@@ -366,7 +367,7 @@ final class JointKFPrediction
    /** EKF time update in isolation: x <- F x, P <- F P F^T + Q(q). */
    void predict()
    {
-      // Q is state-dependent on the mass-matrix path (Qa = sigma_tau^2 Lambda(q)^-2), so refresh it from the
+      // Q is state-dependent on the mass-matrix path (Qa = sigma_tau^2 lambda(q)^-2), so refresh it from the
       // model's current configuration before propagating the covariance. No-op on the scalar fallback path.
       updateProcessNoiseFromMassMatrix();
       CommonOps_DDRM.mult(F, state.x, xtmp);
@@ -383,12 +384,12 @@ final class JointKFPrediction
    }
 
    /**
-    * Rebuilds Q's joint-space Van Loan blocks from Qa = sigma_tau^2 Lambda(q)^-2. Runs at the top of every
+    * Rebuilds Q's joint-space Van Loan blocks from Qa = sigma_tau^2 lambda(q)^-2. Runs at the top of every
     * {@link #predict()} because M(q) is configuration-dependent. Only the (q, qd) blocks are touched; the bias
     * random-walk block is left as {@link #buildProcessNoise()} made it. Any numerical failure leaves the
     * previous Q in place (at worst the scalar-CWNA build) and warns once. Allocation-free.
     *
-    * <p>TODO(retune): Lambda^-2 ⪰ M_jj^-2, so Qa grows at fixed sigma_tau relative to the Rev. 1 locked-base
+    * <p>TODO(retune): lambda^-2 ⪰ M_jj^-2, so Qa grows at fixed sigma_tau relative to the Rev. 1 locked-base
     * map. sigma_tau must be retuned against quiet-standing and walking NIS by a human — do NOT carry the Rev. 1
     * value over as if it were still calibrated.</p>
     */
@@ -397,7 +398,7 @@ final class JointKFPrediction
       if (massMatrixCalculator == null)
          return;
 
-      int n = state.n;
+      int n = state.numberOfJoints;
       // Pull this tick's LIVE per-joint rotor inertia and alpha into the flat arrays used below, so an SCS edit
       // takes effect on the very next predict.
       refreshRotorInertiaAndSigmaTau();
@@ -412,7 +413,7 @@ final class JointKFPrediction
       }
 
       // Extract by resolved column index, never by assumed ordering. M is symmetric, so M_jN = M_Nf^T and only
-      // M_NN, M_Nf, M_ff are needed. M_ff is read in filter state order, so Lambda comes out already in state
+      // M_NN, M_Nf, M_ff are needed. M_ff is read in filter state order, so lambda comes out already in state
       // order — no permutation in the fill below.
       int nN = numberOfNuisanceDOF;
       for (int a = 0; a < nN; a++)
@@ -427,11 +428,12 @@ final class JointKFPrediction
       {
          int ci = massMatrixColumn[i];
          for (int j = 0; j < n; j++)
+            //TODO: use this via block operations?
             Mff.set(i, j, massMatrix.get(ci, massMatrixColumn[j]));          // M_ff (nxn)
       }
 
-      // Floors M_NN the same way the filtered rotor diagonal floors Lambda_eff below.
-      if (nuisanceRotorInertiaDiag != null)
+      // Floors M_NN the same way the filtered rotor diagonal floors lambda_eff below.
+      if (nuisanceRotorInertiaDiag != null) //TODO: need to rename this to be more intuitive, rather than just "nuisance"
          for (int a = 0; a < nN; a++)
             MNN.add(a, a, nuisanceRotorInertiaDiag[a]);
 
@@ -448,41 +450,43 @@ final class JointKFPrediction
          return;
       }
 
-      // Lambda = M_ff - M_jN X = M_ff - M_Nf^T X (M symmetric => M_jN = M_Nf^T). SPEC §3.2.
-      CommonOps_DDRM.multTransA(MNf, MNNInvMNf, Lambda); // Lambda <- M_Nf^T X
-      CommonOps_DDRM.changeSign(Lambda);                 // Lambda <- -M_jN X
-      CommonOps_DDRM.addEquals(Lambda, Mff);             // Lambda <- M_ff - M_jN X
+      // lambda = M_ff - M_jN X = M_ff - M_Nf^T X (M symmetric => M_jN = M_Nf^T). SPEC §3.2.
+      lambda.set(Mff);
+      CommonOps_DDRM.multAddTransA(-1.0, MNf, MNNInvMNf, lambda);
       // Symmetrize before the Cholesky invert: the block extraction is exact but the matrix products leave
-      // Lambda symmetric only to round-off, and Cholesky assumes exact symmetry.
-      JointLevelKFPreFilter.symmetrize(Lambda);
+      // lambda symmetric only to round-off, and Cholesky assumes exact symmetry.
+      JointLevelKFPreFilter.symmetrize(lambda);
+      //TODO: check if this is done internally by the EJML solver
 
-      // Lambda_eff = Lambda + diag(rotor inertia). The rotor does not couple through the floating base, so this
+      // lambda_eff = lambda + diag(rotor inertia). The rotor does not couple through the floating base, so this
       // post-Schur diagonal add is the EXACT drivetrain term and simultaneously a principled regularizer: by
-      // Weyl it floors lambda_min(Lambda_eff), which is what stops Qa blowing up as it did on Alex002.
+      // Weyl it floors lambda_min(lambda_eff), which is what stops Qa blowing up as it did on Alex002.
       for (int i = 0; i < n; i++)
-         Lambda.add(i, i, rotorInertiaDiag[i]);
+//         MatrixTools.addDiagonal(lambda, rotorInertiaDiag[i]);
+         //TODO: tests fail when addDiagonal is used - need to figure out why.
+         lambda.add(i,i, rotorInertiaDiag[i]);
 
-      if (!schurSolver.setA(Lambda)) // Cholesky: rejects a non-PD Lambda_eff before it can enter Q
+      if (!schurSolver.setA(lambda)) // Cholesky: rejects a non-PD lambda_eff before it can enter Q
       {
-         warnMassMatrixFailureOnce("Schur complement Lambda_eff not positive definite");
+         warnMassMatrixFailureOnce("Schur complement lambda_eff not positive definite");
          return;
       }
-      schurSolver.invert(LambdaInv); // LambdaInv = Lambda_eff^-1 (symmetric)
-      if (JointLevelKFPreFilter.containsNonFinite(LambdaInv))
+      schurSolver.invert(lambdaInv); // lambdaInv = lambda_eff^-1 (symmetric)
+      if (JointLevelKFPreFilter.containsNonFinite(lambdaInv))
       {
-         warnMassMatrixFailureOnce("non-finite Schur-complement inverse (near-singular Lambda_eff)");
+         warnMassMatrixFailureOnce("non-finite Schur-complement inverse (near-singular lambda_eff)");
          return;
       }
 
-      // Gram form: Y = Lambda_eff^-1 with column j scaled by sigma_tau,j, so Qa = Y Y^T is PSD AND exactly
+      // Gram form: Y = lambda_eff^-1 with column j scaled by sigma_tau,j, so Qa = Y Y^T is PSD AND exactly
       // symmetric by construction and the Van Loan fill below can read it directly. Per-joint sigma_tau scales
       // the process noise with each actuator's own capacity instead of one number across hip and wrist.
-      for (int i = 0; i < n; i++)
-         for (int j = 0; j < n; j++)
-            Ytau.set(i, j, LambdaInv.get(i, j) * sigmaTauPerJoint[j]); // scale column j by sigma_tau,j
-      CommonOps_DDRM.multTransB(Ytau, Ytau, Qa); // Qa = Y Y^T
+      Ytau.set(lambdaInv);
+      for (int col = 0; col < n; col++)
+         CommonOps_DDRM.scaleCol(sigmaTauPerJoint[col], Ytau, col);
+      CommonOps_DDRM.multOuter(Ytau, Qa);
 
-      // QA_MAX tripwire: SURFACE, do not rescale. With the rotor floor on Lambda_eff, max diag(Qa) must sit far
+      // QA_MAX tripwire: SURFACE, do not rescale. With the rotor floor on lambda_eff, max diag(Qa) must sit far
       // below it, so exceeding it is a model/config regression to chase. The old uniform rescale coupled one
       // joint's outlier into GLOBAL Q starvation (hips down ~6 orders), which collapsed P onto the measurement
       // floors and CAUSED the min-side S singularity — a cap that rescales the whole robot is worse than the disease.
@@ -530,9 +534,9 @@ final class JointKFPrediction
             + " (scalar CWNA if this is the first computation). Reported once.");
    }
 
-   /** One-shot: max diag(Qa) exceeded the ceiling. With the rotor floor on Lambda_eff this should never fire;
+   /** One-shot: max diag(Qa) exceeded the ceiling. With the rotor floor on lambda_eff this should never fire;
     *  if it does, the named joint is a regression to chase (a rotor-table gap, a bad mass matrix, or a genuinely
-    *  near-singular Lambda_eff). Surfaced, never rescaled. */
+    *  near-singular lambda_eff). Surfaced, never rescaled. */
    private void warnQaCapWouldBindOnce(int argMaxJointStateIndex, double maxQaDiag)
    {
       if (warnedMassMatrixConditioningCap)
