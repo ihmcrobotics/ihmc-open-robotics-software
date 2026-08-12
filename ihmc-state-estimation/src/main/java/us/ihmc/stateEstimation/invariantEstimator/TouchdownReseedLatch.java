@@ -24,6 +24,8 @@ public class TouchdownReseedLatch
 
    private boolean armed;
    private int lowDwellCounter = 0;
+   /** True only on the single tick this cycle's sustained-swing dwell completed and the latch re-armed. */
+   private boolean justArmed = false;
 
    /**
     * @param triggerProbability rising through this while armed fires the re-seed.
@@ -50,10 +52,15 @@ public class TouchdownReseedLatch
     */
    public boolean advance(double contactProbability)
    {
+      justArmed = false;
+
       if (contactProbability < rearmProbability)
       {
          if (!armed && ++lowDwellCounter >= rearmDwellTicks)
+         {
             armed = true;
+            justArmed = true;
+         }
          return false;
       }
 
@@ -69,5 +76,20 @@ public class TouchdownReseedLatch
    public boolean isArmed()
    {
       return armed;
+   }
+
+   /**
+    * The liftoff edge, symmetric to {@link #advance}'s touchdown edge: true on exactly the single
+    * tick this cycle's sustained-swing dwell completed and the latch re-armed. The contact
+    * add/remove mode marginalizes a foot's contact on this edge. Mutually exclusive with an
+    * {@code advance} return of true within a tick (re-arm needs {@code p < rearmProbability};
+    * touchdown needs {@code p >= triggerProbability}, and {@code rearmProbability < triggerProbability}).
+    * Reflects the {@code advance} call it follows — read it immediately after {@code advance}.
+    *
+    * @return true iff the most recent {@link #advance} completed the re-arm dwell this tick.
+    */
+   public boolean becameArmedThisTick()
+   {
+      return justArmed;
    }
 }

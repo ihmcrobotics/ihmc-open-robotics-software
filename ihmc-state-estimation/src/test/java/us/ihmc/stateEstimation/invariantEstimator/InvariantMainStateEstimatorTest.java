@@ -1,6 +1,7 @@
 package us.ihmc.stateEstimation.invariantEstimator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -247,6 +248,33 @@ public class InvariantMainStateEstimatorTest
       rig.ekf.getRotation(rotation);
       assertTrue(Double.isFinite(rotation.distance(new RotationMatrix())), "InEKF orientation finite despite a poisoned leg IMU");
       assertPipelineFinite(rig, "poisoned leg IMU");
+   }
+
+   @Test
+   public void testContactAddRemoveStartsHangingThenAdmitsFeetOnContact()
+   {
+      // Robot starts hanging on the gantry: no ground contact. buildRig defaults to the ADD_REMOVE lifecycle.
+      Rig rig = buildRig(4006L, new RotationMatrix(), 0.0, false);
+      setGravityConsistentAccel(rig);
+      for (SettableTestIMU imu : rig.imus)
+         imu.setAngularVelocity(0.0, 0.0, 0.0);
+
+      InvariantEKFStateEstimator estimator = rig.main.getInvariantEKFStateEstimator();
+      assertTrue(estimator.isUsingContactAddRemoveMode(), "add/remove is the default mode");
+
+      // While hanging, neither foot is admitted to the state.
+      for (int k = 0; k < 200; k++)
+         rig.doControl();
+      assertFalse(estimator.isContactActive(RobotSide.LEFT), "left foot must stay out of the state while hanging");
+      assertFalse(estimator.isContactActive(RobotSide.RIGHT), "right foot must stay out of the state while hanging");
+
+      // Set the robot down: both feet come into solid contact and are augmented into the state.
+      estimator.setContactProbabilityProvider(constantContact(1.0));
+      for (int k = 0; k < 50; k++)
+         rig.doControl();
+      assertTrue(estimator.isContactActive(RobotSide.LEFT), "left foot admitted once it bears load");
+      assertTrue(estimator.isContactActive(RobotSide.RIGHT), "right foot admitted once it bears load");
+      assertPipelineFinite(rig, "hanging-then-contact add/remove");
    }
 
    // ---------------------------------------------------------------------------------------------------------

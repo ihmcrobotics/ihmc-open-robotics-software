@@ -159,6 +159,19 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final Matrix3D inflatedContactCovariance = new Matrix3D();
    private final SideDependentList<YoDouble> yoContactProbability;
 
+   // Contact add/remove lifecycle (Hartley marginalize/augment, paper eq 30-32). When true, a swing foot's
+   // contact is MARGINALIZED out of the state on confirmed liftoff ({@link InvariantEKF#marginalizeContact},
+   // eq 30) and AUGMENTED back from forward kinematics on touchdown ({@link InvariantEKF#reseedContact},
+   // eq 31/32), so only stance feet anchor the base and no swing-foot residual can leak into base Z. When
+   // false, the legacy ALWAYS_ON behavior: both feet stay in the state every tick, the swing foot muted only
+   // by covariance inflation. Fixed at construction — no runtime swap between constant and non-constant contacts.
+   private final boolean useContactAddRemoveMode;
+   private final YoBoolean yoContactAddRemoveModeEnabled = new YoBoolean("invariantContactAddRemoveModeEnabled", registry);
+   // Per-foot active flag (and its log var): true when the foot's contact is currently in the state. In
+   // ADD_REMOVE a foot enters on augment and leaves on marginalize. Init false — the robot starts hanging on
+   // the gantry with no ground contact, so nothing is in the state until the first foot touches down.
+   private final SideDependentList<YoBoolean> yoContactActive;
+
    // Filter-consistency: per-foot Normalized Innovation Squared (NIS = rᵀS⁻¹r) from the contact update,
    // plus the shared two-sided χ² acceptance band it should stay inside (same DOF for both feet, so one
    // pair). Set NaN on ticks where the contact update is skipped (frozen / no contact).
@@ -369,6 +382,41 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
                                      double initialCovariance,
                                      double gravitationalAcceleration)
    {
+      // Default to the contact add/remove lifecycle (ADD_REMOVE); pass false via the overload for legacy ALWAYS_ON.
+      this(fullRobotModel,
+           sensorOutputMap,
+           primaryImuName,
+           imuBiasProvider,
+           dt,
+           gyroVariance,
+           accelVariance,
+           contactVariance,
+           contactMeasurementVariance,
+           initialCovariance,
+           gravitationalAcceleration,
+           true);
+   }
+
+   /**
+    * @param useContactAddRemoveMode {@code true} for the contact add/remove lifecycle (marginalize a foot's
+    *                                contact on liftoff, augment it on touchdown — paper eq 30/32); {@code false}
+    *                                for the legacy ALWAYS_ON behavior (both feet always in the state, swing
+    *                                muted by covariance inflation). Fixed at construction; the mode cannot be
+    *                                swapped at runtime.
+    */
+   public InvariantEKFStateEstimator(FullHumanoidRobotModel fullRobotModel,
+                                     SensorOutputMapReadOnly sensorOutputMap,
+                                     String primaryImuName,
+                                     IMUBiasProvider imuBiasProvider,
+                                     double dt,
+                                     double gyroVariance,
+                                     double accelVariance,
+                                     double contactVariance,
+                                     double contactMeasurementVariance,
+                                     double initialCovariance,
+                                     double gravitationalAcceleration,
+                                     boolean useContactAddRemoveMode)
+   {
       this.dt = dt;
       this.initialCovariance = initialCovariance;
       this.sensorOutputMap = sensorOutputMap;
@@ -427,6 +475,14 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
                                               new YoInteger("invariantContactReseedCountRight", registry));
       yoReseedResidual = new SideDependentList<>(new YoDouble("invariantContactReseedResidualLeft", registry),
                                                  new YoDouble("invariantContactReseedResidualRight", registry));
+
+      this.useContactAddRemoveMode = useContactAddRemoveMode;
+      yoContactAddRemoveModeEnabled.set(useContactAddRemoveMode);
+      yoContactActive = new SideDependentList<>(new YoBoolean("invariantContactActiveLeft", registry),
+                                                new YoBoolean("invariantContactActiveRight", registry));
+      for (RobotSide side : RobotSide.values)
+         yoContactActive.get(side).set(false); // robot starts hanging: no contact in the state until first touchdown
+
       yoReseedEnabled.set(true);
       int rearmDwellTicks = Math.max(1, (int) Math.round(RESEED_REARM_DWELL_SECONDS / dt));
       reseedLatches = new SideDependentList<>(new TouchdownReseedLatch(RESEED_TRIGGER_PROBABILITY, RESEED_REARM_PROBABILITY, rearmDwellTicks, false),
@@ -460,6 +516,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       }
 
       ekf.initialize(tempRotation, new Vector3D(), basePosition, contactPositions, scaledIdentity(initialCovariance));
+      syncContactActiveSetAfterReinitialize();
       updateYoVariables();
    }
 
@@ -496,6 +553,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       }
 
       ekf.initialize(tempRotation, new Vector3D(), basePosition, contactPositions, scaledIdentity(initialCovariance));
+      syncContactActiveSetAfterReinitialize();
       updateYoVariables();
    }
 
@@ -512,7 +570,12 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       {
          double contactProbability = clamp(contactProbabilityProvider.getContactProbability(side));
          yoContactProbability.get(side).set(contactProbability);
-         ekf.setContactSlipVariance(CONTACT_INDICES.get(side), contactSlipVariance(contactProbability));
+         // A marginalized (inactive) foot is not being estimated, so it carries no slip process noise of its own;
+         // otherwise the standard soft-contact slip variance. (Its residual Q_d re-coupling is re-zeroed below.)
+         double slipVariance = (useContactAddRemoveMode && !yoContactActive.get(side).getBooleanValue())
+                             ? 0.0
+                             : contactSlipVariance(contactProbability);
+         ekf.setContactSlipVariance(CONTACT_INDICES.get(side), slipVariance);
       }
 
       // IMU omega and a: bias-corrected in the measurement frame (where the bias is estimated),
@@ -571,6 +634,13 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          {
             yoContactNIS.get(side).setToNaN();
             yoContactUpdateApplied.get(side).set(false);
+            if (useContactAddRemoveMode)
+            {
+               // Hanging / flight: no foot anchors the base. Marginalize both (after predict's Q_d re-coupling)
+               // and mark them inactive; they re-enter via reAnchor + touchdown when the robot is set down.
+               ekf.marginalizeContact(CONTACT_INDICES.get(side));
+               yoContactActive.get(side).set(false);
+            }
          }
          updateYoVariables();
          return;
@@ -600,16 +670,57 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          contactInBody.changeFrame(pelvisFrame);
          contactMeasurementNoiseProvider.packContactCovariance(side, inflatedContactCovariance);
 
-         // H4 Phase 2: one-shot touchdown re-seed, BEFORE this side's update consumes the residual.
-         // Uses the UN-inflated FK covariance (the re-seeded anchor is as good as the FK that placed it).
-         if (yoReseedEnabled.getBooleanValue())
+         if (useContactAddRemoveMode)
          {
-            if (reseedLatches.get(side).advance(contactProbability))
+            // Contact add/remove lifecycle. Keep the latch state fresh each tick. AUGMENT when a marginalized
+            // foot comes into solid contact — threshold form (not the latch touchdown edge) so a foot already
+            // planted at start-up (never swung, latch never armed) is still added; MARGINALIZE on the
+            // dwell-gated liftoff edge. A foot only leaves via a sustained-low swing, so no edge chatter.
+            reseedLatches.get(side).advance(contactProbability);
+            boolean liftoff = reseedLatches.get(side).becameArmedThisTick();
+            yoReseedArmed.get(side).set(reseedLatches.get(side).isArmed());
+
+            boolean active = yoContactActive.get(side).getBooleanValue();
+            if (!active && contactProbability >= RESEED_TRIGGER_PROBABILITY)
             {
+               // AUGMENT (eq 31/32): add the contact fresh from FK, UN-inflated covariance (as in the reseed path).
                yoReseedResidual.get(side).set(ekf.reseedContact(CONTACT_INDICES.get(side), contactInBody, inflatedContactCovariance));
                yoReseedCount.get(side).increment();
+               yoContactActive.get(side).set(true);
+               active = true;
             }
-            yoReseedArmed.get(side).set(reseedLatches.get(side).isArmed());
+            else if (active && liftoff)
+            {
+               // MARGINALIZE (eq 30): remove the contact on confirmed liftoff.
+               ekf.marginalizeContact(CONTACT_INDICES.get(side));
+               yoContactActive.get(side).set(false);
+               active = false;
+            }
+
+            if (!active)
+            {
+               // Inactive foot contributes nothing: re-assert the decoupling against this tick's Q_d re-coupling
+               // (adjoint hat(d)·R block) and skip the update. NaN the per-foot diagnostics.
+               ekf.marginalizeContact(CONTACT_INDICES.get(side));
+               yoContactNIS.get(side).setToNaN();
+               yoContactUpdateApplied.get(side).set(false);
+               yoContactRInflation.get(side).setToNaN();
+               continue;
+            }
+         }
+         else
+         {
+            // Legacy ALWAYS_ON: one-shot touchdown re-seed, BEFORE this side's update consumes the residual.
+            // Uses the UN-inflated FK covariance (the re-seeded anchor is as good as the FK that placed it).
+            if (yoReseedEnabled.getBooleanValue())
+            {
+               if (reseedLatches.get(side).advance(contactProbability))
+               {
+                  yoReseedResidual.get(side).set(ekf.reseedContact(CONTACT_INDICES.get(side), contactInBody, inflatedContactCovariance));
+                  yoReseedCount.get(side).increment();
+               }
+               yoReseedArmed.get(side).set(reseedLatches.get(side).isArmed());
+            }
          }
 
          double inflation = measurementInflation(contactProbability);
@@ -630,6 +741,25 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoInvariantUpdateGateSkipCount.set(ekf.getUpdateGateSkipCount());
 
       updateYoVariables();
+   }
+
+   /**
+    * ADD_REMOVE only: after a full (re)initialization that reset P (init or hold-recovery reAnchor), mark each
+    * foot active iff it is currently bearing load ({@code p >= CONTACT_HOLD_THRESHOLD}) and decouple the
+    * inactive ones. At construction/init the probabilities are still zero (robot hanging), so both start
+    * inactive; at hold-recovery they are this tick's fresh values, so only the loaded foot re-enters the state.
+    */
+   private void syncContactActiveSetAfterReinitialize()
+   {
+      if (!useContactAddRemoveMode)
+         return;
+      for (RobotSide side : RobotSide.values)
+      {
+         boolean inContact = getContactProbability(side) >= CONTACT_HOLD_THRESHOLD;
+         yoContactActive.get(side).set(inContact);
+         if (!inContact)
+            ekf.marginalizeContact(CONTACT_INDICES.get(side));
+      }
    }
 
    /** Trace of the 3×3 diagonal block of the EKF covariance starting at {@code tangentIndex}. */
@@ -887,6 +1017,22 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    public double getContactProbability(RobotSide side)
    {
       return yoContactProbability.get(side).getDoubleValue();
+   }
+
+   /** @return whether the mode uses the contact add/remove lifecycle (fixed at construction). */
+   public boolean isUsingContactAddRemoveMode()
+   {
+      return useContactAddRemoveMode;
+   }
+
+   /**
+    * @param side the foot to query.
+    * @return whether {@code side}'s contact is currently in the filter state. In ADD_REMOVE a foot is active
+    *         between its touchdown (augment) and liftoff (marginalize); in ALWAYS_ON this is not maintained.
+    */
+   public boolean isContactActive(RobotSide side)
+   {
+      return yoContactActive.get(side).getBooleanValue();
    }
 
    /** Knob 1: contact FK measurement covariance scale, inflation^(1−p) — 1 at p = 1, swing inflation at p = 0. */

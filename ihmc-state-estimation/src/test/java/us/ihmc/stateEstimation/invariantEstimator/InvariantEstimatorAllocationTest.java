@@ -87,6 +87,54 @@ public class InvariantEstimatorAllocationTest
    }
 
    /**
+    * The contact add/remove per-tick path: single support (marginalize the swing foot each tick, update only the
+    * stance foot) plus the augment (reseed) that fires on touchdown. {@link InvariantEKF#marginalizeContact} and
+    * {@link InvariantEKF#reseedContact} must be allocation-free too, since both run on live control ticks.
+    */
+   @Test
+   public void testContactAddRemoveHotPathIsAllocationFree()
+   {
+      assumeTrue(threadMXBean.isThreadAllocatedMemorySupported(), "Thread allocation counting not supported on this JVM.");
+      threadMXBean.setThreadAllocatedMemoryEnabled(true);
+
+      InvariantEKF ekf = new InvariantEKF(NUMBER_OF_CONTACTS, 1.0e-4, 1.0e-3, 1.0e-6, GRAVITY);
+
+      RotationMatrix initialRotation = new RotationMatrix();
+      Vector3D initialVelocity = new Vector3D();
+      Point3D initialPosition = new Point3D();
+      Tuple3DReadOnly[] contactPositions = {new Point3D(0.1, 0.1, 0.0), new Point3D(0.1, -0.1, 0.0)};
+
+      int m = 9 + 3 * NUMBER_OF_CONTACTS;
+      DMatrixRMaj initialCovariance = new DMatrixRMaj(m, m);
+      for (int i = 0; i < m; i++)
+         initialCovariance.set(i, i, 1.0);
+      ekf.initialize(initialRotation, initialVelocity, initialPosition, contactPositions, initialCovariance);
+
+      Vector3D angularVelocity = new Vector3D(0.01, -0.02, 0.03);
+      Vector3D linearAcceleration = new Vector3D(0.0, 0.0, Math.abs(GRAVITY));
+      Vector3D contactMeasurement = new Vector3D(0.0, 0.12, -0.90);
+      Matrix3D measurementCovariance = new Matrix3D();
+      measurementCovariance.set(1.0e-4, 0.0, 0.0,
+                                0.0, 1.0e-4, 0.0,
+                                0.0, 0.0, 1.0e-4);
+
+      Runnable oneTick = () ->
+      {
+         // Single support: swing (0) slip noise off + marginalized each tick, stance (1) updated. Plus the
+         // once-per-touchdown augment, exercised every tick here to prove reseedContact is allocation-free.
+         ekf.setContactSlipVariance(0, 0.0);
+         ekf.setContactSlipVariance(1, 1.0e-6);
+         ekf.predict(angularVelocity, linearAcceleration, DT);
+         ekf.marginalizeContact(0);
+         ekf.reseedContact(0, contactMeasurement, measurementCovariance);
+         ekf.marginalizeContact(0);
+         ekf.update(1, contactMeasurement, measurementCovariance);
+      };
+
+      assertAllocationFree("InEKF predict + marginalize + reseed + update", oneTick);
+   }
+
+   /**
     * Exercises the allocation-free SE_k(3) overloads and {@link SO3LieGroupTools#exp} directly, so a
     * regression is localized to the Lie-group helpers rather than the whole filter.
     */

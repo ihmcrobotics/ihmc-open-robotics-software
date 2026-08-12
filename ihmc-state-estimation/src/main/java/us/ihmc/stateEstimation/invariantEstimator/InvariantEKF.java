@@ -152,6 +152,7 @@ public class InvariantEKF
    private final us.ihmc.euclid.matrix.RotationMatrix reseedRotation = new us.ihmc.euclid.matrix.RotationMatrix();
    private final us.ihmc.euclid.tuple3D.Vector3D reseedPosition = new us.ihmc.euclid.tuple3D.Vector3D();
    private final us.ihmc.euclid.tuple3D.Vector3D reseedContactPosition = new us.ihmc.euclid.tuple3D.Vector3D();
+   private final us.ihmc.euclid.tuple3D.Vector3D reseedRotatedMeasurement = new us.ihmc.euclid.tuple3D.Vector3D();
    private final us.ihmc.euclid.matrix.Matrix3D reseedRotatedCovariance = new us.ihmc.euclid.matrix.Matrix3D();
 
    /**
@@ -174,7 +175,7 @@ public class InvariantEKF
       state.getContactPosition(contactIndex, reseedContactPosition);
 
       // pre-reseed residual r = R*y - (d - p), world frame
-      us.ihmc.euclid.tuple3D.Vector3D rotated = new us.ihmc.euclid.tuple3D.Vector3D();
+      us.ihmc.euclid.tuple3D.Vector3D rotated = reseedRotatedMeasurement;
       reseedRotation.transform(bodyMeasurement, rotated);
       double rx = rotated.getX() - (reseedContactPosition.getX() - reseedPosition.getX());
       double ry = rotated.getY() - (reseedContactPosition.getY() - reseedPosition.getY());
@@ -205,6 +206,50 @@ public class InvariantEKF
             covariance.add(dIdx + a, dIdx + b, reseedRotatedCovariance.getElement(a, b));
 
       return residualNorm;
+   }
+
+   /**
+    * Marginalizes (removes) contact i from the active state — the liftoff half of the contact
+    * add/remove lifecycle (paper eq 30), the complement of the augment done by {@link #reseedContact}
+    * (eq 31/32). On a variable-dimension SE_k(3) filter this would delete contact i's row and column
+    * from X and P; the marginal over the retained variables is then just P with that row/column
+    * struck out — the retained block is unchanged, since dropping a jointly-Gaussian variable never
+    * alters the others' covariance.
+    *
+    * <p>This filter is fixed-N (the contact column stays allocated), so the equivalent is to
+    * <em>decouple</em> the slot: zero P's contact-i rows and columns (P_{dᵢ·} ← 0, P_{·dᵢ} ← 0,
+    * including P_{dᵢdᵢ} ← 0). The result is a direct sum of the untouched retained block (still PSD)
+    * with a zero block, so P stays symmetric PSD. A contact influences the base only through its own
+    * {@link #update} (H = +I at base-position, −I at the contact), so once decoupled and no longer
+    * updated it contributes nothing: a swing foot can no longer leak its geometric error into the
+    * base. The mean dᵢ is left frozen — {@link #reseedContact} overwrites both dᵢ and P_{dᵢ·} when
+    * the foot next touches down.</p>
+    *
+    * <p>Idempotent and allocation-free, so it is safe to re-assert every tick a contact is inactive.
+    * That re-assert is needed: the SE_k(3) group adjoint has a hat(dᵢ)·R block for every contact
+    * column (see {@link SEK3Utils#adjoint}), so each {@link #predict} maps a little gyro/accel
+    * process noise back into the decoupled block (order σ_ω²·‖dᵢ‖·Δt; the mean is untouched — contacts
+    * are static in propagation). Re-zeroing after predict keeps the slot exactly decoupled.</p>
+    *
+    * TODO: a true variable-dimension SE_k(3) resize (n = 5+N, m = 9+3N shrinking on marginalize and
+    *       growing on augment) would delete the column outright and remove the adjoint re-coupling
+    *       entirely — the more faithful implementation of eq 30/32, deferred for now to keep the
+    *       fixed allocation and the real-time (allocation-free) guarantee.
+    *
+    * @param contactIndex the contact index i in [0, N).
+    */
+   public void marginalizeContact(int contactIndex)
+   {
+      DMatrixRMaj covariance = state.getCovariance();
+      int m = covariance.getNumRows();
+      int dIdx = state.contactTangentIndex(contactIndex);
+
+      for (int a = 0; a < 3; a++)
+         for (int col = 0; col < m; col++)
+            covariance.set(dIdx + a, col, 0.0);
+      for (int row = 0; row < m; row++)
+         for (int a = 0; a < 3; a++)
+            covariance.set(row, dIdx + a, 0.0);
    }
 
    /**

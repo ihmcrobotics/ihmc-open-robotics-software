@@ -128,4 +128,63 @@ public class TouchdownReseedLatchTest
       assertThrows(IllegalArgumentException.class, () -> new TouchdownReseedLatch(0.5, 0.5, 100, false));
       assertThrows(IllegalArgumentException.class, () -> new TouchdownReseedLatch(0.5, 0.1, 0, false));
    }
+
+   // --- liftoff edge (becameArmedThisTick), used by the contact add/remove mode to marginalize a foot ---
+
+   @Test
+   public void becameArmedIsFalseBeforeAnyAdvance()
+   {
+      assertFalse(new TouchdownReseedLatch(TRIGGER, REARM, DWELL_TICKS, false).becameArmedThisTick());
+   }
+
+   @Test
+   public void becameArmedFiresExactlyOnTheDwellCompletionTick()
+   {
+      TouchdownReseedLatch latch = new TouchdownReseedLatch(TRIGGER, REARM, DWELL_TICKS, false);
+      for (int i = 1; i < DWELL_TICKS; i++) // first DWELL_TICKS-1 low ticks: dwell not yet complete
+      {
+         latch.advance(0.0);
+         assertFalse(latch.becameArmedThisTick(), "liftoff edge too early at tick " + i);
+         assertFalse(latch.isArmed());
+      }
+      latch.advance(0.0); // the DWELL_TICKS-th low tick completes the dwell and re-arms
+      assertTrue(latch.becameArmedThisTick(), "liftoff edge on the dwell-completion tick");
+      assertTrue(latch.isArmed());
+
+      latch.advance(0.0); // one-shot: stays armed, edge cleared
+      assertFalse(latch.becameArmedThisTick(), "liftoff edge must last a single tick");
+      assertTrue(latch.isArmed());
+
+      latch.advance(1.0); // high tick clears the edge too
+      assertFalse(latch.becameArmedThisTick());
+   }
+
+   @Test
+   public void touchdownAndLiftoffEdgesAreMutuallyExclusiveOverAFullCycle()
+   {
+      TouchdownReseedLatch latch = new TouchdownReseedLatch(TRIGGER, REARM, DWELL_TICKS, false);
+      for (int cycle = 0; cycle < 3; cycle++)
+      {
+         boolean sawLiftoff = false;
+         for (int i = 0; i < 300; i++) // sustained swing
+         {
+            boolean fired = latch.advance(0.0);
+            assertFalse(fired, "advance must not fire during swing");
+            if (latch.becameArmedThisTick())
+               sawLiftoff = true;
+         }
+         assertTrue(sawLiftoff, "a sustained swing must produce exactly one liftoff edge, cycle " + cycle);
+
+         boolean sawTouchdown = false;
+         for (int i = 0; i < 200; i++) // touchdown, held high
+         {
+            boolean fired = latch.advance(1.0);
+            assertFalse(fired && latch.becameArmedThisTick(), "touchdown and liftoff edges on the same tick");
+            assertFalse(latch.becameArmedThisTick(), "no liftoff edge while high");
+            if (fired)
+               sawTouchdown = true;
+         }
+         assertTrue(sawTouchdown, "touchdown must fire once per cycle, cycle " + cycle);
+      }
+   }
 }
