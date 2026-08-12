@@ -657,6 +657,11 @@ public class AvatarMultiThreadingFactory
       return controllerFactory;
    }
 
+   public void removeControlState(HighLevelControllerName name)
+   {
+      avatarControllerFactory.removeControlState(name);
+   }
+
    /**
     * The transition to the STAND_TRANSITION state will happen when: 1- the STAND_PREP is done, i.e.
     * the ramp up ratio is at 1, AND 2- the feet loaded transition is satisfied is requested via the
