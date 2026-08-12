@@ -39,6 +39,8 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDX2x4Object.FACTORY);
       objectFactories.add(RDXCerealBoxObject.FACTORY);
       objectFactories.add(RDXBottleObject.FACTORY);
+      objectFactories.add(RDXBucketObject.FACTORY);
+      objectFactories.add(RDXTrowelObject.FACTORY);
    }
 
    public static ArrayList<RDXEnvironmentObjectFactory> getObjectFactories()
