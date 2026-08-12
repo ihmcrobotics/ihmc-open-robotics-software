@@ -352,7 +352,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       imuBasedLinearStateCalculator.initialize();
 
       // Reset the velocity estimate from the IMU
-      mainIMULinearVelocityEstimate.getPositionEstimation().setToZero();
       mainIMULinearVelocityEstimate.getRateEstimation().setToZero();
 
       // Set the rootJoint twist to zero.
