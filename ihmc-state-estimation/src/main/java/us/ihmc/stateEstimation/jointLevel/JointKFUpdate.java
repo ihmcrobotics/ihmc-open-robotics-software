@@ -167,14 +167,14 @@ final class JointKFUpdate
       encVarPerJoint = new double[n];
       double encoderVarFallback = parameters.encoderVar.getValue();
       int unwiredEncoderJoints = 0;
-      for (var e : state.jointToIndex.entrySet())
+      for (int idx = 0; idx < n; idx++)
       {
-         double std = encoderPositionNoiseStd == null ? Double.NaN : encoderPositionNoiseStd.applyAsDouble(e.getKey().getName());
+         double std = encoderPositionNoiseStd == null ? Double.NaN : encoderPositionNoiseStd.applyAsDouble(state.jointsByIndex[idx].getName());
          if (Double.isFinite(std) && std > 0.0)
-            encVarPerJoint[e.getValue()] = std * std;
+            encVarPerJoint[idx] = std * std;
          else
          {
-            encVarPerJoint[e.getValue()] = encoderVarFallback;
+            encVarPerJoint[idx] = encoderVarFallback;
             unwiredEncoderJoints++;
          }
       }
@@ -194,10 +194,9 @@ final class JointKFUpdate
       qdSlewSmoothed = new double[n];
       double sigmaQdUnfiltered = parameters.sigmaQdUnfiltered.getValue();
       double qdVarFallback = sigmaQdUnfiltered * sigmaQdUnfiltered;
-      for (var e : state.jointToIndex.entrySet())
+      for (int idx = 0; idx < n; idx++)
       {
-         int idx = e.getValue();
-         String name = e.getKey().getName();
+         String name = state.jointsByIndex[idx].getName();
          double std = encoderVelocityNoiseStd == null ? Double.NaN : encoderVelocityNoiseStd.applyAsDouble(name);
          qdMeasVarPerJoint[idx] = (Double.isFinite(std) && std > 0.0) ? std * std : qdVarFallback;
          double fc = jointVelocityMeasurementBreakFrequencyHz == null ? Double.NaN : jointVelocityMeasurementBreakFrequencyHz.applyAsDouble(name);
@@ -295,10 +294,9 @@ final class JointKFUpdate
       yoQdInnov = new YoDouble[n];
       yoUseDirectVelocity = new YoBoolean("jointKFUseDirectVelocityMeasurement", registry);
       yoUseDirectVelocity.set(useDirectVelocityMeasurement);
-      for (var e : state.jointToIndex.entrySet())
+      for (int idx = 0; idx < n; idx++)
       {
-         int idx = e.getValue();
-         String jointName = e.getKey().getName();
+         String jointName = state.jointsByIndex[idx].getName();
          yoEncNIS[idx] = new YoDouble("jointKF_encNIS_" + jointName, registry);
          yoEncNIS[idx].set(Double.NaN); // no encoder update has run yet
          yoEncInnov[idx] = new YoDouble("jointKF_encInnov_" + jointName, registry);

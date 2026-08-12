@@ -289,14 +289,16 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       prediction.predict();
       state.warnIfNonFiniteState("predict", -1);
 
-      // Encoder update; skipped wholesale if any encoder reads non-finite (boot transient). The z fills stay
-      // INLINE rather than moving behind a component call: their keySet() iterators only fit the allocation
-      // test's 32 B/tick budget because C2 scalar-replaces them, which depends on the allocation, the loop and
-      // the consumer inlining into one compilation unit.
-      int row = 0;
+      // Encoder update; skipped wholesale if any encoder reads non-finite (boot transient).
+      // z_enc row i IS state index i: Henc = I_n and Renc's diagonal are BOTH keyed by state index, so the row
+      // an encoder lands on must be that joint's state index and nothing else. Indexing jointsByIndex makes
+      // that identity structural — there is no iteration order left to get wrong. It also allocates nothing
+      // under any compilation state, where the old keySet() loop only fit the 32 B/tick budget as long as C2
+      // scalar-replaced the iterator. Keep the fills INLINE.
       boolean encodersValid = true;
-      for (OneDoFJointBasics j : state.jointToIndex.keySet())
+      for (int i = 0; i < state.numberOfJoints; i++)
       {
+         OneDoFJointBasics j = state.jointsByIndex[i];
          double q = state.sensorMap.getOneDoFJointOutput(j).getPosition();
          if (!Double.isFinite(q))
          {
@@ -304,7 +306,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
             if (!state.warnedNonFiniteInput)
                state.warnNonFiniteInputOnce("joint position of " + j.getName());
          }
-         update.zEnc.set(row++, 0, q);
+         update.zEnc.set(i, 0, q);
       }
       if (encodersValid)
       {
@@ -316,10 +318,12 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       // adaptive lag inflation on R. Skipped wholesale on any non-finite velocity, like the encoder block.
       if (update.isDirectVelocityEnabled())
       {
-         int qdRow = 0;
+         // Same identity as the encoder block above: z_qd row i is state index i, against Hqd = [0 | I_n | 0]
+         // and an Rqd diagonal keyed by state index. prevZqd[] and qdSlewSmoothed[] are state-index-keyed too.
          boolean velocitiesValid = true;
-         for (OneDoFJointBasics j : state.jointToIndex.keySet())
+         for (int i = 0; i < state.numberOfJoints; i++)
          {
+            OneDoFJointBasics j = state.jointsByIndex[i];
             double qd = state.sensorMap.getOneDoFJointOutput(j).getVelocity();
             if (!Double.isFinite(qd))
             {
@@ -327,7 +331,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                if (!state.warnedNonFiniteInput)
                   state.warnNonFiniteInputOnce("joint velocity of " + j.getName());
             }
-            update.zqd.set(qdRow++, 0, qd);
+            update.zqd.set(i, 0, qd);
          }
          if (velocitiesValid)
          {
@@ -399,21 +403,21 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    @Override
    public boolean containsJoint(OneDoFJointBasics joint)
    {
-      return state.jointToIndex.containsKey(joint);
+      return state.isFilteredJoint(joint);
    }
 
    @Override
    public double getEstimatedJointPosition(OneDoFJointBasics joint)
    {
-      Integer idx = state.jointToIndex.get(joint);
-      return (idx == null || !state.initialized) ? Double.NaN : state.x.get(idx);
+      int idx = state.jointIndex(joint);
+      return (idx == JointKFState.NOT_IN_STATE || !state.initialized) ? Double.NaN : state.x.get(idx);
    }
 
    @Override
    public double getEstimatedJointVelocity(OneDoFJointBasics joint)
    {
-      Integer idx = state.jointToIndex.get(joint);
-      return (idx == null || !state.initialized) ? Double.NaN : state.x.get(state.numberOfJoints + idx);
+      int idx = state.jointIndex(joint);
+      return (idx == JointKFState.NOT_IN_STATE || !state.initialized) ? Double.NaN : state.x.get(state.numberOfJoints + idx);
    }
 
    @Override
@@ -441,16 +445,16 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       toPack.zero();
       for (int a = 0; a < mm; a++)
       {
-         Integer ia = state.jointToIndex.get(joints[a]);
-         if (ia == null)
+         int ia = state.jointIndex(joints[a]);
+         if (ia == JointKFState.NOT_IN_STATE)
          {
             toPack.set(a, a, fallbackVariance);
             continue;
          }
          for (int b = 0; b < mm; b++)
          {
-            Integer ib = state.jointToIndex.get(joints[b]);
-            if (ib != null)
+            int ib = state.jointIndex(joints[b]);
+            if (ib != JointKFState.NOT_IN_STATE)
                toPack.set(a, b, state.P.get(blockOffset + ia, blockOffset + ib)); // adding the off diagonals for the cross-covariances
          }
       }
@@ -459,12 +463,15 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    @Override
    public FrameVector3DReadOnly getAngularVelocityBiasInIMUFrame(IMUSensorReadOnly imu)
    {
-      Integer ord = state.imuToOrdinal.get(imu);
-      if (ord == null || !state.initialized)
+      int ord = state.imuOrdinal(imu);
+      if (ord == JointKFState.NOT_IN_STATE || !state.initialized)
       {
-         // IMU not in the filter's state (e.g. the primary pelvis IMU when it isn't a pair member),
-         // or the filter hasn't initialized yet: report zero bias. MUST return here — falling through
-         // would unbox a null ord in "3 * ord" and NPE every tick on the estimator thread.
+         // IMU not in the filter's state (e.g. the primary pelvis IMU when it isn't a pair member), or the
+         // filter hasn't initialized yet: report zero bias. MUST return here, and the reason is now STRONGER
+         // than it was: this used to guard an NPE on unboxing a null ord in "3 * ord". With the -1 sentinel
+         // the fall-through is worse than a crash — 2n + 3*(-1) = 2n-3 is a VALID index into x, so it would
+         // silently export three JOINT VELOCITIES as this IMU's gyro bias, straight into the InEKF's predict.
+         // No exception, no NaN, just a wrong robot.
          biasOut.setToZero(imu.getMeasurementFrame());
          return biasOut;
       }
@@ -518,8 +525,14 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    int getNumberOfPairs()           { return state.pairs.size(); }
 
    /** State index of the given joint's position entry (its velocity entry is this + n); -1 if not filtered. */
-   int getJointStateIndex(OneDoFJointBasics joint) { Integer i = state.jointToIndex.get(joint); return i == null ? -1 : i; }
-   List<OneDoFJointBasics> getFilteredJointsInStateOrder() { return new ArrayList<>(state.jointToIndex.keySet()); }
+   int getJointStateIndex(OneDoFJointBasics joint) { return state.jointIndex(joint); }
+   /** Immutable snapshot: jointsByIndex IS the filter's state order and must not escape as a mutable array. */
+   List<OneDoFJointBasics> getFilteredJointsInStateOrder() { return List.of(state.jointsByIndex); }
+
+   /** This tick's encoder measurement vector; row i must be the joint at state index i. */
+   DMatrixRMaj getEncoderMeasurementForTest()        { return update.zEnc.copy(); }
+   /** This tick's direct-velocity measurement vector; row i must be the joint at state index i. */
+   DMatrixRMaj getDirectVelocityMeasurementForTest() { return update.zqd.copy(); }
 
    DMatrixRMaj getStateVector()      { return state.x.copy(); }     // x = [q ; q_dot ; b_omega]
    DMatrixRMaj getCovariance()       { return state.P.copy(); }
@@ -565,8 +578,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    DMatrixRMaj getStackedMeasurementNoise()    { return biasUpdate.Rg.copy(); }  // R_g (3(E+K) x 3(E+K))
    DMatrixRMaj getMixingOperator()             { return biasUpdate.Lmix.copy(); } // L (3(E+K) x 3m); H_g bias columns == this
    int getStackedRowForPair(int pairIndex)     { return 3 * pairIndex; }      // pair e occupies rows [3e, 3e+3)
-   int getBiasBlockColumn(IMUSensorReadOnly imu) { return 2 * state.numberOfJoints + 3 * state.imuToOrdinal.get(imu); } // state col of imu's bias
-   int getImuOrdinal(IMUSensorReadOnly imu)    { return state.imuToOrdinal.get(imu); }
+   int getBiasBlockColumn(IMUSensorReadOnly imu) { return 2 * state.numberOfJoints + 3 * state.requireImuOrdinal(imu); } // state col of imu's bias
+   int getImuOrdinal(IMUSensorReadOnly imu)    { return state.requireImuOrdinal(imu); }
+   /** The ORDINAL-INDEXED array side, so a test can check it against the map the way it does for joints. */
+   IMUSensorReadOnly getImuByOrdinal(int ordinal) { return state.imusByOrdinal[ordinal]; }
    IMUSensorReadOnly getBaseIMU()              { return state.baseIMU; }
    /** Anchors active on the last {@link #buildStackedMeasurementForTest}. 0 => the base-bias gauge is unfixed. */
    int getActiveAnchorCountForTest()           { return biasUpdate.getActiveAnchorCount(); }

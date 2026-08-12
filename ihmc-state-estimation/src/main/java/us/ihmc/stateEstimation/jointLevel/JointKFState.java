@@ -1,9 +1,12 @@
 package us.ihmc.stateEstimation.jointLevel;
 
+import gnu.trove.impl.Constants;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -16,7 +19,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 
@@ -26,7 +28,11 @@ import java.util.function.ToDoubleFunction;
  * <pre>
  *   x = [ q(0..n-1) ; q̇(n..2n-1) ; b_omega(2n..2n+3m-1) ] ,  dim = 2n + 3m
  * </pre>
- * Joint state index and IMU ordinal are the insertion orders of {@code jointToIndex} / {@code imuToOrdinal};
+ * Joint state index and IMU ordinal are the POSITIONS in {@link #jointsByIndex} / {@link #imusByOrdinal},
+ * assigned in first-encounter order as the IMU-pair chains are resolved. Those two arrays ARE the state order.
+ * {@code jointToIndex} / {@code imuToOrdinal} are the inverse lookup ONLY and are private for one reason: they
+ * are hash maps, so their iteration order is bucket order and has nothing to do with the state layout, and
+ * every iterator they hand out allocates. Loop over joints and IMUs by index, never over a map.
  * IMU {@code o}'s bias occupies columns {@code [2n+3o, 2n+3o+3)}; the stacked gyro measurement lays pair
  * {@code e} on rows {@code [3e, 3e+3)} with the active anchors trailing.
  *
@@ -42,11 +48,26 @@ final class JointKFState
    final SensorOutputMapReadOnly sensorMap;
    final double dt;
 
-   final LinkedHashMap<OneDoFJointBasics, Integer> jointToIndex = new LinkedHashMap<>();
-   //TODO: look at JointIndexHandler and use that here, rather than using unsafe Integer hashmap
-   final LinkedHashMap<IMUSensorReadOnly, Integer> imuToOrdinal = new LinkedHashMap<>();
+   /**
+    * Returned by {@link #jointIndex} / {@link #imuOrdinal} for a key that is NOT part of the filter state.
+    * Trove's DEFAULT no-entry value is 0, which is a valid joint index and a valid IMU ordinal — the -1 passed
+    * to both constructors below is therefore mandatory, not stylistic, and every lookup must test against it.
+    */
+   static final int NOT_IN_STATE = -1;
+
+   /**
+    * Inverse lookup ONLY, and private so nothing can iterate them (see the class javadoc) or write to them
+    * after construction. Deliberately NOT {@code JointIndexHandler}: that stores a
+    * {@code LinkedHashMap<JointReadOnly, int[]>}, so it is neither unboxed nor iteration-free; it hands back
+    * full-multibody DoF column blocks rather than this filter's dense 0..n-1 state indices; and it has no
+    * IMU-ordinal equivalent at all. {@link #jointsByIndex} IS this filter's index handler.
+    */
+   private final TObjectIntHashMap<OneDoFJointBasics> jointToIndex;
+   private final TObjectIntHashMap<IMUSensorReadOnly> imuToOrdinal;
    final List<Pair> pairs = new ArrayList<>();
    final List<FootAnchor> footAnchors = new ArrayList<>();
+   /** state index -> joint. THE definition of state order: x[i] is the position of {@code jointsByIndex[i]}. */
+   OneDoFJointBasics[] jointsByIndex;
    /** ordinal -> IMU, so a per-tick loop over IMUs is an index loop (no map-iterator allocation). */
    IMUSensorReadOnly[] imusByOrdinal;
    IMUSensorReadOnly baseIMU;
@@ -102,6 +123,12 @@ final class JointKFState
       this.dt = estimatorDT;
       this.parameters = parameters;
 
+      // Capacities only; both maps are filled exactly once, in the pass below, and never written again. The IMU
+      // count is bounded exactly at 2 per pair; the joint count is not known until the chains are resolved, so
+      // this is a generous guess whose only cost is one boot-time rehash. NOT_IN_STATE is the no-entry value.
+      jointToIndex = new TObjectIntHashMap<>(64, Constants.DEFAULT_LOAD_FACTOR, NOT_IN_STATE);
+      imuToOrdinal = new TObjectIntHashMap<>(Math.max(1, 2 * pairParameters.size()), Constants.DEFAULT_LOAD_FACTOR, NOT_IN_STATE);
+
       // 1)  Resolve all pairs of IMUs, collect distinct joints and IMUs into the state layout
       for (IMUBasedJointStateEstimatorParameters pp : pairParameters)
       {
@@ -138,6 +165,19 @@ final class JointKFState
       numberOfIMUs = imuToOrdinal.size();
       dim = 2 * numberOfJoints + 3 * numberOfIMUs;
 
+      // index -> key inverses, built ONCE, here, before anything reads them. Built by re-walking `pairs` — the
+      // same source that populated the maps — so not even construction has to iterate a hash map. Writes are
+      // idempotent for a joint that appears on two chains.
+      jointsByIndex = new OneDoFJointBasics[numberOfJoints];
+      imusByOrdinal = new IMUSensorReadOnly[numberOfIMUs];
+      for (Pair p : pairs)
+      {
+         for (OneDoFJointBasics j : p.chainJoints)
+            jointsByIndex[jointToIndex.get(j)] = j;
+         imusByOrdinal[imuToOrdinal.get(p.parent)] = p.parent;
+         imusByOrdinal[imuToOrdinal.get(p.child)] = p.child;
+      }
+
       // Acyclicity assert (Part B item 6): with the exact R_g, a cycle's telescoping row-combination has zero H,
       // zero z and zero noise, so S is singular BY CONSTRUCTION (SPEC §5.3). The used IMU graph MUST be a tree.
       assertAcyclicIMUGraph();
@@ -149,15 +189,24 @@ final class JointKFState
          p.Jang.reshape(3, dof); // Jang is allocated blank at construction in the chain, only reshaped once full DoF are known
          p.qdCols = new int[dof];
          for (int c = 0; c < dof; c++)
-            p.qdCols[c] = numberOfJoints + jointToIndex.get(p.chainJoints[c]); // this int[] is the selector matrix of the path S_ab, but in sparse form as all joints are not related directly
-         p.parentBias = 2 * numberOfJoints + 3 * imuToOrdinal.get(p.parent);
-         p.childBias = 2 * numberOfJoints + 3 * imuToOrdinal.get(p.child);
+         {
+            // Fail loud rather than let a sentinel through: numberOfJoints + (-1) is an IN-RANGE column, so a
+            // missing chain joint would silently alias another joint's q̇ instead of throwing. Unreachable —
+            // the first pass inserted every chain joint of every pair.
+            int idx = jointToIndex.get(p.chainJoints[c]);
+            if (idx == NOT_IN_STATE)
+               throw new IllegalStateException("JointLevelKFPreFilter: chain joint " + p.chainJoints[c].getName() + " of pair "
+                     + p.parent.getSensorName() + "->" + p.child.getSensorName() + " is not a filter state.");
+            p.qdCols[c] = numberOfJoints + idx; // this int[] is the selector matrix of the path S_ab, but in sparse form as all joints are not related directly
+         }
+         p.parentBias = 2 * numberOfJoints + 3 * requireImuOrdinal(p.parent);
+         p.childBias = 2 * numberOfJoints + 3 * requireImuOrdinal(p.child);
       }
 
       // 3) Base IMU = root of the tree + first pair parent.
       //WARNING: Need to configure if the root differs.
       baseIMU = pairs.isEmpty() ? null : pairs.get(0).parent;
-      baseBiasCol = baseIMU == null ? -1 : 2 * numberOfJoints + 3 * imuToOrdinal.get(baseIMU);
+      baseBiasCol = baseIMU == null ? -1 : 2 * numberOfJoints + 3 * requireImuOrdinal(baseIMU);
       if (baseIMU == null)
          throw new RuntimeException("Base IMU is null, check the kinematic tree.");
       LogTools.info("Base IMU initialized as " + baseIMU.getSensorName());
@@ -189,8 +238,8 @@ final class JointKFState
             int unfiltered = 0;
             for (int c = 0; c < fa.legJoints.length; c++)
             {
-               Integer idx = jointToIndex.get(fa.legJoints[c]);
-               if (idx == null)
+               int idx = jointToIndex.get(fa.legJoints[c]);
+               if (idx == NOT_IN_STATE)
                {
                   fa.qdCols[c] = -1; // unfiltered: contributes J_U * qd^meas to z', no H column
                   unfiltered++;
@@ -228,9 +277,6 @@ final class JointKFState
 
       x.reshape(dim, 1);
       P.reshape(dim, dim);
-      imusByOrdinal = new IMUSensorReadOnly[numberOfIMUs];
-      for (var e : imuToOrdinal.entrySet()) // construction-time only; the hot path indexes this array
-         imusByOrdinal[e.getValue()] = e.getKey();
 
       yoStateDimension = new YoInteger("jointKFStateDimension", registry);
       yoNumberOfFilteredJoints = new YoInteger("jointKFNumberOfFilteredJoints", registry);
@@ -239,6 +285,36 @@ final class JointKFState
       yoNumberOfFilteredJoints.set(numberOfJoints);
       yoNumberOfIMUs.set(numberOfIMUs);
       createJointYoVariables(registry);
+   }
+
+   /** Filter state index of {@code joint}'s position entry (its velocity entry is this + n), or {@link #NOT_IN_STATE}. */
+   int jointIndex(OneDoFJointBasics joint)
+   {
+      return jointToIndex.get(joint);
+   }
+
+   /** Whether {@code joint} is an estimated filter state. Takes the supertype for the spanning-joint walk. */
+   boolean isFilteredJoint(JointReadOnly joint)
+   {
+      return jointToIndex.containsKey(joint);
+   }
+
+   /** Bias-block ordinal of {@code imu}, or {@link #NOT_IN_STATE}. */
+   int imuOrdinal(IMUSensorReadOnly imu)
+   {
+      return imuToOrdinal.get(imu);
+   }
+
+   /**
+    * Ordinal of an IMU that MUST be in the state. Fails loud rather than returning a -1 that would index three
+    * columns backwards out of the bias block and into the q̇ block — an in-range, silently wrong answer.
+    */
+   int requireImuOrdinal(IMUSensorReadOnly imu)
+   {
+      int ordinal = imuToOrdinal.get(imu);
+      if (ordinal == NOT_IN_STATE)
+         throw new IllegalArgumentException("JointLevelKFPreFilter: IMU '" + imu.getSensorName() + "' is not part of the filter state.");
+      return ordinal;
    }
 
    /** One set per filtered joint, indexed by state index so the per-tick update is a straight array write. */
@@ -250,10 +326,9 @@ final class JointKFState
       yoJointPositionLowerBound = new YoDouble[numberOfJoints];
       yoJointVelocityUpperBound = new YoDouble[numberOfJoints];
       yoJointVelocityLowerBound = new YoDouble[numberOfJoints];
-      for (var e : jointToIndex.entrySet())
+      for (int idx = 0; idx < numberOfJoints; idx++)
       {
-         int idx = e.getValue();
-         String jointName = e.getKey().getName();
+         String jointName = jointsByIndex[idx].getName();
          yoJointPosition[idx] = new YoDouble("jointKF_q_" + jointName, registry);
          yoJointVelocity[idx] = new YoDouble("jointKF_qd_" + jointName, registry);
          yoJointPositionUpperBound[idx] = new YoDouble("jointKF_q_" + jointName + "_upperBound", registry);
@@ -270,17 +345,20 @@ final class JointKFState
     */
    boolean seed()
    {
-      for (var e : jointToIndex.entrySet())
+      // Index loops, not map iteration: seed() runs EVERY tick until the encoders come good, so an entry-set
+      // iterator here allocates on the estimator thread for the whole boot window. The allocation test never
+      // sees it because it calls initialize() before it starts measuring.
+      for (int i = 0; i < numberOfJoints; i++)
       {
-         if (!Double.isFinite(sensorMap.getOneDoFJointOutput(e.getKey()).getPosition()))
+         if (!Double.isFinite(sensorMap.getOneDoFJointOutput(jointsByIndex[i]).getPosition()))
          {
-            warnNonFiniteInputOnce("joint position of " + e.getKey().getName() + " at initialization");
+            warnNonFiniteInputOnce("joint position of " + jointsByIndex[i].getName() + " at initialization");
             return false;
          }
       }
       x.zero();
-      for (var e : jointToIndex.entrySet())
-         x.set(e.getValue(), sensorMap.getOneDoFJointOutput(e.getKey()).getPosition());
+      for (int i = 0; i < numberOfJoints; i++)
+         x.set(i, sensorMap.getOneDoFJointOutput(jointsByIndex[i]).getPosition());
       P.zero();
       for (int i = 0; i < numberOfJoints; i++) P.set(i, i, parameters.initPosVar.getValue());
       for (int i = numberOfJoints; i < 2 * numberOfJoints; i++) P.set(i, i, parameters.initVelVar.getValue());
@@ -367,10 +445,7 @@ final class JointKFState
    /** Reverse of {@code jointToIndex} for the diagnostic paths: filter-joint name at a given state index. */
    String jointNameByStateIndex(int stateIndex)
    {
-      for (var e : jointToIndex.entrySet())
-         if (e.getValue() == stateIndex)
-            return e.getKey().getName();
-      return "?idx" + stateIndex;
+      return (stateIndex >= 0 && stateIndex < numberOfJoints) ? jointsByIndex[stateIndex].getName() : "?idx" + stateIndex;
    }
 
    static String jointNamesOf(OneDoFJointBasics[] joints)
@@ -397,8 +472,8 @@ final class JointKFState
          parent[i] = i;
       for (Pair p : pairs)
       {
-         int a = find(parent, imuToOrdinal.get(p.parent));
-         int b = find(parent, imuToOrdinal.get(p.child));
+         int a = find(parent, requireImuOrdinal(p.parent));
+         int b = find(parent, requireImuOrdinal(p.child));
          if (a == b)
             throw new IllegalStateException("JointLevelKFPreFilter: the used IMU graph has a CYCLE — the pair "
                   + p.parent.getSensorName() + "->" + p.child.getSensorName() + " closes a loop. With the exact R_g a "

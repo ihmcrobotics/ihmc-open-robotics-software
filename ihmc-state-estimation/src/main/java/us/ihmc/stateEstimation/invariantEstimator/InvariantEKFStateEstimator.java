@@ -59,7 +59,17 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class InvariantEKFStateEstimator implements StateEstimatorController
 {
    private static final int NUMBER_OF_CONTACTS = 2; // left, right feet
-   private static final SideDependentList<Integer> CONTACT_INDICES = new SideDependentList<>(0, 1);
+
+   /**
+    * Contact-array index for a side. {@link RobotSide} declares LEFT then RIGHT, so this IS {@code ordinal()};
+    * it is a named method rather than a bare call so the layout contract shared by {@code contactPositions[]},
+    * {@link #NUMBER_OF_CONTACTS}, {@code InvariantState.contactTangentIndex} and {@code InvariantEKF.update}
+    * has exactly one home. Replaces a {@code SideDependentList<Integer>} that boxed on every per-tick read.
+    */
+   private static int contactIndex(RobotSide side)
+   {
+      return side.ordinal();
+   }
 
    // Filter-consistency check: each contact update is a 3-DOF position measurement, so its NIS is
    // χ²-distributed with 3 DOF. The two-sided CONSISTENCY_CONFIDENCE band gives the acceptance interval
@@ -456,7 +466,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       {
          contactInWorld.setToZero(soleFrames.get(side));
          contactInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-         contactPositions[CONTACT_INDICES.get(side)] = new Point3D(contactInWorld);
+         contactPositions[contactIndex(side)] = new Point3D(contactInWorld);
       }
 
       ekf.initialize(tempRotation, new Vector3D(), basePosition, contactPositions, scaledIdentity(initialCovariance));
@@ -492,7 +502,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       {
          contactInWorld.setToZero(soleFrames.get(side));
          contactInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-         contactPositions[CONTACT_INDICES.get(side)] = new Point3D(contactInWorld);
+         contactPositions[contactIndex(side)] = new Point3D(contactInWorld);
       }
 
       ekf.initialize(tempRotation, new Vector3D(), basePosition, contactPositions, scaledIdentity(initialCovariance));
@@ -512,7 +522,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       {
          double contactProbability = clamp(contactProbabilityProvider.getContactProbability(side));
          yoContactProbability.get(side).set(contactProbability);
-         ekf.setContactSlipVariance(CONTACT_INDICES.get(side), contactSlipVariance(contactProbability));
+         ekf.setContactSlipVariance(contactIndex(side), contactSlipVariance(contactProbability));
       }
 
       // IMU omega and a: bias-corrected in the measurement frame (where the bias is estimated),
@@ -606,7 +616,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          {
             if (reseedLatches.get(side).advance(contactProbability))
             {
-               yoReseedResidual.get(side).set(ekf.reseedContact(CONTACT_INDICES.get(side), contactInBody, inflatedContactCovariance));
+               yoReseedResidual.get(side).set(ekf.reseedContact(contactIndex(side), contactInBody, inflatedContactCovariance));
                yoReseedCount.get(side).increment();
             }
             yoReseedArmed.get(side).set(reseedLatches.get(side).isArmed());
@@ -615,8 +625,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          double inflation = measurementInflation(contactProbability);
          inflatedContactCovariance.scale(inflation);
          yoContactRInflation.get(side).set(inflation);
-         yoContactPContactTrace.get(side).set(covarianceBlockTrace(ekf.getState().contactTangentIndex(CONTACT_INDICES.get(side))));
-         ekf.update(CONTACT_INDICES.get(side), contactInBody, inflatedContactCovariance);
+         yoContactPContactTrace.get(side).set(covarianceBlockTrace(ekf.getState().contactTangentIndex(contactIndex(side))));
+         ekf.update(contactIndex(side), contactInBody, inflatedContactCovariance);
          yoContactNIS.get(side).set(ekf.getLastNormalizedInnovationSquared());
          yoContactCondSProxyLog10.get(side).set(Math.log10(ekf.getLastConditionProxy()));
          yoContactResidualNorm.get(side).set(ekf.getLastResidualNorm());
