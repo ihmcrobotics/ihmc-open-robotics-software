@@ -472,7 +472,7 @@ public class RDXLocomotionManager
       {
          goalsReceived = true;
       }
-      //      System.out.println(waypointsStarted + " " + currentWaypointsRemaining);
+
       if (currentWaypointsRemaining != previousGoalsRemaining)
       {
          System.out.println("Waypoint completed");
@@ -635,7 +635,7 @@ public class RDXLocomotionManager
       // The abort walking message can only be process when the controller is in walking state, this forces the abort to go through
       pauseWalkingMessage.setPause(false);
       controllerHelper.publishToController(pauseWalkingMessage);
-      numGoals = 0;
+      clearWaypoints();
    }
 
    public void setPauseWalkingAndPublish(boolean pauseWalking)
