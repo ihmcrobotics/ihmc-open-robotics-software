@@ -159,44 +159,27 @@ public class FootStepPlanner
       desiredVelocityScaled.setAndScale(swingTime * swingTimeScalar.getDoubleValue(), desiredLinearVelocity);
       desiredVelocityScaled.changeFrame(centerOfMassFrameWithOrientation);
 
-      if (Math.abs(desiredAngularVelocity.getZ()) > MIN_ANGULAR_VELOCITY_FOR_TURN_PROJECTION)
-      {
-         double radius = desiredLinearVelocity.length() / desiredAngularVelocity.getZ();
-         turnRadiusVisual.setDiameter(radius * 2.0);
-         perpindicularToCenterOfMassVelocity.set(-desiredLinearVelocity.getY(), desiredLinearVelocity.getX(), 0.0);
-         perpindicularToCenterOfMassVelocity.normalize();
-         perpindicularToCenterOfMassVelocity.scale(radius);
+      double radius = desiredLinearVelocity.length() / desiredAngularVelocity.getZ();
+      turnRadiusVisual.setDiameter(radius * 2.0);
+      perpindicularToCenterOfMassVelocity.set(-desiredLinearVelocity.getY(), desiredLinearVelocity.getX(), 0.0);
+      perpindicularToCenterOfMassVelocity.normalize();
+      perpindicularToCenterOfMassVelocity.scale(radius);
 
-         centerOfTurn.setToZero(centerOfMassFrameWithOrientation);
-         centerOfTurn.changeFrame(ReferenceFrame.getWorldFrame());
-         centerOfTurn.add(perpindicularToCenterOfMassVelocity);
-         turnRadiusVisual.setPosition(centerOfTurn.getX(), centerOfTurn.getY());
+      centerOfTurn.setToZero(centerOfMassFrameWithOrientation);
+      centerOfTurn.changeFrame(ReferenceFrame.getWorldFrame());
+      centerOfTurn.add(perpindicularToCenterOfMassVelocity);
+      turnRadiusVisual.setPosition(centerOfTurn.getX(), centerOfTurn.getY());
 
-         bodyPoseProjectedInFuture.setToZero(bodyZUpFrame);
-         bodyPositionProjectedInFuture.setIncludingFrame(bodyPoseProjectedInFuture.getPosition());
-         centerOfTurn.changeFrame(bodyZUpFrame);
-         GeometryTools.yawAboutPoint(bodyPositionProjectedInFuture, centerOfTurn, desiredAngularVelocity.getZ() * swingTime, bodyPositionProjectedInFuture);
-         bodyPoseProjectedInFuture.getPosition().set(bodyPositionProjectedInFuture);
-         bodyFrameProjectedInFuture.setPoseAndUpdate(bodyPoseProjectedInFuture);
+      bodyPoseProjectedInFuture.setToZero(bodyZUpFrame);
+      bodyPositionProjectedInFuture.setIncludingFrame(bodyPoseProjectedInFuture.getPosition());
+      centerOfTurn.changeFrame(bodyZUpFrame);
+      GeometryTools.yawAboutPoint(bodyPositionProjectedInFuture, centerOfTurn, desiredAngularVelocity.getZ() * swingTime, bodyPositionProjectedInFuture);
+      bodyPoseProjectedInFuture.getPosition().set(bodyPositionProjectedInFuture);
+      bodyFrameProjectedInFuture.setPoseAndUpdate(bodyPoseProjectedInFuture);
 
-         rotationAtEnd.setToZero(bodyFrameProjectedInFuture);
-         rotationAtEnd.setYawPitchRoll(desiredAngularVelocity.getZ() * swingTime, 0.0, 0.0);
-         bodyFrameEndRotationProjectedInFuture.setOrientationAndUpdate(rotationAtEnd);
-      }
-      else
-      {
-         // Negligible yaw rate: project the body straight ahead by the scaled desired velocity
-         // instead of computing a turn radius/center, which would require dividing by ~0.
-         turnRadiusVisual.setDiameter(0.0);
-
-         bodyPoseProjectedInFuture.setToZero(bodyZUpFrame);
-         desiredVelocityScaled.changeFrame(bodyZUpFrame);
-         bodyPoseProjectedInFuture.getPosition().add(desiredVelocityScaled);
-         bodyFrameProjectedInFuture.setPoseAndUpdate(bodyPoseProjectedInFuture);
-
-         rotationAtEnd.setToZero(bodyFrameProjectedInFuture);
-         bodyFrameEndRotationProjectedInFuture.setOrientationAndUpdate(rotationAtEnd);
-      }
+      rotationAtEnd.setToZero(bodyFrameProjectedInFuture);
+      rotationAtEnd.setYawPitchRoll(desiredAngularVelocity.getZ() * swingTime, 0.0, 0.0);
+      bodyFrameEndRotationProjectedInFuture.setOrientationAndUpdate(rotationAtEnd);
 
       bodyFrameProjectedInFutureViz.update();
       bodyPoseProjectedInFuture.changeFrame(ReferenceFrame.getWorldFrame());
