@@ -8,6 +8,7 @@ import perception_msgs.HeightMapMessage;
 import perception_msgs.ImageMessage;
 import perception_msgs.PlanarRegionsListMessage;
 import perception_msgs.TerrainMapMessage;
+import perception_msgs.VoxelMapMessage;
 import perception_msgs.YOLOv8AnnotationInfoList;
 import perception_msgs.YOLOv8ExecutorParameters;
 import perception_msgs.ZEDSVOCurrentFileMessage;
@@ -206,6 +207,11 @@ public final class PerceptionAPI
     */
    public static final ROS2Topic<Empty> REQUEST_YOLO = PERCEPTION_MODULE.withSuffix("request_yolo").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_YOLO_ANNOTATED_IMAGE = PERCEPTION_MODULE.withSuffix("request_yolo_image").withType(Empty.class);
+
+   /*
+    * Voxel Map
+    */
+   public static final ROS2Topic<VoxelMapMessage> VOXEL_MAP = PERCEPTION_MODULE.withSuffix("voxel_map").withType(VoxelMapMessage.class);
 
    /*
     * Mocap
