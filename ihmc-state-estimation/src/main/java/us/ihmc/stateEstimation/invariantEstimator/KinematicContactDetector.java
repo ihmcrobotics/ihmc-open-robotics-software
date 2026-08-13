@@ -31,7 +31,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  * <p>Not allocation-free on the first tick (one {@link FramePoint3D} per foot is reused thereafter).
  * Reads sole frames only; if constructed with a non-null {@code frameUpdater} it runs that first each
  * tick (used when the sole frames belong to a model this detector must refresh itself, e.g. an
- * independent controller-model oracle; pass null when the caller already updates the frames).</p>
+ * independent controller-model ground truth; pass null when the caller already updates the frames).</p>
  */
 public class KinematicContactDetector implements ContactProbabilityProvider
 {

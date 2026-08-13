@@ -119,7 +119,7 @@ public class InvariantState
     */
    public void setRotation(RotationMatrixReadOnly rotation)
    {
-      JointLevelKFPreFilter.set_matrix(groupElement, rotation);
+      JointLevelKFPreFilter.setMatrix(groupElement, rotation);
    }
 
    /**

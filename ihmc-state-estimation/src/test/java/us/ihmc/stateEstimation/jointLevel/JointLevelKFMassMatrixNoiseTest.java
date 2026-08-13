@@ -42,9 +42,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 public class JointLevelKFMassMatrixNoiseTest
 {
    private static final double DT = JointLevelKFTestFixture.DT;
-   private static final double SIGMA_TAU = 5.0;    // matches JointLevelKFPreFilter.SIGMA_TAU (retuned after Schur switch)
-   private static final double QA_MAX = 900.0;     // matches JointLevelKFPreFilter.QA_MAX (Qa conditioning cap)
-   private static final double SIGMA_ACCEL = 50.0; // matches JointLevelKFPreFilter.SIGMA_ACCEL (fallback path)
+   private static final double SIGMA_TAU = 5.0;    // matches JointKFParameters.SIGMA_TAU (retuned after Schur switch)
+   private static final double QA_MAX = 900.0;     // matches JointKFParameters.QA_MAX (Qa conditioning cap)
+   private static final double SIGMA_ACCEL = 50.0; // matches JointKFParameters.SIGMA_ACCEL (fallback path)
 
    /**
     * Relative tolerance for comparisons against the reference Qa: the filter inverts by Cholesky, the
@@ -63,7 +63,7 @@ public class JointLevelKFMassMatrixNoiseTest
     * 100%+ mismatch, not 0.1%. 3e-3·maxAbs still catches any such structural error; the EXACT Gram + rotor
     * algebra is pinned to machine precision, on a WELL-conditioned synthetic Λ_eff, by
     * {@link JointLevelKFRotorAndGramTest}. TODO(tighten): re-derive the reference with a Cholesky M_NN solve
-    * (matching the filter) to restore a 1e-8 oracle.
+    * (matching the filter) to restore a 1e-8 agreement.
     */
    private static double relTol(DMatrixRMaj expected)
    {
@@ -74,7 +74,7 @@ public class JointLevelKFMassMatrixNoiseTest
     * Independent reference for the Schur complement {@code Λ} and the fully-locked filtered block {@code M_ff},
     * both in filter state order. Replicates the filter's model definition (SPEC §3.2 generalized to arbitrary
     * topology): builds a second calculator over the floating base + the joints spanning base→filtered, then
-    * marginalizes the NUISANCE block (base 6-DoF + any unfiltered "gap" joints) via
+    * marginalizes the TORQUE-FREE block (base 6-DoF + any unfiltered "gap" joints) via
     * {@code Λ = M_ff − M_Nf^T M_NN⁻¹ M_Nf} (using {@code M_jN = M_Nf^T} since {@code M} is symmetric). Done in
     * plain EJML (LU) — no contact with the filter's Cholesky solvers or column mapping. Returns {@code {Λ, M_ff}}.
     */
@@ -101,19 +101,19 @@ public class JointLevelKFMassMatrixNoiseTest
       calc.reset();
       DMatrixRMaj massMatrix = calc.getMassMatrix().copy();
 
-      // Filtered-joint columns (in filter state order) and nuisance columns (base + gap joints).
+      // Filtered-joint columns (in filter state order) and torqueFree columns (base + gap joints).
       int[] filteredCols = new int[n];
       for (int i = 0; i < n; i++)
          filteredCols[i] = input.getJointMatrixIndexProvider().getJointDoFIndices(f.filteredJoints.get(i))[0];
       int[] baseCols = input.getJointMatrixIndexProvider().getJointDoFIndices(f.rootJoint);
       assertEquals(6, baseCols.length, "floating base is 6-DoF");
-      List<Integer> nuisance = new ArrayList<>();
+      List<Integer> torqueFree = new ArrayList<>();
       for (int c : baseCols)
-         nuisance.add(c);
+         torqueFree.add(c);
       for (JointReadOnly spanningJoint : spanning)
          if (!f.filteredJoints.contains(spanningJoint)) // gap joint => marginalize
-            nuisance.add(input.getJointMatrixIndexProvider().getJointDoFIndices(spanningJoint)[0]);
-      int nN = nuisance.size();
+            torqueFree.add(input.getJointMatrixIndexProvider().getJointDoFIndices(spanningJoint)[0]);
+      int nN = torqueFree.size();
 
       DMatrixRMaj mNN = new DMatrixRMaj(nN, nN);
       DMatrixRMaj mNf = new DMatrixRMaj(nN, n);
@@ -121,9 +121,9 @@ public class JointLevelKFMassMatrixNoiseTest
       for (int a = 0; a < nN; a++)
       {
          for (int b = 0; b < nN; b++)
-            mNN.set(a, b, massMatrix.get(nuisance.get(a), nuisance.get(b)));
+            mNN.set(a, b, massMatrix.get(torqueFree.get(a), torqueFree.get(b)));
          for (int j = 0; j < n; j++)
-            mNf.set(a, j, massMatrix.get(nuisance.get(a), filteredCols[j]));
+            mNf.set(a, j, massMatrix.get(torqueFree.get(a), filteredCols[j]));
       }
       for (int i = 0; i < n; i++)
          for (int j = 0; j < n; j++)
@@ -140,14 +140,14 @@ public class JointLevelKFMassMatrixNoiseTest
       return new DMatrixRMaj[] {lambda, mff};
    }
 
-   private static final double ROTOR_DEFAULT = 0.005; // JointLevelKFPreFilter.ROTOR_INERTIA_DEFAULT (synthetic joints match no table key)
+   private static final double ROTOR_DEFAULT = 0.005; // JointKFParameters.ROTOR_INERTIA_DEFAULT (synthetic joints match no table key)
 
    /**
     * Independent reference for the Rev.2 process noise, UPDATED for Part B items 1 &amp; 3 (was Qa = σ_τ² Λ⁻²
     * with a QA_MAX cap): Lambda_eff = Λ + diag(reflected rotor inertia), then Qa = Lambda_eff⁻¹ diag(σ_τ²)
     * Lambda_eff⁻ᵀ (the Gram form). The random chain's joints match no rotor-table key (so each rotor term is the
     * default {@link #ROTOR_DEFAULT}) and carry no finite effort limit (so each σ_τ falls back to SIGMA_TAU); both
-    * are read the same way the filter reads them, so this stays an INDEPENDENT oracle. The QA_MAX cap is no
+    * are read the same way the filter reads them, so this stays an INDEPENDENT reference. The QA_MAX cap is no
     * longer applied (demoted to a surfacing tripwire). In filter state order.
     */
    private static DMatrixRMaj referenceQa(JointLevelKFTestFixture f)
@@ -155,7 +155,7 @@ public class JointLevelKFMassMatrixNoiseTest
       int n = f.n;
       DMatrixRMaj lambdaEff = referenceSchur(f)[0].copy();
       for (int i = 0; i < n; i++) // Lambda_eff = Λ + diag(rotor); read rotor per joint via the filter's own seam
-         lambdaEff.add(i, i, JointLevelKFPreFilter.reflectedRotorInertiaForNameOrDefault(f.filteredJoints.get(i).getName()));
+         lambdaEff.add(i, i, JointKFParameters.reflectedRotorInertiaForNameOrDefault(f.filteredJoints.get(i).getName()));
       DMatrixRMaj lambdaInv = new DMatrixRMaj(n, n);
       assertTrue(CommonOps_DDRM.invert(lambdaEff, lambdaInv), "reference Lambda_eff inverts");
 
@@ -174,7 +174,7 @@ public class JointLevelKFMassMatrixNoiseTest
    {
       double tauMax = f.filteredJoints.get(stateIndex).getEffortLimitUpper();
       String name = f.filteredJoints.get(stateIndex).getName();
-      return (Double.isFinite(tauMax) && tauMax > 0.0) ? JointLevelKFPreFilter.alphaForName(name) * tauMax : SIGMA_TAU;
+      return (Double.isFinite(tauMax) && tauMax > 0.0) ? JointKFParameters.alphaForName(name) * tauMax : SIGMA_TAU;
    }
 
    @Test
@@ -189,7 +189,7 @@ public class JointLevelKFMassMatrixNoiseTest
    @Test
    public void testProcessNoiseEqualsVanLoanOfSchurComplementInverseSquared()
    {
-      // Decisive oracle for the Schur algebra: the filter's Q joint blocks must equal the Van Loan discretization
+      // Decisive reference for the Schur algebra: the filter's Q joint blocks must equal the Van Loan discretization
       // of Qa = σ_τ² Λ⁻², with Λ recomputed by the fully independent reference (§3.2). Any block-extraction or
       // sign error in M_bb / M_bj / M_jj shows up here.
       for (JointLevelKFTestFixture f : JointLevelKFTestFixture.shapesMassMatrix(6100L))
@@ -212,7 +212,7 @@ public class JointLevelKFMassMatrixNoiseTest
    @Test
    public void testSchurComplementIsSymmetricPDAndDominatedByLockedInertia()
    {
-      // SPEC §3.2/§8: Λ is symmetric PD whenever M is, and Λ ⪯ M_ff (the free base/nuisance recoils, so the
+      // SPEC §3.2/§8: Λ is symmetric PD whenever M is, and Λ ⪯ M_ff (the free base/torqueFree recoils, so the
       // joints accelerate MORE per unit torque than the fully-locked model — hence Λ⁻² ⪰ M_ff⁻² and the
       // effective Qa grows). M_ff is the filtered block with everything else locked; for the real gapless
       // topology M_ff = the locked-base joint inertia M_jj. Assert Λ symmetric PD and the PSD ordering

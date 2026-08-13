@@ -19,7 +19,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 
 /**
- * THE decisive oracle for the Rev. 2 stacked gyro measurement (SPEC §9): the stacked update must equal a
+ * THE decisive independent reference for the Rev. 2 stacked gyro measurement (SPEC §9): the stacked update must equal a
  * reference KF that measures the RAW per-IMU gyros — with mutually INDEPENDENT (block-diagonal) noise — plus a
  * near-zero absolute-rate constraint per trusted foot, over a state augmented with a nuisance base angular
  * velocity ω_base, then marginalizes ω_base out.
@@ -31,9 +31,9 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
  * R_g-correlation error in the filter's L / H_g / R_g assembly (the "silent" convention traps of SPEC §9)
  * makes this posterior disagree. Agreement to round-off over many randomized ticks pins all of them at once.</p>
  */
-public class JointLevelKFStackedOracleTest
+public class JointLevelKFStackedReferenceTest
 {
-   private static final double ANCHOR_VAR = 4.0e-4; // must match JointLevelKFPreFilter.ANCHOR_VAR (Sigma_eps)
+   private static final double ANCHOR_VAR = 4.0e-4; // must match JointKFParameters.ANCHOR_VAR (Sigma_eps)
 
    @Test
    public void testStackedUpdateMatchesNuisanceMarginalizedReference()
@@ -143,7 +143,7 @@ public class JointLevelKFStackedOracleTest
 
          // ω_base columns: R(base measurement frame → IMU measurement frame).
          base.getMeasurementFrame().getTransformToDesiredFrame(transform, imu.getMeasurementFrame());
-         JointLevelKFPreFilter.set_matrix(rot, transform.getRotation());
+         JointLevelKFPreFilter.setMatrix(rot, transform.getRotation());
          for (int a = 0; a < 3; a++)
             for (int b = 0; b < 3; b++)
                H.set(row + a, dim + b, rot.get(a, b));
