@@ -29,14 +29,27 @@ import java.util.List;
  *
  * <p>Process noise (SPEC §3.2): unmodeled joint torque maps to joint acceleration through the FLOATING-BASE
  * dynamics, not the locked-base map, so delta_qddot = lambda^-1 w_tau with
- * lambda = M_jj - M_jN M_NN^-1 M_Nj the Schur complement of the nuisance block, and Qa = sigma_tau^2 lambda^-2.</p>
+ * lambda = M_jj - M_jN M_NN^-1 M_Nj the Schur complement of the TORQUE-FREE block, and Qa = sigma_tau^2 lambda^-2.</p>
  *
- * <p>"Nuisance" = the 6-DoF floating base plus any UNFILTERED joints on the tree path between it and a filtered
- * joint ("gap" joints). On the real robot there are none, so this is exactly the SPEC's 6-DoF-base Schur
- * complement; gap joints are a topology generalization, marginalized rather than locked because the
- * composite-rigid-body calculator prunes the subtree below any ignored joint. Marginalizing is also the
- * conservative choice (more recoil => more process noise). Off-path joints stay ignored and their inertia is
- * composited into the adjacent link.</p>
+ * <p>Every considered DoF falls into one of three groups, and which group a DoF is in IS the modeling choice
+ * this class makes:</p>
+ * <ul>
+ *   <li><b>filtered</b> (f) — the filter's own joints; these carry the unmodeled torque w_tau.</li>
+ *   <li><b>torque-free</b> (N) — the 6-DoF floating base plus any UNFILTERED joints on the tree path between it
+ *       and a filtered joint ("gap" joints). Free to RECOIL under w_tau, which is what Schur-eliminating them
+ *       expresses. Note "torque-free" means these rows carry no UNMODELED-TORQUE input, not that they are
+ *       unactuated: the base obviously takes gravity and contact wrenches, and a gap joint has a real actuator.
+ *       It is exact within this model because Qa maps w_tau only.</li>
+ *   <li><b>locked</b> — genuinely off-path joints (e.g. arms when only legs are filtered). Stay ignored, so the
+ *       composite-rigid-body calculator welds them into the adjacent link's inertia.</li>
+ * </ul>
+ *
+ * <p>N is therefore the free/welded boundary of the disturbance-response model. On the real robot there are no
+ * gap joints, so N is exactly the SPEC's 6-DoF base and lambda is exactly its M_jj - M_jb M_bb^-1 M_bj. Gap
+ * joints are a topology generalization, marginalized rather than locked because the composite-rigid-body
+ * calculator prunes the whole subtree below any ignored joint (locking one would zero the filtered joints'
+ * inertia). Marginalizing is also the conservative choice: lambda &preceq; M_ff, so more recoil => more process
+ * noise.</p>
  *
  * <p>All columns are resolved through the calculator's index provider — never assume ordering. A null
  * calculator (no robot model, or no floating base) falls back to the scalar-CWNA diagonal.</p>
@@ -59,24 +72,27 @@ final class JointKFPrediction
    private final DMatrixRMaj Rimu = new DMatrixRMaj(3, 3);
 
    private CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
-   private int numberOfNuisanceDOF;         // 6 (base) + number of gap joints; the marginalized block width N
-   private int[] massMatrixNuisanceColumns; // nuisance DoF columns of the full mass matrix (length N)
-   private int[] massMatrixColumn;          // filter joint state index -> DoF column in the calculator's mass matrix
-   private final DMatrixRMaj MNN = new DMatrixRMaj(0, 0);       // nuisance block, N x N
-   private final DMatrixRMaj MNf = new DMatrixRMaj(0, 0);       // nuisance-filtered coupling, N x n (= M_jN^T)
-   private final DMatrixRMaj Mff = new DMatrixRMaj(0, 0);       // filtered block, n x n
-   private final DMatrixRMaj MNNInvMNf = new DMatrixRMaj(0, 0); // X = M_NN^-1 M_Nf, N x n
+   private int numberOfTorqueFreeDoFs;        // 6 (base) + number of gap joints; the marginalized block width N
+   private int numberOfGapJoints;             // unfiltered joints on a base->filtered path; 0 on Alex's topology
+   private int[] massMatrixTorqueFreeColumns; // torque-free DoF columns of the full mass matrix (length N)
+   private int[] massMatrixFilteredColumns;   // filter joint state index -> DoF column in the calculator's mass matrix
+   private final DMatrixRMaj torqueFreeInertia = new DMatrixRMaj(0, 0);          // M_NN, N x N
+   private final DMatrixRMaj torqueFreeFilteredCoupling = new DMatrixRMaj(0, 0); // M_Nf, N x n (= M_jN^T)
+   private final DMatrixRMaj filteredJointInertia = new DMatrixRMaj(0, 0);       // M_ff, n x n
+   /** X = M_NN^-1 M_Nf (N x n): the recoil of the torque-free DoFs per unit filtered-joint acceleration,
+    *  qddot_N = -X qddot_f. Subtracting M_jN X from M_ff is exactly what makes lambda a free-base inertia. */
+   private final DMatrixRMaj recoilMap = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj lambda = new DMatrixRMaj(0, 0);    // Schur complement lambda_eff (rotor diag added in place), n x n
    private final DMatrixRMaj lambdaInv = new DMatrixRMaj(0, 0); // lambda_eff^-1, n x n
    private final DMatrixRMaj Ytau = new DMatrixRMaj(0, 0);      // lambda_eff^-1 with column j scaled by sigma_tau,j, n x n
    private final DMatrixRMaj Qa = new DMatrixRMaj(0, 0);        // Qa = Ytau Ytau^T (PSD, symmetric BY CONSTRUCTION), n x n
-   private LinearSolverDense<DMatrixRMaj> nuisanceMassMatrixSolver; // Cholesky over M_NN, solves M_NN X = M_Nf
+   private LinearSolverDense<DMatrixRMaj> torqueFreeMassMatrixSolver; // Cholesky over M_NN, solves M_NN X = M_Nf
    private LinearSolverDense<DMatrixRMaj> schurSolver;               // Cholesky over lambda_eff, inverts it
 
-   // Filter-order arrays refreshed every predict from the LIVE YoVariables below; the nuisance one is fixed at
-   // construction (a gap joint has no tunable of its own — none exist on Alex).
-   private double[] rotorInertiaDiag;         // length n, added to lambda's diagonal (filter joint state order)
-   private double[] nuisanceRotorInertiaDiag; // length numNuisanceDoF: 0 on base rows, rotor inertia on gap-joint rows
+   // Filter-order arrays refreshed every predict from the LIVE YoVariables below; the torque-free one is fixed
+   // at construction (a gap joint has no tunable of its own — none exist on Alex).
+   private double[] rotorInertiaDiag;           // length n, added to lambda's diagonal (filter joint state order)
+   private double[] torqueFreeRotorInertiaDiag; // length N: 0 on base rows, rotor inertia on gap-joint rows
    private double[] sigmaTauPerJoint;         // length n, sigma_tau,i = alpha_i * tau_max,i
    private YoDouble[] yoAlpha;
    private YoDouble[] yoRotorInertia;
@@ -153,40 +169,40 @@ final class JointKFPrediction
 
             var indexProvider = massMatrixInput.getJointMatrixIndexProvider();
             // Filtered-joint columns, in filter state order.
-            massMatrixColumn = new int[n];
+            massMatrixFilteredColumns = new int[n];
             for (int i = 0; i < n; i++)
-               massMatrixColumn[i] = indexProvider.getJointDoFIndices(state.jointsByIndex[i])[0];
-            // Nuisance = base 6-DoF columns + each gap joint's column, i.e. every considered DoF that is not a
-            // filtered joint. Its parallel rotor diagonal is 0 on the base rows (a free base carries no
+               massMatrixFilteredColumns[i] = indexProvider.getJointDoFIndices(state.jointsByIndex[i])[0];
+            // Torque-free = base 6-DoF columns + each gap joint's column, i.e. every considered DoF that is not
+            // a filtered joint. Its parallel rotor diagonal is 0 on the base rows (a free base carries no
             // reflected rotor inertia) so a marginalized gap joint still floors M_NN.
             int[] baseColumns = indexProvider.getJointDoFIndices(baseJoint);
-            int nuisanceCapacity = baseColumns.length + spanningJoints.size();
-            TIntArrayList nuisanceColumns = new TIntArrayList(nuisanceCapacity);
-            TDoubleArrayList nuisanceRotor = new TDoubleArrayList(nuisanceCapacity);
+            int torqueFreeCapacity = baseColumns.length + spanningJoints.size();
+            TIntArrayList torqueFreeColumns = new TIntArrayList(torqueFreeCapacity);
+            TDoubleArrayList torqueFreeRotorInertia = new TDoubleArrayList(torqueFreeCapacity);
             for (int c : baseColumns)
             {
-               nuisanceColumns.add(c);
-               nuisanceRotor.add(0.0);
+               torqueFreeColumns.add(c);
+               torqueFreeRotorInertia.add(0.0);
             }
-            int gapJoints = 0;
+            numberOfGapJoints = 0;
             for (JointReadOnly spanningJoint : spanningJoints)
             {
                if (!state.isFilteredJoint(spanningJoint)) // unfiltered => gap joint => marginalize it
                {
-                  nuisanceColumns.add(indexProvider.getJointDoFIndices(spanningJoint)[0]);
+                  torqueFreeColumns.add(indexProvider.getJointDoFIndices(spanningJoint)[0]);
                   // Gap joints take the table value or the conservative default, silently — unlike a filtered
                   // joint, whose unmatched case is worth a warn (see createRotorInertiaAndSigmaTauParameters).
-                  nuisanceRotor.add(JointKFParameters.reflectedRotorInertiaForNameOrDefault(spanningJoint.getName()));
-                  gapJoints++;
+                  torqueFreeRotorInertia.add(JointKFParameters.reflectedRotorInertiaForNameOrDefault(spanningJoint.getName()));
+                  numberOfGapJoints++;
                }
             }
-            massMatrixNuisanceColumns = nuisanceColumns.toArray(); // exact-size copies; no boxed drain loop
-            nuisanceRotorInertiaDiag = nuisanceRotor.toArray();
-            numberOfNuisanceDOF = massMatrixNuisanceColumns.length; // 6 + gap joints
+            massMatrixTorqueFreeColumns = torqueFreeColumns.toArray(); // exact-size copies; no boxed drain loop
+            torqueFreeRotorInertiaDiag = torqueFreeRotorInertia.toArray();
+            numberOfTorqueFreeDoFs = massMatrixTorqueFreeColumns.length; // 6 + gap joints
 
             LogTools.info("Joint-level KF process noise: Schur-complement path (sigma_tau = " + parameters.sigmaTau.getValue() + " N*m) over "
-                          + n + " joints, marginalizing a " + numberOfNuisanceDOF + "-DoF nuisance block (6-DoF floating base"
-                          + (gapJoints > 0 ? " + " + gapJoints + " unfiltered gap joint(s))." : ")."));
+                          + n + " joints, marginalizing a " + numberOfTorqueFreeDoFs + "-DoF torque-free block (6-DoF floating base"
+                          + (numberOfGapJoints > 0 ? " + " + numberOfGapJoints + " unfiltered gap joint(s))." : ")."));
          }
       }
       else
@@ -212,42 +228,42 @@ final class JointKFPrediction
       sigmaTauIsFallback = new boolean[n];
       sigmaTauFallback = parameters.sigmaTau.getValue();
 
-      for (int idx = 0; idx < n; idx++)
+      for (int stateIndex = 0; stateIndex < n; stateIndex++)
       {
-         OneDoFJointBasics joint = state.jointsByIndex[idx];
+         OneDoFJointBasics joint = state.jointsByIndex[stateIndex];
          String jointName = joint.getName();
 
          if (JointKFParameters.isRotorInertiaUnmatched(jointName))
             LogTools.warn("JointLevelKFPreFilter: no reflected-rotor-inertia table entry for filtered joint '"
                           + jointName + "'; applying the conservative default floor "
                           + parameters.rotorInertiaDefault.getValue() + " kg*m^2.");
-         yoRotorInertia[idx] = new YoDouble("jointKFParam_rotorInertia_" + jointName,
+         yoRotorInertia[stateIndex] = new YoDouble("jointKFParam_rotorInertia_" + jointName,
                                             "LIVE: reflected rotor inertia n^2 J_rotor (kg*m^2) added to lambda's diagonal "
                                             + "before inversion. Floors lambda_min(lambda_eff), so lowering it inflates Qa.",
                                             registry);
-         yoRotorInertia[idx].set(JointKFParameters.reflectedRotorInertiaForNameOrDefault(jointName));
+         yoRotorInertia[stateIndex].set(JointKFParameters.reflectedRotorInertiaForNameOrDefault(jointName));
 
          double tauMax = joint.getEffortLimitUpper();
-         sigmaTauIsFallback[idx] = !Double.isFinite(tauMax) || tauMax <= 0.0;
-         if (sigmaTauIsFallback[idx])
+         sigmaTauIsFallback[stateIndex] = !Double.isFinite(tauMax) || tauMax <= 0.0;
+         if (sigmaTauIsFallback[stateIndex])
          {
             LogTools.warn("JointLevelKFPreFilter: filtered joint '" + jointName + "' has no finite positive effort"
                           + " limit (" + tauMax + "); falling back to the scalar SIGMA_TAU = " + sigmaTauFallback
                           + " N*m for its sigma_tau.");
-            tauMaxPerJoint[idx] = Double.NaN; // unused on the fallback path; NaN so a regression is loud
+            tauMaxPerJoint[stateIndex] = Double.NaN; // unused on the fallback path; NaN so a regression is loud
          }
          else
          {
-            tauMaxPerJoint[idx] = tauMax;
+            tauMaxPerJoint[stateIndex] = tauMax;
          }
-         yoAlpha[idx] = new YoDouble("jointKFParam_alpha_" + jointName,
+         yoAlpha[stateIndex] = new YoDouble("jointKFParam_alpha_" + jointName,
                                      "LIVE: fraction of this joint's torque capacity treated as unmodeled; "
                                      + "sigma_tau = alpha * tau_max. Retune against jointKF_QaDiag_" + jointName
                                      + " to equalize sqrt(diag(Qa)) at jointKFParam_targetQddStd."
-                                     + (sigmaTauIsFallback[idx] ? " IGNORED for this joint: no finite effort limit, so "
+                                     + (sigmaTauIsFallback[stateIndex] ? " IGNORED for this joint: no finite effort limit, so "
                                                                   + "jointKFParam_sigmaTau is used instead." : ""),
                                      registry);
-         yoAlpha[idx].set(JointKFParameters.alphaForName(jointName));
+         yoAlpha[stateIndex].set(JointKFParameters.alphaForName(jointName));
       }
 
       refreshRotorInertiaAndSigmaTau();
@@ -258,11 +274,11 @@ final class JointKFPrediction
       int n = state.numberOfJoints;
       yoQaDiag = new YoDouble[n];
       yoQaCapBindCount = new YoInteger[n];
-      for (int idx = 0; idx < n; idx++)
+      for (int stateIndex = 0; stateIndex < n; stateIndex++)
       {
-         String jointName = state.jointsByIndex[idx].getName();
-         yoQaDiag[idx] = new YoDouble("jointKF_QaDiag_" + jointName, registry);
-         yoQaCapBindCount[idx] = new YoInteger("jointKF_QaCapBind_" + jointName + "_count", registry);
+         String jointName = state.jointsByIndex[stateIndex].getName();
+         yoQaDiag[stateIndex] = new YoDouble("jointKF_QaDiag_" + jointName, registry);
+         yoQaCapBindCount[stateIndex] = new YoInteger("jointKF_QaCapBind_" + jointName + "_count", registry);
       }
    }
 
@@ -293,21 +309,20 @@ final class JointKFPrediction
       // rather than a garbage inverse entering the filter.
       if (massMatrixCalculator != null)
       {
-         int nN = numberOfNuisanceDOF;
-         MNN.reshape(nN, nN);
-         MNf.reshape(nN, n);
-         Mff.reshape(n, n);
-         MNNInvMNf.reshape(nN, n);
+         torqueFreeInertia.reshape(numberOfTorqueFreeDoFs, numberOfTorqueFreeDoFs);
+         torqueFreeFilteredCoupling.reshape(numberOfTorqueFreeDoFs, n);
+         filteredJointInertia.reshape(n, n);
+         recoilMap.reshape(numberOfTorqueFreeDoFs, n);
          lambda.reshape(n, n);
          lambdaInv.reshape(n, n);
          Ytau.reshape(n, n);
          Qa.reshape(n, n);
 
-         nuisanceMassMatrixSolver = LinearSolverFactory_DDRM.chol(nN);
-         nuisanceMassMatrixSolver.setA(CommonOps_DDRM.identity(nN));
-         // Warm the nuisance solver's multi-column solve buffers at RHS width n (M_NN X = M_Nf is N x n), so the
-         // per-tick solve reuses them. The MNf scratch is still zero here — this is only a buffer warm-up.
-         nuisanceMassMatrixSolver.solve(MNf, MNNInvMNf);
+         torqueFreeMassMatrixSolver = LinearSolverFactory_DDRM.chol(numberOfTorqueFreeDoFs);
+         torqueFreeMassMatrixSolver.setA(CommonOps_DDRM.identity(numberOfTorqueFreeDoFs));
+         // Warm the torque-free solver's multi-column solve buffers at RHS width n (M_NN X = M_Nf is N x n), so the
+         // per-tick solve reuses them. The torqueFreeFilteredCoupling scratch is still zero here — this is only a buffer warm-up.
+         torqueFreeMassMatrixSolver.solve(torqueFreeFilteredCoupling, recoilMap);
 
          schurSolver = LinearSolverFactory_DDRM.chol(n);
          schurSolver.setA(CommonOps_DDRM.identity(n));
@@ -326,7 +341,7 @@ final class JointKFPrediction
       int n = state.numberOfJoints;
       Q.zero();
       double sigmaAccel = parameters.sigmaAccel.getValue();
-      double sa2 = sigmaAccel * sigmaAccel;
+      double sigmaAccelSquared = sigmaAccel * sigmaAccel;
       double dt2 = dt * dt;
       double dt3 = dt2 * dt;
 
@@ -334,10 +349,10 @@ final class JointKFPrediction
       // update leaves in place if its very first computation fails (e.g. model not yet in a valid pose).
       for (int i = 0; i < n; i++)
       {
-         Q.set(i, i, sa2 * dt3 / 3.0); // CT white noise accel block, per joint
-         Q.set(i, n + i, sa2 * dt2 / 2.0); // q - qd cross term
-         Q.set(n + i, i, sa2 * dt2 / 2.0);
-         Q.set(n + i, n + i, sa2 * dt);
+         Q.set(i, i, sigmaAccelSquared * dt3 / 3.0); // CT white noise accel block, per joint
+         Q.set(i, n + i, sigmaAccelSquared * dt2 / 2.0); // q - qd cross term
+         Q.set(n + i, i, sigmaAccelSquared * dt2 / 2.0);
+         Q.set(n + i, n + i, sigmaAccelSquared * dt);
       }
       for (int o = 0; o < state.numberOfIMUs; o++) // bias random walk, per-IMU process noise
       {
@@ -413,44 +428,43 @@ final class JointKFPrediction
       // Extract by resolved column index, never by assumed ordering. M is symmetric, so M_jN = M_Nf^T and only
       // M_NN, M_Nf, M_ff are needed. M_ff is read in filter state order, so lambda comes out already in state
       // order — no permutation in the fill below.
-      int nN = numberOfNuisanceDOF;
-      for (int a = 0; a < nN; a++)
+      for (int a = 0; a < numberOfTorqueFreeDoFs; a++)
       {
-         int ca = massMatrixNuisanceColumns[a];
-         for (int b = 0; b < nN; b++)
-            MNN.set(a, b, massMatrix.get(ca, massMatrixNuisanceColumns[b])); // M_NN (NxN)
+         int torqueFreeColumn = massMatrixTorqueFreeColumns[a];
+         for (int b = 0; b < numberOfTorqueFreeDoFs; b++)
+            torqueFreeInertia.set(a, b, massMatrix.get(torqueFreeColumn, massMatrixTorqueFreeColumns[b])); // M_NN (NxN)
          for (int j = 0; j < n; j++)
-            MNf.set(a, j, massMatrix.get(ca, massMatrixColumn[j]));          // M_Nf (Nxn) = M_jN^T
+            torqueFreeFilteredCoupling.set(a, j, massMatrix.get(torqueFreeColumn, massMatrixFilteredColumns[j]));          // M_Nf (Nxn) = M_jN^T
       }
       for (int i = 0; i < n; i++)
       {
-         int ci = massMatrixColumn[i];
+         int filteredColumn = massMatrixFilteredColumns[i];
          for (int j = 0; j < n; j++)
             //TODO: use this via block operations?
-            Mff.set(i, j, massMatrix.get(ci, massMatrixColumn[j]));          // M_ff (nxn)
+            filteredJointInertia.set(i, j, massMatrix.get(filteredColumn, massMatrixFilteredColumns[j]));          // M_ff (nxn)
       }
 
       // Floors M_NN the same way the filtered rotor diagonal floors lambda_eff below.
-      if (nuisanceRotorInertiaDiag != null) //TODO: need to rename this to be more intuitive, rather than just "nuisance"
-         for (int a = 0; a < nN; a++)
-            MNN.add(a, a, nuisanceRotorInertiaDiag[a]);
+      if (torqueFreeRotorInertiaDiag != null)
+         for (int a = 0; a < numberOfTorqueFreeDoFs; a++)
+            torqueFreeInertia.add(a, a, torqueFreeRotorInertiaDiag[a]);
 
-      // X = M_NN^-1 M_Nf via Cholesky (rejects a non-PD nuisance block before it can enter the Schur complement).
-      if (!nuisanceMassMatrixSolver.setA(MNN))
+      // X = M_NN^-1 M_Nf via Cholesky (rejects a non-PD torque-free block before it can enter the Schur complement).
+      if (!torqueFreeMassMatrixSolver.setA(torqueFreeInertia))
       {
-         warnMassMatrixFailureOnce("nuisance mass-matrix block M_NN not positive definite");
+         warnMassMatrixFailureOnce("torque-free mass-matrix block M_NN not positive definite");
          return;
       }
-      nuisanceMassMatrixSolver.solve(MNf, MNNInvMNf); // X (Nxn); solve leaves MNf unmodified
-      if (JointLevelKFPreFilter.containsNonFinite(MNNInvMNf))
+      torqueFreeMassMatrixSolver.solve(torqueFreeFilteredCoupling, recoilMap); // X (Nxn); solve leaves torqueFreeFilteredCoupling unmodified
+      if (JointLevelKFPreFilter.containsNonFinite(recoilMap))
       {
-         warnMassMatrixFailureOnce("non-finite M_NN^-1 M_Nf (near-singular nuisance block)");
+         warnMassMatrixFailureOnce("non-finite M_NN^-1 M_Nf (near-singular torque-free block)");
          return;
       }
 
       // lambda = M_ff - M_jN X = M_ff - M_Nf^T X (M symmetric => M_jN = M_Nf^T). SPEC §3.2.
-      lambda.set(Mff);
-      CommonOps_DDRM.multAddTransA(-1.0, MNf, MNNInvMNf, lambda);
+      lambda.set(filteredJointInertia);
+      CommonOps_DDRM.multAddTransA(-1.0, torqueFreeFilteredCoupling, recoilMap, lambda);
       // Symmetrize before the Cholesky invert: the block extraction is exact but the matrix products leave
       // lambda symmetric only to round-off, and Cholesky assumes exact symmetry.
       JointLevelKFPreFilter.symmetrize(lambda);
@@ -513,11 +527,11 @@ final class JointKFPrediction
       {
          for (int j = 0; j < n; j++)
          {
-            double qa = Qa.get(i, j); // exactly symmetric (Y Yᵀ), so no symmetrized read is needed
-            Q.set(i, j, qa * dt3 / 3.0);     // q-q block
-            Q.set(i, n + j, qa * dt2 / 2.0); // q-qd cross term
-            Q.set(n + i, j, qa * dt2 / 2.0);
-            Q.set(n + i, n + j, qa * dt);    // qd-qd block
+            double qaEntry = Qa.get(i, j); // exactly symmetric (Y Yᵀ), so no symmetrized read is needed
+            Q.set(i, j, qaEntry * dt3 / 3.0);     // q-q block
+            Q.set(i, n + j, qaEntry * dt2 / 2.0); // q-qd cross term
+            Q.set(n + i, j, qaEntry * dt2 / 2.0);
+            Q.set(n + i, n + j, qaEntry * dt);    // qd-qd block
          }
       }
    }

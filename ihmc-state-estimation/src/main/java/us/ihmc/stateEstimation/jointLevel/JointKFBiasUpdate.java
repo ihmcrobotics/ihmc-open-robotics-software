@@ -54,10 +54,12 @@ final class JointKFBiasUpdate
    /** 3x3 scratch for the gyro MEASUREMENT-noise covariance. Deliberately NOT shared with JointKFPrediction's
     *  bias PROCESS-noise scratch — see that field. */
    private final DMatrixRMaj Rimu = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj rot3 = new DMatrixRMaj(3, 3);
-   private final RigidBodyTransform tmpTransform = new RigidBodyTransform();
-   private final FrameVector3D fvA = new FrameVector3D();
-   private final FrameVector3D fvB = new FrameVector3D();
+   private final DMatrixRMaj rotationToJacobianFrame = new DMatrixRMaj(3, 3);
+   private final RigidBodyTransform imuToJacobianTransform = new RigidBodyTransform();
+   /** Pair scratch, both expressed in the pair's Jacobian frame. After the subtraction in
+    *  {@link #buildStackedMeasurement()}, childAngularVelocity holds the residual z_e (child +, parent -). */
+   private final FrameVector3D childAngularVelocity = new FrameVector3D();
+   private final FrameVector3D parentAngularVelocity = new FrameVector3D();
 
    /** The IHMC estimator finalizes contact trust in phase 2, AFTER computeJointState, so this phase-1 update
     *  must use the previous tick's set. Pre-sized to the anchor count; only cleared/refilled, never grown. */
@@ -190,9 +192,9 @@ final class JointKFBiasUpdate
       int activeAnchors = 0;
       for (int i = 0; i < state.footAnchors.size(); i++)
       {
-         JointKFState.FootAnchor fa = state.footAnchors.get(i);
-         fa.active = fa.usable && trustedFeetFromLastTick.contains(fa.foot);
-         if (fa.active)
+         JointKFState.FootAnchor footAnchor = state.footAnchors.get(i);
+         footAnchor.active = footAnchor.usable && trustedFeetFromLastTick.contains(footAnchor.foot);
+         if (footAnchor.active)
             activeAnchors++;
       }
       yoActiveAnchorCount.set(activeAnchors);
@@ -209,34 +211,34 @@ final class JointKFBiasUpdate
       // Pair rows.
       for (int e = 0; e < E; e++)
       {
-         JointKFState.Pair p = state.pairs.get(e);
+         JointKFState.Pair pair = state.pairs.get(e);
          int row0 = 3 * e;
-         p.jac.reset();
-         CommonOps_DDRM.extract(p.jac.getJacobianMatrix(), 0, 3, 0, p.qdCols.length, p.Jang, 0, 0); // angular part
+         pair.jacobian.reset();
+         CommonOps_DDRM.extract(pair.jacobian.getJacobianMatrix(), 0, 3, 0, pair.qdCols.length, pair.Jang, 0, 0); // angular part
 
          // z_e = omega_child - omega_parent expressed in the child body-fixed Jacobian frame (child +, parent -).
-         fvA.setToZero(p.child.getMeasurementFrame());
-         fvA.set(p.child.getAngularVelocityMeasurement());
-         fvA.changeFrame(p.jac.getJacobianFrame());
-         fvB.setToZero(p.parent.getMeasurementFrame());
-         fvB.set(p.parent.getAngularVelocityMeasurement());
-         fvB.changeFrame(p.jac.getJacobianFrame());
-         fvA.sub(fvB);
-         zg.set(row0, 0, fvA.getX());
-         zg.set(row0 + 1, 0, fvA.getY());
-         zg.set(row0 + 2, 0, fvA.getZ());
+         childAngularVelocity.setToZero(pair.child.getMeasurementFrame());
+         childAngularVelocity.set(pair.child.getAngularVelocityMeasurement());
+         childAngularVelocity.changeFrame(pair.jacobian.getJacobianFrame());
+         parentAngularVelocity.setToZero(pair.parent.getMeasurementFrame());
+         parentAngularVelocity.set(pair.parent.getAngularVelocityMeasurement());
+         parentAngularVelocity.changeFrame(pair.jacobian.getJacobianFrame());
+         childAngularVelocity.sub(parentAngularVelocity); // childAngularVelocity now holds the residual z_e
+         zg.set(row0, 0, childAngularVelocity.getX());
+         zg.set(row0 + 1, 0, childAngularVelocity.getY());
+         zg.set(row0 + 2, 0, childAngularVelocity.getZ());
 
          // H_g q̇-columns: +J_e scattered onto the path joints. q-columns left 0 (SPEC §5.4); bias columns via L.
-         for (int c = 0; c < p.qdCols.length; c++)
+         for (int c = 0; c < pair.qdCols.length; c++)
             for (int r = 0; r < 3; r++)
-               Hg.set(row0 + r, p.qdCols[c], p.Jang.get(r, c));
+               Hg.set(row0 + r, pair.qdCols[c], pair.Jang.get(r, c));
 
          // L pair blocks: +R(child->J_e) at the child IMU bias column, -R(parent->J_e) at the parent IMU column.
-         // Lmix column = state bias column minus the 2n (q,q̇) offset (p.childBias/parentBias were precomputed).
-         packRotationToJacFrame(p.child, p.jac.getJacobianFrame(), rot3);
-         insertScaledInto(rot3, +1.0, Lmix, row0, p.childBias - 2 * n);
-         packRotationToJacFrame(p.parent, p.jac.getJacobianFrame(), rot3);
-         insertScaledInto(rot3, -1.0, Lmix, row0, p.parentBias - 2 * n);
+         // Lmix column = state bias column minus the 2n (q,q̇) offset (pair.childBias/parentBias were precomputed).
+         packRotationToJacobianFrame(pair.child, pair.jacobian.getJacobianFrame(), rotationToJacobianFrame);
+         insertScaledInto(rotationToJacobianFrame, +1.0, Lmix, row0, pair.childBias - 2 * n);
+         packRotationToJacobianFrame(pair.parent, pair.jacobian.getJacobianFrame(), rotationToJacobianFrame);
+         insertScaledInto(rotationToJacobianFrame, -1.0, Lmix, row0, pair.parentBias - 2 * n);
       }
 
       // Active stance-anchor rows. A planted foot has zero angular velocity, so
@@ -247,55 +249,55 @@ final class JointKFBiasUpdate
       // H gets -J_F on the FILTERED columns only; the L block stays +I3 on the base IMU. That +I3 does not
       // depend on which leg joints are states, so the anchor's gauge-fixing role survives the split intact. The
       // price is qd_U^meas's encoder noise, propagated into R below.
-      int arow = 3 * E;
+      int anchorRow = 3 * E;
       for (int i = 0; i < state.footAnchors.size(); i++)
       {
-         JointKFState.FootAnchor fa = state.footAnchors.get(i);
-         if (!fa.active)
+         JointKFState.FootAnchor footAnchor = state.footAnchors.get(i);
+         if (!footAnchor.active)
             continue;
-         fa.jac.reset();
-         CommonOps_DDRM.extract(fa.jac.getJacobianMatrix(), 0, 3, 0, fa.qdCols.length, fa.Jang, 0, 0);
+         footAnchor.jacobian.reset();
+         CommonOps_DDRM.extract(footAnchor.jacobian.getJacobianMatrix(), 0, 3, 0, footAnchor.qdCols.length, footAnchor.Jang, 0, 0);
 
-         Vector3DReadOnly w = state.baseIMU.getAngularVelocityMeasurement();
-         zg.set(arow, 0, w.getX());
-         zg.set(arow + 1, 0, w.getY());
-         zg.set(arow + 2, 0, w.getZ());
+         Vector3DReadOnly baseAngularVelocity = state.baseIMU.getAngularVelocityMeasurement();
+         zg.set(anchorRow, 0, baseAngularVelocity.getX());
+         zg.set(anchorRow + 1, 0, baseAngularVelocity.getY());
+         zg.set(anchorRow + 2, 0, baseAngularVelocity.getZ());
 
          // Sigma_eps + J_U diag(sigma_qd^2) J_U^T, accumulated as we walk the chain.
-         fa.R.zero();
+         footAnchor.R.zero();
          double anchorVar = parameters.anchorVar.getValue();
          for (int r = 0; r < 3; r++)
-            fa.R.add(r, r, anchorVar);
+            footAnchor.R.add(r, r, anchorVar);
 
-         for (int c = 0; c < fa.qdCols.length; c++)
+         for (int c = 0; c < footAnchor.qdCols.length; c++)
          {
-            if (fa.qdCols[c] >= 0)
+            if (footAnchor.qdCols[c] >= 0)
             {
                // Filtered joint: a state, so it gets an H column.
                for (int r = 0; r < 3; r++)
-                  Hg.set(arow + r, fa.qdCols[c], -fa.Jang.get(r, c)); // -J_F
+                  Hg.set(anchorRow + r, footAnchor.qdCols[c], -footAnchor.Jang.get(r, c)); // -J_F
             }
             else
             {
                // Unfiltered joint: fold J_U(:,c) * qd^meas into z', and its noise into R.
-               double qdMeasured = state.sensorMap.getOneDoFJointOutput(fa.legJoints[c]).getVelocity();
+               double qdMeasured = state.sensorMap.getOneDoFJointOutput(footAnchor.legJoints[c]).getVelocity();
                if (!Double.isFinite(qdMeasured))
                {
-                  state.warnNonFiniteInputOnce("joint velocity of unfiltered anchor joint " + fa.legJoints[c].getName());
+                  state.warnNonFiniteInputOnce("joint velocity of unfiltered anchor joint " + footAnchor.legJoints[c].getName());
                   qdMeasured = 0.0;
                }
                for (int r = 0; r < 3; r++)
-                  zg.add(arow + r, 0, fa.Jang.get(r, c) * qdMeasured); // z' = z + J_U qd_U^meas
+                  zg.add(anchorRow + r, 0, footAnchor.Jang.get(r, c) * qdMeasured); // z' = z + J_U qd_U^meas
 
                // Rank-1 congruence: J_U(:,c) sigma_c^2 J_U(:,c)^T, per-joint sigma (measured; fallback otherwise).
                for (int r = 0; r < 3; r++)
-                  for (int cc = 0; cc < 3; cc++)
-                     fa.R.add(r, cc, fa.qdVar[c] * fa.Jang.get(r, c) * fa.Jang.get(cc, c));
+                  for (int colInBlock = 0; colInBlock < 3; colInBlock++)
+                     footAnchor.R.add(r, colInBlock, footAnchor.qdVar[c] * footAnchor.Jang.get(r, c) * footAnchor.Jang.get(colInBlock, c));
             }
          }
 
-         insertScaledInto(identity3, +1.0, Lmix, arow, state.baseBiasCol - 2 * n); // +I3, base measurement frame
-         arow += 3;
+         insertScaledInto(identity3, +1.0, Lmix, anchorRow, state.baseBiasCol - 2 * n); // +I3, base measurement frame
+         anchorRow += 3;
       }
 
       // Copy L into H_g's bias columns [2n, 2n+3m): "the bias columns of H_g ARE L" (SPEC §5.3), one build, two uses.
@@ -310,16 +312,16 @@ final class JointKFBiasUpdate
       LSigma.reshape(rows, 3 * m);
       CommonOps_DDRM.mult(Lmix, Sigma, LSigma);
       CommonOps_DDRM.multTransB(LSigma, Lmix, Rg);
-      int arow2 = 3 * E;
+      int anchorNoiseRow = 3 * E;
       for (int i = 0; i < state.footAnchors.size(); i++)
       {
-         JointKFState.FootAnchor fa = state.footAnchors.get(i);
-         if (!fa.active)
+         JointKFState.FootAnchor footAnchor = state.footAnchors.get(i);
+         if (!footAnchor.active)
             continue;
          for (int r = 0; r < 3; r++)
             for (int c = 0; c < 3; c++)
-               Rg.add(arow2 + r, arow2 + c, fa.R.get(r, c));
-         arow2 += 3;
+               Rg.add(anchorNoiseRow + r, anchorNoiseRow + c, footAnchor.R.get(r, c));
+         anchorNoiseRow += 3;
       }
       // Exact symmetry for the Joseph update (the congruence is symmetric only to round-off).
       JointLevelKFPreFilter.symmetrize(Rg);
@@ -397,11 +399,11 @@ final class JointKFBiasUpdate
       for (int o = 0; o < state.numberOfIMUs; o++)
       {
          int col = 2 * n + 3 * o;
-         double bx = state.x.get(col), by = state.x.get(col + 1), bz = state.x.get(col + 2);
-         yoImuGyroBiasX[o].set(bx);
-         yoImuGyroBiasY[o].set(by);
-         yoImuGyroBiasZ[o].set(bz);
-         yoImuGyroBiasNorm[o].set(Math.sqrt(bx * bx + by * by + bz * bz));
+         double biasX = state.x.get(col), biasY = state.x.get(col + 1), biasZ = state.x.get(col + 2);
+         yoImuGyroBiasX[o].set(biasX);
+         yoImuGyroBiasY[o].set(biasY);
+         yoImuGyroBiasZ[o].set(biasZ);
+         yoImuGyroBiasNorm[o].set(Math.sqrt(biasX * biasX + biasY * biasY + biasZ * biasZ));
       }
 
       if (state.baseBiasCol >= 0)
@@ -416,12 +418,12 @@ final class JointKFBiasUpdate
       cacheTrustedFeet(feet);
    }
 
-   private void packRotationToJacFrame(IMUSensorReadOnly imu, ReferenceFrame jacFrame, DMatrixRMaj out)
+   private void packRotationToJacobianFrame(IMUSensorReadOnly imu, ReferenceFrame jacobianFrame, DMatrixRMaj out)
    {
-      imu.getMeasurementFrame().getTransformToDesiredFrame(tmpTransform, jacFrame);
-      RotationMatrixReadOnly r = tmpTransform.getRotation();
+      imu.getMeasurementFrame().getTransformToDesiredFrame(imuToJacobianTransform, jacobianFrame);
+      RotationMatrixReadOnly r = imuToJacobianTransform.getRotation();
       out.reshape(3, 3);
-      JointLevelKFPreFilter.set_matrix(out, r);
+      JointLevelKFPreFilter.setMatrix(out, r);
    }
 
    private static void insertScaledInto(DMatrixRMaj src, double scale, DMatrixRMaj dst, int row0, int col0)

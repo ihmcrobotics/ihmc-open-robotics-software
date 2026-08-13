@@ -74,7 +74,7 @@ public class JointLevelKFMassMatrixNoiseTest
     * Independent reference for the Schur complement {@code Λ} and the fully-locked filtered block {@code M_ff},
     * both in filter state order. Replicates the filter's model definition (SPEC §3.2 generalized to arbitrary
     * topology): builds a second calculator over the floating base + the joints spanning base→filtered, then
-    * marginalizes the NUISANCE block (base 6-DoF + any unfiltered "gap" joints) via
+    * marginalizes the TORQUE-FREE block (base 6-DoF + any unfiltered "gap" joints) via
     * {@code Λ = M_ff − M_Nf^T M_NN⁻¹ M_Nf} (using {@code M_jN = M_Nf^T} since {@code M} is symmetric). Done in
     * plain EJML (LU) — no contact with the filter's Cholesky solvers or column mapping. Returns {@code {Λ, M_ff}}.
     */
@@ -101,19 +101,19 @@ public class JointLevelKFMassMatrixNoiseTest
       calc.reset();
       DMatrixRMaj massMatrix = calc.getMassMatrix().copy();
 
-      // Filtered-joint columns (in filter state order) and nuisance columns (base + gap joints).
+      // Filtered-joint columns (in filter state order) and torqueFree columns (base + gap joints).
       int[] filteredCols = new int[n];
       for (int i = 0; i < n; i++)
          filteredCols[i] = input.getJointMatrixIndexProvider().getJointDoFIndices(f.filteredJoints.get(i))[0];
       int[] baseCols = input.getJointMatrixIndexProvider().getJointDoFIndices(f.rootJoint);
       assertEquals(6, baseCols.length, "floating base is 6-DoF");
-      List<Integer> nuisance = new ArrayList<>();
+      List<Integer> torqueFree = new ArrayList<>();
       for (int c : baseCols)
-         nuisance.add(c);
+         torqueFree.add(c);
       for (JointReadOnly spanningJoint : spanning)
          if (!f.filteredJoints.contains(spanningJoint)) // gap joint => marginalize
-            nuisance.add(input.getJointMatrixIndexProvider().getJointDoFIndices(spanningJoint)[0]);
-      int nN = nuisance.size();
+            torqueFree.add(input.getJointMatrixIndexProvider().getJointDoFIndices(spanningJoint)[0]);
+      int nN = torqueFree.size();
 
       DMatrixRMaj mNN = new DMatrixRMaj(nN, nN);
       DMatrixRMaj mNf = new DMatrixRMaj(nN, n);
@@ -121,9 +121,9 @@ public class JointLevelKFMassMatrixNoiseTest
       for (int a = 0; a < nN; a++)
       {
          for (int b = 0; b < nN; b++)
-            mNN.set(a, b, massMatrix.get(nuisance.get(a), nuisance.get(b)));
+            mNN.set(a, b, massMatrix.get(torqueFree.get(a), torqueFree.get(b)));
          for (int j = 0; j < n; j++)
-            mNf.set(a, j, massMatrix.get(nuisance.get(a), filteredCols[j]));
+            mNf.set(a, j, massMatrix.get(torqueFree.get(a), filteredCols[j]));
       }
       for (int i = 0; i < n; i++)
          for (int j = 0; j < n; j++)
@@ -212,7 +212,7 @@ public class JointLevelKFMassMatrixNoiseTest
    @Test
    public void testSchurComplementIsSymmetricPDAndDominatedByLockedInertia()
    {
-      // SPEC §3.2/§8: Λ is symmetric PD whenever M is, and Λ ⪯ M_ff (the free base/nuisance recoils, so the
+      // SPEC §3.2/§8: Λ is symmetric PD whenever M is, and Λ ⪯ M_ff (the free base/torqueFree recoils, so the
       // joints accelerate MORE per unit torque than the fully-locked model — hence Λ⁻² ⪰ M_ff⁻² and the
       // effective Qa grows). M_ff is the filtered block with everything else locked; for the real gapless
       // topology M_ff = the locked-base joint inertia M_jj. Assert Λ symmetric PD and the PSD ordering

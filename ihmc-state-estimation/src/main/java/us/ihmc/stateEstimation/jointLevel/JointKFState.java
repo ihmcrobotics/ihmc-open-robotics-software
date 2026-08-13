@@ -147,18 +147,18 @@ final class JointKFState
          if (parent.getMeasurementLink() == child.getMeasurementLink())
             throw new IllegalArgumentException("JointLevelKFPreFilter: pair '" + pp.getEstimatorName() + "' parent and child IMUs "
                   + "share the measurement link " + parent.getMeasurementLink().getName() + " (zero-DoF chain).");
-         Pair p = new Pair(parent, child);
-         p.jac.setKinematicChain(parent.getMeasurementLink(), child.getMeasurementLink());
-         p.jac.setJacobianFrame(child.getMeasurementLink().getBodyFixedFrame());
+         Pair pair = new Pair(parent, child);
+         pair.jacobian.setKinematicChain(parent.getMeasurementLink(), child.getMeasurementLink());
+         pair.jacobian.setJacobianFrame(child.getMeasurementLink().getBodyFixedFrame());
          //NOTE: Assumes 1-DoF and fixed joints only, just as IMUBasedJointStateEstimator does.
          // The i-th angular jacobian column correspnods to the i-th filtered joint.
-         List<OneDoFJointBasics> chain = MultiBodySystemTools.filterJoints(p.jac.getJointsFromBaseToEndEffector(), OneDoFJointBasics.class);
-         p.chainJoints = chain.toArray(new OneDoFJointBasics[0]);
-         for (OneDoFJointBasics j : p.chainJoints)
+         List<OneDoFJointBasics> chain = MultiBodySystemTools.filterJoints(pair.jacobian.getJointsFromBaseToEndEffector(), OneDoFJointBasics.class);
+         pair.chainJoints = chain.toArray(new OneDoFJointBasics[0]);
+         for (OneDoFJointBasics j : pair.chainJoints)
             jointToIndex.putIfAbsent(j, jointToIndex.size()); // places joints via hash mapping
          imuToOrdinal.putIfAbsent(parent, imuToOrdinal.size());
          imuToOrdinal.putIfAbsent(child, imuToOrdinal.size());
-         pairs.add(p);
+         pairs.add(pair);
       }
 
       numberOfJoints = jointToIndex.size();
@@ -170,12 +170,12 @@ final class JointKFState
       // idempotent for a joint that appears on two chains.
       jointsByIndex = new OneDoFJointBasics[numberOfJoints];
       imusByOrdinal = new IMUSensorReadOnly[numberOfIMUs];
-      for (Pair p : pairs)
+      for (Pair pair : pairs)
       {
-         for (OneDoFJointBasics j : p.chainJoints)
+         for (OneDoFJointBasics j : pair.chainJoints)
             jointsByIndex[jointToIndex.get(j)] = j;
-         imusByOrdinal[imuToOrdinal.get(p.parent)] = p.parent;
-         imusByOrdinal[imuToOrdinal.get(p.child)] = p.child;
+         imusByOrdinal[imuToOrdinal.get(pair.parent)] = pair.parent;
+         imusByOrdinal[imuToOrdinal.get(pair.child)] = pair.child;
       }
 
       // Acyclicity assert (Part B item 6): with the exact R_g, a cycle's telescoping row-combination has zero H,
@@ -183,24 +183,24 @@ final class JointKFState
       assertAcyclicIMUGraph();
 
       // 2) Second pass: assemble state sinze columns are known as n is fixed.
-      for (Pair p : pairs)
+      for (Pair pair : pairs)
       {
-         int dof = p.chainJoints.length;
-         p.Jang.reshape(3, dof); // Jang is allocated blank at construction in the chain, only reshaped once full DoF are known
-         p.qdCols = new int[dof];
-         for (int c = 0; c < dof; c++)
+         int numberOfChainDoFs = pair.chainJoints.length;
+         pair.Jang.reshape(3, numberOfChainDoFs); // Jang is allocated blank at construction in the chain, only reshaped once full DoF are known
+         pair.qdCols = new int[numberOfChainDoFs];
+         for (int c = 0; c < numberOfChainDoFs; c++)
          {
             // Fail loud rather than let a sentinel through: numberOfJoints + (-1) is an IN-RANGE column, so a
             // missing chain joint would silently alias another joint's q̇ instead of throwing. Unreachable —
             // the first pass inserted every chain joint of every pair.
-            int idx = jointToIndex.get(p.chainJoints[c]);
-            if (idx == NOT_IN_STATE)
-               throw new IllegalStateException("JointLevelKFPreFilter: chain joint " + p.chainJoints[c].getName() + " of pair "
-                     + p.parent.getSensorName() + "->" + p.child.getSensorName() + " is not a filter state.");
-            p.qdCols[c] = numberOfJoints + idx; // this int[] is the selector matrix of the path S_ab, but in sparse form as all joints are not related directly
+            int stateIndex = jointToIndex.get(pair.chainJoints[c]);
+            if (stateIndex == NOT_IN_STATE)
+               throw new IllegalStateException("JointLevelKFPreFilter: chain joint " + pair.chainJoints[c].getName() + " of pair "
+                     + pair.parent.getSensorName() + "->" + pair.child.getSensorName() + " is not a filter state.");
+            pair.qdCols[c] = numberOfJoints + stateIndex; // this int[] is the selector matrix of the path S_ab, but in sparse form as all joints are not related directly
          }
-         p.parentBias = 2 * numberOfJoints + 3 * requireImuOrdinal(p.parent);
-         p.childBias = 2 * numberOfJoints + 3 * requireImuOrdinal(p.child);
+         pair.parentBias = 2 * numberOfJoints + 3 * requireImuOrdinal(pair.parent);
+         pair.childBias = 2 * numberOfJoints + 3 * requireImuOrdinal(pair.child);
       }
 
       // 3) Base IMU = root of the tree + first pair parent.
@@ -218,15 +218,15 @@ final class JointKFState
          double qdVarFallback = sigmaQdUnfiltered * sigmaQdUnfiltered;
          for (RigidBodyBasics foot : feet)
          {
-            FootAnchor fa = new FootAnchor(foot);
-            fa.jac.setKinematicChain(baseIMU.getMeasurementLink(), foot);
-            fa.jac.setJacobianFrame(baseIMU.getMeasurementFrame()); // express J in the same frame as the base gyro
-            List<OneDoFJointBasics> leg = MultiBodySystemTools.filterJoints(fa.jac.getJointsFromBaseToEndEffector(), OneDoFJointBasics.class);
+            FootAnchor footAnchor = new FootAnchor(foot);
+            footAnchor.jacobian.setKinematicChain(baseIMU.getMeasurementLink(), foot);
+            footAnchor.jacobian.setJacobianFrame(baseIMU.getMeasurementFrame()); // express J in the same frame as the base gyro
+            List<OneDoFJointBasics> leg = MultiBodySystemTools.filterJoints(footAnchor.jacobian.getJointsFromBaseToEndEffector(), OneDoFJointBasics.class);
 
-            fa.legJoints = leg.toArray(new OneDoFJointBasics[0]);
-            fa.Jang.reshape(3, fa.legJoints.length);
-            fa.qdCols = new int[fa.legJoints.length];
-            fa.qdVar = new double[fa.legJoints.length];
+            footAnchor.legJoints = leg.toArray(new OneDoFJointBasics[0]);
+            footAnchor.Jang.reshape(3, footAnchor.legJoints.length);
+            footAnchor.qdCols = new int[footAnchor.legJoints.length];
+            footAnchor.qdVar = new double[footAnchor.legJoints.length];
 
             // A leg joint that is NOT a filter state does not disable the anchor -- it only has to be KNOWN, not
             // ESTIMATED, so it moves to the measurement side (see JointKFBiasUpdate.buildStackedMeasurement).
@@ -234,38 +234,38 @@ final class JointKFState
             // This used to set usable=false for ANY unfiltered chain joint, which on Alex is always (no foot
             // IMUs => ankles never filtered => both anchors dead every tick, bias gauge never fixed, pelvis gyro
             // bias random-walked to 0.17 rad/s and drove the pitch drift). See FINDINGS.md Part F.
-            fa.usable = true;
+            footAnchor.usable = true;
             int unfiltered = 0;
-            for (int c = 0; c < fa.legJoints.length; c++)
+            for (int c = 0; c < footAnchor.legJoints.length; c++)
             {
-               int idx = jointToIndex.get(fa.legJoints[c]);
-               if (idx == NOT_IN_STATE)
+               int stateIndex = jointToIndex.get(footAnchor.legJoints[c]);
+               if (stateIndex == NOT_IN_STATE)
                {
-                  fa.qdCols[c] = -1; // unfiltered: contributes J_U * qd^meas to z', no H column
+                  footAnchor.qdCols[c] = -1; // unfiltered: contributes J_U * qd^meas to z', no H column
                   unfiltered++;
                }
                else
-                  fa.qdCols[c] = numberOfJoints + idx;
+                  footAnchor.qdCols[c] = numberOfJoints + stateIndex;
                // Per-joint encoder VELOCITY variance for the anchor's input-noise congruence (only the
                // unfiltered columns are ever read, but fill every slot — cheap, and no -1 bookkeeping).
-               double qdStd = encoderVelocityNoiseStd == null ? Double.NaN : encoderVelocityNoiseStd.applyAsDouble(fa.legJoints[c].getName());
-               fa.qdVar[c] = (Double.isFinite(qdStd) && qdStd > 0.0) ? qdStd * qdStd : qdVarFallback;
+               double qdStd = encoderVelocityNoiseStd == null ? Double.NaN : encoderVelocityNoiseStd.applyAsDouble(footAnchor.legJoints[c].getName());
+               footAnchor.qdVar[c] = (Double.isFinite(qdStd) && qdStd > 0.0) ? qdStd * qdStd : qdVarFallback;
             }
             // A chain with no joints at all cannot anchor anything (degenerate model).
-            if (fa.legJoints.length == 0)
-               fa.usable = false;
+            if (footAnchor.legJoints.length == 0)
+               footAnchor.usable = false;
             if (unfiltered > 0)
                LogTools.info("JointLevelKFPreFilter: foot anchor " + foot.getName() + " has " + unfiltered + " of "
-                             + fa.legJoints.length + " chain joints unfiltered; their measured velocities are folded into the "
+                             + footAnchor.legJoints.length + " chain joints unfiltered; their measured velocities are folded into the "
                              + "anchor measurement and their encoder noise into the anchor covariance.");
-            footAnchors.add(fa);
+            footAnchors.add(footAnchor);
          }
       }
 
       // Structural assert (gauge fixing): with no usable anchor the base-IMU gyro bias is unobservable FOREVER
       // -- it random-walks and integrates straight into base orientation. Not a degraded mode, a broken filter,
       // and it must never boot silently again (it did, for months). Fail loud.
-      if (feet != null && !feet.isEmpty() && footAnchors.stream().noneMatch(fa -> fa.usable))
+      if (feet != null && !feet.isEmpty() && footAnchors.stream().noneMatch(footAnchor -> footAnchor.usable))
          throw new IllegalArgumentException("JointLevelKFPreFilter: no usable foot anchor. The base-IMU gyro bias is a gauge "
                + "freedom fixed ONLY by the stance-anchor rows; without one it is unobservable and will diverge. "
                + "Check that the base IMU's measurement link connects to at least one foot.");
@@ -326,15 +326,15 @@ final class JointKFState
       yoJointPositionLowerBound = new YoDouble[numberOfJoints];
       yoJointVelocityUpperBound = new YoDouble[numberOfJoints];
       yoJointVelocityLowerBound = new YoDouble[numberOfJoints];
-      for (int idx = 0; idx < numberOfJoints; idx++)
+      for (int stateIndex = 0; stateIndex < numberOfJoints; stateIndex++)
       {
-         String jointName = jointsByIndex[idx].getName();
-         yoJointPosition[idx] = new YoDouble("jointKF_q_" + jointName, registry);
-         yoJointVelocity[idx] = new YoDouble("jointKF_qd_" + jointName, registry);
-         yoJointPositionUpperBound[idx] = new YoDouble("jointKF_q_" + jointName + "_upperBound", registry);
-         yoJointPositionLowerBound[idx] = new YoDouble("jointKF_q_" + jointName + "_lowerBound", registry);
-         yoJointVelocityUpperBound[idx] = new YoDouble("jointKF_qd_" + jointName + "_upperBound", registry);
-         yoJointVelocityLowerBound[idx] = new YoDouble("jointKF_qd_" + jointName + "_lowerBound", registry);
+         String jointName = jointsByIndex[stateIndex].getName();
+         yoJointPosition[stateIndex] = new YoDouble("jointKF_q_" + jointName, registry);
+         yoJointVelocity[stateIndex] = new YoDouble("jointKF_qd_" + jointName, registry);
+         yoJointPositionUpperBound[stateIndex] = new YoDouble("jointKF_q_" + jointName + "_upperBound", registry);
+         yoJointPositionLowerBound[stateIndex] = new YoDouble("jointKF_q_" + jointName + "_lowerBound", registry);
+         yoJointVelocityUpperBound[stateIndex] = new YoDouble("jointKF_qd_" + jointName + "_upperBound", registry);
+         yoJointVelocityLowerBound[stateIndex] = new YoDouble("jointKF_qd_" + jointName + "_lowerBound", registry);
       }
    }
 
@@ -426,38 +426,38 @@ final class JointKFState
     */
    void logChainDoFCensus()
    {
-      StringBuilder sb = new StringBuilder("JointLevelKFPreFilter chain-DoF census (" + pairs.size() + " pairs over " + numberOfIMUs + " IMUs, tree):");
-      for (Pair p : pairs)
+      StringBuilder message = new StringBuilder("JointLevelKFPreFilter chain-DoF census (" + pairs.size() + " pairs over " + numberOfIMUs + " IMUs, tree):");
+      for (Pair pair : pairs)
       {
-         int dof = p.chainJoints.length;
-         sb.append("\n  ").append(p.parent.getSensorName()).append("->").append(p.child.getSensorName())
-           .append(" : ").append(dof).append("-DoF chain [").append(jointNamesOf(p.chainJoints)).append("]");
-         if (dof == 1)
+         int numberOfChainDoFs = pair.chainJoints.length;
+         message.append("\n  ").append(pair.parent.getSensorName()).append("->").append(pair.child.getSensorName())
+                .append(" : ").append(numberOfChainDoFs).append("-DoF chain [").append(jointNamesOf(pair.chainJoints)).append("]");
+         if (numberOfChainDoFs == 1)
          {
-            Vector3DReadOnly axis = p.chainJoints[0].getJointAxis();
-            sb.append("  (1-DoF sentinel: joint axis ~[").append(String.format("%.2f,%.2f,%.2f", axis.getX(), axis.getY(), axis.getZ()))
-              .append("]; the two rows orthogonal to it observe PURE bias — min-side S floor = Sigma)");
+            Vector3DReadOnly axis = pair.chainJoints[0].getJointAxis();
+            message.append("  (1-DoF sentinel: joint axis ~[").append(String.format("%.2f,%.2f,%.2f", axis.getX(), axis.getY(), axis.getZ()))
+                   .append("]; the two rows orthogonal to it observe PURE bias — min-side S floor = Sigma)");
          }
       }
-      LogTools.info(sb.toString());
+      LogTools.info(message.toString());
    }
 
    /** Reverse of {@code jointToIndex} for the diagnostic paths: filter-joint name at a given state index. */
    String jointNameByStateIndex(int stateIndex)
    {
-      return (stateIndex >= 0 && stateIndex < numberOfJoints) ? jointsByIndex[stateIndex].getName() : "?idx" + stateIndex;
+      return (stateIndex >= 0 && stateIndex < numberOfJoints) ? jointsByIndex[stateIndex].getName() : "?stateIndex" + stateIndex;
    }
 
    static String jointNamesOf(OneDoFJointBasics[] joints)
    {
-      StringBuilder sb = new StringBuilder();
+      StringBuilder names = new StringBuilder();
       for (int i = 0; i < joints.length; i++)
       {
          if (i > 0)
-            sb.append(",");
-         sb.append(joints[i].getName());
+            names.append(",");
+         names.append(joints[i].getName());
       }
-      return sb.toString();
+      return names.toString();
    }
 
    /**
@@ -470,13 +470,13 @@ final class JointKFState
       int[] parent = new int[numberOfIMUs];
       for (int i = 0; i < numberOfIMUs; i++)
          parent[i] = i;
-      for (Pair p : pairs)
+      for (Pair pair : pairs)
       {
-         int a = find(parent, requireImuOrdinal(p.parent));
-         int b = find(parent, requireImuOrdinal(p.child));
+         int a = find(parent, requireImuOrdinal(pair.parent));
+         int b = find(parent, requireImuOrdinal(pair.child));
          if (a == b)
             throw new IllegalStateException("JointLevelKFPreFilter: the used IMU graph has a CYCLE — the pair "
-                  + p.parent.getSensorName() + "->" + p.child.getSensorName() + " closes a loop. With the exact R_g a "
+                  + pair.parent.getSensorName() + "->" + pair.child.getSensorName() + " closes a loop. With the exact R_g a "
                   + "cycle's telescoping row-combination has zero H, zero z and zero noise, so the stacked innovation "
                   + "covariance S is singular by construction (SPEC §5.3). Drop this redundant pair — its chain joints "
                   + "are already covered by the remaining edges, so removing it loses no information.");
@@ -513,7 +513,7 @@ final class JointKFState
    static final class Pair
    {
       final IMUSensorReadOnly parent, child;
-      final GeometricJacobianCalculator jac = new GeometricJacobianCalculator();
+      final GeometricJacobianCalculator jacobian = new GeometricJacobianCalculator();
       OneDoFJointBasics[] chainJoints;
       int[] qdCols;
       int parentBias, childBias;
@@ -529,7 +529,7 @@ final class JointKFState
    static final class FootAnchor
    {
       final RigidBodyBasics foot;
-      final GeometricJacobianCalculator jac = new GeometricJacobianCalculator();
+      final GeometricJacobianCalculator jacobian = new GeometricJacobianCalculator();
       OneDoFJointBasics[] legJoints;
       /** Filter qd column per chain joint, or -1 if that joint is NOT a filter state (folded into z' instead). */
       int[] qdCols;

@@ -365,10 +365,10 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    }
 
    // ================================ Shared matrix helpers ================================
-   // Static, stateless EJML helpers shared by the components. They live here beside set_matrix, which main-source
+   // Static, stateless EJML helpers shared by the components. They live here beside setMatrix, which main-source
    // code outside this package already calls (invariantEstimator/InvariantState).
 
-   public static void set_matrix(DMatrixRMaj out, RotationMatrixReadOnly r)
+   public static void setMatrix(DMatrixRMaj out, RotationMatrixReadOnly r)
    {
       r.get(out);
    }
@@ -409,15 +409,15 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    @Override
    public double getEstimatedJointPosition(OneDoFJointBasics joint)
    {
-      int idx = state.jointIndex(joint);
-      return (idx == JointKFState.NOT_IN_STATE || !state.initialized) ? Double.NaN : state.x.get(idx);
+      int stateIndex = state.jointIndex(joint);
+      return (stateIndex == JointKFState.NOT_IN_STATE || !state.initialized) ? Double.NaN : state.x.get(stateIndex);
    }
 
    @Override
    public double getEstimatedJointVelocity(OneDoFJointBasics joint)
    {
-      int idx = state.jointIndex(joint);
-      return (idx == JointKFState.NOT_IN_STATE || !state.initialized) ? Double.NaN : state.x.get(state.numberOfJoints + idx);
+      int stateIndex = state.jointIndex(joint);
+      return (stateIndex == JointKFState.NOT_IN_STATE || !state.initialized) ? Double.NaN : state.x.get(state.numberOfJoints + stateIndex);
    }
 
    @Override
@@ -440,22 +440,22 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 
    private void packCov(OneDoFJointBasics[] joints, int blockOffset, double fallbackVariance, DMatrixRMaj toPack)
    {
-      int mm = joints.length;
-      toPack.reshape(mm, mm);
+      int numberOfChainJoints = joints.length;
+      toPack.reshape(numberOfChainJoints, numberOfChainJoints);
       toPack.zero();
-      for (int a = 0; a < mm; a++)
+      for (int a = 0; a < numberOfChainJoints; a++)
       {
-         int ia = state.jointIndex(joints[a]);
-         if (ia == JointKFState.NOT_IN_STATE)
+         int indexOfJointA = state.jointIndex(joints[a]);
+         if (indexOfJointA == JointKFState.NOT_IN_STATE)
          {
             toPack.set(a, a, fallbackVariance);
             continue;
          }
-         for (int b = 0; b < mm; b++)
+         for (int b = 0; b < numberOfChainJoints; b++)
          {
-            int ib = state.jointIndex(joints[b]);
-            if (ib != JointKFState.NOT_IN_STATE)
-               toPack.set(a, b, state.P.get(blockOffset + ia, blockOffset + ib)); // adding the off diagonals for the cross-covariances
+            int indexOfJointB = state.jointIndex(joints[b]);
+            if (indexOfJointB != JointKFState.NOT_IN_STATE)
+               toPack.set(a, b, state.P.get(blockOffset + indexOfJointA, blockOffset + indexOfJointB)); // adding the off diagonals for the cross-covariances
          }
       }
    }
@@ -463,19 +463,19 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    @Override
    public FrameVector3DReadOnly getAngularVelocityBiasInIMUFrame(IMUSensorReadOnly imu)
    {
-      int ord = state.imuOrdinal(imu);
-      if (ord == JointKFState.NOT_IN_STATE || !state.initialized)
+      int imuOrdinal = state.imuOrdinal(imu);
+      if (imuOrdinal == JointKFState.NOT_IN_STATE || !state.initialized)
       {
          // IMU not in the filter's state (e.g. the primary pelvis IMU when it isn't a pair member), or the
          // filter hasn't initialized yet: report zero bias. MUST return here, and the reason is now STRONGER
-         // than it was: this used to guard an NPE on unboxing a null ord in "3 * ord". With the -1 sentinel
+         // than it was: this used to guard an NPE on unboxing a null imuOrdinal in "3 * imuOrdinal". With the -1 sentinel
          // the fall-through is worse than a crash — 2n + 3*(-1) = 2n-3 is a VALID index into x, so it would
          // silently export three JOINT VELOCITIES as this IMU's gyro bias, straight into the InEKF's predict.
          // No exception, no NaN, just a wrong robot.
          biasOut.setToZero(imu.getMeasurementFrame());
          return biasOut;
       }
-      int col = 2 * state.numberOfJoints + 3 * ord;
+      int col = 2 * state.numberOfJoints + 3 * imuOrdinal;
       double bx = state.x.get(col);
       double by = state.x.get(col + 1);
       double bz = state.x.get(col + 2);

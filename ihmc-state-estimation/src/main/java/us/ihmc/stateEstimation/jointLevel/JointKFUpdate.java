@@ -167,14 +167,14 @@ final class JointKFUpdate
       encVarPerJoint = new double[n];
       double encoderVarFallback = parameters.encoderVar.getValue();
       int unwiredEncoderJoints = 0;
-      for (int idx = 0; idx < n; idx++)
+      for (int stateIndex = 0; stateIndex < n; stateIndex++)
       {
-         double std = encoderPositionNoiseStd == null ? Double.NaN : encoderPositionNoiseStd.applyAsDouble(state.jointsByIndex[idx].getName());
+         double std = encoderPositionNoiseStd == null ? Double.NaN : encoderPositionNoiseStd.applyAsDouble(state.jointsByIndex[stateIndex].getName());
          if (Double.isFinite(std) && std > 0.0)
-            encVarPerJoint[idx] = std * std;
+            encVarPerJoint[stateIndex] = std * std;
          else
          {
-            encVarPerJoint[idx] = encoderVarFallback;
+            encVarPerJoint[stateIndex] = encoderVarFallback;
             unwiredEncoderJoints++;
          }
       }
@@ -194,14 +194,14 @@ final class JointKFUpdate
       qdSlewSmoothed = new double[n];
       double sigmaQdUnfiltered = parameters.sigmaQdUnfiltered.getValue();
       double qdVarFallback = sigmaQdUnfiltered * sigmaQdUnfiltered;
-      for (int idx = 0; idx < n; idx++)
+      for (int stateIndex = 0; stateIndex < n; stateIndex++)
       {
-         String name = state.jointsByIndex[idx].getName();
+         String name = state.jointsByIndex[stateIndex].getName();
          double std = encoderVelocityNoiseStd == null ? Double.NaN : encoderVelocityNoiseStd.applyAsDouble(name);
-         qdMeasVarPerJoint[idx] = (Double.isFinite(std) && std > 0.0) ? std * std : qdVarFallback;
-         double fc = jointVelocityMeasurementBreakFrequencyHz == null ? Double.NaN : jointVelocityMeasurementBreakFrequencyHz.applyAsDouble(name);
-         invOmegaEffPerJoint[idx] = (Double.isFinite(fc) && fc > 0.0) ? 1.0 / (2.0 * Math.PI * fc) : 0.0;
-         prevZqd[idx] = Double.NaN;
+         qdMeasVarPerJoint[stateIndex] = (Double.isFinite(std) && std > 0.0) ? std * std : qdVarFallback;
+         double breakFrequencyHz = jointVelocityMeasurementBreakFrequencyHz == null ? Double.NaN : jointVelocityMeasurementBreakFrequencyHz.applyAsDouble(name);
+         invOmegaEffPerJoint[stateIndex] = (Double.isFinite(breakFrequencyHz) && breakFrequencyHz > 0.0) ? 1.0 / (2.0 * Math.PI * breakFrequencyHz) : 0.0;
+         prevZqd[stateIndex] = Double.NaN;
       }
       qdVarFloorMin = qdVarFallback; // seed, then min-reduce (see the field doc)
       for (int i = 0; i < n; i++)
@@ -294,21 +294,21 @@ final class JointKFUpdate
       yoQdInnov = new YoDouble[n];
       yoUseDirectVelocity = new YoBoolean("jointKFUseDirectVelocityMeasurement", registry);
       yoUseDirectVelocity.set(useDirectVelocityMeasurement);
-      for (int idx = 0; idx < n; idx++)
+      for (int stateIndex = 0; stateIndex < n; stateIndex++)
       {
-         String jointName = state.jointsByIndex[idx].getName();
-         yoEncNIS[idx] = new YoDouble("jointKF_encNIS_" + jointName, registry);
-         yoEncNIS[idx].set(Double.NaN); // no encoder update has run yet
-         yoEncInnov[idx] = new YoDouble("jointKF_encInnov_" + jointName, registry);
-         yoEncInnov[idx].set(Double.NaN); // signed innovation (rad); no encoder update has run yet
-         yoEncR[idx] = new YoDouble("jointKF_encR_" + jointName, registry);
-         yoEncR[idx].set(encVarPerJoint[idx]); // constant: the wired measurement variance (rad^2)
-         yoQdNIS[idx] = new YoDouble("jointKF_qdNIS_" + jointName, registry);
-         yoQdNIS[idx].set(Double.NaN); // no direct-velocity update has run yet
-         yoQdInnov[idx] = new YoDouble("jointKF_qdInnov_" + jointName, registry);
-         yoQdInnov[idx].set(Double.NaN); // signed innovation (rad/s); no direct-velocity update has run yet
-         yoQdR[idx] = new YoDouble("jointKF_qdR_" + jointName, registry);
-         yoQdR[idx].set(qdMeasVarPerJoint[idx]); // per-tick: floor + adaptive lag inflation
+         String jointName = state.jointsByIndex[stateIndex].getName();
+         yoEncNIS[stateIndex] = new YoDouble("jointKF_encNIS_" + jointName, registry);
+         yoEncNIS[stateIndex].set(Double.NaN); // no encoder update has run yet
+         yoEncInnov[stateIndex] = new YoDouble("jointKF_encInnov_" + jointName, registry);
+         yoEncInnov[stateIndex].set(Double.NaN); // signed innovation (rad); no encoder update has run yet
+         yoEncR[stateIndex] = new YoDouble("jointKF_encR_" + jointName, registry);
+         yoEncR[stateIndex].set(encVarPerJoint[stateIndex]); // constant: the wired measurement variance (rad^2)
+         yoQdNIS[stateIndex] = new YoDouble("jointKF_qdNIS_" + jointName, registry);
+         yoQdNIS[stateIndex].set(Double.NaN); // no direct-velocity update has run yet
+         yoQdInnov[stateIndex] = new YoDouble("jointKF_qdInnov_" + jointName, registry);
+         yoQdInnov[stateIndex].set(Double.NaN); // signed innovation (rad/s); no direct-velocity update has run yet
+         yoQdR[stateIndex] = new YoDouble("jointKF_qdR_" + jointName, registry);
+         yoQdR[stateIndex].set(qdMeasVarPerJoint[stateIndex]); // per-tick: floor + adaptive lag inflation
       }
    }
 
@@ -421,16 +421,16 @@ final class JointKFUpdate
       }
       Lchol.reshape(k, k); // shrink into the capacity pre-reserved in allocate() (no realloc); getT needs an exact k x k target
       innovationSolver.getDecomposition().getT(Lchol);
-      double minLii = Double.POSITIVE_INFINITY, maxLii = 0.0;
+      double minCholeskyDiagonal = Double.POSITIVE_INFINITY, maxCholeskyDiagonal = 0.0;
       for (int i = 0; i < k; i++)
       {
-         double lii = Lchol.get(i, i);
-         if (lii < minLii) minLii = lii;
-         if (lii > maxLii) maxLii = lii;
+         double choleskyDiagonal = Lchol.get(i, i);
+         if (choleskyDiagonal < minCholeskyDiagonal) minCholeskyDiagonal = choleskyDiagonal;
+         if (choleskyDiagonal > maxCholeskyDiagonal) maxCholeskyDiagonal = choleskyDiagonal;
       }
-      double minPivot = minLii * minLii;                 // ~ lambda_min(S)
-      double maxPivot = maxLii * maxLii;                 // ~ lambda_max(S)
-      double condProxy = minLii > 0.0 ? (maxLii / minLii) * (maxLii / minLii) : Double.POSITIVE_INFINITY;
+      double minPivot = minCholeskyDiagonal * minCholeskyDiagonal;                 // ~ lambda_min(S)
+      double maxPivot = maxCholeskyDiagonal * maxCholeskyDiagonal;                 // ~ lambda_max(S)
+      double condProxy = minCholeskyDiagonal > 0.0 ? (maxCholeskyDiagonal / minCholeskyDiagonal) * (maxCholeskyDiagonal / minCholeskyDiagonal) : Double.POSITIVE_INFINITY;
       if (channel.publishesSDiagnostics) // publish the gyro-block S diagnostics every tick (cheap)
       {
          yoCondSProxyLog10.set(Math.log10(condProxy));
@@ -525,10 +525,10 @@ final class JointKFUpdate
       int dim = state.dim;
       int k = Hm.getNumRows();
       // Recompute S = H P H^T + R fresh (setA above may have decomposed the field S in place). Rare path — ok to allocate.
-      DMatrixRMaj phT = new DMatrixRMaj(dim, k);
+      DMatrixRMaj pHTransposed = new DMatrixRMaj(dim, k);
       DMatrixRMaj Sfresh = new DMatrixRMaj(k, k);
-      CommonOps_DDRM.multTransB(state.P, Hm, phT);
-      CommonOps_DDRM.mult(Hm, phT, Sfresh);
+      CommonOps_DDRM.multTransB(state.P, Hm, pHTransposed);
+      CommonOps_DDRM.mult(Hm, pHTransposed, Sfresh);
       CommonOps_DDRM.addEquals(Sfresh, Rm);
 
       StringBuilder msg = new StringBuilder();
@@ -622,16 +622,16 @@ final class JointKFUpdate
       }
       int block = row / 3;
       int axis = row % 3;
-      char ax = axis == 0 ? 'x' : axis == 1 ? 'y' : 'z';
+      char axisLabel = axis == 0 ? 'x' : axis == 1 ? 'y' : 'z';
       if (block < state.numberOfIMUPairs)
       {
-         JointKFState.Pair p = state.pairs.get(block);
-         return "gyro pair " + block + " (" + p.parent.getSensorName() + "->" + p.child.getSensorName()
-                + "), axis " + ax + ", chain=[" + JointKFState.jointNamesOf(p.chainJoints) + "]";
+         JointKFState.Pair pair = state.pairs.get(block);
+         return "gyro pair " + block + " (" + pair.parent.getSensorName() + "->" + pair.child.getSensorName()
+                + "), axis " + axisLabel + ", chain=[" + JointKFState.jointNamesOf(pair.chainJoints) + "]";
       }
-      JointKFState.FootAnchor fa = nthActiveAnchor(block - state.numberOfIMUPairs);
-      if (fa != null)
-         return "stance anchor (foot " + fa.foot.getName() + "), axis " + ax + ", leg=[" + JointKFState.jointNamesOf(fa.legJoints) + "]";
+      JointKFState.FootAnchor footAnchor = nthActiveAnchor(block - state.numberOfIMUPairs);
+      if (footAnchor != null)
+         return "stance anchor (foot " + footAnchor.foot.getName() + "), axis " + axisLabel + ", leg=[" + JointKFState.jointNamesOf(footAnchor.legJoints) + "]";
       return "gyro row " + row + " (unmapped)";
    }
 
@@ -641,11 +641,11 @@ final class JointKFUpdate
       int count = 0;
       for (int i = 0; i < state.footAnchors.size(); i++)
       {
-         JointKFState.FootAnchor fa = state.footAnchors.get(i);
-         if (fa.active)
+         JointKFState.FootAnchor footAnchor = state.footAnchors.get(i);
+         if (footAnchor.active)
          {
             if (count == activeIdx)
-               return fa;
+               return footAnchor;
             count++;
          }
       }

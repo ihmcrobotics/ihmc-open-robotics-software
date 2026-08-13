@@ -55,21 +55,21 @@ public class JointLevelKFStandingStabilityTest
       for (int i = 0; i < n; i++)
          filteredCols[i] = input.getJointMatrixIndexProvider().getJointDoFIndices(f.filteredJoints.get(i))[0];
       int[] baseCols = input.getJointMatrixIndexProvider().getJointDoFIndices(f.rootJoint);
-      List<Integer> nuisance = new ArrayList<>();
+      List<Integer> torqueFree = new ArrayList<>();
       for (int c : baseCols)
-         nuisance.add(c);
+         torqueFree.add(c);
       for (JointReadOnly spanningJoint : spanning)
          if (!f.filteredJoints.contains(spanningJoint))
-            nuisance.add(input.getJointMatrixIndexProvider().getJointDoFIndices(spanningJoint)[0]);
-      int nN = nuisance.size();
+            torqueFree.add(input.getJointMatrixIndexProvider().getJointDoFIndices(spanningJoint)[0]);
+      int nN = torqueFree.size();
 
       DMatrixRMaj mNN = new DMatrixRMaj(nN, nN), mNf = new DMatrixRMaj(nN, n), mff = new DMatrixRMaj(n, n);
       for (int a = 0; a < nN; a++)
       {
          for (int b = 0; b < nN; b++)
-            mNN.set(a, b, massMatrix.get(nuisance.get(a), nuisance.get(b)));
+            mNN.set(a, b, massMatrix.get(torqueFree.get(a), torqueFree.get(b)));
          for (int j = 0; j < n; j++)
-            mNf.set(a, j, massMatrix.get(nuisance.get(a), filteredCols[j]));
+            mNf.set(a, j, massMatrix.get(torqueFree.get(a), filteredCols[j]));
       }
       for (int i = 0; i < n; i++)
          for (int j = 0; j < n; j++)

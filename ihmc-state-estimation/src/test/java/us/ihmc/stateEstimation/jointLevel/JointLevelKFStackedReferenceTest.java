@@ -143,7 +143,7 @@ public class JointLevelKFStackedReferenceTest
 
          // ω_base columns: R(base measurement frame → IMU measurement frame).
          base.getMeasurementFrame().getTransformToDesiredFrame(transform, imu.getMeasurementFrame());
-         JointLevelKFPreFilter.set_matrix(rot, transform.getRotation());
+         JointLevelKFPreFilter.setMatrix(rot, transform.getRotation());
          for (int a = 0; a < 3; a++)
             for (int b = 0; b < 3; b++)
                H.set(row + a, dim + b, rot.get(a, b));

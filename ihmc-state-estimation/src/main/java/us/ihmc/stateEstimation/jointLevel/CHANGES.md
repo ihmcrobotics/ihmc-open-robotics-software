@@ -25,10 +25,10 @@ and the effective process noise **grows** at fixed `σ_τ`, worst for proximal j
   built over `{6-DoF floating base} ∪ {joints spanning base→filtered}` instead of the joints-only system.
   The base joint is found as the 6-DoF child of the tree root (`findFloatingBaseJoint`); if there is none
   (fixed-base model) the filter degrades to the scalar-CWNA fallback with a warning.
-- **Topology generalization (nuisance block).** The composite-rigid-body calculator prunes the entire
+- **Topology generalization (torque-free block).** The composite-rigid-body calculator prunes the entire
   subtree below any *ignored* joint, so an unfiltered joint sitting *above* a filtered joint cannot simply be
   locked — it would zero the filtered joints' inertia. Such "gap" joints are therefore **included** in the
-  considered set and **marginalized** (treated as free) alongside the base. The marginalized "nuisance" block
+  considered set and **marginalized** (treated as free) alongside the base. The marginalized "torque-free" block
   `N` is `{base 6-DoF} + {gap joints}`, and `Λ = M_ff − M_jN M_NN⁻¹ M_Nj`. In the **real gapless topology**
   (base IMU on the base link, every path joint filtered) there are no gap joints and this is *exactly* the
   SPEC's `Λ = M_jj − M_jb M_bb⁻¹ M_bj`. Genuinely off-path joints (e.g. arms when only legs are filtered)
@@ -60,7 +60,7 @@ All in `us.ihmc.stateEstimation.jointLevel` (test source set), all green.
 | `JointLevelKFPreFilterAllocationTest.testSchurProcessNoiseHotPathIsAllocationFree` | The per-tick Schur rebuild (block extraction + `M_NN` solve + `Λ` invert) allocates < 32 B/tick on the estimator thread. |
 
 The independent reference in the test (`referenceSchur`) replicates the *model definition* (spanning subtree
-+ nuisance partition) but computes the linear algebra by a separate path (LU, its own calculator instance),
++ torque-free partition) but computes the linear algebra by a separate path (LU, its own calculator instance),
 so agreement to round-off validates the filter's own extraction/solve/subtract, not a shared implementation.
 
 ## Convention-bound lines — review by hand (do not self-approve)
@@ -165,7 +165,7 @@ ground-truth reference through the public API.
 
 1. **`L` sign table** (`buildStackedMeasurement`): pair rows `+R(child→J_e)` in the child IMU's bias column,
    `−R(parent→J_e)` in the parent's — consistent with `setKinematicChain(parent, child)` and the residual
-   `fvA(child) − fvB(parent)`.
+   `childAngularVelocity(child) − parentAngularVelocity(parent)`.
 2. **Anchor signs:** q̇-columns `−J_leg`, `L`-block `+I3` on the base IMU (J frame = base measurement frame, so
    the anchor's own rotation is exactly identity — not generalized away).
 3. **Frames:** every rotation packed into `L` goes IMU-measurement-frame → Jacobian frame via

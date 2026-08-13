@@ -164,8 +164,8 @@ final class JointKFParameters
    /** The rotor inertia the filter applies: the table match, or the conservative default when unmatched. */
    static double reflectedRotorInertiaForNameOrDefault(String jointName)
    {
-      double v = lookupRotorInertia(jointName);
-      return v < 0.0 ? ROTOR_INERTIA_DEFAULT : v;
+      double rotorInertia = lookupRotorInertia(jointName);
+      return rotorInertia < 0.0 ? ROTOR_INERTIA_DEFAULT : rotorInertia;
    }
 
    /** True when the table has no entry for this joint, i.e. the default floor is being applied. */
