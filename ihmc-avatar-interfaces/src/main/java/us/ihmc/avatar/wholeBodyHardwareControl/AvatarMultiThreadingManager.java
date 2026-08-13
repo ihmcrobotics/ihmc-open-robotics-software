@@ -58,6 +58,11 @@ public class AvatarMultiThreadingManager
 
    private final YoLong threadSchedulerComputeTime = new YoLong("threadSchedulerComputeTime", registry);
 
+   // DEBUG: capture the raw timestamp value the master/scheduler thread hands to yoVariableServer.update(),
+   // to compare against estimatorLoggedTimestampDebug/controllerLoggedTimestampDebug and see whether they
+   // ever coincide - explains whether raw log rows merge across threads or always stay separate.
+   private final YoLong schedulerLoggedTimestampDebug = new YoLong("schedulerLoggedTimestampDebug", registry);
+
    private final YoDouble masterThreadUpdateRate = new YoDouble("masterThreadUpdateRate", registry);
    private final FrequencyCalculator masterThreadFrequencyCalculator = new FrequencyCalculator(false);
 
@@ -333,7 +338,9 @@ public class AvatarMultiThreadingManager
       if (yoVariableServer == null)
          return;
 
-      yoVariableServer.update(monotonicTimeProvider.getTimestamp(), rootRegistry);
+      long timestamp = monotonicTimeProvider.getTimestamp();
+      schedulerLoggedTimestampDebug.set(timestamp);
+      yoVariableServer.update(timestamp, rootRegistry);
    }
 
    public HardwareCommunicationInterface getHardwareCommunicationInterface()
