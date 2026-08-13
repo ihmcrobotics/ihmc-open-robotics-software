@@ -94,7 +94,9 @@ public class InvariantEKFStateEstimatorFactory implements StateEstimatorControll
    }
 
    @Override
-   public StateEstimatorController createStateEstimator(FullHumanoidRobotModel fullRobotModel, SensorReader sensorReader)
+   public StateEstimatorController createStateEstimator(FullHumanoidRobotModel fullRobotModel,
+                                                        SensorReader sensorReader,
+                                                        double gravitationalAcceleration)
    {
      estimator = new InvariantEKFStateEstimator(fullRobotModel,
                                                 sensorReader.getProcessedSensorOutputMap(),
@@ -104,7 +106,8 @@ public class InvariantEKFStateEstimatorFactory implements StateEstimatorControll
                                                 accelVariance,
                                                 contactVariance,
                                                 contactMeasurementVariance,
-                                                initialCovariance);
+                                                initialCovariance,
+                                                gravitationalAcceleration);
      return estimator;
    }
 

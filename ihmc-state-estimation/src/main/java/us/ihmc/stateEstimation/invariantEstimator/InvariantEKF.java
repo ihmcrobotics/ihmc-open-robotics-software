@@ -33,8 +33,6 @@ public class InvariantEKF
    private final InvariantUpdater updater;
    private final GravityLevelingUpdater gravityUpdater;
 
-   /** |g| (m/s²), used only by the gravity-leveling quasi-static gate. */
-   private static final double GRAVITY_MAGNITUDE = 9.81;
    /** σ_roll² default for the gravity-leveling measurement (rad²); ~ (0.05 rad ≈ 2.9°)². Trust the accel for roll. */
    private static final double DEFAULT_ROLL_MEASUREMENT_VARIANCE = 2.5e-3;
    /** σ_pitch² default (rad²); ~ (0.44 rad ≈ 25°)². Distrust the accel for pitch — fore-aft accel fakes pitch tilt
@@ -49,17 +47,19 @@ public class InvariantEKF
     * @param gyroVariance     continuous angular-velocity noise variance σ_ω² (rad²/s).
     * @param accelVariance    continuous specific-force noise variance σ_a² (m²/s³).
     * @param contactVariance  continuous contact-slip noise variance σ_c² (m²/s).
+    * @param gravitationalAcceleration the process gravity (m/s²); sign not considered. One value feeds both the
+    *                                  propagator (0, 0, −|g|) and the quasi-static gate (|g|), so they cannot disagree.
     */
-   public InvariantEKF(int numberOfContacts, double gyroVariance, double accelVariance, double contactVariance)
+   public InvariantEKF(int numberOfContacts, double gyroVariance, double accelVariance, double contactVariance, double gravitationalAcceleration)
    {
       state = new InvariantState(numberOfContacts);
-      propagator = new InvariantPropagator(numberOfContacts, gyroVariance, accelVariance, contactVariance);
+      propagator = new InvariantPropagator(numberOfContacts, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration);
       updater = new InvariantUpdater(state.getTangentSize());
       updater.setContactUpdater(new ContactUpdater(numberOfContacts));
       gravityUpdater = new GravityLevelingUpdater(state.getTangentSize(),
                                                   DEFAULT_ROLL_MEASUREMENT_VARIANCE,
                                                   DEFAULT_PITCH_MEASUREMENT_VARIANCE,
-                                                  GRAVITY_MAGNITUDE);
+                                                  Math.abs(gravitationalAcceleration));
    }
 
    /**
@@ -70,11 +70,12 @@ public class InvariantEKF
     * @param gyroVariance     continuous angular-velocity noise variance σ_ω² (rad²/s).
     * @param accelVariance    continuous specific-force noise variance σ_a² (m²/s³).
     * @param contactVariance  continuous contact-slip noise variance σ_c² (m²/s).
+    * @param gravitationalAcceleration the process gravity (m/s²); sign not considered.
     * @return the wired filter.
     */
-   public static InvariantEKF create(int numberOfContacts, double gyroVariance, double accelVariance, double contactVariance)
+   public static InvariantEKF create(int numberOfContacts, double gyroVariance, double accelVariance, double contactVariance, double gravitationalAcceleration)
    {
-      return new InvariantEKF(numberOfContacts, gyroVariance, accelVariance, contactVariance);
+      return new InvariantEKF(numberOfContacts, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration);
    }
 
    /**

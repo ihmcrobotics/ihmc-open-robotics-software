@@ -188,6 +188,8 @@ public class InvariantMainStateEstimator implements StateEstimatorController
     * @param contactVariance            continuous contact-slip noise variance σ_c² (base value at full contact).
     * @param contactMeasurementVariance per-axis body-frame contact FK measurement variance (m²).
     * @param initialCovariance          scalar for the initial P = initialCovariance · I.
+    * @param gravitationalAcceleration  the robot process's gravitational acceleration (m/s²), i.e.
+    *                                   {@code AvatarEstimatorThreadFactory.getGravity()}. Sign not considered.
     * @param enableYawSeeding           if true, install the foot-referenced yaw corrector.
     * @param preFilter                  joint-level pre-filter: joint estimates overlay the raw sensor
     *                                   values in {@link #updateJoints()} and its bias estimates feed
@@ -204,6 +206,7 @@ public class InvariantMainStateEstimator implements StateEstimatorController
                                       double contactVariance,
                                       double contactMeasurementVariance,
                                       double initialCovariance,
+                                      double gravitationalAcceleration,
                                       boolean enableYawSeeding,
                                       ProprioceptivePreFilter preFilter)
    {
@@ -227,7 +230,8 @@ public class InvariantMainStateEstimator implements StateEstimatorController
                                                           accelVariance,
                                                           contactVariance,
                                                           contactMeasurementVariance,
-                                                          initialCovariance);
+                                                          initialCovariance,
+                                                          gravitationalAcceleration);
       invariantEstimator.setRunningAsMain(true); // disables the invariantMinusMain* self-comparisons
       registry.addChild(invariantEstimator.getYoRegistry());
 

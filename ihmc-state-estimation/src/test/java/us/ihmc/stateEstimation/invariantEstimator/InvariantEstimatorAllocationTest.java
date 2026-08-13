@@ -31,6 +31,7 @@ public class InvariantEstimatorAllocationTest
 {
    private static final int NUMBER_OF_CONTACTS = 2;
    private static final double DT = 0.001;
+   private static final double GRAVITY = -9.81;
 
    /** Allowed slack, in bytes per tick, above which the path is considered to be generating garbage. */
    private static final double MAX_BYTES_PER_TICK = 16.0;
@@ -51,7 +52,7 @@ public class InvariantEstimatorAllocationTest
       assumeTrue(threadMXBean.isThreadAllocatedMemorySupported(), "Thread allocation counting not supported on this JVM.");
       threadMXBean.setThreadAllocatedMemoryEnabled(true);
 
-      InvariantEKF ekf = new InvariantEKF(NUMBER_OF_CONTACTS, 1.0e-4, 1.0e-3, 1.0e-6);
+      InvariantEKF ekf = new InvariantEKF(NUMBER_OF_CONTACTS, 1.0e-4, 1.0e-3, 1.0e-6, GRAVITY);
 
       RotationMatrix initialRotation = new RotationMatrix();
       Vector3D initialVelocity = new Vector3D();
@@ -65,7 +66,7 @@ public class InvariantEstimatorAllocationTest
       ekf.initialize(initialRotation, initialVelocity, initialPosition, contactPositions, initialCovariance);
 
       Vector3D angularVelocity = new Vector3D(0.01, -0.02, 0.03);
-      Vector3D linearAcceleration = new Vector3D(0.0, 0.0, 9.81);
+      Vector3D linearAcceleration = new Vector3D(0.0, 0.0, Math.abs(GRAVITY));
       Vector3D contactMeasurement = new Vector3D(0.0, 0.12, -0.90);
       Matrix3D measurementCovariance = new Matrix3D();
       measurementCovariance.set(1.0e-4, 0.0, 0.0,

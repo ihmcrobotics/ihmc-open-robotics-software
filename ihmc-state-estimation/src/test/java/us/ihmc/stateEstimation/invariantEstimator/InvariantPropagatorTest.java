@@ -25,7 +25,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 public class InvariantPropagatorTest
 {
    private static final double EPSILON = 1.0e-10;
-   private static final double GRAVITY = -9.81; // matches InvariantPropagator's gravity z-component
+   private static final double GRAVITY = -9.81; // injected into InvariantPropagator below; the expected values assume it
 
    /** ω = 0, a = 0: pure free fall. After T seconds, v_z = g·T and p_z = ½·g·T² exactly, R = I. */
    @Test
@@ -34,7 +34,7 @@ public class InvariantPropagatorTest
       double dt = 1.0e-3;
       int steps = 1000;
 
-      InvariantPropagator propagator = new InvariantPropagator(0, 0.0, 0.0, 0.0); // no contacts and no noise
+      InvariantPropagator propagator = new InvariantPropagator(0, 0.0, 0.0, 0.0, GRAVITY); // no contacts and no noise
       InvariantState state = new InvariantState(0);
 
       Vector3D omega = new Vector3D(0.0, 0.0, 0.0);
@@ -67,7 +67,7 @@ public class InvariantPropagatorTest
    {
       double dt = 1.0e-3;
       int steps = 1000;
-      InvariantPropagator propagator = new InvariantPropagator(0, 0.0, 0.0, 0.0);
+      InvariantPropagator propagator = new InvariantPropagator(0, 0.0, 0.0, 0.0, GRAVITY);
       InvariantState state = new InvariantState(0);
 
       Vector3D omega = new Vector3D(0.0, 0.0, 0.0);
@@ -91,7 +91,7 @@ public class InvariantPropagatorTest
    {
       double dt = 1.0e-3;
       int steps = 500;
-      InvariantPropagator propagator = new InvariantPropagator(0, 0.0, 0.0, 0.0);
+      InvariantPropagator propagator = new InvariantPropagator(0, 0.0, 0.0, 0.0, GRAVITY);
       InvariantState state = new InvariantState(0);
 
       Vector3D omega = new Vector3D(0.3, -0.2, 0.5);
@@ -120,7 +120,7 @@ public class InvariantPropagatorTest
    public void testContactsRemainStatic()
    {
       double dt = 1.0e-2;
-      InvariantPropagator propagator = new InvariantPropagator(2, 1.0e-4, 1.0e-2, 1.0e-6);
+      InvariantPropagator propagator = new InvariantPropagator(2, 1.0e-4, 1.0e-2, 1.0e-6, GRAVITY);
       InvariantState state = new InvariantState(2);
 
       Vector3D contact0 = new Vector3D(1.0, 2.0, 3.0);
@@ -145,7 +145,7 @@ public class InvariantPropagatorTest
    {
       Random random = new Random(12345L);
       double dt = 1.0e-2;
-      InvariantPropagator propagator = new InvariantPropagator(2, 1.0e-3, 1.0e-2, 1.0e-4);
+      InvariantPropagator propagator = new InvariantPropagator(2, 1.0e-3, 1.0e-2, 1.0e-4, GRAVITY);
       InvariantState state = new InvariantState(2);
 
       state.setRotation(EuclidCoreRandomTools.nextRotationMatrix(random));
@@ -170,7 +170,7 @@ public class InvariantPropagatorTest
    public void testCovarianceGrowsFromZero()
    {
       double dt = 1.0e-2;
-      InvariantPropagator propagator = new InvariantPropagator(1, 1.0e-3, 1.0e-2, 1.0e-4);
+      InvariantPropagator propagator = new InvariantPropagator(1, 1.0e-3, 1.0e-2, 1.0e-4, GRAVITY);
       InvariantState state = new InvariantState(1); // P starts at zero
 
       Vector3D omega = new Vector3D(0.0, 0.0, 0.0);
@@ -187,7 +187,7 @@ public class InvariantPropagatorTest
    public void testZeroNoiseKeepsCovarianceZero()
    {
       double dt = 1.0e-2;
-      InvariantPropagator propagator = new InvariantPropagator(1, 0.0, 0.0, 0.0);
+      InvariantPropagator propagator = new InvariantPropagator(1, 0.0, 0.0, 0.0, GRAVITY);
       InvariantState state = new InvariantState(1); // P starts at zero
 
       Vector3D omega = new Vector3D(0.0, 0.0, 0.0);
@@ -238,7 +238,7 @@ public class InvariantPropagatorTest
       estimateState.getGroupElement().set(estimateInitial); // copy into the live group matrix
 
       // propagate both with identical inputs and no process noise
-      InvariantPropagator propagator = new InvariantPropagator(numberOfContacts, 0.0, 0.0, 0.0);
+      InvariantPropagator propagator = new InvariantPropagator(numberOfContacts, 0.0, 0.0, 0.0, GRAVITY);
       Vector3D omega = new Vector3D(0.4, -0.3, 0.6);
       Vector3D accel = new Vector3D(0.5, 0.2, -GRAVITY);
       for (int i = 0; i < steps; i++)
