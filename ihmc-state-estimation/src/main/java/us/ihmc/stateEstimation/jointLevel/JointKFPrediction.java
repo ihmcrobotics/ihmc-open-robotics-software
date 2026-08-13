@@ -1,5 +1,7 @@
 package us.ihmc.stateEstimation.jointLevel;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
@@ -12,6 +14,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -119,7 +122,7 @@ final class JointKFPrediction
       // and M_bj are unavailable for the Schur complement.
       if (rootBody != null && n > 0)
       {
-         List<OneDoFJointBasics> massMatrixJoints = new ArrayList<>(state.jointToIndex.keySet());
+         List<OneDoFJointBasics> massMatrixJoints = List.of(state.jointsByIndex); // filter state order, by definition
          // The filtered joints ARE joints of the passed-in robot model; the model root is only used as a
          // sanity check here.
          RigidBodyBasics treeRoot = MultiBodySystemTools.getRootBody(massMatrixJoints.get(0).getPredecessor());
@@ -151,14 +154,15 @@ final class JointKFPrediction
             var indexProvider = massMatrixInput.getJointMatrixIndexProvider();
             // Filtered-joint columns, in filter state order.
             massMatrixColumn = new int[n];
-            for (var e : state.jointToIndex.entrySet())
-               massMatrixColumn[e.getValue()] = indexProvider.getJointDoFIndices(e.getKey())[0];
+            for (int i = 0; i < n; i++)
+               massMatrixColumn[i] = indexProvider.getJointDoFIndices(state.jointsByIndex[i])[0];
             // Nuisance = base 6-DoF columns + each gap joint's column, i.e. every considered DoF that is not a
             // filtered joint. Its parallel rotor diagonal is 0 on the base rows (a free base carries no
             // reflected rotor inertia) so a marginalized gap joint still floors M_NN.
             int[] baseColumns = indexProvider.getJointDoFIndices(baseJoint);
-            List<Integer> nuisanceColumns = new ArrayList<>();
-            List<Double> nuisanceRotor = new ArrayList<>();
+            int nuisanceCapacity = baseColumns.length + spanningJoints.size();
+            TIntArrayList nuisanceColumns = new TIntArrayList(nuisanceCapacity);
+            TDoubleArrayList nuisanceRotor = new TDoubleArrayList(nuisanceCapacity);
             for (int c : baseColumns)
             {
                nuisanceColumns.add(c);
@@ -167,7 +171,7 @@ final class JointKFPrediction
             int gapJoints = 0;
             for (JointReadOnly spanningJoint : spanningJoints)
             {
-               if (!state.jointToIndex.containsKey(spanningJoint)) // unfiltered => gap joint => marginalize it
+               if (!state.isFilteredJoint(spanningJoint)) // unfiltered => gap joint => marginalize it
                {
                   nuisanceColumns.add(indexProvider.getJointDoFIndices(spanningJoint)[0]);
                   // Gap joints take the table value or the conservative default, silently — unlike a filtered
@@ -176,13 +180,8 @@ final class JointKFPrediction
                   gapJoints++;
                }
             }
-            massMatrixNuisanceColumns = new int[nuisanceColumns.size()];
-            nuisanceRotorInertiaDiag = new double[nuisanceColumns.size()];
-            for (int i = 0; i < massMatrixNuisanceColumns.length; i++)
-            {
-               massMatrixNuisanceColumns[i] = nuisanceColumns.get(i);
-               nuisanceRotorInertiaDiag[i] = nuisanceRotor.get(i);
-            }
+            massMatrixNuisanceColumns = nuisanceColumns.toArray(); // exact-size copies; no boxed drain loop
+            nuisanceRotorInertiaDiag = nuisanceRotor.toArray();
             numberOfNuisanceDOF = massMatrixNuisanceColumns.length; // 6 + gap joints
 
             LogTools.info("Joint-level KF process noise: Schur-complement path (sigma_tau = " + parameters.sigmaTau.getValue() + " N*m) over "
@@ -213,10 +212,9 @@ final class JointKFPrediction
       sigmaTauIsFallback = new boolean[n];
       sigmaTauFallback = parameters.sigmaTau.getValue();
 
-      for (var e : state.jointToIndex.entrySet())
+      for (int idx = 0; idx < n; idx++)
       {
-         OneDoFJointBasics joint = e.getKey();
-         int idx = e.getValue();
+         OneDoFJointBasics joint = state.jointsByIndex[idx];
          String jointName = joint.getName();
 
          if (JointKFParameters.isRotorInertiaUnmatched(jointName))
@@ -260,10 +258,9 @@ final class JointKFPrediction
       int n = state.numberOfJoints;
       yoQaDiag = new YoDouble[n];
       yoQaCapBindCount = new YoInteger[n];
-      for (var e : state.jointToIndex.entrySet())
+      for (int idx = 0; idx < n; idx++)
       {
-         int idx = e.getValue();
-         String jointName = e.getKey().getName();
+         String jointName = state.jointsByIndex[idx].getName();
          yoQaDiag[idx] = new YoDouble("jointKF_QaDiag_" + jointName, registry);
          yoQaCapBindCount[idx] = new YoInteger("jointKF_QaCapBind_" + jointName + "_count", registry);
       }
@@ -342,19 +339,20 @@ final class JointKFPrediction
          Q.set(n + i, i, sa2 * dt2 / 2.0);
          Q.set(n + i, n + i, sa2 * dt);
       }
-      for (var e : state.imuToOrdinal.entrySet()) // bias random walk, per-IMU process noise
+      for (int o = 0; o < state.numberOfIMUs; o++) // bias random walk, per-IMU process noise
       {
-         e.getKey().getAngularVelocityBiasProcessNoiseCovariance(Rimu);
+         IMUSensorReadOnly imu = state.imusByOrdinal[o];
+         imu.getAngularVelocityBiasProcessNoiseCovariance(Rimu);
          // Do not let a non-finite covariance (e.g. an IMU still booting at construction) poison Q: a single
          // NaN here spreads to P on the first predict and never recovers. Skip this IMU's bias random-walk
          // instead, and name it so the offender is obvious in the log.
          if (JointLevelKFPreFilter.containsNonFinite(Rimu))
          {
-            LogTools.error("Non-finite angular-velocity bias process-noise covariance from IMU " + e.getKey().getSensorName()
+            LogTools.error("Non-finite angular-velocity bias process-noise covariance from IMU " + imu.getSensorName()
                            + " at construction; skipping its Q contribution (its bias random-walk is disabled) so Q stays finite.");
             continue;
          }
-         int col = 2 * n + 3 * e.getValue();
+         int col = 2 * n + 3 * o;
          for (int i = 0; i < 3; i++)
             for (int j = 0; j < 3; j++)
                Q.set(col + i, col + j, Q.get(col + i, col + j) + dt * Rimu.get(i, j));
