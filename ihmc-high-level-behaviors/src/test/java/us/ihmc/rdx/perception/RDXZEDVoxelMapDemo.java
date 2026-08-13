@@ -3,7 +3,7 @@ package us.ihmc.rdx.perception;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.voxelMap.CUDAVoxelMapExtractor;
+import us.ihmc.perception.voxelMap.VoxelMapExtractor;
 import us.ihmc.perception.voxelMap.VoxelMap;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -20,7 +20,7 @@ public class RDXZEDVoxelMapDemo
    private static final float VOXEL_SIZE = 0.1f;
 
    private ZEDImageSensor zedImageSensor;
-   private CUDAVoxelMapExtractor voxelMapExtractor;
+   private VoxelMapExtractor voxelMapExtractor;
    private RDXPose3DGizmo mapOriginGizmo;
    private final RDXVoxelMapRenderer voxelMapRenderer = new RDXVoxelMapRenderer();
    private final RDXRawImagePointCloudVisualizer pointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud");
@@ -48,7 +48,7 @@ public class RDXZEDVoxelMapDemo
             zedImageSensor = new ZEDImageSensor(0, 0, ZEDModelData.ZED_2I, zed.SL_INPUT_TYPE_USB, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_VGA, 15);
             zedImageSensor.run(true);
 
-            voxelMapExtractor = new CUDAVoxelMapExtractor(MAP_SIZE, VOXEL_SIZE);
+            voxelMapExtractor = new VoxelMapExtractor(MAP_SIZE, VOXEL_SIZE);
             voxelMapRenderer.create(MAP_SIZE * MAP_SIZE * MAP_SIZE);
             baseUI.getPrimaryScene().addRenderableProvider(voxelMapRenderer);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudVisualizer);
