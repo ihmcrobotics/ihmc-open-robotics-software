@@ -18,13 +18,14 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.voxelMap.VoxelMap;
+import us.ihmc.perception.voxelMap.VoxelMapExtractor;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
 
 import java.nio.FloatBuffer;
 
 /**
- * Renders an occupancy voxel map produced by {@link us.ihmc.perception.voxelMap.CUDAVoxelMapExtractor}
+ * Renders an occupancy voxel map produced by {@link VoxelMapExtractor}
  * as true 3D cubes, one cube per occupied voxel, colored by world-Z height with simple diffuse shading.
  * Cube faces are axis-aligned with the voxel map frame, not world frame.
  */
@@ -109,7 +110,7 @@ public class RDXVoxelMapRenderer implements RenderableProvider
       FloatPointer cpuData = voxelMap.getCpuData();
       cpuData.get(occupancyArray, 0, totalVoxels);
 
-      voxelMap.getOrigin().get(mapToWorld);
+      mapToWorld.set(voxelMap.getOrigin());
 
       // Extract rotation for the shader uniform; cube corners are defined in map frame and rotated to world
       RotationMatrixReadOnly r = mapToWorld.getRotation();
