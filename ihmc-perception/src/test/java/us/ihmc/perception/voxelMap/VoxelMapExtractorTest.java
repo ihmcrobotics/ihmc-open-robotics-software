@@ -21,7 +21,7 @@ import static org.bytedeco.cuda.global.cudart.cudaMemcpyDefault;
 import static org.bytedeco.opencv.global.opencv_core.CV_16UC1;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CUDAVoxelMapExtractorTest
+public class VoxelMapExtractorTest
 {
    private static final int MAP_SIZE = 32;
    private static final float VOXEL_SIZE = 0.1f;
@@ -42,7 +42,7 @@ public class CUDAVoxelMapExtractorTest
       CameraIntrinsics intrinsics = new CameraIntrinsics(height, width, fx, fy, cx, cy);
       RawImage depthImage = RawImage.createWith16BitDepth(depthMat, intrinsics, new RigidBodyTransform(), Instant.now(), 0, DEPTH_DISCRETIZATION);
 
-      try (CUDAVoxelMapExtractor extractor = new CUDAVoxelMapExtractor(MAP_SIZE, VOXEL_SIZE))
+      try (VoxelMapExtractor extractor = new VoxelMapExtractor(MAP_SIZE, VOXEL_SIZE))
       {
          float[] voxelMap = downloadVoxelMap(extractor.getVoxelMap(new Pose3D(), depthImage).getGpuData());
 
@@ -113,7 +113,7 @@ public class CUDAVoxelMapExtractorTest
       }
       assertEquals(3, expectedOccupiedIndices.size()); // sanity check that the out-of-map point got dropped
 
-      try (CUDAVoxelMapExtractor extractor = new CUDAVoxelMapExtractor(MAP_SIZE, VOXEL_SIZE))
+      try (VoxelMapExtractor extractor = new VoxelMapExtractor(MAP_SIZE, VOXEL_SIZE))
       {
          float[] voxelMap = downloadVoxelMap(extractor.getVoxelMap(origin, depthImage).getGpuData());
 
@@ -136,7 +136,7 @@ public class CUDAVoxelMapExtractorTest
       CameraIntrinsics intrinsics = new CameraIntrinsics(64, 64, 100.0, 100.0, 32.0, 32.0);
       RawImage depthImage = RawImage.createWith16BitDepth(depthMat, intrinsics, new RigidBodyTransform(), Instant.now(), 0, DEPTH_DISCRETIZATION);
 
-      try (CUDAVoxelMapExtractor extractor = new CUDAVoxelMapExtractor(MAP_SIZE, VOXEL_SIZE))
+      try (VoxelMapExtractor extractor = new VoxelMapExtractor(MAP_SIZE, VOXEL_SIZE))
       {
          float[] voxelMap = downloadVoxelMap(extractor.getVoxelMap(new Pose3D(), depthImage).getGpuData());
          float occupancySum = 0.0f;

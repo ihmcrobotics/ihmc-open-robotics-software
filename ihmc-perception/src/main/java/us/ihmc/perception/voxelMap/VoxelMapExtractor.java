@@ -3,8 +3,8 @@ package us.ihmc.perception.voxelMap;
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.FloatPointer;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
@@ -20,7 +20,7 @@ import static org.bytedeco.cuda.global.cudart.*;
 /**
  * Fuses depth images into a robot-centric voxel occupancy map on the GPU.
  */
-public class CUDAVoxelMapExtractor implements AutoCloseable
+public class VoxelMapExtractor implements AutoCloseable
 {
    private static final int BLOCK_SIZE_XY = 16;
 
@@ -49,12 +49,12 @@ public class CUDAVoxelMapExtractor implements AutoCloseable
 
    private int error;
 
-   public CUDAVoxelMapExtractor(int mapSize, float voxelSize)
+   public VoxelMapExtractor(int mapSize, float voxelSize)
    {
       this(mapSize, mapSize, mapSize, voxelSize);
    }
 
-   public CUDAVoxelMapExtractor(int mapSizeX, int mapSizeY, int mapSizeZ, float voxelSize)
+   public VoxelMapExtractor(int mapSizeX, int mapSizeY, int mapSizeZ, float voxelSize)
    {
       this.mapSizeX = mapSizeX;
       this.mapSizeY = mapSizeY;
@@ -95,15 +95,15 @@ public class CUDAVoxelMapExtractor implements AutoCloseable
     * @return a {@link VoxelMap} whose GPU data pointer holds the freshly computed occupancy values;
     *       CPU data is fetched lazily on first call to {@link VoxelMap#getCpuData()}
     */
-   public VoxelMap getVoxelMap(Pose3D origin, RawImage... depthImages)
+   public VoxelMap getVoxelMap(RigidBodyTransformReadOnly origin, RawImage... depthImages)
    {
-      // Allocate device memory for the voxel map
+      // Allocate device memory for the voxel map`
       int voxelCount = getNumberOfVoxels();
       FloatPointer voxelMapPointer = new FloatPointer();
       CUDATools.mallocAsync(voxelMapPointer, voxelCount, stream);
       voxelMapPointer.limit(voxelCount);
 
-      origin.get(worldToMapTransform);
+      worldToMapTransform.set(origin);
       worldToMapTransform.invert();
 
       int imageIndex = 0;
