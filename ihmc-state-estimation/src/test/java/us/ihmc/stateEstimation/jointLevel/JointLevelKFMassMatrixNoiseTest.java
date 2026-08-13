@@ -63,7 +63,7 @@ public class JointLevelKFMassMatrixNoiseTest
     * 100%+ mismatch, not 0.1%. 3e-3·maxAbs still catches any such structural error; the EXACT Gram + rotor
     * algebra is pinned to machine precision, on a WELL-conditioned synthetic Λ_eff, by
     * {@link JointLevelKFRotorAndGramTest}. TODO(tighten): re-derive the reference with a Cholesky M_NN solve
-    * (matching the filter) to restore a 1e-8 oracle.
+    * (matching the filter) to restore a 1e-8 agreement.
     */
    private static double relTol(DMatrixRMaj expected)
    {
@@ -147,7 +147,7 @@ public class JointLevelKFMassMatrixNoiseTest
     * with a QA_MAX cap): Lambda_eff = Λ + diag(reflected rotor inertia), then Qa = Lambda_eff⁻¹ diag(σ_τ²)
     * Lambda_eff⁻ᵀ (the Gram form). The random chain's joints match no rotor-table key (so each rotor term is the
     * default {@link #ROTOR_DEFAULT}) and carry no finite effort limit (so each σ_τ falls back to SIGMA_TAU); both
-    * are read the same way the filter reads them, so this stays an INDEPENDENT oracle. The QA_MAX cap is no
+    * are read the same way the filter reads them, so this stays an INDEPENDENT reference. The QA_MAX cap is no
     * longer applied (demoted to a surfacing tripwire). In filter state order.
     */
    private static DMatrixRMaj referenceQa(JointLevelKFTestFixture f)
@@ -189,7 +189,7 @@ public class JointLevelKFMassMatrixNoiseTest
    @Test
    public void testProcessNoiseEqualsVanLoanOfSchurComplementInverseSquared()
    {
-      // Decisive oracle for the Schur algebra: the filter's Q joint blocks must equal the Van Loan discretization
+      // Decisive reference for the Schur algebra: the filter's Q joint blocks must equal the Van Loan discretization
       // of Qa = σ_τ² Λ⁻², with Λ recomputed by the fully independent reference (§3.2). Any block-extraction or
       // sign error in M_bb / M_bj / M_jj shows up here.
       for (JointLevelKFTestFixture f : JointLevelKFTestFixture.shapesMassMatrix(6100L))

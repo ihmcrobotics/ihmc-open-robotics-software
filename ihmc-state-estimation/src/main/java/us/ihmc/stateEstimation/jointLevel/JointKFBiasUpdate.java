@@ -166,7 +166,7 @@ final class JointKFBiasUpdate
     * estimator calls {@code updateFramesRecursively()} every tick) so they are deliberately not re-updated here.
     * Allocation-free: every matrix is pre-sized and only reshaped DOWN.
     *
-    * <p>Convention traps, each of which fails SILENTLY if wrong, and all pinned by the oracle test: the pair
+    * <p>Convention traps, each of which fails SILENTLY if wrong, and all pinned by the independent-reference test: the pair
     * residual is child-plus / parent-minus, matching {@code setKinematicChain(parent, child)}; L's pair blocks
     * carry the same signs; the anchor gets -J_leg on its q̇-columns and +I3 on the base IMU's bias column
     * (identity because J's frame IS the base measurement frame); and Sigma is the gyro MEASUREMENT-noise

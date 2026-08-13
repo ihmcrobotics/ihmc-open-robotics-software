@@ -10,8 +10,8 @@ import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 import org.junit.jupiter.api.Test;
 
 /**
- * Machine-precision oracle for the two algebraic halves of the Part B process-noise fix, on a WELL-conditioned
- * synthetic {@code Λ} so no ill-conditioning masks a sign/index error (the random-fixture oracle in
+ * Machine-precision independent reference for the two algebraic halves of the Part B process-noise fix, on a
+ * WELL-conditioned synthetic {@code Λ} so no ill-conditioning masks a sign/index error (the random-fixture reference in
  * {@link JointLevelKFMassMatrixNoiseTest} runs the same algebra through the live filter but can only assert to
  * ~1e-3 because LU vs Cholesky diverge on nearly-singular random floating-base blocks — see its {@code relTol}).
  *

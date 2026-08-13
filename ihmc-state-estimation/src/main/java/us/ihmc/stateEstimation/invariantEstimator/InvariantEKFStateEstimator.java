@@ -845,7 +845,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    }
 
    /**
-    * Installs the contact-probability source (e.g. the controller-contact oracle, or a learned ContactNet
+    * Installs the contact-probability source (e.g. the controller-contact ground truth, or a learned ContactNet
     * head). Replaces the default forward-kinematics detector.
     *
     * @param provider the new provider. Not null.
