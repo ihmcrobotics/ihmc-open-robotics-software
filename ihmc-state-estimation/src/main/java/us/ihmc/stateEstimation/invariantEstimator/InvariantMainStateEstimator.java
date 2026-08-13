@@ -21,6 +21,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBiasProvider;
 import us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter;
 import us.ihmc.stateEstimation.jointLevel.ProprioceptivePreFilter;
 import us.ihmc.stateEstimation.jointLevel.ZeroIMUBiasProvider;
@@ -466,6 +467,23 @@ public class InvariantMainStateEstimator implements StateEstimatorController
    public void requestStateEstimatorMode(StateEstimatorMode operatingMode)
    {
       invariantEstimator.requestStateEstimatorMode(operatingMode);
+   }
+
+   /**
+    * Re-seeds the joint-level pre-filter from the estimator that was running until now, for the case where this
+    * estimator is switched in after standing by cold. Without it the pre-filter would predict from a mean that
+    * is however-many minutes stale, against a converged (small) covariance, so the resulting innovation bleeds
+    * in over many ticks.
+    *
+    * <p>Call immediately before {@link #initializeEstimator}, so phase 1 inside that method runs on the seeded
+    * state. No-op when no pre-filter is installed, or when the installed one carries no covariance.</p>
+    *
+    * @param biasSource the outgoing estimator's IMU bias estimates; may be null, leaving the bias block zeroed.
+    */
+   public void seedPreFilterFromHandover(IMUBiasProvider biasSource)
+   {
+      if (preFilter != null)
+         preFilter.seedFromHandover(biasSource);
    }
 
    @Override

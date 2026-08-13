@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
@@ -33,8 +34,6 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
-import us.ihmc.stateEstimation.jointLevel.ProprioceptivePreFilter;
-import us.ihmc.stateEstimation.jointLevel.ProprioceptivePreFilterFactory;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.DistributedIMUBasedCenterOfMassStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.MomentumStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.SimpleMomentumStateUpdater;
@@ -63,7 +62,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final PelvisRotationalStateUpdaterInterface pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
    private final MomentumStateUpdater momentumStateUpdater;
-   private final ProprioceptivePreFilter preFilter;
+   private final IMUBiasStateEstimator imuBiasStateEstimator;
    private final IMUYawDriftEstimator imuYawDriftEstimator;
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
@@ -153,14 +152,12 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                                                                       registry,
                                                                                       stateEstimatorParameters.cancelGravityFromAccelerationMeasurement());
 
-      preFilter = ProprioceptivePreFilterFactory.create(sensorOutputMap,
-                                                        stateEstimatorParameters,
-                                                        imuProcessedOutputs,
+      imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs,
                                                         feet.keySet(),
-                                                        inverseDynamicsStructure.getElevator(), // enables the JOINT_KF mass-matrix process noise
                                                         gravitationalAcceleration,
                                                         cancelGravityFromAccelerationMeasurement,
                                                         estimatorDT,
+                                                        stateEstimatorParameters,
                                                         registry);
       imuYawDriftEstimator = new IMUYawDriftEstimator(inverseDynamicsStructure,
                                                       footSwitches,
@@ -169,7 +166,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                                       stateEstimatorParameters,
                                                       registry);
 
-      jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMap, preFilter, registry);
+      jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMap, stateEstimatorParameters, registry);
 
       if (forceSensorDataHolderToUpdate != null)
       {
@@ -191,7 +188,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       {
          pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure,
                                                                                  imusToUse,
-                                                                                 preFilter,
+                                                                                 imuBiasStateEstimator,
                                                                                  imuYawDriftEstimator,
                                                                                  estimatorDT,
                                                                                  registry);
@@ -204,7 +201,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
       pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure,
                                                               imusToUse,
-                                                              preFilter,
+                                                              imuBiasStateEstimator,
                                                               cancelGravityFromAccelerationMeasurement,
                                                               footSwitches,
                                                               centerOfPressureDataHolderFromController,
@@ -286,8 +283,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    @Override
    public void initialize()
    {
-      // Phase 1 must run before every updateJointState() call; JointStateUpdater.initialize() calls it.
-      preFilter.computeJointState();
       jointStateUpdater.initialize();
       if (pelvisRotationalStateUpdater != null)
       {
@@ -302,7 +297,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       if (momentumStateUpdater != null)
          momentumStateUpdater.initialize();
 
-      preFilter.initialize();
+      imuBiasStateEstimator.initialize();
       imuYawDriftEstimator.initialize();
    }
 
@@ -322,7 +317,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          LogTools.debug("Estimator went to {}", operatingMode.getEnumValue());
       }
 
-      preFilter.computeJointState(); // phase 1: before joint outputs are consumed
       jointStateUpdater.updateJointState();
 
       if (pelvisRotationalStateUpdater != null)
@@ -351,7 +345,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       yoRootTwist.setMatchingFrame(rootJoint.getJointTwist());
 
       List<RigidBodyBasics> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
-      preFilter.computeImuBiases(trustedFeet); // phase 2: after the trust decision
+      imuBiasStateEstimator.compute(trustedFeet);
 
       if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {
@@ -382,6 +376,27 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       pelvisLinearStateUpdater.initializeRootJointPosition(rootJointTransform.getTranslation());
       reinitializeStateEstimator.set(true);
       // Do nothing for the orientation since the IMU is trusted
+   }
+
+   /**
+    * Seeds the estimated root <em>yaw</em> from {@code orientation}, to be applied by the re-initialization that
+    * {@link #initializeEstimator} schedules. Intended for a hand-over from another main estimator whose heading
+    * this one does not share.
+    *
+    * <p>Deliberately NOT folded into {@link #initializeEstimator}: that method's contract is "translation only,
+    * the IMU owns orientation", and the ROS2 re-initialize path depends on it staying that way. Roll and pitch
+    * are left to the IMU, which is absolute for them.</p>
+    */
+   public void seedOrientation(Orientation3DReadOnly orientation)
+   {
+      if (pelvisRotationalStateUpdater instanceof IMUBasedPelvisRotationalStateUpdater imuBasedUpdater)
+         imuBasedUpdater.initializeToWorldYaw(orientation.getYaw());
+   }
+
+   /** The IMU bias estimates this estimator maintains, e.g. to hand over to another estimator's pre-filter. */
+   public IMUBiasProvider getIMUBiasProvider()
+   {
+      return imuBiasStateEstimator;
    }
 
    @Override

@@ -164,7 +164,7 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
          public void controllerStateHasChanged(Enum<?> oldState, Enum<?> newState)
          {
             StateEstimatorMode requestedMode = stateModeMap.get(newState);
-            if (requestedMode != null)
+            if (requestedMode != null && mainStateEstimator != null)
                mainStateEstimator.requestStateEstimatorMode(requestedMode);
          }
       });

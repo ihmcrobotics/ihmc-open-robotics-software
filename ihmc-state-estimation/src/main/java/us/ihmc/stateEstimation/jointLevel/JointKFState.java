@@ -1,8 +1,10 @@
 package us.ihmc.stateEstimation.jointLevel;
 
 import org.ejml.data.DMatrixRMaj;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBiasProvider;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -281,12 +283,82 @@ final class JointKFState
       x.zero();
       for (var e : jointToIndex.entrySet())
          x.set(e.getValue(), sensorMap.getOneDoFJointOutput(e.getKey()).getPosition());
+      resetCovarianceToStartup();
+      initialized = true;
+      return true;
+   }
+
+   /**
+    * Handover seed, used when this filter is switched in after running cold: takes the <em>mean</em> from the
+    * estimator that was already running — joint q/q̇ read off the model joints this filter tracks (the active
+    * estimator wrote them last tick) and each IMU's gyro bias from {@code biasSource} — instead of re-deriving
+    * it from raw encoders as {@link #seed()} does.
+    *
+    * <p>The <em>covariance</em> is deliberately NOT carried over: the two estimators do not share a state
+    * parameterization, so no cross-covariance in this filter's layout is recoverable from theirs. P returns to
+    * the standard startup block-diagonal — every cross term zeroed, every diagonal back to its {@code init*}
+    * value — which is the conservative choice and keeps P trivially PSD.</p>
+    *
+    * <p>Returns false and changes nothing if any handover value is non-finite; a KF permanently latches NaN,
+    * so a bad handover must not be seeded.</p>
+    *
+    * @param biasSource per-IMU gyro bias from the outgoing estimator; may be null, leaving the bias block zeroed.
+    */
+   boolean seedFrom(IMUBiasProvider biasSource)
+   {
+      for (var e : jointToIndex.entrySet())
+      {
+         OneDoFJointBasics joint = e.getKey();
+         if (!Double.isFinite(joint.getQ()) || !Double.isFinite(joint.getQd()))
+         {
+            warnNonFiniteInputOnce("handover joint state of " + joint.getName());
+            return false;
+         }
+      }
+      if (biasSource != null)
+      {
+         for (int o = 0; o < numberOfIMUs; o++)
+         {
+            FrameVector3DReadOnly bias = biasSource.getAngularVelocityBiasInIMUFrame(imusByOrdinal[o]);
+            if (bias != null && bias.containsNaN())
+            {
+               warnNonFiniteInputOnce("handover gyro bias of " + imusByOrdinal[o].getSensorName());
+               return false;
+            }
+         }
+      }
+
+      x.zero();
+      for (var e : jointToIndex.entrySet())
+      {
+         x.set(e.getValue(), e.getKey().getQ());
+         x.set(numberOfJoints + e.getValue(), e.getKey().getQd());
+      }
+      if (biasSource != null)
+      {
+         for (int o = 0; o < numberOfIMUs; o++)
+         {
+            FrameVector3DReadOnly bias = biasSource.getAngularVelocityBiasInIMUFrame(imusByOrdinal[o]);
+            if (bias == null)
+               continue;
+            int biasColumn = 2 * numberOfJoints + 3 * o;
+            x.set(biasColumn, bias.getX());
+            x.set(biasColumn + 1, bias.getY());
+            x.set(biasColumn + 2, bias.getZ());
+         }
+      }
+      resetCovarianceToStartup();
+      initialized = true;
+      return true;
+   }
+
+   /** P -> the startup block-diagonal: all cross-covariances zero, each diagonal at its {@code init*} value. */
+   private void resetCovarianceToStartup()
+   {
       P.zero();
       for (int i = 0; i < numberOfJoints; i++) P.set(i, i, parameters.initPosVar.getValue());
       for (int i = numberOfJoints; i < 2 * numberOfJoints; i++) P.set(i, i, parameters.initVelVar.getValue());
       for (int i = 2 * numberOfJoints; i < dim; i++) P.set(i, i, parameters.initBiasVar.getValue());
-      initialized = true;
-      return true;
    }
 
    /**

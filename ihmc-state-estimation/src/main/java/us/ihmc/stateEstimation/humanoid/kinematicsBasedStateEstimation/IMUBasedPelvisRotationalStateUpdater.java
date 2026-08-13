@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -42,7 +43,15 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final YoFrameVector3D yoRootJointAngularVelocityInWorld;
 
    private final BooleanParameter zeroYawAtInitialization = new BooleanParameter("zeroEstimatedRootYawAtInitialization", registry, false);
+   /**
+    * Yaw offset subtracted from the raw IMU yaw on every tick. 0 unless {@link #zeroYawAtInitialization} or a
+    * {@link #initializeToWorldYaw(double)} handover set it. The YoVariable name is kept as-is so existing
+    * log-plotting scripts that resolve it by name keep working.
+    */
    private final YoDouble initialYaw = new YoDouble("initialEstimatedRootYaw", registry);
+   /** Latched request from {@link #initializeToWorldYaw(double)}, consumed by the next {@link #initialize()}. */
+   private boolean hasPendingWorldYaw = false;
+   private double pendingWorldYaw = 0.0;
 
    private final FiniteDifferenceAngularVelocityYoFrameVector3D yoRootJointAngularVelocityFromFD;
 
@@ -112,11 +121,33 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
          throw new RuntimeException("No sensor set up for the IMU.");
    }
 
+   /**
+    * Requests that the next {@link #initialize()} land the estimated root yaw on {@code desiredYaw} in world,
+    * instead of on the raw IMU yaw. Used when this estimator is switched in behind another one that owns a
+    * different (filter-integrated, foot-anchored) heading: the IMU gives an absolute yaw of its own, so without
+    * this the world-anchored root pose would step by the whole accumulated disagreement on the first tick.
+    *
+    * <p>The request is <em>latched</em>, not applied here, because the caller's re-init path defers the actual
+    * {@link #initialize()} to the next control tick. Roll and pitch are deliberately untouched: both estimators
+    * level to the same gravity, so only yaw diverges.</p>
+    */
+   public void initializeToWorldYaw(double desiredYaw)
+   {
+      pendingWorldYaw = desiredYaw;
+      hasPendingWorldYaw = true;
+   }
+
    @Override
    public void initialize()
    {
-
-      if (zeroYawAtInitialization.getValue())
+      if (hasPendingWorldYaw)
+      {
+         // Solve yawOffset so that (raw IMU yaw - yawOffset) == the requested world yaw.
+         computeOrientationAtEstimateFrame(measurementFrame, imuProcessedOutput.getOrientationMeasurement(), rootJointFrame, rotationFromRootJointFrameToWorld);
+         initialYaw.set(EuclidCoreTools.trimAngleMinusPiToPi(rotationFromRootJointFrameToWorld.getYaw() - pendingWorldYaw));
+         hasPendingWorldYaw = false;
+      }
+      else if (zeroYawAtInitialization.getValue())
       {
          computeOrientationAtEstimateFrame(measurementFrame, imuProcessedOutput.getOrientationMeasurement(), rootJointFrame, rotationFromRootJointFrameToWorld);
          initialYaw.set(rotationFromRootJointFrameToWorld.getYaw());
@@ -146,10 +177,9 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       rootJoint.setJointOrientation(rotationFromRootJointFrameToWorld);
       rootJointFrame.update();
 
-      if (zeroYawAtInitialization.getValue())
-      {
-         rotationFromRootJointFrameToWorld.prependYawRotation(-initialYaw.getValue());
-      }
+      // Applied unconditionally: initialYaw is 0 unless zeroYawAtInitialization asked for it or a handover
+      // seeded it via initializeToWorldYaw, so this reproduces the previous behaviour when neither is in play.
+      rotationFromRootJointFrameToWorld.prependYawRotation(-initialYaw.getValue());
 
       if (imuYawDriftEstimator != null)
       {

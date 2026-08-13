@@ -49,6 +49,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
+import us.ihmc.stateEstimation.humanoid.MainStateEstimatorType;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.invariantEstimator.InvariantContactSource;
 import us.ihmc.tools.TimestampProvider;
@@ -265,7 +266,10 @@ public class AvatarMultiThreadingFactory
       avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(estimatorContextDataFactory);
       avatarEstimatorThreadFactory.setGravity(GRAVITY);
-      avatarEstimatorThreadFactory.setUseInvariantStateEstimator(useInvariantMainEstimator);
+      // Both main estimators are always built now; this only picks which one is active at boot. Swap at
+      // runtime through the SwitchableMainStateEstimator's "activeMainStateEstimator" YoEnum.
+      avatarEstimatorThreadFactory.setDefaultMainStateEstimator(useInvariantMainEstimator ? MainStateEstimatorType.INVARIANT_EKF
+                                                                                          : MainStateEstimatorType.DRC_KINEMATICS);
       avatarEstimatorThreadFactory.setInvariantContactSource(invariantContactSource);
       //      if (secondaryEstimatorFactory != null)
       //         avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryEstimatorFactory);

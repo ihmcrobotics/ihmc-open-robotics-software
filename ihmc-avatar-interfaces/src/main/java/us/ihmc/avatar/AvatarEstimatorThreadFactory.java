@@ -52,8 +52,10 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.stateEstimation.ekf.HumanoidRobotEKFWithSimpleJoints;
 import us.ihmc.stateEstimation.ekf.LeggedRobotEKF;
+import us.ihmc.stateEstimation.humanoid.MainStateEstimatorType;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorControllerFactory;
+import us.ihmc.stateEstimation.humanoid.SwitchableMainStateEstimator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
@@ -103,8 +105,11 @@ public class AvatarEstimatorThreadFactory
    // Optional fields -----------------------------------------------
    private final OptionalFactoryField<YoGraphicsListRegistry> yoGraphicsListRegistryField = new OptionalFactoryField<>("yoGraphicsListRegistry");
    private final OptionalFactoryField<StateEstimatorController> mainStateEstimatorField = new OptionalFactoryField<>("mainEstimatorController");
-   /** When set, {@link #getMainStateEstimator()} builds the invariant InEKF main estimator instead of the DRC one. */
-   private boolean useInvariantStateEstimator = false;
+   /**
+    * Which main estimator {@link #getMainStateEstimator()} starts out active on. Both are always built and
+    * wrapped in a {@link SwitchableMainStateEstimator}, so this selects the boot default, not the only option.
+    */
+   private MainStateEstimatorType defaultMainStateEstimator = MainStateEstimatorType.DRC_KINEMATICS;
    private boolean invariantEstimatorYawSeeding = true;
    /**
     * Source for the invariant main estimator's per-foot contact probability. Default
@@ -493,7 +498,7 @@ public class AvatarEstimatorThreadFactory
       return avatarEstimatorThread;
    }
 
-   public StateEstimatorController createDRCKinematicsStateEstimator()
+   public DRCKinematicsBasedStateEstimator createDRCKinematicsStateEstimator()
    {
       if (!useStateEstimator())
          return null;
@@ -511,28 +516,30 @@ public class AvatarEstimatorThreadFactory
       estimatorFactory.setCenterOfPressureDataHolderFromController(getCenterOfPressureDataHolderFromController());
       estimatorFactory.setRobotMotionStatusFromController(getRobotMotionStatusFromController());
       estimatorFactory.setExternalPelvisCorrectorSubscriber(getExternalPelvisPoseSubscriberField());
-      DRCKinematicsBasedStateEstimator stateEstimator = estimatorFactory.createStateEstimator(getEstimatorRegistry(), getStateEstimatorParameters()::getEstimatorDT);
-
-      if (asyncROS2NodeField.hasValue())
-      {
-         ForceSensorStateUpdater forceSensorStateUpdater = stateEstimator.getForceSensorStateUpdater();
-         asyncROS2NodeField.get().createSubscription(inputTopicField.get().withType(RequestWristForceSensorCalibrationPacket.class),
-                                     subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
-         asyncROS2NodeField.get().createSubscriptionSampler(inputTopicField.get().withType(ReinitializeStateEstimatorMessage.class),
-                                                            sample ->
-                                                            {
-                                                               if (sample.getRequestReinitialize())
-                                                                  stateEstimator.requestReinitializeEstimator();
-                                                            });
-      }
-
-      return stateEstimator;
+      // NOTE: the RequestWristForceSensorCalibration / ReinitializeStateEstimator subscriptions used to be
+      // created here. They now live in getMainStateEstimator(), so the re-initialize request reaches whichever
+      // estimator is *active* -- setting the flag on this one directly would leave it armed while this
+      // estimator stands by, then fire an unexpected re-init the moment it is switched in.
+      return estimatorFactory.createStateEstimator(getEstimatorRegistry(), getStateEstimatorParameters()::getEstimatorDT);
    }
 
-   /** Selects the invariant InEKF as the main estimator (built by {@link #createInvariantStateEstimator()}). */
+   /**
+    * Selects which main estimator is <em>active at boot</em>. Both are built either way and can be swapped at
+    * runtime through the {@link SwitchableMainStateEstimator} that {@link #getMainStateEstimator()} returns.
+    */
+   public void setDefaultMainStateEstimator(MainStateEstimatorType defaultMainStateEstimator)
+   {
+      this.defaultMainStateEstimator = defaultMainStateEstimator;
+   }
+
+   /**
+    * @deprecated use {@link #setDefaultMainStateEstimator(MainStateEstimatorType)}. Kept so callers that
+    *       predate the runtime switch keep compiling and booting on the estimator they asked for.
+    */
+   @Deprecated
    public void setUseInvariantStateEstimator(boolean useInvariantStateEstimator)
    {
-      this.useInvariantStateEstimator = useInvariantStateEstimator;
+      setDefaultMainStateEstimator(useInvariantStateEstimator ? MainStateEstimatorType.INVARIANT_EKF : MainStateEstimatorType.DRC_KINEMATICS);
    }
 
    /** Enables/disables foot-referenced yaw seeding on the invariant main estimator (default true). */
@@ -547,7 +554,7 @@ public class AvatarEstimatorThreadFactory
     * write, and CoM position/velocity published to the shared center-of-mass holder. Uses the same noise
     * defaults as {@code InvariantEKFStateEstimatorFactory}.
     */
-   public StateEstimatorController createInvariantStateEstimator()
+   public InvariantMainStateEstimator createInvariantStateEstimator()
    {
       if (!useStateEstimator())
          return null;
@@ -947,14 +954,47 @@ public class AvatarEstimatorThreadFactory
          return null;
    }
 
+   /**
+    * Builds <em>both</em> main estimators and wraps them in a {@link SwitchableMainStateEstimator}, so the DRC
+    * estimator and the invariant EKF can be swapped at runtime instead of picked at compile time.
+    * {@link #setDefaultMainStateEstimator} chooses which one is active at boot.
+    *
+    * <p>Construction order matters: both paths mutate the shared {@link ContactableBodiesFactory}, each setting
+    * its full robot model and reference frames immediately before its own {@code createFootContactableFeet()}.
+    * They must therefore be built one after the other, never interleaved.</p>
+    */
    public StateEstimatorController getMainStateEstimator()
    {
       if (!mainStateEstimatorField.hasValue())
       {
-         if (useInvariantStateEstimator)
-            mainStateEstimatorField.set(createInvariantStateEstimator());
-         else
-            mainStateEstimatorField.set(createDRCKinematicsStateEstimator());
+         DRCKinematicsBasedStateEstimator drcStateEstimator = createDRCKinematicsStateEstimator();
+         InvariantMainStateEstimator invariantStateEstimator = createInvariantStateEstimator();
+
+         if (drcStateEstimator == null || invariantStateEstimator == null)
+            return null; // !useStateEstimator(): AvatarEstimatorThread tolerates a null main estimator.
+
+         SwitchableMainStateEstimator switchableStateEstimator = new SwitchableMainStateEstimator(drcStateEstimator,
+                                                                                                 invariantStateEstimator,
+                                                                                                 getEstimatorFullRobotModel().getRootJoint(),
+                                                                                                 defaultMainStateEstimator,
+                                                                                                 getEstimatorRegistry());
+
+         if (asyncROS2NodeField.hasValue())
+         {
+            // Wrist calibration only exists on the DRC estimator's force-sensor updater, so it is wired
+            // straight to it. Re-initialize goes through the wrapper, which re-seeds whichever is active.
+            ForceSensorStateUpdater forceSensorStateUpdater = drcStateEstimator.getForceSensorStateUpdater();
+            asyncROS2NodeField.get().createSubscription(inputTopicField.get().withType(RequestWristForceSensorCalibrationPacket.class),
+                                                        subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
+            asyncROS2NodeField.get().createSubscriptionSampler(inputTopicField.get().withType(ReinitializeStateEstimatorMessage.class),
+                                                               sample ->
+                                                               {
+                                                                  if (sample.getRequestReinitialize())
+                                                                     switchableStateEstimator.requestReinitializeEstimator();
+                                                               });
+         }
+
+         mainStateEstimatorField.set(switchableStateEstimator);
       }
       return mainStateEstimatorField.get();
    }

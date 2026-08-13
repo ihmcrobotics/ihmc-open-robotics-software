@@ -12,6 +12,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUBasedJointStateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBiasProvider;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -267,6 +268,25 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 
       // Refuse to latch non-finite boot data (see JointKFState.seed): stay uninitialized and retry next tick.
       if (!state.seed())
+         return;
+
+      yoInitialized.set(true);
+      yoWaitingForGroundContact.set(false);
+   }
+
+   /**
+    * {@inheritDoc}
+    *
+    * <p>Deliberately bypasses the on-ground gate that {@link #initialize()} honours. That gate exists because
+    * at boot the exported gyro bias is unobservable while the robot hangs, so seeding early would latch a
+    * wandering bias. A handover is the opposite situation: the mean arrives from an estimator that has already
+    * converged it, and the switch is gated to a standing, frozen robot — a strictly stronger precondition than
+    * the debounce tests for.</p>
+    */
+   @Override
+   public void seedFromHandover(IMUBiasProvider biasSource)
+   {
+      if (!state.seedFrom(biasSource))
          return;
 
       yoInitialized.set(true);

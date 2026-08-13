@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBiasProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -68,6 +69,13 @@ public class SwitchableJointLevelSource implements ProprioceptivePreFilter
    {
       jointKF.computeImuBiases(trustedFeet);
       alphaComplementary.computeImuBiases(trustedFeet);
+   }
+
+   @Override
+   public void seedFromHandover(IMUBiasProvider biasSource)
+   {
+      jointKF.seedFromHandover(biasSource);
+      alphaComplementary.seedFromHandover(biasSource);
    }
 
    @Override

@@ -101,6 +101,7 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
+import us.ihmc.stateEstimation.humanoid.MainStateEstimatorType;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorControllerFactory;
 import us.ihmc.stateEstimation.invariantEstimator.InvariantContactSource;
 import us.ihmc.tools.factories.FactoryFieldNotSetException;
@@ -552,9 +553,11 @@ public class SCS2AvatarSimulationFactory
       avatarEstimatorThreadFactory.setGravity(gravity.get());
       if (secondaryStateEstimatorFactory.hasBeenSet())
          avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryStateEstimatorFactory.get());
+      // Both main estimators are always built now; this only picks which one is active at boot. Swap at
+      // runtime through the SwitchableMainStateEstimator's "activeMainStateEstimator" YoEnum.
       if (useInvariantMainStateEstimator)
       {
-         avatarEstimatorThreadFactory.setUseInvariantStateEstimator(true);
+         avatarEstimatorThreadFactory.setDefaultMainStateEstimator(MainStateEstimatorType.INVARIANT_EKF);
          avatarEstimatorThreadFactory.setInvariantEstimatorYawSeeding(invariantMainEstimatorYawSeeding);
          avatarEstimatorThreadFactory.setInvariantContactSource(invariantMainEstimatorContactSource);
       }

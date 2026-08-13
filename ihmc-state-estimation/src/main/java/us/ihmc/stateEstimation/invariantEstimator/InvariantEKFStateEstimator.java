@@ -129,7 +129,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     * are set to NaN instead so they cannot be misread as a DRC comparison.
     */
    private boolean runningAsMain = false;
-   private StateEstimatorMode operatingMode = StateEstimatorMode.NORMAL;
+   /** Volatile: written from the controller thread via {@link #requestStateEstimatorMode}, read in doControl(). */
+   private volatile StateEstimatorMode operatingMode = StateEstimatorMode.NORMAL;
    private boolean heldLastTick = false;
    private static final double CONTACT_HOLD_THRESHOLD = 0.5; // both feet below -> base translation will be unobservable
    private final Vector3D zeroVelocity = new Vector3D(); // final, stays zero
