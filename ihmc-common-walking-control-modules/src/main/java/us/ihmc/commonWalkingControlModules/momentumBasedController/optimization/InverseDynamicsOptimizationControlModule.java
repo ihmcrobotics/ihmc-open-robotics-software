@@ -227,6 +227,16 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       motionQPInputCalculator.initialize();
    }
 
+   /**
+    * Requests to cold-start the solver on the next solve: the active set it warm starts from lives
+    * outside YoVariables and may no longer match the robot state, e.g. after falling or after the
+    * simulation has been reset.
+    */
+   public void notifyResetActiveSet()
+   {
+      qpSolver.notifyResetActiveSet();
+   }
+
    public void resetCustomBounds()
    {
       CommonOps_DDRM.fill(customQDDotMaxMatrix, Double.POSITIVE_INFINITY);

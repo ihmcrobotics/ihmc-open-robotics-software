@@ -839,6 +839,15 @@ public class SCS2AvatarSimulationFactory
             TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
             SubtreeStreams.fromChildren(OneDoFJointBasics.class, robot.getRootBody())
                           .forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
+
+            // Refresh the raw sensor data before initializing the estimator so its first tick does not
+            // consume stale values, e.g. after the simulation has been reset to its initial state. This
+            // matters in particular in the single-threaded mode where the periodic sensor read only
+            // happens after the estimator has run.
+            SensorReader sensorReader = estimatorThread.getSensorReader();
+            long initialTimestamp = sensorReader.read(masterContext.getSensorDataContext());
+            masterContext.setTimestamp(initialTimestamp);
+
             estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
             controllerThread.initialize();
             stepGeneratorThread.initialize();
@@ -861,6 +870,7 @@ public class SCS2AvatarSimulationFactory
             if (robotController instanceof BarrierScheduledRobotController)
                ((BarrierScheduledRobotController) robotController).waitUntilTasksDone();
          }
+
       });
    }
 
