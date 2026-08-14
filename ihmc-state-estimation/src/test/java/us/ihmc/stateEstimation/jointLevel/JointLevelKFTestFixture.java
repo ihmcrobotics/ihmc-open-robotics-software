@@ -351,6 +351,12 @@ final class JointLevelKFTestFixture
       sensorMap.setPosition(joint, q);
    }
 
+   /** Firmware-reported joint velocity, i.e. the direct-velocity channel's raw measurement. */
+   void setMeasuredVelocity(OneDoFJointBasics joint, double qd)
+   {
+      sensorMap.setVelocity(joint, qd);
+   }
+
    /**
     * Applies one tick of a self-consistent simulated motion: sets each filtered joint's true {@code q}/{@code q̇}
     * on the live mecano chain and its encoder to the true {@code q}, refreshes the frames, then sets every IMU's
@@ -624,6 +630,11 @@ final class JointLevelKFTestFixture
       void setPosition(OneDoFJointBasics joint, double q)
       {
          states.get(joint).position = q;
+      }
+
+      void setVelocity(OneDoFJointBasics joint, double qd)
+      {
+         states.get(joint).velocity = qd;
       }
 
       @Override

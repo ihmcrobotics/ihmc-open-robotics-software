@@ -34,7 +34,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 | `JointLevelKFBiasObservabilityTest` | 4 | Common-mode bias gauge nullspace; stance anchor fixes gauge; unfiltered-ankle anchor | Full (needs FK) |
 | `JointLevelKFEncoderNISConsistencyTest` | 4 | Per-joint encoder R wiring + χ²₁ NIS consistency (4000 trials) | Full |
 | `JointLevelKFDirectVelocityMeasurementTest` | 5 | Direct q̇ channel wiring, adaptive lag inflation of R, χ²₁ NIS | Full |
-| `JointLevelKFStackedOracleTest` | 2 | **Decisive oracle**: stacked update == nuisance-ω_base-marginalized raw-gyro reference KF | Full (needs FK/Jacobians) |
+| `JointLevelKFStackedReferenceTest` | 2 | **Decisive reference**: stacked update == nuisance-ω_base-marginalized raw-gyro reference KF | Full (needs FK/Jacobians) |
 | `JointLevelKFRotorAndGramTest` | 3 | Rotor-inertia Weyl floor, Gram-form Qa vs dense reference, rotor table lookup | Full |
 | `JointLevelKFSingularInnovationDiagnosticTest` | 2 | Near-singular S diagnostic names the physical measurement | Adapt (message text) |
 | `JointLevelKFPreFilterAllocationTest` | 3 | Hot-path allocation-free guard (JVM) + finiteness smoke | Only `testHotPathStaysFinite` |
@@ -82,17 +82,17 @@ estimator can be validated against the same properties, scenarios, and tolerance
   4. `twoPairs(baseSeed+4, 10, a=1, b=5, c=9)` → n=8, m=3, 2 pairs (pairs (a,b),(b,c) share middle IMU b; foot on c link).
   - Note: `n` = number of joints strictly between parent-link and child-link along the chain (child index − parent index − 1). Encoder-only m=0 case is intentionally absent.
 - **`shapesMassMatrix(baseSeed)`** — same 4 shapes but with the elevator handed to the filter (activates `Qa = σ_τ² M(q)⁻²` mass-matrix process noise instead of scalar-CWNA fallback).
-- **`applyConsistentMotion(qTrue[], qdTrue[])`** (oracle for measurement-consistency): zeros the root joint twist (static base), zeros all joints' qd, then for each filtered joint `i` sets `q=qTrue[i]`, `qd=qdTrue[i]`, and encoder = qTrue[i]; `updateFramesRecursively()`; then sets each IMU's gyro to its link's body-frame angular velocity via `refreshGyroFromTwist`. Because the pair measurement is `ω_child − R·ω_parent`, the zeroed base cancels and the relative gyro equals `J_ang·q̇` at the true state.
+- **`applyConsistentMotion(qTrue[], qdTrue[])`** (reference for measurement-consistency): zeros the root joint twist (static base), zeros all joints' qd, then for each filtered joint `i` sets `q=qTrue[i]`, `qd=qdTrue[i]`, and encoder = qTrue[i]; `updateFramesRecursively()`; then sets each IMU's gyro to its link's body-frame angular velocity via `refreshGyroFromTwist`. Because the pair measurement is `ω_child − R·ω_parent`, the zeroed base cancels and the relative gyro equals `J_ang·q̇` at the true state.
 - **`refreshGyroFromTwist(imu)`**: reads the link body-fixed frame's twist, changes frame to the IMU measurement frame, sets gyro to its angular part.
-- **Assertion / oracle helpers** (must be replicated in Python):
+- **Assertion / reference helpers** (must be replicated in Python):
   - `assertAllClose(actual, expected, tol, msg)`: shape check then elementwise `|a−e| ≤ tol`.
   - `assertSymmetric(a, tol, msg)`: `|a[r,c] − a[c,r]| ≤ tol` for upper triangle.
   - `assertPositiveSemiDefinite(a, msg)`: symmetric eigenvalues (EJML `EigenDecomposition`), require `min_eig ≥ −1e-6·max(max_eig, 1.0)`.
   - `symmetricEigenvalues(a)`: real parts of eigenvalues.
   - `block(a, row0, col0, rows, cols)`: submatrix extraction.
-  - `spd(size, seed)`: **deterministic SPD generator** — fill `m` with `m.data[i] = sin(i + 1.0 + seed)` (row-major, i=0..size²−1); `a = m·mᵀ`; then add `size` to each diagonal (`a += size·I`) → symmetric positive-definite. (This is the oracle for all seeded priors/noises; replicate exactly.)
+  - `spd(size, seed)`: **deterministic SPD generator** — fill `m` with `m.data[i] = sin(i + 1.0 + seed)` (row-major, i=0..size²−1); `a = m·mᵀ`; then add `size` to each diagonal (`a += size·I`) → symmetric positive-definite. (This is the reference for all seeded priors/noises; replicate exactly.)
   - `identity(size)`, `scaledIdentity(size, value)`, `trace(a)`.
-- **Port notes**: Mecano `RandomFloatingRevoluteJointChain` + `nextState(random, CONFIGURATION, VELOCITY)` with a fixed `java.util.Random(seed)` — the Python port must reproduce the SAME random chain geometry and state, OR the port must abstract the geometry so tests can inject known transforms. This is the hardest cross-language dependency (Java `Random` LCG + Mecano link geometry). EJML matrices → NumPy. YoRegistry → no-op / registry stub. `IMUBasedJointStateEstimatorParameters` constructor signature `(name, enabled, parentImuName, childImuName, 0.0, 0.0)`. `TestIMU.setBiasProcessNoiseCovarianceNonFinite()` sets `[0,0]=NaN`. The `spd` and `sin`-based `genericH` oracles are language-agnostic and should be ported bit-for-bit.
+- **Port notes**: Mecano `RandomFloatingRevoluteJointChain` + `nextState(random, CONFIGURATION, VELOCITY)` with a fixed `java.util.Random(seed)` — the Python port must reproduce the SAME random chain geometry and state, OR the port must abstract the geometry so tests can inject known transforms. This is the hardest cross-language dependency (Java `Random` LCG + Mecano link geometry). EJML matrices → NumPy. YoRegistry → no-op / registry stub. `IMUBasedJointStateEstimatorParameters` constructor signature `(name, enabled, parentImuName, childImuName, 0.0, 0.0)`. `TestIMU.setBiasProcessNoiseCovarianceNonFinite()` sets `[0,0]=NaN`. The `spd` and `sin`-based `genericH` references are language-agnostic and should be ported bit-for-bit.
 
 ### JointLevelKFTestSupport.java
 - **Purpose**: Test-only bridge exposing the package-private `JointLevelKFPreFilter` constructors to tests in other packages. No tests, no assertions.
@@ -159,7 +159,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 ### JointLevelKFPredictTest.java
 - **Purpose**: Ported from `test_predict.py`. Locks in EKF time update `x⁻ = F·x`, `P⁻ = F·P·Fᵀ + Q` through the package-private `predict()` seam from a seeded prior.
 - **Shared setup / constants**: `DT = 1e-3` (from fixture), `IMU_BIAS_VAR = 1e-4` (from fixture).
-- **`seededPrior(f, seed)` oracle**: builds mean `x` (dim×1): position segment `x[i] = i+1` (i=0..n−1); velocity segment `x[n+i] = i+1+100`; bias segment `x[2n+i] = i+1+1000` (i=0..3m−1); covariance `= spd(dim, seed)`; calls `filter.setStateForTest(x, P)`.
+- **`seededPrior(f, seed)` reference**: builds mean `x` (dim×1): position segment `x[i] = i+1` (i=0..n−1); velocity segment `x[n+i] = i+1+100`; bias segment `x[2n+i] = i+1+1000` (i=0..3m−1); covariance `= spd(dim, seed)`; calls `filter.setStateForTest(x, P)`.
 
 #### testShapesPreserved
 - **Scenario**: `shapes(2000L)`; `seededPrior(f,0)`; `predict()`.
@@ -191,10 +191,10 @@ estimator can be validated against the same properties, scenarios, and tolerance
 
 ### JointLevelKFUpdateTest.java
 - **Purpose**: Ported from `test_update.py`. Locks in the Joseph-form measurement update `ν=z−Hx⁻`, `S=HP⁻Hᵀ+R`, `K=P⁻Hᵀ S⁻¹`, `x⁺=x⁻+Kν`, `P⁺=(I−KH)P⁻(I−KH)ᵀ+KRKᵀ` via package-private `josephUpdate(H,z,R)`, checked against an explicit-inverse reference KF.
-- **Oracle helpers**:
+- **Reference helpers**:
   - `genericH(k, dim, seed)`: `H[r,c] = sin(0.37·(r·dim + c + 1) + seed)` — deterministic non-geometric Jacobian. Replicate exactly.
   - `seededPrior(f, seed)`: mean `x[i] = 0.1·(i+1)`, cov `P = spd(dim, seed)`, `setStateForTest`; returns P.
-  - `referenceUpdate(x,P,H,z,R)`: full explicit-inverse KF (transpose, `PHt=P·Hᵀ`, `S=H·PHt+R`, `Sinv=inv(S)`, `K=PHt·Sinv`, `ν=z−H·x`, `xNew=x+K·ν`, `Pnew=(I−KH)·P·(I−KH)ᵀ + K·R·Kᵀ`). This is the oracle to reproduce in NumPy.
+  - `referenceUpdate(x,P,H,z,R)`: full explicit-inverse KF (transpose, `PHt=P·Hᵀ`, `S=H·PHt+R`, `Sinv=inv(S)`, `K=PHt·Sinv`, `ν=z−H·x`, `xNew=x+K·ν`, `Pnew=(I−KH)·P·(I−KH)ᵀ + K·R·Kᵀ`). This is the reference to reproduce in NumPy.
 
 #### testShapesAndReferenceKF
 - **Scenario**: `shapes(3000L)`; `P=seededPrior(f,1)`, `x=getStateVector()`; `H=genericH(3, dim, 2)`; `z[i]=0.05·(i+1)` (3×1); `R=spd(3,7)`. Compute `ref=referenceUpdate(...)`; call `josephUpdate(H,z,R)`.
@@ -222,7 +222,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 
 ### JointLevelKFMeasurementTest.java
 - **Purpose**: Ported from `test_measurement.py` (Rev. 2). Locks in the measurement model: encoder Jacobian `[I_n | 0]`, and relative-gyro measurement `z = ω_child − R·ω_parent` with Jacobian rows `[0 | scattered J | +R_child at child-bias | −R_parent at parent-bias]`. Uses the STACKED measurement seam: one stacked `z_g/H_g/R_g` over all pairs (rows `[3e, 3e+3)` for pair e) plus stance anchors; with no trusted feet anchors are inactive (K=0), so a single-pair stacked build == the old 3×dim H, 3×1 z, 3×3 R.
-- **Oracle helpers**:
+- **Reference helpers**:
   - `pairJacobian(f, pairIndex)`: `buildStackedMeasurementForTest()`, then `block(Hg, getStackedRowForPair(pairIndex), 0, 3, dim)`.
   - `pairResidual(f, pairIndex)`: same for the residual (3×1 slice).
 
@@ -264,8 +264,8 @@ estimator can be validated against the same properties, scenarios, and tolerance
 
 #### testMeasurementNoiseUsesGyroMeasurementCovariance
 - **Scenario**: `singlePair(4700L, 8, 1, 7)`; parent = IMU0, child = IMU1. Set ANISOTROPIC gyro MEASUREMENT covariances: parent `diag(4e-4, 1e-6, 2.5e-5)`, child `diag(9e-4, 1.6e-5, 4.9e-6)`; set tiny bias process covariances: both `diag(1e-9,1e-9,1e-9)`. `buildStackedMeasurementForTest()`; `R = getStackedMeasurementNoise()` (3×3, no anchors).
-- **Checks**: Independently build `expected = R_c·Σ_c·R_cᵀ + R_p·Σ_p·R_pᵀ`, where Jacobian frame = child's body-fixed frame so `R_child = I` and `R_parent` = parent-measurement-frame→child-frame rotation (read from euclid `getTransformToDesiredFrame`, converted via `JointLevelKFPreFilter.set_matrix`). So `expected = rotParent·Σ_parent·rotParentᵀ + Σ_child`. Assert `R == expected` (tol `1e-12`). Also assert `trace(R) = R[0,0]+R[1,1]+R[2,2] > 1e-5` (guard: bias-built R would have trace ~6e-9). Regression: R built from gyro MEASUREMENT noise, not bias random-walk covariance.
-- **Port notes**: Uses `JointLevelKFPreFilter.set_matrix(dmatrix, euclidRotation)` static helper and euclid `RigidBodyTransform.getTransformToDesiredFrame`.
+- **Checks**: Independently build `expected = R_c·Σ_c·R_cᵀ + R_p·Σ_p·R_pᵀ`, where Jacobian frame = child's body-fixed frame so `R_child = I` and `R_parent` = parent-measurement-frame→child-frame rotation (read from euclid `getTransformToDesiredFrame`, converted via `JointLevelKFPreFilter.setMatrix`). So `expected = rotParent·Σ_parent·rotParentᵀ + Σ_child`. Assert `R == expected` (tol `1e-12`). Also assert `trace(R) = R[0,0]+R[1,1]+R[2,2] > 1e-5` (guard: bias-built R would have trace ~6e-9). Regression: R built from gyro MEASUREMENT noise, not bias random-walk covariance.
+- **Port notes**: Uses `JointLevelKFPreFilter.setMatrix(dmatrix, euclidRotation)` static helper and euclid `RigidBodyTransform.getTransformToDesiredFrame`.
 
 #### testMeasurementNoiseIndependentOfBiasProcessCovariance
 - **Scenario**: `singlePair(4800L, 8, 1, 7)`; `buildStackedMeasurementForTest()`, capture `rBefore`; scale every IMU's bias process covariance to `diag(0.1,0.1,0.1)` (1000×); rebuild, capture `rAfter`.
@@ -274,9 +274,9 @@ estimator can be validated against the same properties, scenarios, and tolerance
 ---
 #### Cross-cutting port notes (jointLevel unit tests)
 - **Fixed seeds** (all `java.util.Random(seed)` / `spd(seed)` — deterministic): State test bases 100/200; singlePair seeds 1,2,3,4,6,7. Predict base 2000/2100/2200/2300 and singlePair 2400,2500,2600 with `spd` seeds 0–5. Update base 3000/3100/3200 and singlePair 3300,3400,3500; `genericH` seeds 2,4,6,22; `spd` seeds 1,3,5,7,9,11,13,21,23. Measurement bases 4000,4100,4150,4600 and singlePair 4050,4200,4300,4400,4500,4700,4800. Each `shapes(base)` uses sub-seeds `base+1..base+4` for the 4 chain geometries.
-- **Deterministic matrix oracles to port bit-for-bit**: `spd(size,seed)` (`sin(i+1+seed)` fill, `m·mᵀ + size·I`); `genericH(k,dim,seed)` (`sin(0.37·(r·dim+c+1)+seed)`); the `seededPrior` mean patterns (predict: `i+1`, `i+1+100`, `i+1+1000`; update: `0.1·(i+1)`).
-- **Filter test seams the Python port must expose**: `initialize()`, `predict()`, `josephUpdate(H,z,R)`, `setStateForTest(x,P)`, `getStateVector()`, `getCovariance()`, `getStateDimension()`, `getTransitionMatrix()`, `getProcessNoise()`, `getEncoderJacobian()`, `buildStackedMeasurementForTest()`, `getStackedMeasurementJacobian/Residual/Noise()`, `getStackedRowForPair(i)`, `getMixingOperator()`, `getPairParentBiasColumn(i)`, `getPairChildBiasColumn(i)`, `getPairVelocityColumns(i)`, `getNumberOfPairs()`, `getNumberOfFilteredJoints()`, `getNumberOfIMUs()`, `getFilteredJointsInStateOrder()`, static `set_matrix(...)`.
-- **Hard dependency**: Mecano `RandomFloatingRevoluteJointChain` + `nextState(random, CONFIGURATION, VELOCITY)` and euclid frame math generate the actual link rotations that the gyro-Jacobian and R-rotation tests depend on. The Python port must either reproduce identical geometry from the Java `Random` sequence (unlikely feasible) or restructure these geometry-dependent tests around injected/known transforms while keeping the pure-linear-algebra tests (state, predict, Joseph update, spd/genericH oracles) exact.
+- **Deterministic matrix references to port bit-for-bit**: `spd(size,seed)` (`sin(i+1+seed)` fill, `m·mᵀ + size·I`); `genericH(k,dim,seed)` (`sin(0.37·(r·dim+c+1)+seed)`); the `seededPrior` mean patterns (predict: `i+1`, `i+1+100`, `i+1+1000`; update: `0.1·(i+1)`).
+- **Filter test seams the Python port must expose**: `initialize()`, `predict()`, `josephUpdate(H,z,R)`, `setStateForTest(x,P)`, `getStateVector()`, `getCovariance()`, `getStateDimension()`, `getTransitionMatrix()`, `getProcessNoise()`, `getEncoderJacobian()`, `buildStackedMeasurementForTest()`, `getStackedMeasurementJacobian/Residual/Noise()`, `getStackedRowForPair(i)`, `getMixingOperator()`, `getPairParentBiasColumn(i)`, `getPairChildBiasColumn(i)`, `getPairVelocityColumns(i)`, `getNumberOfPairs()`, `getNumberOfFilteredJoints()`, `getNumberOfIMUs()`, `getFilteredJointsInStateOrder()`, static `setMatrix(...)`.
+- **Hard dependency**: Mecano `RandomFloatingRevoluteJointChain` + `nextState(random, CONFIGURATION, VELOCITY)` and euclid frame math generate the actual link rotations that the gyro-Jacobian and R-rotation tests depend on. The Python port must either reproduce identical geometry from the Java `Random` sequence (unlikely feasible) or restructure these geometry-dependent tests around injected/known transforms while keeping the pure-linear-algebra tests (state, predict, Joseph update, spd/genericH references) exact.
 - EJML → NumPy; `assertPositiveSemiDefinite` uses eigenvalues with tolerance `min_eig ≥ −1e-6·max(max_eig,1)`. YoRegistry → stub. Tests are plain JUnit 5 `@Test` iterating over `shapes(...)` lists (not `@ParameterizedTest`/`@RepeatedTest`), so Python can loop over the same shape list.
 
 ---
@@ -358,8 +358,8 @@ estimator can be validated against the same properties, scenarios, and tolerance
 
 ### JointLevelKFStandingStabilityTest.java
 - **Purpose**: Reconciliation/diagnostic harness for the Alex002 hardware finding that joint VELOCITY covariance blows up in one `predict()` while POSITION covariance stays sane, driven by Schur process noise `Qa = σ_τ² Λ⁻²`. Quantifies Λ conditioning, proves predict()/Qa (not the gyro update) is the inflation source, ranks candidate fixes, and provides the property test the fix must pass. Several tests print diagnostics via `System.out`.
-- **Shared setup**: Constants: `DT = 1e-3`, `SIGMA_TAU = 5.0`, `QA_MAX = 900.0` (= (30 rad/s²)²), `ROTOR_DEFAULT = 0.005`, `TARGET_QDD_STD = 20.0` rad/s², `ONE_TICK_QDD_VARIANCE_BOUND = 1.0` (rad/s)². Fixtures via `shapesMassMatrix(seed)`. Local oracle/helper methods:
-  - `referenceSchur(f)` → `{Λ, M_ff}`: independent EJML/LU reference. Builds spanning joint set from each filtered joint up to `f.rootJoint`; constructs `CompositeRigidBodyMassMatrixCalculator` over `[rootJoint]+spanning`; extracts filtered columns (in filter state order) and nuisance columns (base 6-DoF + gap joints); `Λ = M_ff − M_Nf^T M_NN⁻¹ M_Nf` (LU invert `M_NN`).
+- **Shared setup**: Constants: `DT = 1e-3`, `SIGMA_TAU = 5.0`, `QA_MAX = 900.0` (= (30 rad/s²)²), `ROTOR_DEFAULT = 0.005`, `TARGET_QDD_STD = 20.0` rad/s², `ONE_TICK_QDD_VARIANCE_BOUND = 1.0` (rad/s)². Fixtures via `shapesMassMatrix(seed)`. Local reference/helper methods:
+  - `referenceSchur(f)` → `{Λ, M_ff}`: independent EJML/LU reference. Builds spanning joint set from each filtered joint up to `f.rootJoint`; constructs `CompositeRigidBodyMassMatrixCalculator` over `[rootJoint]+spanning`; extracts filtered columns (in filter state order) and torque-free columns (base 6-DoF + gap joints); `Λ = M_ff − M_Nf^T M_NN⁻¹ M_Nf` (LU invert `M_NN`).
   - `condSPD(a)` = maxEig/minEig via `symmetricEigenvalues`; `minEig(a)`; `maxDiag(a)`; `maxAbs(a)`.
   - `qaFromLambda(Λ, σ_τ)` = `σ_τ² · Λ⁻¹·Λ⁻¹` (LU invert then square).
   - `qaFromLambdaEff(f, Λ, σ_τ)`: `Lambda_eff = Λ + diag(reflectedRotorInertiaForNameOrDefault(jointName))`, then `qaFromLambda(Lambda_eff, σ_τ)`.
@@ -391,7 +391,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 
 ### JointLevelKFMassMatrixNoiseTest.java
 - **Purpose**: Locks in the Schur-complement process noise (SPEC §3.2): unmodeled joint torque `w_τ` through floating-base dynamics gives `δq̈ = Λ⁻¹ w_τ`, `Λ = M_jj − M_jb M_bb⁻¹ M_bj`; with per-joint `Σ_τ`, `Qa = Λ_eff⁻¹ diag(σ_τ²) Λ_eff⁻ᵀ` (Gram form), Van-Loan discretized (`dt³/3·Qa`, `dt²/2·Qa`, `dt·Qa`). Expected values computed independently of the filter (second `CompositeRigidBodyMassMatrixCalculator`, plain EJML LU).
-- **Shared setup**: Constants: `DT = 1e-3`, `SIGMA_TAU = 5.0`, `QA_MAX = 900.0`, `SIGMA_ACCEL = 50.0` (fallback), `ROTOR_DEFAULT = 0.005`. `relTol(expected) = 3.0e-3·max(1e-30, elementMaxAbs(expected))` (loosened from 1e-8 because filter uses Cholesky/Gram, reference uses LU). Oracle methods:
+- **Shared setup**: Constants: `DT = 1e-3`, `SIGMA_TAU = 5.0`, `QA_MAX = 900.0`, `SIGMA_ACCEL = 50.0` (fallback), `ROTOR_DEFAULT = 0.005`. `relTol(expected) = 3.0e-3·max(1e-30, elementMaxAbs(expected))` (loosened from 1e-8 because filter uses Cholesky/Gram, reference uses LU). Reference methods:
   - `referenceSchur(f)` → `{Λ, M_ff}`: identical construction to StandingStability's; asserts `baseCols.length==6` and `M_NN` inverts.
   - `referenceQa(f)`: `Lambda_eff = Λ + diag(reflectedRotorInertiaForNameOrDefault)`; `Y[i,j] = Lambda_eff⁻¹[i,j]·referenceSigmaTau(f,j)`; `Qa = Y Yᵀ` via `multTransB`.
   - `referenceSigmaTau(f, i)`: `alphaForName(name)·effortLimitUpper` if finite/positive else `SIGMA_TAU` (random chain → fallback).
@@ -471,7 +471,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 
 ### JointLevelKFBiasObservabilityTest.java
 - **Purpose**: Tests observability of the base-IMU gyro bias (root cause of pelvis pitch drift). The stacked gyro measurement `z = J_stack(q)·q̇ + L(q)·b + noise`; the IMU-pair rows see bias only as rotated differences, so its nullspace is the 3-D common-mode gauge `N = {δb : δb_i = R(i←W)·β}`. The stance-anchor row's `+I₃` on base bias is the only absolute bias observation. Also tests the Alex ankle regression (anchor with unfiltered chain joints).
-- **Shared setup**: `SEED = 20260712L`. Fixtures via `shapes(SEED)`, `singlePairFootBeyondIMUs(SEED, 10, 1, 5, 9)`, `singlePair(SEED, 10, 1, 9)`. Uses filter test hooks: `setTrustedFeetForTest`, `buildStackedMeasurementForTest`, `getStackedMeasurementJacobian`, `getStackedMeasurementNoise`, `getActiveAnchorCountForTest`, `getBiasBlockColumn`. Oracle helper `gaugeDirection(f, βWorld)`: builds δx=(0,0,δb) where for each IMU `δb_i = R(imu←world)·β` (via `worldToImu.inverseTransform`), placed at `getBiasBlockColumn(imu)`.
+- **Shared setup**: `SEED = 20260712L`. Fixtures via `shapes(SEED)`, `singlePairFootBeyondIMUs(SEED, 10, 1, 5, 9)`, `singlePair(SEED, 10, 1, 9)`. Uses filter test hooks: `setTrustedFeetForTest`, `buildStackedMeasurementForTest`, `getStackedMeasurementJacobian`, `getStackedMeasurementNoise`, `getActiveAnchorCountForTest`, `getBiasBlockColumn`. Reference helper `gaugeDirection(f, βWorld)`: builds δx=(0,0,δb) where for each IMU `δb_i = R(imu←world)·β` (via `worldToImu.inverseTransform`), placed at `getBiasBlockColumn(imu)`.
 
 #### testCommonModeBiasIsUnobservableWithoutAnchors
 - **Scenario**: For each `shapes(SEED)`: `setTrustedFeetForTest(empty)` (no foot ⇒ pairs only), `buildStackedMeasurementForTest`. `gauge = gaugeDirection(f, (0.013,-0.007,0.021))`. `hDelta = H·gauge`.
@@ -495,7 +495,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 ### JointLevelKFEncoderNISConsistencyTest.java
 - **Purpose**: Per-joint encoder measurement-noise wiring and chi-square NIS consistency. Property: with prior `(x̂, P)` (P diagonal) and encoder `z_i = q_true,i + e_i`, truth sampled from prior `q_true,i = x̂_i + ε_i, ε_i~N(0,P_ii)`, noise `e_i~N(0,R_ii)`, innovation `ν_i = ε_i + e_i ~ N(0, S_ii)`, per-joint `NIS_i = ν_i²/S_ii ~ χ²₁` (mean 1, var 2).
 - **Shared setup**: `ENCODER_VAR_FALLBACK = 5.0e-5`, `SEED = 31_001L`, `NUM_CHAIN_JOINTS = 10` (→ n=8). `sigmaFor(name) = 1e-4·(1 + floorMod(name.hashCode(), 9))` → STD in [1e-4, 9e-4]. Fixtures via `singlePairWithEncoderNoise(SEED, 10, 1, 9, sigmaFor)`. Uses `getEncoderNoise`, `getEncoderJacobian`, `josephUpdate(H,z,R,"encoder")`, YoVariable lookups via `registry.findVariable`.
-  - Oracle helper `runNISTrials(noiseScale, trials)`: builds fixture; prior `x=0`, diagonal P with `P[i,i]=0.25·R[i,i]` (i<n), `1e-2` (velocities), `1e-6` (bias); `Random(SEED+7)`. Each trial: `setStateForTest(xPrior,pPrior)`; for each joint sample `truth = xPrior_i + sqrt(P_ii)·gaussian`, `noise = noiseScale·sqrt(R_ii)·gaussian`, `z_i = truth+noise`; `josephUpdate(Henc,z,Renc,"encoder")`; read YoDouble `jointKF_encNIS_<name>`. Returns per-joint mean.
+  - Reference helper `runNISTrials(noiseScale, trials)`: builds fixture; prior `x=0`, diagonal P with `P[i,i]=0.25·R[i,i]` (i<n), `1e-2` (velocities), `1e-6` (bias); `Random(SEED+7)`. Each trial: `setStateForTest(xPrior,pPrior)`; for each joint sample `truth = xPrior_i + sqrt(P_ii)·gaussian`, `noise = noiseScale·sqrt(R_ii)·gaussian`, `z_i = truth+noise`; `josephUpdate(Henc,z,Renc,"encoder")`; read YoDouble `jointKF_encNIS_<name>`. Returns per-joint mean.
 
 #### perJointEncoderVarianceIsWiredIntoREncAndPublished
 - **Scenario**: `singlePairWithEncoderNoise(SEED, 10, 1, 9, sigmaFor)`. `Renc = getEncoderNoise()`.
@@ -520,7 +520,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 ### JointLevelKFDirectVelocityMeasurementTest.java
 - **Purpose**: Direct joint-velocity measurement channel: wiring, adaptive lag inflation, chi-square NIS consistency. Lag-inflation property: measured q̇ is output of first-order low-pass with corner ω_eff; `R_ii(t) = σ_i² + (d̂_i/ω_eff,i)²`, d̂ = 5 Hz-smoothed finite difference of the measurement.
 - **Shared setup**: `SIGMA_QD_FALLBACK = 0.1` rad/s, `DT = 1e-3`, `SEED = 47_001L`, `NUM_CHAIN_JOINTS = 10` (n=8). `posSigmaFor(name)=1e-4·(1+floorMod(hashCode,9))`; `velSigmaFor(name)=5e-3·(1+floorMod(hashCode,7))` → STD in [5e-3, 3.5e-2]. Fixtures via `singlePairWithDirectVelocity(SEED, 10, 1, 9, posSigmaFor, velSigmaFor, cornerFn)`. Uses `getVelocityMeasurementJacobian`, `getVelocityMeasurementNoise`, `setDirectVelocityMeasurementForTest`, `refreshDirectVelocityNoise`, `josephUpdate(H,z,R,"encoderVelocity")`.
-  - Oracle helper `runNISTrials(noiseScale, trials)`: cornerFn=null (static R). Prior `x=0`, `P[i,i]=1e-4` (positions), `P[n+i,n+i]=0.25·R[i,i]` (velocities), `1e-6` (bias). `Random(SEED+13)`. Each trial: sample `truth = xPrior[n+i] + sqrt(P[n+i,n+i])·gaussian`, `noise = noiseScale·sqrt(R[i,i])·gaussian`; `josephUpdate(Hqd,z,Rqd,"encoderVelocity")`; read `jointKF_qdNIS_<name>`.
+  - Reference helper `runNISTrials(noiseScale, trials)`: cornerFn=null (static R). Prior `x=0`, `P[i,i]=1e-4` (positions), `P[n+i,n+i]=0.25·R[i,i]` (velocities), `1e-6` (bias). `Random(SEED+13)`. Each trial: sample `truth = xPrior[n+i] + sqrt(P[n+i,n+i])·gaussian`, `noise = noiseScale·sqrt(R[i,i])·gaussian`; `josephUpdate(Hqd,z,Rqd,"encoderVelocity")`; read `jointKF_qdNIS_<name>`.
 
 #### velocityMeasurementModelIsWired
 - **Scenario**: cornerFn=null. `Hqd = getVelocityMeasurementJacobian()` (n×dim), `Rqd = getVelocityMeasurementNoise()`.
@@ -547,10 +547,10 @@ estimator can be validated against the same properties, scenarios, and tolerance
 
 ---
 
-### JointLevelKFStackedOracleTest.java
-- **Purpose**: THE decisive oracle for the Rev.2 stacked gyro measurement (SPEC §9): the stacked Joseph update must equal a reference KF that measures RAW per-IMU gyros with block-diagonal (independent) noise plus a near-zero absolute-rate constraint per trusted foot, over a state augmented with a nuisance base angular velocity ω_base, then marginalizes ω_base out (information form, improper ω_base prior = γ→∞ limit).
-- **Shared setup**: `ANCHOR_VAR = 4.0e-4` (must match filter's `ANCHOR_VAR`/Σ_ε). Fixtures via `twoPairs(seed, 10, 1, 5, 9)` and `singlePairMassMatrix(seed, 8, 1, 6)`. Uses `spd(dim, seed)`, filter hooks `setStateForTest`, `setTrustedFeetForTest`, `buildStackedMeasurementForTest`, `getStackedMeasurementJacobian/Residual/Noise`, `josephUpdate(H,z,R)`, `getBaseIMU`, `getBiasBlockColumn`, `getJointStateIndex`, `JointLevelKFPreFilter.set_matrix`.
-  - **Oracle `referenceMarginalized(f, muX, Pxx, activeFeet)`** → `{muXPost, PxxPost}`: augments state `x=[q;q̇;b]` with nuisance ω_base (D=dim+3). Builds `H (M×D)`, `z`, `R` where `M = 3·numIMUs + 3·numActiveFeet`. For each IMU: `z = raw gyro`; ω_base columns = `R(base measurement frame → IMU measurement frame)` (via `getTransformToDesiredFrame` + `set_matrix`); bias columns = `+I₃` at `getBiasBlockColumn(imu)`; q̇ columns = absolute angular Jacobian base→IMU link expressed in IMU frame (0 for base IMU) via `GeometricJacobianCalculator` (setKinematicChain(baseLink, imuLink), setJacobianFrame(imuFrame)); noise block = `imu.getAngularVelocityNoiseCovariance` (independent Σ_i). For each active foot: q̇ columns = `J_leg` base→foot in base frame; `+I₃` on ω_base; `z=0`; `R = ANCHOR_VAR·I₃`. Then information-form: `Λ = blkdiag(Pxx⁻¹, 0₃) + Hᵀ R⁻¹ H`, `η = [Pxx⁻¹·muX; 0] + Hᵀ R⁻¹ z`, `Σ = Λ⁻¹`, `mu = Σ·η`; return x-block of mu and Σ.
+### JointLevelKFStackedReferenceTest.java
+- **Purpose**: THE decisive reference for the Rev.2 stacked gyro measurement (SPEC §9): the stacked Joseph update must equal a reference KF that measures RAW per-IMU gyros with block-diagonal (independent) noise plus a near-zero absolute-rate constraint per trusted foot, over a state augmented with a nuisance base angular velocity ω_base, then marginalizes ω_base out (information form, improper ω_base prior = γ→∞ limit).
+- **Shared setup**: `ANCHOR_VAR = 4.0e-4` (must match filter's `ANCHOR_VAR`/Σ_ε). Fixtures via `twoPairs(seed, 10, 1, 5, 9)` and `singlePairMassMatrix(seed, 8, 1, 6)`. Uses `spd(dim, seed)`, filter hooks `setStateForTest`, `setTrustedFeetForTest`, `buildStackedMeasurementForTest`, `getStackedMeasurementJacobian/Residual/Noise`, `josephUpdate(H,z,R)`, `getBaseIMU`, `getBiasBlockColumn`, `getJointStateIndex`, `JointLevelKFPreFilter.setMatrix`.
+  - **Reference `referenceMarginalized(f, muX, Pxx, activeFeet)`** → `{muXPost, PxxPost}`: augments state `x=[q;q̇;b]` with nuisance ω_base (D=dim+3). Builds `H (M×D)`, `z`, `R` where `M = 3·numIMUs + 3·numActiveFeet`. For each IMU: `z = raw gyro`; ω_base columns = `R(base measurement frame → IMU measurement frame)` (via `getTransformToDesiredFrame` + `setMatrix`); bias columns = `+I₃` at `getBiasBlockColumn(imu)`; q̇ columns = absolute angular Jacobian base→IMU link expressed in IMU frame (0 for base IMU) via `GeometricJacobianCalculator` (setKinematicChain(baseLink, imuLink), setJacobianFrame(imuFrame)); noise block = `imu.getAngularVelocityNoiseCovariance` (independent Σ_i). For each active foot: q̇ columns = `J_leg` base→foot in base frame; `+I₃` on ω_base; `z=0`; `R = ANCHOR_VAR·I₃`. Then information-form: `Λ = blkdiag(Pxx⁻¹, 0₃) + Hᵀ R⁻¹ H`, `η = [Pxx⁻¹·muX; 0] + Hᵀ R⁻¹ z`, `Σ = Λ⁻¹`, `mu = Σ·η`; return x-block of mu and Σ.
 
 #### testStackedUpdateMatchesNuisanceMarginalizedReference
 - **Scenario**: `Random(90000L)`, 12 trials. Each: `twoPairs(90100L+trial, 10, 1, 5, 9)` (two pairs sharing middle IMU, chain a-b-c, base=a; one stance foot on far link). Random raw gyros per IMU `0.4·(rand-0.5)`. `muX[i] = 0.05·(i+1) - 0.1`, `Pxx = spd(dim, 700L+trial)`. All feet trusted. Compute reference; run filter stacked update from same prior.
@@ -559,12 +559,12 @@ estimator can be validated against the same properties, scenarios, and tolerance
 #### testPairsOnlyMatchesReference
 - **Scenario**: `Random(91000L)`, 8 trials. Each: `singlePairMassMatrix(91100L+trial, 8, 1, 6)`. Random gyros `0.3·(rand-0.5)`. `muX[i]=0.02·(i+1)`, `Pxx=spd(dim, 800L+trial)`. No trusted feet (K=0, pairs-only; bias common mode unobservable but improper prior handles it).
 - **Checks**: `assertAllClose(x⁺, ref[0], 1e-5)`, `assertAllClose(P⁺, ref[1], 1e-5)`.
-- **Port notes**: Depends on Mecano `GeometricJacobianCalculator`, `getTransformToDesiredFrame`, `set_matrix`. Python port needs its own independent forward-kinematics/Jacobian reference. `spd(dim, seed)` deterministic SPD generator.
+- **Port notes**: Depends on Mecano `GeometricJacobianCalculator`, `getTransformToDesiredFrame`, `setMatrix`. Python port needs its own independent forward-kinematics/Jacobian reference. `spd(dim, seed)` deterministic SPD generator.
 
 ---
 
 ### JointLevelKFRotorAndGramTest.java
-- **Purpose**: Machine-precision oracle for the two algebraic halves of the Part B process-noise fix on a well-conditioned synthetic Λ (item 1: reflected rotor inertia + Weyl floor; item 3/6: per-joint σ_τ Gram form). Mirrors `updateProcessNoiseFromMassMatrix`'s exact arithmetic. Fully self-contained (hand-built matrices, no fixture except the static `reflectedRotorInertiaForNameOrDefault` lookup).
+- **Purpose**: Machine-precision reference for the two algebraic halves of the Part B process-noise fix on a well-conditioned synthetic Λ (item 1: reflected rotor inertia + Weyl floor; item 3/6: per-joint σ_τ Gram form). Mirrors `updateProcessNoiseFromMassMatrix`'s exact arithmetic. Fully self-contained (hand-built matrices, no fixture except the static `reflectedRotorInertiaForNameOrDefault` lookup).
 - **Shared setup**: helper `minEig(a)` via EJML `EigenDecomposition_F64`.
 
 #### testReflectedRotorInertiaAddAndWeylFloor
@@ -576,7 +576,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 - **Checks**: `Qa_gram[i,j] == Qa_ref[i,j]` within `1e-10·max(1,maxAbs(Qa_ref))`; exact symmetry `Qa_gram[i,j]==Qa_gram[j,i]` (tol 0.0); PSD `minEig(Qa_gram) >= -1e-12`.
 
 #### testRotorInertiaTableLookup
-- **Scenario**: Direct calls to `JointLevelKFPreFilter.reflectedRotorInertiaForNameOrDefault(name)`.
+- **Scenario**: Direct calls to `JointKFParameters.reflectedRotorInertiaForNameOrDefault(name)`.
 - **Checks** (all tol 0.0): `LEFT_HIP_X`→0.062; `RIGHT_HIP_Y`→0.167; `left_knee_y`→0.167 (case-insensitive, KNEE); `LEFT_ANKLE_Y`→0.070; `LEFT_ANKLE_X`→0.050; `SPINE_Z`→0.062; `SOME_UNKNOWN_JOINT`→0.005 (default floor).
 - **Port notes**: Rotor-inertia name→value table is a filter constant the port must replicate exactly (substring, case-insensitive matching).
 
@@ -666,7 +666,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 - **Checks**: for all m components `assertEquals(adXi[j], lhsXi[j], 1.0e-8)`. Verifies the defining adjoint identity log(X·exp(ξ)·X⁻¹) = Ad_X·ξ, tying adjoint to exp/log through conjugation.
 - **Port notes**: tolerance 1e-8. Uses matrix inverse of X. Two random draws (η then ξ) per iteration.
 
-**Helper/oracle methods**:
+**Helper/reference methods**:
 - `multiply(DMatrixRMaj A, double[] x, double[] result)`: plain matrix-vector product result = A·x (rows×cols · cols).
 - `randomAlgebraVector(Random random, int k, double[] xiToPack)`: fills length `3+3k`. Slots 0..2 = `EuclidCoreRandomTools.nextRotationVector(random)` (a random rotation vector with magnitude bounded by π, so exp/log stays in the injectivity radius). Then k blocks each = `EuclidCoreRandomTools.nextVector3D(random)` (components ~ U(-1,1) by default in Euclid). Port must emulate the bounded-π rotation vector to keep log well-defined; the translation vectors need only be modest-magnitude random.
 
@@ -759,7 +759,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 - **Checks**: measured final error ξ_N = log_G(X̂_N · X_N⁻¹) (via invert X_N, mult, log). Predicted ξ_N = exp(A·T)·ξ₀ using `buildErrorTransition(T, ...)`. For all 15 components `assertEquals(xiPredicted, xiMeasured, 1.0e-10)`. Verifies the exact log-linear property of the right-invariant error: η = X̂·X⁻¹ evolves exactly linearly (not merely first-order) even for large ξ₀.
 - **Port notes**: This is the deepest correctness test. Python needs SE_k(3) exp/log, group inverse, and the exact `buildErrorTransition`. Right-invariant error is X̂·X⁻¹ (left multiplication convention: X̂ = exp(ξ)·X).
 
-**Helper/oracle methods**:
+**Helper/reference methods**:
 - `buildErrorTransition(double time, DMatrixRMaj transition m×m)`: Constructs Φ(T) = exp(A·T) analytically. Start with identity. Let gravity = (0,0,-9.81), `hatGravity = hat(gravity)` (3×3 skew). Then for the 3×3 blocks: block (velocity-rows 3..5, rotation-cols 0..2) = `time · hatGravity`; block (position-rows 6..8, rotation-cols 0..2) = `0.5·time²·hatGravity`; block (position-rows 6..8, velocity-cols 3..5) += `time·I`. All contact blocks stay identity. Math: ξ̇ = A ξ with A = [[0,0,0,...],[hat(g),0,0,...],[0,I,0,...],[0...]], so exp(A·T) = I + A·T + ½A²T² gives exactly these blocks (the ½T² term is A² producing position←rotation = hat(g)·½T²).
 - `assertSymmetric(matrix, epsilon)`: for all r, c>r, `assertEquals(M(r,c), M(c,r), epsilon)`.
 
@@ -800,7 +800,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 - **Checks**: `meanNIS = sumNIS/4000`; `assertEquals(3.0, meanNIS, 0.25)`. Verifies NIS consistency: when innovation ~ N(0,S), NIS ~ χ²(3) with mean = 3 DOF.
 - **Port notes**: 4000 Gaussian draws — Python should use a seeded Gaussian RNG; result is statistical (tol 0.25, std of mean ≈ sqrt(6/4000)≈0.039). Uses a single updater instance reused across samples. S = (2+σ²)I derivation depends on H = [+I at position, −I at contact], P = I.
 
-**Helper/oracle methods**:
+**Helper/reference methods**:
 - `randomState(random)`: `InvariantState(1)` with random rotation/velocity/position/1 contact.
 - `forwardKinematicsFromTruth(truth)`: y = Rᵀ(d − p) — subtract position from contact, then `rotation.inverseTransform` (Rᵀ). This is the body-frame contact measurement.
 - `randomError(random, scale)`: length-12 array, each `scale·(2·rand−1)` ~ U(−scale, scale).
@@ -853,7 +853,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 - **Checks**: `residualAfter < residualBefore`. Verifies the assembled predict→update loop reduces estimation error.
 - **Port notes**: measurement computed from truth AFTER the truth predict, so the update targets the propagated truth.
 
-**Helper/oracle methods**:
+**Helper/reference methods**:
 - `initializeRandom(ekf, random)`: random rotation/velocity/position + CONTACTS random contacts, covariance = `scaledIdentity(12, 1.0)`.
 - `initializeFromState(ekf, source, cov)`: extracts rotation/velocity/position/contacts from an existing `InvariantState` and initializes the ekf with them.
 - `randomState(random)` / `forwardKinematicsFromTruth(truth)` / `randomError(random, scale)` / `perturb(truth, xi)` / `worldResidualNorm` / `copyOf` / `assertStatesEqual` / `assertMatricesEqual` / `scaledIdentity` / `bodyScaledIdentity(scale)` (Euclid `Matrix3D` identity·scale, 3×3 body-frame covariance) — as in InvariantUpdaterTest.
@@ -880,7 +880,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 - **Checks**: `preResidual > 1e-3` (real geometric discrepancy); after the update: `wasLastUpdateApplied()` true (passes the conditioning gate); `getLastNormalizedInnovationSquared() == 0.0` (tol 1e-9); `getLastCorrectionRotationNorm() == 0.0` (tol 1e-9); rotation unchanged (`epsilonEquals`, 1e-9); position unchanged (1e-9). Verifies zero-release: after re-seeding the contact to be exactly consistent with the measurement, re-applying the same measurement produces zero residual → zero NIS → zero correction (rotation rows of gain K_θ vanish).
 - **Port notes**: exercises the EKF's introspection API — `wasLastUpdateApplied()`, `getLastNormalizedInnovationSquared()`, `getLastCorrectionRotationNorm()`, plus a conditioning/NIS gate on `update`. Python port must expose these. Reseed must make the immediately-following identical measurement produce exactly zero innovation.
 
-**Helper/oracle methods**:
+**Helper/reference methods**:
 - `randomlyInitializedEKF(random, cov)`: `new InvariantEKF(2, 1e-4, 1e-3, 1e-6)`. Rotation via `setYawPitchRoll(yaw=rand−0.5, pitch=0.4·(rand−0.5), roll=0.4·(rand−0.5))`. basePosition = `Point3D(rand, rand, 0.9+0.1·rand)`. Contacts (2): each `Point3D(baseX + 0.3·(rand−0.5), baseY + (i==0? +0.1 : −0.1), 0.0)` (feet near ground, offset ±0.1 in y). Zero base velocity. `initialize(rotation, zeroVelocity, basePosition, contacts, cov)`.
 - `randomPsd(random, scale)`: A is M×M with entries `scale·(rand−0.5)`; psd = A·Aᵀ; add 1e-9 to each diagonal.
 - `minEigenvalue(symmetric)`: EJML symmetric `EigenDecomposition_F64`, min real eigenvalue.
@@ -942,14 +942,14 @@ estimator can be validated against the same properties, scenarios, and tolerance
 - **Checks**: throws `NotImplementedException` (Apache commons-lang3).
 - **Port notes**: The `learned` measurement branch is unimplemented; Python raises `NotImplementedError`.
 
-**Helper/oracle methods (math)**:
+**Helper/reference methods (math)**:
 - `randomState(random)`: InvariantState(1) with random rotation/velocity/position/contact.
 - `forwardKinematicsFromTruth(truth)`: y = Rᵀ(d − p).
 - `randomError(random, scale)`: 12-vector, each = scale·(2·rand−1), uniform ±scale.
 - `perturb(truth, xi)`: expXi = SEK3_Utils.exp(xi) (6×6); estimate.groupElement = expXi · truth.groupElement.
 - `worldResidualNorm(estimate, i, meas)`: ‖R̂·y − (d̂ − p̂)‖.
 - `symmetricMatrix(size, random)`: A random ±1; return ½(A + Aᵀ). `symmetricMatrix3D`: same wrapped as Matrix3D.
-- **Port-wide notes**: Fixed seeds 101/202/303/404/505/606/707/808/909 — Java `Random` + `EuclidCoreRandomTools` sampling will NOT reproduce identical numbers in Python, so port must use tolerance-based/property assertions; the FK/residual/covariance oracles are all self-consistent (recomputed from the same random state), so they port cleanly regardless of RNG.
+- **Port-wide notes**: Fixed seeds 101/202/303/404/505/606/707/808/909 — Java `Random` + `EuclidCoreRandomTools` sampling will NOT reproduce identical numbers in Python, so port must use tolerance-based/property assertions; the FK/residual/covariance references are all self-consistent (recomputed from the same random state), so they port cleanly regardless of RNG.
 
 ---
 
@@ -1085,7 +1085,7 @@ estimator can be validated against the same properties, scenarios, and tolerance
 - **Scenario**: roll=0.05 rad. State rotation identity. Updater(ROLL_VAR,PITCH_VAR). trueRotation=yawPitchRoll(0,0,0.05); specificForce = trueRotation⁻¹·(0,0,G). `settleGravityReference(updater, specificForce)`; `assemble(state, specificForce)`.
 - **Checks**: residual.x==0 (tol 1e-6); residual.y==sin(0.05) (tol 1e-4); residual.z==cos(0.05)−1 (tol 1e-4). Full undiminished DC tilt.
 
-**Helpers/oracles**:
+**Helpers/references**:
 - `oneStepTiltAfterCorrection(yaw,pitch,roll,p0)`: EKF(0,1e-7,1e-7,1e-12); init rotation yawPitchRoll, P=p0·I; one assembleGravityLeveling((0,0,G))+apply; assert symmetric-PSD; return tiltAngle.
 - `quadraticForm(R,u)`: uᵀRu.
 - `settleGravityReference(updater, sf)`: 3000× updateGravityReference(sf, zeroOmega, DT).
@@ -1195,13 +1195,13 @@ estimator can be validated against the same properties, scenarios, and tolerance
 
 ### What ports bit-for-bit
 
-- **Deterministic matrix oracles** — replicate exactly, they seed most priors and Jacobians:
+- **Deterministic matrix references** — replicate exactly, they seed most priors and Jacobians:
   - `spd(size, seed)`: fill row-major `m[i] = sin(i + 1 + seed)`, `A = m·mᵀ + size·I`.
   - `genericH(k, dim, seed)`: `H[r,c] = sin(0.37·(r·dim + c + 1) + seed)`.
-  - Seeded prior mean patterns (predict: `i+1` / `i+1+100` / `i+1+1000`; update: `0.1·(i+1)`; stacked oracle: `0.05·(i+1)−0.1`).
-- **Reference-KF oracles** (independent of the implementation under test): explicit-inverse Joseph
+  - Seeded prior mean patterns (predict: `i+1` / `i+1+100` / `i+1+1000`; update: `0.1·(i+1)`; stacked reference: `0.05·(i+1)−0.1`).
+- **Reference-KF cross-checks** (independent of the implementation under test): explicit-inverse Joseph
   update (`JointLevelKFUpdateTest.referenceUpdate`), information-form nuisance-marginalized stacked
-  reference (`JointLevelKFStackedOracleTest.referenceMarginalized`), LU-based Schur complement
+  reference (`JointLevelKFStackedReferenceTest.referenceMarginalized`), LU-based Schur complement
   (`referenceSchur`), Gram-vs-dense Qa (`JointLevelKFRotorAndGramTest`), quadratic-form NIS
   (`quadraticFormNIS`), analytic error transition `exp(A·T)` (`InvariantPropagatorTest.buildErrorTransition`).
 - **Assertion helpers**: `assertAllClose` (elementwise `|a−e| ≤ tol`), `assertSymmetric`
@@ -1211,11 +1211,11 @@ estimator can be validated against the same properties, scenarios, and tolerance
 ### RNG strategy
 
 Java `java.util.Random(seed)` / `EuclidCoreRandomTools` streams cannot be reproduced in NumPy.
-This is fine: every randomized test is either (a) property-based (the oracle is recomputed from
+This is fine: every randomized test is either (a) property-based (the reference is recomputed from
 the same random draw, so any seeded RNG works), or (b) statistical with wide envelopes
 (χ² NIS means over 4000 trials, envelope `4·sqrt(2/N)`). Preserve the **trial counts**
 (1000 for Lie-group identities, 500 round-trips, 4000 NIS samples, 50 reseed-PSD trials,
-200k latch-chatter ticks, 12/8 stacked-oracle trials) and use a fixed Python seed per test for
+200k latch-chatter ticks, 12/8 stacked-reference trials) and use a fixed Python seed per test for
 run-to-run determinism. `sigmaFor`-style maps use Java `String.hashCode()` — either reimplement
 Java's hashCode (`h = 31·h + c`) or substitute any deterministic per-joint map.
 
@@ -1235,7 +1235,7 @@ kinematics stand-in. Two viable routes:
    link transforms. More work per test but removes the kinematics library dependency.
 
 `applyConsistentMotion` (zero base twist; gyros = link angular velocity from FK of the commanded
-q/q̇) is the key fixture oracle to keep: it guarantees encoder and gyro measurements are consistent
+q/q̇) is the key fixture reference to keep: it guarantees encoder and gyro measurements are consistent
 with the same truth, which is what the trajectory/tracking tolerances assume.
 
 ### Not portable / adapt
@@ -1263,7 +1263,7 @@ with the same truth, which is what the trajectory/tracking tolerances assume.
 | `SIGMA_TAU` fallback | 5.0 N·m | MassMatrixNoise, StandingStability |
 | σ_τ per-joint | `0.15 · effortLimit` | MassMatrixNoise |
 | Rotor-inertia table | HIP_X 0.062, HIP_Y/KNEE 0.167, ANKLE_Y 0.070, ANKLE_X 0.050, SPINE 0.062, default 0.005 | RotorAndGramTest |
-| `ANCHOR_VAR` (stance anchor Σ_ε) | 4.0e-4 | StackedOracle, BiasObservability |
+| `ANCHOR_VAR` (stance anchor Σ_ε) | 4.0e-4 | StackedReference, BiasObservability |
 | `SIGMA_QD_UNFILTERED` | 0.1 rad/s | BiasObservability, DirectVelocity |
 | Direct-velocity slew smoother | 5 Hz first-order | DirectVelocityMeasurementTest |
 | InEKF gravity | (0, 0, −9.81) | PropagatorTest |
@@ -1307,6 +1307,6 @@ with the same truth, which is what the trajectory/tracking tolerances assume.
    `RotorAndGramTest`.
 5. Build the Python chain fixture (route 1 above), then: `MeasurementTest`, `FilterTest`,
    `TrajectoryTest`, `MassMatrixNoiseTest`, `StandingStabilityTest`, `BiasObservabilityTest`,
-   `StackedOracleTest`, NIS tests, `SingularInnovationDiagnosticTest`.
+   `StackedReferenceTest`, NIS tests, `SingularInnovationDiagnosticTest`.
 6. Optional: an `InvariantMainStateEstimatorTest` analogue as end-to-end scenario tests once a full
    robot-model stand-in exists.

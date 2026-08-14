@@ -28,7 +28,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 class JointLevelKFDirectVelocityMeasurementTest
 {
-   /** Mirrors the private JointLevelKFPreFilter.SIGMA_QD_UNFILTERED fallback (rad/s). */
+   /** Mirrors the JointKFParameters.SIGMA_QD_UNFILTERED fallback (rad/s). */
    private static final double SIGMA_QD_FALLBACK = 0.1;
    private static final double DT = JointLevelKFTestFixture.DT;
 

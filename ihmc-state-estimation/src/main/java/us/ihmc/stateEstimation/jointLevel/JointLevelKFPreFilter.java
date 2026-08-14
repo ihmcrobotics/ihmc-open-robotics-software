@@ -1,27 +1,13 @@
 package us.ihmc.stateEstimation.jointLevel;
 
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
-import org.ejml.dense.row.decomposition.chol.CholeskyDecompositionInner_DDRM;
-import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
-import org.ejml.dense.row.linsol.chol.LinearSolverChol_DDRM;
-import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
-import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
-import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUBasedJointStateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -29,13 +15,9 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.ToDoubleFunction;
@@ -49,397 +31,53 @@ import java.util.function.ToDoubleFunction;
  *
  * <p><b>Do not share an instance between pipelines</b> (the filter holds its covariance).</p>
  *
- * <p><b>Rev. 2 measurement model (SPEC §5-§6).</b> The gyro measurements are applied as ONE stacked Joseph
- * update per tick over z_g = [pair diffs ; active stance anchors], not the Rev. 1 per-pair sequential updates.
- * Its noise R_g = L Sigma L^T + Sigma_eps carries the exact shared-IMU cross-covariances (biases and gyro white
- * noise both enter through the same edge-incidence operator L, whose blocks also ARE the bias columns of H_g).
- * The stance anchors are merged into this phase-1 update using the previous tick's trusted-feet set;
- * {@link #computeImuBiases} is reduced to caching that set. See jointKF_derivation.md §5-§7.</p>
+ * <p>This class is the ORCHESTRATOR: it owns the tick sequence, the on-ground initialization gate, and the
+ * {@code OneDoFJointStateSource} / {@code IMUBiasProvider} surface the estimator consumes. The filter itself is
+ * five collaborators, constructed in this order and depending on each other one way only
+ * (BiasUpdate → Update → State), so there are no initialization cycles: {@link JointKFParameters} (the tuning,
+ * as YoVariables), {@link JointKFState} (layout, x and P, the structural holders), {@link JointKFPrediction}
+ * (F, Q, the Schur mass-matrix noise), {@link JointKFUpdate} (encoder + direct-velocity channels and the shared
+ * Joseph core), and {@link JointKFBiasUpdate} (the stacked gyro channel).</p>
  *
- * <p><b>Rev. 2 process noise (SPEC §3.2).</b> The joint process noise is now the floating-base Schur
- * complement Qa = sigma_tau^2 * Lambda(q)^-2, Lambda = M_jj - M_jb M_bb^-1 M_bj, rather than the Rev. 1
- * locked-base Qa = sigma_tau^2 * M_jj^-2. Because the free base recoils, the joints accelerate more per unit
- * torque, so Lambda ⪯ M_jj (PSD ordering) and Lambda^-2 ⪰ M_jj^-2: the effective process noise grows at fixed
- * sigma_tau, worst for proximal joints. See the SPEC (jointKF_derivation.md §3.2, §8) for the derivation and
- * the sigma_tau retune obligation.</p>
+ * <p>Rev. 2 measurement model (SPEC §5-§6): the gyro measurements are ONE stacked Joseph update per tick over
+ * [pair diffs ; active stance anchors], not Rev. 1's per-pair sequential updates, so R_g can carry the exact
+ * shared-IMU cross-covariances. {@link #computeImuBiases} is reduced to caching the trusted-feet set.</p>
+ *
+ * <p>Rev. 2 process noise (SPEC §3.2): Qa is the floating-base Schur complement sigma_tau^2 Lambda(q)^-2 rather
+ * than the locked-base sigma_tau^2 M_jj^-2. Because the free base recoils, Lambda ⪯ M_jj and so Lambda^-2 ⪰
+ * M_jj^-2 — the effective process noise GROWS at fixed sigma_tau, worst for proximal joints, which is why
+ * sigma_tau carries a retune obligation.</p>
  *
  * @author Lucas Libshutz
  */
 public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 {
-   //TUNING VARIABLES
-   // Fallback encoder position variance (rad^2), used for any joint the per-joint lookup does not cover
-   // (encoderPositionNoiseStd == null or returns NaN). sigma ~ 7.1e-3 rad. Hardware-measured per-joint values
-   // (walking-run FFT/PSD noise floor, 2026-07-15) run sigma 5.6e-5..7.5e-4 rad — variances 2-4 ORDERS OF
-   // MAGNITUDE below this fallback — so an Alex joint silently on the fallback badly under-trusts its encoder;
-   // watch jointKF_encR_<joint> at boot.
-   private static final double ENCODER_VAR = 5.0e-5;
-   private static final double SIGMA_ACCEL = 50.0; // rad/s^2 CWNA process-noise STD (scalar fallback when no robot model is provided)
-   // N*m unmodeled-torque STD for the mass-matrix path: Qa = Lambda_eff^-1 diag(sigma_tau,i^2) Lambda_eff^-T.
-   // SIGMA_TAU is now only the FALLBACK STD used for a joint whose effort limit is absent/non-finite; the live
-   // per-joint STD is sigma_tau,i = ALPHA * tau_max,i (see ALPHA and sigmaTauPerJoint). Kept at 5 N*m as the
-   // Rev.2 interim (Lambda^-2 ⪰ M_jj^-2 inflated Qa vs. the Rev.1 locked-base map). TODO(retune) with ALPHA.
-   private static final double SIGMA_TAU = 5.0;
-   // Per-joint unmodeled-torque STD as a fraction of the joint's effort limit: sigma_tau,i = alpha_i * tau_max,i
-   // (Part B item 3), tau_max,i from OneDoFJointReadOnly.getEffortLimitUpper(). Two levels of per-joint scaling:
-   // tau_max,i already scales by each actuator's torque capacity (a hip 217 N*m vs a wrist a few), and alpha_i is
-   // the dimensionless "fraction of capacity that is unmodeled". alpha_i is a scalar default with per-joint
-   // OVERRIDES (below), matched by case-insensitive name substring exactly like the rotor table — so a joint the
-   // QA_MAX tripwire flags can be knocked down without touching the rest of the robot.
-   //
-   // RETUNE PRINCIPLE (2026-07-10, hardware log 20260710_135507): a uniform ALPHA fixes the unmodeled torque at a
-   // fixed FRACTION OF TORQUE CAPACITY, but the torque->acceleration map Lambda_eff^-1 varies by orders of
-   // magnitude across joints, so sqrt(diag(Qa)_i) = |Lambda_eff^-1|_ii * alpha_i * tau_max,i spans orders of
-   // magnitude and joints trip QA_MAX one after another (knee was knocked to 0.03; a hip/spine_Z is the new argmax
-   // binding EVERY tick in that log). The physically-motivated fix is to equalize the unmodeled-ACCELERATION STD
-   // (the CWNA quantity for a (q,qd) filter) across joints at a common target TARGET_QDD_STD:
-   //     alpha_i = TARGET_QDD_STD / (|Lambda_eff^-1|_ii * tau_max,i)   ==>   alpha_i = alpha_old_i * sqrt(TARGET_QDD_STD^2 / diag(Qa)_i)
-   // The second form is how to CALIBRATE from a run: read the per-joint yoQaDiag (jointKF_QaDiag_<joint>) at the
-   // current alpha and rescale (iterate 2-3x; off-diagonal Lambda_eff^-1 coupling makes it not one-shot).
-   // TARGET_QDD_STD = 20 rad/s^2 (var 400) gives a 2.25x variance margin under QA_MAX = 900, so quiet standing
-   // sits below the cap and only genuine walking transients trip it (a tripwire, not a per-tick clamp).
-   //
-   // CALIBRATED 2026-07-10 from a live STAND_PREP read of jointKF_QaDiag_<joint> on the instrumented build:
-   // ALPHA_VALUES below are the equalized set alpha_i = alpha_old_i * sqrt(400 / diag(Qa)_i), one per filtered
-   // joint. Cross-check: the LEFT/RIGHT pairs agree to ~0.2% (HIP_X 0.0874 vs 0.0875, HIP_Z/HIP_Y/KNEE likewise)
-   // — the legs are physically identical, so that symmetry validates the measurement. The knee RAISED from the
-   // old reactive 0.03 to ~0.071: in quiet STAND_PREP its diag(Qa) ~ 72 = (8.5 rad/s^2)^2 sat well UNDER target,
-   // i.e. it was over-damped there (0.03 had been set against a more dynamic config that logged diag(Qa)=14842 at
-   // alpha=0.15). diag(Qa) is CONFIGURATION-DEPENDENT, so re-read jointKF_QaDiag_<joint> after a gait change and
-   // iterate until every sqrt(diag(Qa)) ~ 20 and the jointKF_QaCapBind_<joint>_count counters stay flat. All 9
-   // currently-filtered joints are listed; ALPHA_DEFAULT is the fallback for any future unlisted filtered joint.
-   private static final double TARGET_QDD_STD = 20.0; // rad/s^2, common unmodeled-acceleration STD target for the ALPHA equalization
-   private static final double ALPHA_DEFAULT = 0.15;  // fallback only (surfaces an unlisted filtered joint via the QA_MAX tripwire)
-   private static final String[] ALPHA_JOINT_KEYS = {
-         "SPINE_Z",
-         "LEFT_HIP_X",  "LEFT_HIP_Z",  "LEFT_HIP_Y",  "LEFT_KNEE_Y",
-         "RIGHT_HIP_X", "RIGHT_HIP_Z", "RIGHT_HIP_Y", "RIGHT_KNEE_Y"};
-   private static final double[] ALPHA_VALUES = {
-         5.61133e-2,
-         6.01544e-2, 2.94985e-2, 2.82043e-2, 2.47925e-2,
-         5.52493e-2, 3.34146e-2, 2.56966e-2, 2.49771e-2
-   };
-   // TRIPWIRE ONLY (Part B item 2 — no longer a scaler). Physical ceiling on the per-joint acceleration
-   // process-noise VARIANCE (~ (30 rad/s^2)^2). With the reflected-rotor-inertia floor on Lambda_eff (item 1),
-   // max diag(Qa) must sit far below this; if it ever would not, that is a model/config regression to SURFACE,
-   // not to hide. When max diag(Qa) > QA_MAX we warn once (naming the argmax joint) and count it in
-   // jointKFQaCapWouldBindCount, but we DO NOT rescale — the old uniform CommonOps_DDRM.scale coupled one
-   // joint's outlier into GLOBAL Q starvation (hips down ~6 orders), which collapsed P onto the measurement
-   // floors and CAUSED the min-side S singularity. A cap that silently rescales the whole robot is worse than
-   // the disease.
-   private static final double QA_MAX = 900.0;
-   // Reflected rotor inertia n^2 * J_rotor (kg*m^2) per joint, matched by case-insensitive joint-name substring
-   // (Part B item 1). Added as a diagonal term to the Schur complement Lambda BEFORE inversion:
-   // Lambda_eff = Lambda + diag(n_i^2 J_rotor,i). Physics: the rotor spins behind the gearbox about its own
-   // axis and does not couple through the floating base, so the post-Schur diagonal add is simultaneously the
-   // EXACT drivetrain term and a principled regularizer (it floors lambda_min(Lambda_eff) by Weyl). Distal
-   // joints' link-side apparent inertia is as low as ~8e-4 kg*m^2 while their drivetrains reflect 0.05-0.07 —
-   // without this term Lambda^-2 has diagonal outliers up to ~1.6e6 and Qa blows up for proximal/light joints.
-   private static final String[] ROTOR_INERTIA_JOINT_KEYS = {
-         "HIP_X", "HIP_Z", "HIP_Y", "KNEE", "ANKLE_Y", "ANKLE_X", "SPINE",
-         "SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW",
-         "WRIST_Z", "WRIST_X", "GRIPPER_Z", "NECK_Z", "NECK_Y"};
-   private static final double[] ROTOR_INERTIA_VALUES = {
-         //TODO: needs to be moved to use the calibrated inertia values either from alex-sdk or alex-hardware
-         0.062, 0.02, 0.167, 0.167, 0.07, 0.05, 0.062,
-         0.067, 0.067, 0.022, 0.022,
-         0.005, 0.005, 0.005, 0.005, 0.005};
-   private static final double ROTOR_INERTIA_DEFAULT = 0.005; // conservative floor for an unmatched filtered joint
-   // Gyro measurement-noise floor (Part B item 4). getAngularVelocityNoiseCovariance is zero on hardware whenever
-   // the IMU's SensorNoiseParameters are unset (Alex historically ran with a null SensorNoiseParameters => all
-   // covariances 0). A zero Sigma removes the innovation-covariance floor on the pure-bias rows of every 1-DoF
-   // chain, collapsing lambda_min(S) (the logged 2.155e-12) and, via the Joseph K R K^T squaring loop, diverging
-   // P. Any IMU whose gyro-noise trace is below SIGMA_GYRO_FLOOR_TRACE is floored to SIGMA_GYRO_FLOOR * I3.
-   //
-   // 2026-07-10: lowered 1e-4 -> 1e-6 (sigma 0.01 -> 0.001 rad/s). This is a SAFETY NET only — the real gyro
-   // Sigma is now wired via AlexSensorNoiseParameters and sits above it, so the floor should not normally engage.
-   // The old 1e-4 was ~2500x the wired value; because the JointKF uses Sigma to weight the gyro in BOTH the
-   // joint-velocity and the base-bias estimate, that over-inflation lazily degraded the base gyro-bias estimate
-   // the downstream InEKF relies on. 1e-6 keeps lambda_min(S) ~6 orders above the 2e-12 collapse (the COND_S_MAX
-   // gate backstops), while no longer over-inflating the gyro when a real (small) Sigma is present.
-   private static final double SIGMA_GYRO_FLOOR = 1.0e-6;        // (0.001 rad/s)^2 per axis (safety net)
-   private static final double SIGMA_GYRO_FLOOR_TRACE = 3.0e-6;  // 3 * (0.001 rad/s)^2
-   // Active innovation-covariance conditioning gate (Part B item 5). cond(S) is estimated from the Cholesky
-   // factor diagonal ((max L_ii / min L_ii)^2 — no eigendecomposition); above this the whole stacked update is
-   // skipped, because a finite-but-ill-conditioned S inverts to a huge gain that the Joseph K R K^T loop squares
-   // each tick (the P divergence mechanism the LU/isFinite guards were blind to).
-   //TODO: these need to be YoVariable-ized so that these can be tuned on the fly while the filter is running live.
-   private static final double COND_S_MAX = 1.0e9;
-   private static final double INIT_POS_VAR = 1.0e-6; // encoders trusted at initialization
-   private static final double INIT_VEL_VAR = 1.0; // velocity unknown at initialization
-   private static final double INIT_BIAS_VAR = 2.5e-3; // (0.05 rad/s)^2
-   private static final double ANCHOR_VAR = 4.0e-4; // stance FK slip variance (Sigma_eps)
-   /**
-    * Encoder joint-VELOCITY noise STD (rad/s) for leg joints on a base->foot chain that are NOT filter states
-    * (on Alex: the ankles, because there are no foot IMUs). Their measured velocity enters the stance-anchor row
-    * as a known input, so by the standard input-noise congruence its covariance must be propagated into the
-    * anchor's measurement covariance:  R_anchor = Sigma_eps + J_U diag(SIGMA_QD_UNFILTERED^2) J_U^T.
-    * <p>
-    * Conservative placeholder: MEASURE the actual qd noise of the ankle encoder signal and retune. Erring large
-    * is safe -- it merely weakens the anchor, which still fixes the bias gauge, just with more averaging. Erring
-    * small is NOT safe: it over-trusts a noisy input and feeds that noise into the base gyro-bias estimate.
-    */
-   private static final double SIGMA_QD_UNFILTERED = 0.1; // rad/s
-   /**
-    * Smoothing corner (Hz) for the measured-q̇ slew estimate that drives the direct-velocity channel's lag
-    * inflation. The firmware/alpha low-pass makes q̇^meas a LAGGED measurement; for a first-order filter the
-    * identity u - y = ẏ/ω_c is EXACT, so the instantaneous lag error is the measured signal's own slope over
-    * the effective corner (cascade: 1/ω_eff = Σ 1/ω_stage). The slope must be estimated from a finite
-    * difference of the NOISY measurement — raw, its variance 2σ²/dt² would inflate R by ~2 orders of magnitude
-    * at quiet standing, exactly the regime the channel exists for — so it is low-passed here. 5 Hz sits above
-    * the gait band (slew tracking stays honest through swing) while cutting the FD noise contribution to ~σ²
-    * order. See refreshDirectVelocityNoise().
-    */
-   private static final double LAG_SLEW_SMOOTHING_HZ = 5.0;
-   // On-ground initialization gate: the exported base-IMU gyro bias is only observable through the phase-2
-   // stance anchor, which runs only when a foot is trusted. If the filter is seeded while the robot hangs
-   // (feet off the ground) the base bias is unobservable, its covariance grows unbounded under the bias
-   // random-walk, and the estimate wanders — which the downstream InEKF (no gyro-bias state of its own)
-   // integrates straight into orientation. So we defer initialization until BOTH feet have been firmly in
-   // contact for a short debounce window; while uninitialized the filter exports NaN joint states and zero
-   // bias, so consumers cleanly fall back to the raw gyro/sensors. Debounced (not a single-tick check)
-   // because the foot-switch contact-probability source seeds to 1.0 on the assumption feet are planted at
-   // init, so a naive "both == 1" would false-pass on the first tick(s) precisely while hanging.
-   private static final double ON_GROUND_INIT_DEBOUNCE = 0.05; // s of continuous ground contact before seeding
+   private final JointKFParameters parameters;
+   private final JointKFState state;
+   private final JointKFPrediction prediction;
+   private final JointKFUpdate update;
+   private final JointKFBiasUpdate biasUpdate;
 
-   // Declaration of all pre-allocated variables
-   private final SensorOutputMapReadOnly sensorMap;
-   private final double dt;
-
-   private final LinkedHashMap<OneDoFJointBasics, Integer> jointToIndex = new LinkedHashMap<>();
-   private final LinkedHashMap<IMUSensorReadOnly, Integer> imuToOrdinal = new LinkedHashMap<>();
-   private final List<Pair> pairs = new ArrayList<>();
-   private final List<FootAnchor> footAnchors = new ArrayList<>();
-   private IMUSensorReadOnly baseIMU;
-
-   private int baseBiasCol;
-   private int n; // number of distinct joints
-   private int m; // number of IMUs
-   private int dim; // 2n + 3m
-   private boolean initialized = false;
-   private boolean warnedNonFiniteInput = false;
-   // Separate one-shot flag for the near-singular innovation-covariance diagnostic (warnSingularInnovationOnce),
-   // so its detailed S-conditioning report is not swallowed by an unrelated earlier non-finite-input warning.
-   private boolean warnedSingularInnovation = false;
-
-   // Optional on-ground gate (see ON_GROUND_INIT_DEBOUNCE). Null => no gating: the filter initializes as soon
-   // as boot data is finite (the behavior the package tests rely on). Wired by the consumer that owns the
-   // contact-probability signal (InvariantMainStateEstimator) via setInitializationGate.
+   // Optional on-ground gate (see JointKFParameters.ON_GROUND_INIT_DEBOUNCE). Null => no gating: the filter
+   // initializes as soon as boot data is finite (the behavior the package tests rely on). Wired by the consumer
+   // that owns the contact-probability signal (InvariantMainStateEstimator) via setInitializationGate.
    private BooleanSupplier onGroundGate = null;
    private int consecutiveOnGroundTicks = 0;
    private final int requiredOnGroundTicks;
 
-   // Observability: the constructor was previously handed a parentRegistry that it dropped on the floor
-   // (so the filter published nothing on hardware). These are wired to the parent registry now.
+   // ONE flat registry shared by every component, so YoVariable simple names stay unique and their full
+   // namespaces are unchanged by the split. (This was once handed a parentRegistry that it dropped on the
+   // floor, so the filter published nothing on hardware.)
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoBoolean yoInitialized = new YoBoolean("jointKFInitialized", registry);
    private final YoBoolean yoWaitingForGroundContact = new YoBoolean("jointKFWaitingForGroundContact", registry);
-   private final YoInteger yoStateDimension = new YoInteger("jointKFStateDimension", registry);
-   private final YoInteger yoNumberOfFilteredJoints = new YoInteger("jointKFNumberOfFilteredJoints", registry);
-   private final YoInteger yoNumberOfIMUs = new YoInteger("jointKFNumberOfIMUs", registry);
-   // Conditioning telemetry (Part B items 2 & 5). Counters latch how often each safety path WOULD/DID engage
-   // so a hardware run surfaces a model/config regression instead of hiding it; the gyro-block S diagnostics are
-   // read straight off the Cholesky factor diagonal each tick (cheap, no eigendecomposition).
-   private final YoInteger yoQaCapWouldBindCount = new YoInteger("jointKFQaCapWouldBindCount", registry);
-   private final YoInteger yoInnovationGateSkipCount = new YoInteger("jointKFInnovationGateSkipCount", registry);
-   private final YoDouble yoCondSProxyLog10 = new YoDouble("jointKFCondSProxyLog10", registry);
-   private final YoDouble yoMinSDiag = new YoDouble("jointKFMinSDiag", registry);
-   // The two variables that would have caught the pitch drift months earlier, and that condS/minSDiag CANNOT.
-   // S is the innovation covariance of the MEASURED directions -- the bias-DIFFERENCE rows -- which stay
-   // perfectly well-conditioned even while the common-mode bias gauge is unfixed. A nullspace of H is invisible
-   // to S by construction; it shows up in P. So watch the anchor count (0 => gauge unfixed => bias WILL diverge)
-   // and the base-bias covariance trace (unbounded growth <=> unobservable). See FINDINGS.md §F.4.
-   private final YoInteger yoActiveAnchorCount = new YoInteger("jointKFActiveAnchorCount", registry);
-   private final YoDouble yoBiasPTrace = new YoDouble("jointKF_biasPTrace", registry);
-   private final YoDouble yoMaxSDiag = new YoDouble("jointKFMaxSDiag", registry);
 
-   // Per-joint filtered state (q, qd) and the 1-sigma covariance envelope around each. All indexed by the
-   // joint's state index (the same index used into x and P). Allocated once in the constructor after n is
-   // known, then only .set() on the estimator thread (allocation-free). The upper/lower "bounds" are the
-   // estimate +/- one standard deviation, i.e. q +/- sqrt(P_qq) and qd +/- sqrt(P_qdqd), for plotting the
-   // filter's confidence envelope alongside the estimate in SCS.
-   private YoDouble[] yoJointPosition;
-   private YoDouble[] yoJointVelocity;
-   private YoDouble[] yoJointPositionUpperBound;
-   private YoDouble[] yoJointPositionLowerBound;
-   private YoDouble[] yoJointVelocityUpperBound;
-   private YoDouble[] yoJointVelocityLowerBound;
-   // Per-joint process-noise diagnostics (Part B item 2, extended for the ALPHA retune). yoQaDiag[i] is
-   // diag(Qa)_i — joint i's acceleration process-noise VARIANCE ((rad/s^2)^2) this tick, the quantity the QA_MAX
-   // tripwire thresholds. yoQaCapBindCount[i] counts the ticks joint i was the argmax that exceeded QA_MAX. The
-   // aggregate jointKFQaCapWouldBindCount says the cap binds but not WHICH joint, so it cannot drive the per-joint
-   // ALPHA retune (equalize sqrt(diag(Qa)) across joints -> alpha_i = sigma*_qdd / (|Lambda_eff^-1|_ii * tau_max,i));
-   // these per-joint reads are the measurement that closes it. Indexed by joint state index.
-   private YoDouble[] yoQaDiag;
-   private YoInteger[] yoQaCapBindCount;
-   // Per-joint encoder-update diagnostics. yoEncNIS[i] is the normalized innovation squared nu_i^2 / S_ii of
-   // encoder row i this tick — E[NIS] = 1 for a consistent filter, so a per-joint mean far from 1 reads
-   // directly as "R_i is wrong by that factor". Published BEFORE the conditioning gates so a gated tick still
-   // shows the innovation that tripped it. yoEncR[i] is the wired measurement variance (constant; logged so a
-   // joint that silently fell back to ENCODER_VAR is visible). Indexed by joint state index.
-   private YoDouble[] yoEncNIS;
-   private YoDouble[] yoEncR;
-   // Signed pre-update innovations nu_i = z_i - (H x)_i for the same two channels (rad / rad/s). NIS squares
-   // away the sign; these keep it — the DISCRIMINATOR for lag-shaped vs impact-shaped encoder innovations:
-   // during walking, corr(encInnov, qd_meas/(2*pi*25)) near +1 with slope near 1 implicates the 25 Hz
-   // drive-side position filter lag (nu tracks the first-order lag error qd/omega_c); innovation instead
-   // concentrated in <100 ms bursts at contact transitions implicates unmodeled impact acceleration vs Qa.
-   private YoDouble[] yoEncInnov;
-   private YoDouble[] yoQdInnov;
-   // Direct-velocity channel diagnostics, same semantics as the encoder pair: yoQdNIS[i] = nu_i^2/S_ii of
-   // velocity row i (E[NIS] = 1 when R is honest), yoQdR[i] = this tick's APPLIED variance — measured floor
-   // plus the adaptive lag inflation, so the inflation itself is visible in the log. yoUseDirectVelocity is
-   // the live kill switch (settable from SCS mid-run for the hardware A/B).
-   private YoDouble[] yoQdNIS;
-   private YoDouble[] yoQdR;
-   private YoBoolean yoUseDirectVelocity;
-   // Per-IMU estimated gyro bias (IMU frame), indexed by ordinal. Published so the bias this filter EXPORTS to
-   // the downstream InEKF (via getAngularVelocityBiasInIMUFrame) is visible — a runaway base-IMU bias here is
-   // integrated straight into the InEKF's base orientation, so it must not be an unlogged black box.
-   private YoDouble[] yoImuGyroBiasX;
-   private YoDouble[] yoImuGyroBiasY;
-   private YoDouble[] yoImuGyroBiasZ;
-   private YoDouble[] yoImuGyroBiasNorm;
-
-   // State and constant model
-   private final DMatrixRMaj x = new DMatrixRMaj(0,1); // reshaped to dimx1 later when constructed
-   private final DMatrixRMaj xtmp = new DMatrixRMaj(0,1);
-   private final DMatrixRMaj P = new DMatrixRMaj(0,0); // dim x dim
-   private final DMatrixRMaj F = new DMatrixRMaj(0,0); // dim x dim transition matrix
-   private final DMatrixRMaj Q = new DMatrixRMaj(0,0); // dim x dim process noise
-   private DMatrixRMaj Henc, Renc, zEnc;
-   /** Wired per-joint encoder position measurement variance (rad^2), state order; ENCODER_VAR where unwired. */
-   private double[] encVarPerJoint;
-   /** min_i encVarPerJoint[i]: the encoder-block S-pivot floor. A healthy S = H P H^T + R has every pivot >= its
-    *  row's R_ii, so the collapsed-row gate must threshold on the SMALLEST wired variance, not on ENCODER_VAR —
-    *  with per-joint values below the scalar fallback the old constant would false-trip the gate. */
-   private double encVarFloorMin = ENCODER_VAR;
-   // Direct joint-velocity measurement channel ("encoderVelocity" update): the twitter firmware reports a
-   // drive-side-filtered output velocity per joint; treating it as a measurement of the q̇ states pins the
-   // J·q̇ part of every pair-gyro row, which makes the IMU bias DIFFERENCES directly inferable each tick
-   // instead of only through the process model (the anchor still fixes the common mode). H_qd = [0 | I_n | 0].
-   private DMatrixRMaj Hqd, Rqd, zqd;
-   /** Wired per-joint encoder velocity measurement variance ((rad/s)^2); SIGMA_QD_UNFILTERED^2 where unwired. */
-   private double[] qdMeasVarPerJoint;
-   /** 1/omega_eff (s) of the measurement's low-pass cascade per joint; 0 => no lag inflation (unknown/sim). */
-   private double[] invOmegaEffPerJoint;
-   /** Last tick's measured q̇ (NaN before the first sample) and its LAG_SLEW_SMOOTHING_HZ-smoothed slope. */
-   private double[] prevZqd, qdSlewSmoothed;
-   private double lagSlewSmoothingAlpha;
-   /** min_i qdMeasVarPerJoint[i]: S-pivot floor for the velocity rows (lag inflation only ever raises R). */
-   private double qdVarFloorMin = SIGMA_QD_UNFILTERED * SIGMA_QD_UNFILTERED;
-   private final boolean useDirectVelocityMeasurement;
-
-   // Measurement model matrices
-   private final DMatrixRMaj PHt = new DMatrixRMaj(0,0);
-   private final DMatrixRMaj S = new DMatrixRMaj(0,0);
-   private final DMatrixRMaj Sinv = new DMatrixRMaj(0,0);
-   private final DMatrixRMaj K = new DMatrixRMaj(0,0);
-   private final DMatrixRMaj nu = new DMatrixRMaj(0,0);
-   private final DMatrixRMaj KR = new DMatrixRMaj(0,0); // I-KH, dim x dim, Joseph form
-   private final DMatrixRMaj IKH = new DMatrixRMaj(0,0); // I-KH, dim x dim, Joseph form
-   private final DMatrixRMaj Ptmp = new DMatrixRMaj(0,0);
-   private final DMatrixRMaj Rimu = new DMatrixRMaj(3,3);
-   private final DMatrixRMaj rot3 = new DMatrixRMaj(3,3);
-   // (The stance-anchor covariance is no longer a constant Sigma_eps: it is per-anchor and per-tick, held in
-   //  FootAnchor.R, because the unfiltered-joint congruence J_U diag(sigma_qd^2) J_U^T depends on the posture.)
-
-   // ---- Stacked gyro measurement (SPEC §5). ONE Joseph update per tick over z_g in R^{3(E+K)}: E = pairs
-   // (rows [0, 3E)), K = active stance anchors this tick (rows [3E, 3E+3K)). This replaces Rev. 1's per-pair
-   // sequential updates AND the separate phase-2 anchor. Biases and gyro white noise both enter through the
-   // SAME rotational edge-incidence operator L, so a block-diagonal per-pair R is inconsistent (it double-
-   // counts shared-IMU samples on a star topology, and both anchors' shared base sample in double support);
-   // the stacked R_g = L Sigma L^T + Sigma_eps-block carries the exact cross-covariances (SPEC §5.3). The bias
-   // columns of H_g ARE L: build L once per tick, use it in both places so the identity cannot drift.
-   private int E;             // number of IMU pairs (fixed at construction)
-   private int maxStackRows;  // 3 * (E + K_max), K_max = number of foot anchors; the widest stacked measurement
-   private DMatrixRMaj Hg;    // 3(E+K) x dim measurement Jacobian [ 0 | J_stack(q^) | L(q^) ]
-   private DMatrixRMaj zg;    // 3(E+K) x 1 stacked measurement (raw gyro samples)
-   private DMatrixRMaj Rg;    // 3(E+K) x 3(E+K) stacked measurement noise L Sigma L^T + Sigma_eps
-   private DMatrixRMaj Lmix;  // 3(E+K) x 3m mixing operator L (also copied into H_g's bias columns)
-   private DMatrixRMaj Sigma; // 3m x 3m blkdiag of each IMU's angular-velocity MEASUREMENT-noise covariance
-   private DMatrixRMaj LSigma; // 3(E+K) x 3m scratch for the L*Sigma product
-   private IMUSensorReadOnly[] imusByOrdinal; // ordinal -> IMU, so the per-tick Sigma build is an index loop (no
-                                              // map-iterator allocation on the estimator thread)
-   private final DMatrixRMaj identity3 = new DMatrixRMaj(3,3); // constant I3 for anchor L-blocks
-   // Previous tick's trusted-feet set: the phase-1 stacked update reads THIS tick's anchors from the set cached
-   // by last tick's computeImuBiases (SPEC §6 phase note — the IHMC estimator finalizes contact trust in
-   // phase 2, after computeJointState, so a phase-1 stacked anchor must use the prior tick's trust). Pre-sized
-   // in allocate() and only cleared/refilled on the estimator thread (no per-tick allocation).
-   private List<RigidBodyBasics> trustedFeetFromLastTick;
-   // Reused LU solver for the innovation-covariance inverse, pre-sized in allocate(). This replaces the
-   // per-tick CommonOps_DDRM.invert(S, Sinv), which allocates a fresh LU decomposition + solver on every
-   // call once S is larger than 5x5 (i.e. the n-joint encoder update) — garbage on the estimator thread.
-   // Cholesky (S = H P H^T + R is symmetric PD by construction). setA failure = non-PD => skip. Its factor L
-   // (L L^T = S) also gives the conditioning/floor gate cheaply: S's pivots are L_ii^2, so cond(S) ~
-   // (max L_ii / min L_ii)^2 with no eigendecomposition (Part B item 5).
-   private LinearSolverChol_DDRM innovationSolver;
-   private final DMatrixRMaj Lchol = new DMatrixRMaj(0, 0); // scratch for the innovation Cholesky factor L (k x k)
-   private final RigidBodyTransform tmpTransform = new RigidBodyTransform();
-   private final FrameVector3D fvA = new FrameVector3D();
-   private final FrameVector3D fvB = new FrameVector3D();
    private final FrameVector3D biasOut = new FrameVector3D();
-
-   // Schur-complement process noise (SPEC §3.2). The unmodeled joint torque w_tau maps to joint acceleration
-   // through the FLOATING-BASE dynamics, not the locked-base map: eliminating the (unforced) nuisance
-   // acceleration from the perturbed EOM gives delta_qddot = Lambda^-1 w_tau, Lambda = M_jj - M_jN M_NN^-1 M_Nj
-   // the Schur complement of the nuisance block. Hence Qa = sigma_tau^2 Lambda^-2.
-   //
-   // "Nuisance" = the 6-DoF floating base (SPEC §3.2) plus any UNFILTERED joints that lie on the tree path
-   // between the base and a filtered joint ("gap" joints). In the real robot the base IMU is on the base link
-   // and every joint on a pair/anchor path is itself filtered, so there are NO gap joints and this is exactly
-   // the SPEC's Lambda = M_jj - M_jb M_bb^-1 M_bj over the plain 6-DoF base. The gap term is a topology
-   // generalization (needed because the composite-rigid-body calculator prunes the subtree below any ignored
-   // joint, so an unfiltered joint above a filtered one cannot be silently locked): such gap joints are
-   // instead marginalized (treated as free) alongside the base — the conservative choice (more recoil => more
-   // process noise, consistent with §3.2's free-flyer upper bound). Genuinely OFF-path joints stay ignored and
-   // their inertia is composited into the adjacent link by the calculator (considerIgnoredSubtreesInertia).
-   //
-   // The mass matrix M is built over {base} ∪ {joints spanning base->filtered}. All columns (nuisance and each
-   // filtered joint) are resolved through the calculator's index provider — never assume ordering. Null
-   // calculator (no robot model, or no 6-DoF floating base found) => the constant scalar-CWNA diagonal fallback.
-   // NOTE: CompositeRigidBodyMassMatrixCalculator is correct here. DynamicsMatrixCalculator merely wraps this
-   // same calculator (it holds one internally, built over the whole-body-control toolbox) and computes the
-   // identical M(q) — switching changes nothing numerically. Process-noise magnitude is governed by SIGMA_TAU
-   // and the QA_MAX conditioning cap in updateProcessNoiseFromMassMatrix, not by the choice of calculator.
-   private CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
-   private int numberOfNuisanceDOF;          // 6 (base) + number of gap joints; the marginalized block width N
-   private int[] massMatrixNuisanceColumns; // nuisance DoF columns of the full mass matrix (length N)
-   private int[] massMatrixColumn;      // filter joint state index -> DoF column in the calculator's mass matrix
-   private final DMatrixRMaj MNN = new DMatrixRMaj(0, 0);       // nuisance block, N x N
-   private final DMatrixRMaj MNf = new DMatrixRMaj(0, 0);       // nuisance-filtered coupling, N x n (= M_jN^T)
-   private final DMatrixRMaj Mff = new DMatrixRMaj(0, 0);       // filtered block, n x n
-   private final DMatrixRMaj MNNInvMNf = new DMatrixRMaj(0, 0); // X = M_NN^-1 M_Nf, N x n
-   private final DMatrixRMaj Lambda = new DMatrixRMaj(0, 0);    // Schur complement Lambda_eff (rotor diag added in place), n x n
-   private final DMatrixRMaj LambdaInv = new DMatrixRMaj(0, 0); // Lambda_eff^-1, n x n
-   private final DMatrixRMaj Ytau = new DMatrixRMaj(0, 0);      // Lambda_eff^-1 with column j scaled by sigma_tau,j, n x n (Part B item 3)
-   private final DMatrixRMaj Qa = new DMatrixRMaj(0, 0);        // Qa = Ytau Ytau^T (PSD, symmetric BY CONSTRUCTION), n x n
-   private LinearSolverDense<DMatrixRMaj> nuisanceMassMatrixSolver; // Cholesky over M_NN, solves M_NN X = M_Nf
-   private LinearSolverDense<DMatrixRMaj> schurSolver;          // Cholesky over Lambda_eff, inverts it
-   // Reflected rotor inertia diagonals (Part B item 1), built at construction in filter/nuisance order.
-   private double[] rotorInertiaDiag;          // length n, added to Lambda's diagonal (filter joint state order)
-   private double[] nuisanceRotorInertiaDiag;  // length numNuisanceDoF: 0 on base rows, rotor inertia on gap-joint rows
-   private double[] sigmaTauPerJoint;          // length n, sigma_tau,i = ALPHA * tau_max,i (Part B item 3)
-   private boolean warnedMassMatrixFailure = false;
-   private boolean warnedMassMatrixConditioningCap = false;
-   private boolean sigmaFloorInitialized = false; // Sigma validated/floored/cached on first buildStackedMeasurement
-   private boolean gyroSigmaFloored = false;   // any IMU's gyro noise was floored (Part B item 4)
-   private boolean warnedGyroFloorRegression = false; // one-shot: R_g pair-row diagonal fell below the floor at runtime
-
-   // Rollback backups: a KF has no recovery once x/P go non-finite (predict/Joseph spread the NaN with no
-   // way back), so a single non-finite measurement update is skipped by restoring the pre-update mean and
-   // covariance instead of latching NaN forever. Pre-sized in allocate(); .set() reuses them (no per-tick
-   // allocation). The O(dim^2) copy is negligible next to the O(dim^3) Joseph matrix products already here.
-   private final DMatrixRMaj xBackup = new DMatrixRMaj(0, 1);
-   private final DMatrixRMaj PBackup = new DMatrixRMaj(0, 0);
-   // One-shot triage: names the first predict/update stage whose output goes non-finite, so a hardware run
-   // prints exactly where the NaN enters. Latches after the first report (the KF stays NaN anyway).
-   private boolean nonFiniteStateReported = false;
-
 
    // Package-private (not private) so the allocation/behavior tests in this package can build it directly
    // from a synthetic IMU-pair setup without standing up a full StateEstimatorParameters.
    /** Scalar-CWNA process-noise overload: no robot model, so Qa = SIGMA_ACCEL^2 I (the pre-mass-matrix behavior). */
+   //TODO: all objects passed in should be `final`, so they should either be declared in the constructor or the class definition.
    JointLevelKFPreFilter(SensorOutputMapReadOnly sensorMap,
                          List<IMUBasedJointStateEstimatorParameters> pairParameters,
                          Collection<RigidBodyBasics> feet,
@@ -507,528 +145,51 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                          double estimatorDT,
                          YoRegistry parentRegistry)
    {
-      this.sensorMap = sensorMap;
-      this.dt = estimatorDT;
-      this.useDirectVelocityMeasurement = useDirectVelocityMeasurement;
-      this.requiredOnGroundTicks = Math.max(1, (int) Math.round(ON_GROUND_INIT_DEBOUNCE / estimatorDT));
+      // Parameters first: every component below reads its tuning from here, and the LIVE ones keep being
+      // re-read on the hot path afterwards.
+      this.parameters = new JointKFParameters(registry);
+      this.requiredOnGroundTicks = Math.max(1, (int) Math.round(parameters.onGroundInitDebounce.getValue() / estimatorDT));
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
 
-      // 1)  Resolve all pairs of IMUs, collect distinct joints and IMUs into the state layout
-      for (IMUBasedJointStateEstimatorParameters pp : pairParameters)
-      {
-         IMUSensorReadOnly parent = findIMU(sensorMap, pp.getParentIMUName());
-         IMUSensorReadOnly child = findIMU(sensorMap, pp.getChildIMUName());
-         if (parent == null || child == null)
-         {
-            LogTools.warn("Skipping pair, IMU not found: parent = " + pp.getParentIMUName() + " child = " + pp.getChildIMUName());
-            continue;
-         }
-         // Structural asserts (Part B item 6): a self-pair or a pair whose two IMUs sit on the same measurement
-         // link has zero H, zero z and zero noise — S is singular by construction (SPEC §5). Fail loud at boot.
-         if (parent == child)
-            throw new IllegalArgumentException("JointLevelKFPreFilter: pair '" + pp.getEstimatorName() + "' has the same IMU ("
-                  + parent.getSensorName() + ") as parent and child.");
-         if (parent.getMeasurementLink() == child.getMeasurementLink())
-            throw new IllegalArgumentException("JointLevelKFPreFilter: pair '" + pp.getEstimatorName() + "' parent and child IMUs "
-                  + "share the measurement link " + parent.getMeasurementLink().getName() + " (zero-DoF chain).");
-         Pair p = new Pair(parent,child);
-         p.jac.setKinematicChain(parent.getMeasurementLink(),child.getMeasurementLink());
-         p.jac.setJacobianFrame(child.getMeasurementLink().getBodyFixedFrame());
-         //NOTE: Assumes 1-DoF and fixed joints only, just as IMUBasedJointStateEstimator does.
-         // The i-th angular jacobian column correspnods to the i-th filtered joint.
-         List<OneDoFJointBasics> chain = MultiBodySystemTools.filterJoints(p.jac.getJointsFromBaseToEndEffector(), OneDoFJointBasics.class);
-         p.chainJoints = chain.toArray(new OneDoFJointBasics[0]);
-         for (OneDoFJointBasics j : p.chainJoints)
-            jointToIndex.putIfAbsent(j, jointToIndex.size()); // places joints via hash mapping
-         imuToOrdinal.putIfAbsent(parent, imuToOrdinal.size());
-         imuToOrdinal.putIfAbsent(child, imuToOrdinal.size());
-         pairs.add(p);
-      }
+      // ORDER IS LOAD-BEARING: State fixes the layout (n, m, dim, pairs, anchors, base IMU, maxStackRows) that
+      // both Prediction and Update size themselves against, and BiasUpdate applies its block through Update's
+      // Joseph core. All four share the one flat registry above, so simple names stay unique.
+      this.state = new JointKFState(sensorMap, pairParameters, feet, encoderVelocityNoiseStd, estimatorDT, parameters, registry);
+      this.prediction = new JointKFPrediction(state, rootBody, parameters, registry);
+      this.update = new JointKFUpdate(state,
+                                      encoderPositionNoiseStd,
+                                      encoderVelocityNoiseStd,
+                                      jointVelocityMeasurementBreakFrequencyHz,
+                                      useDirectVelocityMeasurement,
+                                      parameters,
+                                      registry);
+      this.biasUpdate = new JointKFBiasUpdate(state, update, parameters, registry);
 
-      n = jointToIndex.size();
-      m = imuToOrdinal.size();
-      dim = 2 * n + 3 * m;
-
-      // Per-joint encoder position variance, resolved once (lookup is by joint NAME; state order thereafter).
-      // The S-pivot floor for the encoder block follows the smallest wired variance — see encVarFloorMin.
-      encVarPerJoint = new double[n];
-      int unwiredEncoderJoints = 0;
-      for (var e : jointToIndex.entrySet())
-      {
-         double std = encoderPositionNoiseStd == null ? Double.NaN : encoderPositionNoiseStd.applyAsDouble(e.getKey().getName());
-         if (Double.isFinite(std) && std > 0.0)
-            encVarPerJoint[e.getValue()] = std * std;
-         else
-         {
-            encVarPerJoint[e.getValue()] = ENCODER_VAR;
-            unwiredEncoderJoints++;
-         }
-      }
-      for (int i = 0; i < n; i++)
-         encVarFloorMin = Math.min(encVarFloorMin, encVarPerJoint[i]);
-      if (encoderPositionNoiseStd != null && unwiredEncoderJoints > 0)
-         LogTools.warn("JointLevelKFPreFilter: " + unwiredEncoderJoints + " of " + n + " filtered joints have no wired "
-               + "encoder position noise; they fall back to ENCODER_VAR = " + ENCODER_VAR + " rad^2 — orders of magnitude "
-               + "above the measured per-joint values, so those encoders will be badly under-trusted. Check jointKF_encR_<joint>.");
-
-      // Direct-velocity channel wiring: measured noise floor + effective low-pass corner per joint, resolved
-      // once by name. 1/omega_eff = 0 disables the lag inflation for that joint (measurement treated as
-      // instantaneous); the smoothing alpha for the slew estimate is fixed by LAG_SLEW_SMOOTHING_HZ.
-      qdMeasVarPerJoint = new double[n];
-      invOmegaEffPerJoint = new double[n];
-      prevZqd = new double[n];
-      qdSlewSmoothed = new double[n];
-      for (var e : jointToIndex.entrySet())
-      {
-         int idx = e.getValue();
-         String name = e.getKey().getName();
-         double std = encoderVelocityNoiseStd == null ? Double.NaN : encoderVelocityNoiseStd.applyAsDouble(name);
-         qdMeasVarPerJoint[idx] = (Double.isFinite(std) && std > 0.0) ? std * std : SIGMA_QD_UNFILTERED * SIGMA_QD_UNFILTERED;
-         double fc = jointVelocityMeasurementBreakFrequencyHz == null ? Double.NaN : jointVelocityMeasurementBreakFrequencyHz.applyAsDouble(name);
-         invOmegaEffPerJoint[idx] = (Double.isFinite(fc) && fc > 0.0) ? 1.0 / (2.0 * Math.PI * fc) : 0.0;
-         prevZqd[idx] = Double.NaN;
-      }
-      for (int i = 0; i < n; i++)
-         qdVarFloorMin = Math.min(qdVarFloorMin, qdMeasVarPerJoint[i]);
-      lagSlewSmoothingAlpha = Math.exp(-2.0 * Math.PI * LAG_SLEW_SMOOTHING_HZ * dt);
-      if (useDirectVelocityMeasurement)
-         LogTools.info("JointLevelKFPreFilter: direct joint-velocity measurement channel ENABLED over " + n
-               + " joints (adaptive lag inflation on " + (int) java.util.Arrays.stream(invOmegaEffPerJoint).filter(v -> v > 0.0).count()
-               + " of them; live kill switch: jointKFUseDirectVelocityMeasurement).");
-
-      // Acyclicity assert (Part B item 6): with the exact R_g, a cycle's telescoping row-combination has zero H,
-      // zero z and zero noise, so S is singular BY CONSTRUCTION (SPEC §5.3). The used IMU graph MUST be a tree.
-      assertAcyclicIMUGraph();
-
-      // 2) Second pass: assemble state sinze columns are known as n is fixed.
-      for (Pair p: pairs)
-      {
-         int dof = p.chainJoints.length;
-         p.Jang.reshape(3,dof); // Jang is allocated blank at construction in the chain, only reshaped once full DoF are known
-         p.qdCols = new int[dof];
-         for (int c = 0; c < dof; c++)
-            p.qdCols[c] = n + jointToIndex.get(p.chainJoints[c]); // this int[] is the selector matrix of the path S_ab, but in sparse form as all joints are not related directly
-         p.parentBias = 2 * n + 3 * imuToOrdinal.get(p.parent);
-         p.childBias = 2 * n + 3 * imuToOrdinal.get(p.child);
-      }
-
-      // 3) Base IMU = root of the tree + first pair parent.
-      //WARNING: Need to configure if the root differs.
-      baseIMU = pairs.isEmpty() ? null : pairs.get(0).parent;
-      baseBiasCol = baseIMU == null ? -1 : 2 * n + 3 * imuToOrdinal.get(baseIMU);
-      if (baseIMU == null)
-         throw new RuntimeException("Base IMU is null, check the kinematic tree.");
-      LogTools.info("Base IMU initialized as " + baseIMU.getSensorName());
-
-      // 3b) Schur-complement process noise (SPEC §3.2): the calculator is built over the FLOATING BASE plus the
-      // filtered joints of the LIVE estimator model (the same joint objects the Jacobians read), so its M(q)
-      // tracks the consumer-updated configuration each tick with no extra bookkeeping. Unlike Rev. 1 (joints
-      // only), the floating joint MUST be included so the 6x6 base block M_bb and the base-joint coupling M_bj
-      // are available for the Schur complement. Column mappings (base and each joint) are resolved through the
-      // index provider rather than assumed from list order.
-      if (rootBody != null && n > 0)
-      {
-         List<OneDoFJointBasics> massMatrixJoints = new ArrayList<>(jointToIndex.keySet());
-         // The filtered joints ARE joints of the passed-in robot model; the model root is only used as a
-         // sanity check here.
-         RigidBodyBasics treeRoot = MultiBodySystemTools.getRootBody(massMatrixJoints.get(0).getPredecessor());
-         if (treeRoot != rootBody)
-            LogTools.warn("The provided robot model root '" + rootBody.getName() + "' is not the root of the filtered joints' tree;"
-                          + " M(q) is computed on the joints' own tree.");
-
-         // The base joint is the 6-DoF free-flyer at the root of the filtered joints' tree (elevator's child).
-         JointReadOnly baseJoint = findFloatingBaseJoint(treeRoot);
-         if (baseJoint == null)
-         {
-            // No floating base (e.g. a fixed-base model): the Schur complement is undefined, so degrade to the
-            // scalar-CWNA fallback rather than silently reverting to the locked-base map this revision removes.
-            LogTools.warn("Joint-level KF process noise: no 6-DoF floating base joint found at the tree root; "
-                          + "falling back to scalar CWNA (the Schur-complement path needs a floating base — SPEC §3.2).");
-         }
-         else
-         {
-            // Joints to CONSIDER = base joint + the joints spanning base->filtered (every filtered joint plus any
-            // unfiltered "gap" joints above it). The gap joints MUST be considered, not ignored: the calculator
-            // prunes the whole subtree below an ignored joint, which would zero the filtered joints' inertia if an
-            // unfiltered joint sat above them. Genuinely off-path joints are neither filtered nor spanning, so they
-            // fall in getJointsToIgnore() and their inertia is composited (considerIgnoredSubtreesInertia).
-            LinkedHashSet<JointReadOnly> spanningJoints = collectSpanningJoints(baseJoint, massMatrixJoints);
-            List<JointReadOnly> jointsToConsider = new ArrayList<>();
-            jointsToConsider.add(baseJoint);
-            jointsToConsider.addAll(spanningJoints);
-            MultiBodySystemReadOnly massMatrixInput = MultiBodySystemReadOnly.toMultiBodySystemInput(jointsToConsider);
-            massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(massMatrixInput);
-
-            var indexProvider = massMatrixInput.getJointMatrixIndexProvider();
-            // Filtered-joint columns, in filter state order.
-            massMatrixColumn = new int[n];
-            for (var e : jointToIndex.entrySet())
-               massMatrixColumn[e.getValue()] = indexProvider.getJointDoFIndices(e.getKey())[0];
-            // Nuisance columns to marginalize = base 6-DoF columns + each gap joint's column (a gap joint is a
-            // spanning joint that is not itself filtered). These are exactly the considered DoFs that are not
-            // filtered joints.
-            int[] baseColumns = indexProvider.getJointDoFIndices(baseJoint);
-            List<Integer> nuisanceColumns = new ArrayList<>();
-            // Parallel rotor-inertia diagonal for the nuisance block (Part B item 1): 0 on the 6 base DoF (the
-            // free base carries no reflected rotor inertia), the joint's reflected rotor inertia on each gap
-            // joint (so a marginalized unfiltered joint still floors M_NN). None on Alex today; kept general.
-            List<Double> nuisanceRotor = new ArrayList<>();
-            for (int c : baseColumns)
-            {
-               nuisanceColumns.add(c);
-               nuisanceRotor.add(0.0);
-            }
-            int gapJoints = 0;
-            for (JointReadOnly spanningJoint : spanningJoints)
-            {
-               if (!jointToIndex.containsKey(spanningJoint)) // unfiltered => gap joint => marginalize it
-               {
-                  nuisanceColumns.add(indexProvider.getJointDoFIndices(spanningJoint)[0]);
-                  double gapRotor = lookupRotorInertia(spanningJoint.getName());
-                  if (gapRotor < 0.0)
-                     gapRotor = ROTOR_INERTIA_DEFAULT;
-                  nuisanceRotor.add(gapRotor);
-                  gapJoints++;
-               }
-            }
-            massMatrixNuisanceColumns = new int[nuisanceColumns.size()];
-            nuisanceRotorInertiaDiag = new double[nuisanceColumns.size()];
-            for (int i = 0; i < massMatrixNuisanceColumns.length; i++)
-            {
-               massMatrixNuisanceColumns[i] = nuisanceColumns.get(i);
-               nuisanceRotorInertiaDiag[i] = nuisanceRotor.get(i);
-            }
-            numberOfNuisanceDOF = massMatrixNuisanceColumns.length; // 6 + gap joints
-
-            LogTools.info("Joint-level KF process noise: Schur-complement path (sigma_tau = " + SIGMA_TAU + " N*m) over "
-                          + n + " joints, marginalizing a " + numberOfNuisanceDOF + "-DoF nuisance block (6-DoF floating base"
-                          + (gapJoints > 0 ? " + " + gapJoints + " unfiltered gap joint(s))." : ")."));
-         }
-      }
-      else
-      {
-         LogTools.info("Joint-level KF process noise: scalar CWNA fallback (no robot model provided).");
-      }
-
-      // 4) Precompute base->foot chains for the phase 2 stance anchoring measurement update
-      if (baseIMU != null && feet != null)
-      {
-         for (RigidBodyBasics foot : feet)
-         {
-            FootAnchor fa = new FootAnchor(foot);
-            fa.jac.setKinematicChain(baseIMU.getMeasurementLink(), foot);
-            fa.jac.setJacobianFrame(baseIMU.getMeasurementFrame()); // express J in the same frame as the base gyro
-            List<OneDoFJointBasics> leg = MultiBodySystemTools.filterJoints(fa.jac.getJointsFromBaseToEndEffector(), OneDoFJointBasics.class);
-
-            fa.legJoints = leg.toArray(new OneDoFJointBasics[0]);
-            fa.Jang.reshape(3, fa.legJoints.length);
-            fa.qdCols = new int[fa.legJoints.length];
-            fa.qdVar = new double[fa.legJoints.length];
-
-            // A leg joint that is NOT a filter state does not disable the anchor -- it only has to be KNOWN, not
-            // ESTIMATED. Splitting the chain into filtered F and unfiltered U, the anchor equation
-            //    omega_base = -J_F qd_F - J_U qd_U + b_base
-            // moves the unfiltered part to the measurement side (see buildStackedMeasurement):
-            //    z' = omega_base + J_U qd_U^meas = -J_F qd_F + b_base + noise'
-            // The +I3 on b_base -- the ONLY absolute bias observation in the filter, and hence the ONLY thing
-            // that fixes the 3-dim common-mode bias gauge -- is untouched by this split, so the anchor keeps its
-            // observability role for ANY subset of filtered leg joints.
-            //
-            // This used to set usable=false whenever any chain joint was unfiltered. On Alex that is ALWAYS: the
-            // robot has no foot IMUs, so the shin->foot pair is never built, so the ankles are never filtered
-            // joints -- and they sit on the pelvis->foot chain. Both anchors were therefore dead on every tick
-            // since day one, the bias gauge was never fixed, and the exported pelvis gyro bias random-walked to
-            // 0.17 rad/s and drove the base pitch drift. See FINDINGS.md Part F.
-            fa.usable = true;
-            int unfiltered = 0;
-            for (int c = 0; c < fa.legJoints.length; c++)
-            {
-               Integer idx = jointToIndex.get(fa.legJoints[c]);
-               if (idx == null)
-               {
-                  fa.qdCols[c] = -1; // unfiltered: contributes J_U * qd^meas to z', no H column
-                  unfiltered++;
-               }
-               else
-                  fa.qdCols[c] = n + idx;
-               // Per-joint encoder VELOCITY variance for the anchor's input-noise congruence (only the
-               // unfiltered columns are ever read, but fill every slot — cheap, and no -1 bookkeeping).
-               double qdStd = encoderVelocityNoiseStd == null ? Double.NaN : encoderVelocityNoiseStd.applyAsDouble(fa.legJoints[c].getName());
-               fa.qdVar[c] = (Double.isFinite(qdStd) && qdStd > 0.0) ? qdStd * qdStd : SIGMA_QD_UNFILTERED * SIGMA_QD_UNFILTERED;
-            }
-            // A chain with no joints at all cannot anchor anything (degenerate model).
-            if (fa.legJoints.length == 0)
-               fa.usable = false;
-            if (unfiltered > 0)
-               LogTools.info("JointLevelKFPreFilter: foot anchor " + foot.getName() + " has " + unfiltered + " of "
-                             + fa.legJoints.length + " chain joints unfiltered; their measured velocities are folded into the "
-                             + "anchor measurement and their encoder noise into the anchor covariance.");
-            footAnchors.add(fa);
-         }
-      }
-
-      // Structural assert (gauge fixing): the pair rows see the bias ONLY as a difference, so the common-mode
-      // bias is a 3-dim nullspace of H. The anchor's +I3 on the base bias is the one row that fixes it. With no
-      // usable anchor the base-IMU gyro bias is unobservable FOREVER -- it random-walks, gets subtracted from the
-      // gyro, and integrates straight into base orientation. That is not a degraded mode, it is a broken filter,
-      // and it must never boot silently again (it did, for months). Fail loud, like the self-pair/acyclic asserts.
-      if (baseIMU != null && feet != null && !feet.isEmpty() && footAnchors.stream().noneMatch(fa -> fa.usable))
-         throw new IllegalArgumentException("JointLevelKFPreFilter: no usable foot anchor. The base-IMU gyro bias is a gauge "
-               + "freedom fixed ONLY by the stance-anchor rows; without one it is unobservable and will diverge. "
-               + "Check that the base IMU's measurement link connects to at least one foot.");
-      // Per-joint reflected rotor inertia (item 1) and per-joint sigma_tau (item 3), in filter state order.
-      // Built BEFORE allocate() because allocate() -> buildProcessNoise() -> updateProcessNoiseFromMassMatrix()
-      // reads both.
-      buildRotorInertiaAndSigmaTau();
-      allocate();
-
-      yoStateDimension.set(dim);
-      yoNumberOfFilteredJoints.set(n);
-      yoNumberOfIMUs.set(m);
-
-      createJointYoVariables();
+      validateConstantModel();
 
       // Boot-time census (Part B item 6): every hardware boot prints the chain-DoF layout and, for each 1-DoF
       // chain, the joint axis and its two pure-bias sentinel rows (the min-side rows whose S floor is Sigma).
-      logChainDoFCensus();
+      state.logChainDoFCensus();
    }
 
    /**
-    * Union-find acyclicity check on the used IMU graph (Part B item 6). Each pair is an edge between its two
-    * IMU ordinals; if an edge ever joins two already-connected IMUs the graph has a cycle, which makes the
-    * stacked S singular by construction with the exact R_g (SPEC §5.3 — the cycle's telescoping row-combination
-    * carries the identity 0 = 0: zero H, zero z, zero noise). THROW naming the redundant pair to drop (its
-    * chain joints are already covered by the rest of the spanning tree, so dropping it loses no information).
-    * Construction-only.
+    * The constant model matrices are built once and reused every tick, so a single non-finite entry — most
+    * plausibly an IMU returning a non-finite bias process-noise covariance while still booting — permanently
+    * poisons Q or F and makes P go NaN on the first predict, with no recovery. Naming the matrix at boot beats
+    * discovering a silent all-NaN filter later.
     */
-   private void assertAcyclicIMUGraph()
+   private void validateConstantModel()
    {
-      int[] parent = new int[m];
-      for (int i = 0; i < m; i++)
-         parent[i] = i;
-      for (Pair p : pairs)
-      {
-         int a = find(parent, imuToOrdinal.get(p.parent));
-         int b = find(parent, imuToOrdinal.get(p.child));
-         if (a == b)
-            throw new IllegalStateException("JointLevelKFPreFilter: the used IMU graph has a CYCLE — the pair "
-                  + p.parent.getSensorName() + "->" + p.child.getSensorName() + " closes a loop. With the exact R_g a "
-                  + "cycle's telescoping row-combination has zero H, zero z and zero noise, so the stacked innovation "
-                  + "covariance S is singular by construction (SPEC §5.3). Drop this redundant pair — its chain joints "
-                  + "are already covered by the remaining edges, so removing it loses no information.");
-         parent[a] = b;
-      }
-      // E <= m - 1 for a forest; with connectivity from the base IMU the used graph is a tree. (A disconnected
-      // forest is not an error here — an IMU island simply contributes an independent sub-filter.)
-   }
-
-   private static int find(int[] parent, int i)
-   {
-      while (parent[i] != i)
-      {
-         parent[i] = parent[parent[i]];
-         i = parent[i];
-      }
-      return i;
-   }
-
-   /** Reflected rotor inertia for a joint by case-insensitive name substring (Part B item 1); -1 if unmatched. */
-   private static double lookupRotorInertia(String jointName)
-   {
-      String upper = jointName.toUpperCase();
-      for (int i = 0; i < ROTOR_INERTIA_JOINT_KEYS.length; i++)
-         if (upper.contains(ROTOR_INERTIA_JOINT_KEYS[i]))
-            return ROTOR_INERTIA_VALUES[i];
-      return -1.0;
-   }
-
-   /** Package-private test seam: the reflected rotor inertia the filter actually applies to the named joint —
-    *  the table match, or the conservative default when unmatched. Lets the mass-matrix Qa oracle reconstruct
-    *  Lambda_eff exactly (Part C), independent of whether a synthetic joint name happens to hit a table key. */
-   static double reflectedRotorInertiaForNameOrDefault(String jointName)
-   {
-      double v = lookupRotorInertia(jointName);
-      return v < 0.0 ? ROTOR_INERTIA_DEFAULT : v;
-   }
-
-   /** Per-joint alpha (fraction of tau_max used as the unmodeled-torque STD) by case-insensitive name substring;
-    *  the override table value if matched, else ALPHA_DEFAULT. Package-private so tests can mirror sigma_tau. */
-   static double alphaForName(String jointName)
-   {
-      String upper = jointName.toUpperCase();
-      for (int i = 0; i < ALPHA_JOINT_KEYS.length; i++)
-         if (upper.contains(ALPHA_JOINT_KEYS[i]))
-            return ALPHA_VALUES[i];
-      return ALPHA_DEFAULT;
-   }
-
-   /**
-    * Builds the per-joint reflected-rotor-inertia diagonal (Part B item 1) and the per-joint unmodeled-torque
-    * STD sigma_tau,i = ALPHA * tau_max,i (Part B item 3), both in filter joint state order. Any joint with no
-    * rotor-table match gets the conservative default floor (warn); any joint with no finite positive effort
-    * limit falls back to the scalar SIGMA_TAU (warn). Construction-only; the per-tick process-noise update just
-    * reads these arrays (allocation-free).
-    */
-   private void buildRotorInertiaAndSigmaTau()
-   {
-      rotorInertiaDiag = new double[n];
-      sigmaTauPerJoint = new double[n];
-      for (var e : jointToIndex.entrySet())
-      {
-         OneDoFJointBasics joint = e.getKey();
-         int idx = e.getValue();
-
-         double rotor = lookupRotorInertia(joint.getName());
-         if (rotor < 0.0)
-         {
-            rotor = ROTOR_INERTIA_DEFAULT;
-            LogTools.warn("JointLevelKFPreFilter: no reflected-rotor-inertia table entry for filtered joint '"
-                          + joint.getName() + "'; applying the conservative default floor " + ROTOR_INERTIA_DEFAULT + " kg*m^2.");
-         }
-         rotorInertiaDiag[idx] = rotor;
-
-         double tauMax = joint.getEffortLimitUpper();
-         if (!Double.isFinite(tauMax) || tauMax <= 0.0)
-         {
-            LogTools.warn("JointLevelKFPreFilter: filtered joint '" + joint.getName() + "' has no finite positive effort"
-                          + " limit (" + tauMax + "); falling back to the scalar SIGMA_TAU = " + SIGMA_TAU + " N*m for its sigma_tau.");
-            sigmaTauPerJoint[idx] = SIGMA_TAU;
-         }
-         else
-         {
-            sigmaTauPerJoint[idx] = alphaForName(joint.getName()) * tauMax;
-         }
-      }
-   }
-
-   /**
-    * Logs the chain-DoF census and, for each 1-DoF chain, the joint axis and its two pure-bias sentinel rows
-    * (Part B item 6). The pure-bias rows are the two gyro axes orthogonal to the single joint axis: with a zero
-    * gyro Sigma their innovation variance has no floor, so they are the min-side rows the Sigma floor (item 4)
-    * protects. Construction-only string work; never on the hot path.
-    */
-   private void logChainDoFCensus()
-   {
-      StringBuilder sb = new StringBuilder("JointLevelKFPreFilter chain-DoF census (" + pairs.size() + " pairs over " + m + " IMUs, tree):");
-      for (Pair p : pairs)
-      {
-         int dof = p.chainJoints.length;
-         sb.append("\n  ").append(p.parent.getSensorName()).append("->").append(p.child.getSensorName())
-           .append(" : ").append(dof).append("-DoF chain [").append(jointNamesOf(p.chainJoints)).append("]");
-         if (dof == 1)
-         {
-            Vector3DReadOnly axis = p.chainJoints[0].getJointAxis();
-            sb.append("  (1-DoF sentinel: joint axis ~[").append(String.format("%.2f,%.2f,%.2f", axis.getX(), axis.getY(), axis.getZ()))
-              .append("]; the two rows orthogonal to it observe PURE bias — min-side S floor = Sigma)");
-         }
-      }
-      LogTools.info(sb.toString());
-   }
-
-   /**
-    * Allocates the per-joint state / covariance-envelope YoVariables, one set per filtered joint, indexed by
-    * the joint's state index so the per-tick update is a straight array write. Called once from the
-    * constructor after the state layout (n) is fixed.
-    */
-   private void createJointYoVariables()
-   {
-      yoJointPosition = new YoDouble[n];
-      yoJointVelocity = new YoDouble[n];
-      yoJointPositionUpperBound = new YoDouble[n];
-      yoJointPositionLowerBound = new YoDouble[n];
-      yoJointVelocityUpperBound = new YoDouble[n];
-      yoJointVelocityLowerBound = new YoDouble[n];
-      yoQaDiag = new YoDouble[n];
-      yoQaCapBindCount = new YoInteger[n];
-      yoEncNIS = new YoDouble[n];
-      yoEncR = new YoDouble[n];
-      yoEncInnov = new YoDouble[n];
-      yoQdNIS = new YoDouble[n];
-      yoQdR = new YoDouble[n];
-      yoQdInnov = new YoDouble[n];
-      yoUseDirectVelocity = new YoBoolean("jointKFUseDirectVelocityMeasurement", registry);
-      yoUseDirectVelocity.set(useDirectVelocityMeasurement);
-      for (var e : jointToIndex.entrySet())
-      {
-         int idx = e.getValue();
-         String jointName = e.getKey().getName();
-         yoJointPosition[idx] = new YoDouble("jointKF_q_" + jointName, registry);
-         yoJointVelocity[idx] = new YoDouble("jointKF_qd_" + jointName, registry);
-         yoJointPositionUpperBound[idx] = new YoDouble("jointKF_q_" + jointName + "_upperBound", registry);
-         yoJointPositionLowerBound[idx] = new YoDouble("jointKF_q_" + jointName + "_lowerBound", registry);
-         yoJointVelocityUpperBound[idx] = new YoDouble("jointKF_qd_" + jointName + "_upperBound", registry);
-         yoJointVelocityLowerBound[idx] = new YoDouble("jointKF_qd_" + jointName + "_lowerBound", registry);
-         yoQaDiag[idx] = new YoDouble("jointKF_QaDiag_" + jointName, registry);
-         yoQaCapBindCount[idx] = new YoInteger("jointKF_QaCapBind_" + jointName + "_count", registry);
-         yoEncNIS[idx] = new YoDouble("jointKF_encNIS_" + jointName, registry);
-         yoEncNIS[idx].set(Double.NaN); // no encoder update has run yet
-         yoEncInnov[idx] = new YoDouble("jointKF_encInnov_" + jointName, registry);
-         yoEncInnov[idx].set(Double.NaN); // signed innovation (rad); no encoder update has run yet
-         yoEncR[idx] = new YoDouble("jointKF_encR_" + jointName, registry);
-         yoEncR[idx].set(encVarPerJoint[idx]); // constant: the wired measurement variance (rad^2)
-         yoQdNIS[idx] = new YoDouble("jointKF_qdNIS_" + jointName, registry);
-         yoQdNIS[idx].set(Double.NaN); // no direct-velocity update has run yet
-         yoQdInnov[idx] = new YoDouble("jointKF_qdInnov_" + jointName, registry);
-         yoQdInnov[idx].set(Double.NaN); // signed innovation (rad/s); no direct-velocity update has run yet
-         yoQdR[idx] = new YoDouble("jointKF_qdR_" + jointName, registry);
-         yoQdR[idx].set(qdMeasVarPerJoint[idx]); // per-tick: floor + adaptive lag inflation (see refreshDirectVelocityNoise)
-      }
-
-      // Per-IMU gyro-bias diagnostics (IMU frame), named by sensor. imusByOrdinal is populated by allocate(),
-      // which runs before this method in the constructor.
-      yoImuGyroBiasX = new YoDouble[m];
-      yoImuGyroBiasY = new YoDouble[m];
-      yoImuGyroBiasZ = new YoDouble[m];
-      yoImuGyroBiasNorm = new YoDouble[m];
-      for (int o = 0; o < m; o++)
-      {
-         String imuName = imusByOrdinal[o].getSensorName();
-         yoImuGyroBiasX[o] = new YoDouble("jointKF_gyroBias_" + imuName + "_X", registry);
-         yoImuGyroBiasY[o] = new YoDouble("jointKF_gyroBias_" + imuName + "_Y", registry);
-         yoImuGyroBiasZ[o] = new YoDouble("jointKF_gyroBias_" + imuName + "_Z", registry);
-         yoImuGyroBiasNorm[o] = new YoDouble("jointKF_gyroBias_" + imuName + "_norm", registry);
-      }
-   }
-
-   /**
-    * Publishes the per-joint estimate (q, qd) and its 1-sigma covariance envelope to the YoVariables. Reads
-    * straight from x and P; allocation-free (only primitive .set()). The variance diagonal is clamped at 0
-    * before the sqrt to stay finite through the numerical negatives a covariance can momentarily take.
-    */
-   private void updateJointYoVariables()
-   {
-      for (int i = 0; i < n; i++)
-      {
-         double q = x.get(i);
-         double qd = x.get(n + i);
-         double sigmaQ = Math.sqrt(Math.max(0.0, P.get(i, i)));
-         double sigmaQd = Math.sqrt(Math.max(0.0, P.get(n + i, n + i)));
-         yoJointPosition[i].set(q);
-         yoJointVelocity[i].set(qd);
-         yoJointPositionUpperBound[i].set(q + sigmaQ);
-         yoJointPositionLowerBound[i].set(q - sigmaQ);
-         yoJointVelocityUpperBound[i].set(qd + sigmaQd);
-         yoJointVelocityLowerBound[i].set(qd - sigmaQd);
-      }
-
-      // Per-IMU gyro bias straight from the state (IMU frame). The base-IMU entry is the one the InEKF subtracts;
-      // a physical MEMS gyro bias is ~0.001-0.01 rad/s, so a norm approaching 0.1+ rad/s here is a divergence.
-      for (int o = 0; o < m; o++)
-      {
-         int col = 2 * n + 3 * o;
-         double bx = x.get(col), by = x.get(col + 1), bz = x.get(col + 2);
-         yoImuGyroBiasX[o].set(bx);
-         yoImuGyroBiasY[o].set(by);
-         yoImuGyroBiasZ[o].set(bz);
-         yoImuGyroBiasNorm[o].set(Math.sqrt(bx * bx + by * by + bz * bz));
-      }
-
-      // trace of P's base-bias 3x3 block. This is the diagnostic that detects an unfixed gauge: an unobservable
-      // direction has NO measurement to shrink it, so its covariance grows without bound under Q. Bounded =>
-      // the anchor is doing its job. Monotonically climbing => the base bias is unobservable and will diverge.
-      if (baseBiasCol >= 0)
-         yoBiasPTrace.set(P.get(baseBiasCol, baseBiasCol) + P.get(baseBiasCol + 1, baseBiasCol + 1) + P.get(baseBiasCol + 2, baseBiasCol + 2));
+      if (containsNonFinite(prediction.F))
+         LogTools.error("JointLevelKFPreFilter transition matrix F is non-finite at construction.");
+      if (containsNonFinite(prediction.Q))
+         LogTools.error("JointLevelKFPreFilter process-noise Q is non-finite at construction — check the per-IMU "
+                        + "angular-velocity bias process-noise covariances (see JointKFPrediction.buildProcessNoise).");
+      if (containsNonFinite(update.Henc))
+         LogTools.error("JointLevelKFPreFilter encoder Jacobian Henc is non-finite at construction.");
+      if (containsNonFinite(update.Renc))
+         LogTools.error("JointLevelKFPreFilter encoder noise Renc is non-finite at construction.");
    }
 
    // Mirrors AlphaComplimentaryFilter.createForKinematicsEstiamtor, works for the factory implementation
@@ -1063,522 +224,23 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                                        parentRegistry);
    }
 
-   /**
-    * Finds the 6-DoF free-flyer joint at the root of the filtered joints' tree (SPEC §3.2 partitions the mass
-    * matrix over a 6-DoF base). In an IHMC model this is the elevator's single child joint (the SixDoFJoint /
-    * root joint). Returns {@code null} if no 6-DoF joint sits directly below the tree root (fixed-base model),
-    * which drops the filter to the scalar-CWNA fallback. Construction-only; no hot-path use.
-    */
-   private static JointReadOnly findFloatingBaseJoint(RigidBodyBasics treeRoot)
-   {
-      for (JointReadOnly childJoint : treeRoot.getChildrenJoints())
-      {
-         if (childJoint.getDegreesOfFreedom() == 6)
-            return childJoint;
-      }
-      return null;
-   }
-
-   /**
-    * Collects every joint on the tree paths from {@code baseJoint} to each filtered joint: the filtered joints
-    * themselves plus any unfiltered "gap" joints above them. Walks up from each filtered joint via
-    * predecessor/parent-joint links until it reaches {@code baseJoint}. Order is insertion order (irrelevant —
-    * all columns are later resolved by index). Construction-only; no hot-path use.
-    */
-   private static LinkedHashSet<JointReadOnly> collectSpanningJoints(JointReadOnly baseJoint, List<OneDoFJointBasics> filteredJoints)
-   {
-      LinkedHashSet<JointReadOnly> spanning = new LinkedHashSet<>();
-      for (OneDoFJointBasics filteredJoint : filteredJoints)
-      {
-         JointReadOnly joint = filteredJoint;
-         while (joint != null && joint != baseJoint)
-         {
-            spanning.add(joint);
-            joint = joint.getPredecessor().getParentJoint(); // step one link toward the root
-         }
-      }
-      return spanning;
-   }
-
-   private void allocate()
-   {
-      // Widest measurement is either the n-joint encoder block or the 3(E+K_max) stacked gyro block. Size all
-      // the KF innovation scratch (PHt, S, Sinv, K, KR, nu) and the LU solver at this width so a full-anchor
-      // stacked update never reallocates on the estimator thread.
-      E = pairs.size();
-      int kMax = footAnchors.size();
-      maxStackRows = 3 * (E + kMax);
-      int maxMeas = Math.max(n, maxStackRows);
-      x.reshape(dim, 1);
-      xtmp.reshape(dim, 1);
-
-      P.reshape(dim,dim);
-      F.reshape(dim,dim);
-      Q.reshape(dim,dim);
-      PHt.reshape(dim,maxMeas);
-      K.reshape(dim,maxMeas);
-      KR.reshape(dim,maxMeas);
-      S.reshape(maxMeas, maxMeas);
-      Sinv.reshape(maxMeas,maxMeas);
-      nu.reshape(maxMeas,1);
-      Henc = new DMatrixRMaj(n,dim);
-      Renc = new DMatrixRMaj(n,n);
-      zEnc = new DMatrixRMaj(n,1);
-      zqd = new DMatrixRMaj(n, 1);
-
-      // Stacked gyro measurement scratch, pre-sized at the max (K = K_max active anchors); each tick reshapes
-      // DOWN to the current 3(E+K) within this capacity, so no per-tick allocation. Lmix/Sigma/LSigma feed the
-      // R_g = L Sigma L^T congruence and H_g's bias columns.
-      Hg = new DMatrixRMaj(maxStackRows, dim);
-      zg = new DMatrixRMaj(maxStackRows, 1);
-      Rg = new DMatrixRMaj(maxStackRows, maxStackRows);
-      Lmix = new DMatrixRMaj(maxStackRows, 3 * m);
-      Sigma = new DMatrixRMaj(3 * m, 3 * m);
-      LSigma = new DMatrixRMaj(maxStackRows, 3 * m);
-      CommonOps_DDRM.setIdentity(identity3);
-      trustedFeetFromLastTick = new ArrayList<>(Math.max(1, kMax));
-      imusByOrdinal = new IMUSensorReadOnly[m];
-      for (var e : imuToOrdinal.entrySet()) // construction-time only; the hot path indexes this array
-         imusByOrdinal[e.getValue()] = e.getKey();
-
-      // Sigma is validated + floored and cached on the FIRST buildStackedMeasurement (Part B item 4), not here:
-      // an IMU's SensorNoiseParameters may be assigned after this filter is constructed (the package tests set
-      // them post-construction; hardware sets them before the first tick), so deferring to first use captures the
-      // real covariance instead of a construction-time zero. Once built it is reused every tick (never re-read).
-
-      // Pre-size the Joseph-form scratch. IKH in particular MUST start at dim x dim: the first josephUpdate
-      // does setIdentity(IKH) *before* multAdd reshapes it, so on a 0x0 IKH the identity is silently dropped
-      // and the first covariance update becomes -KH instead of I-KH. Sizing both here also keeps their first
-      // use from reallocating on the estimator thread.
-      Ptmp.reshape(dim, dim);
-      IKH.reshape(dim, dim);
-      xBackup.reshape(dim, 1);
-      PBackup.reshape(dim, dim);
-
-      // Reused Cholesky solver for the innovation-covariance inverse (Part B item 5), warmed at the widest
-      // measurement (maxMeas). S = H P H^T + R is symmetric PD by construction, so Cholesky is the right
-      // factorization: setA returns false on a NON-PD S (a strictly stronger, better-conditioned reject than
-      // LU's exact-singular test), and its factor L (L L^T = S) gives the conditioning/floor gate for free. The
-      // warm-up forces every internal buffer to its largest size now, so per-tick setA()/invert() never allocate.
-      innovationSolver = new LinearSolverChol_DDRM(new CholeskyDecompositionInner_DDRM(true)); // lower-triangular L
-      innovationSolver.setA(CommonOps_DDRM.identity(maxMeas));
-      Lchol.reshape(maxMeas, maxMeas);
-
-      // Schur-complement scratch + two Cholesky solvers, pre-warmed at their fixed sizes so the per-tick
-      // setA()/solve()/invert() never allocate (chol decomposes in place and reuses its internal buffers once
-      // warmed). Cholesky both exploits and enforces SPD-ness: a non-PD M_bb or Lambda (bad model state) fails
-      // setA and the previous Q is kept instead of a garbage inverse entering the filter.
-      if (massMatrixCalculator != null)
-      {
-         int nN = numberOfNuisanceDOF;
-         MNN.reshape(nN, nN);
-         MNf.reshape(nN, n);
-         Mff.reshape(n, n);
-         MNNInvMNf.reshape(nN, n);
-         Lambda.reshape(n, n);
-         LambdaInv.reshape(n, n);
-         Ytau.reshape(n, n);
-         Qa.reshape(n, n);
-
-         nuisanceMassMatrixSolver = LinearSolverFactory_DDRM.chol(nN);
-         nuisanceMassMatrixSolver.setA(CommonOps_DDRM.identity(nN));
-         // Warm the nuisance solver's multi-column solve buffers at RHS width n (M_NN X = M_Nf is N x n), so the
-         // per-tick solve reuses them. The MNf scratch is still zero here — this is only a buffer warm-up.
-         nuisanceMassMatrixSolver.solve(MNf, MNNInvMNf);
-
-         schurSolver = LinearSolverFactory_DDRM.chol(n);
-         schurSolver.setA(CommonOps_DDRM.identity(n));
-      }
-
-
-      buildConstantTransition();
-      buildProcessNoise();
-      buildEncoderModel();
-      buildDirectVelocityModel();
-      validateConstantModel();
-   }
-
-   /**
-    * One-time (construction) finiteness check on the constant model matrices. These are built once and reused
-    * every tick, so a single non-finite entry here — most plausibly an IMU that returns a non-finite
-    * angular-velocity bias process-noise covariance while it is still booting — permanently poisons Q (or F)
-    * and makes P go NaN on the first {@link #predict()}, with no recovery. Logged as an error naming the
-    * matrix so this shows up clearly at estimator start instead of as a silent all-NaN filter. Runs at
-    * construction only; the string work here is not on the estimator hot path.
-    */
-   private void validateConstantModel()
-   {
-      if (containsNonFinite(F))
-         LogTools.error("JointLevelKFPreFilter transition matrix F is non-finite at construction.");
-      if (containsNonFinite(Q))
-         LogTools.error("JointLevelKFPreFilter process-noise Q is non-finite at construction — check the per-IMU "
-                        + "angular-velocity bias process-noise covariances (see buildProcessNoise).");
-      if (containsNonFinite(Henc))
-         LogTools.error("JointLevelKFPreFilter encoder Jacobian Henc is non-finite at construction.");
-      if (containsNonFinite(Renc))
-         LogTools.error("JointLevelKFPreFilter encoder noise Renc is non-finite at construction.");
-   }
-
-   private void buildConstantTransition()
-   {
-      CommonOps_DDRM.setIdentity(F);
-      for (int i = 0; i < n; i++)
-         F.set(i, n + i, dt); // q_{k+1} = q_k + dt * qd_k ; qd and bias are constant with noise
-   }
-
-   private void buildProcessNoise()
-   {
-      Q.zero();
-      double sa2 = SIGMA_ACCEL * SIGMA_ACCEL;
-      double dt2 = dt * dt;
-      double dt3 = dt2 * dt;
-
-      // Scalar-CWNA joint blocks first: this is both the no-model path and the fallback the mass-matrix
-      // update leaves in place if its very first computation fails (e.g. model not yet in a valid pose).
-      for (int i = 0; i < n; i++)
-      {
-         Q.set(i, i, sa2 * dt3/3.0); // CT white noise accel block, per joint
-         Q.set(i, n + i, sa2 * dt2 / 2.0); // q - qd cross term
-         Q.set(n + i, i, sa2 * dt2 / 2.0);
-         Q.set(n + i, n + i, sa2 * dt);
-      }
-      for (var e : imuToOrdinal.entrySet()) // bias random walk, per-IMU process noise
-      {
-         e.getKey().getAngularVelocityBiasProcessNoiseCovariance(Rimu);
-         // Do not let a non-finite covariance (e.g. an IMU still booting at construction) poison Q: a single
-         // NaN here spreads to P on the first predict and never recovers. Skip this IMU's bias random-walk
-         // instead, and name it so the offender is obvious in the log.
-         if (containsNonFinite(Rimu))
-         {
-            LogTools.error("Non-finite angular-velocity bias process-noise covariance from IMU " + e.getKey().getSensorName()
-                           + " at construction; skipping its Q contribution (its bias random-walk is disabled) so Q stays finite.");
-            continue;
-         }
-         int col = 2 * n + 3 * e.getValue();
-         for (int i = 0; i < 3; i++)
-            for (int j = 0; j < 3; j++)
-               Q.set(col + i, col + j, Q.get(col + i, col + j) + dt * Rimu.get(i,j));
-      }
-
-      // Overwrites the joint (q, qd) blocks with the mass-matrix Qa if a model is available; no-op otherwise.
-      updateProcessNoiseFromMassMatrix();
-   }
-
-   /**
-    * Rebuilds the joint-space Van Loan blocks of Q from the Schur-complement acceleration noise
-    * Qa = sigma_tau^2 Lambda(q)^-2 (SPEC §3.2): an unmodeled joint torque w_tau propagates through the
-    * floating-base dynamics, and eliminating the (unforced) nuisance acceleration from the perturbed EOM gives
-    * delta_qddot = Lambda^-1 w_tau with Lambda = M_ff - M_jN M_NN^-1 M_Nj the Schur complement of the nuisance
-    * block (nuisance = 6-DoF base + any unfiltered gap joints; see the field comment). For the real gapless
-    * topology the nuisance is exactly the 6-DoF base and this is the SPEC's Lambda = M_jj - M_jb M_bb^-1 M_bj.
-    * For scalar Sigma_tau = sigma_tau^2 I and symmetric Lambda this is sigma_tau^2 Lambda^-2. Called once from
-    * {@link #buildProcessNoise()} and then at the top of every {@link #predict()}, because M(q) — read from the
-    * live model joints, whose frames the estimator refreshes each tick — is configuration-dependent. Only the
-    * (q, qd) blocks are touched; the bias random-walk block and the zero joint/bias coupling are left exactly
-    * as {@link #buildProcessNoise()} made them.
-    *
-    * <p>Numerical failure (non-finite M, Cholesky rejection of a non-PD M_NN or Lambda, non-finite
-    * intermediate) leaves the previous Q in place — which at worst is the scalar-CWNA build — and warns once,
-    * identical to the Rev. 1 fallback philosophy. Allocation-free: the calculator, all scratch matrices, and
-    * both Cholesky solvers are pre-sized/warmed in {@link #allocate()}.</p>
-    *
-    * <p>TODO(retune): SPEC §8 — Lambda^-2 ⪰ M_jj^-2, so the effective Qa grows at fixed sigma_tau relative to
-    * the Rev. 1 locked-base map. SIGMA_TAU must be retuned against quiet-standing and walking NIS by a human;
-    * do NOT carry the Rev. 1 value over as if it were still calibrated.</p>
-    */
-   private void updateProcessNoiseFromMassMatrix()
-   {
-      if (massMatrixCalculator == null)
-         return;
-
-      massMatrixCalculator.reset();
-      // Full mass matrix over {6-DoF base} ∪ {filtered joints}, ordered by the calculator's index provider.
-      DMatrixRMaj massMatrix = massMatrixCalculator.getMassMatrix();
-      if (containsNonFinite(massMatrix))
-      {
-         warnMassMatrixFailureOnce("non-finite mass matrix");
-         return;
-      }
-
-      // Extract the blocks by resolved column index (never assume ordering — SPEC §3.2). M is symmetric, so
-      // M_jN = M_Nj^T and we only need M_NN, M_Nf, M_ff. M_ff is read in filter joint state order (row i =
-      // filtered joint i), so Lambda and Lambda^-2 come out already in state order — no permutation in the fill.
-      int nN = numberOfNuisanceDOF;
-      for (int a = 0; a < nN; a++)
-      {
-         int ca = massMatrixNuisanceColumns[a];
-         for (int b = 0; b < nN; b++)
-            MNN.set(a, b, massMatrix.get(ca, massMatrixNuisanceColumns[b])); // M_NN (NxN)
-         for (int j = 0; j < n; j++)
-            MNf.set(a, j, massMatrix.get(ca, massMatrixColumn[j]));          // M_Nf (Nxn) = M_jN^T
-      }
-      for (int i = 0; i < n; i++)
-      {
-         int ci = massMatrixColumn[i];
-         for (int j = 0; j < n; j++)
-            Mff.set(i, j, massMatrix.get(ci, massMatrixColumn[j]));          // M_ff (nxn)
-      }
-
-      // Gap-joint reflected rotor inertia on the nuisance-block diagonal (Part B item 1): 0 on the 6 base rows,
-      // the joint's reflected rotor inertia on each unfiltered gap joint (none on Alex; kept general). Floors
-      // M_NN the same way the filtered rotor diagonal floors Lambda_eff below.
-      if (nuisanceRotorInertiaDiag != null)
-         for (int a = 0; a < nN; a++)
-            MNN.add(a, a, nuisanceRotorInertiaDiag[a]);
-
-      // X = M_NN^-1 M_Nf via Cholesky (rejects a non-PD nuisance block before it can enter the Schur complement).
-      if (!nuisanceMassMatrixSolver.setA(MNN))
-      {
-         warnMassMatrixFailureOnce("nuisance mass-matrix block M_NN not positive definite");
-         return;
-      }
-      nuisanceMassMatrixSolver.solve(MNf, MNNInvMNf); // X (Nxn); solve leaves MNf unmodified
-      if (containsNonFinite(MNNInvMNf))
-      {
-         warnMassMatrixFailureOnce("non-finite M_NN^-1 M_Nf (near-singular nuisance block)");
-         return;
-      }
-
-      // Lambda = M_ff - M_jN X = M_ff - M_Nf^T X (M symmetric => M_jN = M_Nf^T). SPEC §3.2.
-      CommonOps_DDRM.multTransA(MNf, MNNInvMNf, Lambda); // Lambda <- M_Nf^T X
-      CommonOps_DDRM.changeSign(Lambda);                 // Lambda <- -M_jN X
-      CommonOps_DDRM.addEquals(Lambda, Mff);             // Lambda <- M_ff - M_jN X
-      // Symmetrize before the Cholesky invert: the block extraction is exact but the matrix products leave
-      // Lambda symmetric only to round-off, and Cholesky assumes exact symmetry.
-      symmetrize(Lambda);
-
-      // Lambda_eff = Lambda + diag(reflected rotor inertia) (Part B item 1, the primary fix). The rotor spins
-      // behind the gearbox about its own axis and does not couple through the floating base, so this post-Schur
-      // diagonal add is the EXACT drivetrain term — and simultaneously a principled regularizer: by Weyl it
-      // floors lambda_min(Lambda_eff) >= min_i rotorInertiaDiag[i], so Lambda_eff^-1 has no proximal-joint
-      // outliers and Qa cannot blow up the way the un-floored sigma_tau^2 Lambda^-2 did on Alex002.
-      for (int i = 0; i < n; i++)
-         Lambda.add(i, i, rotorInertiaDiag[i]);
-
-      if (!schurSolver.setA(Lambda)) // Cholesky: rejects a non-PD Lambda_eff before it can enter Q
-      {
-         warnMassMatrixFailureOnce("Schur complement Lambda_eff not positive definite");
-         return;
-      }
-      schurSolver.invert(LambdaInv); // LambdaInv = Lambda_eff^-1 (symmetric)
-      if (containsNonFinite(LambdaInv))
-      {
-         warnMassMatrixFailureOnce("non-finite Schur-complement inverse (near-singular Lambda_eff)");
-         return;
-      }
-
-      // Per-joint Sigma_tau via the Gram form (Part B item 3): Y = Lambda_eff^-1 with column j scaled by
-      // sigma_tau,j, then Qa = Y Y^T = Lambda_eff^-1 diag(sigma_tau^2) Lambda_eff^-T. Qa is PSD AND exactly
-      // symmetric by construction, so the Van Loan fill below reads it directly (no symmetrized read). This
-      // replaces the scalar Qa = sigma_tau^2 Lambda^-2; per-joint sigma_tau = ALPHA * tau_max,i scales the
-      // process noise with each actuator's own torque capacity instead of one number across hip and wrist.
-      for (int i = 0; i < n; i++)
-         for (int j = 0; j < n; j++)
-            Ytau.set(i, j, LambdaInv.get(i, j) * sigmaTauPerJoint[j]); // scale column j by sigma_tau,j
-      CommonOps_DDRM.multTransB(Ytau, Ytau, Qa); // Qa = Y Y^T
-
-      // QA_MAX tripwire (Part B item 2 — SURFACE, do not rescale). With the rotor floor on Lambda_eff, max
-      // diag(Qa) must sit far below QA_MAX; if it ever would not, that is a model/config regression. Warn once
-      // (naming the argmax joint by state index -> name) and count every tick it would bind — but keep Qa as
-      // computed. The old uniform CommonOps_DDRM.scale coupled one joint's outlier into GLOBAL Q starvation
-      // (hips down ~6 orders), which collapsed P onto the measurement floors and CAUSED the min-side S
-      // singularity; a cap that silently rescales the whole robot is worse than the disease.
-      double maxQaDiag = 0.0;
-      int argMaxJoint = 0;
-      for (int i = 0; i < n; i++)
-      {
-         double qaDiag = Qa.get(i, i);
-         // Per-joint acceleration process-noise variance, the input the ALPHA equalization is calibrated from
-         // (null on the construction-time call, which runs before createJointYoVariables()).
-         if (yoQaDiag != null)
-            yoQaDiag[i].set(qaDiag);
-         if (qaDiag > maxQaDiag)
-         {
-            maxQaDiag = qaDiag;
-            argMaxJoint = i;
-         }
-      }
-      if (maxQaDiag > QA_MAX)
-      {
-         yoQaCapWouldBindCount.increment();
-         if (yoQaCapBindCount != null) // per-joint attribution: WHICH joint's alpha needs knocking down
-            yoQaCapBindCount[argMaxJoint].increment();
-         warnQaCapWouldBindOnce(argMaxJoint, maxQaDiag);
-      }
-
-      double dt2 = dt * dt;
-      double dt3 = dt2 * dt;
-      for (int i = 0; i < n; i++)
-      {
-         for (int j = 0; j < n; j++)
-         {
-            // Qa is exactly symmetric by construction (Y Y^T), so read directly (Part B item 3 removed the
-            // 0.5*(a_ij + a_ji) symmetrized read). Van Loan dt^3/3, dt^2/2, dt structure unchanged (SPEC §3.4).
-            double qa = Qa.get(i, j);
-            Q.set(i, j, qa * dt3 / 3.0);     // q-q block
-            Q.set(i, n + j, qa * dt2 / 2.0); // q-qd cross term
-            Q.set(n + i, j, qa * dt2 / 2.0);
-            Q.set(n + i, n + j, qa * dt);    // qd-qd block
-         }
-      }
-   }
-
-   /** In-place symmetrization A <- 0.5 (A + A^T). Allocation-free. */
-   private static void symmetrize(DMatrixRMaj a)
-   {
-      for (int i = 0; i < a.numRows; i++)
-      {
-         for (int j = i + 1; j < a.numCols; j++)
-         {
-            double avg = 0.5 * (a.get(i, j) + a.get(j, i));
-            a.set(i, j, avg);
-            a.set(j, i, avg);
-         }
-      }
-   }
-
-   /** One-shot warning for mass-matrix Q failures; the filter keeps running on the previous (finite) Q. */
-   private void warnMassMatrixFailureOnce(String reason)
-   {
-      if (warnedMassMatrixFailure)
-         return;
-      warnedMassMatrixFailure = true;
-      LogTools.warn("Mass-matrix process-noise update failed (" + reason + "); keeping the previous Q"
-            + " (scalar CWNA if this is the first computation). Reported once.");
-   }
-
-   /** One-shot warning that the Qa TRIPWIRE (QA_MAX) would bind (Part B item 2): max diag(Qa) exceeded the
-    *  physical acceleration-noise ceiling. NOT rescaled — surfaced. With the reflected-rotor-inertia floor on
-    *  Lambda_eff this should never fire; if it does, the named joint is a model/config regression (a rotor-table
-    *  gap, a bad mass matrix, or a genuinely near-singular Lambda_eff) to chase, and jointKFQaCapWouldBindCount
-    *  counts every tick it binds. */
-   private void warnQaCapWouldBindOnce(int argMaxJointStateIndex, double maxQaDiag)
-   {
-      if (warnedMassMatrixConditioningCap)
-         return;
-      warnedMassMatrixConditioningCap = true;
-      LogTools.warn("Joint-level KF process noise: max diag(Qa) = " + maxQaDiag + " (rad/s^2)^2 exceeds the QA_MAX tripwire ("
-            + QA_MAX + ") at joint '" + jointNameByStateIndex(argMaxJointStateIndex) + "'. Qa is NOT rescaled (a uniform "
-            + "scale would starve global Q, the old failure mode); this indicates a model/config regression — check the "
-            + "reflected-rotor-inertia table entry and the mass matrix for this joint. Counting in jointKFQaCapWouldBindCount. Reported once.");
-   }
-
-   /**
-    * Validates and floors each IMU's angular-velocity MEASUREMENT-noise covariance ONCE, at construction, and
-    * fills the cached block-diagonal {@code Sigma} (Part B item 4). An IMU whose gyro-noise trace is zero /
-    * non-finite (an unset SensorNoiseParameters — Alex historically ran with a null one, so every covariance was
-    * the 3x3 zero) is an ERROR: its zero Sigma removes the innovation-covariance floor on the pure-bias rows of
-    * every 1-DoF chain, which collapses lambda_min(S) and diverges P. An IMU whose trace is positive but below
-    * the conditioning floor is a softer WARN. Either way the block is substituted with SIGMA_GYRO_FLOOR * I3. The
-    * flooring decision is made HERE, once; the per-tick build copies this cached Sigma (never re-reads a
-    * possibly-zero covariance).
-    */
-   private void buildAndFloorSigma()
-   {
-      Sigma.zero();
-      for (int o = 0; o < m; o++)
-      {
-         imusByOrdinal[o].getAngularVelocityNoiseCovariance(Rimu);
-         boolean nonFinite = containsNonFinite(Rimu);
-         double trace = nonFinite ? Double.NaN : Rimu.get(0, 0) + Rimu.get(1, 1) + Rimu.get(2, 2);
-         if (nonFinite || !(trace >= SIGMA_GYRO_FLOOR_TRACE))
-         {
-            gyroSigmaFloored = true;
-            String name = imusByOrdinal[o].getSensorName();
-            if (nonFinite || !(trace > 0.0))
-               LogTools.error("JointLevelKFPreFilter: IMU '" + name + "' has an unset/zero/non-finite angular-velocity "
-                     + "noise covariance (trace=" + trace + "). A zero Sigma removes the innovation-covariance floor on "
-                     + "the pure-bias rows of every 1-DoF chain (the min-side S collapse). Substituting the gyro floor "
-                     + SIGMA_GYRO_FLOOR + " (rad/s)^2 * I3; fix the sensor SensorNoiseParameters at the source.");
-            else
-               LogTools.warn("JointLevelKFPreFilter: IMU '" + name + "' gyro-noise trace " + trace + " (rad/s)^2 is below "
-                     + "the conditioning floor " + SIGMA_GYRO_FLOOR_TRACE + "; substituting " + SIGMA_GYRO_FLOOR
-                     + " * I3 for innovation-covariance conditioning.");
-            Rimu.zero();
-            for (int d = 0; d < 3; d++)
-               Rimu.set(d, d, SIGMA_GYRO_FLOOR);
-         }
-         insertScaledInto(Rimu, 1.0, Sigma, 3 * o, 3 * o);
-      }
-   }
-
-   private void buildEncoderModel()
-   {
-      Henc.zero();
-      for (int i = 0; i < n; i++)
-         Henc.set(i, i, 1.0);
-      Renc.zero();
-      for (int i = 0; i < n; i++)
-         Renc.set(i, i, encVarPerJoint[i]);
-   }
-
-   /**
-    * Direct-velocity measurement model: H_qd = [0 | I_n | 0] observes the q̇ block, R_qd starts at the
-    * measured per-joint floor. Unlike Renc, R_qd is NOT constant — {@link #refreshDirectVelocityNoise()}
-    * re-diagonals it every tick with the adaptive lag inflation before the update is applied.
-    */
-   private void buildDirectVelocityModel()
-   {
-      Hqd = new DMatrixRMaj(n, dim);
-      for (int i = 0; i < n; i++)
-         Hqd.set(i, n + i, 1.0);
-      Rqd = new DMatrixRMaj(n, n);
-      for (int i = 0; i < n; i++)
-         Rqd.set(i, i, qdMeasVarPerJoint[i]);
-   }
-
-   /**
-    * Adaptive measurement covariance for the direct-velocity channel. The measured q̇ is the output of a
-    * first-order low-pass cascade (drive-side LPF, then the sensor-processing alpha filter), and for a
-    * first-order filter y = LPF_{ω}(u) the identity u − y = ẏ/ω is exact — the instantaneous lag error IS the
-    * measured signal's own slope over the corner; stages cascade as 1/ω_eff = Σ 1/ω_stage. So per joint:
-    *
-    *    R_ii(t) = σ_i² + (d̂_i(t) / ω_eff,i)² ,   d̂ = LAG_SLEW_SMOOTHING_HZ-low-passed  (z_k − z_{k−1})/dt
-    *
-    * (smoothing rationale on the constant). Behavior: at quiet stance d̂ → 0 and the channel runs at the
-    * measured noise floor — full sharpness exactly in the quasi-static regime the gyro-bias split needs it —
-    * while during fast swings each joint softens by its own instantaneous lag error (a 9 Hz forearm inflates
-    * hard, a 50 Hz hip barely moves). A static inflation would instead detune the channel permanently.
-    * Package-private so the lag-inflation property test can drive it via setDirectVelocityMeasurementForTest.
-    */
-   void refreshDirectVelocityNoise()
-   {
-      for (int i = 0; i < n; i++)
-      {
-         double z = zqd.get(i, 0);
-         if (Double.isFinite(prevZqd[i]))
-         {
-            double slew = (z - prevZqd[i]) / dt;
-            qdSlewSmoothed[i] = lagSlewSmoothingAlpha * qdSlewSmoothed[i] + (1.0 - lagSlewSmoothingAlpha) * slew;
-         }
-         prevZqd[i] = z;
-         double lagError = qdSlewSmoothed[i] * invOmegaEffPerJoint[i];
-         double variance = qdMeasVarPerJoint[i] + lagError * lagError;
-         Rqd.set(i, i, variance);
-         if (yoQdR != null)
-            yoQdR[i].set(variance);
-      }
-   }
+   // ================================ Initialization ================================
 
    /**
     * Installs the optional on-ground gate: while {@code onGround} does not read true, {@link #initialize()}
-    * stays deferred (the filter exports NaN joint states and zero bias, so consumers fall back to the raw
-    * sensors). Pass {@code null} to disable gating (the default — initialize as soon as boot data is finite).
-    * The gate is debounced internally over {@link #ON_GROUND_INIT_DEBOUNCE}; see that constant for why a
-    * single-tick check is not enough. Called once at wiring time by the consumer that owns the
-    * contact-probability signal; never on the estimator hot path.
+    * stays deferred and consumers fall back to the raw sensors. Null disables gating (the default). Debounced
+    * over {@code JointKFParameters.ON_GROUND_INIT_DEBOUNCE} — see that constant for why one tick is not enough.
     */
    public void setInitializationGate(BooleanSupplier onGround)
    {
       this.onGroundGate = onGround;
       this.consecutiveOnGroundTicks = 0;
-      yoWaitingForGroundContact.set(onGround != null && !initialized);
+      yoWaitingForGroundContact.set(onGround != null && !state.initialized);
    }
 
    /**
-    * True when the filter is clear to seed this tick: no gate wired, or the gate has read true for
-    * {@link #requiredOnGroundTicks} consecutive attempts (both feet firmly in contact). Advances/resets the
-    * debounce counter as a side effect, so it is called exactly once per {@link #initialize()} attempt.
+    * True when clear to seed: no gate wired, or the gate has read true for {@link #requiredOnGroundTicks}
+    * consecutive attempts. Advances the debounce counter as a side effect, so call it exactly once per attempt.
     */
    private boolean readyToInitialize()
    {
@@ -1596,35 +258,17 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    @Override
    public void initialize()
    {
-      // Do not seed the filter until the robot is firmly on the ground: the exported base-IMU gyro bias is
-      // unobservable while hanging (its only anchor is the phase-2 stance update, gated off when no foot is
-      // trusted), so seeding then lets the bias wander and the downstream InEKF integrates that into a
-      // rotating/glitching base. Staying uninitialized exports NaN/zero, which the consumers treat as
-      // "fall back to the raw gyro/sensors". No-op when no gate is wired (unit tests / non-invariant pipelines).
+      // Do not seed until the robot is firmly on the ground: while hanging, the exported base gyro bias is
+      // unobservable (its only anchor is gated off with no trusted foot), so it wanders and the downstream InEKF
+      // integrates that into a rotating base. Staying uninitialized exports NaN/zero, which consumers treat as
+      // "fall back to the raw sensors". No-op when no gate is wired.
       if (!readyToInitialize())
          return;
 
-      // Refuse to latch non-finite boot data: a KF permanently latches NaN (predict/Joseph spread it
-      // through x and P with no recovery when sensors come good), so stay uninitialized and retry next
-      // tick instead. While uninitialized, getEstimatedJoint* return NaN — which the consumers
-      // (JointStateUpdater / InvariantMainStateEstimator.updateJoints) treat as "fall back to the raw
-      // sensor" — and the bias getters return zero. Same fail-soft behavior as the alpha filter.
-      for (var e : jointToIndex.entrySet())
-      {
-         if (!Double.isFinite(sensorMap.getOneDoFJointOutput(e.getKey()).getPosition()))
-         {
-            warnNonFiniteInputOnce("joint position of " + e.getKey().getName() + " at initialization");
-            return;
-         }
-      }
-      x.zero();
-      for (var e : jointToIndex.entrySet())
-         x.set(e.getValue(), sensorMap.getOneDoFJointOutput(e.getKey()).getPosition());
-      P.zero();
-      for (int i = 0; i < n; i++) P.set(i, i, INIT_POS_VAR);
-      for (int i = n; i < 2 * n; i++) P.set(i, i, INIT_VEL_VAR);
-      for (int i = 2 * n; i < dim; i++) P.set(i, i, INIT_BIAS_VAR);
-      initialized = true;
+      // Refuse to latch non-finite boot data (see JointKFState.seed): stay uninitialized and retry next tick.
+      if (!state.seed())
+         return;
+
       yoInitialized.set(true);
       yoWaitingForGroundContact.set(false);
    }
@@ -1635,293 +279,80 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    public void computeJointState()
    {
       // Phase 1: joint predict + encoder/pair-gyro measurement updates go here.
-      if (!initialized)
+      if (!state.initialized)
       {
          initialize();
-         if (!initialized)
+         if (!state.initialized)
             return; // boot data not valid yet; consumers keep falling back to raw sensors until it is
       }
 
-      predict();
-      warnIfNonFiniteState("predict", -1);
+      prediction.predict();
+      state.warnIfNonFiniteState("predict", -1);
 
-      // update encoder states; skipped wholesale if any encoder reads non-finite (boot transient)
-      int row = 0;
+      // Encoder update; skipped wholesale if any encoder reads non-finite (boot transient).
+      // z_enc row i IS state index i: Henc = I_n and Renc's diagonal are BOTH keyed by state index, so the row
+      // an encoder lands on must be that joint's state index and nothing else. Indexing jointsByIndex makes
+      // that identity structural — there is no iteration order left to get wrong. It also allocates nothing
+      // under any compilation state, where the old keySet() loop only fit the 32 B/tick budget as long as C2
+      // scalar-replaced the iterator. Keep the fills INLINE.
       boolean encodersValid = true;
-      for (OneDoFJointBasics j : jointToIndex.keySet())
+      for (int i = 0; i < state.numberOfJoints; i++)
       {
-         double q = sensorMap.getOneDoFJointOutput(j).getPosition();
+         OneDoFJointBasics j = state.jointsByIndex[i];
+         double q = state.sensorMap.getOneDoFJointOutput(j).getPosition();
          if (!Double.isFinite(q))
          {
             encodersValid = false;
-            if (!warnedNonFiniteInput)
-               warnNonFiniteInputOnce("joint position of " + j.getName());
+            if (!state.warnedNonFiniteInput)
+               state.warnNonFiniteInputOnce("joint position of " + j.getName());
          }
-         zEnc.set(row++, 0, q);
+         update.zEnc.set(i, 0, q);
       }
       if (encodersValid)
       {
-         josephUpdate(Henc, zEnc, Renc, "encoder");
-         warnIfNonFiniteState("encoderUpdate", -1);
+         update.josephUpdate(update.Henc, update.zEnc, update.Renc, JointKFUpdate.Channel.ENCODER);
+         state.warnIfNonFiniteState("encoderUpdate", -1);
       }
 
-      // Direct-velocity update: the firmware-reported joint velocity as a measurement of the q̇ states, with
-      // the per-tick adaptive lag inflation on R (see refreshDirectVelocityNoise). Skipped wholesale on any
-      // non-finite velocity, like the encoder block.
-      if (yoUseDirectVelocity != null && yoUseDirectVelocity.getValue())
+      // Direct-velocity update: firmware-reported joint velocity as a measurement of q̇, with the per-tick
+      // adaptive lag inflation on R. Skipped wholesale on any non-finite velocity, like the encoder block.
+      if (update.isDirectVelocityEnabled())
       {
-         int qdRow = 0;
+         // Same identity as the encoder block above: z_qd row i is state index i, against Hqd = [0 | I_n | 0]
+         // and an Rqd diagonal keyed by state index. prevZqd[] and qdSlewSmoothed[] are state-index-keyed too.
          boolean velocitiesValid = true;
-         for (OneDoFJointBasics j : jointToIndex.keySet())
+         for (int i = 0; i < state.numberOfJoints; i++)
          {
-            double qd = sensorMap.getOneDoFJointOutput(j).getVelocity();
+            OneDoFJointBasics j = state.jointsByIndex[i];
+            double qd = state.sensorMap.getOneDoFJointOutput(j).getVelocity();
             if (!Double.isFinite(qd))
             {
                velocitiesValid = false;
-               if (!warnedNonFiniteInput)
-                  warnNonFiniteInputOnce("joint velocity of " + j.getName());
+               if (!state.warnedNonFiniteInput)
+                  state.warnNonFiniteInputOnce("joint velocity of " + j.getName());
             }
-            zqd.set(qdRow++, 0, qd);
+            update.zqd.set(i, 0, qd);
          }
          if (velocitiesValid)
          {
-            refreshDirectVelocityNoise();
-            josephUpdate(Hqd, zqd, Rqd, "encoderVelocity");
-            warnIfNonFiniteState("encoderVelocityUpdate", -1);
+            // Inside the validity guard on purpose: the slew state must NOT advance on an invalid tick.
+            update.refreshDirectVelocityNoise();
+            update.josephUpdate(update.Hqd, update.zqd, update.Rqd, JointKFUpdate.Channel.ENCODER_VELOCITY);
+            state.warnIfNonFiniteState("encoderVelocityUpdate", -1);
          }
       }
 
-      // Single stacked gyro update (SPEC §5-§6): all pair rows plus the active stance-anchor rows in ONE Joseph
-      // update, using the previous tick's trusted-feet set (cached in computeImuBiases). The pairs+anchors share
-      // IMU samples, so they MUST NOT be split — a per-block update cannot represent the shared-IMU noise
-      // cross-covariance carried in R_g. If ANY entry of z_g/H_g/R_g is non-finite the WHOLE block is skipped
-      // (never individual rows — a partial stack silently changes the bias-gauge structure, SPEC §6 step 3).
-      buildStackedMeasurement();
-      if (containsNonFinite(zg) || containsNonFinite(Hg) || containsNonFinite(Rg))
-      {
-         if (!warnedNonFiniteInput)
-            warnNonFiniteInputOnce("stacked gyro measurement (pairs/anchors)");
-      }
-      else
-      {
-         josephUpdate(Hg, zg, Rg, "stackedGyroUpdate");
-         warnIfNonFiniteState("stackedGyroUpdate", -1);
-      }
+      // All pair rows plus the active stance-anchor rows in ONE Joseph update, using the previous tick's
+      // trusted-feet set (cached in computeImuBiases).
+      biasUpdate.applyStackedUpdate();
 
-      // P hygiene (Part B item 7): re-symmetrize P once per tick. The Joseph products keep P symmetric only to
-      // round-off; a slow asymmetry drift eventually corrupts the Cholesky conditioning gate. O(dim^2),
-      // negligible next to the Joseph O(dim^3) products.
-      symmetrize(P);
+      // The Joseph products keep P symmetric only to round-off, and a slow asymmetry drift eventually corrupts
+      // the Cholesky conditioning gate. O(dim^2), negligible next to the O(dim^3) products. Runs BEFORE the Yo
+      // publication so the confidence envelope reads the symmetrized P.
+      symmetrize(state.P);
 
-      updateJointYoVariables();
-   }
-
-   /** EKF time update in isolation: x <- F x, P <- F P F^T + Q(q). Package-private so tests can drive it alone. */
-   void predict()
-   {
-      // Q is state-dependent on the mass-matrix path (Qa = sigma_tau^2 M(q)^-2), so refresh it from the
-      // model's current configuration before propagating the covariance. No-op on the scalar fallback path.
-      updateProcessNoiseFromMassMatrix();
-      CommonOps_DDRM.mult(F, x, xtmp);
-      x.set(xtmp);
-      CommonOps_DDRM.mult(F, P, Ptmp);
-      CommonOps_DDRM.multTransB(Ptmp, F, P); // FPF^T term
-      CommonOps_DDRM.addEquals(P, Q);
-   }
-
-   /**
-    * Assembles the stacked gyro measurement (H_g, z_g, R_g, and the mixing operator L = {@code Lmix}) for this
-    * tick, WITHOUT applying the update (SPEC §5). Rows: pair {@code e} occupies rows [3e, 3e+3); the active
-    * stance anchors (feet trusted last tick) follow at rows [3E, 3E+3K). Frames are already current — the
-    * estimator calls {@code updateFramesRecursively()} every tick — so, as in the Rev. 1 pair build, we do NOT
-    * re-update them here (redundant and allocates inside MovingReferenceFrame.update()). Allocation-free: every
-    * matrix is pre-sized in {@link #allocate()} and only reshaped DOWN here.
-    *
-    * <p>Convention-bound lines (SPEC §9, "convention traps") — each fails silently if wrong, so all are called
-    * out here and pinned by the nuisance-marginalization oracle test:</p>
-    * <ul>
-    *   <li>pair residual z_e = R(child-&gt;J_e) w_child - R(parent-&gt;J_e) w_parent (child +, parent -),
-    *   matching {@code setKinematicChain(parent, child)};</li>
-    *   <li>L pair blocks: +R(child-&gt;J_e) in the child IMU's bias column, -R(parent-&gt;J_e) in the parent's;</li>
-    *   <li>anchor: H q̇-columns -J_leg, L block +I3 in the base IMU's column (J frame = base measurement frame,
-    *   so the anchor's own rotation block is exactly identity), z = raw base gyro;</li>
-    *   <li>R_g = L Sigma L^T + Sigma_eps on the anchor diagonals, Sigma = each IMU's angular-velocity
-    *   MEASUREMENT-noise covariance (NOT the bias process-noise covariance).</li>
-    * </ul>
-    */
-   private void buildStackedMeasurement()
-   {
-      // Validate + floor + cache Sigma on first use (Part B item 4). One-time; the warn/error strings build only
-      // on this first fire. After this the cached Sigma is reused unchanged (never re-read from the IMUs).
-      if (!sigmaFloorInitialized)
-      {
-         buildAndFloorSigma();
-         sigmaFloorInitialized = true;
-      }
-
-      // Mark active anchors (usable + trusted last tick, SPEC §6 phase note) and count them. activeAnchors == 0
-      // means the base-bias gauge is unfixed THIS TICK -- see yoActiveAnchorCount.
-      int activeAnchors = 0;
-      for (int i = 0; i < footAnchors.size(); i++)
-      {
-         FootAnchor fa = footAnchors.get(i);
-         fa.active = fa.usable && trustedFeetFromLastTick.contains(fa.foot);
-         if (fa.active)
-            activeAnchors++;
-      }
-      yoActiveAnchorCount.set(activeAnchors);
-      int rows = 3 * (E + activeAnchors);
-
-      Hg.reshape(rows, dim);       Hg.zero();
-      zg.reshape(rows, 1);         zg.zero();
-      Lmix.reshape(rows, 3 * m);   Lmix.zero();
-      Rg.reshape(rows, rows);      Rg.zero();
-
-      // Sigma (blkdiag over IMUs of each IMU's angular-velocity MEASUREMENT-noise covariance, in its own frame)
-      // is a measurement-noise CONSTANT, built and FLOORED once at construction (buildAndFloorSigma, Part B
-      // item 4). It is NOT rebuilt here — re-reading getAngularVelocityNoiseCovariance every tick would re-admit
-      // a possibly-zero covariance (the min-side S collapse). Deliberately NOT the bias process-noise covariance
-      // (the bias random-walk intensity, orders of magnitude smaller — a Rev. 1 over-confidence bug class).
-
-      // Pair rows.
-      for (int e = 0; e < E; e++)
-      {
-         Pair p = pairs.get(e);
-         int row0 = 3 * e;
-         p.jac.reset();
-         CommonOps_DDRM.extract(p.jac.getJacobianMatrix(), 0, 3, 0, p.qdCols.length, p.Jang, 0, 0); // angular part
-
-         // z_e = omega_child - omega_parent expressed in the child body-fixed Jacobian frame (child +, parent -).
-         fvA.setToZero(p.child.getMeasurementFrame());
-         fvA.set(p.child.getAngularVelocityMeasurement());
-         fvA.changeFrame(p.jac.getJacobianFrame());
-         fvB.setToZero(p.parent.getMeasurementFrame());
-         fvB.set(p.parent.getAngularVelocityMeasurement());
-         fvB.changeFrame(p.jac.getJacobianFrame());
-         fvA.sub(fvB);
-         zg.set(row0, 0, fvA.getX());
-         zg.set(row0 + 1, 0, fvA.getY());
-         zg.set(row0 + 2, 0, fvA.getZ());
-
-         // H_g q̇-columns: +J_e scattered onto the path joints. q-columns left 0 (SPEC §5.4); bias columns via L.
-         for (int c = 0; c < p.qdCols.length; c++)
-            for (int r = 0; r < 3; r++)
-               Hg.set(row0 + r, p.qdCols[c], p.Jang.get(r, c));
-
-         // L pair blocks: +R(child->J_e) at the child IMU bias column, -R(parent->J_e) at the parent IMU column.
-         // Lmix column = state bias column minus the 2n (q,q̇) offset (p.childBias/parentBias were precomputed).
-         packRotationToJacFrame(p.child, p.jac.getJacobianFrame(), rot3);
-         insertScaledInto(rot3, +1.0, Lmix, row0, p.childBias - 2 * n);
-         packRotationToJacFrame(p.parent, p.jac.getJacobianFrame(), rot3);
-         insertScaledInto(rot3, -1.0, Lmix, row0, p.parentBias - 2 * n);
-      }
-
-      // Active stance-anchor rows (SPEC §5.2). A planted foot has zero angular velocity, so
-      //    omega_base = -J_leg qd_leg    =>    omega_base^meas = -J_F qd_F - J_U qd_U + b_base + noise
-      // where F = leg joints that ARE filter states and U = leg joints that are not (the ankles on Alex -- no
-      // foot IMUs, so no shin->foot pair, so they never became states). The unfiltered joints are KNOWN, not
-      // estimated, so they move to the measurement side:
-      //    z' = omega_base^meas + J_U qd_U^meas = -J_F qd_F + b_base + noise'
-      // H q̇-columns get -J_F on the FILTERED columns only; the L block stays +I3 on the base IMU. That +I3 is
-      // the only absolute bias observation in the model and the only thing that fixes the common-mode bias
-      // gauge -- it does not depend on which leg joints are states, so the anchor's observability role survives
-      // the split intact. The price is qd_U^meas's encoder noise, propagated into R below. See FINDINGS.md §F.
-      int arow = 3 * E;
-      for (int i = 0; i < footAnchors.size(); i++)
-      {
-         FootAnchor fa = footAnchors.get(i);
-         if (!fa.active)
-            continue;
-         fa.jac.reset();
-         CommonOps_DDRM.extract(fa.jac.getJacobianMatrix(), 0, 3, 0, fa.qdCols.length, fa.Jang, 0, 0);
-
-         Vector3DReadOnly w = baseIMU.getAngularVelocityMeasurement();
-         zg.set(arow, 0, w.getX());
-         zg.set(arow + 1, 0, w.getY());
-         zg.set(arow + 2, 0, w.getZ());
-
-         // Sigma_eps + J_U diag(sigma_qd^2) J_U^T, accumulated as we walk the chain.
-         fa.R.zero();
-         for (int r = 0; r < 3; r++)
-            fa.R.add(r, r, ANCHOR_VAR);
-
-         for (int c = 0; c < fa.qdCols.length; c++)
-         {
-            if (fa.qdCols[c] >= 0)
-            {
-               // Filtered joint: a state, so it gets an H column.
-               for (int r = 0; r < 3; r++)
-                  Hg.set(arow + r, fa.qdCols[c], -fa.Jang.get(r, c)); // -J_F
-            }
-            else
-            {
-               // Unfiltered joint: fold J_U(:,c) * qd^meas into z', and its noise into R.
-               double qdMeasured = sensorMap.getOneDoFJointOutput(fa.legJoints[c]).getVelocity();
-               if (!Double.isFinite(qdMeasured))
-               {
-                  warnNonFiniteInputOnce("joint velocity of unfiltered anchor joint " + fa.legJoints[c].getName());
-                  qdMeasured = 0.0;
-               }
-               for (int r = 0; r < 3; r++)
-                  zg.add(arow + r, 0, fa.Jang.get(r, c) * qdMeasured); // z' = z + J_U qd_U^meas
-
-               // Rank-1 congruence: J_U(:,c) sigma_c^2 J_U(:,c)^T, per-joint sigma (measured; SIGMA_QD_UNFILTERED fallback).
-               for (int r = 0; r < 3; r++)
-                  for (int cc = 0; cc < 3; cc++)
-                     fa.R.add(r, cc, fa.qdVar[c] * fa.Jang.get(r, c) * fa.Jang.get(cc, c));
-            }
-         }
-
-         insertScaledInto(identity3, +1.0, Lmix, arow, baseBiasCol - 2 * n); // +I3, base measurement frame
-         arow += 3;
-      }
-
-      // Copy L into H_g's bias columns [2n, 2n+3m): "the bias columns of H_g ARE L" (SPEC §5.3), one build, two uses.
-      for (int r = 0; r < rows; r++)
-         for (int c = 0; c < 3 * m; c++)
-            Hg.set(r, 2 * n + c, Lmix.get(r, c));
-
-      // R_g = L Sigma L^T + Sigma_eps-block. The congruence reproduces the SPEC §5.3 block table exactly (pair
-      // diagonals, shared-IMU s_e*s_f cross-blocks, pair×anchor, anchor×anchor Sigma_base). Allocation-free:
-      // LSigma/Rg are pre-sized. Then add each active anchor's own 3x3 block, which is NO LONGER the constant
-      // Sigma_eps: it is Sigma_eps + J_U diag(sigma_qd^2) J_U^T, built per tick in the anchor loop above because
-      // J_U depends on the configuration. This is desirable, not just correct -- the anchor automatically
-      // de-weights itself in postures where the unfiltered (ankle) Jacobian is large, i.e. exactly where an
-      // ankle-velocity error does the most damage to the base gyro-bias estimate.
-      LSigma.reshape(rows, 3 * m);
-      CommonOps_DDRM.mult(Lmix, Sigma, LSigma);
-      CommonOps_DDRM.multTransB(LSigma, Lmix, Rg);
-      int arow2 = 3 * E;
-      for (int i = 0; i < footAnchors.size(); i++)
-      {
-         FootAnchor fa = footAnchors.get(i);
-         if (!fa.active)
-            continue;
-         for (int r = 0; r < 3; r++)
-            for (int c = 0; c < 3; c++)
-               Rg.add(arow2 + r, arow2 + c, fa.R.get(r, c));
-         arow2 += 3;
-      }
-      // Exact symmetry for the Joseph update (the congruence is symmetric only to round-off). Reuses the
-      // Schur path's helper.
-      symmetrize(Rg);
-
-      // Runtime floor tripwire (Part B item 4). Each pair row of R_g = L Sigma L^T is a rotation-congruence of
-      // the floored Sigma blocks (parent + child), so its diagonal is ~2 * floor and cannot fall below the floor
-      // unless the L/Sigma assembly regresses. Warn once if any pair-row diagonal drops below half the floor.
-      if (!warnedGyroFloorRegression)
-      {
-         double minPairDiag = Double.POSITIVE_INFINITY;
-         for (int r = 0; r < 3 * E; r++)
-            minPairDiag = Math.min(minPairDiag, Rg.get(r, r));
-         if (minPairDiag < 0.5 * SIGMA_GYRO_FLOOR)
-         {
-            warnedGyroFloorRegression = true;
-            LogTools.warn("JointLevelKFPreFilter: min R_g pair-row diagonal " + minPairDiag + " fell below half the gyro floor "
-                  + SIGMA_GYRO_FLOOR + " — the Sigma floor should make this impossible; the stacked-measurement assembly (L or "
-                  + "Sigma) has regressed. Reported once.");
-         }
-      }
+      state.updateJointYoVariables();
+      biasUpdate.updateBiasYoVariables();
    }
 
    // ================================ Phase 2 ================================
@@ -1929,223 +360,35 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    @Override
    public void computeImuBiases(List<RigidBodyBasics> trustedFeet)
    {
-      // Phase 2 is now bookkeeping only (SPEC §6 phase note): the stance anchors have moved into the phase-1
-      // stacked update, so all this does is cache THIS tick's trusted-feet set for next tick's anchor rows.
-      // Splitting the anchors back into a phase-2 update would make the base-gyro correlation between the
-      // anchors and the base-adjacent pairs unexpressible (sequential updates cannot carry cross-block noise
-      // correlation) — which is exactly the bug this revision removes, so do NOT run a measurement update here.
-      // Cleared + refilled with an index loop (not addAll, which allocates via Collection.toArray); the list is
-      // pre-sized to the anchor count in allocate(), so this stays allocation-free on the estimator thread.
-      trustedFeetFromLastTick.clear();
-      if (trustedFeet != null)
-      {
-         for (int i = 0; i < trustedFeet.size(); i++)
-            trustedFeetFromLastTick.add(trustedFeet.get(i));
-      }
+      // Bookkeeping only: the stance anchors moved into the phase-1 stacked update, so this just caches the set.
+      biasUpdate.cacheTrustedFeet(trustedFeet);
    }
 
-   // ================================ KF core ================================
-   // Sequential Joseph form measurement update for any matrix of dimension k.
-   // Package-private so tests can drive a single measurement update against a reference KF.
-   void josephUpdate(DMatrixRMaj Hm, DMatrixRMaj zm, DMatrixRMaj Rm)
+   // ================================ Shared matrix helpers ================================
+   // Static, stateless EJML helpers shared by the components. They live here beside setMatrix, which main-source
+   // code outside this package already calls (invariantEstimator/InvariantState).
+
+   public static void setMatrix(DMatrixRMaj out, RotationMatrixReadOnly r)
    {
-      josephUpdate(Hm, zm, Rm, "test"); // backward-compatible overload for the package-private unit tests
+      r.get(out);
    }
 
-   /**
-    * Sequential Joseph-form measurement update, hardened against latching NaN. {@code label} names the
-    * calling update ("encoder" / "pairGyro" / "stanceAnchor") so a skip or rollback identifies its source in
-    * the log. Two extra guards over a textbook update:
-    * <ul>
-    *   <li>after the innovation inverse, if S^-1 is non-finite (S was only <em>near</em>-singular, so the LU
-    *   {@code setA} did not reject it but {@code invert} overflowed), the update is skipped <em>before</em> x
-    *   or P are touched;</li>
-    *   <li>if the completed update still leaves x or P non-finite (e.g. a finite-but-huge intermediate
-    *   overflowed to +/-Inf), the pre-update mean and covariance are restored from the backups.</li>
-    * </ul>
-    * Both leave the filter in its prior valid state rather than propagating NaN forever.
-    */
-   void josephUpdate(DMatrixRMaj Hm, DMatrixRMaj zm, DMatrixRMaj Rm, String label)
+   /** In-place symmetrization A <- 0.5 (A + A^T). Allocation-free. */
+   static void symmetrize(DMatrixRMaj a)
    {
-      int k = Hm.getNumRows();
-      PHt.reshape(dim, k);
-      S.reshape(k, k);
-      Sinv.reshape(k,k);
-      nu.reshape(k,1);
-
-      CommonOps_DDRM.multTransB(P, Hm, PHt);
-      CommonOps_DDRM.mult(Hm, PHt, S);
-      CommonOps_DDRM.addEquals(S, Rm); // innovation covariance S = H P H^T + R (the +R was previously missing,
-                                       // which made the gain over-confident and could grow the covariance)
-      // Cholesky factor + ACTIVE conditioning/floor gate (Part B item 5). symmetrize first (Cholesky assumes
-      // exact symmetry; S is symmetric only to round-off). setA returns false on a NON-PD S => skip. Then read
-      // the factor diagonal: S's pivots are L_ii^2, so cond(S) ~ (max L_ii / min L_ii)^2 and lambda_min(S) ~
-      // (min L_ii)^2 — both with NO eigendecomposition. A finite-but-ill-conditioned S (cond > COND_S_MAX)
-      // inverts to a huge gain the Joseph K R K^T loop squares each tick — the divergence the old LU/isFinite
-      // guards were blind to — so the WHOLE block is skipped. The floor gate catches the dual pathology: a pivot
-      // below half the applicable measurement-noise floor (ENCODER_VAR / SIGMA_GYRO_FLOOR) is algebraically
-      // impossible for a healthy S = H P H^T + R and signals a collapsed (zero-Sigma) row.
-      symmetrize(S);
-      // Innovation nu = z - H x, computed BEFORE the Cholesky/conditioning gates: it depends on neither the
-      // factorization nor the gain, and S's diagonal must be read here anyway (setA may decompose in place).
-      CommonOps_DDRM.mult(Hm, x, nu);
-      CommonOps_DDRM.changeSign(nu);
-      CommonOps_DDRM.addEquals(nu, zm);
-      // Per-joint NIS nu_i^2 / S_ii for the two identity-block channels (row i IS joint i in state order).
-      // Published pre-gate so a gated tick still shows the innovation that tripped it; E[NIS] = 1 for a
-      // consistent filter. EXACT label match: "encoder" and "encoderVelocity" are distinct channels and a
-      // startsWith would cross-publish the velocity innovations into the position NIS.
-      // The SIGNED innovation is published alongside the NIS: it is the lag-vs-impact discriminator
-      // (corr(encInnov, qd_meas/(2*pi*25)) ~ +1, slope ~1 => 25 Hz drive-side position filter lag;
-      // <100 ms bursts at contact transitions => unmodeled impact acceleration vs Qa). See the field doc.
-      if (yoEncNIS != null && "encoder".equals(label))
+      for (int i = 0; i < a.numRows; i++)
       {
-         for (int i = 0; i < k; i++)
+         for (int j = i + 1; j < a.numCols; j++)
          {
-            yoEncNIS[i].set(nu.get(i, 0) * nu.get(i, 0) / S.get(i, i));
-            yoEncInnov[i].set(nu.get(i, 0)); // rad
+            double avg = 0.5 * (a.get(i, j) + a.get(j, i));
+            a.set(i, j, avg);
+            a.set(j, i, avg);
          }
       }
-      else if (yoQdNIS != null && "encoderVelocity".equals(label))
-      {
-         for (int i = 0; i < k; i++)
-         {
-            yoQdNIS[i].set(nu.get(i, 0) * nu.get(i, 0) / S.get(i, i));
-            yoQdInnov[i].set(nu.get(i, 0)); // rad/s
-         }
-      }
-      if (!innovationSolver.setA(S))
-      {
-         warnSingularInnovationOnce(label, "S is not positive definite (Cholesky factorization rejected it)", Hm, Rm);
-         return;
-      }
-      Lchol.reshape(k, k); // shrink into the capacity pre-reserved in allocate() (no realloc); getT needs an exact k x k target
-      innovationSolver.getDecomposition().getT(Lchol);
-      double minLii = Double.POSITIVE_INFINITY, maxLii = 0.0;
-      for (int i = 0; i < k; i++)
-      {
-         double lii = Lchol.get(i, i);
-         if (lii < minLii) minLii = lii;
-         if (lii > maxLii) maxLii = lii;
-      }
-      double minPivot = minLii * minLii;                 // ~ lambda_min(S)
-      double maxPivot = maxLii * maxLii;                 // ~ lambda_max(S)
-      double condProxy = minLii > 0.0 ? (maxLii / minLii) * (maxLii / minLii) : Double.POSITIVE_INFINITY;
-      if (label != null && label.startsWith("stackedGyro")) // publish the gyro-block S diagnostics every tick (cheap)
-      {
-         yoCondSProxyLog10.set(Math.log10(condProxy));
-         yoMinSDiag.set(minPivot);
-         yoMaxSDiag.set(maxPivot);
-      }
-      if (condProxy > COND_S_MAX)
-      {
-         yoInnovationGateSkipCount.increment();
-         warnSingularInnovationOnce(label, String.format("cond(S) proxy %.3e exceeds COND_S_MAX %.1e; whole block gated", condProxy, COND_S_MAX), Hm, Rm);
-         return;
-      }
-      // Channel-specific S-pivot floor: min wired R_ii of the block (lag inflation only raises the velocity
-      // rows' R, so the boot-time min stays a valid lower bound). Exact label match — see the NIS dispatch.
-      double rFloor;
-      if ("encoder".equals(label))
-         rFloor = encVarFloorMin;
-      else if ("encoderVelocity".equals(label))
-         rFloor = qdVarFloorMin;
-      else
-         rFloor = SIGMA_GYRO_FLOOR;
-      if (minPivot < 0.5 * rFloor)
-      {
-         yoInnovationGateSkipCount.increment();
-         warnSingularInnovationOnce(label, String.format("min S pivot %.3e below half the R floor %.3e (collapsed row); block gated", minPivot, rFloor), Hm, Rm);
-         return;
-      }
-      innovationSolver.invert(Sinv);
-      // A PD, well-conditioned S still gets a residual-overflow guard before x/P are touched.
-      if (containsNonFinite(Sinv))
-      {
-         warnSingularInnovationOnce(label, "S^-1 is non-finite (S is near-singular and its inverse overflowed)", Hm, Rm);
-         return;
-      }
-
-      // Snapshot for rollback: everything below writes x then P in place.
-      xBackup.set(x);
-      PBackup.set(P);
-
-      K.reshape(dim, k);
-      CommonOps_DDRM.mult(PHt, Sinv, K);
-      CommonOps_DDRM.multAdd(K, nu, x); // nu = z - H x was computed above, before the gates
-
-      // Full Joseph form update
-      CommonOps_DDRM.setIdentity(IKH);
-      CommonOps_DDRM.multAdd(-1.0, K, Hm, IKH); // I - KH
-      CommonOps_DDRM.mult(IKH, P, Ptmp);
-      CommonOps_DDRM.multTransB(Ptmp, IKH, P);
-      KR.reshape(dim, k);
-      CommonOps_DDRM.mult(K, Rm, KR);
-      CommonOps_DDRM.multAddTransB(KR, K, P); // + K R K^T
-
-      if (containsNonFinite(x) || containsNonFinite(P))
-      {
-         x.set(xBackup);
-         P.set(PBackup);
-         if (!warnedNonFiniteInput)
-            warnNonFiniteInputOnce("the " + label + " update produced a non-finite state; rolled back to the prior estimate");
-      }
-   }
-
-   /**
-    * One-shot triage hook: the first time the filter's state goes non-finite, logs which stage produced it
-    * (predict / encoderUpdate / pairGyroUpdate #i / stanceAnchor #i) and then stays quiet. Allocation-free
-    * until it fires (the message is only built on that single occurrence); the finiteness scans are O(dim^2)
-    * but run only until the first report. With the input/inverse/rollback guards above this should not fire —
-    * if it does, its stage name is the exact place NaN enters, which is what to chase next.
-    */
-   private void warnIfNonFiniteState(String stage, int index)
-   {
-      if (nonFiniteStateReported)
-         return;
-      if (containsNonFinite(x) || containsNonFinite(P))
-      {
-         nonFiniteStateReported = true;
-         LogTools.error("JointLevelKFPreFilter state first went non-finite after stage '" + stage + "'"
-                        + (index >= 0 ? " #" + index : "") + " [x non-finite=" + containsNonFinite(x)
-                        + ", P non-finite=" + containsNonFinite(P) + "]. This is where the NaN enters.");
-      }
-   }
-
-
-   private void packRotationToJacFrame(IMUSensorReadOnly imu, ReferenceFrame jacFrame, DMatrixRMaj out)
-   {
-      imu.getMeasurementFrame().getTransformToDesiredFrame(tmpTransform, jacFrame);
-      RotationMatrixReadOnly r = tmpTransform.getRotation();
-      out.reshape(3,3);
-
-      set_matrix(out, r);
-   }
-
-   public static void set_matrix(DMatrixRMaj out, RotationMatrixReadOnly r)
-   {
-      out.set(0, 0, r.getM00());
-      out.set(0, 1, r.getM01());
-      out.set(0, 2, r.getM02());
-
-      out.set(1, 0, r.getM10());
-      out.set(1, 1, r.getM11());
-      out.set(1, 2, r.getM12());
-
-      out.set(2, 0, r.getM20());
-      out.set(2, 1, r.getM21());
-      out.set(2, 2, r.getM22());
-   }
-
-   private static void insertScaledInto(DMatrixRMaj src, double scale, DMatrixRMaj dst, int row0, int col0)
-   {
-      for (int i = 0; i < src.getNumRows(); i++)
-         for (int j = 0; j < src.getNumCols(); j++)
-            dst.set(row0 + i, col0 + j, scale * src.get(i,j));
    }
 
    /** True if any entry of the matrix is NaN or infinite. Allocation-free; O(elements). */
-   private static boolean containsNonFinite(DMatrixRMaj mat)
+   static boolean containsNonFinite(DMatrixRMaj mat)
    {
       for (int i = 0; i < mat.getNumElements(); i++)
       {
@@ -2155,238 +398,32 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       return false;
    }
 
-   /**
-    * Logs the FIRST non-finite input source ever seen, once — identifying which sensor is late in the
-    * boot sequence — then stays silent (this runs on the estimator thread; the string concat only
-    * happens on that single occurrence).
-    */
-   private void warnNonFiniteInputOnce(String source)
-   {
-      if (warnedNonFiniteInput)
-         return;
-      warnedNonFiniteInput = true;
-      LogTools.warn("Non-finite input to JointLevelKFPreFilter; first offender: " + source
-            + ". Affected updates are skipped and consumers fall back to raw sensors / zero bias.");
-   }
-
-   /**
-    * One-shot diagnostic for a singular / near-singular innovation covariance S = H P H^T + R, which forces the
-    * offending measurement update to be skipped — a hidden way the filter keeps diverging even after the Qa cap
-    * binds (a near-singular Lambda inflates P, which makes S ill-conditioned). Names WHICH physical measurement
-    * is degenerate: S is symmetric PSD, so the eigenvector of its smallest eigenvalue is the measurement
-    * direction with almost no innovation variance; the rows carrying the most weight in it are the pairs / stance
-    * anchors / encoder joints driving the ill-conditioning. The eigen/string work runs only on this single
-    * occurrence — never on the healthy hot path.
-    *
-    * @param label  the update ("encoder" / "stackedGyroUpdate"); selects the row-to-physical-element mapping.
-    * @param reason how S was found bad (exactly singular vs inverse overflowed).
-    * @param Hm     this update's measurement Jacobian. S is recomputed from it because the solver's {@code setA}
-    *               may have overwritten the shared S buffer in place with its LU factors.
-    * @param Rm     this update's measurement noise.
-    */
-   private void warnSingularInnovationOnce(String label, String reason, DMatrixRMaj Hm, DMatrixRMaj Rm)
-   {
-      if (warnedSingularInnovation)
-         return;
-      warnedSingularInnovation = true;
-      LogTools.warn(describeSingularInnovation(label, reason, Hm, Rm) + " Reported once.");
-   }
-
-   /**
-    * Builds the singular-innovation diagnostic string used by {@link #warnSingularInnovationOnce}. Package-private
-    * so a test can assert the row -> physical-element mapping directly instead of scraping the log output.
-    */
-   String describeSingularInnovation(String label, String reason, DMatrixRMaj Hm, DMatrixRMaj Rm)
-   {
-      int k = Hm.getNumRows();
-      // Recompute S = H P H^T + R fresh (setA above may have decomposed the field S in place). Rare path — ok to allocate.
-      DMatrixRMaj phT = new DMatrixRMaj(dim, k);
-      DMatrixRMaj Sfresh = new DMatrixRMaj(k, k);
-      CommonOps_DDRM.multTransB(P, Hm, phT);
-      CommonOps_DDRM.mult(Hm, phT, Sfresh);
-      CommonOps_DDRM.addEquals(Sfresh, Rm);
-
-      StringBuilder msg = new StringBuilder();
-      msg.append("JointLevelKFPreFilter: near-singular innovation covariance in the ").append(label)
-         .append(" update — ").append(reason).append(", so this measurement was skipped this tick. ");
-
-      EigenDecomposition_F64<DMatrixRMaj> eig = DecompositionFactory_DDRM.eig(k, true, true); // symmetric, with eigenvectors
-      if (eig.decompose(Sfresh))
-      {
-         int minIdx = 0, maxIdx = 0;
-         double minEig = Double.POSITIVE_INFINITY, maxEig = Double.NEGATIVE_INFINITY;
-         for (int i = 0; i < k; i++)
-         {
-            double lambda = eig.getEigenvalue(i).getReal();
-            if (lambda < minEig) { minEig = lambda; minIdx = i; }
-            if (lambda > maxEig) { maxEig = lambda; maxIdx = i; }
-         }
-         double cond = minEig != 0.0 ? Math.abs(maxEig / minEig) : Double.POSITIVE_INFINITY;
-         // Report BOTH ends (Part B item 5). When the pathology is a lambda_MAX blow-up (P diverging), the
-         // SMALLEST eigenvector points at the HEALTHIEST rows — so naming only the min side (as the prior
-         // diagnostic did) mis-blames the stance-leg encoders. Compare lambda_max against a sane innovation
-         // scale to say which side is actually pathological.
-         final double SANE_INNOVATION_SCALE = 1.0e6;
-         boolean maxSidePathological = maxEig > SANE_INNOVATION_SCALE;
-         msg.append(String.format("cond(S)=%.3e, lambda_min=%.3e, lambda_max=%.3e — the %s side is pathological. ",
-                                  cond, minEig, maxEig,
-                                  maxSidePathological ? "MAX (lambda_max above a sane innovation scale ~1e6; P has diverged)"
-                                                      : "MIN (lambda_min collapsed toward 0; a row lost its noise floor)"));
-         msg.append("min-side rows (near-null measurement directions): ");
-         appendDominantRows(msg, eig.getEigenVector(minIdx), k, label, Hm);
-         msg.append(". max-side rows (P-blowup directions): ");
-         appendDominantRows(msg, eig.getEigenVector(maxIdx), k, label, Hm);
-      }
-      else
-      {
-         int minRow = 0;
-         double minDiag = Double.POSITIVE_INFINITY;
-         for (int i = 0; i < k; i++)
-            if (Sfresh.get(i, i) < minDiag) { minDiag = Sfresh.get(i, i); minRow = i; }
-         msg.append(String.format("(eigen-decomposition failed; smallest S diagonal %.3e at %s)",
-                                  minDiag, describeMeasurementRow(minRow, label, Hm)));
-      }
-      msg.append(" This is where the innovation ill-conditioning lives.");
-      return msg.toString();
-   }
-
-   /** Appends the up-to-4 rows carrying the most weight in eigenvector {@code v}, as "|weight| -> physical
-    *  element", for the both-ends singular-innovation diagnostic. Diagnostic-only; never on the hot path. */
-   private void appendDominantRows(StringBuilder msg, DMatrixRMaj v, int k, String label, DMatrixRMaj Hm)
-   {
-      if (v == null)
-      {
-         msg.append("(eigenvector unavailable)");
-         return;
-      }
-      boolean[] used = new boolean[k];
-      int reported = 0;
-      for (int rank = 0; rank < 4; rank++)
-      {
-         int best = -1;
-         double bestAbs = -1.0;
-         for (int i = 0; i < k; i++)
-         {
-            if (used[i])
-               continue;
-            double a = Math.abs(v.get(i));
-            if (a > bestAbs) { bestAbs = a; best = i; }
-         }
-         if (best < 0 || bestAbs < 1.0e-3)
-            break;
-         used[best] = true;
-         if (reported > 0)
-            msg.append("; ");
-         msg.append(String.format("%.2f -> %s", bestAbs, describeMeasurementRow(best, label, Hm)));
-         reported++;
-      }
-      if (reported == 0)
-         msg.append("(spread across the whole block; no single row dominates)");
-   }
-
-   /**
-    * Maps a measurement row to the physical element it observes, for the singular-innovation diagnostic. Encoder
-    * rows are mapped through {@code Hm} (the observed joint is the column with the unit entry), so this stays
-    * correct even if the encoder update is later gated to a joint subset. Stacked gyro rows follow the SPEC §5
-    * layout: rows [3e,3e+3) are pair e; rows [3E,...) are the active stance anchors in {@code footAnchors} order.
-    * Diagnostic-only; never on the hot path.
-    */
-   private String describeMeasurementRow(int row, String label, DMatrixRMaj Hm)
-   {
-      if (label != null && label.startsWith("encoder"))
-      {
-         int col = -1;
-         for (int c = 0; c < Hm.getNumCols(); c++)
-            if (Hm.get(row, c) != 0.0) { col = c; break; }
-         return "encoder q of joint " + ((col >= 0 && col < n) ? jointNameByStateIndex(col) : "?");
-      }
-      int block = row / 3;
-      int axis = row % 3;
-      char ax = axis == 0 ? 'x' : axis == 1 ? 'y' : 'z';
-      if (block < E)
-      {
-         Pair p = pairs.get(block);
-         return "gyro pair " + block + " (" + p.parent.getSensorName() + "->" + p.child.getSensorName()
-                + "), axis " + ax + ", chain=[" + jointNamesOf(p.chainJoints) + "]";
-      }
-      FootAnchor fa = nthActiveAnchor(block - E);
-      if (fa != null)
-         return "stance anchor (foot " + fa.foot.getName() + "), axis " + ax + ", leg=[" + jointNamesOf(fa.legJoints) + "]";
-      return "gyro row " + row + " (unmapped)";
-   }
-
-   /** Reverse of {@code jointToIndex} for the diagnostic path: filter-joint name at a given state index. */
-   private String jointNameByStateIndex(int stateIndex)
-   {
-      for (var e : jointToIndex.entrySet())
-         if (e.getValue() == stateIndex)
-            return e.getKey().getName();
-      return "?idx" + stateIndex;
-   }
-
-   /** The {@code activeIdx}-th anchor with {@code active == true}, in footAnchors order (matches the stacked-row layout). */
-   private FootAnchor nthActiveAnchor(int activeIdx)
-   {
-      int count = 0;
-      for (int i = 0; i < footAnchors.size(); i++)
-      {
-         FootAnchor fa = footAnchors.get(i);
-         if (fa.active)
-         {
-            if (count == activeIdx)
-               return fa;
-            count++;
-         }
-      }
-      return null;
-   }
-
-   private static String jointNamesOf(OneDoFJointBasics[] joints)
-   {
-      StringBuilder sb = new StringBuilder();
-      for (int i = 0; i < joints.length; i++)
-      {
-         if (i > 0)
-            sb.append(",");
-         sb.append(joints[i].getName());
-      }
-      return sb.toString();
-   }
-
-   private static IMUSensorReadOnly findIMU(SensorOutputMapReadOnly map, String name)
-   {
-      for (int i = 0; i < map.getIMUOutputs().size(); i++)
-      {
-         IMUSensorReadOnly s = map.getIMUOutputs().get(i);
-         if (s.getSensorName().equals(name)) return s;
-      }
-      return null;
-   }
+   // ================================ Consumed state ================================
 
    @Override
    public boolean containsJoint(OneDoFJointBasics joint)
    {
-      return jointToIndex.containsKey(joint);
+      return state.isFilteredJoint(joint);
    }
 
    @Override
    public double getEstimatedJointPosition(OneDoFJointBasics joint)
    {
-      Integer idx = jointToIndex.get(joint);
-      return (idx == null || !initialized) ? Double.NaN : x.get(idx);
+      int stateIndex = state.jointIndex(joint);
+      return (stateIndex == JointKFState.NOT_IN_STATE || !state.initialized) ? Double.NaN : state.x.get(stateIndex);
    }
 
    @Override
    public double getEstimatedJointVelocity(OneDoFJointBasics joint)
    {
-      Integer idx = jointToIndex.get(joint);
-      return (idx == null || !initialized) ? Double.NaN : x.get(n + idx);
+      int stateIndex = state.jointIndex(joint);
+      return (stateIndex == JointKFState.NOT_IN_STATE || !state.initialized) ? Double.NaN : state.x.get(state.numberOfJoints + stateIndex);
    }
 
    @Override
    public boolean hasCovariance()
    {
-      return initialized;
+      return state.initialized;
    }
 
    @Override
@@ -2398,27 +435,27 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    @Override
    public void packVelocityCovariance(OneDoFJointBasics[] joints, double fallbackVariance, DMatrixRMaj toPack)
    {
-      packCov(joints, n, fallbackVariance, toPack);
+      packCov(joints, state.numberOfJoints, fallbackVariance, toPack);
    }
 
    private void packCov(OneDoFJointBasics[] joints, int blockOffset, double fallbackVariance, DMatrixRMaj toPack)
    {
-      int mm = joints.length;
-      toPack.reshape(mm, mm);
+      int numberOfChainJoints = joints.length;
+      toPack.reshape(numberOfChainJoints, numberOfChainJoints);
       toPack.zero();
-      for (int a = 0; a < mm; a++)
+      for (int a = 0; a < numberOfChainJoints; a++)
       {
-         Integer ia = jointToIndex.get(joints[a]);
-         if (ia == null)
+         int indexOfJointA = state.jointIndex(joints[a]);
+         if (indexOfJointA == JointKFState.NOT_IN_STATE)
          {
             toPack.set(a, a, fallbackVariance);
             continue;
          }
-         for (int b = 0; b < mm; b++)
+         for (int b = 0; b < numberOfChainJoints; b++)
          {
-            Integer ib = jointToIndex.get(joints[b]);
-            if (ib != null)
-               toPack.set(a, b, P.get(blockOffset + ia, blockOffset + ib)); // adding the off diagonals for the cross-covariances
+            int indexOfJointB = state.jointIndex(joints[b]);
+            if (indexOfJointB != JointKFState.NOT_IN_STATE)
+               toPack.set(a, b, state.P.get(blockOffset + indexOfJointA, blockOffset + indexOfJointB)); // adding the off diagonals for the cross-covariances
          }
       }
    }
@@ -2426,25 +463,28 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    @Override
    public FrameVector3DReadOnly getAngularVelocityBiasInIMUFrame(IMUSensorReadOnly imu)
    {
-      Integer ord = imuToOrdinal.get(imu);
-      if (ord == null || !initialized)
+      int imuOrdinal = state.imuOrdinal(imu);
+      if (imuOrdinal == JointKFState.NOT_IN_STATE || !state.initialized)
       {
-         // IMU not in the filter's state (e.g. the primary pelvis IMU when it isn't a pair member),
-         // or the filter hasn't initialized yet: report zero bias. MUST return here — falling through
-         // would unbox a null ord in "3 * ord" and NPE every tick on the estimator thread.
+         // IMU not in the filter's state (e.g. the primary pelvis IMU when it isn't a pair member), or the
+         // filter hasn't initialized yet: report zero bias. MUST return here, and the reason is now STRONGER
+         // than it was: this used to guard an NPE on unboxing a null imuOrdinal in "3 * imuOrdinal". With the -1 sentinel
+         // the fall-through is worse than a crash — 2n + 3*(-1) = 2n-3 is a VALID index into x, so it would
+         // silently export three JOINT VELOCITIES as this IMU's gyro bias, straight into the InEKF's predict.
+         // No exception, no NaN, just a wrong robot.
          biasOut.setToZero(imu.getMeasurementFrame());
          return biasOut;
       }
-      int col = 2 * n + 3 * ord;
-      double bx = x.get(col);
-      double by = x.get(col + 1);
-      double bz = x.get(col + 2);
+      int col = 2 * state.numberOfJoints + 3 * imuOrdinal;
+      double bx = state.x.get(col);
+      double by = state.x.get(col + 1);
+      double bz = state.x.get(col + 2);
       if (!Double.isFinite(bx) || !Double.isFinite(by) || !Double.isFinite(bz))
       {
          // Fail soft like the alpha filter's bias provider: never export a non-finite bias. This is
          // consumed directly by the InEKF's predict (gyro - bias -> R*exp(phi*dt)), which throws
          // NotARotationMatrixException on NaN — a hardware-only crash the joint NaN-fallback can't catch.
-         warnNonFiniteInputOnce("bias state of " + imu.getSensorName());
+         state.warnNonFiniteInputOnce("bias state of " + imu.getSensorName());
          biasOut.setToZero(imu.getMeasurementFrame());
          return biasOut;
       }
@@ -2479,108 +519,77 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    // implementation's pure-function seams). Not part of the public API and never called on the estimator
    // thread. Getters return fresh copies so a test cannot mutate filter internals.
 
-   int getStateDimension()          { return dim; }
-   int getNumberOfFilteredJoints()  { return n; }
-   int getNumberOfIMUs()            { return m; }
-   int getNumberOfPairs()           { return pairs.size(); }
+   int getStateDimension()          { return state.dim; }
+   int getNumberOfFilteredJoints()  { return state.numberOfJoints; }
+   int getNumberOfIMUs()            { return state.numberOfIMUs; }
+   int getNumberOfPairs()           { return state.pairs.size(); }
 
    /** State index of the given joint's position entry (its velocity entry is this + n); -1 if not filtered. */
-   int getJointStateIndex(OneDoFJointBasics joint) { Integer i = jointToIndex.get(joint); return i == null ? -1 : i; }
-   List<OneDoFJointBasics> getFilteredJointsInStateOrder() { return new ArrayList<>(jointToIndex.keySet()); }
+   int getJointStateIndex(OneDoFJointBasics joint) { return state.jointIndex(joint); }
+   /** Immutable snapshot: jointsByIndex IS the filter's state order and must not escape as a mutable array. */
+   List<OneDoFJointBasics> getFilteredJointsInStateOrder() { return List.of(state.jointsByIndex); }
 
-   DMatrixRMaj getStateVector()      { return x.copy(); }     // x = [q ; q_dot ; b_omega]
-   DMatrixRMaj getCovariance()       { return P.copy(); }
-   DMatrixRMaj getTransitionMatrix() { return F.copy(); }
-   DMatrixRMaj getProcessNoise()     { return Q.copy(); }
+   /** This tick's encoder measurement vector; row i must be the joint at state index i. */
+   DMatrixRMaj getEncoderMeasurementForTest()        { return update.zEnc.copy(); }
+   /** This tick's direct-velocity measurement vector; row i must be the joint at state index i. */
+   DMatrixRMaj getDirectVelocityMeasurementForTest() { return update.zqd.copy(); }
+
+   DMatrixRMaj getStateVector()      { return state.x.copy(); }     // x = [q ; q_dot ; b_omega]
+   DMatrixRMaj getCovariance()       { return state.P.copy(); }
+   DMatrixRMaj getTransitionMatrix() { return prediction.F.copy(); }
+   DMatrixRMaj getProcessNoise()     { return prediction.Q.copy(); }
 
    /** True when Q's joint blocks come from Qa = sigma_tau^2 M(q)^-2 (a robot model was provided). */
-   boolean isUsingMassMatrixProcessNoise() { return massMatrixCalculator != null; }
+   boolean isUsingMassMatrixProcessNoise() { return prediction.isUsingMassMatrixProcessNoise(); }
    /** Recomputes the mass-matrix Q blocks from the model's current configuration (no-op on the scalar path). */
-   void updateProcessNoiseFromMassMatrixForTest() { updateProcessNoiseFromMassMatrix(); }
-   DMatrixRMaj getEncoderJacobian()  { return Henc.copy(); }
-   DMatrixRMaj getEncoderNoise()     { return Renc.copy(); }
-   DMatrixRMaj getVelocityMeasurementJacobian() { return Hqd.copy(); }
+   void updateProcessNoiseFromMassMatrixForTest() { prediction.updateProcessNoiseFromMassMatrix(); }
+   /** EKF time update in isolation: x <- F x, P <- F P F^T + Q(q). */
+   void predict() { prediction.predict(); }
+
+   DMatrixRMaj getEncoderJacobian()  { return update.Henc.copy(); }
+   DMatrixRMaj getEncoderNoise()     { return update.Renc.copy(); }
+   DMatrixRMaj getVelocityMeasurementJacobian() { return update.Hqd.copy(); }
    /** This tick's APPLIED velocity R (floor + lag inflation); call refreshDirectVelocityNoise()/update() first. */
-   DMatrixRMaj getVelocityMeasurementNoise()    { return Rqd.copy(); }
+   DMatrixRMaj getVelocityMeasurementNoise()    { return update.Rqd.copy(); }
    /** Loads a measured q̇ vector (filter state order) into zqd so tests can drive refreshDirectVelocityNoise(). */
-   void setDirectVelocityMeasurementForTest(double[] qdMeasured)
+   void setDirectVelocityMeasurementForTest(double[] qdMeasured) { update.setDirectVelocityMeasurementForTest(qdMeasured); }
+   void refreshDirectVelocityNoise() { update.refreshDirectVelocityNoise(); }
+
+   void josephUpdate(DMatrixRMaj Hm, DMatrixRMaj zm, DMatrixRMaj Rm) { update.josephUpdate(Hm, zm, Rm); }
+   void josephUpdate(DMatrixRMaj Hm, DMatrixRMaj zm, DMatrixRMaj Rm, String label) { update.josephUpdate(Hm, zm, Rm, label); }
+   String describeSingularInnovation(String label, String reason, DMatrixRMaj Hm, DMatrixRMaj Rm)
    {
-      for (int i = 0; i < n; i++)
-         zqd.set(i, 0, qdMeasured[i]);
+      return update.describeSingularInnovation(label, reason, Hm, Rm);
    }
 
    /** Overwrites the mean and covariance (and marks initialized) so tests can drive predict()/josephUpdate() from a known prior. */
    void setStateForTest(DMatrixRMaj xPrior, DMatrixRMaj pPrior)
    {
-      x.set(xPrior);
-      P.set(pPrior);
-      initialized = true;
+      state.x.set(xPrior);
+      state.P.set(pPrior);
+      state.initialized = true;
    }
 
-   /**
-    * Builds the stacked gyro measurement (H_g, z_g, R_g, L) from the current model configuration and the cached
-    * trusted-feet-from-last-tick set, WITHOUT applying the update, for inspection. Set the active anchors first
-    * with {@link #setTrustedFeetForTest} (empty => pairs-only, K = 0). Replaces the Rev. 1 per-pair
-    * {@code buildPairMeasurementForTest} seam — the filter no longer has a per-pair update path.
-    */
-   void buildStackedMeasurementForTest() { buildStackedMeasurement(); }
-   DMatrixRMaj getStackedMeasurementJacobian() { return Hg.copy(); }  // H_g (3(E+K) x dim), reshaped to this tick
-   DMatrixRMaj getStackedMeasurementResidual() { return zg.copy(); }  // z_g (3(E+K) x 1)
-   DMatrixRMaj getStackedMeasurementNoise()    { return Rg.copy(); }  // R_g (3(E+K) x 3(E+K))
-   DMatrixRMaj getMixingOperator()             { return Lmix.copy(); } // L (3(E+K) x 3m); H_g bias columns == this
+   /** Builds the stacked measurement without applying it. Set the anchors first with
+    *  {@link #setTrustedFeetForTest} (empty => pairs-only, K = 0). */
+   void buildStackedMeasurementForTest() { biasUpdate.buildStackedMeasurement(); }
+   DMatrixRMaj getStackedMeasurementJacobian() { return biasUpdate.Hg.copy(); }  // H_g (3(E+K) x dim), reshaped to this tick
+   DMatrixRMaj getStackedMeasurementResidual() { return biasUpdate.zg.copy(); }  // z_g (3(E+K) x 1)
+   DMatrixRMaj getStackedMeasurementNoise()    { return biasUpdate.Rg.copy(); }  // R_g (3(E+K) x 3(E+K))
+   DMatrixRMaj getMixingOperator()             { return biasUpdate.Lmix.copy(); } // L (3(E+K) x 3m); H_g bias columns == this
    int getStackedRowForPair(int pairIndex)     { return 3 * pairIndex; }      // pair e occupies rows [3e, 3e+3)
-   int getBiasBlockColumn(IMUSensorReadOnly imu) { return 2 * n + 3 * imuToOrdinal.get(imu); } // state col of imu's bias
-   int getImuOrdinal(IMUSensorReadOnly imu)    { return imuToOrdinal.get(imu); }
-   IMUSensorReadOnly getBaseIMU()              { return baseIMU; }
+   int getBiasBlockColumn(IMUSensorReadOnly imu) { return 2 * state.numberOfJoints + 3 * state.requireImuOrdinal(imu); } // state col of imu's bias
+   int getImuOrdinal(IMUSensorReadOnly imu)    { return state.requireImuOrdinal(imu); }
+   /** The ORDINAL-INDEXED array side, so a test can check it against the map the way it does for joints. */
+   IMUSensorReadOnly getImuByOrdinal(int ordinal) { return state.imusByOrdinal[ordinal]; }
+   IMUSensorReadOnly getBaseIMU()              { return state.baseIMU; }
    /** Anchors active on the last {@link #buildStackedMeasurementForTest}. 0 => the base-bias gauge is unfixed. */
-   int getActiveAnchorCountForTest()           { return yoActiveAnchorCount.getValue(); }
+   int getActiveAnchorCountForTest()           { return biasUpdate.getActiveAnchorCount(); }
 
-   /** Overwrites the cached previous-tick trusted-feet set that {@link #buildStackedMeasurement} reads anchors from. */
-   void setTrustedFeetForTest(List<RigidBodyBasics> feet)
-   {
-      trustedFeetFromLastTick.clear();
-      if (feet != null)
-         for (int i = 0; i < feet.size(); i++)
-            trustedFeetFromLastTick.add(feet.get(i));
-   }
-   int[] getPairVelocityColumns(int pairIndex) { return pairs.get(pairIndex).qdCols.clone(); }
-   int getPairParentBiasColumn(int pairIndex)  { return pairs.get(pairIndex).parentBias; }
-   int getPairChildBiasColumn(int pairIndex)   { return pairs.get(pairIndex).childBias; }
+   /** Overwrites the cached previous-tick trusted-feet set that the stacked build reads anchors from. */
+   void setTrustedFeetForTest(List<RigidBodyBasics> feet) { biasUpdate.setTrustedFeetForTest(feet); }
 
-   // ================================ Structure holders ================================
-   private static final class Pair
-   {
-      final IMUSensorReadOnly parent, child;
-      final GeometricJacobianCalculator jac = new GeometricJacobianCalculator();
-      OneDoFJointBasics[] chainJoints;
-      int[] qdCols;
-      int parentBias, childBias;
-      final DMatrixRMaj Jang = new DMatrixRMaj(3,1);
-      Pair(IMUSensorReadOnly parent, IMUSensorReadOnly child)
-      {
-         this.parent = parent;
-         this.child = child;
-      }
-   }
-
-   private static final class FootAnchor
-   {
-      final RigidBodyBasics foot;
-      final GeometricJacobianCalculator jac = new GeometricJacobianCalculator();
-      OneDoFJointBasics[] legJoints;
-      /** Filter qd column per chain joint, or -1 if that joint is NOT a filter state (folded into z' instead). */
-      int[] qdCols;
-      /** Encoder velocity variance per chain joint ((rad/s)^2), consumed only for the unfiltered (-1) columns. */
-      double[] qdVar;
-      boolean usable; // false only for a degenerate (jointless) base->foot chain
-      boolean active; // true this tick: usable AND trusted last tick (SPEC §6); set in buildStackedMeasurement
-      final DMatrixRMaj Jang = new DMatrixRMaj(3,1);
-      /** Per-tick anchor covariance Sigma_eps + J_U Sigma_qdU J_U^T (configuration-dependent; see buildStackedMeasurement). */
-      final DMatrixRMaj R = new DMatrixRMaj(3,3);
-      FootAnchor(RigidBodyBasics foot)
-      {
-         this.foot = foot;
-      }
-   }
-
+   int[] getPairVelocityColumns(int pairIndex) { return state.pairs.get(pairIndex).qdCols.clone(); }
+   int getPairParentBiasColumn(int pairIndex)  { return state.pairs.get(pairIndex).parentBias; }
+   int getPairChildBiasColumn(int pairIndex)   { return state.pairs.get(pairIndex).childBias; }
 }

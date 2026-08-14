@@ -30,7 +30,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 class JointLevelKFEncoderNISConsistencyTest
 {
-   /** Mirrors the private JointLevelKFPreFilter.ENCODER_VAR scalar fallback (rad^2). */
+   /** Mirrors the JointKFParameters.ENCODER_VAR scalar fallback (rad^2). */
    private static final double ENCODER_VAR_FALLBACK = 5.0e-5;
 
    private static final long SEED = 31_001L;

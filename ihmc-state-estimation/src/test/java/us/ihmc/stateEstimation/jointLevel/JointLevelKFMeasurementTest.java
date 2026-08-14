@@ -218,7 +218,7 @@ public class JointLevelKFMeasurementTest
       RigidBodyTransform parentToChild = new RigidBodyTransform();
       parent.getMeasurementFrame().getTransformToDesiredFrame(parentToChild, child.getMeasurementFrame());
       DMatrixRMaj rotParent = new DMatrixRMaj(3, 3);
-      JointLevelKFPreFilter.set_matrix(rotParent, parentToChild.getRotation());
+      JointLevelKFPreFilter.setMatrix(rotParent, parentToChild.getRotation());
 
       DMatrixRMaj expected = new DMatrixRMaj(3, 3);
       DMatrixRMaj sigmaParent = new DMatrixRMaj(3, 3);

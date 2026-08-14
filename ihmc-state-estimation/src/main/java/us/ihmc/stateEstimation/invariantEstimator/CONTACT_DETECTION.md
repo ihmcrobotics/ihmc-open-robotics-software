@@ -84,7 +84,7 @@ Known failure mode (why it is only the fallback): it reads sole heights **in wor
 estimator's own model**. Run as the *main* estimator's detector, that is circular — unobservable
 world-Z drift lowers/raises the perceived sole height and can mute a planted foot, which removes
 the very measurement that would have arrested the drift. It also assumes flat ground at a known
-height. In sim it doubles as a convenient ground-truth "oracle" when driven by the ground-truth
+height. In sim it doubles as a convenient ground-truth source when driven by the ground-truth
 model.
 
 ### 2.2 `FootSwitchContactProbabilityProvider` — production (pre-2026-07-17 form)
