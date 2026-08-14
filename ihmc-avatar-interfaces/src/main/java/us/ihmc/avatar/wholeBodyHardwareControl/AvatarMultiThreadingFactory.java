@@ -372,16 +372,11 @@ public class AvatarMultiThreadingFactory
 
       EstimatorTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, masterThreadDt, masterFullRobotModel);
 
-      // DEBUG: capture the raw timestamp value this thread hands to yoVariableServer.update(), to compare
-      // against schedulerLoggedTimestampDebug/controllerLoggedTimestampDebug and see whether they ever coincide.
-      YoLong estimatorLoggedTimestampDebug = new YoLong("estimatorLoggedTimestampDebug", rootRegistry);
-
       // Add post-estimator callback to update YoVariable server with estimator registry
       if (yoVariableServer != null)
          estimatorTask.addCallbackPostTask(() ->
                                            {
                                               long timestamp = estimatorThread.getHumanoidRobotContextData().getTimestamp();
-                                              estimatorLoggedTimestampDebug.set(timestamp);
                                               yoVariableServer.update(timestamp, estimatorThread.getYoRegistry());
                                            });
 
@@ -445,16 +440,11 @@ public class AvatarMultiThreadingFactory
       // Set up Controller Task
       ControllerTask controllerTask = new ControllerTask("Controller", controllerThread, masterThreadDt, masterFullRobotModel);
 
-      // DEBUG: capture the raw timestamp value this thread hands to yoVariableServer.update(), to compare
-      // against schedulerLoggedTimestampDebug/estimatorLoggedTimestampDebug and see whether they ever coincide.
-      YoLong controllerLoggedTimestampDebug = new YoLong("controllerLoggedTimestampDebug", rootRegistry);
-
       // Add post-controller callback to update YoVariable server with controller registry
       if (yoVariableServer != null)
          controllerTask.addCallbackPostTask(() ->
                                             {
                                                long timestamp = controllerThread.getHumanoidRobotContextData().getTimestamp();
-                                               controllerLoggedTimestampDebug.set(timestamp);
                                                yoVariableServer.update(timestamp, controllerThread.getYoVariableRegistry());
                                             });
 
