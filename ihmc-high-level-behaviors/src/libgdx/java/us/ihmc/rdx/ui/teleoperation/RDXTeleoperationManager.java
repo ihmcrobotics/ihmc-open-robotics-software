@@ -425,6 +425,7 @@ public class RDXTeleoperationManager extends RDXPanel
 
    public void update()
    {
+      hardwareControlStateManager.update();
       desiredRobot.update();
       dofsWidgets.getDesiredRobot().update();
 
@@ -894,6 +895,7 @@ public class RDXTeleoperationManager extends RDXPanel
 
    public void destroy()
    {
+      hardwareControlStateManager.destroy();
       desiredRobot.destroy();
       locomotionManager.destroy();
       armManager.destroy();

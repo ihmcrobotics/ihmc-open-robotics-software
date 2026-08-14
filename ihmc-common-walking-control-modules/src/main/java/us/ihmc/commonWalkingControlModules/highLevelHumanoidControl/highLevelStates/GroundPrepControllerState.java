@@ -45,7 +45,7 @@ public class GroundPrepControllerState extends HighLevelControllerState
       this.highLevelControlOutput = highLevelControlOutput;
       this.timeProvider = timeProvider;
 
-      this.timeToPrepareForGround.set(highLevelControllerParameters.getTimeToMoveInStandPrep());
+      this.timeToPrepareForGround.set(highLevelControllerParameters.getTimeToMoveInGroundPrep());
 
       WholeBodySetpointParameters groundPrepParameters = highLevelControllerParameters.getGroundPrepParameters();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
@@ -75,6 +75,19 @@ public class GroundPrepControllerState extends HighLevelControllerState
    public void setMinimumTimeDoneWithGroundPrep(double minimumTimeDoneWithGroundPrep)
    {
       this.minimumTimeDoneWithGroundPrep.set(minimumTimeDoneWithGroundPrep);
+   }
+
+   /**
+    * Sets the ground-prep spline duration used on the next initialize / reinitialize.
+    */
+   public void setTimeToPrepareForGround(double timeToPrepareForGround)
+   {
+      this.timeToPrepareForGround.set(timeToPrepareForGround);
+   }
+
+   public void requestReinitialize()
+   {
+      reinitialize.set(true);
    }
 
    @Override

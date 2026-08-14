@@ -21,3 +21,5 @@ uint64 sequence_id
 
 # Specifies the which state the controller should transition into.
 byte high_level_controller_name 255
+# Optional spline duration for GROUND_PREP_STATE. Values <= 0 keep the controller default.
+float64 trajectory_time 0.0

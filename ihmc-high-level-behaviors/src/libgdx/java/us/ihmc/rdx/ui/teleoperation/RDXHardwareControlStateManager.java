@@ -22,6 +22,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -42,6 +43,8 @@ public class RDXHardwareControlStateManager
    protected final ImInt desiredRLModel = new ImInt();
    protected String[] rlModelNames = new String[0];
    protected HighLevelControllerName currentHighLevelState = null;
+   /** Last model reported by the controller via {@link RLPolicyState}, not the local combo selection. */
+   protected String controllerRLModelName = null;
 
    public RDXHardwareControlStateManager(ROS2ControllerHelper controllerHelper)
    {
@@ -70,6 +73,7 @@ public class RDXHardwareControlStateManager
       {
          rlModelNames = new String[0];
          desiredRLModel.set(0);
+         controllerRLModelName = null;
          return;
       }
 
@@ -85,7 +89,10 @@ public class RDXHardwareControlStateManager
       // (e.g. standup → walking handoff), not only on first receive / catalog changes.
       int currentModel = Byte.toUnsignedInt(rlPolicyState.getCurrentModel());
       if (currentModel >= 0 && currentModel < rlModelNames.length)
+      {
          desiredRLModel.set(currentModel);
+         controllerRLModelName = rlModelNames[currentModel];
+      }
       else if (desiredRLModel.get() >= rlModelNames.length)
          desiredRLModel.set(rlModelNames.length - 1);
    }
@@ -193,6 +200,7 @@ public class RDXHardwareControlStateManager
          ImGui.textDisabled("Waiting for RL models...");
       }
 
+      ImGui.separator();
       ImGui.text("Command:");
       ImGui.sameLine();
       ImGui.setCursorPosX(widgetStartX);
@@ -284,6 +292,34 @@ public class RDXHardwareControlStateManager
       controllerHelper.publishToController(modelSelectionMessage);
    }
 
+   public HighLevelControllerName getCurrentHighLevelState()
+   {
+      return currentHighLevelState;
+   }
+
+   public String getCurrentRLModelName()
+   {
+      return controllerRLModelName;
+   }
+
+   public boolean selectRLModelByName(String modelName)
+   {
+      if (modelName == null)
+         return false;
+
+      for (int i = 0; i < rlModelNames.length; i++)
+      {
+         if (modelName.equals(rlModelNames[i]))
+         {
+            desiredRLModel.set(i);
+            sendRLModelSelectionRequest();
+            return true;
+         }
+      }
+      LogTools.warn("Requested RL model is not in the controller catalog: {}", modelName);
+      return false;
+   }
+
    public void sendRLTransitionRequest()
    {
       HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
@@ -307,8 +343,29 @@ public class RDXHardwareControlStateManager
 
    public void sendGroundPrepRequest()
    {
+      sendGroundPrepRequest(0.0);
+   }
+
+   /**
+    * Requests ground prep. {@code trajectoryTimeSeconds <= 0} keeps the controller default duration.
+    */
+   public void sendGroundPrepRequest(double trajectoryTimeSeconds)
+   {
       HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
       highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.GROUND_PREP_STATE.toByte());
+      highLevelStateMessage.setTrajectoryTime(trajectoryTimeSeconds);
+      controllerHelper.publishToController(highLevelStateMessage);
+   }
+
+   /**
+    * Sets the next ground-prep spline duration without requesting a state change.
+    */
+   public void sendGroundPrepTrajectoryDuration(double trajectoryTimeSeconds)
+   {
+      HighLevelControllerName state = currentHighLevelState != null ? currentHighLevelState : HighLevelControllerName.GROUND_PREP_STATE;
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(state.toByte());
+      highLevelStateMessage.setTrajectoryTime(trajectoryTimeSeconds);
       controllerHelper.publishToController(highLevelStateMessage);
    }
 
@@ -352,5 +409,13 @@ public class RDXHardwareControlStateManager
       HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
       highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.WALKING.toByte());
       controllerHelper.publishToController(highLevelStateMessage);
+   }
+
+   public void update()
+   {
+   }
+
+   public void destroy()
+   {
    }
 }

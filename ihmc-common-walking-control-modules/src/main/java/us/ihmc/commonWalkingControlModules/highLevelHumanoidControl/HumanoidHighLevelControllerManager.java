@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.GroundPrepControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPlugin;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
@@ -213,7 +214,10 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       {
          if (commandInputManager.isNewCommandAvailable(HighLevelControllerStateCommand.class))
          {
-            requestedHighLevelControllerState.set(commandInputManager.pollNewestCommand(HighLevelControllerStateCommand.class).getHighLevelControllerName());
+            HighLevelControllerStateCommand command = commandInputManager.pollNewestCommand(HighLevelControllerStateCommand.class);
+            applyGroundPrepTrajectoryTime(command);
+            if (command.getHighLevelControllerName() != null)
+               requestedHighLevelControllerState.set(command.getHighLevelControllerName());
          }
       }
       if (getCurrentHighLevelControlState() == HighLevelControllerName.RL_CONTROL)
@@ -393,6 +397,20 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
    public HighLevelControllerName getCurrentHighLevelControlState()
    {
       return stateMachine.getCurrentStateKey();
+   }
+
+   private void applyGroundPrepTrajectoryTime(HighLevelControllerStateCommand command)
+   {
+      if (command.getTrajectoryTime() <= 0.0)
+         return;
+
+      HighLevelControllerState groundPrepState = highLevelControllerStates.get(HighLevelControllerName.GROUND_PREP_STATE);
+      if (groundPrepState instanceof GroundPrepControllerState groundPrep)
+      {
+         groundPrep.setTimeToPrepareForGround(command.getTrajectoryTime());
+         if (getCurrentHighLevelControlState() == HighLevelControllerName.GROUND_PREP_STATE)
+            groundPrep.requestReinitialize();
+      }
    }
 
    public void addHighLevelStateChangedListener(StateChangedListener<HighLevelControllerName> stateChangedListener)
