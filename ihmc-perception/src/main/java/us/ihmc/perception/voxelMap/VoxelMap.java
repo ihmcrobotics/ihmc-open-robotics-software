@@ -50,7 +50,7 @@ public class VoxelMap
       {
          gpuData = new FloatPointer();
          cudaMalloc(gpuData, (long) cpuData.sizeof() * voxelCount);
-         cudaMemcpy(gpuData, cpuData, (long) gpuData.sizeof() * voxelCount, cudaMemcpyDeviceToHost);
+         cudaMemcpy(gpuData, cpuData, (long) gpuData.sizeof() * voxelCount, cudaMemcpyHostToDevice);
       }
 
       return gpuData;
@@ -103,11 +103,23 @@ public class VoxelMap
       messageToPack.getVoxelMapData().clear();
       messageToPack.getVoxelMapData().ensureMinCapacity(voxelCount);
       getCpuData().get(messageToPack.getVoxelMapData().getBuffer().array());
+      messageToPack.getVoxelMapData().getBuffer().position(voxelCount);
 
       messageToPack.setSizeX(sizeX);
       messageToPack.setSizeY(sizeY);
       messageToPack.setSizeZ(sizeZ);
       messageToPack.setVoxelSize(voxelSize);
       messageToPack.getOrigin().set(origin);
+   }
+
+   public static VoxelMap fromMessage(VoxelMapMessage message)
+   {
+      return new VoxelMap(new FloatPointer(message.getVoxelMapData().getBuffer()),
+                          null,
+                          message.getSizeX(),
+                          message.getSizeY(),
+                          message.getSizeZ(),
+                          message.getVoxelSize(),
+                          message.getOrigin().getPose());
    }
 }

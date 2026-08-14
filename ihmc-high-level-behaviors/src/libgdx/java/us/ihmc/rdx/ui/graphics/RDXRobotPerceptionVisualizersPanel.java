@@ -9,6 +9,7 @@ import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2KSTRobotVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2VoxelMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.foundationPose.RDXIsaacROSFoundationPoseVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
@@ -38,6 +39,7 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    protected RDXROS2HeightMapVisualizer heightMapVisualizer;
    protected RDXROS2HeightMapVisualizer yoloMapVisualizer;
    protected RDXROS2FramePlanarRegionsVisualizer planarRegionsVisualizer;
+   protected RDXROS2VoxelMapVisualizer voxelMapVisualizer;
 
    protected RDXRobotPerceptionVisualizersPanel(ROS2Node ros2Node, ROS2SyncedRobotModel syncedRobot, ROS2PeerClockOffsetEstimator peerClockOffsetEstimator)
    {
@@ -164,5 +166,10 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    public RDXROS2FramePlanarRegionsVisualizer getPlanarRegionsVisualizer()
    {
       return planarRegionsVisualizer;
+   }
+
+   public RDXROS2VoxelMapVisualizer getVoxelMapVisualizer()
+   {
+      return voxelMapVisualizer;
    }
 }
