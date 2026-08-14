@@ -2,7 +2,6 @@ package us.ihmc.perception.voxelMap;
 
 import perception_msgs.VoxelMapMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
@@ -25,7 +24,12 @@ public class VoxelMappingThread extends RepeatingTaskThread
    private final ROS2Publisher<VoxelMapMessage> publisher;
    private final VoxelMapMessage voxelMapMessage;
 
-   public VoxelMappingThread(ROS2Node ros2Node, ROS2Topic<VoxelMapMessage> ros2Topic, int mapSize, float voxelSize, Supplier<RigidBodyTransformReadOnly> mapOriginSupplier, Map<ImageSensor, Integer> sensorDepthImageKeyMap)
+   public VoxelMappingThread(ROS2Node ros2Node,
+                             ROS2Topic<VoxelMapMessage> ros2Topic,
+                             int mapSize,
+                             float voxelSize,
+                             Supplier<RigidBodyTransformReadOnly> mapOriginSupplier,
+                             Map<ImageSensor, Integer> sensorDepthImageKeyMap)
    {
       super(VoxelMappingThread.class.getSimpleName());
 
@@ -51,20 +55,19 @@ public class VoxelMappingThread extends RepeatingTaskThread
             depthImages[arrayIndex++] = depthImage;
       }
 
-      VoxelMap map = null;
-      if (arrayIndex > 0)
-         map = extractor.getVoxelMap(mapOriginSupplier.get(), depthImages);
+      if (arrayIndex == 0)
+         return;
 
-      if (publisher != null && map != null)
-      {
-         map.toMessage(voxelMapMessage);
-         publisher.publish(voxelMapMessage);
-      }
+      VoxelMap map = extractor.getVoxelMap(mapOriginSupplier.get(), depthImages);
+
+      map.toMessage(voxelMapMessage);
+      publisher.publish(voxelMapMessage);
+
+      map.close();
 
       for (RawImage image : depthImages)
-         image.release();
-      if (map != null)
-         map.close();
+         if (image != null)
+            image.release();
    }
 
    @Override
