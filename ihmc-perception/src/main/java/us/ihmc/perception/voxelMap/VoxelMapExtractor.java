@@ -97,11 +97,12 @@ public class VoxelMapExtractor implements AutoCloseable
     */
    public VoxelMap getVoxelMap(RigidBodyTransformReadOnly origin, RawImage... depthImages)
    {
-      // Allocate device memory for the voxel map`
+      // Allocate and zero device memory for the voxel map.
       int voxelCount = getNumberOfVoxels();
       FloatPointer voxelMapPointer = new FloatPointer();
       CUDATools.mallocAsync(voxelMapPointer, voxelCount, stream);
-      voxelMapPointer.limit(voxelCount);
+      error = cudaMemsetAsync(voxelMapPointer, 0, voxelMapPointer.sizeof() * voxelCount, stream);
+      CUDATools.checkCUDAError(error);
 
       worldToMapTransform.set(origin);
       worldToMapTransform.invert();
