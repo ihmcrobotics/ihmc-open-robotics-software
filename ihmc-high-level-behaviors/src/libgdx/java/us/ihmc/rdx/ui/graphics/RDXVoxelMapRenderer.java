@@ -108,7 +108,7 @@ public class RDXVoxelMapRenderer implements RenderableProvider
 
       // One JNI call to bulk-copy native host memory into the Java heap array
       FloatPointer cpuData = voxelMap.getCpuData();
-      cpuData.get(occupancyArray, 0, totalVoxels);
+      cpuData.position(0).get(occupancyArray, 0, totalVoxels);
 
       mapToWorld.set(voxelMap.getOrigin());
 
