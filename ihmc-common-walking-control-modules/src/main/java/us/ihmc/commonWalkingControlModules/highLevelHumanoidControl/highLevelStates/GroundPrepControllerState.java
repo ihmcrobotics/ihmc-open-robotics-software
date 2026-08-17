@@ -9,8 +9,6 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.commons.lists.PairList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -32,17 +30,14 @@ public class GroundPrepControllerState extends HighLevelControllerState
    private final YoDouble splineStartTime = new YoDouble("groundPrepSplineStartTime", registry);
    private final YoDouble timeToPrepareForGround = new YoDouble("timeToPrepareForGround", registry);
    private final YoDouble minimumTimeDoneWithGroundPrep = new YoDouble("minimumTimeDoneWithGroundPrep", registry);
-   private final JointDesiredOutputListReadOnly highLevelControlOutput;
 
    private final DoubleProvider timeProvider;
 
    public GroundPrepControllerState(OneDoFJointBasics[] controlledJoints,
                                     HighLevelControllerParameters highLevelControllerParameters,
-                                    JointDesiredOutputListReadOnly highLevelControlOutput,
                                     DoubleProvider timeProvider)
    {
       super(controllerState, highLevelControllerParameters, controlledJoints);
-      this.highLevelControlOutput = highLevelControlOutput;
       this.timeProvider = timeProvider;
 
       this.timeToPrepareForGround.set(highLevelControllerParameters.getTimeToMoveInGroundPrep());
@@ -110,14 +105,9 @@ public class GroundPrepControllerState extends HighLevelControllerState
          OneDoFJointBasics joint = jointsData.get(jointIndex).getLeft();
          TrajectoryData trajectoryData = jointsData.get(jointIndex).getRight();
 
-         JointDesiredOutputReadOnly jointDesiredOutput = highLevelControlOutput.getJointDesiredOutput(joint);
-         double startAngle;
-         if (jointDesiredOutput != null && jointDesiredOutput.hasDesiredPosition())
-            startAngle = jointDesiredOutput.getDesiredPosition();
-         else
-            startAngle = joint.getQ();
-
-         trajectoryData.getInitialJointConfiguration().set(startAngle);
+         // Start from the measured pose. Previous desireds (e.g. AvatarMimic) can sit far from
+         // actual under different gains; commanding those desireds with ground-prep gains jerks.
+         trajectoryData.getInitialJointConfiguration().set(joint.getQ());
       }
 
       trajectory.setCubic(0.0, timeToPrepareForGround.getDoubleValue(), 0, 0, 1, 0);
