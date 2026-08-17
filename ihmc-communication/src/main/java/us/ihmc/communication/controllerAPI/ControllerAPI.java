@@ -4,6 +4,7 @@ import controller_msgs.*;
 import ihmc_common_msgs.MessageCollection;
 import ihmc_common_msgs.MessageCollectionNotification;
 import ihmc_common_msgs.Point2DMessage;
+import ihmc_common_msgs.StampedPosePacket;
 import ihmc_common_msgs.TextToSpeechPacket;
 import toolbox_msgs.*;
 import us.ihmc.communication.HumanoidROS2Topic;
@@ -140,6 +141,9 @@ public final class ControllerAPI
 
       // RL policy state (available models and current selection)
       outputMessageClasses.add(RLPolicyState.class);
+
+      // RL nav goal pose (active waypoint / hold anchor marker for the operator UI)
+      outputMessageClasses.add(StampedPosePacket.class);
 
       // Setting the input messages with specific QoS
       inputMessageClassSpecificQoS.put(WholeBodyStreamingMessage.class, ROS2QoSProfile.BEST_EFFORT);
