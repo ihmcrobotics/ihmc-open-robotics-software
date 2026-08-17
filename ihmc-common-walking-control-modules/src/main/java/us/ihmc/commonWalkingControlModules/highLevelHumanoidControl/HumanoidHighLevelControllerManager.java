@@ -407,7 +407,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       HighLevelControllerState groundPrepState = highLevelControllerStates.get(HighLevelControllerName.GROUND_PREP_STATE);
       if (groundPrepState instanceof GroundPrepControllerState groundPrep)
       {
-         groundPrep.setTimeToPrepareForGround(command.getTrajectoryTime());
+         groundPrep.setTimeToMoveInGroundPrep(command.getTrajectoryTime());
          if (getCurrentHighLevelControlState() == HighLevelControllerName.GROUND_PREP_STATE)
             groundPrep.requestReinitialize();
       }

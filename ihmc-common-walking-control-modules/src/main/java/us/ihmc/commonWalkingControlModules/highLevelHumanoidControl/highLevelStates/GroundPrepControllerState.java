@@ -28,7 +28,7 @@ public class GroundPrepControllerState extends HighLevelControllerState
    private final YoBoolean reinitialize = new YoBoolean("groundPrepReinitialize", registry);
    private final YoBoolean continuousUpdate = new YoBoolean("groundPrepContinuousUpdate", registry);
    private final YoDouble splineStartTime = new YoDouble("groundPrepSplineStartTime", registry);
-   private final YoDouble timeToPrepareForGround = new YoDouble("timeToPrepareForGround", registry);
+   private final YoDouble timeToMoveInGroundPrep = new YoDouble("timeToMoveInGroundPrep", registry);
    private final YoDouble minimumTimeDoneWithGroundPrep = new YoDouble("minimumTimeDoneWithGroundPrep", registry);
 
    private final DoubleProvider timeProvider;
@@ -40,7 +40,7 @@ public class GroundPrepControllerState extends HighLevelControllerState
       super(controllerState, highLevelControllerParameters, controlledJoints);
       this.timeProvider = timeProvider;
 
-      this.timeToPrepareForGround.set(highLevelControllerParameters.getTimeToMoveInGroundPrep());
+      this.timeToMoveInGroundPrep.set(highLevelControllerParameters.getTimeToMoveInGroundPrep());
 
       WholeBodySetpointParameters groundPrepParameters = highLevelControllerParameters.getGroundPrepParameters();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
@@ -75,9 +75,9 @@ public class GroundPrepControllerState extends HighLevelControllerState
    /**
     * Sets the ground-prep spline duration used on the next initialize / reinitialize.
     */
-   public void setTimeToPrepareForGround(double timeToPrepareForGround)
+   public void setTimeToMoveInGroundPrep(double timeToMoveInGroundPrep)
    {
-      this.timeToPrepareForGround.set(timeToPrepareForGround);
+      this.timeToMoveInGroundPrep.set(timeToMoveInGroundPrep);
    }
 
    public void requestReinitialize()
@@ -110,7 +110,7 @@ public class GroundPrepControllerState extends HighLevelControllerState
          trajectoryData.getInitialJointConfiguration().set(joint.getQ());
       }
 
-      trajectory.setCubic(0.0, timeToPrepareForGround.getDoubleValue(), 0, 0, 1, 0);
+      trajectory.setCubic(0.0, timeToMoveInGroundPrep.getDoubleValue(), 0, 0, 1, 0);
    }
 
    @Override
@@ -133,7 +133,7 @@ public class GroundPrepControllerState extends HighLevelControllerState
          initializeSplines(time);
       }
 
-      double timeInTrajectory = MathTools.clamp(time - splineStartTime.getValue(), 0.0, timeToPrepareForGround.getDoubleValue());
+      double timeInTrajectory = MathTools.clamp(time - splineStartTime.getValue(), 0.0, timeToMoveInGroundPrep.getDoubleValue());
 
       trajectory.compute(timeInTrajectory);
       double alphaPosition = trajectory.getValue();
@@ -150,7 +150,7 @@ public class GroundPrepControllerState extends HighLevelControllerState
          JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
          lowLevelJointData.clear();
 
-         if (timeInTrajectory < timeToPrepareForGround.getDoubleValue())
+         if (timeInTrajectory < timeToMoveInGroundPrep.getDoubleValue())
          {
             double jointPosition = ((1 - alphaPosition) * q_initial) + (alphaPosition * q_final);
             double jointVelocity = alphaVelocity * (q_final - q_initial);
@@ -175,7 +175,7 @@ public class GroundPrepControllerState extends HighLevelControllerState
    @Override
    public boolean isDone(double timeInState)
    {
-      return timeInState > (timeToPrepareForGround.getDoubleValue() + minimumTimeDoneWithGroundPrep.getDoubleValue());
+      return timeInState > (timeToMoveInGroundPrep.getDoubleValue() + minimumTimeDoneWithGroundPrep.getDoubleValue());
    }
 
    @Override
