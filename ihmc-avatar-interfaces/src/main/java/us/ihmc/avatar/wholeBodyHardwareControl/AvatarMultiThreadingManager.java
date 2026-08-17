@@ -303,11 +303,10 @@ public class AvatarMultiThreadingManager
 
       // Copy measured robot data to master context
       hardwareCommunicationInterface.read(masterContext.getSensorDataContext());
+      masterContext.setTimestamp(monotonicTimeProvider.getTimestamp());
 
       if (hardwareCommunicationInterface.hasReceivedFirstState())
       {
-         masterContext.setTimestamp(monotonicTimeProvider.getTimestamp());
-
          // Update all pre-estimator thread runnables
          runAll(preMasterThreadRunnables);
 
@@ -336,11 +335,8 @@ public class AvatarMultiThreadingManager
       // Reuse masterContext's timestamp (set once per cycle, before doControl() dispatches the estimator
       // and controller) instead of re-reading the clock here. The estimator and controller copy that same
       // masterContext timestamp into their own context, so matching it here lets their independent
-      // yoVariableServer.update() calls merge into this row instead of always writing a separate one - a
-      // second, later clock read here previously guaranteed they never would. Before the first hardware
-      // state arrives, masterContext's timestamp hasn't been set yet, so fall back to a fresh read then.
-      long timestamp = hardwareCommunicationInterface.hasReceivedFirstState() ? masterContext.getTimestamp() : monotonicTimeProvider.getTimestamp();
-      yoVariableServer.update(timestamp, rootRegistry);
+      // yoVariableServer.update() calls merge into this row instead of always writing a different ones.
+      yoVariableServer.update(masterContext.getTimestamp(), rootRegistry);
    }
 
    public HardwareCommunicationInterface getHardwareCommunicationInterface()
