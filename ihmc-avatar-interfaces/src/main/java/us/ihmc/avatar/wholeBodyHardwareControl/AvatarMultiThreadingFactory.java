@@ -374,11 +374,8 @@ public class AvatarMultiThreadingFactory
 
       // Add post-estimator callback to update YoVariable server with estimator registry
       if (yoVariableServer != null)
-         estimatorTask.addCallbackPostTask(() ->
-                                           {
-                                              long timestamp = estimatorThread.getHumanoidRobotContextData().getTimestamp();
-                                              yoVariableServer.update(timestamp, estimatorThread.getYoRegistry());
-                                           });
+         estimatorTask.addCallbackPostTask(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                         estimatorThread.getYoRegistry()));
 
       // Add pre-task callback to run all externally-set pre-estimator runnables
       estimatorTask.addCallbackPreTask(() -> runAll(preEstimatorRunnables));
@@ -442,11 +439,8 @@ public class AvatarMultiThreadingFactory
 
       // Add post-controller callback to update YoVariable server with controller registry
       if (yoVariableServer != null)
-         controllerTask.addCallbackPostTask(() ->
-                                            {
-                                               long timestamp = controllerThread.getHumanoidRobotContextData().getTimestamp();
-                                               yoVariableServer.update(timestamp, controllerThread.getYoVariableRegistry());
-                                            });
+         controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                          controllerThread.getYoVariableRegistry()));
 
       // Add pre-task callback to run all externally-set pre-controller runnables
       controllerTask.addCallbackPreTask(() -> runAll(preControllerRunnables));
