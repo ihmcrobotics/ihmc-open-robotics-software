@@ -26,6 +26,7 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXRightJerseyBarrierObject.FACTORY);
       objectFactories.add(RDXLeftJerseyBarrierObject.FACTORY);
       objectFactories.add(RDXCenteredJerseyBarrierObject.FACTORY);
+      objectFactories.add(RDXTrafficBarrierObject.FACTORY);
       objectFactories.add(RDXChargeObject.FACTORY);
       objectFactories.add(RDXCouchObject.FACTORY);
       objectFactories.add(RDXTableObject.FACTORY);

@@ -91,6 +91,11 @@ public class RigidBodySceneObjectDefinitions
    public static final String BARRIER_VISUAL_MODEL_FILE_PATH = "environmentObjects/barrier/barrier.g3dj";
    public static final RigidBodyTransform BARRIER_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
+   /** Matches the {@code traffic_barrier} YOLO class and the FoundationPose mesh of the same name. */
+   public static final String TRAFFIC_BARRIER_NAME = "Traffic Barrier";
+   public static final String TRAFFIC_BARRIER_VISUAL_MODEL_FILE_PATH = "environmentObjects/traffic_barrier/traffic_barrier.glb";
+   public static final RigidBodyTransform TRAFFIC_BARRIER_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
    public static final String TABLE_NAME = "Table";
    public static final String TABLE_VISUAL_MODEL_FILE_PATH = "environmentObjects/table/Table.g3dj";
    public static final RigidBodyTransform TABLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
