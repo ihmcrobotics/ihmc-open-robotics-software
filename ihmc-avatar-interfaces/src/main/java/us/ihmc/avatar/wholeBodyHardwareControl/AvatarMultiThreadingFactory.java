@@ -15,6 +15,8 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -27,6 +29,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -113,9 +116,20 @@ public class AvatarMultiThreadingFactory
    // Controller
    private final HighLevelHumanoidControllerFactory avatarControllerFactory;
    private AvatarControllerThread avatarController;
-   private ControllerTask avatarControllerTask;
    private final List<Runnable> preControllerRunnables = new ArrayList<>();
    private final List<Runnable> postControllerRunnables = new ArrayList<>();
+
+   /**
+    * Lets the master thread pick up the controller task's freshly computed desired joint outputs as
+    * soon as it finishes each control tick, instead of waiting for the barrier scheduler to bubble
+    * them up via the master context, which only happens on the controller task's own next release
+    * (i.e. up to one full control period later). Single producer (the controller thread, via the
+    * post-controller-task callback below), single consumer (the master thread, in
+    * {@link AvatarMultiThreadingManager#run()}), so a lock-free/garbage-free {@link ConcurrentCopier}
+    * is safe. See {@link AvatarMultiThreadingManager#setFastJointDesiredOutputCopier}.
+    */
+   private final ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastJointDesiredOutputCopier = new ConcurrentCopier<>(LowLevelOneDoFJointDesiredDataHolder::new);
+   private final CrossRobotCommandResolver controllerToMasterResolver;
 
    // Step Generator
    private final OptionalFactoryField<AvatarStepGeneratorThread> avatarStepGenerator = new OptionalFactoryField<>("AvatarStepGeneratorThread");
@@ -175,6 +189,7 @@ public class AvatarMultiThreadingFactory
       this.yoVariableServer = yoVariableServer;
 
       masterContext = new HumanoidRobotContextData(masterFullRobotModel);
+      controllerToMasterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
 
       // Estimator and controller ROS2 nodes
       IHMC_ROS_STATE_ESTIMATOR_NODE_NAME = robotModel.getSimpleRobotName().toLowerCase() + "_ihmc_state_estimator";
@@ -229,8 +244,8 @@ public class AvatarMultiThreadingFactory
                                                            useMultiThreading,
                                                            externalMasterThread.hasValue() ? externalMasterThread.get() : null,
                                                            yoVariableServer,
-                                                           rootRegistry,
-                                                           avatarControllerTask.getFastJointDesiredOutputCopier()));
+                                                           rootRegistry));
+      threadingManager.get().setFastJointDesiredOutputCopier(fastJointDesiredOutputCopier);
 
       // Set up the block to prevent execution whenever there is no new state message.
       threadingManager.get().setBlockingProvider(() -> !hardwareCommunicationInterface.hasNewStateMessage());
@@ -309,7 +324,7 @@ public class AvatarMultiThreadingFactory
       yoVariableServer.addRegistry(avatarController.getYoVariableRegistry(), avatarController.getSCS2YoGraphics());
 
       // Set up the task and thread for the controller
-      avatarControllerTask = setupControllerTaskAndThread(avatarController, masterFullRobotModel, yoVariableServer);
+      setupControllerTaskAndThread(avatarController, masterFullRobotModel, yoVariableServer);
 
       return avatarController;
    }
@@ -431,7 +446,7 @@ public class AvatarMultiThreadingFactory
    /**
     * Sets up the actual thread and thread task for the high-level control module
     */
-   private ControllerTask setupControllerTaskAndThread(AvatarControllerThread controllerThread,
+   private HumanoidRobotControlTask setupControllerTaskAndThread(AvatarControllerThread controllerThread,
                                                        FullHumanoidRobotModel masterFullRobotModel,
                                                        YoVariableServer yoVariableServer)
    {
@@ -448,6 +463,17 @@ public class AvatarMultiThreadingFactory
 
       // Add post-controller callback to interpolate desired setpoints
       controllerTask.addCallbackPostTask(lowLevelOutputProcessor::startDesiredsInterpolation);
+
+      // Publish the controller's freshly computed desired joint outputs immediately, resolved into
+      // the master robot model's joint identities, so the master thread doesn't have to wait for the
+      // controller task's next barrier-scheduler release to see them. See fastJointDesiredOutputCopier.
+      controllerTask.addCallbackPostTask(() ->
+                                         {
+                                            controllerToMasterResolver.resolveLowLevelOneDoFJointDesiredDataHolder(controllerThread.getHumanoidRobotContextData()
+                                                                                                                                   .getJointDesiredOutputList(),
+                                                                                                                    fastJointDesiredOutputCopier.getCopyForWriting());
+                                            fastJointDesiredOutputCopier.commit();
+                                         });
 
       // Add post-controller callback to update the thread frequency calculator and YoVariable (Hz)
       YoDouble controllerThreadUpdateRate = new YoDouble("controllerThreadUpdateRate", rootRegistry);

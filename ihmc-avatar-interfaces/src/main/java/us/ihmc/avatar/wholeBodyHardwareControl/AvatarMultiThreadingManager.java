@@ -81,7 +81,14 @@ public class AvatarMultiThreadingManager
    private final boolean useRealtimeThreads;
 
    private final AvatarLowLevelOutputProcessor lowLevelOutputProcessor;
-   private final ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastJointDesiredOutputCopier;
+   /**
+    * Set via {@link #setFastJointDesiredOutputCopier(ConcurrentCopier)}, typically right after
+    * construction. When set, {@link #run()} prefers this over {@code masterContext}'s copy of the
+    * controller's desired joint outputs, since the latter is only refreshed on the controller task's
+    * own next barrier-scheduler release (up to one full control period later). Left {@code null},
+    * {@link #run()} falls back to the old, laggier behavior unchanged.
+    */
+   private ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastJointDesiredOutputCopier;
    private volatile boolean running = false;
 
    public AvatarMultiThreadingManager(String prefix,
@@ -97,8 +104,7 @@ public class AvatarMultiThreadingManager
                                       boolean useRealtimeThreads,
                                       boolean useMultiThreading,
                                       YoVariableServer yoVariableServer,
-                                      YoRegistry rootRegistry,
-                                      ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastJointDesiredOutputCopier)
+                                      YoRegistry rootRegistry)
    {
       this(prefix,
            masterContext,
@@ -114,8 +120,7 @@ public class AvatarMultiThreadingManager
            useMultiThreading,
            null,
            yoVariableServer,
-           rootRegistry,
-           fastJointDesiredOutputCopier);
+           rootRegistry);
    }
    public AvatarMultiThreadingManager(String prefix,
                                       HumanoidRobotContextData masterContext,
@@ -131,8 +136,7 @@ public class AvatarMultiThreadingManager
                                       boolean useMultiThreading,
                                       Runnable masterThread,
                                       YoVariableServer yoVariableServer,
-                                      YoRegistry rootRegistry,
-                                      ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastJointDesiredOutputCopier)
+                                      YoRegistry rootRegistry)
    {
       this.masterContext = masterContext;
       this.hardwareCommunicationInterface = hardwareCommunicationInterface;
@@ -143,7 +147,6 @@ public class AvatarMultiThreadingManager
       this.useRealtimeThreads = useRealtimeThreads;
       this.rootRegistry = rootRegistry;
       this.yoVariableServer = yoVariableServer;
-      this.fastJointDesiredOutputCopier = fastJointDesiredOutputCopier;
 
       // Set up the thread manager
       if (useMultiThreading)
@@ -331,7 +334,9 @@ public class AvatarMultiThreadingManager
          // copy, which is only refreshed on the controller task's own next barrier-scheduler release -
          // up to one full control period later. Fall back to masterContext until the controller has
          // published its first output.
-         LowLevelOneDoFJointDesiredDataHolder freshControllerDesiredOutput = fastJointDesiredOutputCopier.getCopyForReading();
+         LowLevelOneDoFJointDesiredDataHolder freshControllerDesiredOutput = fastJointDesiredOutputCopier != null
+               ? fastJointDesiredOutputCopier.getCopyForReading()
+               : null;
          lowLevelOutputProcessor.update(freshControllerDesiredOutput != null ? freshControllerDesiredOutput : masterContext.getJointDesiredOutputList());
          hardwareCommunicationInterface.write(lowLevelOutputProcessor.getProcessedDesiredOutput(), lowLevelOutputProcessor.getMasterGain().getValue());
       }
@@ -371,6 +376,14 @@ public class AvatarMultiThreadingManager
    public void addPostMasterThreadRunnable(Runnable runnable)
    {
       postMasterThreadRunnables.add(runnable);
+   }
+
+   /**
+    * See {@link #fastJointDesiredOutputCopier}.
+    */
+   public void setFastJointDesiredOutputCopier(ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastJointDesiredOutputCopier)
+   {
+      this.fastJointDesiredOutputCopier = fastJointDesiredOutputCopier;
    }
 
    static void runAll(List<Runnable> runnables)
