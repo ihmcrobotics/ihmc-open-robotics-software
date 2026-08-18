@@ -123,10 +123,10 @@ public class AvatarMultiThreadingFactory
     * Lets the master thread pick up the controller task's freshly computed desired joint outputs as
     * soon as it finishes each control tick, instead of waiting for the barrier scheduler to bubble
     * them up via the master context, which only happens on the controller task's own next release
-    * (i.e. up to one full control period later). Single producer (the controller thread, via the
+    * (i.e. up to one full control period later). This needs to be setup as a single producer (the controller thread, via the
     * post-controller-task callback below), single consumer (the master thread, in
     * {@link AvatarMultiThreadingManager#run()}), so a lock-free/garbage-free {@link ConcurrentCopier}
-    * is safe. See {@link AvatarMultiThreadingManager#setFastJointDesiredOutputCopier}.
+    * is safe.
     */
    private final ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastJointDesiredOutputCopier = new ConcurrentCopier<>(LowLevelOneDoFJointDesiredDataHolder::new);
    private final CrossRobotCommandResolver controllerToMasterResolver;
@@ -245,7 +245,9 @@ public class AvatarMultiThreadingFactory
                                                            externalMasterThread.hasValue() ? externalMasterThread.get() : null,
                                                            yoVariableServer,
                                                            rootRegistry));
-      threadingManager.get().setFastJointDesiredOutputCopier(fastJointDesiredOutputCopier);
+
+      // Setup the fast copier to get the desired sent to the low level output processor in the same tick
+      threadingManager.get().setFastDesiredOutputHolder(fastJointDesiredOutputCopier);
 
       // Set up the block to prevent execution whenever there is no new state message.
       threadingManager.get().setBlockingProvider(() -> !hardwareCommunicationInterface.hasNewStateMessage());
@@ -447,8 +449,8 @@ public class AvatarMultiThreadingFactory
     * Sets up the actual thread and thread task for the high-level control module
     */
    private HumanoidRobotControlTask setupControllerTaskAndThread(AvatarControllerThread controllerThread,
-                                                       FullHumanoidRobotModel masterFullRobotModel,
-                                                       YoVariableServer yoVariableServer)
+                                                                 FullHumanoidRobotModel masterFullRobotModel,
+                                                                 YoVariableServer yoVariableServer)
    {
       // Set up Controller Task
       ControllerTask controllerTask = new ControllerTask("Controller", controllerThread, masterThreadDt, masterFullRobotModel);
@@ -466,7 +468,7 @@ public class AvatarMultiThreadingFactory
 
       // Publish the controller's freshly computed desired joint outputs immediately, resolved into
       // the master robot model's joint identities, so the master thread doesn't have to wait for the
-      // controller task's next barrier-scheduler release to see them. See fastJointDesiredOutputCopier.
+      // controller task's next barrier-scheduler release to see them.
       controllerTask.addCallbackPostTask(() ->
                                          {
                                             controllerToMasterResolver.resolveLowLevelOneDoFJointDesiredDataHolder(controllerThread.getHumanoidRobotContextData()

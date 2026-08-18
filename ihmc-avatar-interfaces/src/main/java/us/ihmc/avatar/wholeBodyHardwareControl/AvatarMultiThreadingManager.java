@@ -1,6 +1,5 @@
 package us.ihmc.avatar.wholeBodyHardwareControl;
 
-import us.ihmc.avatar.*;
 import us.ihmc.avatar.factory.BarrierScheduledRobotController;
 import us.ihmc.avatar.factory.DisposableRobotController;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
@@ -82,13 +81,12 @@ public class AvatarMultiThreadingManager
 
    private final AvatarLowLevelOutputProcessor lowLevelOutputProcessor;
    /**
-    * Set via {@link #setFastJointDesiredOutputCopier(ConcurrentCopier)}, typically right after
+    * Set via {@link #setFastDesiredOutputHolder(ConcurrentCopier)}, typically right after
     * construction. When set, {@link #run()} prefers this over {@code masterContext}'s copy of the
     * controller's desired joint outputs, since the latter is only refreshed on the controller task's
-    * own next barrier-scheduler release (up to one full control period later). Left {@code null},
-    * {@link #run()} falls back to the old, laggier behavior unchanged.
+    * own next barrier-scheduler release (up to one full control period later)
     */
-   private ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastJointDesiredOutputCopier;
+   private ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastDesiredOutputHolder;
    private volatile boolean running = false;
 
    public AvatarMultiThreadingManager(String prefix,
@@ -334,10 +332,8 @@ public class AvatarMultiThreadingManager
          // copy, which is only refreshed on the controller task's own next barrier-scheduler release -
          // up to one full control period later. Fall back to masterContext until the controller has
          // published its first output.
-         LowLevelOneDoFJointDesiredDataHolder freshControllerDesiredOutput = fastJointDesiredOutputCopier != null
-               ? fastJointDesiredOutputCopier.getCopyForReading()
-               : null;
-         lowLevelOutputProcessor.update(freshControllerDesiredOutput != null ? freshControllerDesiredOutput : masterContext.getJointDesiredOutputList());
+         LowLevelOneDoFJointDesiredDataHolder freshDesiredOutputHolder = fastDesiredOutputHolder != null ? fastDesiredOutputHolder.getCopyForReading() : null;
+         lowLevelOutputProcessor.update(freshDesiredOutputHolder != null ? freshDesiredOutputHolder : masterContext.getJointDesiredOutputList());
          hardwareCommunicationInterface.write(lowLevelOutputProcessor.getProcessedDesiredOutput(), lowLevelOutputProcessor.getMasterGain().getValue());
       }
 
@@ -378,12 +374,9 @@ public class AvatarMultiThreadingManager
       postMasterThreadRunnables.add(runnable);
    }
 
-   /**
-    * See {@link #fastJointDesiredOutputCopier}.
-    */
-   public void setFastJointDesiredOutputCopier(ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastJointDesiredOutputCopier)
+   public void setFastDesiredOutputHolder(ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastDesiredOutputHolder)
    {
-      this.fastJointDesiredOutputCopier = fastJointDesiredOutputCopier;
+      this.fastDesiredOutputHolder = fastDesiredOutputHolder;
    }
 
    static void runAll(List<Runnable> runnables)
