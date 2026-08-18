@@ -77,7 +77,6 @@ public class RDXHandManager
    {
       if (ImGui.collapsingHeader("Hands"))
       {
-         ImGui.separator();
          rdxHands.values().forEach(RDXHandInterface::renderImGuiWidgets);
       }
    }
