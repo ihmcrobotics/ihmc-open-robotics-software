@@ -27,11 +27,10 @@ import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.examples.simulations.BoxRobotDefinition;
 import us.ihmc.scs2.simulation.collision.Collidable;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
-import us.ihmc.scs2.simulation.parameters.ContactParameters;
+import us.ihmc.scs2.simulation.impulseBased.physicsEngine.parameters.ContactParameters;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.simulation.physicsEngine.MultiBodySystemStateWriter;
-import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
-import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
+import us.ihmc.scs2.simulation.impulseBased.physicsEngine.MultiBodySystemStateWriter;
+import us.ihmc.scs2.simulation.PhysicsEngineFactories;
 import us.ihmc.scs2.examples.simulations.ExampleExperimentalSimulationTools;
 import us.ihmc.simulationConstructionSetTools.tools.TerrainObjectDefinitionTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -85,7 +84,7 @@ public class BoxTeeteringEdgeToEdgeExperimentalSimulation
 
       double simDT = 0.0001;
 
-      SimulationConstructionSet2 scs = new SimulationConstructionSet2("simulation", PhysicsEngineFactory.newImpulseBasedPhysicsEngineFactory(contactParameters));
+      SimulationConstructionSet2 scs = new SimulationConstructionSet2("simulation", PhysicsEngineFactories.newImpulseBasedPhysicsEngineFactory(contactParameters));
       scs.getSimulationSession().setGravity(0.0, 0.0, -9.81);
       scs.addTerrainObject(terrain);
       scs.addRobot(boxRobot);

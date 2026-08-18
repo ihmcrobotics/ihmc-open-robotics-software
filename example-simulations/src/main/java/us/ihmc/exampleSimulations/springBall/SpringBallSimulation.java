@@ -11,8 +11,8 @@ import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.SimulationSessionControls;
-import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
-import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
+import us.ihmc.scs2.simulation.contactPointBased.physicsEngine.parameters.ContactPointBasedContactParameters;
+import us.ihmc.scs2.simulation.PhysicsEngineFactories;
 
 public class SpringBallSimulation
 {
@@ -27,7 +27,7 @@ public class SpringBallSimulation
       contactParameters.setKz(80.0);
       contactParameters.setBz(100.0);
 
-      SimulationSession simulationSession = new SimulationSession(PhysicsEngineFactory.newContactPointBasedPhysicsEngineFactory(contactParameters));
+      SimulationSession simulationSession = new SimulationSession(PhysicsEngineFactories.newContactPointBasedPhysicsEngineFactory(contactParameters));
       simulationSession.addRobot(springBall);
       simulationSession.addTerrainObject(flatGround());
 

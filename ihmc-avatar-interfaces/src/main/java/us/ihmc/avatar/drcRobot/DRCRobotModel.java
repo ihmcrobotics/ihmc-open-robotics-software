@@ -194,7 +194,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    /**
-    * Gets the collision model for this robot to use with {@link us.ihmc.scs2.simulation.physicsEngine.impulseBased.ImpulseBasedPhysicsEngine}.
+    * Gets the collision model for this robot to use with {@link us.ihmc.scs2.simulation.impulseBased.physicsEngine.ImpulseBasedPhysicsEngine}.
 
     * @param helper                    the helper to use when creating the {@link Collidable}s for
     *                                  generating the collidable masks and groups.

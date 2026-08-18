@@ -18,8 +18,8 @@ import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.definition.visual.*;
 import us.ihmc.scs2.examples.simulations.ExampleExperimentalSimulationTools;
-import us.ihmc.scs2.simulation.parameters.ContactParameters;
-import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
+import us.ihmc.scs2.simulation.impulseBased.physicsEngine.parameters.ContactParameters;
+import us.ihmc.scs2.simulation.PhysicsEngineFactories;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class ConnectedShapesExperimentalSimulation
@@ -86,7 +86,7 @@ public class ConnectedShapesExperimentalSimulation
                                                                                          new MaterialDefinition(ColorDefinitions.DarkKhaki())),
                                                                     new CollisionShapeDefinition(terrainPose, terrainGeometry));
 
-      SimulationConstructionSet2 scs = new SimulationConstructionSet2("simulation", PhysicsEngineFactory.newImpulseBasedPhysicsEngineFactory(contactParameters));
+      SimulationConstructionSet2 scs = new SimulationConstructionSet2("simulation", PhysicsEngineFactories.newImpulseBasedPhysicsEngineFactory(contactParameters));
       scs.addTerrainObject(terrain);
       scs.setDT(1e-6);
       scs.setBufferRecordTickPeriod(100);

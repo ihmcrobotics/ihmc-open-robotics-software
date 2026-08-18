@@ -13,8 +13,8 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
-import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
-import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
+import us.ihmc.scs2.simulation.contactPointBased.physicsEngine.parameters.ContactPointBasedContactParameters;
+import us.ihmc.scs2.simulation.PhysicsEngineFactories;
 import us.ihmc.simulationConstructionSetTools.tools.TerrainObjectDefinitionTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
@@ -72,7 +72,7 @@ public class RhinoBeetleSimpleSimulation
       contactParameters.setStiffeningLength(0.015);
 
       SimulationConstructionSet2 scs = new SimulationConstructionSet2("RhinoBeetle",
-                                                                        PhysicsEngineFactory.newContactPointBasedPhysicsEngineFactory(contactParameters));
+                                                                        PhysicsEngineFactories.newContactPointBasedPhysicsEngineFactory(contactParameters));
       scs.getSimulationSession().setGravity(0.0, 0.0, -9.81);
       scs.addTerrainObject(flatGround());
       scs.addRobot(robotDefinition);
