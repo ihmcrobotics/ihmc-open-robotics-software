@@ -3,6 +3,8 @@ package us.ihmc.avatar;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -19,6 +21,15 @@ public class ControllerTask extends HumanoidRobotControlTask
    private final YoLong ticksBehindScheduled;
 
    private final double schedulerDt;
+
+   /**
+    * Lets the master thread pick up this task's freshly computed desired joint outputs as soon as
+    * {@link #execute()} finishes, instead of waiting for the barrier scheduler to bubble them up via
+    * {@link #updateMasterContext(HumanoidRobotContextData)}, which only happens on this task's own
+    * next release (i.e. up to one full control period later). Single producer (this task's thread),
+    * single consumer (the master thread), so a lock-free/garbage-free {@link ConcurrentCopier} is safe.
+    */
+   private final ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastJointDesiredOutputCopier = new ConcurrentCopier<>(LowLevelOneDoFJointDesiredDataHolder::new);
 
    public ControllerTask(String prefix,
                          AvatarControllerThreadInterface controllerThread,
@@ -63,8 +74,26 @@ public class ControllerTask extends HumanoidRobotControlTask
       ticksBehindScheduled.set(schedulerTick - timer.getTickCount() * divisor);
       runAll(preTaskCallbacks);
       controllerThread.run();
+
+      // Publish the freshly computed desired joint outputs immediately, resolved into the master
+      // robot model's joint identities, so the master thread doesn't have to wait for this task's
+      // next release to see them (see fastJointDesiredOutputCopier).
+      masterResolver.resolveLowLevelOneDoFJointDesiredDataHolder(controllerThread.getHumanoidRobotContextData().getJointDesiredOutputList(),
+                                                                  fastJointDesiredOutputCopier.getCopyForWriting());
+      fastJointDesiredOutputCopier.commit();
+
       runAll(postTaskCallbacks);
       timer.stop();
+   }
+
+   /**
+    * Returns the fast, low-latency channel for this task's desired joint outputs. See
+    * {@link #fastJointDesiredOutputCopier} for why this exists alongside the normal master-context
+    * hand-off.
+    */
+   public ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> getFastJointDesiredOutputCopier()
+   {
+      return fastJointDesiredOutputCopier;
    }
 
    @Override

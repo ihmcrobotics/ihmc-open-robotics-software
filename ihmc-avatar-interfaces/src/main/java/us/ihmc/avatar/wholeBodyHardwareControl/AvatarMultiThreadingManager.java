@@ -6,12 +6,14 @@ import us.ihmc.avatar.factory.DisposableRobotController;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.avatar.factory.SingleThreadedRobotController;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.FrequencyCalculator;
+import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PeriodicParameters;
@@ -79,6 +81,7 @@ public class AvatarMultiThreadingManager
    private final boolean useRealtimeThreads;
 
    private final AvatarLowLevelOutputProcessor lowLevelOutputProcessor;
+   private final ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastJointDesiredOutputCopier;
    private volatile boolean running = false;
 
    public AvatarMultiThreadingManager(String prefix,
@@ -94,7 +97,8 @@ public class AvatarMultiThreadingManager
                                       boolean useRealtimeThreads,
                                       boolean useMultiThreading,
                                       YoVariableServer yoVariableServer,
-                                      YoRegistry rootRegistry)
+                                      YoRegistry rootRegistry,
+                                      ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastJointDesiredOutputCopier)
    {
       this(prefix,
            masterContext,
@@ -110,7 +114,8 @@ public class AvatarMultiThreadingManager
            useMultiThreading,
            null,
            yoVariableServer,
-           rootRegistry);
+           rootRegistry,
+           fastJointDesiredOutputCopier);
    }
    public AvatarMultiThreadingManager(String prefix,
                                       HumanoidRobotContextData masterContext,
@@ -126,7 +131,8 @@ public class AvatarMultiThreadingManager
                                       boolean useMultiThreading,
                                       Runnable masterThread,
                                       YoVariableServer yoVariableServer,
-                                      YoRegistry rootRegistry)
+                                      YoRegistry rootRegistry,
+                                      ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastJointDesiredOutputCopier)
    {
       this.masterContext = masterContext;
       this.hardwareCommunicationInterface = hardwareCommunicationInterface;
@@ -137,6 +143,7 @@ public class AvatarMultiThreadingManager
       this.useRealtimeThreads = useRealtimeThreads;
       this.rootRegistry = rootRegistry;
       this.yoVariableServer = yoVariableServer;
+      this.fastJointDesiredOutputCopier = fastJointDesiredOutputCopier;
 
       // Set up the thread manager
       if (useMultiThreading)
@@ -319,8 +326,13 @@ public class AvatarMultiThreadingManager
          // Update all post-estimator thread runnables
          runAll(postMasterThreadRunnables);
 
-         // Write desired commands to robot
-         lowLevelOutputProcessor.update(masterContext.getJointDesiredOutputList());
+         // Write desired commands to robot. Prefer the controller's fast, low-latency output (published
+         // directly by ControllerTask as soon as it finishes each control tick) over masterContext's
+         // copy, which is only refreshed on the controller task's own next barrier-scheduler release -
+         // up to one full control period later. Fall back to masterContext until the controller has
+         // published its first output.
+         LowLevelOneDoFJointDesiredDataHolder freshControllerDesiredOutput = fastJointDesiredOutputCopier.getCopyForReading();
+         lowLevelOutputProcessor.update(freshControllerDesiredOutput != null ? freshControllerDesiredOutput : masterContext.getJointDesiredOutputList());
          hardwareCommunicationInterface.write(lowLevelOutputProcessor.getProcessedDesiredOutput(), lowLevelOutputProcessor.getMasterGain().getValue());
       }
 

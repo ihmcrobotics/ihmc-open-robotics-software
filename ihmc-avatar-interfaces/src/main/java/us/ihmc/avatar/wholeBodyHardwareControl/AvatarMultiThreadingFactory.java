@@ -113,6 +113,7 @@ public class AvatarMultiThreadingFactory
    // Controller
    private final HighLevelHumanoidControllerFactory avatarControllerFactory;
    private AvatarControllerThread avatarController;
+   private ControllerTask avatarControllerTask;
    private final List<Runnable> preControllerRunnables = new ArrayList<>();
    private final List<Runnable> postControllerRunnables = new ArrayList<>();
 
@@ -228,7 +229,8 @@ public class AvatarMultiThreadingFactory
                                                            useMultiThreading,
                                                            externalMasterThread.hasValue() ? externalMasterThread.get() : null,
                                                            yoVariableServer,
-                                                           rootRegistry));
+                                                           rootRegistry,
+                                                           avatarControllerTask.getFastJointDesiredOutputCopier()));
 
       // Set up the block to prevent execution whenever there is no new state message.
       threadingManager.get().setBlockingProvider(() -> !hardwareCommunicationInterface.hasNewStateMessage());
@@ -307,7 +309,7 @@ public class AvatarMultiThreadingFactory
       yoVariableServer.addRegistry(avatarController.getYoVariableRegistry(), avatarController.getSCS2YoGraphics());
 
       // Set up the task and thread for the controller
-      setupControllerTaskAndThread(avatarController, masterFullRobotModel, yoVariableServer);
+      avatarControllerTask = setupControllerTaskAndThread(avatarController, masterFullRobotModel, yoVariableServer);
 
       return avatarController;
    }
@@ -429,9 +431,9 @@ public class AvatarMultiThreadingFactory
    /**
     * Sets up the actual thread and thread task for the high-level control module
     */
-   private HumanoidRobotControlTask setupControllerTaskAndThread(AvatarControllerThread controllerThread,
-                                                                 FullHumanoidRobotModel masterFullRobotModel,
-                                                                 YoVariableServer yoVariableServer)
+   private ControllerTask setupControllerTaskAndThread(AvatarControllerThread controllerThread,
+                                                       FullHumanoidRobotModel masterFullRobotModel,
+                                                       YoVariableServer yoVariableServer)
    {
       // Set up Controller Task
       ControllerTask controllerTask = new ControllerTask("Controller", controllerThread, masterThreadDt, masterFullRobotModel);
