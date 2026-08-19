@@ -262,8 +262,11 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     float globalMeanF = *globalMean;
     float globalVarianceF = *globalVariance;
 
-    // If we have no real data, we don't apply the kalman filter, just take the new real data
-    if (globalVarianceF <= 0.0f)
+    // If we have no real data, we don't apply the kalman filter, just take the new real data.
+    // A large jump in the live view is something that moved, not terrain noise: Kalman with
+    // millimetre prediction noise would keep the old height, which is a ghost the camera can
+    // already see through.
+    if (globalVarianceF <= 0.0f || fabsf(localMeanF - globalMeanF) > 0.15f)
     {
         *globalMean = localMeanF;
         *globalVariance = localVarianceF;

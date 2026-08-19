@@ -54,18 +54,18 @@
     "upperBound": 8.0
   },
   "Cell size": {
-    "value": 0.02,
+    "value": 0.04,
     "lowerBound": 0.01,
     "upperBound": 0.06
   },
   "Local width in meters": {
-    "value": 4.0,
+    "value": 8.0,
     "lowerBound": 1.0,
-    "upperBound": 4.5
+    "upperBound": 10.0
   },
   "Global width in meters": {
-    "value": 4.0,
+    "value": 8.0,
     "lowerBound": 1.0,
-    "upperBound": 4.5
+    "upperBound": 10.0
   }
 }

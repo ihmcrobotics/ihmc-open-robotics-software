@@ -43,6 +43,18 @@ public class ROS2LogReplay
       timestampSupplier = timeSource.createTimestampProvider(robotName, ros2Node);
    }
 
+   /**
+    * Simulation replay that uses an in-process clock (e.g. SCS2 yoTime in milliseconds) instead of
+    * waiting for {@code RobotConfigurationData} on a separate ROS 2 node.
+    */
+   public ROS2LogReplay(String robotName, List<ROS2Topic<?>> loggedTopics, LongSupplier timestampSupplier)
+   {
+      this.timeSource = ROS2LogTimeSource.SIMULATION;
+      this.loggedTopics = loggedTopics;
+      this.timestampSupplier = timestampSupplier;
+      ros2Node = new ROS2Node("ihmc_ros2_log_replay");
+   }
+
    public ROS2LogReplay(String robotName, List<ROS2Topic<?>> loggedTopics, File logFile, ROS2LogTimeSource timeSource)
    {
       this.timeSource = timeSource;
