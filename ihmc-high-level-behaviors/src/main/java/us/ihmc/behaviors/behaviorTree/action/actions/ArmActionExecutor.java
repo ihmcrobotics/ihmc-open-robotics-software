@@ -72,6 +72,7 @@ public class ArmActionExecutor extends ActionNodeExecutor<ArmActionState, ArmAct
 
    private void updateJointspacePreview()
    {
+      updateGoalChestTransform();
       state.setCanExecute(true);
       state.setSolutionQuality(0.0);
       for (int i = 0; i < definition.getJointAngles().getLength(); i++)
