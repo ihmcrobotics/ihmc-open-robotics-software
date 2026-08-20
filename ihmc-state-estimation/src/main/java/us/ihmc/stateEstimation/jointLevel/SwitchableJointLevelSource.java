@@ -18,9 +18,14 @@ import java.util.List;
  * swap the joint q/qd source mid-session.
  * <p>
  * The {@link us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBiasProvider} side
- * is PINNED to the JointKF regardless of selection: the InEKF integrates the provided gyro bias
- * into base orientation, so switching the bias source would inject an orientation-rate step. Both
- * filters stay warm, so the q/qd switch itself is bumpless.
+ * is PINNED for the life of this instance to whichever source was selected at BOOT (construction),
+ * regardless of later live q/qd switches: the InEKF integrates the provided gyro bias into base
+ * orientation, and two independently-running filters estimating the same physical bias will not agree
+ * tick-to-tick, so retargeting the bias source on a LIVE switch would inject an orientation-rate step.
+ * Boot-time selection carries no such risk -- nothing has integrated anything yet -- so it is free to
+ * pick either source's bias, which is what lets {@code ALPHA_COMPLEMENTARY} be a genuinely complete
+ * old-pipeline option (q, qd, AND bias) rather than a hybrid with the JointKF's bias underneath. Both
+ * filters stay warm regardless, so the q/qd switch itself is always bumpless.
  */
 public class SwitchableJointLevelSource implements ProprioceptivePreFilter
 {
@@ -28,27 +33,31 @@ public class SwitchableJointLevelSource implements ProprioceptivePreFilter
 
    private final ProprioceptivePreFilter jointKF;
    private final ProprioceptivePreFilter alphaComplementary;
+   private final ProprioceptivePreFilter biasSource;
    private final YoEnum<JointLevelSource> selection;
 
-   /** Defaults the live selection to {@link JointLevelSource#JOINT_KF}. */
+   /** Defaults the live selection, and therefore the pinned bias source, to {@link JointLevelSource#JOINT_KF}. */
    public SwitchableJointLevelSource(ProprioceptivePreFilter jointKF, ProprioceptivePreFilter alphaComplementary, YoRegistry registry)
    {
       this(jointKF, alphaComplementary, JointLevelSource.JOINT_KF, registry);
    }
 
    /**
-    * @param initialSelection which source is active before anything switches it. Symmetric with the
+    * @param initialSelection which source is active before anything switches it, AND which source's
+    *                         IMU bias is pinned for the life of this instance (see class javadoc).
+    *                         Symmetric with the
     *                         {@link us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters.JointLevelEstimatorType}
     *                         that was actually configured: whichever one was chosen at boot is the one
     *                         live the moment this estimator starts ticking, and the other stays warm in
-    *                         the background ready to switch to -- not always JOINT_KF regardless of
-    *                         configuration.
+    *                         the background ready to switch the q/qd source to -- not always JOINT_KF
+    *                         regardless of configuration.
     */
    public SwitchableJointLevelSource(ProprioceptivePreFilter jointKF, ProprioceptivePreFilter alphaComplementary, JointLevelSource initialSelection,
                                       YoRegistry registry)
    {
       this.jointKF = jointKF;
       this.alphaComplementary = alphaComplementary;
+      this.biasSource = initialSelection == JointLevelSource.JOINT_KF ? jointKF : alphaComplementary;
       selection = new YoEnum<>("jointLevelSourceSelection", registry, JointLevelSource.class);
       selection.set(initialSelection);
    }
@@ -121,29 +130,30 @@ public class SwitchableJointLevelSource implements ProprioceptivePreFilter
       active().packVelocityCovariance(joints, fallbackVariance, toPack);
    }
 
-   // IMU biases: PINNED to the JointKF in both modes (see class javadoc).
+   // IMU biases: PINNED to whichever source was selected at boot (see class javadoc) -- NOT `active()`,
+   // which tracks the live q/qd selection and would retarget the bias source on every live switch.
 
    @Override
    public FrameVector3DReadOnly getAngularVelocityBiasInIMUFrame(IMUSensorReadOnly imu)
    {
-      return jointKF.getAngularVelocityBiasInIMUFrame(imu);
+      return biasSource.getAngularVelocityBiasInIMUFrame(imu);
    }
 
    @Override
    public FrameVector3DReadOnly getAngularVelocityBiasInWorldFrame(IMUSensorReadOnly imu)
    {
-      return jointKF.getAngularVelocityBiasInWorldFrame(imu);
+      return biasSource.getAngularVelocityBiasInWorldFrame(imu);
    }
 
    @Override
    public FrameVector3DReadOnly getLinearAccelerationBiasInIMUFrame(IMUSensorReadOnly imu)
    {
-      return jointKF.getLinearAccelerationBiasInIMUFrame(imu);
+      return biasSource.getLinearAccelerationBiasInIMUFrame(imu);
    }
 
    @Override
    public FrameVector3DReadOnly getLinearAccelerationBiasInWorldFrame(IMUSensorReadOnly imu)
    {
-      return jointKF.getLinearAccelerationBiasInWorldFrame(imu);
+      return biasSource.getLinearAccelerationBiasInWorldFrame(imu);
    }
 }
