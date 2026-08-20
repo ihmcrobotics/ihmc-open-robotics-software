@@ -302,6 +302,14 @@ public class RDXHardwareControlStateManager
       return controllerRLModelName;
    }
 
+   public String getDesiredRLModelName()
+   {
+      int index = desiredRLModel.get();
+      if (rlModelNames.length == 0 || index < 0 || index >= rlModelNames.length)
+         return null;
+      return rlModelNames[index];
+   }
+
    public boolean selectRLModelByName(String modelName)
    {
       if (modelName == null)
