@@ -61,7 +61,10 @@ public class ContinuousHikingProcess
       if (ros2ImageSensors.getSensor("Stepping Camera") != null)
          ros2ImageSensors.getSensor("Stepping Camera").registerImageQueue(rawImageCollectionSteppingCamera, ZEDImageSensor.DEPTH_IMAGE_KEY);
       if (ros2ImageSensors.getSensor("Experimental Camera") != null)
+      {
          ros2ImageSensors.getSensor("Experimental Camera").registerImageQueue(rawImageCollectionHeadCamera, ZEDImageSensor.DEPTH_IMAGE_KEY);
+         ros2ImageSensors.getSensor("Experimental Camera").registerImageQueue(rawImageCollectionSteppingCamera, ZEDImageSensor.DEPTH_IMAGE_KEY);
+      }
 
       // Class's that perform the real work of the process... the good stuff
       {

@@ -79,6 +79,11 @@ public class HeightMapExtractor
    private final int globalCellsPerAxis;
 
    private final RigidBodyTransform previousSensorToWorld = new RigidBodyTransform();
+   /**
+    * Head and belly cameras sit about a metre apart. Treating that jump as robot motion fills the
+    * map with variance and the closer camera's points lose.
+    */
+   private static final double SENSOR_SWITCH_TRANSLATION_METERS = 0.35;
    private int previousCellX;
    private int previousCellY;
    private float resetOffset;
@@ -144,7 +149,8 @@ public class HeightMapExtractor
          groundToWorldTranslationHostPointer = new FloatPointer(16);
          groundToWorldTranslationDevicePointer = new FloatPointer();
 
-         parametersHostPointer = new FloatPointer(21);
+         // Must match populateParameterArray(), including minDepthToAccept at index 21.
+         parametersHostPointer = new FloatPointer(22);
          parametersDevicePointer = new FloatPointer();
       }
       catch (Exception e)
@@ -259,6 +265,12 @@ public class HeightMapExtractor
          RotationMatrixBasics rotation = previousToCurrentSensorOrigin.getRotation();
          AxisAngle axisAngle = new AxisAngle(rotation);
          float angularMotionMagnitude = (float) Math.abs(axisAngle.getAngle());
+
+         if (linearMotionMagnitude > SENSOR_SWITCH_TRANSLATION_METERS)
+         {
+            linearMotionMagnitude = 0.0f;
+            angularMotionMagnitude = 0.0f;
+         }
 
          sensorToWorldAlignedGround.get(this.sensorToWorldAlignedGroundTransformArray);
          sensorToWorldAlignedGroundTransformHostPointer.put(this.sensorToWorldAlignedGroundTransformArray);
@@ -407,6 +419,7 @@ public class HeightMapExtractor
 
    public float[] populateParameterArray(HeightMapParameters parameters, CameraIntrinsics cameraIntrinsics, double groundHeightGuess)
    {
+      // Length must stay 22 so minDepthToAccept is copied onto the GPU (see parametersHostPointer).
       return new float[] {(float) parameters.getCellSize(),
                           (float) localCenterIndex,
                           (float) globalCenterIndex,

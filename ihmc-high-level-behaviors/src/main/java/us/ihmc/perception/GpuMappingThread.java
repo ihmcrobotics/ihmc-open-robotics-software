@@ -31,6 +31,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensors.CameraIntrinsics;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.function.ToDoubleFunction;
 
 public class GpuMappingThread extends RepeatingTaskThread
 {
@@ -43,6 +44,8 @@ public class GpuMappingThread extends RepeatingTaskThread
    private final ROS2Publisher<ImageMessage> filteredDepthPublisher;
    private final BlockingQueue<RawImage> rawImageCollection;
    private final ImageMessage filteredDepthImageMessage = new ImageMessage();
+   /** Per-frame min depth so a belly camera can reject the body while a head camera can see close. */
+   private ToDoubleFunction<RawImage> minDepthForImage = null;
 
    private final ROS2DemandGraphNode publishChunkMap;
    private final ROS2DemandGraphNode publishHeightMap;
@@ -68,9 +71,8 @@ public class GpuMappingThread extends RepeatingTaskThread
       // At the highest level pass in the reference frames for the specific robot
       ReferenceFrame leftFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
       ReferenceFrame rightFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.RIGHT);
-      // TODO we don't have a great way to setup the height map if we are using more then one sensor
-      // This will make the height map not appear correct cause the center is wrong
-      ReferenceFrame heightMapCenterFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
+      // Mid-feet stays under the robot when more than one camera writes the same map.
+      ReferenceFrame heightMapCenterFrame = syncedRobotModel.getReferenceFrames().getMidFeetZUpFrame();
 
       filteredDepthPublisher = ros2Node.createPublisher(PerceptionAPI.STEPPING_REALSENSE_DEPTH_FILTERED);
 
@@ -84,6 +86,15 @@ public class GpuMappingThread extends RepeatingTaskThread
                                                 controllerFootstepQueueMonitor,
                                                 heightMapParameters,
                                                 activeMappingParameterToolBox.getTerrainMapParameters());
+   }
+
+   /**
+    * Optional. When set, each depth frame can use its own {@code minDepthToAccept} so a downward
+    * belly camera can drop the robot body while a head camera still maps the close field.
+    */
+   public void setMinDepthForImage(ToDoubleFunction<RawImage> minDepthForImage)
+   {
+      this.minDepthForImage = minDepthForImage;
    }
 
    @Override
@@ -137,7 +148,17 @@ public class GpuMappingThread extends RepeatingTaskThread
          // Update height map
          synchronized (terrainMapLock)
          {
-            gpuMappingManager.update(filteredDepthImage, depthIntrinsicsCopy, cameraFrameInWorld, cameraZUpFrameInWorld);
+            double restoredMinDepth = heightMapParameters.getMinDepthToAccept();
+            if (minDepthForImage != null)
+               heightMapParameters.setMinDepthToAccept(minDepthForImage.applyAsDouble(depthImage));
+            try
+            {
+               gpuMappingManager.update(filteredDepthImage, depthIntrinsicsCopy, cameraFrameInWorld, cameraZUpFrameInWorld);
+            }
+            finally
+            {
+               heightMapParameters.setMinDepthToAccept(restoredMinDepth);
+            }
          }
 
          // Publish the updated maps if demanded
