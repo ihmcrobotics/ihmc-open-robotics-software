@@ -599,7 +599,7 @@ public class AvatarMultiThreadingFactory
          controllerFactory.setInitialState(highLevelControllerParameters.getDefaultInitialControllerState());
          controllerFactory.addCustomControlState(standPrepStateFactory);
          controllerFactory.addCustomControlState(freezeStateFactory);
-         controllerFactory.useDefaultStandTransitionControlState(STAND_PREP_STATE, WALKING);
+         controllerFactory.useDefaultStandTransitionControlState(STAND_PREP_STATE, RL_CONTROL);
          controllerFactory.useDefaultWalkingControlState();
          controllerFactory.useDefaultDoNothingControlState();
          controllerFactory.useDefaultFallingControlState();
@@ -632,7 +632,7 @@ public class AvatarMultiThreadingFactory
             controllerFactory.addControllerFailureTransition(highLevelControllerName, fallbackControllerState);
          }
 
-         controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING, false);
+         controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, RL_CONTROL, false);
          controllerFactory.addFinishedTransition(EXIT_WALKING, FREEZE_STATE);
 
          controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE,
