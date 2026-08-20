@@ -203,9 +203,15 @@ final class JointKFState
          pair.childBias = 2 * numberOfJoints + 3 * requireImuOrdinal(pair.child);
       }
 
-      // 3) Base IMU = root of the tree + first pair parent.
-      //WARNING: Need to configure if the root differs.
-      baseIMU = pairs.isEmpty() ? null : pairs.get(0).parent;
+      // 3) Base IMU = root of the tree, found structurally rather than assumed from config-list order.
+      // The old distributed-IMU estimator never picked a base by "whichever entry is first": it either took an
+      // explicitly-named primary IMU (IMUSensorInformation.getPrimaryBodyImu()) or derived the root from the
+      // kinematic tree (DistributedIMUBasedCenterOfMassStateUpdater: root = the floating joint's successor
+      // body). This filter has no robot-model root body to anchor on here, but it already builds and validates
+      // (assertAcyclicIMUGraph) a tree over the USED IMUs, so the tree's own root is derivable the same way: an
+      // edge points parent->child, so the root is the one IMU that is never a child in any pair. Positional
+      // config-list order (the old `pairs.get(0).parent`) played no part in this and does not need to.
+      baseIMU = findTreeRootIMU();
       baseBiasCol = baseIMU == null ? -1 : 2 * numberOfJoints + 3 * requireImuOrdinal(baseIMU);
       if (baseIMU == null)
          throw new RuntimeException("Base IMU is null, check the kinematic tree.");
@@ -484,6 +490,45 @@ final class JointKFState
       }
       // E <= m - 1 for a forest; with connectivity from the base IMU the used graph is a tree. (A disconnected
       // forest is not an error here — an IMU island simply contributes an independent sub-filter.)
+   }
+
+   /**
+    * The IMU that is never a {@code child} in any pair. {@link #assertAcyclicIMUGraph} has already run by the
+    * time this is called, so the used graph is a forest of trees; within a single tree the parent->child edges
+    * give every non-root IMU exactly one incoming edge, and the root none. Ambiguous (a disconnected forest with
+    * more than one root, so more than one IMU could gauge-fix the stance anchor) and degenerate (no pairs, or
+    * every IMU has an incoming edge, which acyclicity already rules out) cases fail loud rather than silently
+    * defaulting to config-list order, the exact failure mode this replaces.
+    */
+   private IMUSensorReadOnly findTreeRootIMU()
+   {
+      if (pairs.isEmpty())
+         return null;
+
+      boolean[] isChild = new boolean[numberOfIMUs];
+      for (Pair pair : pairs)
+         isChild[requireImuOrdinal(pair.child)] = true;
+
+      IMUSensorReadOnly root = null;
+      List<String> rootCandidates = new ArrayList<>();
+      for (int ordinal = 0; ordinal < numberOfIMUs; ordinal++)
+      {
+         if (!isChild[ordinal])
+         {
+            root = imusByOrdinal[ordinal];
+            rootCandidates.add(root.getSensorName());
+         }
+      }
+
+      if (rootCandidates.size() > 1)
+         throw new IllegalArgumentException("JointLevelKFPreFilter: the used IMU graph is a forest with " + rootCandidates.size()
+               + " roots (" + rootCandidates + ") — no single IMU can be inferred as the base for the stance-anchor gauge fix. "
+               + "Configure the IMU pairs so exactly one root (an IMU that is never a 'child') exists.");
+      if (root == null)
+         throw new IllegalStateException("JointLevelKFPreFilter: no IMU without an incoming edge was found; assertAcyclicIMUGraph should "
+               + "already have rejected this graph as cyclic.");
+
+      return root;
    }
 
    private static int find(int[] parent, int i)
