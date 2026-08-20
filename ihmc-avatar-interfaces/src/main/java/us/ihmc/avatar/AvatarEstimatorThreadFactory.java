@@ -20,6 +20,7 @@ import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.jros2.AsyncROS2Node;
@@ -27,13 +28,18 @@ import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
@@ -46,7 +52,6 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -54,20 +59,15 @@ import us.ihmc.stateEstimation.ekf.HumanoidRobotEKFWithSimpleJoints;
 import us.ihmc.stateEstimation.ekf.LeggedRobotEKF;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorControllerFactory;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.robotics.MultiBodySystemMissingTools;
-import us.ihmc.robotics.sensors.FootSwitchFactory;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
 import us.ihmc.stateEstimation.invariantEstimator.FootSwitchContactProbabilityProvider;
 import us.ihmc.stateEstimation.invariantEstimator.InvariantContactSource;
 import us.ihmc.stateEstimation.invariantEstimator.InvariantEKFStateEstimator;
 import us.ihmc.stateEstimation.invariantEstimator.InvariantMainStateEstimator;
 import us.ihmc.stateEstimation.jointLevel.ProprioceptivePreFilter;
 import us.ihmc.stateEstimation.jointLevel.ProprioceptivePreFilterFactory;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -92,7 +92,8 @@ public class AvatarEstimatorThreadFactory
 
    // Required fields -----------------------------------------------
    private final RequiredFactoryField<Double> gravityField = new RequiredFactoryField<>("gravity");
-   private final RequiredFactoryField<HumanoidRobotContextDataFactory> humanoidRobotContextDataFactoryField = new RequiredFactoryField<>("humanoidRobotContextDataFactory");
+   private final RequiredFactoryField<HumanoidRobotContextDataFactory> humanoidRobotContextDataFactoryField = new RequiredFactoryField<>(
+         "humanoidRobotContextDataFactory");
    private final RequiredFactoryField<FullHumanoidRobotModel> estimatorFullRobotModelField = new RequiredFactoryField<>("estimatorFullRobotModel");
    private final RequiredFactoryField<StateEstimatorParameters> stateEstimatorParametersField = new RequiredFactoryField<>("stateEstimatorParameters");
    private final RequiredFactoryField<SensorReaderFactory> sensorReaderFactoryField = new RequiredFactoryField<>("sensorReaderFactory");
@@ -103,6 +104,38 @@ public class AvatarEstimatorThreadFactory
    // Optional fields -----------------------------------------------
    private final OptionalFactoryField<YoGraphicsListRegistry> yoGraphicsListRegistryField = new OptionalFactoryField<>("yoGraphicsListRegistry");
    private final OptionalFactoryField<StateEstimatorController> mainStateEstimatorField = new OptionalFactoryField<>("mainEstimatorController");
+   private final OptionalFactoryField<PairList<BooleanSupplier, StateEstimatorController>> secondaryStateEstimatorsField = new OptionalFactoryField<>(
+         "secondaryEstimatorControllers");
+   private final OptionalFactoryField<List<StateEstimatorControllerFactory>> secondaryStateEstimatorFactoriesField = new OptionalFactoryField<>(
+         "secondaryEstimatorControllerFactories");
+   private final OptionalFactoryField<RobotConfigurationDataPublisher> robotConfigurationDataPublisherField = new OptionalFactoryField<>(
+         "robotConfigurationDataPublisher");
+   private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisPoseSubscriberField = new OptionalFactoryField<>(
+         "externalPelvisPoseSubscriberField");
+   private final OptionalFactoryField<AsyncROS2Node> asyncROS2NodeField = new OptionalFactoryField<>("asyncROS2Node");
+   private final OptionalFactoryField<ROS2Topic<?>> outputTopicField = new OptionalFactoryField<>("outputTopic");
+   private final OptionalFactoryField<ROS2Topic<?>> inputTopicField = new OptionalFactoryField<>("inputTopic");
+   private final OptionalFactoryField<SensorDataContext> sensorDataContextField = new OptionalFactoryField<>("sensorDataContext");
+   private final OptionalFactoryField<HumanoidRobotContextData> humanoidRobotContextDataField = new OptionalFactoryField<>("humanoidRobotContextData");
+   private final OptionalFactoryField<HumanoidRobotContextJointData> humanoidRobotContextJointDataField = new OptionalFactoryField<>(
+         "humanoidRobotContextJointData");
+   private final OptionalFactoryField<LowLevelOneDoFJointDesiredDataHolder> desiredJointDataHolderField = new OptionalFactoryField<>("desiredJointDataHolder");
+   private final OptionalFactoryField<FloatingJointBasics> rootJointField = new OptionalFactoryField<>("rootJoint");
+   private final OptionalFactoryField<OneDoFJointBasics[]> oneDoFJointsField = new OptionalFactoryField<>("oneDoFJoints");
+   private final OptionalFactoryField<OneDoFJointBasics[]> controllableOneDoFJointsField = new OptionalFactoryField<>("controllableOneDoFJoints");
+   private final OptionalFactoryField<RobotMotionStatusHolder> robotMotionStatusFromControllerField = new OptionalFactoryField<>(
+         "robotMotionStatusFromController");
+   private final OptionalFactoryField<CenterOfPressureDataHolder> centerOfPressureDataHolderFromControllerField = new OptionalFactoryField<>(
+         "centerOfPressureDataHolderFromController");
+   private final OptionalFactoryField<ForceSensorDataHolder> forceSensorDataHolderField = new OptionalFactoryField<>("forceSensorDataHolder");
+   private final OptionalFactoryField<CenterOfMassDataHolder> centerOfMassDataHolderField = new OptionalFactoryField<>("centerOfMassDataHolder");
+   private final OptionalFactoryField<ForceSensorDefinition[]> forceSensorDefinitionsField = new OptionalFactoryField<>("forceSensorDefinitionsField");
+   private final OptionalFactoryField<IMUDefinition[]> imuDefinitionsField = new OptionalFactoryField<>("imuDefinitions");
+   private final OptionalFactoryField<ContactableBodiesFactory<RobotSide>> contactableBodiesFactoryField = new OptionalFactoryField<>("contactableBodiesFactory");
+   private final OptionalFactoryField<SensorReader> sensorReaderField = new OptionalFactoryField<>("sensorReader");
+   private final OptionalFactoryField<SensorOutputMapReadOnly> rawSensorOutputMapField = new OptionalFactoryField<>("rawSensorOutputMap");
+   private final OptionalFactoryField<SensorOutputMapReadOnly> processedSensorOutputMapField = new OptionalFactoryField<>("processedSensorOutputMap");
+   private final OptionalFactoryField<JointDesiredOutputWriter> jointDesiredOutputWriterField = new OptionalFactoryField<>("jointDesiredOutputWriter");
    /** When set, {@link #getMainStateEstimator()} builds the invariant InEKF main estimator instead of the DRC one. */
    private boolean useInvariantStateEstimator = false;
    private boolean invariantEstimatorYawSeeding = true;
@@ -117,40 +150,6 @@ public class AvatarEstimatorThreadFactory
     * independent of the base estimate.
     */
    private InvariantContactSource invariantContactSource = InvariantContactSource.FOOT_SWITCHES;
-   private final OptionalFactoryField<PairList<BooleanSupplier, StateEstimatorController>> secondaryStateEstimatorsField = new OptionalFactoryField<>("secondaryEstimatorControllers");
-   private final OptionalFactoryField<List<StateEstimatorControllerFactory>> secondaryStateEstimatorFactoriesField = new OptionalFactoryField<>("secondaryEstimatorControllerFactories");
-
-   private final OptionalFactoryField<RobotConfigurationDataPublisher> robotConfigurationDataPublisherField = new OptionalFactoryField<>("robotConfigurationDataPublisher");
-
-   private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisPoseSubscriberField = new OptionalFactoryField<>("externalPelvisPoseSubscriberField");
-
-   private final OptionalFactoryField<AsyncROS2Node> asyncROS2NodeField = new OptionalFactoryField<>("asyncROS2Node");
-   private final OptionalFactoryField<ROS2Topic<?>> outputTopicField = new OptionalFactoryField<>("outputTopic");
-   private final OptionalFactoryField<ROS2Topic<?>> inputTopicField = new OptionalFactoryField<>("inputTopic");
-
-   private final OptionalFactoryField<SensorDataContext> sensorDataContextField = new OptionalFactoryField<>("sensorDataContext");
-   private final OptionalFactoryField<HumanoidRobotContextData> humanoidRobotContextDataField = new OptionalFactoryField<>("humanoidRobotContextData");
-   private final OptionalFactoryField<HumanoidRobotContextJointData> humanoidRobotContextJointDataField = new OptionalFactoryField<>("humanoidRobotContextJointData");
-   private final OptionalFactoryField<LowLevelOneDoFJointDesiredDataHolder> desiredJointDataHolderField = new OptionalFactoryField<>("desiredJointDataHolder");
-
-   private final OptionalFactoryField<FloatingJointBasics> rootJointField = new OptionalFactoryField<>("rootJoint");
-   private final OptionalFactoryField<OneDoFJointBasics[]> oneDoFJointsField = new OptionalFactoryField<>("oneDoFJoints");
-   private final OptionalFactoryField<OneDoFJointBasics[]> controllableOneDoFJointsField = new OptionalFactoryField<>("controllableOneDoFJoints");
-
-   private final OptionalFactoryField<RobotMotionStatusHolder> robotMotionStatusFromControllerField = new OptionalFactoryField<>("robotMotionStatusFromController");
-   private final OptionalFactoryField<CenterOfPressureDataHolder> centerOfPressureDataHolderFromControllerField = new OptionalFactoryField<>("centerOfPressureDataHolderFromController");
-   private final OptionalFactoryField<ForceSensorDataHolder> forceSensorDataHolderField = new OptionalFactoryField<>("forceSensorDataHolder");
-   private final OptionalFactoryField<CenterOfMassDataHolder> centerOfMassDataHolderField = new OptionalFactoryField<>("centerOfMassDataHolder");
-   private final OptionalFactoryField<ForceSensorDefinition[]> forceSensorDefinitionsField = new OptionalFactoryField<>("forceSensorDefinitionsField");
-   private final OptionalFactoryField<IMUDefinition[]> imuDefinitionsField = new OptionalFactoryField<>("imuDefinitions");
-
-   private final OptionalFactoryField<ContactableBodiesFactory<RobotSide>> contactableBodiesFactoryField = new OptionalFactoryField<>("contactableBodiesFactory");
-
-   private final OptionalFactoryField<SensorReader> sensorReaderField = new OptionalFactoryField<>("sensorReader");
-   private final OptionalFactoryField<SensorOutputMapReadOnly> rawSensorOutputMapField = new OptionalFactoryField<>("rawSensorOutputMap");
-   private final OptionalFactoryField<SensorOutputMapReadOnly> processedSensorOutputMapField = new OptionalFactoryField<>("processedSensorOutputMap");
-
-   private final OptionalFactoryField<JointDesiredOutputWriter> jointDesiredOutputWriterField = new OptionalFactoryField<>("jointDesiredOutputWriter");
 
    /**
     * Creates a new factory to create {@link AvatarEstimatorThread}.
@@ -177,17 +176,6 @@ public class AvatarEstimatorThreadFactory
    }
 
    /**
-    * Sets the magnitude of gravity to use in the state estimator, the sign of the value is not
-    * considered.
-    *
-    * @param gravity magnitude of the gravitational acceleration.
-    */
-   public void setGravity(double gravity)
-   {
-      gravityField.set(gravity);
-   }
-
-   /**
     * Configure this factory as follows:
     * <ul>
     * <li>Set the full-robot model using {@link DRCRobotModel#createFullRobotModel()}.
@@ -197,7 +185,7 @@ public class AvatarEstimatorThreadFactory
     * <li>Set the contact point parameters using {@link DRCRobotModel#getContactPointParameters()}.
     * </ul>
     *
-    * @param robotModel        the robot model used to configure this factory.
+    * @param robotModel the robot model used to configure this factory.
     */
    public void configureWithDRCRobotModel(DRCRobotModel robotModel)
    {
@@ -265,38 +253,6 @@ public class AvatarEstimatorThreadFactory
    }
 
    /**
-    * Sets the full-robot model that is to be used by the state estimator.
-    *
-    * @param estimatorFullRobotModel the full-robot model
-    */
-   public void setEstimatorFullRobotModel(FullHumanoidRobotModel estimatorFullRobotModel)
-   {
-      estimatorFullRobotModelField.set(estimatorFullRobotModel);
-   }
-
-   /**
-    * Sets the sensor information that is to be used by the state estimator to retrieve sensors such as
-    * wrist force/torque sensors.
-    *
-    * @param sensorInformation the sensor information.
-    */
-   public void setSensorInformation(HumanoidRobotSensorInformation sensorInformation)
-   {
-      sensorInformationField.set(sensorInformation);
-   }
-
-   /**
-    * Sets the contact point parameters that is used by the state estimator for creating contactable
-    * bodies.
-    *
-    * @param contactPointParameters the contact point parameters.
-    */
-   public void setContactPointParameters(RobotContactPointParameters<RobotSide> contactPointParameters)
-   {
-      contactPointParametersField.set(contactPointParameters);
-   }
-
-   /**
     * Sets the state estimator parameters used to configure things such as filters.
     *
     * @param stateEstimatorParameters the state estimator parameters.
@@ -315,27 +271,6 @@ public class AvatarEstimatorThreadFactory
    public void setConrollerParameters(WholeBodyControllerParameters<RobotSide> controllerParameters)
    {
       controllerParametersField.set(controllerParameters);
-   }
-
-   /**
-    * Sets the factory used to create the sensor reader.
-    *
-    * @param sensorReaderFactory the sensor reader factory.
-    */
-   public void setSensorReaderFactory(SensorReaderFactory sensorReaderFactory)
-   {
-      sensorReaderFactoryField.set(sensorReaderFactory);
-   }
-
-   /**
-    * The factory to create the context for the state estimator needed to run with the
-    * {@link BarrierScheduler}.
-    *
-    * @param contextDataFactory the context factory.
-    */
-   public void setHumanoidRobotContextDataFactory(HumanoidRobotContextDataFactory contextDataFactory)
-   {
-      humanoidRobotContextDataFactoryField.set(contextDataFactory);
    }
 
    /**
@@ -365,37 +300,6 @@ public class AvatarEstimatorThreadFactory
    }
 
    /**
-    * Optional: sets a custom publisher for {@link RobotConfigurationData}.
-    *
-    * @param publisher the custom publisher.
-    */
-   public void setRobotConfigurationDataPublisher(RobotConfigurationDataPublisher publisher)
-   {
-      if (publisher != null)
-         robotConfigurationDataPublisherField.set(publisher);
-   }
-
-   /**
-    * Optional: sets the main state estimator to use.
-    * <p>
-    * Two distinct state estimators can be built with this factory using:
-    * <ul>
-    * <li>{@link #createDRCKinematicsStateEstimator()} to create the default main state estimator.
-    * <li>{@link #createEKFStateEstimator()} to create a state estimator that is based on an Extended
-    * Kalman Filter.
-    * </ul>
-    * </p>
-    *
-    * @param mainStateEstimator the instance of the main state estimator.
-    */
-   public void setMainStateEstimator(StateEstimatorController mainStateEstimator)
-   {
-      if (mainStateEstimatorField.hasValue())
-         throw new IllegalOperationException("The main state estimator has already been set.");
-      mainStateEstimatorField.set(mainStateEstimator);
-   }
-
-   /**
     * Optional: adds a secondary state estimator to run in parallel to the main state estimator.
     *
     * @param secondaryStateEstimator the secondary state estimator.
@@ -404,7 +308,6 @@ public class AvatarEstimatorThreadFactory
    {
       addSecondaryStateEstimators(() -> false, secondaryStateEstimator);
    }
-
 
    /**
     * Optional: adds a secondary state estimator factory to run in parallel to the main state estimator.
@@ -467,9 +370,7 @@ public class AvatarEstimatorThreadFactory
          for (StateEstimatorControllerFactory stateEstimatorControllerFactory : secondaryStateEstimatorFactoriesField.get())
          {
             // Same gravity the main estimator gets, so a secondary estimator never needs its own copy.
-            addSecondaryStateEstimator(stateEstimatorControllerFactory.createStateEstimator(getEstimatorFullRobotModel(),
-                                                                                            getSensorReader(),
-                                                                                            getGravity()));
+            addSecondaryStateEstimator(stateEstimatorControllerFactory.createStateEstimator(getEstimatorFullRobotModel(), getSensorReader(), getGravity()));
          }
       }
 
@@ -511,19 +412,20 @@ public class AvatarEstimatorThreadFactory
       estimatorFactory.setCenterOfPressureDataHolderFromController(getCenterOfPressureDataHolderFromController());
       estimatorFactory.setRobotMotionStatusFromController(getRobotMotionStatusFromController());
       estimatorFactory.setExternalPelvisCorrectorSubscriber(getExternalPelvisPoseSubscriberField());
-      DRCKinematicsBasedStateEstimator stateEstimator = estimatorFactory.createStateEstimator(getEstimatorRegistry(), getStateEstimatorParameters()::getEstimatorDT);
+      DRCKinematicsBasedStateEstimator stateEstimator = estimatorFactory.createStateEstimator(getEstimatorRegistry(),
+                                                                                              getStateEstimatorParameters()::getEstimatorDT);
 
       if (asyncROS2NodeField.hasValue())
       {
          ForceSensorStateUpdater forceSensorStateUpdater = stateEstimator.getForceSensorStateUpdater();
-         asyncROS2NodeField.get().createSubscription(inputTopicField.get().withType(RequestWristForceSensorCalibrationPacket.class),
-                                     subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
-         asyncROS2NodeField.get().createSubscriptionSampler(inputTopicField.get().withType(ReinitializeStateEstimatorMessage.class),
-                                                            sample ->
-                                                            {
-                                                               if (sample.getRequestReinitialize())
-                                                                  stateEstimator.requestReinitializeEstimator();
-                                                            });
+         asyncROS2NodeField.get()
+                           .createSubscription(inputTopicField.get().withType(RequestWristForceSensorCalibrationPacket.class),
+                                               subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
+         asyncROS2NodeField.get().createSubscriptionSampler(inputTopicField.get().withType(ReinitializeStateEstimatorMessage.class), sample ->
+         {
+            if (sample.getRequestReinitialize())
+               stateEstimator.requestReinitializeEstimator();
+         });
       }
 
       return stateEstimator;
@@ -581,11 +483,16 @@ public class AvatarEstimatorThreadFactory
                                                                                 estimatorDT,
                                                                                 preFilterRegistry);
 
-      // 2026-07-16 (12 Hz investigation): when the JointKF is selected, ALSO build the alpha-
-      // complementary filter and wrap both in a live-switchable source (jointLevelSourceSelection
-      // YoEnum). Same InEKF base, joint q/qd source swappable mid-session; biases stay pinned to
-      // the JointKF inside the wrapper so the switch is bumpless for the base state.
-      if (preFilter instanceof us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter)
+      // 2026-07-16 (12 Hz investigation): when either the JointKF or the AlphaComplementary filter is
+      // selected, ALSO build the other one and wrap both in a live-switchable source
+      // (jointLevelSourceSelection YoEnum), so the live-switch A/B is available regardless of which
+      // was configured at boot -- previously this only wrapped when JOINT_KF was the initial choice,
+      // so booting into ALPHA_COMPLEMENTARY had no way to switch to JOINT_KF at runtime, an asymmetry
+      // with no equivalent restriction the other way. Same InEKF base, joint q/qd source swappable
+      // mid-session; biases stay pinned to the JointKF inside the wrapper (see its class javadoc) so
+      // the switch is bumpless for the base state. NONE (raw sensor passthrough) has no counterpart
+      // to switch to and is left unwrapped.
+      if (preFilter instanceof us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter jointKF)
       {
          ProprioceptivePreFilter alpha = us.ihmc.stateEstimation.jointLevel.AlphaComplementaryPreFilter.createForKinematicsEstimator(getProcessedSensorOutputMap(),
                                                                                                                                      getStateEstimatorParameters(),
@@ -595,7 +502,26 @@ public class AvatarEstimatorThreadFactory
                                                                                                                                      () -> cancelGravityFromAccelerationMeasurement,
                                                                                                                                      estimatorDT,
                                                                                                                                      preFilterRegistry);
-         preFilter = new us.ihmc.stateEstimation.jointLevel.SwitchableJointLevelSource(preFilter, alpha, preFilterRegistry);
+         preFilter = new us.ihmc.stateEstimation.jointLevel.SwitchableJointLevelSource(jointKF,
+                                                                                       alpha,
+                                                                                       us.ihmc.stateEstimation.jointLevel.SwitchableJointLevelSource.JointLevelSource.JOINT_KF,
+                                                                                       preFilterRegistry);
+      }
+      else if (preFilter instanceof us.ihmc.stateEstimation.jointLevel.AlphaComplementaryPreFilter alpha)
+      {
+         ProprioceptivePreFilter jointKF = us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter.createForKinematicsEstimator(getProcessedSensorOutputMap(),
+                                                                                                                                 getStateEstimatorParameters(),
+                                                                                                                                 imuProcessedOutputs,
+                                                                                                                                 feet,
+                                                                                                                                 fullRobotModel.getElevator(),
+                                                                                                                                 getGravity(),
+                                                                                                                                 () -> cancelGravityFromAccelerationMeasurement,
+                                                                                                                                 estimatorDT,
+                                                                                                                                 preFilterRegistry);
+         preFilter = new us.ihmc.stateEstimation.jointLevel.SwitchableJointLevelSource(jointKF,
+                                                                                       alpha,
+                                                                                       us.ihmc.stateEstimation.jointLevel.SwitchableJointLevelSource.JointLevelSource.ALPHA_COMPLEMENTARY,
+                                                                                       preFilterRegistry);
       }
 
       InvariantMainStateEstimator mainStateEstimator = new InvariantMainStateEstimator(fullRobotModel,
@@ -745,9 +671,31 @@ public class AvatarEstimatorThreadFactory
       return gravityField.get();
    }
 
+   /**
+    * Sets the magnitude of gravity to use in the state estimator, the sign of the value is not
+    * considered.
+    *
+    * @param gravity magnitude of the gravitational acceleration.
+    */
+   public void setGravity(double gravity)
+   {
+      gravityField.set(gravity);
+   }
+
    public HumanoidRobotContextDataFactory getHumanoidRobotContextDataFactory()
    {
       return humanoidRobotContextDataFactoryField.get();
+   }
+
+   /**
+    * The factory to create the context for the state estimator needed to run with the
+    * {@link BarrierScheduler}.
+    *
+    * @param contextDataFactory the context factory.
+    */
+   public void setHumanoidRobotContextDataFactory(HumanoidRobotContextDataFactory contextDataFactory)
+   {
+      humanoidRobotContextDataFactoryField.set(contextDataFactory);
    }
 
    public HumanoidRobotContextJointData getHumanoidRobotContextJointData()
@@ -835,6 +783,16 @@ public class AvatarEstimatorThreadFactory
       return sensorReaderFactoryField.get();
    }
 
+   /**
+    * Sets the factory used to create the sensor reader.
+    *
+    * @param sensorReaderFactory the sensor reader factory.
+    */
+   public void setSensorReaderFactory(SensorReaderFactory sensorReaderFactory)
+   {
+      sensorReaderFactoryField.set(sensorReaderFactory);
+   }
+
    public boolean useStateEstimator()
    {
       return getSensorReaderFactory().useStateEstimator();
@@ -869,6 +827,16 @@ public class AvatarEstimatorThreadFactory
    public FullHumanoidRobotModel getEstimatorFullRobotModel()
    {
       return estimatorFullRobotModelField.get();
+   }
+
+   /**
+    * Sets the full-robot model that is to be used by the state estimator.
+    *
+    * @param estimatorFullRobotModel the full-robot model
+    */
+   public void setEstimatorFullRobotModel(FullHumanoidRobotModel estimatorFullRobotModel)
+   {
+      estimatorFullRobotModelField.set(estimatorFullRobotModel);
    }
 
    public FloatingJointBasics getRootJoint()
@@ -924,6 +892,17 @@ public class AvatarEstimatorThreadFactory
       return contactPointParametersField.get();
    }
 
+   /**
+    * Sets the contact point parameters that is used by the state estimator for creating contactable
+    * bodies.
+    *
+    * @param contactPointParameters the contact point parameters.
+    */
+   public void setContactPointParameters(RobotContactPointParameters<RobotSide> contactPointParameters)
+   {
+      contactPointParametersField.set(contactPointParameters);
+   }
+
    public StateEstimatorParameters getStateEstimatorParameters()
    {
       return stateEstimatorParametersField.get();
@@ -937,6 +916,17 @@ public class AvatarEstimatorThreadFactory
    public HumanoidRobotSensorInformation getSensorInformation()
    {
       return sensorInformationField.get();
+   }
+
+   /**
+    * Sets the sensor information that is to be used by the state estimator to retrieve sensors such as
+    * wrist force/torque sensors.
+    *
+    * @param sensorInformation the sensor information.
+    */
+   public void setSensorInformation(HumanoidRobotSensorInformation sensorInformation)
+   {
+      sensorInformationField.set(sensorInformation);
    }
 
    public PelvisPoseCorrectionCommunicatorInterface getExternalPelvisPoseSubscriberField()
@@ -957,6 +947,26 @@ public class AvatarEstimatorThreadFactory
             mainStateEstimatorField.set(createDRCKinematicsStateEstimator());
       }
       return mainStateEstimatorField.get();
+   }
+
+   /**
+    * Optional: sets the main state estimator to use.
+    * <p>
+    * Two distinct state estimators can be built with this factory using:
+    * <ul>
+    * <li>{@link #createDRCKinematicsStateEstimator()} to create the default main state estimator.
+    * <li>{@link #createEKFStateEstimator()} to create a state estimator that is based on an Extended
+    * Kalman Filter.
+    * </ul>
+    * </p>
+    *
+    * @param mainStateEstimator the instance of the main state estimator.
+    */
+   public void setMainStateEstimator(StateEstimatorController mainStateEstimator)
+   {
+      if (mainStateEstimatorField.hasValue())
+         throw new IllegalOperationException("The main state estimator has already been set.");
+      mainStateEstimatorField.set(mainStateEstimator);
    }
 
    public PairList<BooleanSupplier, StateEstimatorController> getSecondaryStateEstimators()
@@ -993,6 +1003,17 @@ public class AvatarEstimatorThreadFactory
          robotConfigurationDataPublisherField.set(factory.createRobotConfigurationDataPublisher());
       }
       return robotConfigurationDataPublisherField.get();
+   }
+
+   /**
+    * Optional: sets a custom publisher for {@link RobotConfigurationData}.
+    *
+    * @param publisher the custom publisher.
+    */
+   public void setRobotConfigurationDataPublisher(RobotConfigurationDataPublisher publisher)
+   {
+      if (publisher != null)
+         robotConfigurationDataPublisherField.set(publisher);
    }
 
    public YoRegistry getEstimatorRegistry()

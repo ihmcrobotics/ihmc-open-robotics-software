@@ -30,12 +30,27 @@ public class SwitchableJointLevelSource implements ProprioceptivePreFilter
    private final ProprioceptivePreFilter alphaComplementary;
    private final YoEnum<JointLevelSource> selection;
 
+   /** Defaults the live selection to {@link JointLevelSource#JOINT_KF}. */
    public SwitchableJointLevelSource(ProprioceptivePreFilter jointKF, ProprioceptivePreFilter alphaComplementary, YoRegistry registry)
+   {
+      this(jointKF, alphaComplementary, JointLevelSource.JOINT_KF, registry);
+   }
+
+   /**
+    * @param initialSelection which source is active before anything switches it. Symmetric with the
+    *                         {@link us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters.JointLevelEstimatorType}
+    *                         that was actually configured: whichever one was chosen at boot is the one
+    *                         live the moment this estimator starts ticking, and the other stays warm in
+    *                         the background ready to switch to -- not always JOINT_KF regardless of
+    *                         configuration.
+    */
+   public SwitchableJointLevelSource(ProprioceptivePreFilter jointKF, ProprioceptivePreFilter alphaComplementary, JointLevelSource initialSelection,
+                                      YoRegistry registry)
    {
       this.jointKF = jointKF;
       this.alphaComplementary = alphaComplementary;
       selection = new YoEnum<>("jointLevelSourceSelection", registry, JointLevelSource.class);
-      selection.set(JointLevelSource.JOINT_KF);
+      selection.set(initialSelection);
    }
 
    /** The wrapped JointKF, e.g. for wiring its initialization gate. */
