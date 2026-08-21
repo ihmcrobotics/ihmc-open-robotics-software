@@ -187,6 +187,26 @@ public class InvariantPropagator
       CommonOps_DDRM.multTransB(tempA, Phi, tempB); // Φ·P·Φᵀ
       CommonOps_DDRM.add(tempB, processNoiseDiscrete, covariance); // write back into P
 
+      // P is symmetric only to round-off after the mult/multTransB pair above; JointKFUpdate and
+      // JointKFPrediction both symmetrize their covariance writes for the same reason (round-off
+      // asymmetry compounds tick over tick and can eventually break a downstream Cholesky), and
+      // InvariantUpdater already symmetrizes its own S before decomposing it -- this was the one
+      // covariance write in the package that didn't follow that pattern.
+      symmetrize(covariance);
+   }
+
+   /** In-place symmetrization A &lt;- 0.5 (A + Aᵀ). Allocation-free. */
+   private static void symmetrize(DMatrixRMaj a)
+   {
+      for (int i = 0; i < a.numRows; i++)
+      {
+         for (int j = i + 1; j < a.numCols; j++)
+         {
+            double avg = 0.5 * (a.get(i, j) + a.get(j, i));
+            a.set(i, j, avg);
+            a.set(j, i, avg);
+         }
+      }
    }
 
    /** Builds the state-independent transition Φ = exp(A_c Δt) into {@link #Phi}. */
