@@ -425,9 +425,6 @@ public class SCS2AvatarSimulationFactory
       }
       robot = simulationConstructionSet.addRobot(robotDefinition);
 
-      if (asyncROS2Node.hasBeenSet())
-         AbilityHandSimulationController.attachIfNeeded(robot, asyncROS2Node.get(), robotModel);
-
       // The debug variables don't need to be updated when the GUI isn't shown as users won't have a way of debugging
       if (showGUI.get())
       {

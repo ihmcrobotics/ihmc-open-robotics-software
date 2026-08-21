@@ -53,7 +53,7 @@ public class RDXAbilityHand implements RDXHandInterface
 
       for (int i = 0; i < 6; i++)
       {
-         desiredPositions[i] = new ImFloat(AbilityHandGrip.KEY_CLOSE.getStageFingerPosition(0, i));
+         desiredPositions[i] = new ImFloat(START_POSITION);
          desiredVelocities[i] = new ImFloat(DEFAULT_VELOCITY);
       }
 
