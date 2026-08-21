@@ -8,6 +8,7 @@ import ihmc_hands_ros2.AbilityHandCommand;
 import ihmc_hands_ros2.AbilityHandState;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.HandConfigurationAPI;
 import us.ihmc.handsros2.HandModel;
 import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
 import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
@@ -16,6 +17,7 @@ import us.ihmc.handsros2.abilityHand.AbilityHandModel.AbilityHandJointName;
 import us.ihmc.handsros2.abilityHand.AbilityHandROS2API;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -67,6 +69,11 @@ public class AbilityHandKinematicsSimulation
          message.set(sample);
          commandNotification.set(message);
       });
+      ros2Node.createSubscriptionSampler(HandConfigurationAPI.getCommandTopic(side), sample -> {
+         AbilityHandCommand command = toGripCommand(side, sample.getConfiguration());
+         if (command != null)
+            commandNotification.set(command);
+      });
       statePublisher = ros2Node.createPublisher(AbilityHandROS2API.STATE_TOPICS.get(side));
 
       for (int i = 0; i < ACTUATOR_COUNT; i++)
@@ -76,6 +83,24 @@ public class AbilityHandKinematicsSimulation
       snapToGoals();
       applyToJoints();
       publishState(true);
+   }
+
+   private static AbilityHandCommand toGripCommand(RobotSide robotSide, int configuration)
+   {
+      if (configuration <= 0 || configuration >= AbilityHandGrip.values.length)
+      {
+         LogTools.warn("Unknown Ability Hand configuration command: {}", configuration);
+         return null;
+      }
+
+      AbilityHandGrip grip = AbilityHandGrip.fromByte((byte) configuration);
+      AbilityHandCommand command = new AbilityHandCommand();
+      command.setControlMode(AbilityHandControlMode.GRIP.toByte());
+      command.setGrip(grip.toByte());
+      for (int i = 0; i < ACTUATOR_COUNT; i++)
+         command.getGoalVelocities()[i] = (float) DEFAULT_GOAL_VELOCITY_DEG_PER_SEC;
+      LogTools.info("Ability Hand {} configuration {} -> grip {}", robotSide.getLowerCaseName(), configuration, grip);
+      return command;
    }
 
    public boolean isEnabled()
