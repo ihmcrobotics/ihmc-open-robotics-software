@@ -277,6 +277,12 @@ public class GravityLevelingUpdater
       return index == 0 ? v.getX() : index == 1 ? v.getY() : v.getZ();
    }
 
+   /** True iff every component is finite (rejects NaN and ±Infinity; {@link Tuple3DReadOnly#containsNaN()} alone misses Infinity). */
+   private static boolean isFinite(Vector3DReadOnly v)
+   {
+      return Double.isFinite(v.getX()) && Double.isFinite(v.getY()) && Double.isFinite(v.getZ());
+   }
+
    /**
     * Quasi-static gate: the accelerometer only measures gravity direction when linear acceleration is small
     * (‖a‖ ≈ |g|), the body is barely rotating (‖ω‖ small), AND the HORIZONTAL specific force is small. The last
@@ -350,7 +356,12 @@ public class GravityLevelingUpdater
    public void updateGravityReference(Vector3DReadOnly specificForceBody, Vector3DReadOnly rawAngularVelocity, double dt)
    {
       double accelNorm = specificForceBody.norm();
-      if (accelNorm < 1.0e-9)
+      // NaN/Inf guard: a single IMU glitch must not corrupt gravityReferenceBody, since this is an IIR
+      // reference with no mechanism to recover once NaN enters it (the conditioning gate downstream only
+      // inspects S, not this reference, so it cannot catch this either). See HANDOFF_NOTES.md §2-4. Both
+      // sensors are guarded: rawAngularVelocity also feeds gravityReferenceBody below (via the ω×ĝ carry
+      // term), so a gyro-only glitch with a perfectly finite accelNorm would otherwise slip through.
+      if (!Double.isFinite(accelNorm) || accelNorm < 1.0e-9 || !isFinite(rawAngularVelocity))
          return;
 
       if (!gravityReferenceInitialized)
