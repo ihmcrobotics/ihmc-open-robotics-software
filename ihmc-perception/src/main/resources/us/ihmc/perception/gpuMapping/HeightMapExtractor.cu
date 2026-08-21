@@ -24,6 +24,12 @@ extern "C"
 #define VARIANCE_PER_ROTATION_SPEED 19
 #define GROUND_HEIGHT 20
 #define MIN_DEPTH_TO_ACCEPT 21
+#define ICP_OUTLIER_DISTANCE_THRESHOLD 22
+#define ICP_VARIANCE_PER_METER_OF_CORRECTION 23
+
+// Sentinel written to a global-map variance cell to mark it as holding no real data.
+// Real variances are always non-negative, so this is unambiguous everywhere it's checked.
+#define INVALID_CELL_VARIANCE -1.0f
 
 __device__ float3 back_project_perspective(int2 pos, float Z, const float *params)
 {
@@ -184,29 +190,274 @@ __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOl
     int srcX = x + shiftX;
     int srcY = y + shiftY;
 
+    float* newMeanRow = (float*)((char*)newMeanMap + x * pitchNewMean);
+    float* newVarianceRow = (float*)((char*)newVarianceMap + x * pitchNewVariance);
+
     if (srcX >= 0 && srcX < globalCellsPerAxis && srcY >= 0 && srcY < globalCellsPerAxis)
     {
         float* oldMeanRow = (float*)((char*)oldHeightMapMean + srcX * pitchOldHeightMapMean);
         float* oldVarianceRow = (float *)((char*)oldHeightMapVariance + srcX * pitchOldHeightMapVariance);
 
-        float* newMeanRow = (float*)((char*)newMeanMap + x * pitchNewMean);
-        float* newVarianceRow = (float*)((char*)newVarianceMap + x * pitchNewVariance);
+        float oldVariance = oldVarianceRow[srcY];
 
-        newMeanRow[y] = oldMeanRow[srcY];
-
-        // Add variance due to the translation
-        float increasedVariance = oldVarianceRow[srcY] + params[ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED];
-        // We use min here to prevent over flow of the max value of a unsigned short
-        newVarianceRow[y] = increasedVariance;
+        if (oldVariance < 0.0f)
+        {
+            // Source cell holds no real data, propagate that instead of manufacturing a variance for it
+            newMeanRow[y] = defaultValue;
+            newVarianceRow[y] = INVALID_CELL_VARIANCE;
+        }
+        else
+        {
+            newMeanRow[y] = oldMeanRow[srcY];
+            // Add variance due to the translation
+            newVarianceRow[y] = oldVariance + params[ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED];
+        }
     }
     else
     {
-        float* newMeanRow = (float*)((char*)newMeanMap + x * pitchNewMean);
-        float* newVarianceRow = (float*)((char*)newVarianceMap + x * pitchNewVariance);
-
         newMeanRow[y] = defaultValue;
-        newVarianceRow[y] = defaultValue;
+        newVarianceRow[y] = INVALID_CELL_VARIANCE;
     }
+}
+
+/**
+ * @brief ICP Correspondence KERNEL: One thread per local (new) cell.
+ *
+ * The state estimator can drift (mostly vertically, but also horizontally and in yaw about the
+ * world Z axis) in ways that the translate kernel's integer cell shift doesn't capture, since that
+ * shift only accounts for known/estimated motion. This kernel finds point correspondences between
+ * the newest local data (treated as ground truth for this frame) and the existing global map
+ * (which may have drifted), and accumulates the sums needed to solve a small-angle-linearized
+ * Gauss-Newton update for the rigid transform (tx, ty, tz, yaw) that should be applied to the
+ * OLD map to bring it back into alignment. It is meant to be called iteratively: each call takes
+ * the current best estimate of that transform (totalTx/Ty/Tz/Yaw) and produces the sums for the
+ * next incremental refinement, without modifying the global map itself.
+ *
+ * Accumulator layout (8 floats, atomically added into by every surviving correspondence):
+ *   [0] N               : number of surviving correspondences
+ *   [1] sum_rqx         : sum of the old point's world X, rotated by the current yaw estimate
+ *   [2] sum_rqy         : sum of the old point's world Y, rotated by the current yaw estimate
+ *   [3] sum_rq2         : sum of (rqx^2 + rqy^2)
+ *   [4] sum_rx          : sum of the X residual (predicted old point minus new point)
+ *   [5] sum_ry          : sum of the Y residual
+ *   [6] sum_rz          : sum of the Z residual
+ *   [7] sum_yawRhs      : sum of (rqy * rx - rqx * ry), the yaw right-hand-side term
+ */
+extern "C"
+__global__ void icpCorrespondenceKernel(const float* __restrict__ localMeanMap, size_t pitchLocalMean,
+                                        const float* __restrict__ globalMeanMap, size_t pitchGlobalMean,
+                                        const float* __restrict__ globalVarianceMap, size_t pitchGlobalVariance,
+                                        const float globalMapCenterX,
+                                        const float globalMapCenterY,
+                                        const float* __restrict__ groundToWorldTranslation,
+                                        const float totalTx,
+                                        const float totalTy,
+                                        const float totalTz,
+                                        const float totalYaw,
+                                        const int searchRadiusCells,
+                                        float* __restrict__ accumulator,
+                                        const float* __restrict__ params)
+{
+    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
+
+    const int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
+    const int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+    const float cellSize = params[CELL_SIZE];
+    const int localCenterIndex = static_cast<int>(params[LOCAL_CENTER_INDEX]);
+    const int globalCenterIndex = static_cast<int>(params[GLOBAL_CENTER_INDEX]);
+    const float outlierDistanceThreshold = params[ICP_OUTLIER_DISTANCE_THRESHOLD];
+
+    if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
+        return;
+
+    int2 localCell = make_int2(yIndex, xIndex);
+    const float* localMeanRow = (const float*)((const char*)localMeanMap + localCell.x * pitchLocalMean);
+    float localMeanF = localMeanRow[localCell.y];
+
+    // No point landed in this local cell, nothing to correspond
+    if (localMeanF == 0.0f)
+        return;
+
+    float2 localCoordinate = indices_to_coordinate(localCell, make_float2(0.0f, 0.0f), cellSize, localCenterIndex);
+    float3 pointInLocalFrame = make_float3(localCoordinate.x, localCoordinate.y, 0.0f);
+    float3 pointInGroundToWorld = transformPoint3D(pointInLocalFrame, groundToWorldTranslation);
+
+    // The newest sensor data is treated as the fixed reference this frame
+    float3 newPoint = make_float3(pointInGroundToWorld.x, pointInGroundToWorld.y, localMeanF);
+
+    float cosYaw = cosf(totalYaw);
+    float sinYaw = sinf(totalYaw);
+
+    // Where, in the OLD map's raw (uncorrected) indexing, the corresponding cell should be,
+    // given the current correction estimate: the inverse of the current estimate applied to newPoint
+    float invX = newPoint.x - totalTx;
+    float invY = newPoint.y - totalTy;
+    float searchCenterX = cosYaw * invX + sinYaw * invY;
+    float searchCenterY = -sinYaw * invX + cosYaw * invY;
+
+    int2 searchCenterCell = coordinate_to_indices(make_float2(searchCenterX, searchCenterY),
+                                                  make_float2(globalMapCenterX, globalMapCenterY),
+                                                  cellSize,
+                                                  globalCenterIndex);
+
+    bool foundMatch = false;
+    float bestDistanceSquared = 0.0f;
+    float bestRqx = 0.0f;
+    float bestRqy = 0.0f;
+    float bestQz = 0.0f;
+
+    for (int dcx = -searchRadiusCells; dcx <= searchRadiusCells; ++dcx)
+    {
+        for (int dcy = -searchRadiusCells; dcy <= searchRadiusCells; ++dcy)
+        {
+            int candidateX = searchCenterCell.x + dcx;
+            int candidateY = searchCenterCell.y + dcy;
+
+            if (candidateX < 0 || candidateX >= globalCellsPerAxis || candidateY < 0 || candidateY >= globalCellsPerAxis)
+                continue;
+
+            const float* varianceRow = (const float*)((const char*)globalVarianceMap + candidateX * pitchGlobalVariance);
+            if (varianceRow[candidateY] < 0.0f)
+                continue; // no real data at this candidate
+
+            const float* meanRow = (const float*)((const char*)globalMeanMap + candidateX * pitchGlobalMean);
+            float qz = meanRow[candidateY];
+
+            float2 qWorld = indices_to_coordinate(make_int2(candidateX, candidateY),
+                                                  make_float2(globalMapCenterX, globalMapCenterY),
+                                                  cellSize,
+                                                  globalCenterIndex);
+
+            // Predict where this old cell lands under the current correction estimate
+            float rqx = cosYaw * qWorld.x - sinYaw * qWorld.y;
+            float rqy = sinYaw * qWorld.x + cosYaw * qWorld.y;
+            float predictedX = rqx + totalTx;
+            float predictedY = rqy + totalTy;
+            float predictedZ = qz + totalTz;
+
+            float dx = predictedX - newPoint.x;
+            float dy = predictedY - newPoint.y;
+            float dz = predictedZ - newPoint.z;
+            float distSq = dx * dx + dy * dy + dz * dz;
+
+            if (!foundMatch || distSq < bestDistanceSquared)
+            {
+                foundMatch = true;
+                bestDistanceSquared = distSq;
+                bestRqx = rqx;
+                bestRqy = rqy;
+                bestQz = qz;
+            }
+        }
+    }
+
+    if (!foundMatch || sqrtf(bestDistanceSquared) > outlierDistanceThreshold)
+        return;
+
+    float predictedX = bestRqx + totalTx;
+    float predictedY = bestRqy + totalTy;
+    float predictedZ = bestQz + totalTz;
+
+    float rx = predictedX - newPoint.x;
+    float ry = predictedY - newPoint.y;
+    float rz = predictedZ - newPoint.z;
+    float yawRhsTerm = bestRqy * rx - bestRqx * ry;
+
+    atomicAdd(&accumulator[0], 1.0f);
+    atomicAdd(&accumulator[1], bestRqx);
+    atomicAdd(&accumulator[2], bestRqy);
+    atomicAdd(&accumulator[3], bestRqx * bestRqx + bestRqy * bestRqy);
+    atomicAdd(&accumulator[4], rx);
+    atomicAdd(&accumulator[5], ry);
+    atomicAdd(&accumulator[6], rz);
+    atomicAdd(&accumulator[7], yawRhsTerm);
+}
+
+/**
+ * @brief ICP Apply Correction KERNEL: One thread per global cell.
+ *
+ * Applies the final, converged (tx, ty, tz, yaw) correction (accumulated on the CPU from repeated
+ * calls to {@code icpCorrespondenceKernel}) to the global map, the same double-buffered
+ * old-map/new-map pattern used by {@code translateHeightMapKernel}. For each destination cell, the
+ * inverse of the correction is used to find which old (uncorrected) cell its data should come from,
+ * snapping to the nearest cell rather than interpolating. The variance is bumped in proportion to
+ * how far that cell's data actually moved, so more heavily corrected cells are trusted less.
+ */
+extern "C"
+__global__ void icpApplyCorrectionKernel(float* oldHeightMapMean, size_t pitchOldHeightMapMean,
+                                         float* oldHeightMapVariance, size_t pitchOldHeightMapVariance,
+                                         float* newMeanMap, size_t pitchNewMean,
+                                         float* newVarianceMap, size_t pitchNewVariance,
+                                         const float globalMapCenterX,
+                                         const float globalMapCenterY,
+                                         const float totalTx,
+                                         const float totalTy,
+                                         const float totalTz,
+                                         const float totalYaw,
+                                         float* params,
+                                         float defaultValue)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+    float cellSize = params[CELL_SIZE];
+    int globalCenterIndex = static_cast<int>(params[GLOBAL_CENTER_INDEX]);
+    float variancePerMeter = params[ICP_VARIANCE_PER_METER_OF_CORRECTION];
+
+    if (x >= globalCellsPerAxis || y >= globalCellsPerAxis)
+        return;
+
+    float2 destinationWorld = indices_to_coordinate(make_int2(x, y),
+                                                    make_float2(globalMapCenterX, globalMapCenterY),
+                                                    cellSize,
+                                                    globalCenterIndex);
+
+    float cosYaw = cosf(totalYaw);
+    float sinYaw = sinf(totalYaw);
+
+    // Invert the correction transform to find where this destination cell's data came from
+    float shiftedX = destinationWorld.x - totalTx;
+    float shiftedY = destinationWorld.y - totalTy;
+    float sourceWorldX = cosYaw * shiftedX + sinYaw * shiftedY;
+    float sourceWorldY = -sinYaw * shiftedX + cosYaw * shiftedY;
+
+    int2 sourceCell = coordinate_to_indices(make_float2(sourceWorldX, sourceWorldY),
+                                            make_float2(globalMapCenterX, globalMapCenterY),
+                                            cellSize,
+                                            globalCenterIndex);
+
+    float* newMeanRow = (float*)((char*)newMeanMap + x * pitchNewMean);
+    float* newVarianceRow = (float*)((char*)newVarianceMap + x * pitchNewVariance);
+
+    if (sourceCell.x < 0 || sourceCell.x >= globalCellsPerAxis || sourceCell.y < 0 || sourceCell.y >= globalCellsPerAxis)
+    {
+        newMeanRow[y] = defaultValue;
+        newVarianceRow[y] = INVALID_CELL_VARIANCE;
+        return;
+    }
+
+    float* oldVarianceRow = (float*)((char*)oldHeightMapVariance + sourceCell.x * pitchOldHeightMapVariance);
+    float sourceVariance = oldVarianceRow[sourceCell.y];
+
+    if (sourceVariance < 0.0f)
+    {
+        newMeanRow[y] = defaultValue;
+        newVarianceRow[y] = INVALID_CELL_VARIANCE;
+        return;
+    }
+
+    float* oldMeanRow = (float*)((char*)oldHeightMapMean + sourceCell.x * pitchOldHeightMapMean);
+    float sourceMean = oldMeanRow[sourceCell.y];
+
+    // The physical displacement this cell's data underwent due to the correction
+    float dx = destinationWorld.x - sourceWorldX;
+    float dy = destinationWorld.y - sourceWorldY;
+    float displacement = sqrtf(dx * dx + dy * dy + totalTz * totalTz);
+
+    newMeanRow[y] = sourceMean + totalTz;
+    newVarianceRow[y] = sourceVariance + variancePerMeter * displacement;
 }
 
 extern "C"

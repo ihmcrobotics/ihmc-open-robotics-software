@@ -89,4 +89,44 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    {
       return get(globalWidthInMeters);
    }
+
+   default boolean getIcpRotationEnabled()
+   {
+      return get(icpRotationEnabled);
+   }
+
+   default int getIcpMaxIterations()
+   {
+      return get(icpMaxIterations);
+   }
+
+   default int getIcpMinCorrespondenceCount()
+   {
+      return get(icpMinCorrespondenceCount);
+   }
+
+   default double getIcpMaxHorizontalDrift()
+   {
+      return get(icpMaxHorizontalDrift);
+   }
+
+   default double getIcpOutlierDistanceThreshold()
+   {
+      return get(icpOutlierDistanceThreshold);
+   }
+
+   default double getIcpVariancePerMeterOfCorrection()
+   {
+      return get(icpVariancePerMeterOfCorrection);
+   }
+
+   default double getIcpConvergenceZMeters()
+   {
+      return get(icpConvergenceZMeters);
+   }
+
+   default double getIcpConvergenceYawDegrees()
+   {
+      return get(icpConvergenceYawDegrees);
+   }
 }

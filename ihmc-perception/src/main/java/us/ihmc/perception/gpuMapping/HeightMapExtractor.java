@@ -32,6 +32,13 @@ public class HeightMapExtractor
     * This was chosen based on GPU profiling and significantly effects performance.
     */
    private static final int BLOCK_SIZE_XY = 8;
+   /**
+    * Sentinel written to a global-map variance cell to mark it as holding no real data.
+    * Must match the {@code INVALID_CELL_VARIANCE} constant in HeightMapExtractor.cu.
+    */
+   private static final float INVALID_CELL_VARIANCE = -1.0f;
+   /** [N, sum_rqx, sum_rqy, sum_rq2, sum_rx, sum_ry, sum_rz, sum_yawRhs], see icpCorrespondenceKernel. */
+   private static final int ICP_ACCUMULATOR_SIZE = 8;
 
    private final HeightMapParameters heightMapParameters;
    private final CUstream_st stream;
@@ -57,9 +64,14 @@ public class HeightMapExtractor
    private final CUDAKernel updateTempMapsKernel;
    private final CUDAKernel localMapKernel;
    private final CUDAKernel translateKernel;
+   private final CUDAKernel icpCorrespondenceKernel;
+   private final CUDAKernel icpApplyCorrectionKernel;
    private final CUDAKernel registerKernel;
    private final CUDAKernel planOffsetKernel;
    private final CUDAKernel emptyRegisterKernel;
+
+   private final FloatPointer icpAccumulatorHostPointer;
+   private final FloatPointer icpAccumulatorDevicePointer;
 
    private final float[] groundToWorldNoRotationTransformArray = new float[16];
    private final float[] sensorToWorldAlignedGroundTransformArray = new float[16];
@@ -110,6 +122,8 @@ public class HeightMapExtractor
          updateTempMapsKernel = heightMapProgram.loadKernel("heightMapUpdateDataKernel");
          localMapKernel = heightMapProgram.loadKernel("computeLocalMap");
          translateKernel = heightMapProgram.loadKernel("translateHeightMapKernel");
+         icpCorrespondenceKernel = heightMapProgram.loadKernel("icpCorrespondenceKernel");
+         icpApplyCorrectionKernel = heightMapProgram.loadKernel("icpApplyCorrectionKernel");
          registerKernel = heightMapProgram.loadKernel("heightMapRegistrationKernel");
          planOffsetKernel = heightMapProgram.loadKernel("planOffsetKernel");
          emptyRegisterKernel = heightMapProgram.loadKernel("heightMapEmptyRegistrationKernel");
@@ -117,6 +131,8 @@ public class HeightMapExtractor
          updateTempMapsKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          localMapKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          translateKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
+         icpCorrespondenceKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
+         icpApplyCorrectionKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          registerKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          planOffsetKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          emptyRegisterKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
@@ -144,8 +160,12 @@ public class HeightMapExtractor
          groundToWorldTranslationHostPointer = new FloatPointer(16);
          groundToWorldTranslationDevicePointer = new FloatPointer();
 
-         parametersHostPointer = new FloatPointer(21);
+         parametersHostPointer = new FloatPointer(24);
          parametersDevicePointer = new FloatPointer();
+
+         icpAccumulatorHostPointer = new FloatPointer(ICP_ACCUMULATOR_SIZE);
+         icpAccumulatorDevicePointer = new FloatPointer();
+         CUDATools.mallocAsync(icpAccumulatorDevicePointer, ICP_ACCUMULATOR_SIZE, stream);
       }
       catch (Exception e)
       {
@@ -166,6 +186,7 @@ public class HeightMapExtractor
       resetOffset -= loweredValue;
 
       globalMeanMap.setTo(new Scalar(resetOffset));
+      globalVarianceMap.setTo(new Scalar(INVALID_CELL_VARIANCE));
    }
 
    public void update(GpuMat latestDepthImageGPU,
@@ -320,6 +341,130 @@ public class HeightMapExtractor
          checkCUDAError();
       }
 
+      // ---------- Run the ICP drift-correction step ----------
+      // The state estimator drifts in ways the translate kernel's known integer shift doesn't capture.
+      // Find the rigid (x, y, z, yaw) transform that best aligns the old global map with this frame's
+      // local data, iterating a few times, then apply it to the global map before registration.
+      {
+         int searchRadiusCells = Math.max(1, (int) Math.ceil(heightMapParameters.getIcpMaxHorizontalDrift() / heightMapParameters.getCellSize()));
+         int maxIterations = heightMapParameters.getIcpMaxIterations();
+         int minCorrespondenceCount = heightMapParameters.getIcpMinCorrespondenceCount();
+         boolean rotationEnabled = heightMapParameters.getIcpRotationEnabled();
+         double convergenceZMeters = heightMapParameters.getIcpConvergenceZMeters();
+         double convergenceYawRadians = Math.toRadians(heightMapParameters.getIcpConvergenceYawDegrees());
+         double convergenceXYMeters = heightMapParameters.getCellSize();
+
+         float totalTx = 0.0f;
+         float totalTy = 0.0f;
+         float totalTz = 0.0f;
+         float totalYaw = 0.0f;
+         boolean appliedAnyCorrection = false;
+
+         int icpCorrespondenceGridSizeXY = (localCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+         dim3 icpCorrespondenceGridDim = new dim3(icpCorrespondenceGridSizeXY, icpCorrespondenceGridSizeXY, 1);
+
+         for (int iteration = 0; iteration < maxIterations; iteration++)
+         {
+            cudaMemsetAsync(icpAccumulatorDevicePointer, 0, (long) ICP_ACCUMULATOR_SIZE * Float.BYTES, stream);
+
+            icpCorrespondenceKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
+            icpCorrespondenceKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
+            icpCorrespondenceKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
+            icpCorrespondenceKernel.withFloat(heightMapCenter.getX32());
+            icpCorrespondenceKernel.withFloat(heightMapCenter.getY32());
+            icpCorrespondenceKernel.withPointer(groundToWorldTranslationDevicePointer);
+            icpCorrespondenceKernel.withFloat(totalTx).withFloat(totalTy).withFloat(totalTz).withFloat(totalYaw);
+            icpCorrespondenceKernel.withInt(searchRadiusCells);
+            icpCorrespondenceKernel.withPointer(icpAccumulatorDevicePointer);
+            icpCorrespondenceKernel.withPointer(parametersDevicePointer);
+
+            icpCorrespondenceKernel.run(stream, icpCorrespondenceGridDim, blockSize, 0);
+
+            CUDATools.memcpyAsync(icpAccumulatorHostPointer, icpAccumulatorDevicePointer, ICP_ACCUMULATOR_SIZE, stream);
+            error = cudaStreamSynchronize(stream);
+            CUDATools.checkCUDAError(error);
+
+            float correspondenceCount = icpAccumulatorHostPointer.get(0);
+            if (correspondenceCount < minCorrespondenceCount)
+               break;
+
+            float sumRqx = icpAccumulatorHostPointer.get(1);
+            float sumRqy = icpAccumulatorHostPointer.get(2);
+            float sumRq2 = icpAccumulatorHostPointer.get(3);
+            float sumRx = icpAccumulatorHostPointer.get(4);
+            float sumRy = icpAccumulatorHostPointer.get(5);
+            float sumRz = icpAccumulatorHostPointer.get(6);
+            float sumYawRhs = icpAccumulatorHostPointer.get(7);
+
+            float dtx;
+            float dty;
+            float dtz = -sumRz / correspondenceCount;
+            float dyaw = 0.0f;
+
+            if (rotationEnabled)
+            {
+               double[][] normalMatrix = {{correspondenceCount, 0.0, -sumRqy}, {0.0, correspondenceCount, sumRqx}, {-sumRqy, sumRqx, sumRq2}};
+               double[] rhs = {-sumRx, -sumRy, sumYawRhs};
+               double[] solution = new double[3];
+
+               if (solve3x3(normalMatrix, rhs, solution))
+               {
+                  dtx = (float) solution[0];
+                  dty = (float) solution[1];
+                  dyaw = (float) solution[2];
+               }
+               else
+               {
+                  dtx = -sumRx / correspondenceCount;
+                  dty = -sumRy / correspondenceCount;
+               }
+            }
+            else
+            {
+               dtx = -sumRx / correspondenceCount;
+               dty = -sumRy / correspondenceCount;
+            }
+
+            totalTx += dtx;
+            totalTy += dty;
+            totalTz += dtz;
+            totalYaw += dyaw;
+            appliedAnyCorrection = true;
+
+            boolean converged = Math.abs(dtz) < convergenceZMeters && Math.sqrt((double) dtx * dtx + (double) dty * dty) < convergenceXYMeters
+                              && (!rotationEnabled || Math.abs(dyaw) < convergenceYawRadians);
+
+            if (converged)
+               break;
+         }
+
+         icpCorrespondenceGridDim.close();
+
+         if (appliedAnyCorrection)
+         {
+            globalMeanMap.copyTo(previousGlobalMeanMap);
+            globalVarianceMap.copyTo(previousGlobalVarianceMap);
+
+            int icpApplyGridSizeXY = (globalCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+            dim3 icpApplyGridDim = new dim3(icpApplyGridSizeXY, icpApplyGridSizeXY, 1);
+
+            icpApplyCorrectionKernel.withPointer(previousGlobalMeanMap.data()).withLong(previousGlobalMeanMap.step());
+            icpApplyCorrectionKernel.withPointer(previousGlobalVarianceMap.data()).withLong(previousGlobalVarianceMap.step());
+            icpApplyCorrectionKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
+            icpApplyCorrectionKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
+            icpApplyCorrectionKernel.withFloat(heightMapCenter.getX32());
+            icpApplyCorrectionKernel.withFloat(heightMapCenter.getY32());
+            icpApplyCorrectionKernel.withFloat(totalTx).withFloat(totalTy).withFloat(totalTz).withFloat(totalYaw);
+            icpApplyCorrectionKernel.withPointer(parametersDevicePointer);
+            icpApplyCorrectionKernel.withFloat(resetOffset);
+
+            icpApplyCorrectionKernel.run(stream, icpApplyGridDim, blockSize, 0);
+
+            icpApplyGridDim.close();
+            checkCUDAError();
+         }
+      }
+
       // ---------- Run the registration kernel ----------
       // Ok so now we've got our local map, lets put that onto the global map
       {
@@ -428,7 +573,9 @@ public class HeightMapExtractor
                           (float) parameters.getVariancePerTranslationSpeed(),
                           (float) parameters.getVariancePerRotationSpeed(),
                           (float) groundHeightGuess,
-                          (float) parameters.getMinDepthToAccept()};
+                          (float) parameters.getMinDepthToAccept(),
+                          (float) parameters.getIcpOutlierDistanceThreshold(),
+                          (float) parameters.getIcpVariancePerMeterOfCorrection()};
    }
 
    public HeightMapData getHeightMapData()
@@ -444,6 +591,8 @@ public class HeightMapExtractor
       updateTempMapsKernel.close();
       localMeanMap.close();
       translateKernel.close();
+      icpCorrespondenceKernel.close();
+      icpApplyCorrectionKernel.close();
       registerKernel.close();
       planOffsetKernel.close();
       emptyRegisterKernel.close();
@@ -452,6 +601,7 @@ public class HeightMapExtractor
       deallocateFloatPointer(sensorToWorldAlignedGroundTransformHostPointer, sensorToWorldAlignedGroundTransformDevicePointer, stream);
       deallocateFloatPointer(groundToWorldTranslationHostPointer, groundToWorldTranslationDevicePointer, stream);
       deallocateFloatPointer(parametersHostPointer, parametersDevicePointer, stream);
+      deallocateFloatPointer(icpAccumulatorHostPointer, icpAccumulatorDevicePointer, stream);
 
       tempSumMap.close();
       tempCountMap.close();
@@ -492,6 +642,36 @@ public class HeightMapExtractor
       hostPointer.close();
       devicePointer.close();
       cudaFreeAsync(devicePointer, stream);
+   }
+
+   /**
+    * Solves the 3x3 linear system {@code matrix * solutionToPack = rhs} via Cramer's rule.
+    *
+    * @return false if the matrix is singular, in which case solutionToPack is left untouched.
+    */
+   private static boolean solve3x3(double[][] matrix, double[] rhs, double[] solutionToPack)
+   {
+      double determinant = determinant3x3(matrix);
+      if (Math.abs(determinant) < 1e-9)
+         return false;
+
+      for (int column = 0; column < 3; column++)
+      {
+         double[][] substituted = {matrix[0].clone(), matrix[1].clone(), matrix[2].clone()};
+         for (int row = 0; row < 3; row++)
+            substituted[row][column] = rhs[row];
+
+         solutionToPack[column] = determinant3x3(substituted) / determinant;
+      }
+
+      return true;
+   }
+
+   private static double determinant3x3(double[][] matrix)
+   {
+      return matrix[0][0] * (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1])
+           - matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0])
+           + matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0]);
    }
 
    public GpuMat getHeightMap()
