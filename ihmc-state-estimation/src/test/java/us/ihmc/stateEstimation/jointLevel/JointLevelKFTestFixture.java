@@ -341,6 +341,7 @@ final class JointLevelKFTestFixture
                                                                encoderVelocityNoiseStd,
                                                                velocityBreakFrequencyHz,
                                                                useDirectVelocityMeasurement,
+                                                               Double.NaN,
                                                                DT,
                                                                testRegistry);
       return new JointLevelKFTestFixture(filter, testRegistry, joints, imus, sensorMap, feet, chain.getElevator(), chain.getRootJoint());

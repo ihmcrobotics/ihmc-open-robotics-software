@@ -84,7 +84,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                          double estimatorDT,
                          YoRegistry parentRegistry)
    {
-      this(sensorMap, pairParameters, feet, null, null, null, null, false, estimatorDT, parentRegistry);
+      this(sensorMap, pairParameters, feet, null, null, null, null, false, Double.NaN, estimatorDT, parentRegistry);
    }
 
    /** Overload without per-joint encoder noise lookups: every joint uses the scalar fallbacks. */
@@ -95,7 +95,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                          double estimatorDT,
                          YoRegistry parentRegistry)
    {
-      this(sensorMap, pairParameters, feet, rootBody, null, null, null, false, estimatorDT, parentRegistry);
+      this(sensorMap, pairParameters, feet, rootBody, null, null, null, false, Double.NaN, estimatorDT, parentRegistry);
    }
 
    /** Overload without the direct-velocity channel (per-joint encoder noise lookups only). */
@@ -108,7 +108,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                          double estimatorDT,
                          YoRegistry parentRegistry)
    {
-      this(sensorMap, pairParameters, feet, rootBody, encoderPositionNoiseStd, encoderVelocityNoiseStd, null, false, estimatorDT, parentRegistry);
+      this(sensorMap, pairParameters, feet, rootBody, encoderPositionNoiseStd, encoderVelocityNoiseStd, null, false, Double.NaN, estimatorDT,
+           parentRegistry);
    }
 
    /**
@@ -133,6 +134,12 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
     *                 corner sits far above the motion band).
     * @param useDirectVelocityMeasurement boot-time default for the direct-velocity channel; the live YoBoolean
     *                 jointKFUseDirectVelocityMeasurement can flip it mid-run for hardware A/Bs.
+    * @param sigmaTauOverride boot-time override (N*m) for {@code jointKFParam_sigmaTau} (the fallback
+    *                 unmodeled-torque STD, {@link JointKFParameters#SIGMA_TAU}). NaN leaves the default. Exists
+    *                 for offline NIS-based retuning sweeps (e.g. from a log-replay harness): sigmaTau is
+    *                 consumed once at construction (see {@link JointKFPrediction}'s
+    *                 {@code createRotorInertiaAndSigmaTauParameters}), so it cannot be swept by editing the live
+    *                 YoDouble after this filter is built -- each candidate value needs its own instance.
     */
    JointLevelKFPreFilter(SensorOutputMapReadOnly sensorMap,
                          List<IMUBasedJointStateEstimatorParameters> pairParameters,
@@ -142,12 +149,16 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                          ToDoubleFunction<String> encoderVelocityNoiseStd,
                          ToDoubleFunction<String> jointVelocityMeasurementBreakFrequencyHz,
                          boolean useDirectVelocityMeasurement,
+                         double sigmaTauOverride,
                          double estimatorDT,
                          YoRegistry parentRegistry)
    {
       // Parameters first: every component below reads its tuning from here, and the LIVE ones keep being
-      // re-read on the hot path afterwards.
+      // re-read on the hot path afterwards. The override, if any, must land here -- before State/Prediction
+      // are built below -- since Prediction reads sigmaTau exactly once, at construction.
       this.parameters = new JointKFParameters(registry);
+      if (Double.isFinite(sigmaTauOverride))
+         parameters.sigmaTau.set(sigmaTauOverride);
       this.requiredOnGroundTicks = Math.max(1, (int) Math.round(parameters.onGroundInitDebounce.getValue() / estimatorDT));
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -203,6 +214,30 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                                                                     double estimatorDT,
                                                                     YoRegistry parentRegistry)
    {
+      return createForKinematicsEstimator(sensorOutputMap,
+                                          stateEstimatorParameters,
+                                          imuProcessedOutputs,
+                                          feet,
+                                          estimatorRootBody,
+                                          gravitationalAcceleration,
+                                          cancelGravityFromAccelerationMeasurement,
+                                          Double.NaN,
+                                          estimatorDT,
+                                          parentRegistry);
+   }
+
+   /** @param sigmaTauOverride see the 11-arg constructor's javadoc. NaN leaves the boot default. */
+   public static JointLevelKFPreFilter createForKinematicsEstimator(SensorOutputMapReadOnly sensorOutputMap,
+                                                                    StateEstimatorParameters stateEstimatorParameters,
+                                                                    List<? extends IMUSensorReadOnly> imuProcessedOutputs,
+                                                                    Collection<RigidBodyBasics> feet,
+                                                                    RigidBodyBasics estimatorRootBody,
+                                                                    double gravitationalAcceleration,
+                                                                    BooleanProvider cancelGravityFromAccelerationMeasurement,
+                                                                    double sigmaTauOverride,
+                                                                    double estimatorDT,
+                                                                    YoRegistry parentRegistry)
+   {
       //TODO: this function should be removed and the factory should handle this part.
       if (stateEstimatorParameters == null)
          throw new UnsupportedOperationException("default estimator parameters for this type of estimator are not added yet.");
@@ -220,6 +255,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                                        stateEstimatorParameters::getEncoderVelocityMeasurementStandardDeviation,
                                        stateEstimatorParameters::getJointVelocityMeasurementBreakFrequency,
                                        stateEstimatorParameters.useDirectJointVelocityMeasurementInJointKF(),
+                                       sigmaTauOverride,
                                        estimatorDT,
                                        parentRegistry);
    }

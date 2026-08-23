@@ -39,6 +39,37 @@ public final class ProprioceptivePreFilterFactory
                                                 double estimatorDT,
                                                 YoRegistry parentRegistry)
    {
+      return create(sensorOutputMap,
+                    stateEstimatorParameters,
+                    imuProcessedOutputs,
+                    feet,
+                    estimatorRootBody,
+                    gravitationalAcceleration,
+                    cancelGravityFromAccelerationMeasurement,
+                    Double.NaN,
+                    estimatorDT,
+                    parentRegistry);
+   }
+
+   /**
+    * @param sigmaTauOverride JOINT_KF-only boot-time override (N*m) for {@code jointKFParam_sigmaTau}; NaN
+    *                         leaves the default. Ignored by the other {@code JointLevelEstimatorType}s. See
+    *                         {@link JointLevelKFPreFilter}'s 11-arg constructor javadoc for why this has to be
+    *                         a construction-time argument rather than a post-construction YoDouble edit --
+    *                         useful for an offline NIS-based retuning sweep, where each candidate sigma_tau
+    *                         needs a fresh filter instance built from a fresh log replay.
+    */
+   public static ProprioceptivePreFilter create(SensorOutputMapReadOnly sensorOutputMap,
+                                                StateEstimatorParameters stateEstimatorParameters,
+                                                List<? extends IMUSensorReadOnly> imuProcessedOutputs,
+                                                Collection<RigidBodyBasics> feet,
+                                                RigidBodyBasics estimatorRootBody,
+                                                double gravitationalAcceleration,
+                                                BooleanProvider cancelGravityFromAccelerationMeasurement,
+                                                double sigmaTauOverride,
+                                                double estimatorDT,
+                                                YoRegistry parentRegistry)
+   {
       // Switch expression, deliberately without a default arm: adding a new enum value makes this a
       // compile error here instead of a silent fallthrough.
       return switch (stateEstimatorParameters.getJointLevelEstimatorType())
@@ -60,6 +91,7 @@ public final class ProprioceptivePreFilterFactory
                                                                              estimatorRootBody,
                                                                              gravitationalAcceleration,
                                                                              cancelGravityFromAccelerationMeasurement,
+                                                                             sigmaTauOverride,
                                                                              estimatorDT,
                                                                              parentRegistry);
       };
