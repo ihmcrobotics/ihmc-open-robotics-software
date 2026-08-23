@@ -8,11 +8,19 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.interfaces.Pose2DBasics;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
@@ -37,7 +45,10 @@ public class HeightMapExtractor
     * Must match the {@code INVALID_CELL_VARIANCE} constant in HeightMapExtractor.cu.
     */
    private static final float INVALID_CELL_VARIANCE = -1.0f;
-   /** [N, sum_rqx, sum_rqy, sum_rq2, sum_rx, sum_ry, sum_rz, sum_yawRhs], see icpCorrespondenceKernel. */
+   /**
+    * [N, sum_xTranslationFromYaw, sum_yTranslationFromYaw, sum_translationFromYawSq, sum_residualX, sum_residualY,
+    * sum_residualZ, sum_yawRhs], see icpCorrespondenceKernel.
+    */
    private static final int ICP_ACCUMULATOR_SIZE = 8;
 
    private final HeightMapParameters heightMapParameters;
@@ -354,9 +365,7 @@ public class HeightMapExtractor
          double convergenceYawRadians = Math.toRadians(heightMapParameters.getIcpConvergenceYawDegrees());
          double convergenceXYMeters = heightMapParameters.getCellSize();
 
-         float totalTx = 0.0f;
-         float totalTy = 0.0f;
-         float totalTz = 0.0f;
+         Vector3D totalTranslation = new Vector3D();
          float totalYaw = 0.0f;
          boolean appliedAnyCorrection = false;
 
@@ -373,7 +382,7 @@ public class HeightMapExtractor
             icpCorrespondenceKernel.withFloat(heightMapCenter.getX32());
             icpCorrespondenceKernel.withFloat(heightMapCenter.getY32());
             icpCorrespondenceKernel.withPointer(groundToWorldTranslationDevicePointer);
-            icpCorrespondenceKernel.withFloat(totalTx).withFloat(totalTy).withFloat(totalTz).withFloat(totalYaw);
+            icpCorrespondenceKernel.withFloat(totalTranslation.getX32()).withFloat(totalTranslation.getY32()).withFloat(totalTranslation.getZ32()).withFloat(totalYaw);
             icpCorrespondenceKernel.withInt(searchRadiusCells);
             icpCorrespondenceKernel.withPointer(icpAccumulatorDevicePointer);
             icpCorrespondenceKernel.withPointer(parametersDevicePointer);
@@ -388,53 +397,18 @@ public class HeightMapExtractor
             if (correspondenceCount < minCorrespondenceCount)
                break;
 
-            float sumRqx = icpAccumulatorHostPointer.get(1);
-            float sumRqy = icpAccumulatorHostPointer.get(2);
-            float sumRq2 = icpAccumulatorHostPointer.get(3);
-            float sumRx = icpAccumulatorHostPointer.get(4);
-            float sumRy = icpAccumulatorHostPointer.get(5);
-            float sumRz = icpAccumulatorHostPointer.get(6);
-            float sumYawRhs = icpAccumulatorHostPointer.get(7);
+            Vector3DBasics translation = new Vector3D();
+            double yaw = solvePose2DTransform(icpAccumulatorHostPointer, translation, rotationEnabled);
 
-            float dtx;
-            float dty;
-            float dtz = -sumRz / correspondenceCount;
-            float dyaw = 0.0f;
-
-            if (rotationEnabled)
-            {
-               double[][] normalMatrix = {{correspondenceCount, 0.0, -sumRqy}, {0.0, correspondenceCount, sumRqx}, {-sumRqy, sumRqx, sumRq2}};
-               double[] rhs = {-sumRx, -sumRy, sumYawRhs};
-               double[] solution = new double[3];
-
-               if (solve3x3(normalMatrix, rhs, solution))
-               {
-                  dtx = (float) solution[0];
-                  dty = (float) solution[1];
-                  dyaw = (float) solution[2];
-               }
-               else
-               {
-                  dtx = -sumRx / correspondenceCount;
-                  dty = -sumRy / correspondenceCount;
-               }
-            }
-            else
-            {
-               dtx = -sumRx / correspondenceCount;
-               dty = -sumRy / correspondenceCount;
-            }
-
-            totalTx += dtx;
-            totalTy += dty;
-            totalTz += dtz;
-            totalYaw += dyaw;
+            totalTranslation.add(translation);
+            totalYaw += (float) yaw;
             appliedAnyCorrection = true;
 
-            boolean converged = Math.abs(dtz) < convergenceZMeters && Math.sqrt((double) dtx * dtx + (double) dty * dty) < convergenceXYMeters
-                              && (!rotationEnabled || Math.abs(dyaw) < convergenceYawRadians);
+            boolean zConverged = Math.abs(translation.getZ()) < convergenceZMeters;
+            boolean xyConverged = EuclidCoreTools.norm(translation.getX(), translation.getY()) < convergenceXYMeters;
+            boolean rotationConverged = !rotationEnabled || Math.abs(yaw) < convergenceYawRadians;
 
-            if (converged)
+            if (zConverged && xyConverged && rotationConverged)
                break;
          }
 
@@ -454,7 +428,7 @@ public class HeightMapExtractor
             icpApplyCorrectionKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
             icpApplyCorrectionKernel.withFloat(heightMapCenter.getX32());
             icpApplyCorrectionKernel.withFloat(heightMapCenter.getY32());
-            icpApplyCorrectionKernel.withFloat(totalTx).withFloat(totalTy).withFloat(totalTz).withFloat(totalYaw);
+            icpApplyCorrectionKernel.withFloat(totalTranslation.getX32()).withFloat(totalTranslation.getY32()).withFloat(totalTranslation.getZ32()).withFloat(totalYaw);
             icpApplyCorrectionKernel.withPointer(parametersDevicePointer);
             icpApplyCorrectionKernel.withFloat(resetOffset);
 
@@ -644,34 +618,58 @@ public class HeightMapExtractor
       cudaFreeAsync(devicePointer, stream);
    }
 
-   /**
-    * Solves the 3x3 linear system {@code matrix * solutionToPack = rhs} via Cramer's rule.
-    *
-    * @return false if the matrix is singular, in which case solutionToPack is left untouched.
-    */
-   private static boolean solve3x3(double[][] matrix, double[] rhs, double[] solutionToPack)
-   {
-      double determinant = determinant3x3(matrix);
-      if (Math.abs(determinant) < 1e-9)
-         return false;
+   private final DMatrixRMaj normalMatrix = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj constraint = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj solution = new DMatrixRMaj(3, 1);
+   private final LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.general(3, 3);
 
-      for (int column = 0; column < 3; column++)
+   private double solvePose2DTransform(FloatPointer icpAccumulatorHostPointer, Vector3DBasics translationToPack, boolean rotationEnabled)
+   {
+      float correspondenceCount = icpAccumulatorHostPointer.get(0);
+      float sumXTranslationFromYaw = icpAccumulatorHostPointer.get(1);
+      float sumYTranslationFromYaw = icpAccumulatorHostPointer.get(2);
+      float sumTranslationFromYawSq = icpAccumulatorHostPointer.get(3);
+      float sumResidualX = icpAccumulatorHostPointer.get(4);
+      float sumResidualY = icpAccumulatorHostPointer.get(5);
+      float sumResidualZ = icpAccumulatorHostPointer.get(6);
+      float sumYawRhs = icpAccumulatorHostPointer.get(7);
+
+      translationToPack.setZ(-sumResidualZ / correspondenceCount);
+
+      if (rotationEnabled)
       {
-         double[][] substituted = {matrix[0].clone(), matrix[1].clone(), matrix[2].clone()};
-         for (int row = 0; row < 3; row++)
-            substituted[row][column] = rhs[row];
+         normalMatrix.set(0, 0, correspondenceCount);
+         normalMatrix.set(0, 2, -sumYTranslationFromYaw);
+         normalMatrix.set(1, 1, correspondenceCount);
+         normalMatrix.set(1, 2, sumXTranslationFromYaw);
+         normalMatrix.set(2, 0, -sumYTranslationFromYaw);
+         normalMatrix.set(2, 1, sumXTranslationFromYaw);
+         normalMatrix.set(2, 2, sumTranslationFromYawSq);
+         constraint.set(0, 0, -sumResidualX);
+         constraint.set(1, 0, -sumResidualY);
+         constraint.set(2, 0, sumYawRhs);
 
-         solutionToPack[column] = determinant3x3(substituted) / determinant;
+         if (CommonOps_DDRM.det(normalMatrix) > 1e-9)
+         {
+            solver.setA(normalMatrix);
+            solver.solve(constraint, solution);
+            translationToPack.setX(solution.get(0));
+            translationToPack.setY(solution.get(1));
+            return solution.get(2);
+         }
+         else
+         {
+            translationToPack.setX(-sumResidualX / correspondenceCount);
+            translationToPack.setY(-sumResidualY / correspondenceCount);
+            return 0.0;
+         }
       }
-
-      return true;
-   }
-
-   private static double determinant3x3(double[][] matrix)
-   {
-      return matrix[0][0] * (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1])
-           - matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0])
-           + matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0]);
+      else
+      {
+         translationToPack.setX(-sumResidualX / correspondenceCount);
+         translationToPack.setY(-sumResidualY / correspondenceCount);
+         return 0.0;
+      }
    }
 
    public GpuMat getHeightMap()

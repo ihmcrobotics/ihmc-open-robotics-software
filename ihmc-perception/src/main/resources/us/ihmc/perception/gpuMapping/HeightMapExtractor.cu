@@ -39,6 +39,14 @@ __device__ float3 back_project_perspective(int2 pos, float Z, const float *param
     return point;
 }
 
+// A local-map cell's ground-plane (z = 0) position, transformed into the world frame.
+__device__ float3 localCellToWorldPoint(int2 localCell, float cellSize, int localCenterIndex, const float *groundToWorldTransform)
+{
+    float2 localCoordinate = indices_to_coordinate(localCell, make_float2(0.0f, 0.0f), cellSize, localCenterIndex);
+    float3 pointInLocalFrame = make_float3(localCoordinate.x, localCoordinate.y, 0.0f);
+    return transformPoint3D(pointInLocalFrame, groundToWorldTransform);
+}
+
 /**
  * @brief Height map update KERNEL: One thread per depth pixel for peak optimization.
  * Reads in the depth for each pixel in the image.
@@ -228,20 +236,21 @@ __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOl
  * shift only accounts for known/estimated motion. This kernel finds point correspondences between
  * the newest local data (treated as ground truth for this frame) and the existing global map
  * (which may have drifted), and accumulates the sums needed to solve a small-angle-linearized
- * Gauss-Newton update for the rigid transform (tx, ty, tz, yaw) that should be applied to the
- * OLD map to bring it back into alignment. It is meant to be called iteratively: each call takes
- * the current best estimate of that transform (totalTx/Ty/Tz/Yaw) and produces the sums for the
- * next incremental refinement, without modifying the global map itself.
+ * Gauss-Newton update for the correction transform (tx, ty, tz, yaw) that should be applied to the
+ * OLD map to bring it back into alignment. The correction is: translate every cell by (tx, ty, tz),
+ * then rotate by yaw about the (fixed, robot-pinned) global map center. It is meant to be called
+ * iteratively: each call takes the current best estimate of that transform (totalTx/Ty/Tz/Yaw) and
+ * produces the sums for the next incremental refinement, without modifying the global map itself.
  *
  * Accumulator layout (8 floats, atomically added into by every surviving correspondence):
- *   [0] N               : number of surviving correspondences
- *   [1] sum_rqx         : sum of the old point's world X, rotated by the current yaw estimate
- *   [2] sum_rqy         : sum of the old point's world Y, rotated by the current yaw estimate
- *   [3] sum_rq2         : sum of (rqx^2 + rqy^2)
- *   [4] sum_rx          : sum of the X residual (predicted old point minus new point)
- *   [5] sum_ry          : sum of the Y residual
- *   [6] sum_rz          : sum of the Z residual
- *   [7] sum_yawRhs      : sum of (rqy * rx - rqx * ry), the yaw right-hand-side term
+ *   [0] N                        : number of surviving correspondences
+ *   [1] sum_xTranslationFromYaw  : sum of the old point's X relative to the global map center, rotated by the current yaw estimate
+ *   [2] sum_yTranslationFromYaw  : sum of the old point's Y relative to the global map center, rotated by the current yaw estimate
+ *   [3] sum_translationFromYawSq : sum of (xTranslationFromYaw^2 + yTranslationFromYaw^2)
+ *   [4] sum_residualX            : sum of the X residual (predicted old point minus new point)
+ *   [5] sum_residualY            : sum of the Y residual
+ *   [6] sum_residualZ            : sum of the Z residual
+ *   [7] sum_yawRhs               : sum of (yTranslationFromYaw * residualX - xTranslationFromYaw * residualY), the yaw right-hand-side term
  */
 extern "C"
 __global__ void icpCorrespondenceKernel(const float* __restrict__ localMeanMap, size_t pitchLocalMean,
@@ -279,33 +288,32 @@ __global__ void icpCorrespondenceKernel(const float* __restrict__ localMeanMap, 
     if (localMeanF == 0.0f)
         return;
 
-    float2 localCoordinate = indices_to_coordinate(localCell, make_float2(0.0f, 0.0f), cellSize, localCenterIndex);
-    float3 pointInLocalFrame = make_float3(localCoordinate.x, localCoordinate.y, 0.0f);
-    float3 pointInGroundToWorld = transformPoint3D(pointInLocalFrame, groundToWorldTranslation);
-
-    // The newest sensor data is treated as the fixed reference this frame
-    float3 newPoint = make_float3(pointInGroundToWorld.x, pointInGroundToWorld.y, localMeanF);
+    // The newest sensor data is treated as the fixed reference this frame; x, y come from the cell's
+    // world position, z is overwritten with the actual measured height
+    float3 localPointInWorldFrame = localCellToWorldPoint(localCell, cellSize, localCenterIndex, groundToWorldTranslation);
+    localPointInWorldFrame.z = localMeanF;
 
     float cosYaw = cosf(totalYaw);
     float sinYaw = sinf(totalYaw);
+    float2 globalMapCenter = make_float2(globalMapCenterX, globalMapCenterY);
 
-    // Where, in the OLD map's raw (uncorrected) indexing, the corresponding cell should be,
-    // given the current correction estimate: the inverse of the current estimate applied to newPoint
-    float invX = newPoint.x - totalTx;
-    float invY = newPoint.y - totalTy;
-    float searchCenterX = cosYaw * invX + sinYaw * invY;
-    float searchCenterY = -sinYaw * invX + cosYaw * invY;
+    // Where, in the OLD map's raw (uncorrected) indexing, the corresponding cell should be, given the
+    // current correction estimate: invert "translate by (totalTx, totalTy), then rotate by totalYaw
+    // about the global map center" applied to localPointInWorldFrame
+    float relativeX = localPointInWorldFrame.x - globalMapCenterX - totalTx;
+    float relativeY = localPointInWorldFrame.y - globalMapCenterY - totalTy;
+    float searchCenterX = (cosYaw * relativeX + sinYaw * relativeY) + globalMapCenterX;
+    float searchCenterY = (-sinYaw * relativeX + cosYaw * relativeY) + globalMapCenterY;
 
-    int2 searchCenterCell = coordinate_to_indices(make_float2(searchCenterX, searchCenterY),
-                                                  make_float2(globalMapCenterX, globalMapCenterY),
-                                                  cellSize,
-                                                  globalCenterIndex);
+    int2 searchCenterCell = coordinate_to_indices(make_float2(searchCenterX, searchCenterY), globalMapCenter, cellSize, globalCenterIndex);
 
     bool foundMatch = false;
     float bestDistanceSquared = 0.0f;
-    float bestRqx = 0.0f;
-    float bestRqy = 0.0f;
-    float bestQz = 0.0f;
+    // xTranslationFromYaw/yTranslationFromYaw and residual (see below) of the best-matching candidate so far
+    float bestCandidateXTranslationFromYaw = 0.0f;
+    float bestCandidateYTranslationFromYaw = 0.0f;
+    // Vector from localPointInWorldFrame to the correspondence's predicted position
+    float3 bestCandidateResidual = make_float3(0.0f, 0.0f, 0.0f);
 
     for (int dcx = -searchRadiusCells; dcx <= searchRadiusCells; ++dcx)
     {
@@ -324,30 +332,39 @@ __global__ void icpCorrespondenceKernel(const float* __restrict__ localMeanMap, 
             const float* meanRow = (const float*)((const char*)globalMeanMap + candidateX * pitchGlobalMean);
             float qz = meanRow[candidateY];
 
-            float2 qWorld = indices_to_coordinate(make_int2(candidateX, candidateY),
-                                                  make_float2(globalMapCenterX, globalMapCenterY),
-                                                  cellSize,
-                                                  globalCenterIndex);
+            float2 qWorld = indices_to_coordinate(make_int2(candidateX, candidateY), globalMapCenter, cellSize, globalCenterIndex);
 
-            // Predict where this old cell lands under the current correction estimate
-            float rqx = cosYaw * qWorld.x - sinYaw * qWorld.y;
-            float rqy = sinYaw * qWorld.x + cosYaw * qWorld.y;
-            float predictedX = rqx + totalTx;
-            float predictedY = rqy + totalTy;
-            float predictedZ = qz + totalTz;
+            // Predict where this old cell lands under the current correction estimate: translate by
+            // (totalTx, totalTy), then rotate by totalYaw about the global map center. xTranslationFromYaw/
+            // yTranslationFromYaw is the cell's position relative to the global map center, rotated by
+            // totalYaw, i.e. the X/Y contribution the rotation step adds to the predicted position
+            // (playing the same additive role there as totalTx/totalTy).
+            //
+            // They also double as the yaw column of the per-correspondence Jacobian: d(predictedX)/d(yaw)
+            // = -yTranslationFromYaw and d(predictedY)/d(yaw) = xTranslationFromYaw, since differentiating
+            // a rotation by its own angle just rotates the vector another 90 degrees. That's why they (and
+            // xTranslationFromYaw^2 + yTranslationFromYaw^2, the yaw row's own diagonal term) are what get
+            // accumulated into sum_xTranslationFromYaw/sum_yTranslationFromYaw/sum_translationFromYawSq for
+            // the CPU-side Gauss-Newton solve.
+            float qRelativeX = qWorld.x - globalMapCenterX;
+            float qRelativeY = qWorld.y - globalMapCenterY;
+            float xTranslationFromYaw = cosYaw * qRelativeX - sinYaw * qRelativeY;
+            float yTranslationFromYaw = sinYaw * qRelativeX + cosYaw * qRelativeY;
+            float3 predicted = make_float3(xTranslationFromYaw + totalTx + globalMapCenterX,
+                                           yTranslationFromYaw + totalTy + globalMapCenterY,
+                                           qz + totalTz);
 
-            float dx = predictedX - newPoint.x;
-            float dy = predictedY - newPoint.y;
-            float dz = predictedZ - newPoint.z;
-            float distSq = dx * dx + dy * dy + dz * dz;
+            // Vector from localPointInWorldFrame to this candidate's predicted position
+            float3 residual = predicted - localPointInWorldFrame;
+            float distSq = dot(residual, residual);
 
             if (!foundMatch || distSq < bestDistanceSquared)
             {
                 foundMatch = true;
                 bestDistanceSquared = distSq;
-                bestRqx = rqx;
-                bestRqy = rqy;
-                bestQz = qz;
+                bestCandidateXTranslationFromYaw = xTranslationFromYaw;
+                bestCandidateYTranslationFromYaw = yTranslationFromYaw;
+                bestCandidateResidual = residual;
             }
         }
     }
@@ -355,23 +372,20 @@ __global__ void icpCorrespondenceKernel(const float* __restrict__ localMeanMap, 
     if (!foundMatch || sqrtf(bestDistanceSquared) > outlierDistanceThreshold)
         return;
 
-    float predictedX = bestRqx + totalTx;
-    float predictedY = bestRqy + totalTy;
-    float predictedZ = bestQz + totalTz;
+    // Jacobian's yaw row dotted with the residual; the RHS of the normal equations is -J^T*residual
+    // (see sum_yawRhs above and the CPU-side solve)
+    float yawRhsTerm = bestCandidateYTranslationFromYaw * bestCandidateResidual.x - bestCandidateXTranslationFromYaw * bestCandidateResidual.y;
 
-    float rx = predictedX - newPoint.x;
-    float ry = predictedY - newPoint.y;
-    float rz = predictedZ - newPoint.z;
-    float yawRhsTerm = bestRqy * rx - bestRqx * ry;
-
-    atomicAdd(&accumulator[0], 1.0f);
-    atomicAdd(&accumulator[1], bestRqx);
-    atomicAdd(&accumulator[2], bestRqy);
-    atomicAdd(&accumulator[3], bestRqx * bestRqx + bestRqy * bestRqy);
-    atomicAdd(&accumulator[4], rx);
-    atomicAdd(&accumulator[5], ry);
-    atomicAdd(&accumulator[6], rz);
-    atomicAdd(&accumulator[7], yawRhsTerm);
+    atomicAdd(&accumulator[0], 1.0f);                                 // N
+    atomicAdd(&accumulator[1], bestCandidateXTranslationFromYaw);      // sum_xTranslationFromYaw
+    atomicAdd(&accumulator[2], bestCandidateYTranslationFromYaw);      // sum_yTranslationFromYaw
+    atomicAdd(&accumulator[3],
+             bestCandidateXTranslationFromYaw * bestCandidateXTranslationFromYaw
+             + bestCandidateYTranslationFromYaw * bestCandidateYTranslationFromYaw); // sum_translationFromYawSq
+    atomicAdd(&accumulator[4], bestCandidateResidual.x); // sum_residualX
+    atomicAdd(&accumulator[5], bestCandidateResidual.y); // sum_residualY
+    atomicAdd(&accumulator[6], bestCandidateResidual.z); // sum_residualZ
+    atomicAdd(&accumulator[7], yawRhsTerm);              // sum_yawRhs
 }
 
 /**
@@ -379,10 +393,11 @@ __global__ void icpCorrespondenceKernel(const float* __restrict__ localMeanMap, 
  *
  * Applies the final, converged (tx, ty, tz, yaw) correction (accumulated on the CPU from repeated
  * calls to {@code icpCorrespondenceKernel}) to the global map, the same double-buffered
- * old-map/new-map pattern used by {@code translateHeightMapKernel}. For each destination cell, the
- * inverse of the correction is used to find which old (uncorrected) cell its data should come from,
- * snapping to the nearest cell rather than interpolating. The variance is bumped in proportion to
- * how far that cell's data actually moved, so more heavily corrected cells are trusted less.
+ * old-map/new-map pattern used by {@code translateHeightMapKernel}. The correction translates every
+ * cell by (tx, ty, tz), then rotates by yaw about the (fixed) global map center. For each destination
+ * cell, the inverse of that correction is used to find which old (uncorrected) cell its data should
+ * come from, snapping to the nearest cell rather than interpolating. The variance is bumped in
+ * proportion to how far that cell's data actually moved, so more heavily corrected cells are trusted less.
  */
 extern "C"
 __global__ void icpApplyCorrectionKernel(float* oldHeightMapMean, size_t pitchOldHeightMapMean,
@@ -409,24 +424,20 @@ __global__ void icpApplyCorrectionKernel(float* oldHeightMapMean, size_t pitchOl
     if (x >= globalCellsPerAxis || y >= globalCellsPerAxis)
         return;
 
-    float2 destinationWorld = indices_to_coordinate(make_int2(x, y),
-                                                    make_float2(globalMapCenterX, globalMapCenterY),
-                                                    cellSize,
-                                                    globalCenterIndex);
+    float2 globalMapCenter = make_float2(globalMapCenterX, globalMapCenterY);
+    float2 destinationWorld = indices_to_coordinate(make_int2(x, y), globalMapCenter, cellSize, globalCenterIndex);
 
     float cosYaw = cosf(totalYaw);
     float sinYaw = sinf(totalYaw);
 
-    // Invert the correction transform to find where this destination cell's data came from
-    float shiftedX = destinationWorld.x - totalTx;
-    float shiftedY = destinationWorld.y - totalTy;
-    float sourceWorldX = cosYaw * shiftedX + sinYaw * shiftedY;
-    float sourceWorldY = -sinYaw * shiftedX + cosYaw * shiftedY;
+    // Invert the correction transform to find where this destination cell's data came from: undo
+    // "translate by (totalTx, totalTy), then rotate by totalYaw about the global map center"
+    float relativeX = destinationWorld.x - globalMapCenterX - totalTx;
+    float relativeY = destinationWorld.y - globalMapCenterY - totalTy;
+    float sourceWorldX = (cosYaw * relativeX + sinYaw * relativeY) + globalMapCenterX;
+    float sourceWorldY = (-sinYaw * relativeX + cosYaw * relativeY) + globalMapCenterY;
 
-    int2 sourceCell = coordinate_to_indices(make_float2(sourceWorldX, sourceWorldY),
-                                            make_float2(globalMapCenterX, globalMapCenterY),
-                                            cellSize,
-                                            globalCenterIndex);
+    int2 sourceCell = coordinate_to_indices(make_float2(sourceWorldX, sourceWorldY), globalMapCenter, cellSize, globalCenterIndex);
 
     float* newMeanRow = (float*)((char*)newMeanMap + x * pitchNewMean);
     float* newVarianceRow = (float*)((char*)newVarianceMap + x * pitchNewVariance);
@@ -488,9 +499,7 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     float localMeanF = *localMean;
 
     // While the global memory is being fetched, convert the local cell into the global cell so we can register the data
-    float2 localCoordinate = indices_to_coordinate(localCell, make_float2(0.0f, 0.0f), params[CELL_SIZE], params[LOCAL_CENTER_INDEX]);
-    float3 pointInLocalFrame = make_float3(localCoordinate.x, localCoordinate.y, 0.0f);
-    float3 pointInGlobalFrame = transformPoint3D(pointInLocalFrame, groundToWorldTranslation);
+    float3 pointInGlobalFrame = localCellToWorldPoint(localCell, params[CELL_SIZE], params[LOCAL_CENTER_INDEX], groundToWorldTranslation);
     int2 globalCell = coordinate_to_indices(make_float2(pointInGlobalFrame.x, pointInGlobalFrame.y), make_float2(globalMapCenterX, globalMapCenterY), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
 
     if (globalCell.x < 0 || globalCell.x >= globalCellsPerAxis || globalCell.y < 0 || globalCell.y >= globalCellsPerAxis)
@@ -556,9 +565,7 @@ __global__ void heightMapEmptyRegistrationKernel(float *localMap, size_t pitchLo
         return;
 
     int2 localIndex = make_int2(xIndex, yIndex);
-    float2 localCoordinate = indices_to_coordinate(localIndex, make_float2(0.0f, 0.0f), params[CELL_SIZE], params[LOCAL_CENTER_INDEX]);
-    float3 queryPointInLocal = make_float3(localCoordinate.x, localCoordinate.y, 0.0f);
-    float3 cellInGlobal = transformPoint3D(queryPointInLocal, groundToWorldTranslation);
+    float3 cellInGlobal = localCellToWorldPoint(localIndex, params[CELL_SIZE], params[LOCAL_CENTER_INDEX], groundToWorldTranslation);
     int2 globalIndex = coordinate_to_indices(make_float2(cellInGlobal.x, cellInGlobal.y), make_float2(groundToWorldTranslation[3], groundToWorldTranslation[7]), params[CELL_SIZE], params[GLOBAL_CENTER_INDEX]);
 
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
