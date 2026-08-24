@@ -69,7 +69,12 @@ final class JointKFUpdate
          for (Channel c : values())
             if (c.label.equals(label))
                return c;
-         return TEST;
+         // A typo'd label used to fall through to TEST silently -- TEST skips NIS and the gyro-floor path a
+         // real channel would get, so a misspelled config-driven label could mis-route through the wrong
+         // update behavior with no error at all. Fail loud instead; "test" (lowercase) is still the one
+         // string that legitimately reaches TEST, matched by the loop above.
+         throw new IllegalArgumentException("Unrecognized JointKFUpdate.Channel label '" + label + "'. Known labels: "
+               + java.util.Arrays.stream(values()).map(c -> c.label).collect(java.util.stream.Collectors.joining(", ")));
       }
    }
 

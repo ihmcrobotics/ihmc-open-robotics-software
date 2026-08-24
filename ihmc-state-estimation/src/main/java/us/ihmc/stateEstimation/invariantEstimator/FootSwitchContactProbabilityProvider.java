@@ -125,7 +125,18 @@ public class FootSwitchContactProbabilityProvider implements ContactProbabilityP
                                                double loadStayThreshold,
                                                double trustDwellSeconds)
    {
-      if (loadStayThreshold > loadEnterThreshold)
+      // Explicit finiteness/range checks first: every comparison against NaN is false, so a NaN smoothingAlpha
+      // or threshold would otherwise sail past the Schmitt-band check below and land silently in the smoothing
+      // recursion or the trust comparisons (line ~157, ~189).
+      if (!(smoothingAlpha >= 0.0) || !(smoothingAlpha < 1.0))
+         throw new IllegalArgumentException("smoothingAlpha must be in [0, 1), was " + smoothingAlpha);
+      if (!Double.isFinite(loadEnterThreshold))
+         throw new IllegalArgumentException("loadEnterThreshold must be finite, was " + loadEnterThreshold);
+      if (!Double.isFinite(loadStayThreshold))
+         throw new IllegalArgumentException("loadStayThreshold must be finite, was " + loadStayThreshold);
+      if (!(trustDwellSeconds >= 0.0))
+         throw new IllegalArgumentException("trustDwellSeconds must be >= 0, was " + trustDwellSeconds);
+      if (!(loadStayThreshold <= loadEnterThreshold))
          throw new IllegalArgumentException("Schmitt band inverted: stay " + loadStayThreshold + " > enter " + loadEnterThreshold);
       this.footSwitches = footSwitches;
       this.smoothingAlpha = smoothingAlpha;

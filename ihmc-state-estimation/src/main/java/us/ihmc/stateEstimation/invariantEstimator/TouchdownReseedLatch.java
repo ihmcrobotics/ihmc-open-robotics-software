@@ -33,6 +33,14 @@ public class TouchdownReseedLatch
     */
    public TouchdownReseedLatch(double triggerProbability, double rearmProbability, int rearmDwellTicks, boolean initiallyArmed)
    {
+      // Explicit finiteness checks, not folded into the ordering check below: NaN >= x and x >= NaN are both
+      // false, so "rearmProbability >= triggerProbability" alone would let a NaN threshold silently pass and
+      // the latch would then never re-arm (advance() compares contactProbability against it every tick, and
+      // NaN comparisons are always false there too).
+      if (!Double.isFinite(triggerProbability))
+         throw new IllegalArgumentException("triggerProbability must be finite, was " + triggerProbability);
+      if (!Double.isFinite(rearmProbability))
+         throw new IllegalArgumentException("rearmProbability must be finite, was " + rearmProbability);
       if (rearmProbability >= triggerProbability)
          throw new IllegalArgumentException("re-arm threshold " + rearmProbability + " must be below trigger " + triggerProbability);
       if (rearmDwellTicks < 1)

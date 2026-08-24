@@ -79,6 +79,9 @@ public class InvariantPropagator
    {
       if (numberOfContacts < 0)
          throw new IllegalArgumentException("numberOfContacts must be >= 0, was " + numberOfContacts);
+      requireNonNegativeFinite("gyroVariance", gyroVariance);
+      requireNonNegativeFinite("accelVariance", accelVariance);
+      requireNonNegativeFinite("contactVariance", contactVariance);
 
       this.numberOfContacts = numberOfContacts;
       gravity.set(0.0, 0.0, -Math.abs(gravitationalAcceleration));
@@ -107,12 +110,22 @@ public class InvariantPropagator
    {
       if (contactIndex < 0 || contactIndex >= numberOfContacts)
          throw new IndexOutOfBoundsException("contactIndex must be in [0, " + numberOfContacts + "), was " + contactIndex);
-      if (variance < 0.0)
-         throw new IllegalArgumentException("variance must be >= 0, was " + variance);
+      requireNonNegativeFinite("variance", variance);
 
       int block = FIRST_CONTACT_TANGENT_INDEX + 3 * contactIndex;
       for (int j = 0; j < 3; j++)
          processNoise.set(block + j, block + j, variance);
+   }
+
+   /**
+    * @throws IllegalArgumentException if {@code value} is negative OR non-finite. {@code value < 0.0} alone
+    *                                  would miss NaN (every comparison with NaN is false), which would
+    *                                  otherwise write straight into the process-noise diagonal and poison Q.
+    */
+   private static void requireNonNegativeFinite(String name, double value)
+   {
+      if (!(value >= 0.0))
+         throw new IllegalArgumentException(name + " must be finite and >= 0, was " + value);
    }
 
    /**
