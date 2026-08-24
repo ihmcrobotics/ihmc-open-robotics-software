@@ -1,6 +1,7 @@
 package us.ihmc.avatar.walkToGoal;
 
 import controller_msgs.AbortWalkingMessage;
+import controller_msgs.ControllerReleaseGoalMessage;
 import controller_msgs.ControllerWaypointGoalListMessage;
 import controller_msgs.ControllerWaypointGoalMessage;
 import controller_msgs.ControllerWaypointListStatusMessage;
@@ -41,6 +42,7 @@ public class WalkToGoalClient
    private final ROS2ControllerHelper controllerHelper;
    private final ControllerWaypointGoalListMessage waypointList = new ControllerWaypointGoalListMessage();
    private final AbortWalkingMessage abortMessage = new AbortWalkingMessage();
+   private final ControllerReleaseGoalMessage releaseGoalMessage = new ControllerReleaseGoalMessage();
    private final VelocityBasedWalkingInputMessage velocityMessage = new VelocityBasedWalkingInputMessage();
    private final FixedFramePose2DBasics worldGoal = new FramePose2D();
    private final FixedFramePoint2DBasics worldGoalPoint = new FramePoint2D();
@@ -60,34 +62,24 @@ public class WalkToGoalClient
       waypointListStatus = controllerHelper.subscribeToController(ControllerWaypointListStatusMessage.class);
    }
 
+   /** Replace the current goal with this point, expressed in any frame. If you care about the end orientation, use {@link #setGoal(FramePose2DReadOnly)}*/
    public void setGoal(FramePoint2DReadOnly goal)
    {
       worldGoalPoint.setMatchingFrame(goal);
       setGoal((Point2DReadOnly) worldGoalPoint);
    }
 
+   /** Replace the current goal with this world point. If you care about the end orientation, use {@link #setGoal(Pose2DReadOnly)}*/
    public void setGoal(Point2DReadOnly goal)
    {
       setGoal(DEFAULT_POSITION_PROXIMITY, goal);
    }
 
-
-   public void setGoal(FramePose2DReadOnly goal)
-   {
-      worldGoal.setMatchingFrame(goal);
-      setGoal((Pose2DReadOnly) worldGoal);
-   }
-
-   public void setGoal(Pose2DReadOnly goal)
-   {
-      setGoal(DEFAULT_POSITION_PROXIMITY, DEFAULT_ORIENTATION_PROXIMITY, goal);
-   }
-
-   public void setGoal(Pose3DReadOnly goal)
-   {
-      setGoal(DEFAULT_POSITION_PROXIMITY, DEFAULT_ORIENTATION_PROXIMITY, goal);
-   }
-
+   /**
+    * Replace the current goal with this world point. Marks the goal as reached with the position proximity is satisfied.
+    *
+    * If you care about the end orientation, use {@link #setGoal(Pose2DReadOnly)}
+    **/
    public void setGoal(double positionProximity, Point2DReadOnly goal)
    {
       waitingForGoalToBeAccepted = true;
@@ -95,6 +87,26 @@ public class WalkToGoalClient
       setWaypointListFromGoals(false, positionProximity,  goal);
    }
 
+   /** Replace the current goal with this pose, expressed in any frame. */
+   public void setGoal(FramePose2DReadOnly goal)
+   {
+      worldGoal.setMatchingFrame(goal);
+      setGoal((Pose2DReadOnly) worldGoal);
+   }
+
+   /** Replace the current goal with this world pose. */
+   public void setGoal(Pose2DReadOnly goal)
+   {
+      setGoal(DEFAULT_POSITION_PROXIMITY, DEFAULT_ORIENTATION_PROXIMITY, goal);
+   }
+
+   /** Replace the current goal with this world pose. */
+   public void setGoal(Pose3DReadOnly goal)
+   {
+      setGoal(DEFAULT_POSITION_PROXIMITY, DEFAULT_ORIENTATION_PROXIMITY, goal);
+   }
+
+   /** Replace the current goal with this world pose. Marks the goal as reached with the position and orientation proximity is satisfied.*/
    public void setGoal(double positionProximity, double orientationProximity, Pose2DReadOnly goal)
    {
       waitingForGoalToBeAccepted = true;
@@ -102,6 +114,7 @@ public class WalkToGoalClient
       setWaypointListFromGoals(false, positionProximity, orientationProximity, goal);
    }
 
+   /** Replace the current goal with this world pose. Marks the goal as reached with the position and orientation proximity is satisfied.*/
    public void setGoal(double positionProximity, double orientationProximity, Pose3DReadOnly goal)
    {
       waitingForGoalToBeAccepted = true;
@@ -109,27 +122,27 @@ public class WalkToGoalClient
       setWaypointListFromGoals(false, positionProximity, orientationProximity, goal);
    }
 
-   /** Replace the current goal with this pose, expressed in any frame. */
+   /** Append to the current goal with this pose, expressed in any frame. */
    public void addGoal(FramePose2DReadOnly goal)
    {
       worldGoal.setMatchingFrame(goal);
       addGoals(worldGoal);
    }
 
-   /** Replace the current goal with this world pose. Uses a one-waypoint list so it does not append. */
+   /** Append to the current goal list with this set of poses expressed in any frame. */
    public void addGoals(FramePose2DReadOnly... goals)
    {
       for (FramePose2DReadOnly goal : goals)
          addGoal(goal);
    }
 
-   /** Replace the current goal with this world pose. Uses a one-waypoint list so it does not append. */
+   /** Append to the current goal list with this world pose. */
    public void addGoals(Pose2DReadOnly... goals)
    {
       addGoals(DEFAULT_POSITION_PROXIMITY, DEFAULT_ORIENTATION_PROXIMITY, goals);
    }
 
-   /** Replace the current goal with this world pose. Uses a one-waypoint list so it does not append. */
+   /** Append to the current goal list with this world pose. Marks the goal as reached with the position and orientation proximity is satisfied. */
    public void addGoals(double positionProximity, double orientationProximity, Pose2DReadOnly... goals)
    {
       waitingForGoalToBeAccepted = true;
@@ -137,7 +150,7 @@ public class WalkToGoalClient
       setWaypointListFromGoals(true, positionProximity, orientationProximity, goals);
    }
 
-   /** Replace the current goal with this world pose. Uses a one-waypoint list so it does not append. */
+   /** Append to the current goal list with this world pose. Marks the goal as reached with the position and orientation proximity is satisfied. */
    public void addGoals(double positionProximity, double orientationProximity, Pose3DReadOnly... goals)
    {
       waitingForGoalToBeAccepted = true;
@@ -157,12 +170,40 @@ public class WalkToGoalClient
       if (isRequestedGoalReported() || !resendTimer.isRunning(GOAL_RESEND_TIMEOUT))
       {
          waitingForGoalToBeAccepted = false;
-         waypointList.getWaypoints().clear();
+         waypointList.getWaypoints().clear(); // clear the list so appending continues to work.
       }
       else if (resendThrottler.run())
       {
          publishGoals();
       }
+   }
+   public void commandVelocity(Vector2DReadOnly bodyLinearVelocity, double turnVelocity, boolean walk)
+   {
+      velocityMessage.setWalk(walk);
+      velocityMessage.setAreVelocitiesNormalized(false);
+      velocityMessage.setForwardVelocity(bodyLinearVelocity.getX());
+      velocityMessage.setLateralVelocity(bodyLinearVelocity.getY());
+      velocityMessage.setTurnVelocity(turnVelocity);
+      controllerHelper.publishToController(velocityMessage);
+   }
+
+   public void stop()
+   {
+      abortGoal();
+      commandVelocity(ZERO_LINEAR_VELOCITY, 0.0, false);
+   }
+
+   public void abortGoal()
+   {
+      waitingForGoalToBeAccepted = false;
+      controllerHelper.publish(HumanoidControllerAPI.getTopic(AbortWalkingMessage.class, controllerHelper.getRobotName()), abortMessage);
+      controllerHelper.publish(HumanoidControllerAPI.getTopic(ControllerReleaseGoalMessage.class, controllerHelper.getRobotName()), releaseGoalMessage);
+   }
+
+   public void destroy()
+   {
+      stepGeneratorHeartbeat.destroy();
+      waypointListStatus.destroy();
    }
 
    private boolean isRequestedGoalReported()
@@ -250,33 +291,5 @@ public class WalkToGoalClient
    private void publishGoals()
    {
       controllerHelper.publish(HumanoidControllerAPI.getTopic(ControllerWaypointGoalListMessage.class, controllerHelper.getRobotName()), waypointList);
-   }
-
-   public void commandVelocity(Vector2DReadOnly bodyLinearVelocity, double turnVelocity, boolean walk)
-   {
-      velocityMessage.setWalk(walk);
-      velocityMessage.setAreVelocitiesNormalized(false);
-      velocityMessage.setForwardVelocity(bodyLinearVelocity.getX());
-      velocityMessage.setLateralVelocity(bodyLinearVelocity.getY());
-      velocityMessage.setTurnVelocity(turnVelocity);
-      controllerHelper.publishToController(velocityMessage);
-   }
-
-   public void stop()
-   {
-      abortGoal();
-      commandVelocity(ZERO_LINEAR_VELOCITY, 0.0, false);
-   }
-
-   public void abortGoal()
-   {
-      waitingForGoalToBeAccepted = false;
-      controllerHelper.publish(HumanoidControllerAPI.getTopic(AbortWalkingMessage.class, controllerHelper.getRobotName()), abortMessage);
-   }
-
-   public void destroy()
-   {
-      stepGeneratorHeartbeat.destroy();
-      waypointListStatus.destroy();
    }
 }
