@@ -200,6 +200,20 @@ public class HeightMapExtractor
       globalVarianceMap.setTo(new Scalar(INVALID_CELL_VARIANCE));
    }
 
+   /**
+    * Continuously tracks the robot's current elevation, unlike {@link #reset}: only updates
+    * {@link #resetOffset} (the height translateHeightMapKernel/icpApplyCorrectionKernel seed newly-exposed
+    * cells with), without touching any already-registered map data. Meant to be called every update so
+    * that seed height doesn't go stale between explicit {@link #reset} calls as the robot climbs or descends.
+    *
+    * @param pelvisHeightInWorld current pelvis height (Z) in the world frame
+    * @param heightBelowPelvis   fixed assumed offset from the pelvis down to the ground
+    */
+   public void updateResetOffset(double pelvisHeightInWorld, double heightBelowPelvis)
+   {
+      resetOffset = (float) (pelvisHeightInWorld - heightBelowPelvis);
+   }
+
    public void update(GpuMat latestDepthImageGPU,
                       CameraIntrinsics cameraIntrinsics,
                       RigidBodyTransformReadOnly sensorToWorldTransform,
