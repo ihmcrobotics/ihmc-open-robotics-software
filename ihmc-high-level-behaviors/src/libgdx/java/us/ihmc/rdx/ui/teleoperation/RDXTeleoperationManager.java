@@ -49,6 +49,7 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -262,9 +263,7 @@ public class RDXTeleoperationManager extends RDXPanel
                                                          if (!wholeBodyIKManager.getEnabled())
                                                          {
                                                             RDXBaseUI.pushNotification("Commanding chest trajectory...");
-                                                            ros2Helper.publishToController(HumanoidMessageTools.createChestTrajectoryMessage(
-                                                                  teleoperationParameters.getTrajectoryTime(),
-                                                                  interactableChest.getPose().getOrientation()));
+                                                            processChestCommand();
                                                          }
                                                       });
                   allInteractableRobotLinks.add(interactableChest);
@@ -582,6 +581,42 @@ public class RDXTeleoperationManager extends RDXPanel
       RDXBaseUI.pushNotification("Commanding pelvis  trajectory...");
       ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
                                                                                         interactablePelvis.getPose()));
+   }
+
+   private void processChestCommand()
+   {
+      RDXBaseUI.pushNotification("Commanding chest trajectory...");
+      SpineJointName[] spineJointNamesArray = syncedRobot.getRobotModel().getJointMap().getSpineJointNames();
+      double[] desiredSpineJointValues = new double[spineJointNamesArray.length];
+
+      FramePose3D chestInPelvisFrame = new FramePose3D(interactableChest.getPose());
+      chestInPelvisFrame.changeFrame(syncedRobot.getReferenceFrames().getPelvisFrame());
+
+      double desiredYaw = chestInPelvisFrame.getYaw();
+      double desiredPitch = chestInPelvisFrame.getPitch();
+      double desiredRoll = chestInPelvisFrame.getRoll();
+
+      for (int i = 0; i < spineJointNamesArray.length; i++)
+      {
+         switch (spineJointNamesArray[i])
+         {
+            case SPINE_YAW:
+               desiredSpineJointValues[i] = desiredYaw;
+               break;
+            case SPINE_PITCH:
+               desiredSpineJointValues[i] = desiredPitch;
+               break;
+            case SPINE_ROLL:
+               desiredSpineJointValues[i] = desiredRoll;
+               break;
+            default:
+               desiredSpineJointValues[i] = 0.0; // fallback
+         }
+      }
+      ros2Helper.publishToController(HumanoidMessageTools.createChestHybridJointspaceTaskspaceTrajectoryMessage(syncedRobot.getReferenceFrames(),
+                                                                                                         spineJointNamesArray,
+                                                                                                         desiredSpineJointValues,
+                                                                                                         teleoperationParameters.getTrajectoryTime()));
    }
 
    private void processHeadCommand()

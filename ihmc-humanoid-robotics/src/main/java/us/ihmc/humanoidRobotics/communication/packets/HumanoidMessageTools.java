@@ -29,7 +29,6 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -74,6 +73,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTraj
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.partNames.HandJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -728,6 +728,65 @@ public class HumanoidMessageTools
     * @param desiredNeckPositions Array of desired joint positions (length = neck joints).
     * @param trajectoryTime Duration for the trajectory.
     */
+   public static ChestHybridJointspaceTaskspaceTrajectoryMessage createChestHybridJointspaceTaskspaceTrajectoryMessage(HumanoidReferenceFrames referenceFrames,
+                                                                                                               SpineJointName[] spineJointNamesArray,
+                                                                                                               double[] desiredSpinePositions,
+                                                                                                               double trajectoryTime)
+   {
+      FrameYawPitchRoll frameChest = new FrameYawPitchRoll();
+
+      // Compose the yaw/pitch/roll from desiredNeckPositions
+      for (int i = 0; i < spineJointNamesArray.length; i++)
+      {
+         switch (spineJointNamesArray[i])
+         {
+            case SPINE_YAW ->
+            {
+               frameChest.changeFrame(referenceFrames.getSpineFrame(SpineJointName.SPINE_YAW));
+               frameChest.appendYawRotation(desiredSpinePositions[i]);
+            }
+            case SPINE_PITCH ->
+            {
+               frameChest.changeFrame(referenceFrames.getSpineFrame(SpineJointName.SPINE_PITCH));
+               frameChest.setYaw(desiredSpinePositions[i]);
+            }
+            case SPINE_ROLL ->
+            {
+               frameChest.changeFrame(referenceFrames.getSpineFrame(SpineJointName.SPINE_ROLL));
+               frameChest.setRoll(desiredSpinePositions[i]);
+            }
+         }
+      }
+
+      frameChest.changeFrame(referenceFrames.getChestFrame());
+      SO3TrajectoryMessage taskspaceTrajectoryMessage = HumanoidMessageTools.createSO3TrajectoryMessage(trajectoryTime,
+                                                                                                        frameChest,
+                                                                                                        EuclidCoreTools.zeroVector3D,
+                                                                                                        referenceFrames.getPelvisFrame());
+
+      taskspaceTrajectoryMessage.getWeightMatrix().setXWeight(0.01);
+      taskspaceTrajectoryMessage.getWeightMatrix().setYWeight(0.01);
+      taskspaceTrajectoryMessage.getWeightMatrix().setZWeight(0.01);
+
+      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildJointspaceTrajectoryMessage(QueueableMessage.EXECUTION_MODE_OVERRIDE,
+                                                                                                 desiredSpinePositions,
+                                                                                                 trajectoryTime);
+
+      ChestHybridJointspaceTaskspaceTrajectoryMessage hybridMessage = new ChestHybridJointspaceTaskspaceTrajectoryMessage();
+      hybridMessage.getTaskspaceTrajectoryMessage().set(taskspaceTrajectoryMessage);
+      hybridMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
+
+      return hybridMessage;
+   }
+
+   /**
+    * Generates and publishes the head hybrid trajectory (SO3 + Jointspace).
+    * Used for both UI widgets and N-pose.
+    *
+    * @param neckJointNamesArray The array of the neck joint names
+    * @param desiredNeckPositions Array of desired joint positions (length = neck joints).
+    * @param trajectoryTime Duration for the trajectory.
+    */
    public static HeadHybridJointspaceTaskspaceTrajectoryMessage createHeadJointspaceTaskspaceTrajectoryMessage(HumanoidReferenceFrames referenceFrames,
                                                                                                                NeckJointName[] neckJointNamesArray,
                                                                                                                double[] desiredNeckPositions,
@@ -743,38 +802,32 @@ public class HumanoidMessageTools
             case PROXIMAL_NECK_PITCH ->
             {
                frameHeadYawPitchRoll.changeFrame(referenceFrames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setPitch(desiredNeckPositions[i]);
+               frameHeadYawPitchRoll.appendPitchRotation(desiredNeckPositions[i]);
             }
             case PROXIMAL_NECK_YAW ->
             {
                frameHeadYawPitchRoll.changeFrame(referenceFrames.getNeckFrame(NeckJointName.PROXIMAL_NECK_YAW));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setYaw(desiredNeckPositions[i]);
+               frameHeadYawPitchRoll.appendYawRotation(desiredNeckPositions[i]);
             }
             case PROXIMAL_NECK_ROLL ->
             {
                frameHeadYawPitchRoll.changeFrame(referenceFrames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setRoll(desiredNeckPositions[i]);
+               frameHeadYawPitchRoll.appendRollRotation(desiredNeckPositions[i]);
             }
             case DISTAL_NECK_PITCH ->
             {
                frameHeadYawPitchRoll.changeFrame(referenceFrames.getNeckFrame(NeckJointName.DISTAL_NECK_PITCH));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setPitch(desiredNeckPositions[i]);
+               frameHeadYawPitchRoll.appendPitchRotation(desiredNeckPositions[i]);
             }
             case DISTAL_NECK_YAW ->
             {
                frameHeadYawPitchRoll.changeFrame(referenceFrames.getNeckFrame(NeckJointName.DISTAL_NECK_YAW));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setYaw(desiredNeckPositions[i]);
+               frameHeadYawPitchRoll.appendYawRotation(desiredNeckPositions[i]);
             }
             case DISTAL_NECK_ROLL ->
             {
                frameHeadYawPitchRoll.changeFrame(referenceFrames.getNeckFrame(NeckJointName.DISTAL_NECK_ROLL));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setRoll(desiredNeckPositions[i]);
+               frameHeadYawPitchRoll.appendRollRotation(desiredNeckPositions[i]);
             }
          }
       }
@@ -789,7 +842,9 @@ public class HumanoidMessageTools
       taskspaceTrajectoryMessage.getWeightMatrix().setYWeight(0.01);
       taskspaceTrajectoryMessage.getWeightMatrix().setZWeight(0.01);
 
-      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildHeadJointspaceTrajectoryMessage(desiredNeckPositions, trajectoryTime);
+      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildJointspaceTrajectoryMessage(QueueableMessage.EXECUTION_MODE_OVERRIDE,
+                                                                                                 desiredNeckPositions,
+                                                                                                 trajectoryTime);
 
       HeadHybridJointspaceTaskspaceTrajectoryMessage hybridMessage = new HeadHybridJointspaceTaskspaceTrajectoryMessage();
       hybridMessage.getTaskspaceTrajectoryMessage().set(taskspaceTrajectoryMessage);
@@ -801,11 +856,10 @@ public class HumanoidMessageTools
    /**
     * Build JointspaceTrajectoryMessage for head, parametrized.
     */
-   private static JointspaceTrajectoryMessage buildHeadJointspaceTrajectoryMessage(double[] jointAngles,
-                                                                                   double trajectoryTime)
+   private static JointspaceTrajectoryMessage buildJointspaceTrajectoryMessage(byte executionMode, double[] jointAngles, double trajectoryTime)
    {
       JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
-      jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+      jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(executionMode);
 
       for (double q : jointAngles)
       {
@@ -819,6 +873,7 @@ public class HumanoidMessageTools
 
       return jointspaceTrajectoryMessage;
    }
+
 
    /**
     * set a single point
