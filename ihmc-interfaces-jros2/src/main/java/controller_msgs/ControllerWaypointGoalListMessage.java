@@ -23,6 +23,9 @@ uint64 sequence_id
 
 # Ordered list of goals to execute in sequence.
 ControllerWaypointGoalMessage[<=50] waypoints
+# If true, append these waypoints to the end of the current queue.
+# If false, override the current queue with this list of waypoints.
+bool queue_waypoints false
 }</pre>
 */
 public class ControllerWaypointGoalListMessage implements ROS2Message<ControllerWaypointGoalListMessage>
@@ -37,10 +40,16 @@ public class ControllerWaypointGoalListMessage implements ROS2Message<Controller
       Ordered list of goals to execute in sequence.
    */
    private final IDLObjectSequence<controller_msgs.ControllerWaypointGoalMessage> waypoints_;
+   /**
+      If true, append these waypoints to the end of the current queue.
+      If false, override the current queue with this list of waypoints.
+   */
+   private boolean queue_waypoints_;
 
    public ControllerWaypointGoalListMessage()
    {
       waypoints_ = new IDLObjectSequence<controller_msgs.ControllerWaypointGoalMessage>(0, 50, controller_msgs.ControllerWaypointGoalMessage.class);
+      queue_waypoints_ = (boolean) false;
 
    }
 
@@ -57,6 +66,7 @@ public class ControllerWaypointGoalListMessage implements ROS2Message<Controller
 
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // sequence_id_
       currentAlignment += waypoints_.calculateSizeBytes(currentAlignment);
+      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // queue_waypoints_
 
       return currentAlignment - initialAlignment;
    }
@@ -66,6 +76,7 @@ public class ControllerWaypointGoalListMessage implements ROS2Message<Controller
    {
       buffer.writeLong(sequence_id_);
       waypoints_.serialize(buffer);
+      buffer.writeBoolean(queue_waypoints_);
 
    }
 
@@ -74,6 +85,7 @@ public class ControllerWaypointGoalListMessage implements ROS2Message<Controller
    {
       sequence_id_ = buffer.readLong();
       waypoints_.deserialize(buffer);
+      queue_waypoints_ = buffer.readBoolean();
 
    }
 
@@ -82,6 +94,7 @@ public class ControllerWaypointGoalListMessage implements ROS2Message<Controller
    {
       sequence_id_ = from.sequence_id_;
       waypoints_.set(from.waypoints_);
+      queue_waypoints_ = from.queue_waypoints_;
 
    }
 
@@ -100,6 +113,16 @@ public class ControllerWaypointGoalListMessage implements ROS2Message<Controller
       return waypoints_;
    }
 
+   public boolean getQueueWaypoints()
+   {
+      return queue_waypoints_;
+   }
+
+   public void setQueueWaypoints(boolean queue_waypoints_)
+   {
+      this.queue_waypoints_ = queue_waypoints_;
+   }
+
 
    @Override
    public java.lang.String toString()
@@ -110,6 +133,8 @@ public class ControllerWaypointGoalListMessage implements ROS2Message<Controller
       builder.append(sequence_id_);
       builder.append("waypoints_=");
       builder.append(waypoints_);
+      builder.append("queue_waypoints_=");
+      builder.append(queue_waypoints_);
 
       builder.append("}");
       return builder.toString();

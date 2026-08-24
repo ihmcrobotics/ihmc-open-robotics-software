@@ -19,16 +19,18 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.tools.Timer;
-
-import java.util.List;
 
 /** Plants a walk-to-goal pose, or takes the body back with a streamed velocity. */
 public class WalkToGoalClient
 {
    private static final Vector2DReadOnly ZERO_LINEAR_VELOCITY = new Vector2D();
+   private static final double DEFAULT_POSITION_PROXIMITY = 0.2;
+   private static final double DEFAULT_ORIENTATION_PROXIMITY = Math.toRadians(30.0);
+
    private static final double GOAL_RESEND_PERIOD = 0.2;
    private static final double GOAL_RESEND_TIMEOUT = 2.0;
    private static final double GOAL_MATCH_EPSILON = 1.0e-3;
@@ -54,35 +56,71 @@ public class WalkToGoalClient
       waypointListStatus = controllerHelper.subscribeToController(ControllerWaypointListStatusMessage.class);
    }
 
-   /** Replace the current goal with this pose, expressed in any frame. */
-   public void goTo(FramePose2DReadOnly goal)
+   public void setGoal(FramePose2DReadOnly goal)
    {
       worldGoal.setMatchingFrame(goal);
-      goTo((Pose2DReadOnly) worldGoal);
+      setGoal((Pose2DReadOnly) worldGoal);
    }
 
-   /** Replace the current goal with this world pose. Uses a one-waypoint list so it does not append. */
-   public void goTo(Pose2DReadOnly... goals)
+   public void setGoal(Pose2DReadOnly goal)
    {
-      goTo(0.20, Math.toRadians(30.0), goals);
+      setGoal(DEFAULT_POSITION_PROXIMITY, DEFAULT_ORIENTATION_PROXIMITY, goal);
    }
 
-   /** Replace the current goal with this world pose. Uses a one-waypoint list so it does not append. */
-   public void goTo(double positionProximity, double orientationProximity, Pose2DReadOnly... goals)
+   public void setGoal(Pose3DReadOnly goal)
    {
-      waitingForGoalToBeAccepted = true;
-      resendTimer.reset();
-      setWaypointListFromGoals(positionProximity, orientationProximity, goals);
+      setGoal(DEFAULT_POSITION_PROXIMITY, DEFAULT_ORIENTATION_PROXIMITY, goal);
    }
 
-   /** Replace the current goal with this world pose. Uses a one-waypoint list so it does not append. */
-   public void goTo(double positionProximity, double orientationProximity, Pose3DReadOnly... goals)
+   public void setGoal(double positionProximity, double orientationProximity, Pose2DReadOnly goal)
    {
       waitingForGoalToBeAccepted = true;
       resendTimer.reset();
-      setWaypointListFromGoals(positionProximity, orientationProximity, goals);
+      setWaypointListFromGoals(false, positionProximity, orientationProximity, goal);
    }
 
+   public void setGoal(double positionProximity, double orientationProximity, Pose3DReadOnly goal)
+   {
+      waitingForGoalToBeAccepted = true;
+      resendTimer.reset();
+      setWaypointListFromGoals(false, positionProximity, orientationProximity, goal);
+   }
+
+   /** Replace the current goal with this pose, expressed in any frame. */
+   public void addGoal(FramePose2DReadOnly goal)
+   {
+      worldGoal.setMatchingFrame(goal);
+      addGoals(worldGoal);
+   }
+
+   /** Replace the current goal with this world pose. Uses a one-waypoint list so it does not append. */
+   public void addGoals(FramePose2DReadOnly... goals)
+   {
+      for (FramePose2DReadOnly goal : goals)
+         addGoal(goal);
+   }
+
+   /** Replace the current goal with this world pose. Uses a one-waypoint list so it does not append. */
+   public void addGoals(Pose2DReadOnly... goals)
+   {
+      addGoals(DEFAULT_POSITION_PROXIMITY, DEFAULT_ORIENTATION_PROXIMITY, goals);
+   }
+
+   /** Replace the current goal with this world pose. Uses a one-waypoint list so it does not append. */
+   public void addGoals(double positionProximity, double orientationProximity, Pose2DReadOnly... goals)
+   {
+      waitingForGoalToBeAccepted = true;
+      resendTimer.reset();
+      setWaypointListFromGoals(true, positionProximity, orientationProximity, goals);
+   }
+
+   /** Replace the current goal with this world pose. Uses a one-waypoint list so it does not append. */
+   public void addGoals(double positionProximity, double orientationProximity, Pose3DReadOnly... goals)
+   {
+      waitingForGoalToBeAccepted = true;
+      resendTimer.reset();
+      setWaypointListFromGoals(true, positionProximity, orientationProximity, goals);
+   }
 
    /**
     * The step generator drops incoming commands whenever its heartbeat monitor lapses, which a single
@@ -112,6 +150,12 @@ public class WalkToGoalClient
       double firstWaypointX = waypointList.getWaypoints().get(0).getXPosition();
       double firstWaypointY = waypointList.getWaypoints().get(0).getYPosition();
       IDLObjectSequence<ControllerWaypointStatusMessage> queuedWaypoints = waypointListStatus.getLatest().getWaypoints();
+
+      // If we're overriding the waypoints, the list should be the same length
+      if (!waypointList.getQueueWaypoints() && waypointList.getWaypoints().size() != queuedWaypoints.size())
+         return false;
+
+
       for (int i = 0; i < queuedWaypoints.size(); i++)
       {
          ControllerWaypointStatusMessage queuedWaypoint = queuedWaypoints.get(i);
@@ -124,20 +168,24 @@ public class WalkToGoalClient
       return false;
    }
 
-   private void setWaypointListFromGoals(double positionProximity, double orientationProximity, Pose2DReadOnly... goals)
+   private void setWaypointListFromGoals(boolean queueGoals, double positionProximity, double orientationProximity, Pose2DReadOnly... goals)
    {
       waypointList.setSequenceId(sequenceId++);
       waypointList.getWaypoints().clear();
+      waypointList.setQueueWaypoints(queueGoals);
+
       for (Pose2DReadOnly goal : goals)
       {
          addWaypointToList(positionProximity, orientationProximity, goal.getX(), goal.getY(), goal.getYaw());
       }
    }
 
-   private void setWaypointListFromGoals(double positionProximity, double orientationProximity, Pose3DReadOnly... goals)
+   private void setWaypointListFromGoals(boolean queueGoals, double positionProximity, double orientationProximity, Pose3DReadOnly... goals)
    {
       waypointList.setSequenceId(sequenceId++);
       waypointList.getWaypoints().clear();
+      waypointList.setQueueWaypoints(queueGoals);
+
       for (Pose3DReadOnly goal : goals)
       {
          addWaypointToList(positionProximity, orientationProximity, goal.getX(), goal.getY(), goal.getYaw());

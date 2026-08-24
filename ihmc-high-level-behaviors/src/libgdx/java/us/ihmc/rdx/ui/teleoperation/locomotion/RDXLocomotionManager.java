@@ -24,7 +24,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -539,7 +538,7 @@ public class RDXLocomotionManager
       goalPoseGraphics.get(0).create(0.05, 0.2, Color.RED);
       goalPoseGraphics.get(0).setToPose(goalPoses.get(0));
 
-      walkToGoalClient.goTo(0.1, 0.1, goalPoses.toArray(new Pose3D[0]));
+      walkToGoalClient.addGoals(0.1, 0.1, goalPoses.toArray(new Pose3D[0]));
 
       goalsSent = true;
       goalsReceived = false;

@@ -201,7 +201,10 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    public void consumeNewWaypointList(ControllerWaypointGoalListCommand command)
    {
-      goalPoses.clear();
+      // If not queueing, override the current queue with this list of waypoints.
+      if (!command.getQueueWaypoints())
+         goalPoses.clear();
+
       for (int i = 0; i < command.getNumberOfWaypoints(); i++)
       {
          consumeNewWaypoint(command.getWaypoint(i));
