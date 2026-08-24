@@ -72,7 +72,7 @@
   "ICP max iterations": 5,
   "ICP min correspondence count": 50,
   "ICP max horizontal drift": {
-    "value": 0.02,
+    "value": 0.05,
     "lowerBound": 0.0,
     "upperBound": 0.1
   },
@@ -87,7 +87,7 @@
     "upperBound": 1.0
   },
   "ICP convergence Z meters": {
-    "value": 0.003,
+    "value": 0.002,
     "lowerBound": 0.0,
     "upperBound": 0.05
   },

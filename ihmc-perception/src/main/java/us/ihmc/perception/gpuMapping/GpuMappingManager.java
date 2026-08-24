@@ -91,6 +91,7 @@ public class GpuMappingManager
       controllerHeightMapMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(HeightMapMessageForController.class, robotName));
    }
 
+   boolean firstTick = true;
    /**
     * Update the Height Map with the latest depth image from the sensor
     */
@@ -126,6 +127,13 @@ public class GpuMappingManager
 
       // Keep the seed height for newly-exposed map cells tracking the robot's current elevation
       heightMapExtractor.updateResetOffset(heightMapCenterOrigin.getZ(), HEIGHT_BELOW_PELVIS);
+
+      if (firstTick)
+      {
+         // On the first tick of the update loop, call this reset, otherwise everything is initialized with value to 0 height, and things don't happen properly.
+         heightMapExtractor.reset(heightMapCenterOrigin.getZ(), HEIGHT_BELOW_PELVIS);
+         firstTick = false;
+      }
 
       // -------- Update the Height Map with the latest depth image from the sensor --------------
       // We expect to have knowledge of where the camera is in relation to the world so we can accurately display the height map

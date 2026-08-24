@@ -191,10 +191,9 @@ public class HeightMapExtractor
       reset(footHeight, 0);
    }
 
-   public void reset(double footHeight, float loweredValue)
+   public void reset(double footHeight, double loweredValue)
    {
-      resetOffset = (float) footHeight;
-      resetOffset -= loweredValue;
+      updateResetOffset(footHeight, loweredValue);
 
       globalMeanMap.setTo(new Scalar(resetOffset));
       globalVarianceMap.setTo(new Scalar(INVALID_CELL_VARIANCE));
@@ -249,7 +248,7 @@ public class HeightMapExtractor
       groundToWorldNoRotation.get(groundToWorldNoRotationTransformArray);
       groundToWorldTranslationHostPointer.put(groundToWorldNoRotationTransformArray);
       CUDATools.mallocAsync(groundToWorldTranslationDevicePointer, groundToWorldNoRotationTransformArray.length, stream);
-      CUDATools.memcpyAsync(groundToWorldTranslationDevicePointer, groundToWorldTranslationHostPointer, groundToWorldNoRotationTransformArray.length, stream);      checkCUDAError();
+      CUDATools.memcpyAsync(groundToWorldTranslationDevicePointer, groundToWorldTranslationHostPointer, groundToWorldNoRotationTransformArray.length, stream);
       checkCUDAError();
 
       // ---------- Run the translate kernel ---------
