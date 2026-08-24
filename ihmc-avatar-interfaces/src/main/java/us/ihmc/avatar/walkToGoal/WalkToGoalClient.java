@@ -40,19 +40,22 @@ public class WalkToGoalClient
    private static final double GOAL_MATCH_EPSILON = 1.0e-3;
 
    private final ROS2ControllerHelper controllerHelper;
-   private final ControllerWaypointGoalListMessage waypointList = new ControllerWaypointGoalListMessage();
+   private final ControllerWaypointGoalListMessage waypointListMessage = new ControllerWaypointGoalListMessage();
    private final AbortWalkingMessage abortMessage = new AbortWalkingMessage();
    private final ControllerReleaseGoalMessage releaseGoalMessage = new ControllerReleaseGoalMessage();
    private final VelocityBasedWalkingInputMessage velocityMessage = new VelocityBasedWalkingInputMessage();
-   private final FixedFramePose2DBasics worldGoal = new FramePose2D();
-   private final FixedFramePoint2DBasics worldGoalPoint = new FramePoint2D();
-   /** StepGeneratorCommandInputManager discards goals unless this heartbeat is alive. */
+
+   // StepGeneratorCommandInputManager discards goals unless this heartbeat is alive.
    private final ROS2Heartbeat stepGeneratorHeartbeat;
    private final ROS2Input<ControllerWaypointListStatusMessage> waypointListStatus;
    private final Timer resendTimer = new Timer();
    private final Throttler resendThrottler = new Throttler().setPeriod(GOAL_RESEND_PERIOD);
    private boolean waitingForGoalToBeAccepted = false;
    private long sequenceId = 1L;
+
+   // temp variables for compute.
+   private final FixedFramePose2DBasics worldGoal = new FramePose2D();
+   private final FixedFramePoint2DBasics worldGoalPoint = new FramePoint2D();
 
    public WalkToGoalClient(ROS2ControllerHelper controllerHelper)
    {
@@ -170,7 +173,7 @@ public class WalkToGoalClient
       if (isRequestedGoalReported() || !resendTimer.isRunning(GOAL_RESEND_TIMEOUT))
       {
          waitingForGoalToBeAccepted = false;
-         waypointList.getWaypoints().clear(); // clear the list so appending continues to work.
+         waypointListMessage.getWaypoints().clear(); // clear the list so appending continues to work.
       }
       else if (resendThrottler.run())
       {
@@ -196,6 +199,7 @@ public class WalkToGoalClient
    public void abortGoal()
    {
       waitingForGoalToBeAccepted = false;
+      waypointListMessage.getWaypoints().clear();
       controllerHelper.publish(HumanoidControllerAPI.getTopic(AbortWalkingMessage.class, controllerHelper.getRobotName()), abortMessage);
       controllerHelper.publish(HumanoidControllerAPI.getTopic(ControllerReleaseGoalMessage.class, controllerHelper.getRobotName()), releaseGoalMessage);
    }
@@ -211,12 +215,12 @@ public class WalkToGoalClient
       if (!waypointListStatus.hasReceivedFirstMessage())
          return false;
 
-      double firstWaypointX = waypointList.getWaypoints().get(0).getXPosition();
-      double firstWaypointY = waypointList.getWaypoints().get(0).getYPosition();
+      double firstWaypointX = waypointListMessage.getWaypoints().get(0).getXPosition();
+      double firstWaypointY = waypointListMessage.getWaypoints().get(0).getYPosition();
       IDLObjectSequence<ControllerWaypointStatusMessage> queuedWaypoints = waypointListStatus.getLatest().getWaypoints();
 
       // If we're overriding the waypoints, the list should be the same length
-      if (!waypointList.getQueueWaypoints() && waypointList.getWaypoints().size() != queuedWaypoints.size())
+      if (!waypointListMessage.getQueueWaypoints() && waypointListMessage.getWaypoints().size() != queuedWaypoints.size())
          return false;
 
 
@@ -234,9 +238,9 @@ public class WalkToGoalClient
 
    private void setWaypointListFromGoals(boolean queueGoals, double positionProximity, Point2DReadOnly... goals)
    {
-      waypointList.setSequenceId(sequenceId++);
-      waypointList.getWaypoints().clear();
-      waypointList.setQueueWaypoints(queueGoals);
+      waypointListMessage.setSequenceId(sequenceId++);
+      waypointListMessage.getWaypoints().clear();
+      waypointListMessage.setQueueWaypoints(queueGoals);
 
       for (Point2DReadOnly goal : goals)
       {
@@ -246,9 +250,9 @@ public class WalkToGoalClient
 
    private void setWaypointListFromGoals(boolean queueGoals, double positionProximity, double orientationProximity, Pose2DReadOnly... goals)
    {
-      waypointList.setSequenceId(sequenceId++);
-      waypointList.getWaypoints().clear();
-      waypointList.setQueueWaypoints(queueGoals);
+      waypointListMessage.setSequenceId(sequenceId++);
+      waypointListMessage.getWaypoints().clear();
+      waypointListMessage.setQueueWaypoints(queueGoals);
 
       for (Pose2DReadOnly goal : goals)
       {
@@ -258,9 +262,9 @@ public class WalkToGoalClient
 
    private void setWaypointListFromGoals(boolean queueGoals, double positionProximity, double orientationProximity, Pose3DReadOnly... goals)
    {
-      waypointList.setSequenceId(sequenceId++);
-      waypointList.getWaypoints().clear();
-      waypointList.setQueueWaypoints(queueGoals);
+      waypointListMessage.setSequenceId(sequenceId++);
+      waypointListMessage.getWaypoints().clear();
+      waypointListMessage.setQueueWaypoints(queueGoals);
 
       for (Pose3DReadOnly goal : goals)
       {
@@ -270,7 +274,7 @@ public class WalkToGoalClient
 
    private void addWaypointToList(double positionProximity, double xPosition, double yPosition)
    {
-      ControllerWaypointGoalMessage waypoint = waypointList.getWaypoints().add();
+      ControllerWaypointGoalMessage waypoint = waypointListMessage.getWaypoints().add();
       waypoint.setXPosition(xPosition);
       waypoint.setYPosition(yPosition);
       waypoint.setPositionProximity(positionProximity);
@@ -279,7 +283,7 @@ public class WalkToGoalClient
 
    private void addWaypointToList(double positionProximity, double orientationProximity, double xPosition, double yPosition, double yaw)
    {
-      ControllerWaypointGoalMessage waypoint = waypointList.getWaypoints().add();
+      ControllerWaypointGoalMessage waypoint = waypointListMessage.getWaypoints().add();
       waypoint.setXPosition(xPosition);
       waypoint.setYPosition(yPosition);
       waypoint.setYaw(yaw);
@@ -290,6 +294,6 @@ public class WalkToGoalClient
 
    private void publishGoals()
    {
-      controllerHelper.publish(HumanoidControllerAPI.getTopic(ControllerWaypointGoalListMessage.class, controllerHelper.getRobotName()), waypointList);
+      controllerHelper.publish(HumanoidControllerAPI.getTopic(ControllerWaypointGoalListMessage.class, controllerHelper.getRobotName()), waypointListMessage);
    }
 }
