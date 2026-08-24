@@ -28,6 +28,22 @@ public interface StateEstimatorController extends RobotController, StateEstimato
    public void initializeEstimator(RigidBodyTransformReadOnly rootJointTransform, TObjectDoubleMap<String> jointPositions);
 
    /**
+    * Requests a reinitialization of the estimator on the next control tick (legacy behavior:
+    * restore last stored / provided root translation).
+    */
+   default void requestReinitializeEstimator()
+   {
+   }
+
+   /**
+    * Requests a reinitialization that places mid-feet at the world origin (translation only).
+    * Corresponds to the {@code reinitializeStateEstimatorToWorldOrigin} YoVariable.
+    */
+   default void requestReinitializeEstimatorToWorldOrigin()
+   {
+   }
+
+   /**
     * Initializes the root joint pose in the estimator.
     *
     * @param rootJointTransform the transform of the floating root joint that is estimated.
