@@ -40,6 +40,9 @@ public class WalkToGoalClient
    private final Timer resendTimer = new Timer();
    private final Throttler resendThrottler = new Throttler().setPeriod(GOAL_RESEND_PERIOD);
    private boolean waitingForGoalToBeAccepted = false;
+   private boolean goalActive = false;
+   private double positionProximity = 0.20;
+   private double orientationProximity = Math.toRadians(30.0);
    private long sequenceId = 1L;
 
    public WalkToGoalClient(ROS2ControllerHelper controllerHelper)
@@ -61,7 +64,15 @@ public class WalkToGoalClient
    /** Replace the current goal with this world pose. Uses a one-waypoint list so it does not append. */
    public void goTo(Pose2DReadOnly goal)
    {
+      goTo(goal, 0.20, Math.toRadians(30.0));
+   }
+
+   public void goTo(Pose2DReadOnly goal, double positionProximity, double orientationProximity)
+   {
       requestedGoal.set(goal);
+      this.positionProximity = positionProximity;
+      this.orientationProximity = orientationProximity;
+      goalActive = true;
       waitingForGoalToBeAccepted = true;
       resendTimer.reset();
       publishGoal();
@@ -101,8 +112,8 @@ public class WalkToGoalClient
       waypoint.setYPosition(requestedGoal.getY());
       waypoint.setYaw(requestedGoal.getYaw());
       waypoint.setHoldPosition(true);
-      waypoint.setPositionProximity(0.20);
-      waypoint.setOrientationProximity(Math.toRadians(30.0));
+      waypoint.setPositionProximity(positionProximity);
+      waypoint.setOrientationProximity(orientationProximity);
       controllerHelper.publish(HumanoidControllerAPI.getTopic(ControllerWaypointGoalListMessage.class, controllerHelper.getRobotName()), waypointList);
    }
 
@@ -125,6 +136,9 @@ public class WalkToGoalClient
    public void abortGoal()
    {
       waitingForGoalToBeAccepted = false;
+      if (!goalActive)
+         return;
+      goalActive = false;
       controllerHelper.publish(HumanoidControllerAPI.getTopic(AbortWalkingMessage.class, controllerHelper.getRobotName()), abortMessage);
    }
 
