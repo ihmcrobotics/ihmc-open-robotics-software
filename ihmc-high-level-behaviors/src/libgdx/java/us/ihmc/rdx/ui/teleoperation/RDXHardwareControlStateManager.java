@@ -7,6 +7,7 @@ import controller_msgs.HighLevelStateChangeStatusMessage;
 import controller_msgs.HighLevelStateMessage;
 import controller_msgs.RLModelSelectionMessage;
 import controller_msgs.RLPolicyState;
+import controller_msgs.ReinitializeStateEstimatorMessage;
 import controller_msgs.StopAllTrajectoryMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
@@ -292,6 +293,16 @@ public class RDXHardwareControlStateManager
       controllerHelper.publishToController(modelSelectionMessage);
    }
 
+   public void sendReinitializeEstimatorToWorldOrigin()
+   {
+      ReinitializeStateEstimatorMessage message = new ReinitializeStateEstimatorMessage();
+      message.setRequestReinitialize(true);
+      message.setReinitializeToWorldOrigin(true);
+      controllerHelper.publishToController(message);
+      RDXBaseUI.pushNotification("Reinitializing state estimator to world origin...");
+   }
+
+
    public HighLevelControllerName getCurrentHighLevelState()
    {
       return currentHighLevelState;
@@ -301,6 +312,15 @@ public class RDXHardwareControlStateManager
    {
       return controllerRLModelName;
    }
+
+   public String getDesiredRLModelName()
+   {
+      int index = desiredRLModel.get();
+      if (rlModelNames.length == 0 || index < 0 || index >= rlModelNames.length)
+         return null;
+      return rlModelNames[index];
+   }
+
 
    public boolean selectRLModelByName(String modelName)
    {

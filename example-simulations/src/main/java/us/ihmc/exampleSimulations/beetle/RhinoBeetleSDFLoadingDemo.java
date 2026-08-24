@@ -1,95 +1,86 @@
 package us.ihmc.exampleSimulations.beetle;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleModelFactory;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.scs2.definition.robot.MomentOfInertiaDefinition;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.robot.SixDoFJointDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
+import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
+import us.ihmc.scs2.simulation.SimulationSession;
 
 public class RhinoBeetleSDFLoadingDemo
 {
-
    private static final boolean SHOW_ELLIPSOIDS = true;
    private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = false;
 
    public RhinoBeetleSDFLoadingDemo()
    {
       RhinoBeetleModelFactory robotParameters = new RhinoBeetleModelFactory();
-      FloatingRootJointRobot sdfRobot = robotParameters.createSdfRobot();
-      sdfRobot.setPositionInWorld(new Vector3D(0.0, 0.0, 1.0));
-      System.out.println(sdfRobot.computeCenterOfMass(new Point3D()));
+      RobotDefinition robotDefinition = robotParameters.getRobotDefinition();
+
+      SixDoFJointDefinition rootJoint = robotDefinition.getFloatingRootJointDefinition();
+      rootJoint.getInitialJointState().getPosition().set(0.0, 0.0, 1.0);
+
+      double totalMass = robotDefinition.getAllRigidBodies().stream().mapToDouble(RigidBodyDefinition::getMass).sum();
+      System.out.println("Total robot mass: " + totalMass);
 
       if (SHOW_ELLIPSOIDS)
       {
-         addIntertialEllipsoidsToVisualizer(sdfRobot);
+         addInertialEllipsoidsToVisualizer(robotDefinition);
       }
 
       if (SHOW_COORDINATES_AT_JOINT_ORIGIN)
       {
-         addJointAxis(sdfRobot);
+         addJointAxis(robotDefinition);
       }
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
-      scs.startOnAThread();
+      SimulationSession simulationSession = new SimulationSession();
+      simulationSession.addRobot(robotDefinition);
+
+      SessionVisualizer.startSessionVisualizer(simulationSession);
    }
 
-
-   private void addIntertialEllipsoidsToVisualizer(FloatingRootJointRobot sdfRobot)
+   private void addInertialEllipsoidsToVisualizer(RobotDefinition robotDefinition)
    {
-      ArrayList<Joint> joints = new ArrayList<>();
-      joints.add(sdfRobot.getRootJoint());
-
-      HashSet<Link> links = getAllLinks(joints, new HashSet<Link>());
-
-      for (Link link : links)
+      for (RigidBodyDefinition rigidBody : robotDefinition.getAllRigidBodies())
       {
-         AppearanceDefinition appearance = YoAppearance.Green();
-         appearance.setTransparency(0.6);
-         link.addEllipsoidFromMassProperties(appearance);
-         link.addCoordinateSystemToCOM(0.1);
-//         l.addBoxFromMassProperties(appearance);
-      }
-   }
+         double mass = rigidBody.getMass();
+         if (mass <= 0.0)
+            continue;
 
-   private HashSet<Link> getAllLinks(List<Joint> joints, HashSet<Link> links)
-   {
-      for (Joint joint : joints)
-      {
-         links.add(joint.getLink());
+         // Inertia-ellipsoid radii derived from the diagonal of the moment-of-inertia tensor (no principal-axis
+         // rotation applied), same closed-form SCS1's Link.addEllipsoidFromMassProperties used for a solid ellipsoid.
+         MomentOfInertiaDefinition inertia = rigidBody.getMomentOfInertia();
+         double ixx = inertia.getM00();
+         double iyy = inertia.getM11();
+         double izz = inertia.getM22();
 
-         if (!joint.getChildrenJoints().isEmpty())
-         {
-            links.addAll(getAllLinks(joint.getChildrenJoints(), links));
-         }
-      }
+         double radiusX = Math.sqrt(2.5 * (-ixx + iyy + izz) / mass);
+         double radiusY = Math.sqrt(2.5 * (ixx - iyy + izz) / mass);
+         double radiusZ = Math.sqrt(2.5 * (ixx + iyy - izz) / mass);
 
-      return links;
-   }
-
-   public void addJointAxis(FloatingRootJointRobot sdfRobot)
-   {
-      ArrayList<OneDegreeOfFreedomJoint> joints = new ArrayList<>(Arrays.asList(sdfRobot.getOneDegreeOfFreedomJoints()));
-
-      for (OneDegreeOfFreedomJoint joint : joints)
-      {
-         Graphics3DObject linkGraphics = new Graphics3DObject();
+         VisualDefinitionFactory linkGraphics = new VisualDefinitionFactory();
+         linkGraphics.appendTranslation(rigidBody.getCenterOfMassOffset());
+         linkGraphics.addEllipsoid(radiusX, radiusY, radiusZ, ColorDefinitions.Green().derive(0, 1, 1, 0.6));
+         linkGraphics.identity();
+         linkGraphics.appendTranslation(rigidBody.getCenterOfMassOffset());
          linkGraphics.addCoordinateSystem(0.1);
-         linkGraphics.combine(joint.getLink().getLinkGraphics());
-         joint.getLink().setLinkGraphics(linkGraphics);
+
+         rigidBody.addVisualDefinitions(linkGraphics.getVisualDefinitions());
       }
    }
 
+   private void addJointAxis(RobotDefinition robotDefinition)
+   {
+      for (var joint : robotDefinition.getAllOneDoFJoints())
+      {
+         VisualDefinitionFactory linkGraphics = new VisualDefinitionFactory();
+         linkGraphics.addCoordinateSystem(0.1);
+         joint.getSuccessor().addVisualDefinitions(linkGraphics.getVisualDefinitions());
+      }
+   }
 
    public static void main(String[] args)
    {
