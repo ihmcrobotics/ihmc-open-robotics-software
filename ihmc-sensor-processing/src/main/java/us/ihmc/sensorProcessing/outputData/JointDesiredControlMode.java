@@ -16,7 +16,7 @@ public enum JointDesiredControlMode
 
    public static JointDesiredControlMode fromByte(byte enumAsByte)
    {
-      if (enumAsByte == -1)
+      if (enumAsByte < 0 || enumAsByte >= values.length)
          return null;
       return values[enumAsByte];
    }
