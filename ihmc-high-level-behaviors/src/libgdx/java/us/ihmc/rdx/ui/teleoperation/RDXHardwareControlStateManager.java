@@ -269,10 +269,7 @@ public class RDXHardwareControlStateManager
          {
             desiredNeckJointValues[i] = 0.0; // TODO make 0 robot agnostic
          }
-         controllerHelper.publishToController(HumanoidMessageTools.createHeadJointspaceTaskspaceTrajectoryMessage(referenceFrames,
-                                                                                                            neckJointNamesArray,
-                                                                                                            desiredNeckJointValues,
-                                                                                                            trajectoryTime));
+         controllerHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(trajectoryTime, desiredNeckJointValues));
       }
 
       FramePose3D pelvisPose = new FramePose3D(referenceFrames.getMidFeetZUpFrame());

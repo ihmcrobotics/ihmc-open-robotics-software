@@ -613,10 +613,10 @@ public class RDXTeleoperationManager extends RDXPanel
                desiredSpineJointValues[i] = 0.0; // fallback
          }
       }
-      ros2Helper.publishToController(HumanoidMessageTools.createChestHybridJointspaceTaskspaceTrajectoryMessage(syncedRobot.getReferenceFrames(),
-                                                                                                         spineJointNamesArray,
-                                                                                                         desiredSpineJointValues,
-                                                                                                         teleoperationParameters.getTrajectoryTime()));
+      ros2Helper.publishToController(HumanoidMessageTools.createChestHybridTrajectoryMessage(interactableChest.getPoseGizmo().getGizmoFrame(),
+                                                                                             syncedRobot.getReferenceFrames().getPelvisFrame(),
+                                                                                             desiredSpineJointValues,
+                                                                                             teleoperationParameters.getTrajectoryTime()));
    }
 
    private void processHeadCommand()
@@ -649,10 +649,11 @@ public class RDXTeleoperationManager extends RDXPanel
                desiredNeckJointValues[i] = 0.0; // fallback
          }
       }
-      ros2Helper.publishToController(HumanoidMessageTools.createHeadJointspaceTaskspaceTrajectoryMessage(syncedRobot.getReferenceFrames(),
-                                                                                                         neckJointNamesArray,
-                                                                                                         desiredNeckJointValues,
-                                                                                                         teleoperationParameters.getTrajectoryTime()));
+
+      ros2Helper.publishToController(HumanoidMessageTools.createHeadHybridTrajectoryMessage(interactableHead.getPoseGizmo().getGizmoFrame(),
+                                                                                            syncedRobot.getReferenceFrames().getChestFrame(),
+                                                                                            desiredNeckJointValues,
+                                                                                            teleoperationParameters.getTrajectoryTime()));
    }
 
    private void calculate3DViewPick(ImGui3DViewInput input)
