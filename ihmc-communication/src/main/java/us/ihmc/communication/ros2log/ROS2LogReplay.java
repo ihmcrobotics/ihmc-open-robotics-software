@@ -24,6 +24,8 @@ public class ROS2LogReplay
    private final Map<String, ReplayTopicManager<?>> topicManagersMap = new HashMap<>();
    private final LongSupplier timestampSupplier;
    private final List<ROS2Topic<?>> loggedTopics;
+   @SuppressWarnings("rawtypes")
+   private final Function<ROS2Topic, Consumer> messageConsumerGenerator;
    private boolean paused = false;
 
    private boolean firstUpdate = true;
@@ -38,6 +40,7 @@ public class ROS2LogReplay
    {
       this.timeSource = timeSource;
       this.loggedTopics = loggedTopics;
+      this.messageConsumerGenerator = null;
 
       ros2Node = new ROS2Node("ihmc_ros2_log_replay");
       timestampSupplier = timeSource.createTimestampProvider(robotName, ros2Node);
@@ -47,6 +50,7 @@ public class ROS2LogReplay
    {
       this.timeSource = timeSource;
       this.loggedTopics = loggedTopics;
+      this.messageConsumerGenerator = null;
 
       ros2Node = new ROS2Node("ihmc_ros2_log_replay");
       topicManagers = ROS2LogIOTools.loadLogFile(ros2Node, loggedTopics, logFile);
@@ -61,10 +65,24 @@ public class ROS2LogReplay
       this.timeSource = ROS2LogTimeSource.SIMULATION;
       this.timestampSupplier = timestampSupplier;
       this.loggedTopics = loggedTopics;
+      this.messageConsumerGenerator = messageConsumerGenerator;
 
       topicManagers = ROS2LogIOTools.loadLogFile(logFile, loggedTopics, messageConsumerGenerator);
 
       populateTopicManagers();
+   }
+
+   /**
+    * Local replay that delivers messages to {@code messageConsumerGenerator} instead of publishing
+    * over ROS 2. Call {@link #load(File)} to choose a recording.
+    */
+   public ROS2LogReplay(List<ROS2Topic<?>> loggedTopics, Function<ROS2Topic, Consumer> messageConsumerGenerator, LongSupplier timestampSupplier)
+   {
+      this.ros2Node = null;
+      this.timeSource = ROS2LogTimeSource.SIMULATION;
+      this.timestampSupplier = timestampSupplier;
+      this.loggedTopics = loggedTopics;
+      this.messageConsumerGenerator = messageConsumerGenerator;
    }
 
    public void load(File logFile)
@@ -75,7 +93,10 @@ public class ROS2LogReplay
          return;
       }
       LogTools.info("Loading file {}", logFile.getName());
-      topicManagers = ROS2LogIOTools.loadLogFile(ros2Node, loggedTopics, logFile);
+      if (messageConsumerGenerator != null)
+         topicManagers = ROS2LogIOTools.loadLogFile(logFile, loggedTopics, messageConsumerGenerator);
+      else
+         topicManagers = ROS2LogIOTools.loadLogFile(ros2Node, loggedTopics, logFile);
       populateTopicManagers();
    }
 
