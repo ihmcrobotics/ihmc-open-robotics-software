@@ -256,6 +256,14 @@ public class WalkingCommandConsumer
          if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
             chestManager.handleTaskspaceTrajectoryCommand(so3Trajectory);
       }
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(ChestTrajectoryCommand.class))
+      {
+         ChestTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(ChestTrajectoryCommand.class);
+         SO3TrajectoryControllerCommand so3Trajectory = command.getSO3Trajectory();
+         so3Trajectory.setSequenceId(command.getSequenceId());
+         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
+            chestManager.handleTaskspaceTrajectoryCommand(so3Trajectory);
+      }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(SpineTrajectoryCommand.class))
       {
          SpineTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(SpineTrajectoryCommand.class);
