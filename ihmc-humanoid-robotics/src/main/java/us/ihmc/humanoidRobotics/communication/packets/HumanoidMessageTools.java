@@ -724,16 +724,16 @@ public class HumanoidMessageTools
     * Generates and publishes the head hybrid trajectory (SO3 + Jointspace).
     * Used for both UI widgets and N-pose.
     *
-    * @param neckJointNamesArray The array of the neck joint names
-    * @param desiredNeckPositions Array of desired joint positions (length = neck joints).
+    * @param spineJointNamesArray The array of the spine joint names
+    * @param desiredSpinePositions Array of desired joint positions (length = spine joints).
     * @param trajectoryTime Duration for the trajectory.
     */
    public static ChestHybridJointspaceTaskspaceTrajectoryMessage createChestHybridJointspaceTaskspaceTrajectoryMessage(HumanoidReferenceFrames referenceFrames,
-                                                                                                               SpineJointName[] spineJointNamesArray,
-                                                                                                               double[] desiredSpinePositions,
-                                                                                                               double trajectoryTime)
+                                                                                                                       SpineJointName[] spineJointNamesArray,
+                                                                                                                       double[] desiredSpinePositions,
+                                                                                                                       double trajectoryTime)
    {
-      FrameYawPitchRoll frameChest = new FrameYawPitchRoll();
+      FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(referenceFrames.getPelvisFrame());
 
       // Compose the yaw/pitch/roll from desiredNeckPositions
       for (int i = 0; i < spineJointNamesArray.length; i++)
@@ -742,25 +742,25 @@ public class HumanoidMessageTools
          {
             case SPINE_YAW ->
             {
-               frameChest.changeFrame(referenceFrames.getSpineFrame(SpineJointName.SPINE_YAW));
-               frameChest.appendYawRotation(desiredSpinePositions[i]);
+               frameChestYawPitchRoll.changeFrame(referenceFrames.getSpineFrame(SpineJointName.SPINE_YAW));
+               frameChestYawPitchRoll.appendYawRotation(desiredSpinePositions[i]);
             }
             case SPINE_PITCH ->
             {
-               frameChest.changeFrame(referenceFrames.getSpineFrame(SpineJointName.SPINE_PITCH));
-               frameChest.setYaw(desiredSpinePositions[i]);
+               frameChestYawPitchRoll.changeFrame(referenceFrames.getSpineFrame(SpineJointName.SPINE_PITCH));
+               frameChestYawPitchRoll.appendPitchRotation(desiredSpinePositions[i]);
             }
             case SPINE_ROLL ->
             {
-               frameChest.changeFrame(referenceFrames.getSpineFrame(SpineJointName.SPINE_ROLL));
-               frameChest.setRoll(desiredSpinePositions[i]);
+               frameChestYawPitchRoll.changeFrame(referenceFrames.getSpineFrame(SpineJointName.SPINE_ROLL));
+               frameChestYawPitchRoll.appendRollRotation(desiredSpinePositions[i]);
             }
          }
       }
 
-      frameChest.changeFrame(referenceFrames.getChestFrame());
+      frameChestYawPitchRoll.changeFrame(referenceFrames.getPelvisFrame());
       SO3TrajectoryMessage taskspaceTrajectoryMessage = HumanoidMessageTools.createSO3TrajectoryMessage(trajectoryTime,
-                                                                                                        frameChest,
+                                                                                                        frameChestYawPitchRoll,
                                                                                                         EuclidCoreTools.zeroVector3D,
                                                                                                         referenceFrames.getPelvisFrame());
 
@@ -792,7 +792,7 @@ public class HumanoidMessageTools
                                                                                                                double[] desiredNeckPositions,
                                                                                                                double trajectoryTime)
    {
-      FrameYawPitchRoll frameHeadYawPitchRoll = new FrameYawPitchRoll();
+      FrameYawPitchRoll frameHeadYawPitchRoll = new FrameYawPitchRoll(referenceFrames.getChestFrame());
 
       // Compose the yaw/pitch/roll from desiredNeckPositions
       for (int i = 0; i < neckJointNamesArray.length; i++)
