@@ -8,11 +8,12 @@ import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.jros2.ROS2Node;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
@@ -21,6 +22,7 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
    private final ROS2Input<CapturabilityBasedStatus> capturabilityBasedStatusInput;
    private final SideDependentList<ROS2Input<HandJointAnglePacket>> handJointAnglePacketInputs = new SideDependentList<>();
    private final SideDependentList<ROS2SakeHandStatus> sakeHandStatus = new SideDependentList<>();
+   private final AtomicBoolean loggedJointHashMismatch = new AtomicBoolean(false);
 
    public ROS2SyncedRobotModel(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
@@ -41,8 +43,14 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
                                                     robotConfigurationData,
                                                     message ->
                                                     {
-                                                       FullRobotModelUtils.checkJointNameHash(jointNameHash, message.getJointNameHash());
-                                                       return true;
+                                                       if (jointNameHash == message.getJointNameHash())
+                                                          return true;
+                                                       if (loggedJointHashMismatch.compareAndSet(false, true))
+                                                          LogTools.warn(
+                                                                "Ignoring RobotConfigurationData with joint name hash {} (expected {}). Another robot model is publishing on this ROS domain.",
+                                                                message.getJointNameHash(),
+                                                                jointNameHash);
+                                                       return false;
                                                     });
       robotConfigurationDataInput.addCallback(message -> resetDataReceptionTimer());
       capturabilityBasedStatusInput = new ROS2Input<>(ros2Node,
