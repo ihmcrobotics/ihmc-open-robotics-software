@@ -599,7 +599,7 @@ public class AvatarMultiThreadingFactory
          controllerFactory.setInitialState(highLevelControllerParameters.getDefaultInitialControllerState());
          controllerFactory.addCustomControlState(standPrepStateFactory);
          controllerFactory.addCustomControlState(freezeStateFactory);
-         controllerFactory.useDefaultStandTransitionControlState(STAND_PREP_STATE, RL_CONTROL);
+         controllerFactory.useDefaultStandTransitionControlState(STAND_PREP_STATE, WALKING);
          controllerFactory.useDefaultWalkingControlState();
          controllerFactory.useDefaultDoNothingControlState();
          controllerFactory.useDefaultFallingControlState();
@@ -632,7 +632,7 @@ public class AvatarMultiThreadingFactory
             controllerFactory.addControllerFailureTransition(highLevelControllerName, fallbackControllerState);
          }
 
-         controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, RL_CONTROL, false);
+         controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING, false);
          controllerFactory.addFinishedTransition(EXIT_WALKING, FREEZE_STATE);
 
          controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE,
@@ -760,6 +760,16 @@ public class AvatarMultiThreadingFactory
    public void addStandPrepStateTransition(HighLevelControllerName nextControlStateEnum)
    {
       avatarControllerFactory.addCustomStateTransition(createStandTransitionState(nextControlStateEnum, avatarControllerFactory, true));
+   }
+
+   /**
+    * External API for adding a high-level controller state that is automatically transitioned into from a previous state (in this case the STAND_PREP
+    * state), given logic that determines the trigger of that transition (in this case STAND_PREP is done, and feet are loaded). Adds a boolean check
+    * if you want the controller to transition automatically to this new state.
+    */
+   public void addStandPrepStateTransition(HighLevelControllerName nextControlStateEnum, boolean transitionAutomatically)
+   {
+      avatarControllerFactory.addCustomStateTransition(createStandTransitionState(nextControlStateEnum, avatarControllerFactory, !transitionAutomatically));
    }
 
    /**
