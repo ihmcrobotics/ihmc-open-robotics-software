@@ -10,6 +10,8 @@ byte ACTION_DIG = 5
 byte ACTION_DIG_MORE = 6
 byte ACTION_GET_UP = 7
 byte ACTION_CANCEL = 8
+byte ACTION_PICKUP_BUCKET = 9
+byte ACTION_DROP_BUCKET = 10
 
 byte requested_action
 bool execute

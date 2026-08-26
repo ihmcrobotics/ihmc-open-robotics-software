@@ -25,6 +25,8 @@ byte ACTION_DIG = 5
 byte ACTION_DIG_MORE = 6
 byte ACTION_GET_UP = 7
 byte ACTION_CANCEL = 8
+byte ACTION_PICKUP_BUCKET = 9
+byte ACTION_DROP_BUCKET = 10
 
 byte requested_action
 bool execute
@@ -43,6 +45,8 @@ public class MimicManeuverCommandMessage implements ROS2Message<MimicManeuverCom
    public static final byte ACTION_DIG_MORE = 6;
    public static final byte ACTION_GET_UP = 7;
    public static final byte ACTION_CANCEL = 8;
+   public static final byte ACTION_PICKUP_BUCKET = 9;
+   public static final byte ACTION_DROP_BUCKET = 10;
    private byte requested_action_;
    private boolean execute_;
 
@@ -137,6 +141,10 @@ public class MimicManeuverCommandMessage implements ROS2Message<MimicManeuverCom
       builder.append(ACTION_GET_UP);
       builder.append("ACTION_CANCEL=");
       builder.append(ACTION_CANCEL);
+      builder.append("ACTION_PICKUP_BUCKET=");
+      builder.append(ACTION_PICKUP_BUCKET);
+      builder.append("ACTION_DROP_BUCKET=");
+      builder.append(ACTION_DROP_BUCKET);
       builder.append("requested_action_=");
       builder.append(requested_action_);
       builder.append("execute_=");
