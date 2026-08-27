@@ -20,13 +20,15 @@ public class RDXTrashCanObject extends RDXEnvironmentObject
       Model realisticModel = RDXModelLoader.load("environmentObjects/trashCan/TrashCan.g3dj");
       setRealisticModel(realisticModel);
 
-      double sizeX = 0.2;
-      double sizeY = 0.2;
-      double sizeZ = 0.3;
+      // Mesh bounds are roughly 0.64 x 1.0 x 0.74 and nearly centered on the origin. The old
+      // 0.2^3 box was offset, so click-to-select / the gizmo outline missed the visible can.
+      double sizeX = 0.65;
+      double sizeY = 1.00;
+      double sizeZ = 0.75;
       setMass(10.0f);
-      getCollisionShapeOffset().getTranslation().add(sizeX / 2.0 - 0.08 , 0, sizeZ / 2.0);
-      getBoundingSphere().setRadius(5.0);
-      getBoundingSphere().getPosition().add(sizeX / 2.0, sizeY / 2.0, sizeZ / 2.0);
+      getCollisionShapeOffset().getTranslation().set(0.0, 0.0, 0.0);
+      getBoundingSphere().setRadius(0.85);
+      getBoundingSphere().getPosition().set(0.0, 0.0, 0.0);
       Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
       setCollisionModel(meshBuilder ->
                         {
