@@ -34,6 +34,7 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final DoubleStoredPropertyKey cellSize = keys.addDoubleKey("Cell size");
    public static final DoubleStoredPropertyKey localWidthInMeters = keys.addDoubleKey("Local width in meters");
    public static final DoubleStoredPropertyKey globalWidthInMeters = keys.addDoubleKey("Global width in meters");
+   public static final BooleanStoredPropertyKey icpFilter = keys.addBooleanKey("ICP filter");
    public static final BooleanStoredPropertyKey icpRotationEnabled = keys.addBooleanKey("ICP rotation enabled");
    public static final IntegerStoredPropertyKey icpMaxIterations = keys.addIntegerKey("ICP max iterations");
    public static final IntegerStoredPropertyKey icpMinCorrespondenceCount = keys.addIntegerKey("ICP min correspondence count");

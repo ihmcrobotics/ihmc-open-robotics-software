@@ -68,6 +68,7 @@
     "lowerBound": 1.0,
     "upperBound": 4.5
   },
+  "ICP filter": true,
   "ICP rotation enabled": true,
   "ICP max iterations": 5,
   "ICP min correspondence count": 50,

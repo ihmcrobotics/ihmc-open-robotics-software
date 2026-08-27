@@ -88,42 +88,47 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
    }
 
-   default void setIcpRotationEnabled(boolean icpRotationEnabled)
+   default void setICPFilter(boolean icpFilter)
+   {
+      set(HeightMapParameters.icpFilter, icpFilter);
+   }
+
+   default void setICPRotationEnabled(boolean icpRotationEnabled)
    {
       set(HeightMapParameters.icpRotationEnabled, icpRotationEnabled);
    }
 
-   default void setIcpMaxIterations(int icpMaxIterations)
+   default void setICPMaxIterations(int icpMaxIterations)
    {
       set(HeightMapParameters.icpMaxIterations, icpMaxIterations);
    }
 
-   default void setIcpMinCorrespondenceCount(int icpMinCorrespondenceCount)
+   default void setICPMinCorrespondenceCount(int icpMinCorrespondenceCount)
    {
       set(HeightMapParameters.icpMinCorrespondenceCount, icpMinCorrespondenceCount);
    }
 
-   default void setIcpMaxHorizontalDrift(double icpMaxHorizontalDrift)
+   default void setICPMaxHorizontalDrift(double icpMaxHorizontalDrift)
    {
       set(HeightMapParameters.icpMaxHorizontalDrift, icpMaxHorizontalDrift);
    }
 
-   default void setIcpOutlierDistanceThreshold(double icpOutlierDistanceThreshold)
+   default void setICPOutlierDistanceThreshold(double icpOutlierDistanceThreshold)
    {
       set(HeightMapParameters.icpOutlierDistanceThreshold, icpOutlierDistanceThreshold);
    }
 
-   default void setIcpVariancePerMeterOfCorrection(double icpVariancePerMeterOfCorrection)
+   default void setICPVariancePerMeterOfCorrection(double icpVariancePerMeterOfCorrection)
    {
       set(HeightMapParameters.icpVariancePerMeterOfCorrection, icpVariancePerMeterOfCorrection);
    }
 
-   default void setIcpConvergenceZMeters(double icpConvergenceZMeters)
+   default void setICPConvergenceZMeters(double icpConvergenceZMeters)
    {
       set(HeightMapParameters.icpConvergenceZMeters, icpConvergenceZMeters);
    }
 
-   default void setIcpConvergenceYawDegrees(double icpConvergenceYawDegrees)
+   default void setICPConvergenceYawDegrees(double icpConvergenceYawDegrees)
    {
       set(HeightMapParameters.icpConvergenceYawDegrees, icpConvergenceYawDegrees);
    }
