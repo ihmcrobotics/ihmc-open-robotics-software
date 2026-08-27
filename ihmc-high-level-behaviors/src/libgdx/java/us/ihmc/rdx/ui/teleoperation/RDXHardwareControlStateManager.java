@@ -22,6 +22,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -229,9 +230,14 @@ public class RDXHardwareControlStateManager
          GoHomeMessage homeChest = new GoHomeMessage();
          homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
          homeChest.setTrajectoryTime(trajectoryTime);
+         controllerHelper.publishToController(homeChest);
+
+         GoHomeMessage homeHead = new GoHomeMessage();
+         homeHead.setHumanoidBodyPart(HumanoidBodyPart.HEAD.toByte());
+         homeHead.setTrajectoryTime(trajectoryTime);
+         controllerHelper.publishToController(homeHead);
 
          RDXBaseUI.pushNotification("Commanding home pose...");
-         controllerHelper.publishToController(homeChest);
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("N-Pose")))
@@ -263,10 +269,7 @@ public class RDXHardwareControlStateManager
          {
             desiredNeckJointValues[i] = 0.0; // TODO make 0 robot agnostic
          }
-         controllerHelper.publishToController(HumanoidMessageTools.createHeadJointspaceTaskspaceTrajectoryMessage(referenceFrames,
-                                                                                                            neckJointNamesArray,
-                                                                                                            desiredNeckJointValues,
-                                                                                                            trajectoryTime));
+         controllerHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(trajectoryTime, desiredNeckJointValues));
       }
 
       FramePose3D pelvisPose = new FramePose3D(referenceFrames.getMidFeetZUpFrame());
