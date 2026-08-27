@@ -19,6 +19,9 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXArUcoBoxObject.FACTORY);
       objectFactories.add(RDXPointLightObject.FACTORY);
       objectFactories.add(RDXPersonObject.FACTORY);
+      objectFactories.add(RDXOrangeShirtPersonObject.FACTORY);
+      objectFactories.add(RDXGreenShirtPersonObject.FACTORY);
+      objectFactories.add(RDXBlackPantsPersonObject.FACTORY);
       objectFactories.add(RDXDoorPanelObject.FACTORY);
       objectFactories.add(RDXDoorLeverObject.FACTORY);
       objectFactories.add(RDXDirectionalLightObject.FACTORY);
