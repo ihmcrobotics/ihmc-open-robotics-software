@@ -55,6 +55,7 @@ public class ROS2LogReplay
       this.timeSource = ROS2LogTimeSource.SIMULATION;
       this.loggedTopics = loggedTopics;
       this.timestampSupplier = timestampSupplier;
+      this.messageConsumerGenerator = null;
       ros2Node = new ROS2Node("ihmc_ros2_log_replay");
    }
 
