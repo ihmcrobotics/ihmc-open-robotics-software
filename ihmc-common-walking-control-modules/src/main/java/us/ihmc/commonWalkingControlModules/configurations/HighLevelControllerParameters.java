@@ -38,6 +38,15 @@ public interface HighLevelControllerParameters
 
    double getTimeToMoveInStandPrep();
 
+   /**
+    * Duration of the ground-prep joint spline. Separate from {@link #getTimeToMoveInStandPrep()}.
+    * Mimic stand-up / lie-down can override this per request via {@code HighLevelStateMessage.trajectory_time}.
+    */
+   default double getTimeToMoveInGroundPrep()
+   {
+      return 4.0;
+   }
+
    double getMinimumTimeInStandReady();
 
    double getTimeInStandTransition();

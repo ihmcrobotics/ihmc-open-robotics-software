@@ -49,10 +49,7 @@ public class NeckActionExecutor extends ActionNodeExecutor<NeckActionState, Neck
          }
       }
 
-      ros2ControllerHelper.publishToController(HumanoidMessageTools.createHeadJointspaceTaskspaceTrajectoryMessage(syncedRobot.getReferenceFrames(),
-                                                                                                                    neckJointNamesArray,
-                                                                                                                    desiredNeckJointValues,
-                                                                                                                    definition.getTrajectoryDuration()));
+      ros2ControllerHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(definition.getTrajectoryDuration(), desiredNeckJointValues));
 
       trajectoryStartTime = Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp());
       state.setNominalExecutionDuration(definition.getTrajectoryDuration());
