@@ -177,7 +177,6 @@ public class HeightMapExtractor
 
          icpAccumulatorHostPointer = new FloatPointer(ICP_ACCUMULATOR_SIZE);
          icpAccumulatorDevicePointer = new FloatPointer();
-         CUDATools.mallocAsync(icpAccumulatorDevicePointer, ICP_ACCUMULATOR_SIZE, stream);
       }
       catch (Exception e)
       {
@@ -374,6 +373,9 @@ public class HeightMapExtractor
          if (heightMapParameters.getICPFilter())
          {
             LogTools.info("...");
+
+            CUDATools.mallocAsync(icpAccumulatorDevicePointer, ICP_ACCUMULATOR_SIZE, stream);
+
             int searchRadiusCells = Math.max(1, (int) Math.ceil(heightMapParameters.getICPMaxHorizontalDrift() / heightMapParameters.getCellSize()));
             int maxIterations = heightMapParameters.getICPMaxIterations();
             int minCorrespondenceCount = heightMapParameters.getICPMinCorrespondenceCount();
@@ -460,6 +462,8 @@ public class HeightMapExtractor
                icpApplyGridDim.close();
                checkCUDAError();
             }
+
+            cudaFreeAsync(icpAccumulatorDevicePointer, stream);
          }
       }
 
