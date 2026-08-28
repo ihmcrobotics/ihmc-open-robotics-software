@@ -320,6 +320,16 @@ public class FallingControllerState extends HighLevelControllerState
       return lowLevelOneDoFJointDesiredDataHolder;
    }
 
+   public void setFallingTrialConfiguration(FallingTrialConfiguration fallingTrialConfiguration)
+   {
+      this.fallingTrialConfiguration.set(fallingTrialConfiguration);
+   }
+
+   public FallingTrialConfiguration getFallingTrialConfiguration()
+   {
+      return fallingTrialConfiguration.getEnumValue();
+   }
+
    private double getTotalTransitionDuration()
    {
       return Math.max(1.0e-3, fallTransitionDuration.getDoubleValue());
