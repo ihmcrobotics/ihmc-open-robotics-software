@@ -100,6 +100,18 @@ public class YOLOv8DetectionExecutor
          availableModels.put(model.getName(), model);
       }
 
+      if (loadOnly != null)
+      {
+         for (String requested : loadOnly)
+         {
+            if (!availableModels.containsKey(requested))
+               LogTools.error("YOLO model {} was in yolo.models.load but was not loaded. "
+                              + "Need a valid /yolo/{}/ folder (one .onnx and class_names.yaml) on the classpath.",
+                              requested,
+                              requested);
+         }
+      }
+
       if (availableModels.isEmpty())
       {
          if (loadOnly != null)
