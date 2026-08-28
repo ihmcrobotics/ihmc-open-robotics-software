@@ -1,16 +1,16 @@
 package us.ihmc.perception.detections.supervisePose;
 
-import ihmc_common_msgs.msg.dds.Box3DMessage;
+import ihmc_common_msgs.Box3DMessage;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.javacpp.BytePointer;
-import sensor_msgs.msg.dds.CameraInfo;
-import sensor_msgs.msg.dds.Image;
-import std_msgs.msg.dds.Byte;
-import std_msgs.msg.dds.Empty;
+import sensor_msgs.CameraInfo;
+import sensor_msgs.Image;
+import std_msgs.Byte_;
+import std_msgs.Empty;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.tf2.ROS2MutableFrame;
@@ -35,15 +35,14 @@ import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.perception.tools.RawImageTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Subscription;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.sensors.CameraIntrinsics;
-import vision_msgs.msg.dds.Detection3D;
-import vision_msgs.msg.dds.Detection3DArray;
-import perception_msgs.msg.dds.ImageMessage;
+import vision_msgs.Detection3D;
+import vision_msgs.Detection3DArray;
+import perception_msgs.ImageMessage;
 
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -109,7 +108,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
       LogTools.info("SupervisePose target: {}/{}", target.category(), target.instance());
       LogTools.info("RGB topic: {}", topics.rgbImage());
 
-      ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName() + "_" + sanitize(target.key()));
+      ros2Node = new ROS2Node(getClass().getSimpleName() + "_" + sanitize(target.key()));
       imagePublisher = new RawImagePublisher(ros2Node, 1.0);
 
       resetRequestPublisher = ros2Node.createPublisher(topics.reset());

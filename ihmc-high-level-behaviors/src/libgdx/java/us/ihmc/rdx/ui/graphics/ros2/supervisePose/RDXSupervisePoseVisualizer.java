@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import ihmc_common_msgs.msg.dds.Box3DMessage;
+import ihmc_common_msgs.Box3DMessage;
 import imgui.ImGui;
 import imgui.ImGuiStyle;
 import imgui.flag.ImGuiTableColumnFlags;
@@ -24,9 +24,9 @@ import us.ihmc.rdx.ui.graphics.RDXBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2MultiTopicVisualizer;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Subscription;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -558,7 +558,7 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
    private static class SupervisePoseResultVisualizer implements RenderableProvider
    {
       private final ROS2Subscription<Box3DMessage> resultSubscription;
-      private final ROS2Subscription<std_msgs.msg.dds.Byte> stateSubscription;
+      private final ROS2Subscription<std_msgs.Byte_> stateSubscription;
 
       private final Box3D latestResult;
       private State state;

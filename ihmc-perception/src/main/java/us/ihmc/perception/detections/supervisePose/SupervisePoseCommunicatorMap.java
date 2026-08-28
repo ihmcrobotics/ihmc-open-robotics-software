@@ -6,7 +6,7 @@ import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.jros2.ROS2Node;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;

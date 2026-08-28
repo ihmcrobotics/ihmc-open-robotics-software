@@ -4,7 +4,7 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.perception.detections.DetectionManagerSettings;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySet;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.jros2.ROS2Node;
 
 /*
  *  FIXME: It doesn't make sense to have a visualizer for settings.

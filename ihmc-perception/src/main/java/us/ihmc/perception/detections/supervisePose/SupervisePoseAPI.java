@@ -1,22 +1,22 @@
 package us.ihmc.perception.detections.supervisePose;
 
-import ihmc_common_msgs.msg.dds.Box3DMessage;
-import perception_msgs.msg.dds.FoundationPoseParameters;
-import perception_msgs.msg.dds.ImageMessage;
-import sensor_msgs.msg.dds.CameraInfo;
-import sensor_msgs.msg.dds.Image;
-import std_msgs.msg.dds.Byte;
-import std_msgs.msg.dds.Empty;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
-import vision_msgs.msg.dds.Detection3DArray;
+import ihmc_common_msgs.Box3DMessage;
+import perception_msgs.FoundationPoseParameters;
+import perception_msgs.ImageMessage;
+import sensor_msgs.CameraInfo;
+import sensor_msgs.Image;
+import std_msgs.Byte_;
+import std_msgs.Empty;
+import us.ihmc.jros2.ROS2QoSProfile;
+import us.ihmc.jros2.ROS2Topic;
+import vision_msgs.Detection3DArray;
 
 public class SupervisePoseAPI
 {
    /**
     * Temporary per-object FoundationPose communication topics.
     */
-   private static final ROS2Topic<?> SUPERVISE_POSE_TOPIC = new ROS2Topic<>().withPrefix("foundationpose").withQoS(ROS2QosProfile.RELIABLE());
+   private static final ROS2Topic<?> SUPERVISE_POSE_TOPIC = new ROS2Topic<>().withPrefix("foundationpose").withQoS(ROS2QoSProfile.RELIABLE);
 
    /**
     * Global combined overlay:
@@ -29,7 +29,7 @@ public class SupervisePoseAPI
                .withModule("supervisepose")
                .withSuffix("overlayed_image")
                .withType(ImageMessage.class)
-               .withQoS(ROS2QosProfile.RELIABLE());
+               .withQoS(ROS2QoSProfile.RELIABLE);
 
    public static SupervisePoseTopics topics(String category, String instance)
    {
@@ -43,7 +43,7 @@ public class SupervisePoseAPI
                   .withModule(instance)
                   .withSuffix("overlayed_image")
                   .withType(ImageMessage.class)
-                  .withQoS(ROS2QosProfile.RELIABLE());
+                  .withQoS(ROS2QoSProfile.RELIABLE);
 
       return new SupervisePoseTopics(foundationPoseBase, perObjectOverlay);
    }

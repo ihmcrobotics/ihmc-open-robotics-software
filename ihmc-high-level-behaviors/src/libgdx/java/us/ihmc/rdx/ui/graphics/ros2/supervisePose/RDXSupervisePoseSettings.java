@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui.graphics.ros2.supervisePose;
 
 import imgui.ImGui;
-import std_msgs.msg.dds.Empty;
+import std_msgs.Empty;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
@@ -11,8 +11,8 @@ import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 
 public class RDXSupervisePoseSettings
 {
