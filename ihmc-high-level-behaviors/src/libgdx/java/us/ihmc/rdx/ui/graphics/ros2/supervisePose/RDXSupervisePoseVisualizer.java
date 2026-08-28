@@ -315,7 +315,7 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
             RDXROS2ImageMessageVisualizer imageVisualizer =
                   new RDXROS2ImageMessageVisualizer("SupervisePose Overlay " + object.titleCaseName,
                                                     ros2Node,
-                                                    object.topics.overlayedImage());
+                                                    object.topics.overlayedImage(), "/supervisepose/overlayed_image");
 
             imageVisualizer.setActive(false);
             imageVisualizer.getPanel().getIsShowing().set(false);
