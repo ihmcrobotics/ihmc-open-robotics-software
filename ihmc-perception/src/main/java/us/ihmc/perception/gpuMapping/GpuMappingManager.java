@@ -3,9 +3,9 @@ package us.ihmc.perception.gpuMapping;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.HeightMapMessageForController;
-import perception_msgs.msg.dds.TerrainMapMessage;
+import perception_msgs.HeightMapMessage;
+import perception_msgs.HeightMapMessageForController;
+import perception_msgs.TerrainMapMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
@@ -13,10 +13,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
-import us.ihmc.sensors.CameraIntrinsics;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.perception.gpuMapping.worldModel.ChunkedMapManager;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.sensors.CameraIntrinsics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +26,10 @@ import java.util.List;
  */
 public class GpuMappingManager
 {
+   /** Fixed assumed offset from the pelvis down to the ground, used to keep {@code resetOffset} tracking drift. */
+   private static final double HEIGHT_BELOW_PELVIS = 0.95;
+
+   private final ROS2Node ros2Node;
    private final ReferenceFrame heightMapCenter;
    private final HeightMapParameters heightMapParameters;
    private final HeightMapDriftOffset heightMapDriftOffset;
@@ -61,6 +65,7 @@ public class GpuMappingManager
                             HeightMapParameters heightMapParameters,
                             TerrainMapParameters terrainMapParameters)
    {
+      this.ros2Node = ros2Node;
       this.heightMapCenter = heightMapCenter;
       this.heightMapParameters = heightMapParameters;
 
@@ -80,12 +85,13 @@ public class GpuMappingManager
       // We use a notification to only call resetting the height map in one place
       heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
       terrainMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.TERRAIN_MAP_MESSAGE);
-      ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
-      ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
+      ros2Node.createSubscription(PerceptionAPI.RESET_HEIGHT_MAP, reader -> resetHeightMapRequested.set());
+      ros2Node.createSubscription(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, reader -> lowerHeightMapBackdropRequested.set());
 
       controllerHeightMapMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(HeightMapMessageForController.class, robotName));
    }
 
+   boolean firstTick = true;
    /**
     * Update the Height Map with the latest depth image from the sensor
     */
@@ -118,6 +124,16 @@ public class GpuMappingManager
       // We are deep coping the frames here to avoid a data race condition, still possible but very small chance
       RigidBodyTransform heightMapFrameToWorldFrame = new RigidBodyTransform(heightMapCenter.getTransformToWorldFrame());
       Point3D heightMapCenterOrigin = new Point3D(heightMapFrameToWorldFrame.getTranslation());
+
+      // Keep the seed height for newly-exposed map cells tracking the robot's current elevation
+      heightMapExtractor.updateResetOffset(heightMapCenterOrigin.getZ(), HEIGHT_BELOW_PELVIS);
+
+      if (firstTick)
+      {
+         // On the first tick of the update loop, call this reset, otherwise everything is initialized with value to 0 height, and things don't happen properly.
+         heightMapExtractor.reset(heightMapCenterOrigin.getZ(), HEIGHT_BELOW_PELVIS);
+         firstTick = false;
+      }
 
       // -------- Update the Height Map with the latest depth image from the sensor --------------
       // We expect to have knowledge of where the camera is in relation to the world so we can accurately display the height map
@@ -237,8 +253,8 @@ public class GpuMappingManager
    public void destroy()
    {
       compressedHeightMapPointer.close();
-      controllerHeightMapMessagePublisher.remove();
-      heightMapMessagePublisher.remove();
+      ros2Node.destroyPublisher(controllerHeightMapMessagePublisher);
+      ros2Node.destroyPublisher(heightMapMessagePublisher);
       heightMapExtractor.destroy();
       terrainMapExtractor.destroy();
       chunkedMapManager.destroy();

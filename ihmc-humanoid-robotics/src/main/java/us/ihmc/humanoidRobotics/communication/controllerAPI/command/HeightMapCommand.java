@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import gnu.trove.list.array.TFloatArrayList;
-import perception_msgs.msg.dds.HeightMapMessageForController;
+import perception_msgs.HeightMapMessageForController;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple2D.Point2D;

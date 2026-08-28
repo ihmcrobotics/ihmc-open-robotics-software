@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import controller_msgs.msg.dds.JointDesiredOutputMessage;
+import controller_msgs.JointDesiredOutputMessage;
 import us.ihmc.commons.MathTools;
 
 /**

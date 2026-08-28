@@ -5,22 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.DoubleUnaryOperator;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import controller_msgs.JointspaceTrajectoryStatusMessage;
+import controller_msgs.TaskspaceTrajectoryStatusMessage;
+import ihmc_common_msgs.SO3TrajectoryPointMessage;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -51,9 +40,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.yoVariables.multiBodySystem.interfaces.YoOneDoFJointBasics;
@@ -82,6 +71,17 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.DoubleUnaryOperator;
 
 public class EndToEndTestTools
 {
@@ -112,7 +112,7 @@ public class EndToEndTestTools
                                                          double epsilon,
                                                          YoVariableHolder yoVariableHolder)
    {
-      assertCurrentDesiredsMatch(bodyName, expectedWaypoint.getOrientation(), expectedWaypoint.getAngularVelocity(), epsilon, yoVariableHolder);
+      assertCurrentDesiredsMatch(bodyName, expectedWaypoint.getOrientation().getQuaternion(), expectedWaypoint.getAngularVelocity().getVector(), epsilon, yoVariableHolder);
    }
 
    public static void assertCurrentDesiredsMatch(String bodyName,
@@ -137,11 +137,11 @@ public class EndToEndTestTools
       SO3TrajectoryPoint actualWaypoint = findSO3TrajectoryPoint(bodyName, waypointIndexInController, yoVariableHolder);
       assertEquals(expectedWaypoint.getTime(), actualWaypoint.getTime(), epsilon, "Time");
       EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Orientation",
-                                                                 expectedWaypoint.getOrientation(),
+                                                                 expectedWaypoint.getOrientation().getQuaternion(),
                                                                  actualWaypoint.getOrientation(),
                                                                  epsilon,
                                                                  FORMAT);
-      EuclidCoreTestTools.assertEquals("Angular Velocity", expectedWaypoint.getAngularVelocity(), actualWaypoint.getAngularVelocity(), epsilon, FORMAT);
+      EuclidCoreTestTools.assertEquals("Angular Velocity", expectedWaypoint.getAngularVelocity().getVector(), actualWaypoint.getAngularVelocity(), epsilon, FORMAT);
    }
 
    public static void assertOneDoFJointsFeebackControllerDesireds(String[] jointNames,
@@ -257,7 +257,7 @@ public class EndToEndTestTools
 
       for (int jointIndex = 0; jointIndex < jointNames.length; jointIndex++)
       {
-         assertEquals(jointNames[jointIndex], statusMessage.getJointNames().getString(jointIndex));
+         assertEquals(jointNames[jointIndex], statusMessage.getJointNames().getAsString(jointIndex));
       }
    }
 
@@ -318,15 +318,15 @@ public class EndToEndTestTools
       {
          if (!expectedDesiredPosition.containsNaN())
          {
-            EuclidCoreTestTools.assertEquals(expectedDesiredPosition, statusMessage.getDesiredEndEffectorPosition(), epsilon);
-            assertFalse(statusMessage.getActualEndEffectorPosition().containsNaN());
+            EuclidCoreTestTools.assertEquals(expectedDesiredPosition, statusMessage.getDesiredEndEffectorPosition().getPoint(), epsilon);
+            assertFalse(statusMessage.getActualEndEffectorPosition().getPoint().containsNaN());
          }
          else
          {
             boolean areEqual = true;
             for (int i = 0; i < 3; i++)
             {
-               if (!MathTools.epsilonCompare(expectedDesiredPosition.getElement(i), statusMessage.getDesiredEndEffectorPosition().getElement(i), epsilon))
+               if (!MathTools.epsilonCompare(expectedDesiredPosition.getElement(i), statusMessage.getDesiredEndEffectorPosition().getPoint().getElement(i), epsilon))
                {
                   areEqual = false;
                   break;
@@ -345,7 +345,7 @@ public class EndToEndTestTools
                {
                   if (Double.isNaN(expectedDesiredPosition.getElement(i)))
                   {
-                     if (!Double.isNaN(statusMessage.getActualEndEffectorPosition().getElement(i)))
+                     if (!Double.isNaN(statusMessage.getActualEndEffectorPosition().getPoint().getElement(i)))
                      {
                         badActual = true;
                         break;
@@ -355,7 +355,7 @@ public class EndToEndTestTools
 
                if (badActual)
                {
-                  Point3D expectedActualPosition = new Point3D(statusMessage.getActualEndEffectorPosition());
+                  Point3D expectedActualPosition = new Point3D(statusMessage.getActualEndEffectorPosition().getPoint());
 
                   for (int i = 0; i < 3; i++)
                   {
@@ -369,24 +369,24 @@ public class EndToEndTestTools
       }
       else
       {
-         assertTrue(statusMessage.getDesiredEndEffectorPosition().containsNaN());
-         assertTrue(statusMessage.getActualEndEffectorPosition().containsNaN());
+         assertTrue(statusMessage.getDesiredEndEffectorPosition().getPoint().containsNaN());
+         assertTrue(statusMessage.getActualEndEffectorPosition().getPoint().containsNaN());
       }
 
       if (expectedDesiredOrientation != null)
       {
-         FrameQuaternion desiredOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), statusMessage.getDesiredEndEffectorOrientation());
+         FrameQuaternion desiredOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), statusMessage.getDesiredEndEffectorOrientation().getQuaternion());
          desiredOrientation.changeFrame(desiredFrame);
          EuclidCoreTestTools.assertEquals("The expected desired orientation does not match the value returned by the status message.",
                                           expectedDesiredOrientation,
                                           desiredOrientation,
                                           epsilon);
-         assertFalse(statusMessage.getActualEndEffectorOrientation().containsNaN());
+         assertFalse(statusMessage.getActualEndEffectorOrientation().getQuaternion().containsNaN());
       }
       else
       {
-         assertTrue(statusMessage.getDesiredEndEffectorOrientation().containsNaN());
-         assertTrue(statusMessage.getActualEndEffectorOrientation().containsNaN());
+         assertTrue(statusMessage.getDesiredEndEffectorOrientation().getQuaternion().containsNaN());
+         assertTrue(statusMessage.getActualEndEffectorOrientation().getQuaternion().containsNaN());
       }
       assertTaskspaceTrajectoryStatus(expectedSequenceID, expectedStatus, expectedTimestamp, endEffectorName, statusMessage, controllerDT);
    }
@@ -747,7 +747,7 @@ public class EndToEndTestTools
       Pose3D stepPose = new Pose3D(startPose);
       stepPose.appendTranslation(0.5 * stepLengthFunction.applyAsDouble(0.0), stepSide.negateIfRightSide(0.5 * stepWidth), 0.0);
       footstep.setRobotSide(stepSide.toByte());
-      footstep.getLocation().set(stepPose.getPosition());
+      footstep.getLocation().getPoint().set(stepPose.getPosition());
       footstep.getOrientation().set(stepPose.getOrientation());
       footstep.setSwingDuration(swingTime);
 
@@ -757,7 +757,7 @@ public class EndToEndTestTools
          stepPose.appendTranslation(stepLengthFunction.applyAsDouble(i / (numberOfSteps - 1.0)), stepSide.negateIfRightSide(stepWidth), 0.0);
          footstep = message.getFootstepDataList().add();
          footstep.setRobotSide(stepSide.toByte());
-         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getLocation().getPoint().set(stepPose.getPosition());
          footstep.getOrientation().set(stepPose.getOrientation());
          footstep.setTransferDuration(transferTime);
          footstep.setSwingDuration(swingTime);
@@ -769,7 +769,7 @@ public class EndToEndTestTools
          stepPose.appendTranslation(0.0, stepSide.negateIfRightSide(stepWidth), 0.0);
          footstep = message.getFootstepDataList().add();
          footstep.setRobotSide(stepSide.toByte());
-         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getLocation().getPoint().set(stepPose.getPosition());
          footstep.getOrientation().set(stepPose.getOrientation());
          footstep.setTransferDuration(transferTime);
          footstep.setSwingDuration(swingTime);
@@ -873,7 +873,7 @@ public class EndToEndTestTools
       FootstepDataListMessage footstepDataList = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       RobotSide side = initialStepSide;
 
-      Object<FootstepDataMessage> list = footstepDataList.getFootstepDataList();
+      IDLObjectSequence<FootstepDataMessage> list = footstepDataList.getFootstepDataList();
 
       for (int i = 0; i < footstepPoses.size(); i++)
       {
@@ -1045,7 +1045,7 @@ public class EndToEndTestTools
       stepPose.appendTranslation(yawAboutPoint(angle, circleCenter.getPosition(), 0.0, stepSide.negateIfRightSide(0.5 * stepWidth), 0.0));
       stepPose.appendYawRotation(angle);
       footstep.setRobotSide(stepSide.toByte());
-      footstep.getLocation().set(stepPose.getPosition());
+      footstep.getLocation().getPoint().set(stepPose.getPosition());
       footstep.getOrientation().set(stepPose.getOrientation());
       footstep.setSwingDuration(swingTime);
 
@@ -1058,7 +1058,7 @@ public class EndToEndTestTools
          stepPose.getOrientation().appendYawRotation(angle);
          footstep = message.getFootstepDataList().add();
          footstep.setRobotSide(stepSide.toByte());
-         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getLocation().getPoint().set(stepPose.getPosition());
          footstep.getOrientation().set(stepPose.getOrientation());
          footstep.setTransferDuration(transferTime);
          footstep.setSwingDuration(swingTime);
@@ -1070,7 +1070,7 @@ public class EndToEndTestTools
          stepPose.appendTranslation(0.0, stepSide.negateIfRightSide(stepWidth), 0.0);
          footstep = message.getFootstepDataList().add();
          footstep.setRobotSide(stepSide.toByte());
-         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getLocation().getPoint().set(stepPose.getPosition());
          footstep.getOrientation().set(stepPose.getOrientation());
          footstep.setTransferDuration(transferTime);
          footstep.setSwingDuration(swingTime);
@@ -1099,7 +1099,7 @@ public class EndToEndTestTools
          footPose.changeFrame(ReferenceFrame.getWorldFrame());
 
          FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
-         footstep.getLocation().set(footPose.getPosition());
+         footstep.getLocation().getPoint().set(footPose.getPosition());
          footstep.getOrientation().set(footPose.getOrientation());
          footstep.setRobotSide(stepSide.toByte());
 
@@ -1112,7 +1112,7 @@ public class EndToEndTestTools
       footPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
-      footstep.getLocation().set(footPose.getPosition());
+      footstep.getLocation().getPoint().set(footPose.getPosition());
       footstep.getOrientation().set(footPose.getOrientation());
       footstep.setRobotSide(stepSide.toByte());
 
@@ -1153,7 +1153,7 @@ public class EndToEndTestTools
             {
                FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
                footstep.setRobotSide(robotSide.toByte());
-               footstep.getLocation().set(x, 0.5 * robotSide.negateIfRightSide(stanceWidth), z);
+               footstep.getLocation().getPoint().set(x, 0.5 * robotSide.negateIfRightSide(stanceWidth), z);
             }
 
             x += stepLength;
@@ -1166,14 +1166,14 @@ public class EndToEndTestTools
 
          FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
          footstep.setRobotSide(stepSide.toByte());
-         footstep.getLocation().set(x, 0.5 * stepSide.negateIfRightSide(stanceWidth), z);
+         footstep.getLocation().getPoint().set(x, 0.5 * stepSide.negateIfRightSide(stanceWidth), z);
          stepSide = stepSide.getOppositeSide();
 
          for (int i = 0; i < numberOfSteps + 1; i++)
          {
             footstep = footsteps.getFootstepDataList().add();
             footstep.setRobotSide(stepSide.toByte());
-            footstep.getLocation().set(x, 0.5 * stepSide.negateIfRightSide(stanceWidth), z);
+            footstep.getLocation().getPoint().set(x, 0.5 * stepSide.negateIfRightSide(stanceWidth), z);
 
             stepSide = stepSide.getOppositeSide();
 
@@ -1186,7 +1186,7 @@ public class EndToEndTestTools
 
          footstep = footsteps.getFootstepDataList().add();
          footstep.setRobotSide(stepSide.toByte());
-         footstep.getLocation().set(x, 0.5 * stepSide.negateIfRightSide(stanceWidth), z);
+         footstep.getLocation().getPoint().set(x, 0.5 * stepSide.negateIfRightSide(stanceWidth), z);
       }
 
       return footsteps;

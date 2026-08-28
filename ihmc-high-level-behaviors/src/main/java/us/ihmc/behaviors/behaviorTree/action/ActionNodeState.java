@@ -1,13 +1,13 @@
 package us.ihmc.behaviors.behaviorTree.action;
 
-import behavior_msgs.msg.dds.ActionNodeStateMessage;
+import behavior_msgs.ActionNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
+import us.ihmc.communication.crdt.CRDTStatusDouble;
 import us.ihmc.communication.crdt.CRDTStatusDoubleArray;
 import us.ihmc.communication.crdt.CRDTStatusOneDoFJointTrajectoryList;
 import us.ihmc.communication.crdt.CRDTStatusPose3D;
 import us.ihmc.communication.crdt.CRDTStatusSE3Trajectory;
-import us.ihmc.communication.crdt.CRDTStatusDouble;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 public abstract class ActionNodeState<D extends ActionNodeDefinition> extends LeafNodeState<D>
@@ -59,7 +59,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Le
       message.setNominalExecutionDuration(nominalExecutionDuration.toMessage());
       message.setElapsedExecutionTime(elapsedExecutionTime.toMessage());
       commandedTrajectory.toMessage(message.getCommandedTrajectory());
-      currentPose.toMessage(message.getCurrentPose());
+      message.getCurrentPose().set(currentPose.getValueReadOnly());
       commandedJointTrajectories.toMessage(message.getCommandedJointTrajectories());
       currentJointAngles.toMessage(message.getCurrentJointAngles());
       message.setPositionDistanceToGoalTolerance(positionDistanceToGoalTolerance.toMessage());
@@ -73,7 +73,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Le
       nominalExecutionDuration.fromMessage(message.getNominalExecutionDuration());
       elapsedExecutionTime.fromMessage(message.getElapsedExecutionTime());
       commandedTrajectory.fromMessage(message.getCommandedTrajectory());
-      currentPose.fromMessage(message.getCurrentPose());
+      currentPose.fromMessage(message.getCurrentPose().getPose());
       commandedJointTrajectories.fromMessage(message.getCommandedJointTrajectories());
       currentJointAngles.fromMessage(message.getCurrentJointAngles());
       positionDistanceToGoalTolerance.fromMessage(message.getPositionDistanceToGoalTolerance());

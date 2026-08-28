@@ -1,19 +1,6 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Stack;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
-
+import controller_msgs.FootstepDataListMessage;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
@@ -37,12 +24,17 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
-import perception_msgs.msg.dds.TerrainMapMessage;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
+import perception_msgs.TerrainMapMessage;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -62,15 +54,25 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadRequestType;
 import us.ihmc.footstepPlanning.log.VariableDescriptor;
-import us.ihmc.perception.gpuMapping.TerrainMapData;
-import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Stack;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlannerLogVisualizerController
 {
@@ -339,8 +341,8 @@ public class FootstepPlannerLogVisualizerController
       // publish request parameters
       messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide,
                              RobotSide.fromByte(footstepPlannerLog.getRequestPacket().getRequestedInitialStanceSide()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, footstepPlannerLog.getRequestPacket().getGoalLeftFootPose());
-      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, footstepPlannerLog.getRequestPacket().getGoalRightFootPose());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, footstepPlannerLog.getRequestPacket().getGoalLeftFootPose().getPose());
+      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, footstepPlannerLog.getRequestPacket().getGoalRightFootPose().getPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalDistanceProximity, footstepPlannerLog.getRequestPacket().getGoalDistanceProximity());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalYawProximity, footstepPlannerLog.getRequestPacket().getGoalYawProximity());
 
@@ -355,19 +357,30 @@ public class FootstepPlannerLogVisualizerController
       }
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, footstepPlannerLog.getRequestPacket().getPlannerRequestId());
-      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, footstepPlannerLog.getRequestPacket().getStartLeftFootPose());
-      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, footstepPlannerLog.getRequestPacket().getStartRightFootPose());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, footstepPlannerLog.getRequestPacket().getStartLeftFootPose().getPose());
+      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, footstepPlannerLog.getRequestPacket().getStartRightFootPose().getPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, footstepPlannerLog.getRequestPacket().getPerformAStarSearch());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, footstepPlannerLog.getRequestPacket().getPlanBodyPath());
 
       // publish status
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic,
                              FootstepPlanningResult.fromByte(footstepPlannerLog.getStatusPacket().getFootstepPlanningResult()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, footstepPlannerLog.getStatusPacket().getGoalPose().getPosition());
-      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, footstepPlannerLog.getStatusPacket().getGoalPose().getOrientation());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, footstepPlannerLog.getStatusPacket().getGoalPose().getPose().getPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, footstepPlannerLog.getStatusPacket().getGoalPose().getPose().getOrientation());
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepPlannerLog.getStatusPacket().getFootstepDataList());
-      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData,
-                             Pair.of(footstepPlannerLog.getStatusPacket().getBodyPath(), footstepPlannerLog.getStatusPacket().getBodyPathUnsmoothed()));
+      IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPose3DMessage> bodyPathMessages = footstepPlannerLog.getStatusPacket().getBodyPath();
+      IDLObjectSequence<us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage> bodyPathUnsmoothedMessages = footstepPlannerLog.getStatusPacket().getBodyPathUnsmoothed();
+      List<Pose3D> bodyPath = new ArrayList<>();
+      List<Point3D> bodyPathUnsmoothed = new ArrayList<>();
+      for (int i = 0; i < bodyPathMessages.size(); i++)
+      {
+         bodyPath.add(new Pose3D(bodyPathMessages.get(i).getPose()));
+      }
+      for (int i = 0; i < bodyPathUnsmoothedMessages.size(); i++)
+      {
+         bodyPathUnsmoothed.add(new Point3D(bodyPathUnsmoothedMessages.get(i).getPoint()));
+      }
+      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, Pair.of(bodyPath, bodyPathUnsmoothed));
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimings, footstepPlannerLog.getStatusPacket().getPlannerTimings());
 
       // set graphics

@@ -1,11 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.RobotDesiredConfigurationData;
+import controller_msgs.HighLevelStateChangeStatusMessage;
+import controller_msgs.RobotDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -14,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.GroundPrepControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPlugin;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
@@ -54,6 +51,10 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 
 public class HumanoidHighLevelControllerManager implements RobotController, SCS2YoGraphicHolder
 {
@@ -213,7 +214,10 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       {
          if (commandInputManager.isNewCommandAvailable(HighLevelControllerStateCommand.class))
          {
-            requestedHighLevelControllerState.set(commandInputManager.pollNewestCommand(HighLevelControllerStateCommand.class).getHighLevelControllerName());
+            HighLevelControllerStateCommand command = commandInputManager.pollNewestCommand(HighLevelControllerStateCommand.class);
+            applyGroundPrepTrajectoryTime(command);
+            if (command.getHighLevelControllerName() != null)
+               requestedHighLevelControllerState.set(command.getHighLevelControllerName());
          }
       }
       if (getCurrentHighLevelControlState() == HighLevelControllerName.RL_CONTROL)
@@ -393,6 +397,20 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
    public HighLevelControllerName getCurrentHighLevelControlState()
    {
       return stateMachine.getCurrentStateKey();
+   }
+
+   private void applyGroundPrepTrajectoryTime(HighLevelControllerStateCommand command)
+   {
+      if (command.getTrajectoryTime() <= 0.0)
+         return;
+
+      HighLevelControllerState groundPrepState = highLevelControllerStates.get(HighLevelControllerName.GROUND_PREP_STATE);
+      if (groundPrepState instanceof GroundPrepControllerState groundPrep)
+      {
+         groundPrep.setTimeToMoveInGroundPrep(command.getTrajectoryTime());
+         if (getCurrentHighLevelControlState() == HighLevelControllerName.GROUND_PREP_STATE)
+            groundPrep.requestReinitialize();
+      }
    }
 
    public void addHighLevelStateChangedListener(StateChangedListener<HighLevelControllerName> stateChangedListener)

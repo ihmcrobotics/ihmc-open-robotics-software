@@ -1,15 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.List;
-import java.util.Random;
-
-import ihmc_common_msgs.msg.dds.FrameInformation;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.FrameInformation;
+import ihmc_common_msgs.SE3TrajectoryMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -18,10 +16,12 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBased
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSE3TrajectoryPointList;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+
+import java.util.List;
+import java.util.Random;
 
 public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3TrajectoryControllerCommand, SE3TrajectoryMessage>
       implements FrameBasedCommand<SE3TrajectoryMessage>
@@ -118,14 +118,14 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
 
       sequenceId = message.getSequenceId();
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
-      List<SE3TrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
+      var trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
          SE3TrajectoryPointMessage se3TrajectoryPointMessage = trajectoryPointMessages.get(i);
-         trajectoryPointList.addTrajectoryPoint(se3TrajectoryPointMessage.getTime(), se3TrajectoryPointMessage.getPosition(), se3TrajectoryPointMessage.getOrientation(),
-                                                se3TrajectoryPointMessage.getLinearVelocity(), se3TrajectoryPointMessage.getAngularVelocity());
+         trajectoryPointList.addTrajectoryPoint(se3TrajectoryPointMessage.getTime(), se3TrajectoryPointMessage.getPosition().getPoint(), se3TrajectoryPointMessage.getOrientation().getQuaternion(),
+                                                se3TrajectoryPointMessage.getLinearVelocity().getVector(), se3TrajectoryPointMessage.getAngularVelocity().getVector());
       }
       setQueueableCommandVariables(message.getQueueingProperties());
       selectionMatrix.resetSelection();
@@ -135,7 +135,7 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
       weightMatrix.setAngularWeights(message.getAngularWeightMatrix().getXWeight(), message.getAngularWeightMatrix().getYWeight(), message.getAngularWeightMatrix().getZWeight());
       weightMatrix.setLinearWeights(message.getLinearWeightMatrix().getXWeight(), message.getLinearWeightMatrix().getYWeight(), message.getLinearWeightMatrix().getZWeight());
       useCustomControlFrame = message.getUseCustomControlFrame();
-      message.getControlFramePose().get(controlFramePoseInBodyFrame);
+      message.getControlFramePose().getPose().get(controlFramePoseInBodyFrame);
 
       if (resolver != null)
       {

@@ -1,5 +1,7 @@
 package us.ihmc.perception.detections.yolo;
 
+import static org.bytedeco.opencv.opencv_core.AbstractScalar.*;
+
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -13,7 +15,7 @@ import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
-import perception_msgs.msg.dds.YOLOv8ModelInfo;
+import perception_msgs.YOLOv8ModelInfo;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -41,8 +43,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.bytedeco.opencv.opencv_core.AbstractScalar.*;
 
 public class YOLOv8Tools
 {

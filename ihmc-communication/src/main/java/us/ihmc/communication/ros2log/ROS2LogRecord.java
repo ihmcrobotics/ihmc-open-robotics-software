@@ -1,11 +1,11 @@
 package us.ihmc.communication.ros2log;
 
-import toolbox_msgs.msg.dds.ROS2LogMessage;
-import us.ihmc.communication.ROS2Tools;
+import toolbox_msgs.ROS2LogMessage;
+import us.ihmc.communication.HumanoidROS2Topic;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,12 +41,16 @@ public class ROS2LogRecord
                         ROS2LogSerialization serialization,
                         boolean subscribeToTopics)
    {
-      ros2Node = new ROS2NodeBuilder().build("ihmc_ros2_logger");
+      ros2Node = new ROS2Node("ihmc_ros2_logger");
       this.serialization = serialization;
 
-      ros2Node.createSubscription(getROS2LogTopic(), s ->
+      ros2Node.createSubscription(getROS2LogTopic(), reader ->
       {
-         ROS2LoggerRequestedState requestedState = ROS2LoggerRequestedState.fromByte(s.takeNextData().getRequestedState());
+         ROS2LogMessage message = reader.read();
+         if (message == null)
+            return;
+
+         ROS2LoggerRequestedState requestedState = ROS2LoggerRequestedState.fromByte(message.getRequestedState());
          if (requestedState == ROS2LoggerRequestedState.START)
             start();
          else if (requestedState == ROS2LoggerRequestedState.FINISH)
@@ -61,7 +65,7 @@ public class ROS2LogRecord
       }
    }
 
-   public <T> void setData(ROS2Topic<T> topic, T data)
+   public <T extends ROS2Message<T>> void setData(ROS2Topic<T> topic, T data)
    {
       RecordTopicManager<T> topicManager = getTopicManager(topic);
       if (topicManager == null)
@@ -98,9 +102,9 @@ public class ROS2LogRecord
          return;
 
       boolean hasData = false;
-      for (int i = 0; i < topicManagers.size(); i++)
+      for (RecordTopicManager<?> topicManager : topicManagers)
       {
-         hasData |= topicManagers.get(i).update();
+         hasData |= topicManager.update();
       }
 
       if (hasData)
@@ -109,20 +113,7 @@ public class ROS2LogRecord
          stopRequested.set(true);
 
       if (stopRequested.getAndSet(false))
-      {
-         LogTools.info("Stopping ROS 2 logger, writing to file...");
-
-         // write log file
-         ROS2LogIOTools.writeLogFile(topicManagers, serialization);
-         runnable = null;
-         executorService.shutdown();
-
-         // clear old data
-         for (int i = 0; i < topicManagers.size(); i++)
-         {
-            topicManagers.get(i).clear();
-         }
-      }
+         stopAndFlush();
    }
 
    public void destroy()
@@ -131,23 +122,36 @@ public class ROS2LogRecord
       {
          executorService.shutdownNow();
       }
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    public static ROS2Topic<ROS2LogMessage> getROS2LogTopic()
    {
-      return ROS2Tools.IHMC_ROOT.withModule(MODULE_NAME).withTypeName(ROS2LogMessage.class);
+      return HumanoidROS2Topic.IHMC_ROOT.withModule(MODULE_NAME).withTypeName(ROS2LogMessage.class);
    }
 
    @SuppressWarnings("unchecked")
-   private <T> RecordTopicManager<T> getTopicManager(ROS2Topic<T> topic)
+   private <T extends ROS2Message<T>> RecordTopicManager<T> getTopicManager(ROS2Topic<T> topic)
    {
-      for (int i = 0; i < topicManagers.size(); i++)
+      for (RecordTopicManager<?> manager : topicManagers)
       {
-         RecordTopicManager<?> manager = topicManagers.get(i);
          if (manager.getTopic().equals(topic))
             return (RecordTopicManager<T>) manager;
       }
       return null;
+   }
+
+   private void stopAndFlush()
+   {
+      LogTools.info("Stopping ROS 2 logger, writing to file...");
+
+      ROS2LogIOTools.writeLogFile(topicManagers, serialization);
+      runnable = null;
+      executorService.shutdown();
+
+      for (RecordTopicManager<?> topicManager : topicManagers)
+      {
+         topicManager.clear();
+      }
    }
 }

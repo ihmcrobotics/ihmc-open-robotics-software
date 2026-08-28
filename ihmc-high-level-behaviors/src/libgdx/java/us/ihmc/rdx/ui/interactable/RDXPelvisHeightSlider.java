@@ -1,22 +1,22 @@
 package us.ihmc.rdx.ui.interactable;
 
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.PelvisHeightTrajectoryMessage;
+import controller_msgs.RobotConfigurationData;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.UnitConversions;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.commons.UnitConversions;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.tools.string.StringTools;
-import us.ihmc.commons.thread.Throttler;
 
 public class RDXPelvisHeightSlider
 {

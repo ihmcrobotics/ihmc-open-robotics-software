@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
-import controller_msgs.msg.dds.VelocityBasedWalkingInputMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.FootstepStatusMessage;
+import controller_msgs.HighLevelStateChangeStatusMessage;
+import controller_msgs.PauseWalkingMessage;
+import controller_msgs.VelocityBasedWalkingInputMessage;
+import controller_msgs.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
@@ -21,14 +21,15 @@ import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -38,6 +39,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
 {
@@ -117,6 +119,7 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
 
       goalReacher = new PDVelocityBasedGoalReacher(referenceFrames.getPelvisZUpFrame(), statusMessageOutputManager, registry);
       commandInputManager.addControllerWaypointGoalCommandConsumer(goalReacher::consumeNewWaypoint);
+      commandInputManager.addAbortWalkingConsumer(abortWalkingCommand -> goalReacher.clear());
       commandInputManager.addControllerWaypointGoalListCommandConsumer(goalReacher::consumeNewWaypointList);
       commandInputManager.addControllerReleaseGoalCommand(goalReacher::consumeReleaseGoalCommand);
    }
@@ -136,13 +139,13 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
       this.updatables.add(updatable);
    }
 
-   public void createStepGeneratorNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node)
+   public void createStepGeneratorNetworkSubscriber(String robotName, AsyncROS2Node asyncROS2Node)
    {
       ROS2Topic<?> baseTopic = ControllerAPI.getBaseTopic(HumanoidControllerAPI.HUMANOID_CONTROL_MODULE_NAME, robotName);
       StepGeneratorNetworkSubscriber stepGeneratorNetworkSubscriber = new StepGeneratorNetworkSubscriber(baseTopic,
                                                                                                          commandInputManager.getCommandInputManager(),
                                                                                                          statusMessageOutputManager,
-                                                                                                         realtimeROS2Node);
+                                                                                                         asyncROS2Node);
 
       stepGeneratorNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
    }

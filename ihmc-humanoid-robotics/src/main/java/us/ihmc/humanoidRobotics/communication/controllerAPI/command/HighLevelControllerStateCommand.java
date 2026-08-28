@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.HighLevelStateMessage;
+import controller_msgs.HighLevelStateMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 
@@ -8,12 +8,14 @@ public class HighLevelControllerStateCommand implements Command<HighLevelControl
 {
    private long sequenceId;
    private HighLevelControllerName highLevelControllerName;
+   private double trajectoryTime;
 
    @Override
    public void clear()
    {
       sequenceId = 0;
       highLevelControllerName = null;
+      trajectoryTime = 0.0;
    }
 
    @Override
@@ -21,6 +23,7 @@ public class HighLevelControllerStateCommand implements Command<HighLevelControl
    {
       sequenceId = other.sequenceId;
       highLevelControllerName = other.getHighLevelControllerName();
+      trajectoryTime = other.trajectoryTime;
    }
 
    @Override
@@ -28,6 +31,7 @@ public class HighLevelControllerStateCommand implements Command<HighLevelControl
    {
       sequenceId = message.getSequenceId();
       highLevelControllerName = HighLevelControllerName.fromByte(message.getHighLevelControllerName());
+      trajectoryTime = message.getTrajectoryTime();
    }
 
    public void setHighLevelControllerName(HighLevelControllerName highLevelControllerName)
@@ -38,6 +42,16 @@ public class HighLevelControllerStateCommand implements Command<HighLevelControl
    public HighLevelControllerName getHighLevelControllerName()
    {
       return highLevelControllerName;
+   }
+
+   public void setTrajectoryTime(double trajectoryTime)
+   {
+      this.trajectoryTime = trajectoryTime;
+   }
+
+   public double getTrajectoryTime()
+   {
+      return trajectoryTime;
    }
 
    @Override

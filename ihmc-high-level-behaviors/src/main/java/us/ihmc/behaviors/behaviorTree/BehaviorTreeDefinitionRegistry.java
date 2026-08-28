@@ -1,15 +1,15 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
+import behavior_msgs.BehaviorTreeStateMessage;
+import us.ihmc.behaviors.behaviorTree.action.actions.*;
+import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
+import us.ihmc.behaviors.behaviorTree.control.CheckpointNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.FallbackNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalDefinition;
-import us.ihmc.behaviors.behaviorTree.control.CheckpointNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
-import us.ihmc.behaviors.behaviorTree.control.FallbackNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.*;
 
 import java.util.HashMap;
 import java.util.Map;

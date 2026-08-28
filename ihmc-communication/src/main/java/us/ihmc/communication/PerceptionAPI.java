@@ -1,40 +1,38 @@
 package us.ihmc.communication;
 
-import controller_msgs.msg.dds.RigidBodyTransformMessage;
-import perception_msgs.msg.dds.ArUcoMarkerPoses;
-import perception_msgs.msg.dds.ChunkMessage;
-import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
-import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.TerrainMapMessage;
-import perception_msgs.msg.dds.YOLOv8ExecutorParameters;
-import perception_msgs.msg.dds.YOLOv8AnnotationInfoList;
-import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
-import sensor_msgs.msg.dds.CameraInfo;
-import sensor_msgs.msg.dds.Image;
-import std_msgs.msg.dds.Empty;
-import std_msgs.msg.dds.Int64;
+import controller_msgs.RigidBodyTransformMessage;
+import perception_msgs.ArUcoMarkerPoses;
+import perception_msgs.ChunkMessage;
+import perception_msgs.FramePlanarRegionsListMessage;
+import perception_msgs.HeightMapMessage;
+import perception_msgs.ImageMessage;
+import perception_msgs.PlanarRegionsListMessage;
+import perception_msgs.TerrainMapMessage;
+import perception_msgs.YOLOv8AnnotationInfoList;
+import perception_msgs.YOLOv8ExecutorParameters;
+import perception_msgs.ZEDSVOCurrentFileMessage;
+import sensor_msgs.CameraInfo;
+import sensor_msgs.Image;
+import std_msgs.Empty;
+import std_msgs.Int64;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
-import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.jros2.ROS2QoSProfile;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
 
 /**
  * ROS 2 topics relating to perception
  */
 public final class PerceptionAPI
 {
-   public static final ROS2Topic<?> IHMC_ROOT = ROS2Tools.IHMC_ROOT;
-   public static final ROS2Topic<?> PERCEPTION_MODULE = IHMC_ROOT.withModule("perception");
-   public static final ROS2Topic<?> HEIGHT_MAP_MODULE = IHMC_ROOT.withModule("height_map");
-   public static final ROS2Topic<?> TERRAIN_MAP_MODULE = IHMC_ROOT.withModule("terrain_map");
+   public static final HumanoidROS2Topic<?> PERCEPTION_MODULE = HumanoidROS2Topic.IHMC_ROOT.withModule("perception");
+   public static final HumanoidROS2Topic<?> HEIGHT_MAP_MODULE = HumanoidROS2Topic.IHMC_ROOT.withModule("height_map");
+   public static final HumanoidROS2Topic<?> TERRAIN_MAP_MODULE = HumanoidROS2Topic.IHMC_ROOT.withModule("terrain_map");
 
-   public static final ROS2Topic<?> BEST_EFFORT = IHMC_ROOT.withQoS(ROS2QosProfile.BEST_EFFORT());
-   public static final ROS2Topic<?> RELIABLE = IHMC_ROOT.withQoS(ROS2QosProfile.RELIABLE());
+   private static final HumanoidROS2Topic<?> BEST_EFFORT = HumanoidROS2Topic.IHMC_ROOT.withQoS(ROS2QoSProfile.BEST_EFFORT);
+   private static final HumanoidROS2Topic<?> RELIABLE = HumanoidROS2Topic.IHMC_ROOT.withQoS(ROS2QoSProfile.RELIABLE);
 
    /*
     * Detection manager
@@ -56,20 +54,19 @@ public final class PerceptionAPI
    public static final ROS2Topic<YOLOv8AnnotationInfoList> YOLO_ANNOTATION_INFO = PERCEPTION_MODULE.withModule("yolo")
                                                                                                    .withType(YOLOv8AnnotationInfoList.class)
                                                                                                    .withSuffix("annotation_info_list");
-   public static final ROS2Topic<YOLOv8ExecutorParameters> YOLO_PARAMETERS = IHMC_ROOT.withModule("yolo")
+   public static final ROS2Topic<YOLOv8ExecutorParameters> YOLO_PARAMETERS = HumanoidROS2Topic.IHMC_ROOT.withModule("yolo")
                                                                                       .withSuffix("settings")
                                                                                       .withType(YOLOv8ExecutorParameters.class);
-   public static final ROS2Topic<Image> YOLO_VLM_ANNOTATED_IMAGE = IHMC_ROOT.withModule("yolo")
+   public static final ROS2Topic<Image> YOLO_VLM_ANNOTATED_IMAGE = HumanoidROS2Topic.IHMC_ROOT.withModule("yolo")
                                                                             .withSuffix("vlm/image")
                                                                             .withType(Image.class)
-                                                                            .withQoS(ROS2QosProfile.RELIABLE());
+                                                                            .withQoS(ROS2QoSProfile.RELIABLE);
    public static final ROS2Topic<ImageMessage> YOLO_ANNOTATED_IMAGE = PERCEPTION_MODULE.withModule("yolo")
                                                                                        .withType(ImageMessage.class)
                                                                                        .withSuffix("annotated_image");
-   public static final ROS2Topic<CameraInfo> YOLO_VML_ANNOTATED_IMAGE_CAMERA_INFO = IHMC_ROOT.withModule("yolo")
+   public static final ROS2Topic<CameraInfo> YOLO_VML_ANNOTATED_IMAGE_CAMERA_INFO = HumanoidROS2Topic.IHMC_ROOT.withModule("yolo")
                                                                                              .withSuffix("vlm/camera_Info")
-                                                                                             .withType(CameraInfo.class)
-                                                                                             .withQoS(ROS2QosProfile.RELIABLE());
+                                                                                             .withType(CameraInfo.class);
 
    /*
     * Aruco markers
@@ -80,15 +77,15 @@ public final class PerceptionAPI
    /*
     * Camera topic bases
     */
-   private static final ROS2Topic<?> EXPERIMENTAL_CAMERA = BEST_EFFORT.withPrefix("experimental_camera");
-   private static final ROS2Topic<?> ROS2_EXPERIMENTAL_CAMERA = RELIABLE.withPrefix("ros2_experimental_camera");
-   private static final ROS2Topic<?> STEPPING_CAMERA = BEST_EFFORT.withPrefix("stepping_camera");
-   private static final ROS2Topic<?> ROS2_STEPPING_CAMERA = RELIABLE.withPrefix("ros2_stepping_camera");
+   private static final HumanoidROS2Topic<?> EXPERIMENTAL_CAMERA = BEST_EFFORT.withPrefix("experimental_camera");
+   private static final HumanoidROS2Topic<?> ROS2_EXPERIMENTAL_CAMERA = RELIABLE.withPrefix("ros2_experimental_camera");
+   private static final HumanoidROS2Topic<?> STEPPING_CAMERA = BEST_EFFORT.withPrefix("stepping_camera");
+   private static final HumanoidROS2Topic<?> ROS2_STEPPING_CAMERA = RELIABLE.withPrefix("ros2_stepping_camera");
 
    /*
     * Experimental ZED image topics (IHMC ImageMessage type)
     */
-   private static final ROS2Topic<?> EXPERIMENTAL_ZED = EXPERIMENTAL_CAMERA.withModule("zed");
+   private static final HumanoidROS2Topic<?> EXPERIMENTAL_ZED = EXPERIMENTAL_CAMERA.withModule("zed");
    public static final ROS2Topic<Empty> REQUEST_EXPERIMENTAL_ZED = EXPERIMENTAL_ZED.withSuffix("request").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_EXPERIMENTAL_ZED_PUBLICATION = EXPERIMENTAL_ZED.withSuffix("request_publication").withType(Empty.class);
    public static final ROS2Topic<ImageMessage> EXPERIMENTAL_ZED_DEPTH = EXPERIMENTAL_ZED.withType(ImageMessage.class).withSuffix("depth");
@@ -99,7 +96,7 @@ public final class PerceptionAPI
    /*
     * Experimental ZED image topics (official ROS 2 Image and CameraInfo types)
     */
-   private static final ROS2Topic<?> ROS2_EXPERIMENTAL_ZED = ROS2_EXPERIMENTAL_CAMERA.withModule("zed");
+   private static final HumanoidROS2Topic<?> ROS2_EXPERIMENTAL_ZED = ROS2_EXPERIMENTAL_CAMERA.withModule("zed");
    public static final SideDependentList<ROS2Topic<Image>> ROS2_EXPERIMENTAL_ZED_COLOR
          = new SideDependentList<>(ROS2_EXPERIMENTAL_ZED.withSuffix("color/left/image").withType(Image.class),
                                    ROS2_EXPERIMENTAL_ZED.withSuffix("color/right/image").withType(Image.class));
@@ -113,7 +110,7 @@ public final class PerceptionAPI
    /*
     * Stepping ZED image topics  (IHMC ImageMessage type)
     */
-   private static final ROS2Topic<?> STEPPING_ZED = STEPPING_CAMERA.withModule("zed");
+   private static final HumanoidROS2Topic<?> STEPPING_ZED = STEPPING_CAMERA.withModule("zed");
    public static final ROS2Topic<Empty> REQUEST_STEPPING_ZED = STEPPING_ZED.withSuffix("request").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_STEPPING_ZED_PUBLICATION = STEPPING_ZED.withSuffix("request_publication").withType(Empty.class);
    public static final ROS2Topic<ImageMessage> STEPPING_ZED_DEPTH = STEPPING_ZED.withType(ImageMessage.class).withSuffix("depth");
@@ -124,7 +121,7 @@ public final class PerceptionAPI
    /*
     * Stepping ZED image topics (official ROS 2 Image and CameraInfo types)
     */
-   private static final ROS2Topic<?> ROS2_STEPPING_ZED = ROS2_STEPPING_CAMERA.withModule("zed");
+   private static final HumanoidROS2Topic<?> ROS2_STEPPING_ZED = ROS2_STEPPING_CAMERA.withModule("zed");
    public static final SideDependentList<ROS2Topic<Image>> ROS2_STEPPING_ZED_COLOR
          = new SideDependentList<>(ROS2_STEPPING_ZED.withSuffix("color/left/image").withType(Image.class),
                                    ROS2_STEPPING_ZED.withSuffix("color/right/image").withType(Image.class));
@@ -137,7 +134,7 @@ public final class PerceptionAPI
    /*
     * Stepping RealSense image topics (IHMC ImageMessage type)
     */
-   private static final ROS2Topic<?> STEPPING_REALSENSE = STEPPING_CAMERA.withModule("realsense");
+   private static final HumanoidROS2Topic<?> STEPPING_REALSENSE = STEPPING_CAMERA.withModule("realsense");
    public static final ROS2Topic<Empty> REQUEST_STEPPING_REALSENSE = STEPPING_REALSENSE.withSuffix("request").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_STEPPING_REALSENSE_PUBLICATION = STEPPING_REALSENSE.withSuffix("request_publication").withType(Empty.class);
    public static final ROS2Topic<ImageMessage> STEPPING_REALSENSE_DEPTH = STEPPING_REALSENSE.withType(ImageMessage.class).withSuffix("depth");
@@ -147,7 +144,7 @@ public final class PerceptionAPI
    /*
     * Stepping RealSense image topics (official ROS 2 Image and CameraInfo types)
     */
-   private static final ROS2Topic<?> ROS2_STEPPING_REALSENSE = new ROS2Topic<>().withPrefix("realsense").withQoS(ROS2QosProfile.RELIABLE());
+   private static final HumanoidROS2Topic<?> ROS2_STEPPING_REALSENSE = new HumanoidROS2Topic<>().withPrefix("realsense");
    public static final ROS2Topic<Image> ROS2_STEPPING_REALSENSE_COLOR = ROS2_STEPPING_REALSENSE.withSuffix("color/image").withType(Image.class);
    public static final ROS2Topic<CameraInfo> ROS2_STEPPING_REALSENSE_COLOR_CAMERA_INFO = ROS2_STEPPING_REALSENSE.withSuffix("color/camera_info")
                                                                                                                 .withType(CameraInfo.class);
@@ -158,11 +155,10 @@ public final class PerceptionAPI
    /*
     * Planar regions
     */
-   public static final ROS2Topic<Empty> REQUEST_PLANAR_REGIONS = IHMC_ROOT.withModule("planar_regions").withSuffix("request").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_PLANAR_REGIONS = HumanoidROS2Topic.IHMC_ROOT.withModule("planar_regions").withSuffix("request").withType(Empty.class);
    public static final ROS2Topic<FramePlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS = PERCEPTION_MODULE.withOutput()
                                                                                                              .withTypeName(FramePlanarRegionsListMessage.class)
-                                                                                                             .withSuffix("perspective")
-                                                                                                             .withQoS(ROS2QosProfile.BEST_EFFORT());
+                                                                                                             .withSuffix("perspective");
    public static final ROS2Topic<FramePlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS_WITH_POSE = PERCEPTION_MODULE.withOutput()
                                                                                                                      .withTypeName(FramePlanarRegionsListMessage.class)
                                                                                                                      .withSuffix("spherical");
@@ -197,8 +193,8 @@ public final class PerceptionAPI
    /*
     * Transform tuning
     */
-   private static final ROS2Topic<RigidBodyTransformMessage> TRANSFORM_TUNING_BASE_TOPIC = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
-                                                                                                    .withModule("transform_tuning");
+   private static final HumanoidROS2Topic<RigidBodyTransformMessage> TRANSFORM_TUNING_BASE_TOPIC = HumanoidROS2Topic.IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
+                                                                                                            .withModule("transform_tuning");
    public static final ROS2IOTopicPair<RigidBodyTransformMessage> STEPPING_CAMERA_TO_PARENT_TUNING = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix(
          "stepping_camera_to_parent"));
    public static final ROS2IOTopicPair<RigidBodyTransformMessage> EXPERIMENTAL_CAMERA_TO_PARENT_TUNING = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix(
@@ -224,5 +220,5 @@ public final class PerceptionAPI
    /*
     * Mocap
     */
-   public static final ROS2Topic<Pose3D> MOCAP_RIGID_BODY = IHMC_ROOT.withTypeName(Pose3D.class).withModule("frame_update").withSuffix("mocap");
+   // Mocap Pose3D topic disabled until a custom ROS2Message wrapper is added (see jros2 examples/custom-message-class).
 }

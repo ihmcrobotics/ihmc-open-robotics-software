@@ -2,7 +2,7 @@ package us.ihmc.rdx.behaviorTree;
 
 
 import com.badlogic.gdx.Gdx;
-import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.GoHomeMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
@@ -10,7 +10,7 @@ import imgui.type.ImInt;
 import org.apache.commons.lang3.function.TriFunction;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
@@ -20,7 +20,6 @@ import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeExecutor;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
@@ -44,6 +43,7 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.simulation.scs2.RDXSCS2HumanoidSimulationManager;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
@@ -54,10 +54,8 @@ import us.ihmc.rdx.ui.tools.RDXROS2StatsPanel;
 import us.ihmc.rdx.ui.widgets.ImGuiPlayPauseButtonRenderer;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2NodeBuilder.SpecialTransportMode;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
@@ -72,28 +70,31 @@ import java.awt.Desktop;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-/** Includes RDX UI, RDX operated kinematics sim, SVO playback, no physics. */
+/** Includes RDX UI, RDX operated kinematics or full-physics sim, SVO playback. */
 public class RDXBehaviorTestFacilitator
 {
    /** Disable perception if CUDA 12.9.1 is not installed or not working */
    private boolean runPerception = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() && CUDATools.hasNVJPEG() && ZEDJavaAPINativeLibrary.load();
    private final String svoFile;
    private final Supplier<DRCRobotModel> robotModelBuilder;
-   private final TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;
+   private final TriFunction<DRCRobotModel, ROS2Node, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder;
+   private final BiFunction<RDXBaseUI, DRCRobotModel, RDXSCS2HumanoidSimulationManager> fullSimulationManagerBuilder;
    private final Supplier<RDXBaseUI> baseUIBuilder;
    private final WorkspaceResourceDirectory treeFilesDirectory;
    private final Function<DRCRobotModel, RobotCollisionModel> selectionCollisionModelBuilder;
-   private final Supplier<ROS2NodeBuilder> ros2NodeBuilder;
+   private final Function<String, ROS2Node> ros2NodeFactory = ROS2Node::new;
 
    private HumanoidKinematicsSimulation kinematicsSimulation;
+   private RDXSCS2HumanoidSimulationManager fullPhysicsSimulationManager;
    private final Notification robotReady = new Notification();
 
    private ZEDSVOPlaybackSensor zedSensor;
-   private final ROS2Node relayNode = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY).build("facilitator_relay");
+   private final ROS2Node relayNode;
 
    private ROS2BehaviorTreeExecutor behaviorTree;
    private Function<ROS2BehaviorTreeExecutor, Notification> behaviorTreeAccessorOneTime = null;
@@ -103,7 +104,7 @@ public class RDXBehaviorTestFacilitator
    private RDXROS2BehaviorTree behaviorTreeUI;
    private RDXRawImagePointCloudVisualizer pointCloudVisualizer;
    private final Notification uiIsReady = new Notification();
-   private volatile boolean destroyRequested = false;
+   private volatile boolean destroyed = false;
 
    private final ROS2ControllerHelper ros2ControllerHelper;
 
@@ -111,7 +112,8 @@ public class RDXBehaviorTestFacilitator
          String svoFile,
          String robotName,
          Supplier<DRCRobotModel> robotModelBuilder,
-         TriFunction<DRCRobotModel, ROS2NodeBuilder, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
+         TriFunction<DRCRobotModel, ROS2Node, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
+         BiFunction<RDXBaseUI, DRCRobotModel, RDXSCS2HumanoidSimulationManager> fullSimulationManagerBuilder,
          Supplier<RDXBaseUI> baseUIBuilder,
          WorkspaceResourceDirectory treeFilesDirectory,
          Function<DRCRobotModel, RobotCollisionModel> selectionCollisionModelBuilder
@@ -120,36 +122,56 @@ public class RDXBehaviorTestFacilitator
       this.svoFile = svoFile;
       this.robotModelBuilder = robotModelBuilder;
       this.kinematicsSimulationBuilder = kinematicsSimulationBuilder;
+      this.fullSimulationManagerBuilder = fullSimulationManagerBuilder;
       this.baseUIBuilder = baseUIBuilder;
       this.treeFilesDirectory = treeFilesDirectory;
       this.selectionCollisionModelBuilder = selectionCollisionModelBuilder;
 
       runPerception &= svoFile != null && Files.exists(Paths.get(svoFile));
 
-      ros2NodeBuilder = () ->
-      {
-         if (this.runPerception) // YOLO requires interprocess
-            return new ROS2NodeBuilder();
-         else
-            return new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY);
-      };
+      relayNode = ros2NodeFactory.apply("facilitator_relay");
 
-      ThreadTools.startAThread(this::startSimulation, "StartSimulation");
+      if (fullSimulationManagerBuilder == null)
+      {
+         LogTools.info("Starting kinematics simulation");
+         ThreadTools.startAThread(this::startKinematicsSimulation, "StartKinematicsSimulation");
+      }
+      else
+         LogTools.info("Starting full-physics simulation");
       if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
          ThreadTools.startAThread(() -> ExceptionTools.handle(this::launchRDXUI, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE), "RDX");
       ThreadTools.startAThread(this::startBehaviorTree, "StartBehaviorTree");
 
-      ros2ControllerHelper = new ROS2ControllerHelper(ros2NodeBuilder.get().build("facilitator"), robotName);
+      ros2ControllerHelper = new ROS2ControllerHelper(ros2NodeFactory.apply("facilitator"), robotName);
    }
 
-   private void startSimulation()
+   private void startKinematicsSimulation()
    {
       Pose3D initialWalkingPose = new Pose3D();
-      kinematicsSimulation = kinematicsSimulationBuilder.apply(robotModelBuilder.get(), ros2NodeBuilder.get(), initialWalkingPose);
+      kinematicsSimulation = kinematicsSimulationBuilder.apply(robotModelBuilder.get(), ros2NodeFactory.apply("kinematics_sim"), initialWalkingPose);
+      waitForRobotReady(kinematicsSimulation.getYoRegistry());
+   }
 
+   private void startFullPhysicsSimulation(RDXBaseUI baseUI)
+   {
+      if (fullPhysicsSimulationManager == null)
+      {
+         DRCRobotModel robotModel = robotModelBuilder.get();
+         fullPhysicsSimulationManager = fullSimulationManagerBuilder.apply(baseUI, robotModel);
+      }
+      fullPhysicsSimulationManager.buildSimulationAsync();
       ThreadTools.startAsDaemon(() ->
       {
-         YoRegistry registry = kinematicsSimulation.getYoRegistry();
+         while (fullPhysicsSimulationManager.getAvatarSimulation() == null || !fullPhysicsSimulationManager.isSessionThreadRunning())
+            ThreadTools.park(0.1);
+         waitForRobotReady(fullPhysicsSimulationManager.getAvatarSimulation().getRobot().getRegistry());
+      }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, "WaitForFullPhysicsSimulation");
+   }
+
+   private void waitForRobotReady(YoRegistry registry)
+   {
+      ThreadTools.startAsDaemon(() ->
+      {
          if (registry.findVariable("time") instanceof YoDouble time)
          {
             while (time.getValue() < 0.02)
@@ -163,9 +185,42 @@ public class RDXBehaviorTestFacilitator
       }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, "WaitForWalking");
    }
 
+   private void destroyActiveSimulation()
+   {
+      if (fullPhysicsSimulationManager != null)
+         fullPhysicsSimulationManager.destroySessionForRebuild();
+      else if (kinematicsSimulation != null)
+      {
+         kinematicsSimulation.destroy();
+         kinematicsSimulation = null;
+      }
+   }
+
+   private void restartActiveSimulation()
+   {
+      if (fullPhysicsSimulationManager != null)
+      {
+         fullPhysicsSimulationManager.destroySessionForRebuild();
+         fullPhysicsSimulationManager.buildSimulationAsync();
+      }
+      else
+      {
+         kinematicsSimulation.destroy();
+         startKinematicsSimulation();
+      }
+   }
+
+   private boolean isSimulationRunning()
+   {
+      if (fullPhysicsSimulationManager != null)
+         return fullPhysicsSimulationManager.isSessionThreadRunning();
+      else
+         return kinematicsSimulation != null;
+   }
+
    private void startBehaviorTree()
    {
-      ROS2Node ros2Node = ros2NodeBuilder.get().build("behavior_tree");
+      ROS2Node ros2Node = ros2NodeFactory.apply("behavior_tree");
       DRCRobotModel robotModel = robotModelBuilder.get();
       ROS2ControllerHelper ros2 = new ROS2ControllerHelper(ros2Node, robotModel.getSimpleRobotName());
       ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
@@ -266,11 +321,12 @@ public class RDXBehaviorTestFacilitator
             }
             if (zedSensor != null)
                zedSensor.close();
-            kinematicsSimulation.destroy();
+            destroyActiveSimulation();
             thread.blockingKill();
-            ros2Node.destroy();
+            peerClockEstimator.destroy();
             syncedRobot.destroy();
             behaviorTree.destroy();
+            ros2Node.close();
          }
          catch (Exception e)
          {
@@ -281,7 +337,7 @@ public class RDXBehaviorTestFacilitator
 
    private void launchRDXUI()
    {
-      ROS2Node ros2Node = ros2NodeBuilder.get().build("behavior_ui");
+      ROS2Node ros2Node = ros2NodeFactory.apply("behavior_ui");
       DRCRobotModel robotModel = robotModelBuilder.get();
       ROS2ControllerHelper ros2 = new ROS2ControllerHelper(ros2Node, robotModel.getSimpleRobotName());
       ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
@@ -302,7 +358,7 @@ public class RDXBehaviorTestFacilitator
             baseUI.getPrimary3DPanel().getCamera3D().setCameraFocusPoint(new Point3D(0.7, 0.0, 0.4));
             baseUI.getPrimary3DPanel().getCamera3D().changeCameraPosition(-3.0, -4.0, 4.0);
 
-            robotVisualizer = new RDXROS2RobotVisualizer(ros2, syncedRobot);
+            robotVisualizer = new RDXROS2RobotVisualizer(ros2Node, syncedRobot);
             robotVisualizer.createAndSetupStandalone(baseUI);
 
             baseUI.getImGuiPanelManager().addPanel(new RDXROS2StatsPanel());
@@ -325,12 +381,9 @@ public class RDXBehaviorTestFacilitator
             ImGuiPlayPauseButtonRenderer playPauseButton = new ImGuiPlayPauseButtonRenderer();
             baseUI.getImGuiPanelManager().addPanel("Facilitator", () ->
             {
-               ImGui.beginDisabled(kinematicsSimulation == null);
+               ImGui.beginDisabled(!isSimulationRunning());
                if (ImGui.button(labels.get("Restart Simulation")))
-               {
-                  kinematicsSimulation.destroy();
-                  startSimulation();
-               }
+                  restartActiveSimulation();
                ImGui.endDisabled();
                if (zedSensor != null)
                {
@@ -373,6 +426,9 @@ public class RDXBehaviorTestFacilitator
                                                      baseUI.getPrimary3DPanel(),
                                                      ros2);
             behaviorTreeUI.createAndSetupDefault(baseUI);
+
+            if (fullSimulationManagerBuilder != null)
+               startFullPhysicsSimulation(baseUI);
          }
 
          @Override
@@ -385,14 +441,14 @@ public class RDXBehaviorTestFacilitator
             robotVisualizer.update();
             visualizersPanel.update();
 
+            if (fullPhysicsSimulationManager != null)
+               fullPhysicsSimulationManager.update();
+
             if (behaviorUpdateThrottler.run())
                behaviorTreeUI.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
-
-            if (destroyRequested)
-               Gdx.app.exit(); // FIXME: This is not working
          }
 
          @Override
@@ -401,7 +457,10 @@ public class RDXBehaviorTestFacilitator
             visualizersPanel.destroy();
             robotVisualizer.destroy();
             behaviorTreeUI.destroy();
-            ros2Node.destroy();
+            destroy();
+            peerClockEstimator.destroy();
+            syncedRobot.destroy();
+            ros2Node.close();
             baseUI.dispose();
          }
       });
@@ -468,11 +527,18 @@ public class RDXBehaviorTestFacilitator
 
    public void destroy()
    {
-      kinematicsSimulation.destroy();
-      destroyBehaviorThread.run();
+      if (!destroyed)
+      {
+         destroyed = true;
 
-      destroyRequested = true;
+         destroyActiveSimulation();
+         if (destroyBehaviorThread != null)
+            destroyBehaviorThread.run();
+         relayNode.close();
+         ros2ControllerHelper.getROS2Node().close();
 
-      ros2ControllerHelper.getROS2Node().destroy();
+         if (Gdx.app != null)
+            Gdx.app.postRunnable(() -> Gdx.app.exit());
+      }
    }
 }

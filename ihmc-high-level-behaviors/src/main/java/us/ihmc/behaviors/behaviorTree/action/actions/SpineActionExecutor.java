@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.SpineTrajectoryMessage;
+import controller_msgs.ChestTrajectoryMessage;
+import controller_msgs.SpineTrajectoryMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.TrajectoryTrackingErrorCalculator;

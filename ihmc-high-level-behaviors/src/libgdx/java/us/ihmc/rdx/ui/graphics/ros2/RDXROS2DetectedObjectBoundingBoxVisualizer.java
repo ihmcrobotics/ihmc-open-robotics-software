@@ -11,9 +11,10 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import perception_msgs.msg.dds.DetectedObjectPacket;
-import us.ihmc.communication.ros2.ROS2Helper;
+import perception_msgs.DetectedObjectPacket;
+import us.ihmc.communication.ROS2Input;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,6 +22,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.MeshDataBuilder;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.RDXFocusBasedCamera;
 import us.ihmc.rdx.mesh.MeshDataBuilderMissingTools;
@@ -29,8 +32,6 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.ROS2Topic;
 
 import java.util.Set;
 
@@ -53,7 +54,7 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXROS2SingleTop
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public RDXROS2DetectedObjectBoundingBoxVisualizer(String title,
-                                                     ROS2Helper ros2Helper,
+                                                     ROS2Node ros2Node,
                                                      ReferenceFrame sensorFrame,
                                                      ROS2Topic<DetectedObjectPacket> topic,
                                                      RDXFocusBasedCamera camera)
@@ -61,7 +62,7 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXROS2SingleTop
       super(title);
       this.sensorFrame = sensorFrame;
       this.topic = topic;
-      this.subscription = ros2Helper.subscribe(topic);
+      this.subscription = new ROS2Input<>(ros2Node, topic);
       this.text = new RDX3DSituatedText("", 0.05f);
       this.markerCoordinateFrameInstance = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(0.2, Color.LIGHT_GRAY));
       this.sensorCoordinateFrameInstance = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(0.4));
@@ -82,12 +83,12 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXROS2SingleTop
       if (subscription.getMessageNotification().poll())
       {
          DetectedObjectPacket detectedObjectMessage = subscription.getMessageNotification().read();
-         Point3D[] vertices = detectedObjectMessage.getBoundingBoxVertices();
-         Pose3D objectPoseSensorFrame = detectedObjectMessage.getPose();
+         EuclidPoint3DMessage[] euclidVertices = detectedObjectMessage.getBoundingBoxVertices();
+         Pose3D objectPoseSensorFrame = detectedObjectMessage.getPose().getPose();
          double confidence = detectedObjectMessage.getConfidence();
          String objectType = detectedObjectMessage.getObjectTypeAsString();
 
-         for (int i = 0; i < vertices.length; i++)
+         for (int i = 0; i < euclidVertices.length; i++)
          {
             if (vertices3D[i] == null)
             {
@@ -95,7 +96,7 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXROS2SingleTop
             }
 
             vertices3D[i].changeFrame(sensorFrame);
-            vertices3D[i].interpolate(vertices[i], 0.2);
+            vertices3D[i].interpolate(euclidVertices[i].getPoint(), 0.2);
 
             vertices3D[i].changeFrame(ReferenceFrame.getWorldFrame());
          }
@@ -155,11 +156,11 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXROS2SingleTop
 
    public void drawVertexOverlay(Mat rgba8Image)
    {
-      Point3D[] boundingBox2dVertices = subscription.getLatest().getBoundingBox2dVertices();
+      EuclidPoint3DMessage[] boundingBox2dVertices = subscription.getLatest().getBoundingBox2dVertices();
       Point[] pointVertices = new Point[8];
       for (int i = 0; i < boundingBox2dVertices.length; i++)
       {
-         pointVertices[i] = new Point((int) boundingBox2dVertices[i].getX(), (int) boundingBox2dVertices[i].getY());
+         pointVertices[i] = new Point((int) boundingBox2dVertices[i].getPoint().getX(), (int) boundingBox2dVertices[i].getPoint().getY());
          opencv_imgproc.circle(rgba8Image, pointVertices[i], (int) (1.0f * i + 3), WHITE, 1, opencv_imgproc.LINE_8, 0);
       }
       opencv_imgproc.line(rgba8Image, pointVertices[0], pointVertices[1], RED, 1, opencv_imgproc.LINE_8, 0);
