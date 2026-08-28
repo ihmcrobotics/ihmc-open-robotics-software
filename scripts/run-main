@@ -5,11 +5,11 @@
 # Usage:
 #   run-main <gradle-project> <main-class> [args...]
 #
-# Examples (from alex/):
-#   ../ihmc-open-robotics-software/scripts/run-main :alex-test us.ihmc.alex.rdx.AlexRDXBehaviorTestFacilitator
+# Examples (from ihmc-high-level-behaviors/):
+#   ../scripts/run-main :ihmc-high-level-behaviors-test us.ihmc.rdx.RDXUIDemo
 #
-# Examples (from primary/):
-#   ihmc-open-robotics-software/scripts/run-main :alex:alex-test us.ihmc.alex.rdx.AlexRDXBehaviorTestFacilitator
+# Examples (from a group-of-projects root):
+#   ihmc-open-robotics-software/scripts/run-main :ihmc-open-robotics-software:ihmc-high-level-behaviors:ihmc-high-level-behaviors-test us.ihmc.rdx.RDXUIDemo
 
 set -euo pipefail
 
@@ -18,7 +18,7 @@ INIT_SCRIPT="$SCRIPT_DIR/run-main.init.gradle.kts"
 
 if [[ $# -lt 2 ]]; then
    echo "Usage: run-main <gradle-project> <main-class> [args...]" >&2
-   echo "Example: run-main :alex-test us.ihmc.alex.rdx.AlexRDXBehaviorTestFacilitator" >&2
+   echo "Example: run-main :ihmc-high-level-behaviors-test us.ihmc.rdx.RDXUIDemo" >&2
    exit 1
 fi
 
