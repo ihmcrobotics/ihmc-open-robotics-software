@@ -754,18 +754,19 @@ public class AvatarMultiThreadingFactory
    }
 
    /**
-    * External API for adding a high-level controller state that is automatically transitioned into from a previous state (in this case the STAND_PREP
-    * state), given logic that determines the trigger of that transition (in this case STAND_PREP is done, and feet are loaded)
+    * External API for adding a high-level controller state that is transitioned into from STAND_PREP. Automatic transition will be disabled at start up
+    * by default
+    * @param nextControlStateEnum Enum for the high-level controller to transition to
     */
    public void addStandPrepStateTransition(HighLevelControllerName nextControlStateEnum)
    {
-      avatarControllerFactory.addCustomStateTransition(createStandTransitionState(nextControlStateEnum, avatarControllerFactory, true));
+      addStandPrepStateTransition(nextControlStateEnum, false);
    }
 
    /**
-    * External API for adding a high-level controller state that is automatically transitioned into from a previous state (in this case the STAND_PREP
-    * state), given logic that determines the trigger of that transition (in this case STAND_PREP is done, and feet are loaded). Adds a boolean check
-    * if you want the controller to transition automatically to this new state.
+    * External API for adding a high-level controller state that is transitioned into from STAND_PREP.
+    * @param nextControlStateEnum Enum for the high-level controller to transition to
+    * @param transitionAutomatically If true, automatic transition is enabled. Else, automatic transition is disabled
     */
    public void addStandPrepStateTransition(HighLevelControllerName nextControlStateEnum, boolean transitionAutomatically)
    {
