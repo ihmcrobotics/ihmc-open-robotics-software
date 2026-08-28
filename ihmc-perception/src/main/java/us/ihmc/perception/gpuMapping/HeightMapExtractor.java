@@ -372,8 +372,6 @@ public class HeightMapExtractor
       {
          if (heightMapParameters.getICPFilter())
          {
-            LogTools.info("...");
-
             CUDATools.mallocAsync(icpAccumulatorDevicePointer, ICP_ACCUMULATOR_SIZE, stream);
 
             int searchRadiusCells = Math.max(1, (int) Math.ceil(heightMapParameters.getICPMaxHorizontalDrift() / heightMapParameters.getCellSize()));
