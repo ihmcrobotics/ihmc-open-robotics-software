@@ -23,7 +23,7 @@ public class RDXTrashCanObject extends RDXEnvironmentObject
       // Mesh bounds are roughly 0.64 x 1.0 x 0.74 and nearly centered on the origin. The old
       // 0.2^3 box was offset, so click-to-select / the gizmo outline missed the visible can.
       double sizeX = 0.65;
-      double sizeY = 1.00;
+      double sizeY = 0.65;
       double sizeZ = 0.75;
       setMass(10.0f);
       getCollisionShapeOffset().getTranslation().set(0.0, 0.0, 0.0);
