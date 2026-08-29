@@ -87,9 +87,15 @@ public class HeightMapExtractor
 
    private final float[] groundToWorldNoRotationTransformArray = new float[16];
    private final float[] sensorToWorldAlignedGroundTransformArray = new float[16];
+   private final float[] sensorToWorldNoRotationTransformArray = new float[16];
 
    private final FloatPointer sensorToWorldAlignedGroundTransformHostPointer;
    private final FloatPointer sensorToWorldAlignedGroundTransformDevicePointer;
+
+   // Raw (non-ground-aligned) sensor-to-world translation, used to snap depth points to the height
+   // map's grid regardless of where the sensor's origin actually sits within a cell.
+   private final FloatPointer sensorToWorldNoRotationHostPointer;
+   private final FloatPointer sensorToWorldNoRotationDevicePointer;
 
    private final FloatPointer groundToWorldTranslationHostPointer;
    private final FloatPointer groundToWorldTranslationDevicePointer;
@@ -168,6 +174,9 @@ public class HeightMapExtractor
          // Initialize transformation pointers
          sensorToWorldAlignedGroundTransformHostPointer = new FloatPointer(16);
          sensorToWorldAlignedGroundTransformDevicePointer = new FloatPointer();
+
+         sensorToWorldNoRotationHostPointer = new FloatPointer(16);
+         sensorToWorldNoRotationDevicePointer = new FloatPointer();
 
          groundToWorldTranslationHostPointer = new FloatPointer(16);
          groundToWorldTranslationDevicePointer = new FloatPointer();
@@ -313,6 +322,18 @@ public class HeightMapExtractor
                                this.sensorToWorldAlignedGroundTransformArray.length,
                                stream);
 
+         // Raw sensor-to-world translation (no rotation, no ground alignment) so the kernel can snap
+         // the sensor's actual world position to the height map grid and stabilize cell assignment.
+         RigidBodyTransform sensorToWorldNoRotation = new RigidBodyTransform(sensorToWorldTransform);
+         sensorToWorldNoRotation.getRotation().setIdentity();
+         sensorToWorldNoRotation.get(this.sensorToWorldNoRotationTransformArray);
+         sensorToWorldNoRotationHostPointer.put(this.sensorToWorldNoRotationTransformArray);
+         CUDATools.mallocAsync(sensorToWorldNoRotationDevicePointer, this.sensorToWorldNoRotationTransformArray.length, stream);
+         CUDATools.memcpyAsync(sensorToWorldNoRotationDevicePointer,
+                               sensorToWorldNoRotationHostPointer,
+                               this.sensorToWorldNoRotationTransformArray.length,
+                               stream);
+
          // Clearing all the temp maps so they are ready for the next update call
          cudaMemset2DAsync(tempSumMap.data(), tempSumMap.step(), 0, (long) tempSumMap.cols() * Float.BYTES, tempSumMap.rows());
          cudaMemset2DAsync(tempCountMap.data(), tempCountMap.step(), 0, (long) tempCountMap.cols() * Integer.BYTES, tempCountMap.rows());
@@ -338,6 +359,7 @@ public class HeightMapExtractor
          updateTempMapsKernel.withPointer(tempMotionVarianceMap.data()).withLong(tempMotionVarianceMap.step());
          updateTempMapsKernel.withPointer(parametersDevicePointer);
          updateTempMapsKernel.withPointer(sensorToWorldAlignedGroundTransformDevicePointer);
+         updateTempMapsKernel.withPointer(sensorToWorldNoRotationDevicePointer);
          updateTempMapsKernel.withFloat(linearMotionMagnitude);
          updateTempMapsKernel.withFloat(angularMotionMagnitude);
 
@@ -362,6 +384,7 @@ public class HeightMapExtractor
          updateTempMapsDim.close();
          localKernelDim.close();
          cudaFreeAsync(sensorToWorldAlignedGroundTransformDevicePointer, stream);
+         cudaFreeAsync(sensorToWorldNoRotationDevicePointer, stream);
          checkCUDAError();
       }
 
@@ -599,6 +622,7 @@ public class HeightMapExtractor
 
       // Clean up each resource
       deallocateFloatPointer(sensorToWorldAlignedGroundTransformHostPointer, sensorToWorldAlignedGroundTransformDevicePointer, stream);
+      deallocateFloatPointer(sensorToWorldNoRotationHostPointer, sensorToWorldNoRotationDevicePointer, stream);
       deallocateFloatPointer(groundToWorldTranslationHostPointer, groundToWorldTranslationDevicePointer, stream);
       deallocateFloatPointer(parametersHostPointer, parametersDevicePointer, stream);
       deallocateFloatPointer(icpAccumulatorHostPointer, icpAccumulatorDevicePointer, stream);
