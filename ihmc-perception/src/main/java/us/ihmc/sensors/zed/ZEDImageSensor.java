@@ -46,8 +46,10 @@ public class ZEDImageSensor extends ImageSensor
    public static final int LEFT_COLOR_IMAGE_KEY = 0;
    public static final int RIGHT_COLOR_IMAGE_KEY = 1;
    public static final int DEPTH_IMAGE_KEY = 2;
+   /** Per-pixel stereo confidence (F32, 0/1 = best ... 100 = unreliable). Only produced when {@link #setRetrieveConfidence} is enabled. */
+   public static final int CONFIDENCE_IMAGE_KEY = 3;
 
-   public static final int OUTPUT_IMAGE_COUNT = 3;
+   public static final int OUTPUT_IMAGE_COUNT = 4;
 
    private static final float MILLIMETER_TO_METERS = 0.001f;
 
@@ -82,6 +84,9 @@ public class ZEDImageSensor extends ImageSensor
    private Instant lastGrabTime;
    private boolean lastGrabFailed = false;
    private long lastGrabTimestamp;
+
+   /** When true, each grab also retrieves the ZED per-pixel depth confidence map ({@link #CONFIDENCE_IMAGE_KEY}). */
+   private boolean retrieveConfidence = false;
 
    private boolean positionalTrackingEnabled = false;
    private final MutableReferenceFrame trackedSensorFrame;
@@ -219,6 +224,16 @@ public class ZEDImageSensor extends ImageSensor
       trackedPoseOffset.set(offset);
    }
 
+   /**
+    * Enables retrieval of the ZED per-pixel depth confidence map, published under {@link #CONFIDENCE_IMAGE_KEY}.
+    * Off by default since it adds a GPU retrieve and a full-resolution F32 image per grab. Must be set before
+    * {@link #startSensor()} so the backing GPU mat is allocated.
+    */
+   public void setRetrieveConfidence(boolean retrieveConfidence)
+   {
+      this.retrieveConfidence = retrieveConfidence;
+   }
+
    public SL_InitParameters getInitParameters()
    {
       return zedInitParameters;
@@ -309,6 +324,8 @@ public class ZEDImageSensor extends ImageSensor
          slMatPointers[LEFT_COLOR_IMAGE_KEY] = sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU);
          slMatPointers[RIGHT_COLOR_IMAGE_KEY] = sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU);
          slMatPointers[DEPTH_IMAGE_KEY] = sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U16_C1, SL_MEM_GPU);
+         if (retrieveConfidence)
+            slMatPointers[CONFIDENCE_IMAGE_KEY] = sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_F32_C1, SL_MEM_GPU);
       }
       catch (ZEDException exception)
       {
@@ -403,6 +420,15 @@ public class ZEDImageSensor extends ImageSensor
          returnCode = sl_retrieve_image(cameraID, rightColorImagePointer, SL_VIEW_RIGHT, SL_MEM_GPU, imageWidth, imageHeight, cudaStream);
          throwOnError(returnCode);
 
+         // Retrieve the grabbed per-pixel depth confidence map (aligned with the depth/left image)
+         Pointer confidenceImagePointer = null;
+         if (retrieveConfidence)
+         {
+            confidenceImagePointer = slMatPointers[CONFIDENCE_IMAGE_KEY];
+            returnCode = sl_retrieve_measure(cameraID, confidenceImagePointer, SL_MEASURE_CONFIDENCE, SL_MEM_GPU, imageWidth, imageHeight, cudaStream);
+            throwOnError(returnCode);
+         }
+
          synchronized (grabbedImages)
          {  // Create RawImages from the grabbed retrieved slMats
             if (grabbedImages[LEFT_COLOR_IMAGE_KEY] != null)
@@ -419,6 +445,18 @@ public class ZEDImageSensor extends ImageSensor
             if (grabbedImages[DEPTH_IMAGE_KEY] != null)
                grabbedImages[DEPTH_IMAGE_KEY].release();
             grabbedImages[DEPTH_IMAGE_KEY] = slMatToRawImage(depthImagePointer, PixelFormat.GRAY16, leftSensorIntrinsics, leftSensorTransformAtGrab);
+
+            if (retrieveConfidence)
+            {
+               if (grabbedImages[CONFIDENCE_IMAGE_KEY] != null)
+                  grabbedImages[CONFIDENCE_IMAGE_KEY].release();
+               // depthDiscretization is meaningless for a confidence map, so use 1.0 (raw F32 confidence values).
+               grabbedImages[CONFIDENCE_IMAGE_KEY] = slMatToRawImage(confidenceImagePointer,
+                                                                     PixelFormat.GRAY_F32,
+                                                                     leftSensorIntrinsics,
+                                                                     leftSensorTransformAtGrab,
+                                                                     1.0f);
+            }
          }
       }
       catch (ZEDException exception)
@@ -437,6 +475,15 @@ public class ZEDImageSensor extends ImageSensor
                                     CameraIntrinsics cameraIntrinsics,
                                     RigidBodyTransformReadOnly sensorTransform)
    {
+      return slMatToRawImage(slMatPointer, imagePixelFormat, cameraIntrinsics, sensorTransform, MILLIMETER_TO_METERS);
+   }
+
+   private RawImage slMatToRawImage(Pointer slMatPointer,
+                                    PixelFormat imagePixelFormat,
+                                    CameraIntrinsics cameraIntrinsics,
+                                    RigidBodyTransformReadOnly sensorTransform,
+                                    float depthDiscretization)
+   {
       GpuMat imageGpuMat = new GpuMat(imageHeight,
                                       imageWidth,
                                       imagePixelFormat.toOpenCVType(),
@@ -450,12 +497,14 @@ public class ZEDImageSensor extends ImageSensor
                           sensorTransform,
                           lastGrabTime,
                           grabSequenceNumber,
-                          MILLIMETER_TO_METERS);
+                          depthDiscretization);
    }
 
    @Override
    public int[] getImageKeys()
    {
+      if (retrieveConfidence)
+         return new int[] {LEFT_COLOR_IMAGE_KEY, RIGHT_COLOR_IMAGE_KEY, DEPTH_IMAGE_KEY, CONFIDENCE_IMAGE_KEY};
       return new int[] {LEFT_COLOR_IMAGE_KEY, RIGHT_COLOR_IMAGE_KEY, DEPTH_IMAGE_KEY};
    }
 
@@ -476,7 +525,7 @@ public class ZEDImageSensor extends ImageSensor
    {
       return switch (imageKey)
       {
-         case LEFT_COLOR_IMAGE_KEY, DEPTH_IMAGE_KEY -> leftSensorFrame;
+         case LEFT_COLOR_IMAGE_KEY, DEPTH_IMAGE_KEY, CONFIDENCE_IMAGE_KEY -> leftSensorFrame;
          case RIGHT_COLOR_IMAGE_KEY -> rightSensorFrame;
          default -> null;
       };

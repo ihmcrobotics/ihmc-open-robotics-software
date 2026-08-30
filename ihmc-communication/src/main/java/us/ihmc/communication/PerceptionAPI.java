@@ -174,6 +174,15 @@ public final class PerceptionAPI
    public static final ROS2Topic<TerrainMapMessage> YOLO_TERRAIN_MAP = TERRAIN_MAP_MODULE.withSuffix("yolo").withOutput().withTypeName(TerrainMapMessage.class);
 
    /*
+    * Robot-centric 3-D voxel occupancy crop — a 32×32×40 binary grid (z-as-channel, 40960 floats)
+    * in a yaw-aligned frame centred on the robot, published by the autonomy process from the
+    * dual-camera persistent GPU log-odds voxel grid. Used as the terrain observation by the
+    * fall-recovery RL controller (Gallant-style voxel input, arXiv:2511.14625).
+    */
+   public static final ROS2Topic<perception_msgs.Float32MultiArrayHack> VOXEL_OCCUPANCY =
+         PERCEPTION_MODULE.withSuffix("voxel_occupancy").withOutput().withType(perception_msgs.Float32MultiArrayHack.class);
+
+   /*
     * SLAM (old, not used)
     */
    public static final ROS2Topic<PlanarRegionsListMessage> SLAM_OUTPUT_RAPID_REGIONS = PERCEPTION_MODULE.withOutput()

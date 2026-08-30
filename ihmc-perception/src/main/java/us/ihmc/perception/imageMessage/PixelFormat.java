@@ -97,6 +97,7 @@ public enum PixelFormat
       {
          case 1 -> opencv_core.CV_8UC(numberOfChannels);
          case 2 -> opencv_core.CV_16UC(numberOfChannels);
+         case 4 -> opencv_core.CV_32FC(numberOfChannels);
          default -> throw new NotImplementedException("Tomasz has been too busy (or lazy) to implement this. Feel free to do it yourself!");
       };
    }
