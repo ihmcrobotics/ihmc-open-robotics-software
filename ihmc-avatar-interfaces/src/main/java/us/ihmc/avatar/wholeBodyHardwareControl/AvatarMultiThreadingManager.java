@@ -1,17 +1,18 @@
 package us.ihmc.avatar.wholeBodyHardwareControl;
 
-import us.ihmc.avatar.*;
 import us.ihmc.avatar.factory.BarrierScheduledRobotController;
 import us.ihmc.avatar.factory.DisposableRobotController;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.avatar.factory.SingleThreadedRobotController;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.FrequencyCalculator;
+import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PeriodicParameters;
@@ -79,6 +80,13 @@ public class AvatarMultiThreadingManager
    private final boolean useRealtimeThreads;
 
    private final AvatarLowLevelOutputProcessor lowLevelOutputProcessor;
+   /**
+    * Set via {@link #setFastDesiredOutputHolder(ConcurrentCopier)}, typically right after
+    * construction. When set, {@link #run()} prefers this over {@code masterContext}'s copy of the
+    * controller's desired joint outputs, since the latter is only refreshed on the controller task's
+    * own next barrier-scheduler release (up to one full control period later)
+    */
+   private ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastDesiredOutputHolder;
    private volatile boolean running = false;
 
    public AvatarMultiThreadingManager(String prefix,
@@ -318,8 +326,13 @@ public class AvatarMultiThreadingManager
          // Update all post-estimator thread runnables
          runAll(postMasterThreadRunnables);
 
-         // Write desired commands to robot
-         lowLevelOutputProcessor.update(masterContext.getJointDesiredOutputList());
+         // Write desired commands to robot. Prefer the controller's fast, low-latency output (published
+         // directly by ControllerTask as soon as it finishes each control tick) over masterContext's
+         // copy, which is only refreshed on the controller task's own next barrier-scheduler release -
+         // up to one full control period later. Fall back to masterContext until the controller has
+         // published its first output.
+         LowLevelOneDoFJointDesiredDataHolder freshDesiredOutputHolder = fastDesiredOutputHolder != null ? fastDesiredOutputHolder.getCopyForReading() : null;
+         lowLevelOutputProcessor.update(freshDesiredOutputHolder != null ? freshDesiredOutputHolder : masterContext.getJointDesiredOutputList());
          hardwareCommunicationInterface.write(lowLevelOutputProcessor.getProcessedDesiredOutput(), lowLevelOutputProcessor.getMasterGain().getValue());
       }
 
@@ -362,6 +375,11 @@ public class AvatarMultiThreadingManager
    public void addPostMasterThreadRunnable(Runnable runnable)
    {
       postMasterThreadRunnables.add(runnable);
+   }
+
+   public void setFastDesiredOutputHolder(ConcurrentCopier<LowLevelOneDoFJointDesiredDataHolder> fastDesiredOutputHolder)
+   {
+      this.fastDesiredOutputHolder = fastDesiredOutputHolder;
    }
 
    static void runAll(List<Runnable> runnables)
