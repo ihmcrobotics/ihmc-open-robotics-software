@@ -217,7 +217,7 @@ public class ReadyToPlanState implements State
          // Here we assume the joystick isn't being turned at all, so we give a direction of straight forward
          // The number here it to account for drift in the controller where that value is never actually zero.
          // Cause the Joystick is drifting constantly
-         else if (Math.abs(commandMessage.get().getLateralValue()) < 0.05)
+         else if (commandMessage.get().getWalkForwards())
          {
             previousLateralValue = 0;
             goalPoses = ContinuousPlannerTools.setStraightForwardGoalPoses(continuousPlanner.getWalkingStartMidPose(),

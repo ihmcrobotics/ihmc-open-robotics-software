@@ -384,10 +384,10 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       // Here we check against null rather then .isConnected() because if the controller is unplugged, that method won't work
       boolean controllerConnected = joystickController != null;
 
-      if (controllerConnected)
-      {
-         performJoystickControllerAction(joystickController);
-      }
+//      if (controllerConnected)
+//      {
+//         performJoystickControllerAction(joystickController);
+//      }
    }
 
    private void performJoystickControllerAction(Controller joystickController)
