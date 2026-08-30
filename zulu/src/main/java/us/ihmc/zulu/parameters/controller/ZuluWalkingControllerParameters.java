@@ -161,6 +161,12 @@ public class ZuluWalkingControllerParameters extends WalkingControllerParameters
       return true;
    }
 
+   @Override
+   public double getMaxAllowedDistanceCMPSupport()
+   {
+      return 0.02;
+   }
+
    /** {@inheritDoc} */
    @Override
    public ToeSlippingDetectorParameters getToeSlippingDetectorParameters()
