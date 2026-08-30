@@ -14,6 +14,7 @@ import org.jcodec.common.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
@@ -69,6 +70,11 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    private static final Vector3D zeroVector = new Vector3D();
 
    private SCS2AvatarTestingSimulation simulationTestHelper;
+
+   /** Extension point for subclasses to tweak the simulation factory (e.g. swap physics engine) before the simulation is built. No-op by default. */
+   protected void configureSimulationFactory(SCS2AvatarTestingSimulationFactory testSimulationFactory, TestInfo testInfo)
+   {
+   }
    private FullHumanoidRobotModel fullRobotModel;
    private CommonHumanoidReferenceFrames humanoidReferenceFrames;
 
@@ -618,7 +624,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    }
 
    @BeforeEach
-   public void showMemoryUsageBeforeTest()
+   public void showMemoryUsageBeforeTest(TestInfo testInfo)
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
@@ -628,6 +634,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
                                                                                                                                              environment,
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
+      configureSimulationFactory(simulationTestHelperFactory, testInfo);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
       ThreadTools.sleep(1000);
