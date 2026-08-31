@@ -4,6 +4,8 @@ import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYo
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint3D;
 
 import controller_msgs.ControllerWalkToGoalStatusMessage;
+import controller_msgs.ControllerWaypointChangeStatusMessage;
+import controller_msgs.ControllerWaypointListStatusMessage;
 import controller_msgs.ControllerWaypointStatusMessage;
 import controller_msgs.VelocityBasedWalkingInputMessage;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -13,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.Contr
 import us.ihmc.commons.DeadbandTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -66,6 +69,9 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    private static final double DEFAULT_DISTANCE_TO_MATCH_GOAL_ANGLE = 0.75;
    private static final double DEFAULT_DISTANCE_TO_FACE_GOAL = 1.5;
+
+   /** Waypoint list status is republished every tick, but throttled to this period to limit network traffic. */
+   private static final double WAYPOINT_LIST_STATUS_PERIOD = 0.1;
 
    private final RecyclingArrayList<GoalWaypoint> goalPoses = new RecyclingArrayList<>(GoalWaypoint::new);
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -195,7 +201,10 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    public void consumeNewWaypointList(ControllerWaypointGoalListCommand command)
    {
-      goalPoses.clear();
+      // If not queueing, override the current queue with this list of waypoints.
+      if (!command.getQueueWaypoints())
+         goalPoses.clear();
+
       for (int i = 0; i < command.getNumberOfWaypoints(); i++)
       {
          consumeNewWaypoint(command.getWaypoint(i));
@@ -260,7 +269,9 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
 
    private final ControllerWalkToGoalStatusMessage statusMessage = new ControllerWalkToGoalStatusMessage();
-   private final ControllerWaypointStatusMessage waypointReachedMessage = new ControllerWaypointStatusMessage();
+   private final ControllerWaypointChangeStatusMessage waypointReachedMessage = new ControllerWaypointChangeStatusMessage();
+   private final ControllerWaypointListStatusMessage waypointListStatusMessage = new ControllerWaypointListStatusMessage();
+   private final Throttler waypointListStatusThrottler = new Throttler().setPeriod(WAYPOINT_LIST_STATUS_PERIOD);
 
    @Override
    public void update(double time)
@@ -350,11 +361,29 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          statusMessage.setIsReached(this.hasReachedGoal.getBooleanValue() && !isRampingDownAfterGoal.getBooleanValue());
          reportWalkToGoalStatus();
       }
+
+      if (waypointListStatusThrottler.run())
+         publishWaypointListStatus();
    }
 
    private void reportWalkToGoalStatus()
    {
       statusMessageOutputManager.reportStatusMessage(statusMessage);
+   }
+
+   /** Publishes every waypoint currently queued, from the one being walked toward to the last one in the list. */
+   private void publishWaypointListStatus()
+   {
+      waypointListStatusMessage.getWaypoints().clear();
+      for (int i = 0; i < goalPoses.size(); i++)
+      {
+         FramePose2DReadOnly waypointPose = goalPoses.get(i).getGoalPose();
+         ControllerWaypointStatusMessage waypointStatusMessage = waypointListStatusMessage.getWaypoints().add();
+         waypointStatusMessage.setGoalXPosition(waypointPose.getX());
+         waypointStatusMessage.setGoalYPosition(waypointPose.getY());
+         waypointStatusMessage.setGoalYaw(waypointPose.getYaw());
+      }
+      statusMessageOutputManager.reportStatusMessage(waypointListStatusMessage);
    }
 
    public VelocityBasedWalkingInputMessage getOutputMessage()
@@ -493,9 +522,10 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    private void publishWaypointStatus(FramePose2DReadOnly pose, int waypointsRemaining, boolean isStarted)
    {
-      waypointReachedMessage.setGoalXPosition(pose.getX());
-      waypointReachedMessage.setGoalYPosition(pose.getY());
-      waypointReachedMessage.setGoalYaw(pose.getYaw());
+      ControllerWaypointStatusMessage waypointStatusMessage = waypointReachedMessage.getWaypoint();
+      waypointStatusMessage.setGoalXPosition(pose.getX());
+      waypointStatusMessage.setGoalYPosition(pose.getY());
+      waypointStatusMessage.setGoalYaw(pose.getYaw());
       waypointReachedMessage.setWaypointsRemaining(waypointsRemaining);
       waypointReachedMessage.setIsStarted(isStarted);
       statusMessageOutputManager.reportStatusMessage(waypointReachedMessage);

@@ -7,3 +7,6 @@ uint64 sequence_id
 
 # Ordered list of goals to execute in sequence.
 ControllerWaypointGoalMessage[<=50] waypoints
+# If true, append these waypoints to the end of the current queue.
+# If false, override the current queue with this list of waypoints.
+bool queue_waypoints false

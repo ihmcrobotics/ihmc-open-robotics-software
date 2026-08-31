@@ -10,6 +10,7 @@ import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.avatar.walkToGoal.WalkToGoalClient;
 import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
@@ -502,6 +503,11 @@ public class RDXTeleoperationManager extends RDXPanel
             allAreDeleted &= interactableFeet.get(side).isDeleted();
       }
       desiredRobot.setActive(!allAreDeleted);
+   }
+
+   public void setWalkToGoalClient(WalkToGoalClient walkToGoalClient)
+   {
+      locomotionManager.setWalkToGoalClient(walkToGoalClient);
    }
 
    private void calculateVRPick(RDXVRContext vrContext)

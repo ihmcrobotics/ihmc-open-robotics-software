@@ -1,0 +1,299 @@
+package us.ihmc.avatar.walkToGoal;
+
+import controller_msgs.AbortWalkingMessage;
+import controller_msgs.ControllerReleaseGoalMessage;
+import controller_msgs.ControllerWaypointGoalListMessage;
+import controller_msgs.ControllerWaypointGoalMessage;
+import controller_msgs.ControllerWaypointListStatusMessage;
+import controller_msgs.ControllerWaypointStatusMessage;
+import controller_msgs.VelocityBasedWalkingInputMessage;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.ROS2Input;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
+import us.ihmc.commons.thread.Throttler;
+import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
+import us.ihmc.tools.Timer;
+
+/** Plants a walk-to-goal pose, or takes the body back with a streamed velocity. */
+public class WalkToGoalClient
+{
+   private static final Vector2DReadOnly ZERO_LINEAR_VELOCITY = new Vector2D();
+   private static final double DEFAULT_POSITION_PROXIMITY = 0.2;
+   private static final double DEFAULT_ORIENTATION_PROXIMITY = Math.toRadians(30.0);
+
+   private static final double GOAL_RESEND_PERIOD = 0.2;
+   private static final double GOAL_RESEND_TIMEOUT = 2.0;
+   private static final double GOAL_MATCH_EPSILON = 1.0e-3;
+
+   private final ROS2ControllerHelper controllerHelper;
+   private final ControllerWaypointGoalListMessage waypointListMessage = new ControllerWaypointGoalListMessage();
+   private final AbortWalkingMessage abortMessage = new AbortWalkingMessage();
+   private final ControllerReleaseGoalMessage releaseGoalMessage = new ControllerReleaseGoalMessage();
+   private final VelocityBasedWalkingInputMessage velocityMessage = new VelocityBasedWalkingInputMessage();
+
+   // StepGeneratorCommandInputManager discards goals unless this heartbeat is alive.
+   private final ROS2Heartbeat stepGeneratorHeartbeat;
+   private final ROS2Input<ControllerWaypointListStatusMessage> waypointListStatus;
+   private final Timer resendTimer = new Timer();
+   private final Throttler resendThrottler = new Throttler().setPeriod(GOAL_RESEND_PERIOD);
+   private boolean waitingForGoalToBeAccepted = false;
+   private long sequenceId = 1L;
+
+   // temp variables for compute.
+   private final FixedFramePose2DBasics worldGoal = new FramePose2D();
+   private final FixedFramePoint2DBasics worldGoalPoint = new FramePoint2D();
+
+   public WalkToGoalClient(ROS2ControllerHelper controllerHelper)
+   {
+      this.controllerHelper = controllerHelper;
+      stepGeneratorHeartbeat = new ROS2Heartbeat(controllerHelper.getROS2Node(), CSGROS2CommunicationHelper.CSG_HEARTBEAT_TOPIC);
+      stepGeneratorHeartbeat.setAlive(true);
+      waypointListStatus = controllerHelper.subscribeToController(ControllerWaypointListStatusMessage.class);
+   }
+
+   /** Replace the current goal with this point, expressed in any frame. If you care about the end orientation, use {@link #setGoal(FramePose2DReadOnly)}*/
+   public void setGoal(FramePoint2DReadOnly goal)
+   {
+      worldGoalPoint.setMatchingFrame(goal);
+      setGoal((Point2DReadOnly) worldGoalPoint);
+   }
+
+   /** Replace the current goal with this world point. If you care about the end orientation, use {@link #setGoal(Pose2DReadOnly)}*/
+   public void setGoal(Point2DReadOnly goal)
+   {
+      setGoal(DEFAULT_POSITION_PROXIMITY, goal);
+   }
+
+   /**
+    * Replace the current goal with this world point. Marks the goal as reached with the position proximity is satisfied.
+    *
+    * If you care about the end orientation, use {@link #setGoal(Pose2DReadOnly)}
+    **/
+   public void setGoal(double positionProximity, Point2DReadOnly goal)
+   {
+      waitingForGoalToBeAccepted = true;
+      resendTimer.reset();
+      setWaypointListFromGoals(false, positionProximity,  goal);
+   }
+
+   /** Replace the current goal with this pose, expressed in any frame. */
+   public void setGoal(FramePose2DReadOnly goal)
+   {
+      worldGoal.setMatchingFrame(goal);
+      setGoal((Pose2DReadOnly) worldGoal);
+   }
+
+   /** Replace the current goal with this world pose. */
+   public void setGoal(Pose2DReadOnly goal)
+   {
+      setGoal(DEFAULT_POSITION_PROXIMITY, DEFAULT_ORIENTATION_PROXIMITY, goal);
+   }
+
+   /** Replace the current goal with this world pose. */
+   public void setGoal(Pose3DReadOnly goal)
+   {
+      setGoal(DEFAULT_POSITION_PROXIMITY, DEFAULT_ORIENTATION_PROXIMITY, goal);
+   }
+
+   /** Replace the current goal with this world pose. Marks the goal as reached with the position and orientation proximity is satisfied.*/
+   public void setGoal(double positionProximity, double orientationProximity, Pose2DReadOnly goal)
+   {
+      waitingForGoalToBeAccepted = true;
+      resendTimer.reset();
+      setWaypointListFromGoals(false, positionProximity, orientationProximity, goal);
+   }
+
+   /** Replace the current goal with this world pose. Marks the goal as reached with the position and orientation proximity is satisfied.*/
+   public void setGoal(double positionProximity, double orientationProximity, Pose3DReadOnly goal)
+   {
+      waitingForGoalToBeAccepted = true;
+      resendTimer.reset();
+      setWaypointListFromGoals(false, positionProximity, orientationProximity, goal);
+   }
+
+   /** Append to the current goal with this pose, expressed in any frame. */
+   public void addGoal(FramePose2DReadOnly goal)
+   {
+      worldGoal.setMatchingFrame(goal);
+      addGoals(worldGoal);
+   }
+
+   /** Append to the current goal list with this set of poses expressed in any frame. */
+   public void addGoals(FramePose2DReadOnly... goals)
+   {
+      for (FramePose2DReadOnly goal : goals)
+         addGoal(goal);
+   }
+
+   /** Append to the current goal list with this world pose. */
+   public void addGoals(Pose2DReadOnly... goals)
+   {
+      addGoals(DEFAULT_POSITION_PROXIMITY, DEFAULT_ORIENTATION_PROXIMITY, goals);
+   }
+
+   /** Append to the current goal list with this world pose. Marks the goal as reached with the position and orientation proximity is satisfied. */
+   public void addGoals(double positionProximity, double orientationProximity, Pose2DReadOnly... goals)
+   {
+      waitingForGoalToBeAccepted = true;
+      resendTimer.reset();
+      setWaypointListFromGoals(true, positionProximity, orientationProximity, goals);
+   }
+
+   /** Append to the current goal list with this world pose. Marks the goal as reached with the position and orientation proximity is satisfied. */
+   public void addGoals(double positionProximity, double orientationProximity, Pose3DReadOnly... goals)
+   {
+      waitingForGoalToBeAccepted = true;
+      resendTimer.reset();
+      setWaypointListFromGoals(true, positionProximity, orientationProximity, goals);
+   }
+
+   /**
+    * The step generator drops incoming commands whenever its heartbeat monitor lapses, which a single
+    * publish cannot detect, so resend the goal until the controller reports it as the current goal.
+    */
+   public void update()
+   {
+      if (!waitingForGoalToBeAccepted)
+         return;
+
+      if (isRequestedGoalReported() || !resendTimer.isRunning(GOAL_RESEND_TIMEOUT))
+      {
+         waitingForGoalToBeAccepted = false;
+         waypointListMessage.getWaypoints().clear(); // clear the list so appending continues to work.
+      }
+      else if (resendThrottler.run())
+      {
+         publishGoals();
+      }
+   }
+   public void commandVelocity(Vector2DReadOnly bodyLinearVelocity, double turnVelocity, boolean walk)
+   {
+      velocityMessage.setWalk(walk);
+      velocityMessage.setAreVelocitiesNormalized(false);
+      velocityMessage.setForwardVelocity(bodyLinearVelocity.getX());
+      velocityMessage.setLateralVelocity(bodyLinearVelocity.getY());
+      velocityMessage.setTurnVelocity(turnVelocity);
+      controllerHelper.publishToController(velocityMessage);
+   }
+
+   public void stop()
+   {
+      abortGoal();
+      commandVelocity(ZERO_LINEAR_VELOCITY, 0.0, false);
+   }
+
+   public void abortGoal()
+   {
+      waitingForGoalToBeAccepted = false;
+      waypointListMessage.getWaypoints().clear();
+      controllerHelper.publish(HumanoidControllerAPI.getTopic(AbortWalkingMessage.class, controllerHelper.getRobotName()), abortMessage);
+      controllerHelper.publish(HumanoidControllerAPI.getTopic(ControllerReleaseGoalMessage.class, controllerHelper.getRobotName()), releaseGoalMessage);
+   }
+
+   public void destroy()
+   {
+      stepGeneratorHeartbeat.destroy();
+      waypointListStatus.destroy();
+   }
+
+   private boolean isRequestedGoalReported()
+   {
+      if (!waypointListStatus.hasReceivedFirstMessage())
+         return false;
+
+      double firstWaypointX = waypointListMessage.getWaypoints().get(0).getXPosition();
+      double firstWaypointY = waypointListMessage.getWaypoints().get(0).getYPosition();
+      IDLObjectSequence<ControllerWaypointStatusMessage> queuedWaypoints = waypointListStatus.getLatest().getWaypoints();
+
+      // If we're overriding the waypoints, the list should be the same length
+      if (!waypointListMessage.getQueueWaypoints() && waypointListMessage.getWaypoints().size() != queuedWaypoints.size())
+         return false;
+
+
+      for (int i = 0; i < queuedWaypoints.size(); i++)
+      {
+         ControllerWaypointStatusMessage queuedWaypoint = queuedWaypoints.get(i);
+         if (EuclidCoreTools.epsilonEquals(queuedWaypoint.getGoalXPosition(), firstWaypointX, GOAL_MATCH_EPSILON)
+             && EuclidCoreTools.epsilonEquals(queuedWaypoint.getGoalYPosition(), firstWaypointY, GOAL_MATCH_EPSILON))
+         {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   private void setWaypointListFromGoals(boolean queueGoals, double positionProximity, Point2DReadOnly... goals)
+   {
+      waypointListMessage.setSequenceId(sequenceId++);
+      waypointListMessage.getWaypoints().clear();
+      waypointListMessage.setQueueWaypoints(queueGoals);
+
+      for (Point2DReadOnly goal : goals)
+      {
+         addWaypointToList(positionProximity, goal.getX(), goal.getY());
+      }
+   }
+
+   private void setWaypointListFromGoals(boolean queueGoals, double positionProximity, double orientationProximity, Pose2DReadOnly... goals)
+   {
+      waypointListMessage.setSequenceId(sequenceId++);
+      waypointListMessage.getWaypoints().clear();
+      waypointListMessage.setQueueWaypoints(queueGoals);
+
+      for (Pose2DReadOnly goal : goals)
+      {
+         addWaypointToList(positionProximity, orientationProximity, goal.getX(), goal.getY(), goal.getYaw());
+      }
+   }
+
+   private void setWaypointListFromGoals(boolean queueGoals, double positionProximity, double orientationProximity, Pose3DReadOnly... goals)
+   {
+      waypointListMessage.setSequenceId(sequenceId++);
+      waypointListMessage.getWaypoints().clear();
+      waypointListMessage.setQueueWaypoints(queueGoals);
+
+      for (Pose3DReadOnly goal : goals)
+      {
+         addWaypointToList(positionProximity, orientationProximity, goal.getX(), goal.getY(), goal.getYaw());
+      }
+   }
+
+   private void addWaypointToList(double positionProximity, double xPosition, double yPosition)
+   {
+      ControllerWaypointGoalMessage waypoint = waypointListMessage.getWaypoints().add();
+      waypoint.setXPosition(xPosition);
+      waypoint.setYPosition(yPosition);
+      waypoint.setPositionProximity(positionProximity);
+      waypoint.setGoalOrientationMatters(false);
+   }
+
+   private void addWaypointToList(double positionProximity, double orientationProximity, double xPosition, double yPosition, double yaw)
+   {
+      ControllerWaypointGoalMessage waypoint = waypointListMessage.getWaypoints().add();
+      waypoint.setXPosition(xPosition);
+      waypoint.setYPosition(yPosition);
+      waypoint.setYaw(yaw);
+      waypoint.setPositionProximity(positionProximity);
+      waypoint.setOrientationProximity(orientationProximity);
+      waypoint.setGoalOrientationMatters(true);
+   }
+
+   private void publishGoals()
+   {
+      controllerHelper.publish(HumanoidControllerAPI.getTopic(ControllerWaypointGoalListMessage.class, controllerHelper.getRobotName()), waypointListMessage);
+   }
+}

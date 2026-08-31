@@ -10,6 +10,7 @@ import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.avatar.walkToGoal.WalkToGoalClient;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
@@ -23,7 +24,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -105,13 +105,10 @@ public class RDXLocomotionManager
    private final FilteredNotification<FootstepQueueStatusMessage> footstepQueueNotification = new FilteredNotification<>(new FootstepQueueAcceptanceFunction());
    private final Timer footstepPlanningCompleteTimer = new Timer();
 
-   private final ROS2Publisher<ControllerWaypointGoalListMessage> goalListMessagePublisher;
-   private final ControllerWaypointStatusMessage waypointStatusMessage = new ControllerWaypointStatusMessage();
+   private final ControllerWaypointChangeStatusMessage waypointStatusMessage = new ControllerWaypointChangeStatusMessage();
    private final Pose3D goalPose = new Pose3D();
-   private final ControllerWaypointGoalMessage goalMessage = new ControllerWaypointGoalMessage();
-   private final ControllerWaypointGoalListMessage goalListMessage = new ControllerWaypointGoalListMessage();
+   private WalkToGoalClient walkToGoalClient;
    private static final int maxGoals = 10;
-   private final RecyclingArrayList<ControllerWaypointGoalMessage> goalMessages = new RecyclingArrayList<>(ControllerWaypointGoalMessage::new);
    private final RecyclingArrayList<Pose3D> goalPoses = new RecyclingArrayList<>(Pose3D::new);
    private final RecyclingArrayList<RDXSphereAndArrowGraphic> goalPoseGraphics = new RecyclingArrayList<>(RDXSphereAndArrowGraphic::new);
    private RDXSplineGraphic goalPoseConnector;
@@ -156,11 +153,8 @@ public class RDXLocomotionManager
       interactableFootstepPlan = new RDXInteractableFootstepPlan(controllerStatusTracker);
       controllerFootstepQueueGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
 
-      goalListMessagePublisher = controllerHelper.getROS2Node()
-                                                 .createPublisher(HumanoidControllerAPI.getTopic(ControllerWaypointGoalListMessage.class,
-                                                                                                 robotModel.getSimpleRobotName()));
       controllerHelper.getROS2Node()
-                      .createSubscriptionSampler(HumanoidControllerAPI.getTopic(ControllerWaypointStatusMessage.class, robotModel.getSimpleRobotName()),
+                      .createSubscriptionSampler(HumanoidControllerAPI.getTopic(ControllerWaypointChangeStatusMessage.class, robotModel.getSimpleRobotName()),
                                                  waypointStatusMessage::set);
    }
 
@@ -215,6 +209,11 @@ public class RDXLocomotionManager
       goalPoseConnector.createStart(walkPathControlRing.getGoalPose().getPosition(), Color.BLACK);
 
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() -> renderOverlayElements(baseUI.getPrimary3DPanel()));
+   }
+
+   public void setWalkToGoalClient(WalkToGoalClient walkToGoalClient)
+   {
+      this.walkToGoalClient = walkToGoalClient;
    }
 
    public void update()
@@ -490,13 +489,8 @@ public class RDXLocomotionManager
       if (goalPosePlacement.getPlacedNotification().poll() && goalPosePlacement.isPlaced())
       {
          goalPose.set(goalPosePlacement.getGoalPose());
-         goalMessage.setXPosition(goalPose.getX());
-         goalMessage.setYPosition(goalPose.getY());
-         goalMessage.setYaw(goalPose.getYaw());
-         goalMessage.setPositionProximity(0.1);
 
          goalPoses.add().set(goalPose);
-         goalMessages.add().set(goalMessage);
          RDXSphereAndArrowGraphic newWaypoint = goalPoseGraphics.add();
          newWaypoint.create(0.05, 0.2, Color.BLUE);
          newWaypoint.setToPose(goalPose);
@@ -532,7 +526,6 @@ public class RDXLocomotionManager
       goalPoseConnector.clear();
       goalPoseConnector.createStart(walkPathControlRing.getGoalPose().getPosition(), Color.BLACK);
       goalPoses.clear();
-      goalMessages.clear();
       goalPoseGraphics.clear();
 
       numGoals = 0;
@@ -545,9 +538,8 @@ public class RDXLocomotionManager
       goalPoseGraphics.get(0).create(0.05, 0.2, Color.RED);
       goalPoseGraphics.get(0).setToPose(goalPoses.get(0));
 
-      goalListMessage.getWaypoints().addAll(goalMessages);
-      goalListMessagePublisher.publish(goalListMessage);
-      goalListMessage.getWaypoints().clear();
+      walkToGoalClient.addGoals(0.1, 0.1, goalPoses.toArray(new Pose3D[0]));
+
       goalsSent = true;
       goalsReceived = false;
    }
