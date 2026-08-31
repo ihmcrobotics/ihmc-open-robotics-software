@@ -305,6 +305,7 @@ public class RDXHardwareControlStateManager
       RDXBaseUI.pushNotification("Reinitializing state estimator to world origin...");
    }
 
+
    public HighLevelControllerName getCurrentHighLevelState()
    {
       return currentHighLevelState;
@@ -322,6 +323,7 @@ public class RDXHardwareControlStateManager
          return null;
       return rlModelNames[index];
    }
+
 
    public boolean selectRLModelByName(String modelName)
    {

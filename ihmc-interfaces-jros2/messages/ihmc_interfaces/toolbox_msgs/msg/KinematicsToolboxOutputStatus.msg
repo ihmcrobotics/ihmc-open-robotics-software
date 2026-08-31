@@ -58,3 +58,7 @@ float64 solution_quality -1
 
 # True on the last logged frame of a kinematics streaming replay. Missing in old JSON logs means false.
 bool end_replay false
+
+# 0 means no command. Other values select a hand configuration. Missing in old JSON logs means 0.
+int32 left_hand_configuration_command 0
+int32 right_hand_configuration_command 0

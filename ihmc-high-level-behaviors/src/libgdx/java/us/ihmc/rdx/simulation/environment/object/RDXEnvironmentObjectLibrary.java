@@ -19,6 +19,9 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXArUcoBoxObject.FACTORY);
       objectFactories.add(RDXPointLightObject.FACTORY);
       objectFactories.add(RDXPersonObject.FACTORY);
+      objectFactories.add(RDXOrangeShirtPersonObject.FACTORY);
+      objectFactories.add(RDXGreenShirtPersonObject.FACTORY);
+      objectFactories.add(RDXBlackPantsPersonObject.FACTORY);
       objectFactories.add(RDXDoorPanelObject.FACTORY);
       objectFactories.add(RDXDoorLeverObject.FACTORY);
       objectFactories.add(RDXDirectionalLightObject.FACTORY);
@@ -26,6 +29,7 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXRightJerseyBarrierObject.FACTORY);
       objectFactories.add(RDXLeftJerseyBarrierObject.FACTORY);
       objectFactories.add(RDXCenteredJerseyBarrierObject.FACTORY);
+      objectFactories.add(RDXTrafficBarrierObject.FACTORY);
       objectFactories.add(RDXChargeObject.FACTORY);
       objectFactories.add(RDXCouchObject.FACTORY);
       objectFactories.add(RDXTableObject.FACTORY);
@@ -39,6 +43,8 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDX2x4Object.FACTORY);
       objectFactories.add(RDXCerealBoxObject.FACTORY);
       objectFactories.add(RDXBottleObject.FACTORY);
+      objectFactories.add(RDXBucketObject.FACTORY);
+      objectFactories.add(RDXTrowelObject.FACTORY);
    }
 
    public static ArrayList<RDXEnvironmentObjectFactory> getObjectFactories()
