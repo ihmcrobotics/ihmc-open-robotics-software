@@ -3,17 +3,20 @@ package us.ihmc.sensors.zed;
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.sensors.ImageSensor;
@@ -50,6 +53,10 @@ public class ZEDImageSensor extends ImageSensor
    public static final int OUTPUT_IMAGE_COUNT = 3;
 
    private static final float MILLIMETER_TO_METERS = 0.001f;
+
+   /** Rate at which {@link #sensorFrame}'s pose is sampled into {@link #sensorPoseBuffer}, decoupled from the (much slower, jittery) grab rate. */
+   private static final double POSE_SAMPLING_FREQUENCY = 200.0;
+   private static final int POSE_BUFFER_SIZE = 400;
 
    private final int cameraID;
 
@@ -92,6 +99,15 @@ public class ZEDImageSensor extends ImageSensor
    private final CUstream_st cudaStream;
 
    /**
+    * History of {@link #sensorFrame}'s transform to world, keyed by wall-clock timestamp (nanoseconds since Unix epoch),
+    * used to look up the sensor's pose at the exact instant a frame was captured by the camera, rather than whenever
+    * {@link #grab()} happens to finish (which lags the true capture time by a variable amount.
+    * Access must be synchronized on {@link #sensorPoseBuffer} itself.
+    */
+   private final TimeStampedTransformBuffer sensorPoseBuffer = new TimeStampedTransformBuffer(POSE_BUFFER_SIZE);
+   private final RepeatingTaskThread posePollingThread;
+
+   /**
     * The most basic constructor that sets parameters to some default value.
     *
     * @param cameraID    ID assigned to this camera when opening.
@@ -105,6 +121,9 @@ public class ZEDImageSensor extends ImageSensor
       this.cameraID = cameraID;
 
       trackedSensorFrame = new MutableReferenceFrame(getSensorName() + "_tracked", ReferenceFrameTools.getWorldFrame());
+
+      posePollingThread = new RepeatingTaskThread(getSensorName() + "PoseSampler", this::sampleSensorPose);
+      posePollingThread.setFrequencyLimit(POSE_SAMPLING_FREQUENCY);
 
       cudaStream = CUDAStreamManager.getStream();
 
@@ -253,6 +272,10 @@ public class ZEDImageSensor extends ImageSensor
    {
       try
       {
+         // Ensure ZED timestamps are nanoseconds since the Unix epoch, so camera timestamps can be directly correlated
+         // against sensorPoseBuffer without any clock offset estimation.
+         sl_set_timestamp_clock(SL_TIMESTAMP_CLOCK_SYSTEM_CLOCK);
+
          if (sl_is_opened(cameraID))
             sl_close_camera(cameraID);
 
@@ -317,8 +340,34 @@ public class ZEDImageSensor extends ImageSensor
          return false;
       }
 
+      if (!posePollingThread.isAlive())
+         posePollingThread.start();
+      posePollingThread.setRepeating(true);
+
       lastGrabFailed = false;
       return true;
+   }
+
+   /** Samples {@link #sensorFrame}'s pose into {@link #sensorPoseBuffer}. Run at {@link #POSE_SAMPLING_FREQUENCY} by {@link #posePollingThread}. */
+   private void sampleSensorPose()
+   {
+      RigidBodyTransform currentTransformToWorld = sensorFrame.getTransformToWorldFrame();
+      long nowNanos = instantToEpochNanos(Instant.now());
+
+      synchronized (sensorPoseBuffer)
+      {
+         sensorPoseBuffer.put(currentTransformToWorld, nowNanos);
+      }
+   }
+
+   private static long instantToEpochNanos(Instant instant)
+   {
+      return instant.getEpochSecond() * 1_000_000_000L + instant.getNano();
+   }
+
+   private static Instant epochNanosToInstant(long epochNanos)
+   {
+      return Instant.ofEpochSecond(0L, epochNanos);
    }
 
    protected int openCamera()
@@ -341,9 +390,6 @@ public class ZEDImageSensor extends ImageSensor
       {
          // Grab images now
          returnCode = sl_grab(cameraID, zedRuntimeParameters);
-         RigidBodyTransform leftSensorTransformAtGrab = leftSensorFrame.getTransformToWorldFrame();
-         RigidBodyTransform rightSensorTransformAtGrab = rightSensorFrame.getTransformToWorldFrame();
-         Instant grabTime = Instant.now();
          if (returnCode == SL_ERROR_CODE_END_OF_SVOFILE_REACHED)
          {
             sl_set_svo_position(0, 0);
@@ -367,10 +413,28 @@ public class ZEDImageSensor extends ImageSensor
          }
 
          throwOnError(returnCode);
+
+         // The real timestamp at which the frame was captured by the camera (not "now"), used to look up the
+         // sensor pose that was actually valid at that instant, rather than whatever it is once grab() returns.
+         lastGrabTimestamp = sl_get_image_timestamp(cameraID);
+         Instant grabTime = epochNanosToInstant(lastGrabTimestamp);
+
+         TimeStampedTransform3D interpolatedSensorPose = new TimeStampedTransform3D();
+         boolean poseFound;
+         synchronized (sensorPoseBuffer)
+         {
+            poseFound = sensorPoseBuffer.findTransform(lastGrabTimestamp, interpolatedSensorPose);
+         }
+         // Fall back to the live pose if the buffer doesn't (yet) cover this timestamp, e.g. right after startup.
+         RigidBodyTransform sensorTransformAtCapture = poseFound ? interpolatedSensorPose.getTransform3D() : sensorFrame.getTransformToWorldFrame();
+
+         RigidBodyTransform leftSensorTransformAtGrab = new RigidBodyTransform(sensorTransformAtCapture);
+         leftSensorTransformAtGrab.multiply(leftSensorFrame.getTransformToParent());
+         RigidBodyTransform rightSensorTransformAtGrab = new RigidBodyTransform(sensorTransformAtCapture);
+         rightSensorTransformAtGrab.multiply(rightSensorFrame.getTransformToParent());
+
          lastGrabTime = grabTime;
          ++grabSequenceNumber;
-
-         lastGrabTimestamp = sl_get_current_timestamp(cameraID);
 
          // Update tracked position if tracking enabled
          if (positionalTrackingEnabled)
@@ -513,6 +577,9 @@ public class ZEDImageSensor extends ImageSensor
    {
       System.out.println("Closing " + getClass().getSimpleName());
       super.close();
+
+      if (posePollingThread.isAlive())
+         posePollingThread.blockingKill();
 
       for (Pointer slMat : slMatPointers)
       {
