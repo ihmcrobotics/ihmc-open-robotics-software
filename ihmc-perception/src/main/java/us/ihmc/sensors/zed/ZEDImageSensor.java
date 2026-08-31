@@ -87,6 +87,8 @@ public class ZEDImageSensor extends ImageSensor
 
    private long grabSequenceNumber = 0L;
    private Instant lastGrabTime;
+   /** Local wall-clock time of the last successful grab, used only for {@link #isSensorRunning()}'s liveness check. */
+   private Instant lastGrabReceivedTime;
    private boolean lastGrabFailed = false;
    private long lastGrabTimestamp;
 
@@ -378,7 +380,7 @@ public class ZEDImageSensor extends ImageSensor
    @Override
    public boolean isSensorRunning()
    {
-      boolean recentlyGrabbed = lastGrabTime != null && lastGrabTime.isAfter(Instant.now().minusSeconds(1));
+      boolean recentlyGrabbed = lastGrabReceivedTime != null && lastGrabReceivedTime.isAfter(Instant.now().minusSeconds(1));
       return sl_is_opened(cameraID) && !lastGrabFailed && recentlyGrabbed;
    }
 
@@ -434,6 +436,7 @@ public class ZEDImageSensor extends ImageSensor
          rightSensorTransformAtGrab.multiply(rightSensorFrame.getTransformToParent());
 
          lastGrabTime = grabTime;
+         lastGrabReceivedTime = Instant.now();
          ++grabSequenceNumber;
 
          // Update tracked position if tracking enabled
