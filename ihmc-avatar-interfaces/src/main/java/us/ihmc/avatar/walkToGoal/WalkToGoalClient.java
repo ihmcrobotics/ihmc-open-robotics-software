@@ -43,6 +43,7 @@ public class WalkToGoalClient
    private boolean goalActive = false;
    private double positionProximity = 0.20;
    private double orientationProximity = Math.toRadians(30.0);
+   private boolean keepHeading = false;
    private long sequenceId = 1L;
 
    public WalkToGoalClient(ROS2ControllerHelper controllerHelper)
@@ -69,9 +70,19 @@ public class WalkToGoalClient
 
    public void goTo(Pose2DReadOnly goal, double positionProximity, double orientationProximity)
    {
+      goTo(goal, positionProximity, orientationProximity, false);
+   }
+
+   /**
+    * {@code keepHeading} holds the current facing all the way to the goal so a reverse or sidestep
+    * does not U-turn once the distance is past the reacher's face-goal threshold.
+    */
+   public void goTo(Pose2DReadOnly goal, double positionProximity, double orientationProximity, boolean keepHeading)
+   {
       requestedGoal.set(goal);
       this.positionProximity = positionProximity;
       this.orientationProximity = orientationProximity;
+      this.keepHeading = keepHeading;
       goalActive = true;
       waitingForGoalToBeAccepted = true;
       resendTimer.reset();
@@ -114,6 +125,7 @@ public class WalkToGoalClient
       waypoint.setHoldPosition(true);
       waypoint.setPositionProximity(positionProximity);
       waypoint.setOrientationProximity(orientationProximity);
+      waypoint.setKeepHeading(keepHeading);
       controllerHelper.publish(HumanoidControllerAPI.getTopic(ControllerWaypointGoalListMessage.class, controllerHelper.getRobotName()), waypointList);
    }
 
