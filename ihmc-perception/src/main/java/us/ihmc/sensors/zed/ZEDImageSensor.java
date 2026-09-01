@@ -103,6 +103,12 @@ public class ZEDImageSensor extends ImageSensor
    private final AtomicReference<TransformCsvLogger> poseDebugLogger = new AtomicReference<>();
 
    /**
+    * Optional monitor to synchronize {@code sensorFrame}'s transform-to-world reads against, set via
+    * {@link #setFrameTreeLock}. See that method's doc for why this exists.
+    */
+   private Object frameTreeLock;
+
+   /**
     * The most basic constructor that sets parameters to some default value.
     *
     * @param cameraID    ID assigned to this camera when opening.
@@ -228,6 +234,20 @@ public class ZEDImageSensor extends ImageSensor
    public void setTrackedPoseOffset(RigidBodyTransformReadOnly offset)
    {
       trackedPoseOffset.set(offset);
+   }
+
+   /**
+    * If {@code sensorFrame} (see {@link #setSensorFrame}) is backed by a robot model that's mutated from another
+    * thread - e.g. a {@code ROS2SyncedRobotModel} whose {@code update()} is applied on its own thread as new robot
+    * state messages arrive - that update thread can race the grab thread's {@code getTransformToWorldFrame()} read
+    * of the same frame tree, since {@code ReferenceFrame}'s transform cache isn't otherwise thread-safe. Pass the
+    * same object that update is synchronized on (e.g. the {@code ROS2SyncedRobotModel} instance itself) here, and
+    * the grab thread will synchronize its frame reads on it too. Leave unset (default {@code null}) if
+    * {@code sensorFrame} isn't concurrently mutated by anything else, e.g. a fixed gizmo frame in a demo.
+    */
+   public void setFrameTreeLock(Object frameTreeLock)
+   {
+      this.frameTreeLock = frameTreeLock;
    }
 
    /**
@@ -401,13 +421,25 @@ public class ZEDImageSensor extends ImageSensor
 
          throwOnError(returnCode);
 
-         // sensorFrame (and its ancestors up to world) are only ever read from this grab thread - no other
-         // thread concurrently reads or writes this reference frame tree from within this class. Keep it that
-         // way: ReferenceFrame's transform-to-root cache is a plain, unsynchronized mutable field, recomputed
-         // in place on read, so concurrent reads/writes from multiple threads can return a torn, transiently
-         // wrong transform. A second reader thread here previously caused exactly that.
-         RigidBodyTransform leftSensorTransformAtGrab = leftSensorFrame.getTransformToWorldFrame();
-         RigidBodyTransform rightSensorTransformAtGrab = rightSensorFrame.getTransformToWorldFrame();
+         // ReferenceFrame's transform-to-root cache is a plain, unsynchronized mutable field, recomputed in place
+         // on read. sensorFrame (and its ancestors up to world) can be mutated from another thread - e.g. a
+         // ROS2SyncedRobotModel applying newly-received robot state on its own update thread - so reading it here
+         // unguarded can return a torn, transiently wrong transform. See setFrameTreeLock().
+         RigidBodyTransform leftSensorTransformAtGrab;
+         RigidBodyTransform rightSensorTransformAtGrab;
+         if (frameTreeLock != null)
+         {
+            synchronized (frameTreeLock)
+            {
+               leftSensorTransformAtGrab = leftSensorFrame.getTransformToWorldFrame();
+               rightSensorTransformAtGrab = rightSensorFrame.getTransformToWorldFrame();
+            }
+         }
+         else
+         {
+            leftSensorTransformAtGrab = leftSensorFrame.getTransformToWorldFrame();
+            rightSensorTransformAtGrab = rightSensorFrame.getTransformToWorldFrame();
+         }
 
          // Don't assume the ZED SDK's clock domain lines up with Instant.now() (SL_TIMESTAMP_CLOCK_SYSTEM_CLOCK
          // doesn't reliably produce Unix-epoch nanoseconds on all hardware/SDK builds). Instead, use
