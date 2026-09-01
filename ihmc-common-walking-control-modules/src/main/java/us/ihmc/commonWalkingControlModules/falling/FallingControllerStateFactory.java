@@ -19,7 +19,9 @@ public class FallingControllerStateFactory implements HighLevelControllerStateFa
                                                              controllerFactoryHelper.getManagerFactory(),
                                                              controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
                                                              controllerFactoryHelper.getHighLevelControllerParameters(),
-                                                             controllerFactoryHelper.getWalkingControllerParameters());
+                                                             controllerFactoryHelper.getWalkingControllerParameters(),
+                                                             controllerFactoryHelper.getHighLevelControllerParameters().getFallingControllerParameters(),
+                                                             controllerFactoryHelper.getLowLevelControllerOutput());
       }
 
       return fallingControllerState;
