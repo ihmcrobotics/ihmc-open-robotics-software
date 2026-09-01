@@ -274,10 +274,6 @@ public class ZEDImageSensor extends ImageSensor
    {
       try
       {
-         // Ensure ZED timestamps are nanoseconds since the Unix epoch, so camera timestamps can be directly correlated
-         // against sensorPoseBuffer without any clock offset estimation.
-         sl_set_timestamp_clock(SL_TIMESTAMP_CLOCK_SYSTEM_CLOCK);
-
          if (sl_is_opened(cameraID))
             sl_close_camera(cameraID);
 
@@ -367,11 +363,6 @@ public class ZEDImageSensor extends ImageSensor
       return instant.getEpochSecond() * 1_000_000_000L + instant.getNano();
    }
 
-   private static Instant epochNanosToInstant(long epochNanos)
-   {
-      return Instant.ofEpochSecond(0L, epochNanos);
-   }
-
    protected int openCamera()
    {
       return sl_open_camera(cameraID, zedInitParameters, serialNumber, svoFilePath, remoteStreamingAddress, remoteStreamingPort, -1, "", "", "");
@@ -416,10 +407,19 @@ public class ZEDImageSensor extends ImageSensor
 
          throwOnError(returnCode);
 
-         // The real timestamp at which the frame was captured by the camera (not "now"), used to look up the
-         // sensor pose that was actually valid at that instant, rather than whatever it is once grab() returns.
-         lastGrabTimestamp = sl_get_image_timestamp(cameraID);
-         Instant grabTime = epochNanosToInstant(lastGrabTimestamp);
+         // Don't assume the ZED SDK's clock domain lines up with Instant.now() (SL_TIMESTAMP_CLOCK_SYSTEM_CLOCK
+         // doesn't reliably produce Unix-epoch nanoseconds on all hardware/SDK builds). Instead, use
+         // sl_get_current_timestamp() the way it's documented to be used: diffed against sl_get_image_timestamp()
+         // to get the frame's age in nanoseconds, on the ZED SDK's own clock. That age is then subtracted from a
+         // local Instant.now() taken right alongside it, translating the real capture time into our local clock
+         // domain (matching sensorPoseBuffer's samples) without needing the two clocks' epochs to agree.
+         long imageTimestampZed = sl_get_image_timestamp(cameraID);
+         long currentTimestampZed = sl_get_current_timestamp(cameraID);
+         Instant localNow = Instant.now();
+
+         long imageAgeNanos = Math.max(0L, currentTimestampZed - imageTimestampZed);
+         Instant grabTime = localNow.minusNanos(imageAgeNanos);
+         lastGrabTimestamp = instantToEpochNanos(grabTime);
 
          TimeStampedTransform3D interpolatedSensorPose = new TimeStampedTransform3D();
          boolean poseFound;
