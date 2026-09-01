@@ -36,6 +36,7 @@ public class WalkingFailureDetectionControlModule
 
    private final YoBoolean isUsingNextFootstep;
    private final YoBoolean isFallDetectionActivated;
+   private final YoBoolean forceFallingState;
    private final YoDouble icpDistanceFromFootPolygon;
    private final DoubleProvider icpDistanceFromFootPolygonThreshold;
    private final YoBoolean isRobotFalling;
@@ -66,6 +67,8 @@ public class WalkingFailureDetectionControlModule
 
       isFallDetectionActivated = new YoBoolean("isFallDetectionActivated", registry);
       isFallDetectionActivated.set(true);
+
+      forceFallingState = new YoBoolean("forceFallingState", registry);
 
       icpDistanceFromFootPolygonThreshold = new DoubleParameter("icpDistanceFromFootPolygonThreshold", registry, 0.15);
       icpDistanceFromFootPolygon = new YoDouble("icpDistanceFromFootPolygon", registry);
@@ -122,6 +125,10 @@ public class WalkingFailureDetectionControlModule
 
    public void checkIfRobotIsFalling(FramePoint2DReadOnly capturePoint2d, FramePoint2DReadOnly desiredCapturePoint2d)
    {
+      // Consume the UI request so it triggers exactly one state transition.
+      boolean forceFalling = forceFallingState.getBooleanValue();
+      forceFallingState.set(false);
+
       updateCombinedPolygon();
 
       if (isUsingNextFootstep.getBooleanValue())
@@ -133,7 +140,9 @@ public class WalkingFailureDetectionControlModule
       boolean isCapturePointCloseToFootPolygon = icpDistanceFromFootPolygon.getDoubleValue() < icpDistanceFromFootPolygonThreshold.getValue();
       boolean isCapturePointCloseToDesiredCapturePoint = desiredCapturePoint2d.distance(capturePoint2d) < icpDistanceFromFootPolygonThreshold.getValue();
 
-      isRobotFalling.set(fallWasReported.getAndSet(false) || (!isCapturePointCloseToFootPolygon && !isCapturePointCloseToDesiredCapturePoint));
+      boolean detectorReportsFalling = fallWasReported.getAndSet(false)
+                                       || (!isCapturePointCloseToFootPolygon && !isCapturePointCloseToDesiredCapturePoint);
+      isRobotFalling.set(forceFalling || (isFallDetectionActivated.getBooleanValue() && detectorReportsFalling));
 
       if (isRobotFalling.getBooleanValue())
       {
@@ -153,9 +162,6 @@ public class WalkingFailureDetectionControlModule
 
    public boolean isRobotFalling()
    {
-      if (!isFallDetectionActivated.getBooleanValue())
-         return false;
-
       return isRobotFalling.getBooleanValue();
    }
 
