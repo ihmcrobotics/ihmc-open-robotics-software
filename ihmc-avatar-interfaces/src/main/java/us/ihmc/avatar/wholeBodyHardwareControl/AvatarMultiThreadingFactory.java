@@ -8,6 +8,7 @@ import us.ihmc.affinity.Processor;
 import us.ihmc.avatar.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
+import us.ihmc.avatar.logging.SCS2YoGraphicLogTools;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
@@ -203,10 +204,10 @@ public class AvatarMultiThreadingFactory
       // Set the root registry as the YoVariableServer's main registry
       yoVariableServer.setMainRegistry(rootRegistry,
                                        masterFullRobotModel.getRootJoint().subtreeList(),
-                                       new YoGraphicGroupDefinition(rootRegistry.getName()));
+                                       SCS2YoGraphicLogTools.toYoGraphicsData(new YoGraphicGroupDefinition(rootRegistry.getName())));
 
       // Add estimator thread registry directly to the YoVariableServer (since it is in a separate thread)
-      yoVariableServer.addRegistry(avatarEstimator.getYoRegistry(), avatarEstimator.getSCS2YoGraphics());
+      yoVariableServer.addRegistry(avatarEstimator.getYoRegistry(), SCS2YoGraphicLogTools.toYoGraphicsData(avatarEstimator.getSCS2YoGraphics()));
    }
 
    public AvatarMultiThreadingManager buildThreadsAndThreadingManager()
@@ -305,7 +306,7 @@ public class AvatarMultiThreadingFactory
                                                                                  false);
 
       // Add controller registry directly to the YoVariableServer (since it is in a separate thread)
-      yoVariableServer.addRegistry(avatarController.getYoVariableRegistry(), avatarController.getSCS2YoGraphics());
+      yoVariableServer.addRegistry(avatarController.getYoVariableRegistry(), SCS2YoGraphicLogTools.toYoGraphicsData(avatarController.getSCS2YoGraphics()));
 
       // Set up the task and thread for the controller
       setupControllerTaskAndThread(avatarController, masterFullRobotModel, yoVariableServer);
@@ -327,7 +328,8 @@ public class AvatarMultiThreadingFactory
 
       avatarStepGenerator.set(stepGenerator);
 
-      yoVariableServer.addRegistry(avatarStepGenerator.get().getYoVariableRegistry(), avatarStepGenerator.get().getSCS2YoGraphics());
+      yoVariableServer.addRegistry(avatarStepGenerator.get().getYoVariableRegistry(),
+                                   SCS2YoGraphicLogTools.toYoGraphicsData(avatarStepGenerator.get().getSCS2YoGraphics()));
 
       setupStepGeneratorTaskAndThread(masterRobotModel,
                                       stepGenerator,
@@ -350,7 +352,8 @@ public class AvatarMultiThreadingFactory
                                                                             ikStreamingParameters));
 
       if (yoVariableServer != null && avatarIKStreaming.get().isYoVariableServerEnabled())
-         yoVariableServer.addRegistry(avatarIKStreaming.get().getYoVariableRegistry(), avatarIKStreaming.get().getSCS2YoGraphics());
+         yoVariableServer.addRegistry(avatarIKStreaming.get().getYoVariableRegistry(),
+                                      SCS2YoGraphicLogTools.toYoGraphicsData(avatarIKStreaming.get().getSCS2YoGraphics()));
 
       setupIKStreamingTaskAndThread(avatarIKStreaming.get(), yoVariableServer);
 
