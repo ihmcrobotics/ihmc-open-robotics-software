@@ -144,6 +144,11 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private final YoBoolean hasReachedGoal = new YoBoolean("hasReachedGoal", registry);
    private final YoBoolean wasGoalReached = new YoBoolean("wasGoalReached", registry);
    private final YoBoolean goalOrientationMatters = new YoBoolean("goalOrientationMatters", registry);
+   /**
+    * When true, do not face the goal past {@link #distanceToFaceGoal}. Spoken reverse and sidestep
+    * use this so a 2 m backward walk stays a reverse instead of a U-turn.
+    */
+   private final YoBoolean keepHeading = new YoBoolean("keepHeading", registry);
    private final YoBoolean isRampingDownAfterGoal = new YoBoolean("isRampingDownAfterGoal", registry);
    private final YoDouble rampDownDecayRate = new YoDouble("rampDownDecayRate", registry);
    private final YoDouble rampDownDecay = new YoDouble("rampDownDecay", registry);
@@ -269,6 +274,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    {
       hasReachedGoal.set(true);
       hasGoal.set(false);
+      keepHeading.set(false);
       goalPoses.clear();
       isRampingDownAfterGoal.set(false);
       pendingWaypointReachedPublication.set(false);
@@ -470,6 +476,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          angleToGoalThresholdToStop.set(waypoint.getAngleToReachGoal());
          desiredCruisingSpeedScalar.set(waypoint.getCruisingSpeedScaler());
          goalOrientationMatters.set(waypoint.getGoalOrientationMatters());
+         keepHeading.set(waypoint.getKeepHeading());
 
          // Compute how fast the robot may pass through this waypoint without stopping.
          // Dot product of the incoming leg direction with the outgoing leg direction gives
@@ -500,6 +507,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       else
       {
          currentGoalPose.setToNaN();
+         keepHeading.set(false);
       }
    }
 
@@ -532,10 +540,15 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    /**
     * Computes the heading error and rate-limits the heading target used by the PD feedback.
     * <p>
-    * Far from the goal the robot faces toward the goal position; close to the goal it
+    * Far from a goal that is in front, the robot faces toward the goal position; close to the goal it
     * transitions to matching the goal's final orientation. The blend is governed by
     * {@code distanceToFaceGoal} (start facing goal) and {@code distanceToMatchGoalAngle} (fully
     * aligned with final heading).
+    * </p>
+    * <p>
+    * Spoken reverse and sidestep set {@code keepHeading} so this blend stays at matching the current
+    * heading even past {@code distanceToFaceGoal}. Without that flag a 2 m reverse is faced, which
+    * becomes a U-turn then a forward walk.
     * </p>
     */
    private void updateHeadingControl(FramePose3DReadOnly goalPose)
@@ -550,6 +563,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       double faceGoalBlendFraction = MathTools.clamp(
             (distanceToGoal - distanceToMatchGoalAngle.getValue()) / (distanceToFaceGoal.getDoubleValue() - distanceToMatchGoalAngle.getDoubleValue()),
             0.0, 1.0);
+      if (keepHeading.getValue())
+         faceGoalBlendFraction = 0.0;
 
       if (goalOrientationMatters.getValue())
       {
@@ -634,16 +649,28 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    /**
     * The walking policy tracks a gentle walking arc. A hard yaw with little forward speed locks the
     * knees. Keep enough forward speed, drop the sidestep, and cap yaw to {@code v / radius}.
+    * <p>
+    * Never rewrite a reverse into a forward arc, and when {@code keepHeading} is set leave a sidestep
+    * as a sidestep. Forcing forward is how a 2 m backward spoken step started walking the other way.
     */
    private double applyWalkingTurnSafety(double turningVelocity, double turningScalar)
    {
       if (Math.abs(turningVelocity) < 1.0e-6)
          return 0.0;
 
+      boolean reversing = desiredVelocity.getX() < 0.0;
       boolean wouldPivot = turningScalar < minTranslationScaleWhileTurning.getValue()
-                           || desiredVelocity.getX() < minForwardSpeedWhileTurning.getValue();
+                           || (!reversing && desiredVelocity.getX() < minForwardSpeedWhileTurning.getValue());
       if (wouldPivot)
-         desiredVelocity.set(minForwardSpeedWhileTurning.getValue(), 0.0);
+      {
+         if (keepHeading.getBooleanValue() || reversing)
+         {
+            if (reversing)
+               desiredVelocity.setY(0.0);
+         }
+         else
+            desiredVelocity.set(minForwardSpeedWhileTurning.getValue(), 0.0);
+      }
 
       double radius = Math.max(minTurnRadiusWhileWalking.getValue(), 1.0e-3);
       double maxTurn = Math.max(0.0, desiredVelocity.getX()) / radius;
@@ -665,6 +692,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       private double angleToReachGoal;
       private double cruisingSpeedScaler;
       private boolean goalOrientationMatters;
+      private boolean keepHeading;
       /** Unit vector of the leg that arrives at this waypoint (from previousPose to goalPose). */
       private final Vector2D incomingDirection = new Vector2D();
 
@@ -674,6 +702,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          angleToReachGoal = command.getOrientationProximity();
          proximityToReachGoal = command.getPositionProximity();
          goalOrientationMatters = command.getGoalOrientationMatters();
+         keepHeading = command.getKeepHeading();
 
          double dx = goalPose.getX() - previousPose.getX();
          double dy = goalPose.getY() - previousPose.getY();
@@ -722,6 +751,11 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       public boolean getGoalOrientationMatters()
       {
          return goalOrientationMatters;
+      }
+
+      public boolean getKeepHeading()
+      {
+         return keepHeading;
       }
 
       public Vector2DReadOnly getIncomingDirection()

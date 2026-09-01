@@ -11,7 +11,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-robot-data-logger:0.39.4")
+   api("us.ihmc:ihmc-robot-data-logger:0.39.5")
    api("us.ihmc:ihmc-interfaces-jros2:source")
 
    api("us.ihmc:ihmc-robotics-toolkit:source")

@@ -57,10 +57,22 @@ public class YOLOv8DetectionExecutor
    private final RepeatingTaskThread updateThread;
 
    private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
+   /**
+    * Person follow only needs the 2D box. Mask erosion, CUDA depth segment, and the CPU
+    * point-cloud centroid are the expensive leftover of object pick; skip them when the
+    * callback will unproject the box itself.
+    */
+   private volatile boolean skipPointCloud;
 
    public void addDetectionConsumerCallback(Consumer<List<InstantDetection>> callback)
    {
       detectionConsumerCallbacks.add(callback);
+   }
+
+   public void setSkipPointCloud(boolean skipPointCloud)
+   {
+      this.skipPointCloud = skipPointCloud;
+      LogTools.info("YOLO 3D extraction {}", skipPointCloud ? "skipped (boxes only)" : "enabled");
    }
 
    public YOLOv8DetectionExecutor(ROS2Node ros2Node, ROS2PeerClockOffsetEstimator peerClockEstimator, BooleanSupplier annotationInfoDemanded)
@@ -218,6 +230,21 @@ public class YOLOv8DetectionExecutor
          for (YOLOv8Detection detection : yoloResults)
          {
             RawImage objectMask = detection.mask();
+            if (skipPointCloud)
+            {
+               if (objectMask != null)
+                  objectMask.release();
+               yoloInstantDetections.add(new YOLOv8InstantDetection(detection.objectClass(),
+                                                                    detection.confidence(),
+                                                                    new Pose3D(),
+                                                                    bgrImage.getAcquisitionTime(),
+                                                                    bgrImage,
+                                                                    bgrImage,
+                                                                    depthImage,
+                                                                    detection.boundingBox(),
+                                                                    List.of()));
+               continue;
+            }
 
             // Erode mask to get better segmentation
             RawImage erodedObjectMask = erodeMask(objectMask, modelParameters.getErosionKernelRadii().getValueReadOnly(detection.objectClassID()));

@@ -1,6 +1,9 @@
 package us.ihmc.sensors.zed;
 
-import static us.ihmc.zed.global.zed.*;
+import static us.ihmc.zed.global.zed.sl_get_svo_number_of_frames;
+import static us.ihmc.zed.global.zed.sl_get_svo_position;
+import static us.ihmc.zed.global.zed.sl_is_opened;
+import static us.ihmc.zed.global.zed.sl_set_svo_position;
 
 public class ZEDSVOPlaybackSensor extends ZEDImageSensor
 {
@@ -27,6 +30,16 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
    public void pause()
    {
       run(false);
+   }
+
+   /**
+    * Live ZED treats a 1s grab gap as a dead camera and {@code grabAndNotify} reopens it.
+    * An SVO is often paused on purpose; reopening would seek back to frame 0.
+    */
+   @Override
+   public boolean isSensorRunning()
+   {
+      return sl_is_opened(getCameraID());
    }
 
    public void useTrackedPose(boolean useTrackedPose)
