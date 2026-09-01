@@ -20,6 +20,7 @@ import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.sensors.ImageSensor;
+import us.ihmc.sensors.TransformCsvLogger;
 import us.ihmc.zed.SL_CalibrationParameters;
 import us.ihmc.zed.SL_InitParameters;
 import us.ihmc.zed.SL_PositionalTrackingParameters;
@@ -33,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.zed.ZEDTools.throwOnError;
 import static us.ihmc.zed.global.zed.*;
@@ -108,6 +110,12 @@ public class ZEDImageSensor extends ImageSensor
     */
    private final TimeStampedTransformBuffer sensorPoseBuffer = new TimeStampedTransformBuffer(POSE_BUFFER_SIZE);
    private final RepeatingTaskThread posePollingThread;
+
+   /**
+    * Debug aid for {@link #sensorPoseBuffer}: when set (via {@link #enablePoseDebugLogging}), dumps every raw pose
+    * sample and every grab's interpolated-vs-live pose to a CSV, to check offline whether the frame sync is smooth.
+    */
+   private final AtomicReference<TransformCsvLogger> poseDebugLogger = new AtomicReference<>();
 
    /**
     * The most basic constructor that sets parameters to some default value.
@@ -240,6 +248,26 @@ public class ZEDImageSensor extends ImageSensor
       trackedPoseOffset.set(offset);
    }
 
+   /**
+    * Starts logging {@link #sensorPoseBuffer}'s raw pose samples and every grab's interpolated-vs-live pose to a CSV
+    * at {@code outputFile}, for debugging frame-sync smoothness offline. Overwrites {@code outputFile} if it exists.
+    * Call {@link #disablePoseDebugLogging()} when done to close the file.
+    */
+   public void enablePoseDebugLogging(Path outputFile)
+   {
+      TransformCsvLogger newLogger = new TransformCsvLogger(outputFile, "grabSequenceNumber", "imageAgeNanos", "poseFound");
+      TransformCsvLogger oldLogger = poseDebugLogger.getAndSet(newLogger);
+      if (oldLogger != null)
+         oldLogger.close();
+   }
+
+   public void disablePoseDebugLogging()
+   {
+      TransformCsvLogger oldLogger = poseDebugLogger.getAndSet(null);
+      if (oldLogger != null)
+         oldLogger.close();
+   }
+
    public SL_InitParameters getInitParameters()
    {
       return zedInitParameters;
@@ -356,6 +384,10 @@ public class ZEDImageSensor extends ImageSensor
       {
          sensorPoseBuffer.put(currentTransformToWorld, nowNanos);
       }
+
+      TransformCsvLogger logger = poseDebugLogger.get();
+      if (logger != null)
+         logger.log("sample", nowNanos, currentTransformToWorld, -1L, -1L, false);
    }
 
    private static long instantToEpochNanos(Instant instant)
@@ -429,6 +461,13 @@ public class ZEDImageSensor extends ImageSensor
          }
          // Fall back to the live pose if the buffer doesn't (yet) cover this timestamp, e.g. right after startup.
          RigidBodyTransform sensorTransformAtCapture = poseFound ? interpolatedSensorPose.getTransform3D() : sensorFrame.getTransformToWorldFrame();
+
+         TransformCsvLogger logger = poseDebugLogger.get();
+         if (logger != null)
+         {
+            logger.log("grab_used", lastGrabTimestamp, sensorTransformAtCapture, grabSequenceNumber + 1, imageAgeNanos, poseFound);
+            logger.log("grab_live", lastGrabTimestamp, sensorFrame.getTransformToWorldFrame(), grabSequenceNumber + 1, imageAgeNanos, poseFound);
+         }
 
          RigidBodyTransform leftSensorTransformAtGrab = new RigidBodyTransform(sensorTransformAtCapture);
          leftSensorTransformAtGrab.multiply(leftSensorFrame.getTransformToParent());
