@@ -17,6 +17,7 @@ import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.sensors.ImageSensor;
+import us.ihmc.sensors.TransformCsvLogger;
 import us.ihmc.zed.SL_CalibrationParameters;
 import us.ihmc.zed.SL_InitParameters;
 import us.ihmc.zed.SL_PositionalTrackingParameters;
@@ -30,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.zed.ZEDTools.throwOnError;
 import static us.ihmc.zed.global.zed.*;
@@ -80,6 +82,7 @@ public class ZEDImageSensor extends ImageSensor
 
    private long grabSequenceNumber = 0L;
    private Instant lastGrabTime;
+
    /** Local wall-clock time of the last successful grab, used only for {@link #isSensorRunning()}'s liveness check. */
    private Instant lastGrabReceivedTime;
    private boolean lastGrabFailed = false;
@@ -92,6 +95,12 @@ public class ZEDImageSensor extends ImageSensor
    private final SL_Vector3 sensorTranslation = new SL_Vector3();
 
    private final CUstream_st cudaStream;
+
+   /**
+    * Debug aid: when set (via {@link #enablePoseDebugLogging}), dumps every grabbed frame's sensor pose to a CSV,
+    * to check offline whether the frame-to-robot sync is smooth (see {@code plot_zed_pose_debug.py}).
+    */
+   private final AtomicReference<TransformCsvLogger> poseDebugLogger = new AtomicReference<>();
 
    /**
     * The most basic constructor that sets parameters to some default value.
@@ -219,6 +228,26 @@ public class ZEDImageSensor extends ImageSensor
    public void setTrackedPoseOffset(RigidBodyTransformReadOnly offset)
    {
       trackedPoseOffset.set(offset);
+   }
+
+   /**
+    * Starts logging every grabbed frame's sensor pose to a CSV at {@code outputFile}, for debugging frame-sync
+    * smoothness offline. Overwrites {@code outputFile} if it exists. Call {@link #disablePoseDebugLogging()} when
+    * done to close the file.
+    */
+   public void enablePoseDebugLogging(Path outputFile)
+   {
+      TransformCsvLogger newLogger = new TransformCsvLogger(outputFile, "grabSequenceNumber", "imageAgeNanos");
+      TransformCsvLogger oldLogger = poseDebugLogger.getAndSet(newLogger);
+      if (oldLogger != null)
+         oldLogger.close();
+   }
+
+   public void disablePoseDebugLogging()
+   {
+      TransformCsvLogger oldLogger = poseDebugLogger.getAndSet(null);
+      if (oldLogger != null)
+         oldLogger.close();
    }
 
    public SL_InitParameters getInitParameters()
@@ -398,6 +427,10 @@ public class ZEDImageSensor extends ImageSensor
          lastGrabReceivedTime = Instant.now();
          ++grabSequenceNumber;
 
+         TransformCsvLogger logger = poseDebugLogger.get();
+         if (logger != null)
+            logger.log("grab", lastGrabTimestamp, leftSensorTransformAtGrab, grabSequenceNumber, imageAgeNanos);
+
          // Update tracked position if tracking enabled
          if (positionalTrackingEnabled)
          {
@@ -539,6 +572,8 @@ public class ZEDImageSensor extends ImageSensor
    {
       System.out.println("Closing " + getClass().getSimpleName());
       super.close();
+
+      disablePoseDebugLogging();
 
       for (Pointer slMat : slMatPointers)
       {
