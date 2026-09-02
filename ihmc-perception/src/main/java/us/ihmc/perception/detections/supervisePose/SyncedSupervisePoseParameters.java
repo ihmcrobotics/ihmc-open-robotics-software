@@ -12,6 +12,7 @@ import us.ihmc.jros2.ROS2Topic;
 
 public class SyncedSupervisePoseParameters extends LatestTimestampModifiable
 {
+   private final ROS2Node ros2Node;
    private final FoundationPoseParameters message;
 
    private final ROS2Subscription<FoundationPoseParameters> subscription;
@@ -39,11 +40,17 @@ public class SyncedSupervisePoseParameters extends LatestTimestampModifiable
                                         double defaultResetDistance)
    {
       super(crdtInfo);
+      this.ros2Node = ros2Node;
       setModifierName(modifierName);
 
       message = new FoundationPoseParameters();
 
-      subscription = ros2Node.createSubscription2(parametersTopic, this::fromMessage);
+      subscription = ros2Node.createSubscription(parametersTopic, reader ->
+      {
+         FoundationPoseParameters receivedMessage = reader.read();
+         if (receivedMessage != null)
+            fromMessage(receivedMessage);
+      });
       publisher = ros2Node.createPublisher(parametersTopic);
 
       enabled = new CRDTBidirectionalBoolean(this, true);
@@ -81,8 +88,8 @@ public class SyncedSupervisePoseParameters extends LatestTimestampModifiable
 
    public void close()
    {
-      publisher.remove();
-      subscription.remove();
+      ros2Node.destroyPublisher(publisher);
+      ros2Node.destroySubscription(subscription);
    }
 
    private void toMessage(FoundationPoseParameters messageToPack)

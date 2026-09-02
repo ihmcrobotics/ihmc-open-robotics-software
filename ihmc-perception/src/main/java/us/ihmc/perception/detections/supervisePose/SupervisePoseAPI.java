@@ -16,7 +16,7 @@ public class SupervisePoseAPI
    /**
     * Temporary per-object FoundationPose communication topics.
     */
-   private static final ROS2Topic<?> SUPERVISE_POSE_TOPIC = new ROS2Topic<>().withPrefix("foundationpose").withQoS(ROS2QoSProfile.RELIABLE);
+   private static final ROS2Topic<?> SUPERVISE_POSE_TOPIC = new ROS2Topic<>("/foundationpose").withQoS(ROS2QoSProfile.RELIABLE);
 
    /**
     * Global combined overlay:
@@ -24,24 +24,24 @@ public class SupervisePoseAPI
     * /ihmc/supervisepose/overlayed_image
     */
    public static final ROS2Topic<ImageMessage> SUPERVISE_POSE_OVERLAY_IMAGE =
-         new ROS2Topic<ImageMessage>()
-               .withPrefix("ihmc")
-               .withModule("supervisepose")
-               .withSuffix("overlayed_image")
+         new ROS2Topic<ImageMessage>("/ihmc")
+
+               .appendedWith("supervisepose")
+               .appendedWith("overlayed_image")
                .withType(ImageMessage.class)
                .withQoS(ROS2QoSProfile.RELIABLE);
 
    public static SupervisePoseTopics topics(String category, String instance)
    {
-      ROS2Topic<?> foundationPoseBase = SUPERVISE_POSE_TOPIC.withModule(category + "/" + instance);
+      ROS2Topic<?> foundationPoseBase = SUPERVISE_POSE_TOPIC.appendedWith(category).appendedWith(instance);
 
       ROS2Topic<ImageMessage> perObjectOverlay =
-            new ROS2Topic<ImageMessage>()
-                  .withPrefix("ihmc")
-                  .withModule("supervisepose")
-                  .withModule(category)
-                  .withModule(instance)
-                  .withSuffix("overlayed_image")
+            new ROS2Topic<ImageMessage>("/ihmc")
+
+                  .appendedWith("supervisepose")
+                  .appendedWith(category)
+                  .appendedWith(instance)
+                  .appendedWith("overlayed_image")
                   .withType(ImageMessage.class)
                   .withQoS(ROS2QoSProfile.RELIABLE);
 
@@ -69,46 +69,46 @@ public class SupervisePoseAPI
          ROS2Topic<ImageMessage> overlayedImage,
 
          ROS2Topic<Box3DMessage> ihmcResult,
-         ROS2Topic<Byte> ihmcState,
+         ROS2Topic<Byte_> ihmcState,
          ROS2Topic<FoundationPoseParameters> ihmcParameters)
    {
       public SupervisePoseTopics(ROS2Topic<?> base, ROS2Topic<ImageMessage> overlayedImage)
       {
-         this(base.withSuffix("pose_estimation/depth_image").withType(Image.class),
+         this(base.appendedWith("pose_estimation/depth_image").withType(Image.class),
 
-              base.withSuffix("pose_estimation/image").withType(Image.class),
+              base.appendedWith("pose_estimation/image").withType(Image.class),
 
-              base.withSuffix("pose_estimation/segmentation").withType(Image.class),
+              base.appendedWith("pose_estimation/segmentation").withType(Image.class),
 
-              base.withSuffix("pose_estimation/camera_info").withType(CameraInfo.class),
+              base.appendedWith("pose_estimation/camera_info").withType(CameraInfo.class),
 
-              base.withSuffix("pose_estimation/output").withType(Detection3DArray.class),
+              base.appendedWith("pose_estimation/output").withType(Detection3DArray.class),
 
-              base.withSuffix("tracking/depth_image").withType(Image.class),
+              base.appendedWith("tracking/depth_image").withType(Image.class),
 
-              base.withSuffix("tracking/image").withType(Image.class),
+              base.appendedWith("tracking/image").withType(Image.class),
 
-              base.withSuffix("tracking/camera_info").withType(CameraInfo.class),
+              base.appendedWith("tracking/camera_info").withType(CameraInfo.class),
 
-              base.withSuffix("tracking/output").withType(Detection3DArray.class),
+              base.appendedWith("tracking/output").withType(Detection3DArray.class),
 
-              base.withSuffix("depth_image").withType(Image.class),
+              base.appendedWith("depth_image").withType(Image.class),
 
-              base.withSuffix("image").withType(Image.class),
+              base.appendedWith("image").withType(Image.class),
 
-              base.withSuffix("segmentation").withType(Image.class),
+              base.appendedWith("segmentation").withType(Image.class),
 
-              base.withSuffix("camera_info").withType(CameraInfo.class),
+              base.appendedWith("camera_info").withType(CameraInfo.class),
 
-              base.withSuffix("reset").withType(Empty.class),
+              base.appendedWith("reset").withType(Empty.class),
 
               overlayedImage,
 
-              base.withSuffix("ihmc/result").withType(Box3DMessage.class),
+              base.appendedWith("ihmc/result").withType(Box3DMessage.class),
 
-              base.withSuffix("ihmc/state").withType(Byte.class),
+              base.appendedWith("ihmc/state").withType(Byte_.class),
 
-              base.withSuffix("ihmc/parameters").withType(FoundationPoseParameters.class));
+              base.appendedWith("ihmc/parameters").withType(FoundationPoseParameters.class));
       }
    }
 }

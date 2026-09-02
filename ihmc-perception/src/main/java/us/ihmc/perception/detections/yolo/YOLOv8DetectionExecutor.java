@@ -579,7 +579,7 @@ public class YOLOv8DetectionExecutor
       parameters.close();
 
       if (ownsRos2Node)
-         ros2Node.destroy();
+         ros2Node.close();
 
       System.out.println("Destroyed " + getClass().getSimpleName());
    }

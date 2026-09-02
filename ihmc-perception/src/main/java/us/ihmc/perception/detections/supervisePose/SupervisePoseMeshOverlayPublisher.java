@@ -21,10 +21,12 @@ public class SupervisePoseMeshOverlayPublisher implements AutoCloseable
     *
     * /ihmc/supervisepose/overlayed_image
     */
+   private final ROS2Node ros2Node;
    private final ROS2Publisher<ImageMessage> meshOverlayPublisher;
 
    public SupervisePoseMeshOverlayPublisher(ROS2Node ros2Node)
    {
+      this.ros2Node = ros2Node;
       meshOverlayPublisher = ros2Node.createPublisher(SupervisePoseAPI.SUPERVISE_POSE_OVERLAY_IMAGE);
    }
 
@@ -124,6 +126,6 @@ public class SupervisePoseMeshOverlayPublisher implements AutoCloseable
    @Override
    public void close()
    {
-      meshOverlayPublisher.remove();
+      ros2Node.destroyPublisher(meshOverlayPublisher);
    }
 }

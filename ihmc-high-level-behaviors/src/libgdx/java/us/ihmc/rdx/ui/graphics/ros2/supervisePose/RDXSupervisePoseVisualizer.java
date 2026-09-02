@@ -557,6 +557,7 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
 
    private static class SupervisePoseResultVisualizer implements RenderableProvider
    {
+      private final ROS2Node ros2Node;
       private final ROS2Subscription<Box3DMessage> resultSubscription;
       private final ROS2Subscription<std_msgs.Byte_> stateSubscription;
 
@@ -570,6 +571,7 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
                                            SupervisePoseObject object,
                                            ImGuiAveragedFrequencyText frequencyText)
       {
+         this.ros2Node = ros2Node;
          latestResult = new Box3D();
          latestResult.setToNaN();
 
@@ -582,23 +584,29 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
          referenceFrameGraphic = new RDXReferenceFrameGraphic(0.1);
 
          stateSubscription =
-               ros2Node.createSubscription2(object.topics.ihmcState(),
-                                            message -> state = State.fromByte(message.getData()));
+               ros2Node.createSubscription(object.topics.ihmcState(), reader ->
+               {
+                  std_msgs.Byte_ message = reader.read();
+                  if (message != null)
+                     state = State.fromByte(message.getData());
+               });
 
          resultSubscription =
-               ros2Node.createSubscription2(object.topics.ihmcResult(),
-                                            message ->
+               ros2Node.createSubscription(object.topics.ihmcResult(), reader ->
                                             {
+                                               Box3DMessage message = reader.read();
+                                               if (message == null)
+                                                  return;
                                                frequencyText.ping();
 
                                                latestResult.getPose()
-                                                           .set(message.getPose());
+                                                           .set(message.getPose().getPose());
 
                                                latestResult.getSize()
-                                                           .set(message.getSize());
+                                                           .set(message.getSize().getVector());
 
                                                referenceFrameGraphic.getFramePose3D()
-                                                                    .set(message.getPose());
+                                                                    .set(message.getPose().getPose());
                                             });
       }
 
@@ -629,8 +637,8 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
          boxVisualizer.dispose();
          referenceFrameGraphic.dispose();
 
-         resultSubscription.remove();
-         stateSubscription.remove();
+         ros2Node.destroySubscription(resultSubscription);
+         ros2Node.destroySubscription(stateSubscription);
       }
    }
 }

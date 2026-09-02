@@ -17,6 +17,7 @@ import us.ihmc.jros2.ROS2Publisher;
 public class RDXSupervisePoseSettings
 {
    private final SupervisePoseObject object;
+   private final ROS2Node ros2Node;
 
    private final ROS2Publisher<Empty> resetRequestPublisher;
    private final SyncedSupervisePoseParameters parameters;
@@ -31,6 +32,7 @@ public class RDXSupervisePoseSettings
                                    SupervisePoseObject object)
    {
       this.object = object;
+      this.ros2Node = ros2Node;
 
       resetRequestPublisher = ros2Node.createPublisher(object.topics.reset());
 
@@ -111,6 +113,7 @@ public class RDXSupervisePoseSettings
 
    public void destroy()
    {
-      resetRequestPublisher.remove();
+      ros2Node.destroyPublisher(resetRequestPublisher);
+      parameters.close();
    }
 }

@@ -67,7 +67,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
 
    private final ROS2Publisher<Empty> resetRequestPublisher;
    private final ROS2Publisher<Box3DMessage> resultRelayPublisher;
-   private final ROS2Publisher<Byte> statePublisher;
+   private final ROS2Publisher<Byte_> statePublisher;
    private final ROS2Publisher<ImageMessage> overlayImagePublisher;
 
    private final ROS2Subscription<Detection3DArray> poseEstimationResultSubscription;
@@ -116,12 +116,22 @@ public class SupervisePoseCommunicator implements AutoCloseable
       statePublisher = ros2Node.createPublisher(topics.ihmcState());
       overlayImagePublisher = ros2Node.createPublisher(topics.overlayedImage());
 
-      poseEstimationResultSubscription = ros2Node.createSubscription2(topics.poseEstimationOutput(), this::updateLatestResult);
+      poseEstimationResultSubscription = ros2Node.createSubscription(topics.poseEstimationOutput(), reader ->
+      {
+         Detection3DArray message = reader.read();
+         if (message != null)
+            updateLatestResult(message);
+      });
 
-      trackingResultSubscription = ros2Node.createSubscription2(topics.trackingOutput(), this::updateLatestResult);
+      trackingResultSubscription = ros2Node.createSubscription(topics.trackingOutput(), reader ->
+      {
+         Detection3DArray message = reader.read();
+         if (message != null)
+            updateLatestResult(message);
+      });
 
       resetRequestSubscription =
-            ros2Node.createSubscription2(topics.reset(), message ->
+            ros2Node.createSubscription(topics.reset(), message ->
             {
                if (internallyPublishingReset)
                {
@@ -196,13 +206,13 @@ public class SupervisePoseCommunicator implements AutoCloseable
       if (results.getDetections().isEmpty())
          return;
 
-      Detection3D result = results.getDetections().getFirst();
+      Detection3D result = results.getDetections().get(0);
       if (result == null)
          return;
 
-      FramePose3D poseInWorld = new FramePose3D(sensorFrame, result.getBbox().getCenter());
+      FramePose3D poseInWorld = new FramePose3D(sensorFrame, result.getBbox().getCenter().getPose());
 
-      Pose3D poseSnapshot = new Pose3D(result.getBbox().getCenter());
+      Pose3D poseSnapshot = new Pose3D(result.getBbox().getCenter().getPose());
 
       rawSupervisePose = poseSnapshot;
 
@@ -213,7 +223,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
          poseInWorld.changeFrame(ReferenceFrame.getWorldFrame());
       }
 
-      latestResult = new SupervisePoseInstantDetection(target, new Box3D(poseInWorld, result.getBbox().getSize()), Instant.now());
+      latestResult = new SupervisePoseInstantDetection(target, new Box3D(poseInWorld, result.getBbox().getSize().getVector()), Instant.now());
 
       if (state != State.TRACKING)
          changeState(State.TRACKING);
@@ -222,7 +232,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
 
       Box3DMessage resultRelayMessage = new Box3DMessage();
       resultRelayMessage.getPose().set(poseInWorld);
-      resultRelayMessage.getSize().set(result.getBbox().getSize());
+      resultRelayMessage.getSize().set(result.getBbox().getSize().getVector());
       resultRelayPublisher.publish(resultRelayMessage);
 
       for (Consumer<SupervisePoseInstantDetection> resultCallback : resultCallbacks)
@@ -308,7 +318,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
       previousState = state;
       state = newState;
 
-      Byte stateMessage = new Byte();
+      Byte_ stateMessage = new Byte_();
       stateMessage.setData(state.toByte());
       statePublisher.publish(stateMessage);
 
@@ -792,14 +802,14 @@ public class SupervisePoseCommunicator implements AutoCloseable
    {
       parameters.close();
 
-      poseEstimationResultSubscription.remove();
-      trackingResultSubscription.remove();
-      resetRequestSubscription.remove();
+      ros2Node.destroySubscription(poseEstimationResultSubscription);
+      ros2Node.destroySubscription(trackingResultSubscription);
+      ros2Node.destroySubscription(resetRequestSubscription);
 
-      resetRequestPublisher.remove();
-      resultRelayPublisher.remove();
-      statePublisher.remove();
-      overlayImagePublisher.remove();
+      ros2Node.destroyPublisher(resetRequestPublisher);
+      ros2Node.destroyPublisher(resultRelayPublisher);
+      ros2Node.destroyPublisher(statePublisher);
+      ros2Node.destroyPublisher(overlayImagePublisher);
 
       synchronized (latestRGBImageLock)
       {
@@ -813,7 +823,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
       meshOverlayRenderer.destroy();
 
       imagePublisher.close();
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    public enum State
