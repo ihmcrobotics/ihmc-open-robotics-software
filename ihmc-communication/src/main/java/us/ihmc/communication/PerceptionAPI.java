@@ -5,6 +5,7 @@ import perception_msgs.ArUcoMarkerPoses;
 import perception_msgs.ChunkMessage;
 import perception_msgs.FramePlanarRegionsListMessage;
 import perception_msgs.HeightMapMessage;
+import perception_msgs.HeightScanMessage;
 import perception_msgs.ImageMessage;
 import perception_msgs.PlanarRegionsListMessage;
 import perception_msgs.TerrainMapMessage;
@@ -130,6 +131,7 @@ public final class PerceptionAPI
    public static final ROS2Topic<ImageMessage> STEPPING_REALSENSE_DEPTH = STEPPING_REALSENSE.withType(ImageMessage.class).withSuffix("depth");
    public static final ROS2Topic<ImageMessage> STEPPING_REALSENSE_COLOR = STEPPING_REALSENSE.withType(ImageMessage.class).withSuffix("color");
    public static final ROS2Topic<ImageMessage> STEPPING_REALSENSE_DEPTH_FILTERED = STEPPING_REALSENSE.withType(ImageMessage.class).withSuffix("depth_filtered");
+   public static final ROS2Topic<HeightScanMessage> STEPPING_HEIGHT_SCAN = STEPPING_REALSENSE.withType(HeightScanMessage.class).withSuffix("height_scan");
 
    /*
     * Stepping RealSense image topics (official ROS 2 Image and CameraInfo types)
