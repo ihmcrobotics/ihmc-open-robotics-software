@@ -32,13 +32,12 @@ import us.ihmc.zed.global.zed;
  */
 public class IsaacROSFoundationPoseDemo
 {
-   // private static final String SVO_FILE = "/opt/ihmc/LogData/UserFolders/TomaszFolder/20251020_ZEDXMini_DoorChargeBarrierBottle.svo2";
-   private static final String SVO_FILE = "/opt/ihmc/LogData/UserFolders/ArghyaFolder/PoseEstimationPaperSVOs/20260415_143332_Alex001ArghyaDataset/20260415_160653_Alex001UnifiedControlProcess/perception/20260415_160654_Alex001ExperimentalZEDXMini.svo2";
+   private static final String SVO_FILE = "/opt/ihmc/LogData/UserFolders/TomaszFolder/20251020_ZEDXMini_DoorChargeBarrierBottle.svo2";
 
    private final ROS2Node ros2Node = new ROS2Node(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
 
-   private final RawImagePublisher imagePublisher = new RawImagePublisher(ros2Node, 1.0);
+   private final RawImagePublisher imagePublisher = new RawImagePublisher(ros2Node, 0.5);
 
    private final ZEDImageSensor zedImageSensor;
 
@@ -49,10 +48,9 @@ public class IsaacROSFoundationPoseDemo
 
    private IsaacROSFoundationPoseDemo()
    {
-   //   zedImageSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_NEURAL_LIGHT, SVO_FILE);
-      zedImageSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_X_MINI, zed.SL_DEPTH_MODE_NEURAL, SVO_FILE);
-   //   zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_X_MINI, zed.SL_INPUT_TYPE_GMSL, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_SVGA, 15);
-   //   zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2, zed.SL_INPUT_TYPE_USB, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_HD720, 15);
+      zedImageSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_NEURAL_LIGHT, SVO_FILE);
+//      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_X_MINI, zed.SL_INPUT_TYPE_GMSL, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_SVGA, 15);
+//      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2, zed.SL_INPUT_TYPE_USB, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_HD720, 15);
       zedImageSensor.enablePositionalTracking(true);
       zedImageSensor.setSensorFrame(zedImageSensor.getTrackedSensorFrame());
       zedImageSensor.run(true);

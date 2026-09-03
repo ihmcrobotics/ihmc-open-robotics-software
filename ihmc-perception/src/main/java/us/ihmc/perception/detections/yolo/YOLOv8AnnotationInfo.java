@@ -5,7 +5,6 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
@@ -250,18 +249,8 @@ public record YOLOv8AnnotationInfo(String objectClass, float confidence, Boundin
       RawImage maskImage = detection.mask();
       Mat mask = maskImage.getCpuImageMat();
 
-      GpuMat gpuMask = new GpuMat();
-      gpuMask.upload(mask);
-
-      GpuMat gpuResizedMask = new GpuMat();
-
-      YOLOv8Tools.resizeWithCrop(gpuMask, gpuResizedMask, detectionImageSize);
-
       Mat resizedMask = new Mat();
-      gpuResizedMask.download(resizedMask);
-
-      gpuMask.close();
-      gpuResizedMask.close();
+      YOLOv8Tools.resizeWithCrop(mask, resizedMask, detectionImageSize);
 
       float xScale = 1.0f / resizedMask.cols();
       float yScale = 1.0f / resizedMask.rows();
@@ -286,18 +275,8 @@ public record YOLOv8AnnotationInfo(String objectClass, float confidence, Boundin
       RawImage colorImage = detection.getColorImage().get();
       Mat mask = maskImage.getCpuImageMat();
 
-      GpuMat gpuMask = new GpuMat();
-      gpuMask.upload(mask);
-
-      GpuMat gpuResizedMask = new GpuMat();
-
-      YOLOv8Tools.resizeWithCrop(gpuMask, gpuResizedMask, colorImage.getCpuImageMat().size());
-
       Mat resizedMask = new Mat();
-      gpuResizedMask.download(resizedMask);
-
-      gpuMask.close();
-      gpuResizedMask.close();
+      YOLOv8Tools.resizeWithCrop(mask, resizedMask, colorImage.getCpuImageMat().size());
 
       float xScale = 1.0f / resizedMask.cols();
       float yScale = 1.0f / resizedMask.rows();
