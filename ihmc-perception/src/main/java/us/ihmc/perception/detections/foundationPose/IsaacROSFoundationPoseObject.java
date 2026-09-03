@@ -1,7 +1,5 @@
 package us.ihmc.perception.detections.foundationPose;
 
-import static us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseAPI.*;
-
 import ihmc_common_msgs.Box3DMessage;
 import perception_msgs.FoundationPoseParameters;
 import sensor_msgs.CameraInfo;
@@ -10,6 +8,8 @@ import std_msgs.Empty;
 import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.jros2.ROS2Topic;
 import vision_msgs.Detection3DArray;
+
+import static us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseAPI.*;
 
 public enum IsaacROSFoundationPoseObject
 {
@@ -47,29 +47,28 @@ public enum IsaacROSFoundationPoseObject
    {
       public FoundationPoseTopics(String object)
       {
-         this(withObjectSuffix(POSE_ESTIMATION_DEPTH_IMAGE, object),
-              withObjectSuffix(POSE_ESTIMATION_RGB_IMAGE, object),
-              withObjectSuffix(POSE_ESTIMATION_SEGMENTATION, object),
-              withObjectSuffix(POSE_ESTIMATION_CAMERA_INFO, object),
-              withObjectSuffix(POSE_ESTIMATION_OUTPUT, object),
-              withObjectSuffix(TRACKING_DEPTH_IMAGE, object),
-              withObjectSuffix(TRACKING_RGB_IMAGE, object),
-              withObjectSuffix(TRACKING_CAMERA_INFO, object),
-              withObjectSuffix(TRACKING_OUTPUT, object),
-              withObjectSuffix(DEPTH_IMAGE, object),
-              withObjectSuffix(RGB_IMAGE, object),
-              withObjectSuffix(SEGMENTATION, object),
-              withObjectSuffix(CAMERA_INFO, object),
-              withObjectSuffix(RESET, object),
-              withObjectSuffix(IHMC_RESULT, object),
-              withObjectSuffix(IHMC_STATE, object),
-              withObjectSuffix(IHMC_PARAMETERS, object));
+         this(withObjectModule(POSE_ESTIMATION_DEPTH_IMAGE, object),
+              withObjectModule(POSE_ESTIMATION_RGB_IMAGE, object),
+              withObjectModule(POSE_ESTIMATION_SEGMENTATION, object),
+              withObjectModule(POSE_ESTIMATION_CAMERA_INFO, object),
+              withObjectModule(POSE_ESTIMATION_OUTPUT, object),
+              withObjectModule(TRACKING_DEPTH_IMAGE, object),
+              withObjectModule(TRACKING_RGB_IMAGE, object),
+              withObjectModule(TRACKING_CAMERA_INFO, object),
+              withObjectModule(TRACKING_OUTPUT, object),
+              withObjectModule(DEPTH_IMAGE, object),
+              withObjectModule(RGB_IMAGE, object),
+              withObjectModule(SEGMENTATION, object),
+              withObjectModule(CAMERA_INFO, object),
+              withObjectModule(RESET, object),
+              withObjectModule(IHMC_RESULT, object),
+              withObjectModule(IHMC_STATE, object),
+              withObjectModule(IHMC_PARAMETERS, object));
       }
    }
 
-   @SuppressWarnings("unchecked")
-   private static <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Topic<T> withObjectSuffix(ROS2Topic<T> baseTopic, String object)
+   private static <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Topic<T> withObjectModule(ROS2Topic<T> baseTopic, String object)
    {
-      return ((HumanoidROS2Topic<T>) baseTopic).withSuffix(object);
+      return ((HumanoidROS2Topic<T>) baseTopic).withModule(object);
    }
 }

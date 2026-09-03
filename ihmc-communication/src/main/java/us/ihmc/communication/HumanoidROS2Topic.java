@@ -171,9 +171,25 @@ public class HumanoidROS2Topic<T extends ROS2Message<T>> extends ROS2Topic<T>
                             getQoS());
    }
 
+   @Override
    public <U extends ROS2Message<U>> HumanoidROS2Topic<U> withType(Class<U> messageType)
    {
-      return withTypeName(messageType);
+      if (messageType == null)
+         throw new RuntimeException("Cannot change the type of a topic to null");
+
+      if (getType() != null && !Objects.equals(messageType, getType()))
+         throw new RuntimeException("Cannot change the type of a topic after it's already been set");
+
+      @SuppressWarnings("unchecked")
+      HumanoidROS2Topic<U> typedTopic = (HumanoidROS2Topic<U>) copyIfNotEqual(prefix,
+                                                                              robotName,
+                                                                              moduleName,
+                                                                              ioQualifier,
+                                                                              "",
+                                                                              suffix,
+                                                                              (Class<T>) messageType,
+                                                                              getQoS());
+      return typedTopic;
    }
 
    public <U extends ROS2Message<U>> HumanoidROS2Topic<U> withTypeName(Class<U> messageType)
