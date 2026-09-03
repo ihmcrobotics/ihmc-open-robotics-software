@@ -26,6 +26,7 @@ import us.ihmc.avatar.factory.SingleThreadedRobotController;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLoggerOld;
+import us.ihmc.avatar.logging.SCS2YoGraphicLogTools;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory.IKStreamingRTThread;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
@@ -773,11 +774,13 @@ public class SCS2AvatarSimulationFactory
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
          builders.add(new RegistrySendBufferBuilder(estimatorThread.getYoRegistry(), estimatorThread.getFullRobotModel().getElevator(), null));
          builders.add(new RegistrySendBufferBuilder(controllerThread.getYoVariableRegistry(),
-                                                    controllerThread.getSCS2YoGraphics()));
-         builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getSCS2YoGraphics()));
+                                                    SCS2YoGraphicLogTools.toYoGraphicsData(controllerThread.getSCS2YoGraphics())));
+         builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.getYoVariableRegistry(),
+                                                    SCS2YoGraphicLogTools.toYoGraphicsData(stepGeneratorThread.getSCS2YoGraphics())));
          if (ikStreamingRTThread != null)
          {
-            builders.add(new RegistrySendBufferBuilder(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTThread.getSCS2YoGraphics()));
+            builders.add(new RegistrySendBufferBuilder(ikStreamingRTThread.getYoVariableRegistry(),
+                                                        SCS2YoGraphicLogTools.toYoGraphicsData(ikStreamingRTThread.getSCS2YoGraphics())));
          }
          intraprocessYoVariableLogger = new IntraprocessYoVariableLoggerOld(builders, robotModel.getEstimatorDT(), getClass().getSimpleName());
 
@@ -799,19 +802,21 @@ public class SCS2AvatarSimulationFactory
       {
          yoVariableServer.setMainRegistry(estimatorThread.getYoRegistry(),
                                           createYoVariableServerJointList(estimatorThread.getFullRobotModel().getElevator()),
-                                          estimatorThread.getSCS2YoGraphics());
+                                          SCS2YoGraphicLogTools.toYoGraphicsData(estimatorThread.getSCS2YoGraphics()));
          estimatorTask.addCallbackPostTask(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                          estimatorThread.getYoRegistry()));
 
-         yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(), controllerThread.getSCS2YoGraphics());
+         yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(), SCS2YoGraphicLogTools.toYoGraphicsData(controllerThread.getSCS2YoGraphics()));
          controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
                                                                           controllerThread.getYoVariableRegistry()));
-         yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getSCS2YoGraphics());
+         yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(),
+                                      SCS2YoGraphicLogTools.toYoGraphicsData(stepGeneratorThread.getSCS2YoGraphics()));
          stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                              stepGeneratorThread.getYoVariableRegistry()));
          if (ikStreamingRTThread != null && ikStreamingRTThread.isYoVariableServerEnabled())
          {
-            yoVariableServer.addRegistry(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTThread.getSCS2YoGraphics());
+            yoVariableServer.addRegistry(ikStreamingRTThread.getYoVariableRegistry(),
+                                         SCS2YoGraphicLogTools.toYoGraphicsData(ikStreamingRTThread.getSCS2YoGraphics()));
             stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingRTThread.getHumanoidRobotContextData().getTimestamp(),
                                                                                 ikStreamingRTThread.getYoVariableRegistry()));
          }

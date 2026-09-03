@@ -21,6 +21,7 @@ import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.jros2.AsyncROS2Node;
@@ -38,6 +39,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
 {
@@ -117,6 +119,7 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
 
       goalReacher = new PDVelocityBasedGoalReacher(referenceFrames.getPelvisZUpFrame(), statusMessageOutputManager, registry);
       commandInputManager.addControllerWaypointGoalCommandConsumer(goalReacher::consumeNewWaypoint);
+      commandInputManager.addAbortWalkingConsumer(abortWalkingCommand -> goalReacher.clear());
       commandInputManager.addControllerWaypointGoalListCommandConsumer(goalReacher::consumeNewWaypointList);
       commandInputManager.addControllerReleaseGoalCommand(goalReacher::consumeReleaseGoalCommand);
    }

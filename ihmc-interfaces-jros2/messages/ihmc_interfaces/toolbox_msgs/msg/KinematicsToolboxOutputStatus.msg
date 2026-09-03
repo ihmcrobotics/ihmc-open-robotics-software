@@ -55,3 +55,6 @@ bool left_foot_in_contact
 bool right_foot_in_contact
 
 float64 solution_quality -1
+
+# True on the last logged frame of a kinematics streaming replay. Missing in old JSON logs means false.
+bool end_replay false

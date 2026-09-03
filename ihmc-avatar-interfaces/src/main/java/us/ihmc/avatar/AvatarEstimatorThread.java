@@ -155,6 +155,18 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
       }
    }
 
+   public void requestReinitializeEstimator()
+   {
+      if (mainStateEstimator != null)
+         mainStateEstimator.requestReinitializeEstimator();
+   }
+
+   public void requestReinitializeEstimatorToWorldOrigin()
+   {
+      if (mainStateEstimator != null)
+         mainStateEstimator.requestReinitializeEstimatorToWorldOrigin();
+   }
+
    public void setupHighLevelControllerCallback(HighLevelHumanoidControllerFactory controllerFactory,
                                                 Map<HighLevelControllerName, StateEstimatorMode> stateModeMap)
    {

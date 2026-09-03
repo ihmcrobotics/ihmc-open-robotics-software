@@ -418,14 +418,18 @@ public class AvatarEstimatorThreadFactory
       if (asyncROS2NodeField.hasValue())
       {
          ForceSensorStateUpdater forceSensorStateUpdater = stateEstimator.getForceSensorStateUpdater();
-         asyncROS2NodeField.get()
-                           .createSubscription(inputTopicField.get().withType(RequestWristForceSensorCalibrationPacket.class),
-                                               subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
-         asyncROS2NodeField.get().createSubscriptionSampler(inputTopicField.get().withType(ReinitializeStateEstimatorMessage.class), sample ->
-         {
-            if (sample.getRequestReinitialize())
-               stateEstimator.requestReinitializeEstimator();
-         });
+         asyncROS2NodeField.get().createSubscription(inputTopicField.get().withType(RequestWristForceSensorCalibrationPacket.class),
+                                     subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
+         asyncROS2NodeField.get().createSubscriptionSampler(inputTopicField.get().withType(ReinitializeStateEstimatorMessage.class),
+                                                            sample ->
+                                                            {
+                                                               if (!sample.getRequestReinitialize())
+                                                                  return;
+                                                               if (sample.getReinitializeToWorldOrigin())
+                                                                  stateEstimator.requestReinitializeEstimatorToWorldOrigin();
+                                                               else
+                                                                  stateEstimator.requestReinitializeEstimator();
+                                                            });
       }
 
       return stateEstimator;
