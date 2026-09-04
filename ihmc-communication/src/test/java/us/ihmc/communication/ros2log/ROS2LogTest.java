@@ -90,4 +90,24 @@ public class ROS2LogTest
       Assertions.assertTrue(replayTopicManager.update(11L));
       Assertions.assertEquals(1, publishCount.get());
    }
+
+   @Test
+   public void testReplayDeliversSkippedIntermediateMessages()
+   {
+      ROS2Topic<RobotConfigurationData> topic = HumanoidControllerAPI.getOutputTopic("Robot").withType(RobotConfigurationData.class);
+      List<Long> delivered = new ArrayList<>();
+      ReplayTopicManager<RobotConfigurationData> replayTopicManager = new ReplayTopicManager<>(topic,
+                                                                                              message -> delivered.add(message.getSequenceId()));
+
+      for (int i = 0; i < 3; i++)
+      {
+         RobotConfigurationData message = new RobotConfigurationData();
+         message.setSequenceId(i + 1L);
+         replayTopicManager.getTimestamps().add(i * 10L);
+         replayTopicManager.getMessages().add(message);
+      }
+
+      Assertions.assertTrue(replayTopicManager.update(25L));
+      Assertions.assertEquals(List.of(1L, 2L, 3L), delivered);
+   }
 }
