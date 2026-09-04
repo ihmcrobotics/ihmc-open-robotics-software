@@ -1,5 +1,6 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
+import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
@@ -51,14 +52,12 @@ public class LeRobotDatasetVideoWriter
 
       recorder = new FFmpegFrameRecorder(mp4Path.toString(), 640, 480);
       recorder.setFormat("mp4");
-      //            recorder.setVideoCodecName("av1_nvenc");
-      //            recorder.setVideoOption("preset", "p7");
-      //            recorder.setVideoCodecName("libaom-av1");
-      //            recorder.setVideoOption("preset", "10");
-      //            recorder.setVideoOption("threads", String.valueOf(Runtime.getRuntime().availableProcessors()));
+      recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+      recorder.setVideoCodecName("libx264");
+      recorder.setVideoOption("preset", "fast");
+      recorder.setVideoOption("crf", "23");
       recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
       recorder.setFrameRate(fps);
-      recorder.setVideoBitrate(1352000);
 
       ExceptionTools.handle(() -> recorder.start(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
