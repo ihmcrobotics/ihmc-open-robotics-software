@@ -15,6 +15,7 @@ import sensor_msgs.CameraInfo;
 import sensor_msgs.Image;
 import std_msgs.Empty;
 import std_msgs.Int64;
+import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.jros2.ROS2QoSProfile;
 import us.ihmc.jros2.ROS2Topic;
@@ -32,6 +33,11 @@ public final class PerceptionAPI
 
    private static final HumanoidROS2Topic<?> BEST_EFFORT = HumanoidROS2Topic.IHMC_ROOT.withQoS(ROS2QoSProfile.BEST_EFFORT);
    private static final HumanoidROS2Topic<?> RELIABLE = HumanoidROS2Topic.IHMC_ROOT.withQoS(ROS2QoSProfile.RELIABLE);
+
+   /*
+    * Detection manager
+    */
+   public static final StoredPropertySetROS2TopicPair DETECTION_MANAGER_SETTINGS = new StoredPropertySetROS2TopicPair("detections", "settings");
 
    /*
     * ZED SVO
@@ -53,7 +59,11 @@ public final class PerceptionAPI
                                                                                       .withType(YOLOv8ExecutorParameters.class);
    public static final ROS2Topic<Image> YOLO_VLM_ANNOTATED_IMAGE = HumanoidROS2Topic.IHMC_ROOT.withModule("yolo")
                                                                             .withSuffix("vlm/image")
-                                                                            .withType(Image.class);
+                                                                            .withType(Image.class)
+                                                                            .withQoS(ROS2QoSProfile.RELIABLE);
+   public static final ROS2Topic<ImageMessage> YOLO_ANNOTATED_IMAGE = PERCEPTION_MODULE.withModule("yolo")
+                                                                                       .withType(ImageMessage.class)
+                                                                                       .withSuffix("annotated_image");
    public static final ROS2Topic<CameraInfo> YOLO_VML_ANNOTATED_IMAGE_CAMERA_INFO = HumanoidROS2Topic.IHMC_ROOT.withModule("yolo")
                                                                                              .withSuffix("vlm/camera_Info")
                                                                                              .withType(CameraInfo.class);

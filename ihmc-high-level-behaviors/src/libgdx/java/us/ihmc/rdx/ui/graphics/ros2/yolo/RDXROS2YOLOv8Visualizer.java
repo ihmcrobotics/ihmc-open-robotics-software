@@ -50,7 +50,7 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2MultiTopicVisualizer
 
       this.ros2Node = ros2Node;
       this.colorImageTopic = colorImageTopic;
-      imageMessageVisualizer = new RDXROS2ImageMessageVisualizer(title, intraProcessNode, colorImageTopic)
+      imageMessageVisualizer = new RDXROS2ImageMessageVisualizer(title, intraProcessNode, colorImageTopic, "/yolo/annotated_image")
       {
          @Override
          protected void setImage(RDXImageVisualizer imageVisualizer, Mat image, PixelFormat pixelFormat)
