@@ -7,6 +7,7 @@ import sensor_msgs.CameraInfo;
 import sensor_msgs.Image;
 import std_msgs.Byte_;
 import std_msgs.Empty;
+import std_msgs.String_;
 import us.ihmc.jros2.ROS2QoSProfile;
 import us.ihmc.jros2.ROS2Topic;
 import vision_msgs.Detection3DArray;
@@ -29,6 +30,17 @@ public class SupervisePoseAPI
                .appendedWith("supervisepose")
                .appendedWith("overlayed_image")
                .withType(ImageMessage.class)
+               .withQoS(ROS2QoSProfile.RELIABLE);
+
+   /**
+    * jros2 cannot currently publish std_msgs/Empty in a form accepted by the
+    * native FoundationPose subscriber. The Python instance manager translates
+    * "category instance" requests on this topic into native Empty messages.
+    */
+   public static final ROS2Topic<String_> RESET_REQUEST =
+         new ROS2Topic<String_>("/foundationpose")
+               .appendedWith("reset_request")
+               .withType(String_.class)
                .withQoS(ROS2QoSProfile.RELIABLE);
 
    public static SupervisePoseTopics topics(String category, String instance)
@@ -82,7 +94,9 @@ public class SupervisePoseAPI
 
               base.appendedWith("pose_estimation/camera_info").withType(CameraInfo.class),
 
-              base.appendedWith("pose_estimation/output").withType(Detection3DArray.class),
+              base.appendedWith("pose_estimation/output")
+                  .withType(Detection3DArray.class)
+                  .withQoS(ROS2QoSProfile.BEST_EFFORT),
 
               base.appendedWith("tracking/depth_image").withType(Image.class),
 
@@ -90,7 +104,9 @@ public class SupervisePoseAPI
 
               base.appendedWith("tracking/camera_info").withType(CameraInfo.class),
 
-              base.appendedWith("tracking/output").withType(Detection3DArray.class),
+              base.appendedWith("tracking/output")
+                  .withType(Detection3DArray.class)
+                  .withQoS(ROS2QoSProfile.BEST_EFFORT),
 
               base.appendedWith("depth_image").withType(Image.class),
 

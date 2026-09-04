@@ -10,7 +10,7 @@ import org.bytedeco.javacpp.BytePointer;
 import sensor_msgs.CameraInfo;
 import sensor_msgs.Image;
 import std_msgs.Byte_;
-import std_msgs.Empty;
+import std_msgs.String_;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.tf2.ROS2MutableFrame;
@@ -65,14 +65,14 @@ public class SupervisePoseCommunicator implements AutoCloseable
    private final ROS2Node ros2Node;
    private final RawImagePublisher imagePublisher;
 
-   private final ROS2Publisher<Empty> resetRequestPublisher;
+   private final ROS2Publisher<String_> resetRequestPublisher;
    private final ROS2Publisher<Box3DMessage> resultRelayPublisher;
    private final ROS2Publisher<Byte_> statePublisher;
    private final ROS2Publisher<ImageMessage> overlayImagePublisher;
 
    private final ROS2Subscription<Detection3DArray> poseEstimationResultSubscription;
    private final ROS2Subscription<Detection3DArray> trackingResultSubscription;
-   private final ROS2Subscription<Empty> resetRequestSubscription;
+   private final ROS2Subscription<String_> resetRequestSubscription;
 
    private final SyncedSupervisePoseParameters parameters;
    private final ROS2MutableFrame sensorFrame;
@@ -111,7 +111,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
       ros2Node = new ROS2Node(getClass().getSimpleName() + "_" + sanitize(target.key()));
       imagePublisher = new RawImagePublisher(ros2Node, 1.0);
 
-      resetRequestPublisher = ros2Node.createPublisher(topics.reset());
+      resetRequestPublisher = ros2Node.createPublisher(SupervisePoseAPI.RESET_REQUEST);
       resultRelayPublisher = ros2Node.createPublisher(topics.ihmcResult());
       statePublisher = ros2Node.createPublisher(topics.ihmcState());
       overlayImagePublisher = ros2Node.createPublisher(topics.overlayedImage());
@@ -131,8 +131,12 @@ public class SupervisePoseCommunicator implements AutoCloseable
       });
 
       resetRequestSubscription =
-            ros2Node.createSubscription(topics.reset(), message ->
+            ros2Node.createSubscription(SupervisePoseAPI.RESET_REQUEST, reader ->
             {
+               String_ message = reader.read();
+               if (message == null || !message.getData().toString().equals(target.category() + " " + target.instance()))
+                  return;
+
                if (internallyPublishingReset)
                {
                   internallyPublishingReset = false;
@@ -529,7 +533,9 @@ public class SupervisePoseCommunicator implements AutoCloseable
 
       changeState(State.ESTIMATING_POSE);
       internallyPublishingReset = true;
-      resetRequestPublisher.publish(new Empty());
+      String_ resetRequest = new String_();
+      resetRequest.setData(target.category() + " " + target.instance());
+      resetRequestPublisher.publish(resetRequest);
    }
 
    public SupervisePoseInstantDetection getLatestResult()

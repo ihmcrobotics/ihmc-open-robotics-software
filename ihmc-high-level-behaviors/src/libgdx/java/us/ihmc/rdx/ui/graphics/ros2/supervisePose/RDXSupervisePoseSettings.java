@@ -1,11 +1,12 @@
 package us.ihmc.rdx.ui.graphics.ros2.supervisePose;
 
 import imgui.ImGui;
-import std_msgs.Empty;
+import std_msgs.String_;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.detections.supervisePose.SupervisePoseObject;
+import us.ihmc.perception.detections.supervisePose.SupervisePoseAPI;
 import us.ihmc.perception.detections.supervisePose.SyncedSupervisePoseParameters;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
@@ -19,7 +20,7 @@ public class RDXSupervisePoseSettings
    private final SupervisePoseObject object;
    private final ROS2Node ros2Node;
 
-   private final ROS2Publisher<Empty> resetRequestPublisher;
+   private final ROS2Publisher<String_> resetRequestPublisher;
    private final SyncedSupervisePoseParameters parameters;
 
    private final ImGuiUniqueLabelMap labels;
@@ -34,7 +35,7 @@ public class RDXSupervisePoseSettings
       this.object = object;
       this.ros2Node = ros2Node;
 
-      resetRequestPublisher = ros2Node.createPublisher(object.topics.reset());
+      resetRequestPublisher = ros2Node.createPublisher(SupervisePoseAPI.RESET_REQUEST);
 
       CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, ros2ClockOffsetEstimator);
       parameters = new SyncedSupervisePoseParameters(ros2Node, crdtInfo, object);
@@ -92,7 +93,11 @@ public class RDXSupervisePoseSettings
       {
          ImGui.setNextItemWidth(-1.0f);
          if (ImGui.button(labels.get("Reset_" + object.name())))
-            resetRequestPublisher.publish(new Empty());
+         {
+            String_ resetRequest = new String_();
+            resetRequest.setData(object.category + " " + object.instance);
+            resetRequestPublisher.publish(resetRequest);
+         }
          ImGui.setItemAllowOverlap();
       }
 
