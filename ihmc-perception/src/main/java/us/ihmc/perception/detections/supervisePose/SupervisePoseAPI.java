@@ -14,10 +14,8 @@ import vision_msgs.Detection3DArray;
 
 public class SupervisePoseAPI
 {
-   /**
-    * Temporary per-object FoundationPose communication topics.
-    */
-   private static final ROS2Topic<?> SUPERVISE_POSE_TOPIC = new ROS2Topic<>("/foundationpose").withQoS(ROS2QoSProfile.RELIABLE);
+   private static final ROS2Topic<?> FOUNDATION_POSE_TOPIC = new ROS2Topic<>("/foundationpose").withQoS(ROS2QoSProfile.RELIABLE);
+   private static final ROS2Topic<?> SUPERVISE_POSE_TOPIC = new ROS2Topic<>("/supervisepose").withQoS(ROS2QoSProfile.RELIABLE);
 
    /**
     * Global combined overlay:
@@ -38,14 +36,15 @@ public class SupervisePoseAPI
     * "category instance" requests on this topic into native Empty messages.
     */
    public static final ROS2Topic<String_> RESET_REQUEST =
-         new ROS2Topic<String_>("/foundationpose")
+         new ROS2Topic<String_>("/supervisepose")
                .appendedWith("reset_request")
                .withType(String_.class)
                .withQoS(ROS2QoSProfile.RELIABLE);
 
    public static SupervisePoseTopics topics(String category, String instance)
    {
-      ROS2Topic<?> foundationPoseBase = SUPERVISE_POSE_TOPIC.appendedWith(category).appendedWith(instance);
+      ROS2Topic<?> foundationPoseBase = FOUNDATION_POSE_TOPIC.appendedWith(category).appendedWith(instance);
+      ROS2Topic<?> supervisePoseBase = SUPERVISE_POSE_TOPIC.appendedWith(category).appendedWith(instance);
 
       ROS2Topic<ImageMessage> perObjectOverlay =
             new ROS2Topic<ImageMessage>("/ihmc")
@@ -57,7 +56,7 @@ public class SupervisePoseAPI
                   .withType(ImageMessage.class)
                   .withQoS(ROS2QoSProfile.RELIABLE);
 
-      return new SupervisePoseTopics(foundationPoseBase, perObjectOverlay);
+      return new SupervisePoseTopics(foundationPoseBase, supervisePoseBase, perObjectOverlay);
    }
 
    public record SupervisePoseTopics(
@@ -84,47 +83,49 @@ public class SupervisePoseAPI
          ROS2Topic<Byte_> ihmcState,
          ROS2Topic<FoundationPoseParameters> ihmcParameters)
    {
-      public SupervisePoseTopics(ROS2Topic<?> base, ROS2Topic<ImageMessage> overlayedImage)
+      public SupervisePoseTopics(ROS2Topic<?> foundationPoseBase,
+                                 ROS2Topic<?> supervisePoseBase,
+                                 ROS2Topic<ImageMessage> overlayedImage)
       {
-         this(base.appendedWith("pose_estimation/depth_image").withType(Image.class),
+         this(foundationPoseBase.appendedWith("pose_estimation/depth_image").withType(Image.class),
 
-              base.appendedWith("pose_estimation/image").withType(Image.class),
+              foundationPoseBase.appendedWith("pose_estimation/image").withType(Image.class),
 
-              base.appendedWith("pose_estimation/segmentation").withType(Image.class),
+              foundationPoseBase.appendedWith("pose_estimation/segmentation").withType(Image.class),
 
-              base.appendedWith("pose_estimation/camera_info").withType(CameraInfo.class),
+              foundationPoseBase.appendedWith("pose_estimation/camera_info").withType(CameraInfo.class),
 
-              base.appendedWith("pose_estimation/output")
+              supervisePoseBase.appendedWith("pose_estimation/output")
                   .withType(Detection3DArray.class)
                   .withQoS(ROS2QoSProfile.BEST_EFFORT),
 
-              base.appendedWith("tracking/depth_image").withType(Image.class),
+              foundationPoseBase.appendedWith("tracking/depth_image").withType(Image.class),
 
-              base.appendedWith("tracking/image").withType(Image.class),
+              foundationPoseBase.appendedWith("tracking/image").withType(Image.class),
 
-              base.appendedWith("tracking/camera_info").withType(CameraInfo.class),
+              foundationPoseBase.appendedWith("tracking/camera_info").withType(CameraInfo.class),
 
-              base.appendedWith("tracking/output")
+              supervisePoseBase.appendedWith("tracking/output")
                   .withType(Detection3DArray.class)
                   .withQoS(ROS2QoSProfile.BEST_EFFORT),
 
-              base.appendedWith("depth_image").withType(Image.class),
+              foundationPoseBase.appendedWith("depth_image").withType(Image.class),
 
-              base.appendedWith("image").withType(Image.class),
+              foundationPoseBase.appendedWith("image").withType(Image.class),
 
-              base.appendedWith("segmentation").withType(Image.class),
+              foundationPoseBase.appendedWith("segmentation").withType(Image.class),
 
-              base.appendedWith("camera_info").withType(CameraInfo.class),
+              foundationPoseBase.appendedWith("camera_info").withType(CameraInfo.class),
 
-              base.appendedWith("reset").withType(Empty.class),
+              foundationPoseBase.appendedWith("reset").withType(Empty.class),
 
               overlayedImage,
 
-              base.appendedWith("ihmc/result").withType(Box3DMessage.class),
+              supervisePoseBase.appendedWith("ihmc/result").withType(Box3DMessage.class),
 
-              base.appendedWith("ihmc/state").withType(Byte_.class),
+              supervisePoseBase.appendedWith("ihmc/state").withType(Byte_.class),
 
-              base.appendedWith("ihmc/parameters").withType(FoundationPoseParameters.class));
+              supervisePoseBase.appendedWith("ihmc/parameters").withType(FoundationPoseParameters.class));
       }
    }
 }
