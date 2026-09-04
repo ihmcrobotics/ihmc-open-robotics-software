@@ -151,17 +151,18 @@ public class VLAUpdateThread extends VLAYoRegistry
          {
             if (!openpiRequest.isCompletedExceptionally())
             {
-               openpiClient.unpack(openpiRequest);
-
-               DoubleBuffer actionChunk = openpiClient.getActionChunk().asDoubleBuffer();
-               int actionSize = LeRobotDataset.STATE_SIZE;
-               for (int i = 0; i < actionChunk.capacity() / actionSize; i++)
+               if (openpiClient.unpack(openpiRequest))
                {
-                  DoubleBuffer action = DoubleBuffer.allocate(actionSize);
-                  action.put(0, actionChunk, i * actionSize, actionSize);
-                  actionPlan.addLast(action);
+                  DoubleBuffer actionChunk = openpiClient.getActionChunk().asDoubleBuffer();
+                  int actionSize = LeRobotDataset.STATE_SIZE;
+                  for (int i = 0; i < openpiClient.getHorizon(); i++)
+                  {
+                     DoubleBuffer action = DoubleBuffer.allocate(actionSize);
+                     action.put(0, actionChunk, i * actionSize, actionSize);
+                     actionPlan.addLast(action);
+                  }
+                  numberOfActionsReceived.add(actionPlan.size());
                }
-               numberOfActionsReceived.add(actionPlan.size());
             }
 
             openpiRequest = null;
