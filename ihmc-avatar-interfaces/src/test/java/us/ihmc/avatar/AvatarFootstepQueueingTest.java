@@ -42,6 +42,16 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       return 0.08;
    }
 
+   protected double getExtraSimulationTimeForQueueing()
+   {
+      return 0.0;
+   }
+
+   protected double getSimulationTimeBetweenQueuedStepMessages()
+   {
+      return 0.05;
+   }
+
    @Test
    public void testTwoPlans() throws SimulationExceededMaximumTimeException
    {
@@ -72,6 +82,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       RobotSide side = RobotSide.LEFT;
 
       FootstepDataListMessage footMessage = new FootstepDataListMessage();
+      footMessage.getQueueingProperties().setMessageId(1);
 
       int firstNumberofSteps = 3;
       double stepX = 0.0;
@@ -98,6 +109,8 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
       footMessage = new FootstepDataListMessage();
       footMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+      footMessage.getQueueingProperties().setPreviousMessageId(1);
+      footMessage.getQueueingProperties().setMessageId(2);
 
       int secondNumberOfSteps = 3;
       for (int currentStep = 0; currentStep < secondNumberOfSteps; currentStep++)
@@ -112,7 +125,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
       simulationTestHelper.publishToController(footMessage);
 
-      simulationTime = transfer + (transfer + swing) * (secondNumberOfSteps + 1);
+      simulationTime = transfer + (transfer + swing) * (secondNumberOfSteps + 1) + getExtraSimulationTimeForQueueing();
 
       assertTrue(simulationTestHelper.simulateNow(simulationTime));
       assertEquals(firstNumberofSteps + secondNumberOfSteps, stepCounter.get());
@@ -235,7 +248,17 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       for (int currentStep = 0; currentStep < firstNumberofSteps; currentStep++)
       {
          FootstepDataListMessage footMessage = new FootstepDataListMessage();
-         footMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+         if (currentStep == 0)
+         {
+            footMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+            footMessage.getQueueingProperties().setMessageId(1);
+         }
+         else
+         {
+            footMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+            footMessage.getQueueingProperties().setPreviousMessageId(currentStep);
+            footMessage.getQueueingProperties().setMessageId(currentStep + 1);
+         }
 
          Point3D footLocation = new Point3D(stepX, side.negateIfRightSide(stepWidth / 2), 0.0);
          Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
@@ -243,7 +266,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
          side = side.getOppositeSide();
 
          simulationTestHelper.publishToController(footMessage);
-         simulationTestHelper.simulateNow(0.05);
+         simulationTestHelper.simulateNow(getSimulationTimeBetweenQueuedStepMessages());
 
          stepX += stepLength;
       }
@@ -252,7 +275,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
 
-      double simulationTime = intitialTransfer - transfer + (transfer + swing) * (firstNumberofSteps);
+      double simulationTime = intitialTransfer - transfer + (transfer + swing) * (firstNumberofSteps) + getExtraSimulationTimeForQueueing();
 
       assertTrue(simulationTestHelper.simulateNow(simulationTime));
 
