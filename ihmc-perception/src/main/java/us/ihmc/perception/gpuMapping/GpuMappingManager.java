@@ -26,9 +26,6 @@ import java.util.List;
  */
 public class GpuMappingManager
 {
-   /** Fixed assumed offset from the pelvis down to the ground, used to keep {@code resetOffset} tracking drift. */
-   private static final double HEIGHT_BELOW_PELVIS = 0.95;
-
    private final ROS2Node ros2Node;
    private final ReferenceFrame heightMapCenter;
    private final HeightMapParameters heightMapParameters;
@@ -125,13 +122,15 @@ public class GpuMappingManager
       RigidBodyTransform heightMapFrameToWorldFrame = new RigidBodyTransform(heightMapCenter.getTransformToWorldFrame());
       Point3D heightMapCenterOrigin = new Point3D(heightMapFrameToWorldFrame.getTranslation());
 
+
       // Keep the seed height for newly-exposed map cells tracking the robot's current elevation
-      heightMapExtractor.updateResetOffset(heightMapCenterOrigin.getZ(), HEIGHT_BELOW_PELVIS);
+      double footHeight = computeFootHeight();
+      heightMapExtractor.updateResetOffset(footHeight);
 
       if (firstTick)
       {
          // On the first tick of the update loop, call this reset, otherwise everything is initialized with value to 0 height, and things don't happen properly.
-         heightMapExtractor.reset(heightMapCenterOrigin.getZ(), HEIGHT_BELOW_PELVIS);
+         heightMapExtractor.reset(footHeight);
          firstTick = false;
       }
 
@@ -160,7 +159,7 @@ public class GpuMappingManager
                                 groundToWorld,
                                 driftOffsetInZ,
                                 heightMapCenterOrigin,
-                                computeFootHeight());
+                                footHeight);
 
       terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenterPoint);
 

@@ -202,7 +202,7 @@ public class HeightMapExtractor
 
    public void reset(double footHeight, double loweredValue)
    {
-      updateResetOffset(footHeight, loweredValue);
+      updateResetOffset(footHeight - loweredValue);
 
       globalMeanMap.setTo(new Scalar(resetOffset));
       globalVarianceMap.setTo(new Scalar(INVALID_CELL_VARIANCE));
@@ -214,12 +214,11 @@ public class HeightMapExtractor
     * cells with), without touching any already-registered map data. Meant to be called every update so
     * that seed height doesn't go stale between explicit {@link #reset} calls as the robot climbs or descends.
     *
-    * @param pelvisHeightInWorld current pelvis height (Z) in the world frame
-    * @param heightBelowPelvis   fixed assumed offset from the pelvis down to the ground
+    * @param groundHeightInWorld current ground height (Z) in the world frame, i.e. the height of the feet
     */
-   public void updateResetOffset(double pelvisHeightInWorld, double heightBelowPelvis)
+   public void updateResetOffset(double groundHeightInWorld)
    {
-      resetOffset = (float) (pelvisHeightInWorld - heightBelowPelvis);
+      resetOffset = (float) groundHeightInWorld;
    }
 
    public void update(GpuMat latestDepthImageGPU,
