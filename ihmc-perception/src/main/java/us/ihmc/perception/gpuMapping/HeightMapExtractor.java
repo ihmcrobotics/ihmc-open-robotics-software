@@ -209,10 +209,7 @@ public class HeightMapExtractor
    }
 
    /**
-    * Continuously tracks the robot's current elevation, unlike {@link #reset}: only updates
-    * {@link #resetOffset} (the height translateHeightMapKernel/icpApplyCorrectionKernel seed newly-exposed
-    * cells with), without touching any already-registered map data. Meant to be called every update so
-    * that seed height doesn't go stale between explicit {@link #reset} calls as the robot climbs or descends.
+    * Continuously tracks the robot's current elevation
     *
     * @param groundHeightInWorld current ground height (Z) in the world frame, i.e. the height of the feet
     */

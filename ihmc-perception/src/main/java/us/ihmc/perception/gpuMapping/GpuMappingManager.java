@@ -122,7 +122,6 @@ public class GpuMappingManager
       RigidBodyTransform heightMapFrameToWorldFrame = new RigidBodyTransform(heightMapCenter.getTransformToWorldFrame());
       Point3D heightMapCenterOrigin = new Point3D(heightMapFrameToWorldFrame.getTranslation());
 
-
       // Keep the seed height for newly-exposed map cells tracking the robot's current elevation
       double footHeight = computeFootHeight();
       heightMapExtractor.updateResetOffset(footHeight);
