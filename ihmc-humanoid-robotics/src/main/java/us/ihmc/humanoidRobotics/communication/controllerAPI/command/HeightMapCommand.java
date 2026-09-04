@@ -8,13 +8,10 @@ import us.ihmc.euclid.tuple2D.Point2D;
 
 public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMessageForController>
 {
-   /* By default, use the capacity defined in HeightMapMessage.msg */
-   private static final int DEFAULT_CAPACITY = new HeightMapMessageForController().getHeights().capacity();
-
    private long sequenceId;
 
    /* List of heights indexed by key. See HeightMapTools for definition of key */
-   private final TFloatArrayList heights = new TFloatArrayList(DEFAULT_CAPACITY);
+   private final TFloatArrayList heights = new TFloatArrayList();
    /* Zero-indexed key corresponding to the center of the height map */
    private int centerIndex;
    /* Number of cells along each axis of the height map */
@@ -27,14 +24,6 @@ public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMess
    private final Point2D gridCenter = new Point2D();
    /* Convenience fields for the height map dimensions */
    private double minX, maxX, minY, maxY;
-
-   public HeightMapCommand()
-   {
-      for (int i = 0; i < DEFAULT_CAPACITY; i++)
-      {
-         heights.add(0.0f);
-      }
-   }
 
    @Override
    public void clear()
@@ -51,11 +40,10 @@ public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMess
       this.mapSize = message.getWidthInMeters();
       this.gridCenter.set(message.getGridCenterX(), message.getGridCenterY());
 
+      heights.resetQuick();
       for (int i = 0; i < message.getHeights().size(); i++)
       {
-         // Calculate cell height
-         float cellHeight = message.getHeights().get(i);
-         heights.set(i, cellHeight);
+         heights.add(message.getHeights().get(i));
       }
 
       updateGridDimensions();
