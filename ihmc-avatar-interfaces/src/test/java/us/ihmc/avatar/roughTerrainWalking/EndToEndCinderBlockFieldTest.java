@@ -55,6 +55,11 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       return -1.0;
    }
 
+   public double getSlantedCinderBlockFieldSwingHeight()
+   {
+      return -1.0;
+   }
+
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
@@ -277,6 +282,14 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       EndToEndTestTools.setStepDurations(footsteps, 1.5 * walkingControllerParameters.getDefaultSwingTime(), Double.NaN);
+      double swingHeight = getSlantedCinderBlockFieldSwingHeight();
+      if (Double.isFinite(swingHeight) && swingHeight >= 0.0)
+      {
+         for (int i = 0; i < footsteps.getFootstepDataList().size(); i++)
+         {
+            footsteps.getFootstepDataList().get(i).setSwingHeight(swingHeight);
+         }
+      }
       simulationTestHelper.publishToController(footsteps);
       double simulationTime = 1.1 * EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
       assertTrue(simulationTestHelper.simulateNow(simulationTime));
