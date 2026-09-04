@@ -388,6 +388,9 @@ final class JointKFPrediction
       CommonOps_DDRM.mult(F, state.P, Ptmp);
       CommonOps_DDRM.multTransB(Ptmp, F, state.P); // FPF^T term
       CommonOps_DDRM.addEquals(state.P, Q);
+      // FPF^T + Q is symmetric in exact arithmetic; force it so round-off can't drift P before the encoder/pair
+      // updates read it this tick (matches the JAX reference's LSigmaL^T discipline).
+      JointLevelKFPreFilter.symmetrize(state.P);
    }
 
    /** True when Q's joint blocks come from the Schur-complement Qa (a robot model was provided). */

@@ -325,26 +325,17 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       prediction.predict();
       state.warnIfNonFiniteState("predict", -1);
 
-      // Encoder update; skipped wholesale if any encoder reads non-finite (boot transient).
-      // z_enc row i IS state index i: Henc = I_n and Renc's diagonal are BOTH keyed by state index, so the row
-      // an encoder lands on must be that joint's state index and nothing else. Indexing jointsByIndex makes
-      // that identity structural — there is no iteration order left to get wrong. It also allocates nothing
-      // under any compilation state, where the old keySet() loop only fit the 32 B/tick budget as long as C2
-      // scalar-replaced the iterator. Keep the fills INLINE.
-      boolean encodersValid = true;
-      for (int i = 0; i < state.numberOfJoints; i++)
-      {
-         OneDoFJointBasics j = state.jointsByIndex[i];
-         double q = state.sensorMap.getOneDoFJointOutput(j).getPosition();
-         if (!Double.isFinite(q))
-         {
-            encodersValid = false;
-            if (!state.warnedNonFiniteInput)
-               state.warnNonFiniteInputOnce("joint position of " + j.getName());
-         }
-         update.zEnc.set(i, 0, q);
-      }
-      if (encodersValid)
+      // Encoder update, gated PER JOINT (not all-or-nothing). Alex's encoders are intermittent, so a single
+      // non-finite reading used to drop the WHOLE encoder update — unpinning every joint's position for that
+      // tick. With the position pin gone, q integrates q̇ (which the pair-gyro/stance-anchor updates only
+      // loosely constrain, and the anchor can bias) with no correction, so q ramps without bound and, on the
+      // mass-matrix path, P grows without bound too — the divergence that drove the joint estimates to ~1e18.
+      // Fix: build the encoder measurement over only the joints whose encoder is finite this tick, so every
+      // good encoder keeps pinning its joint while just the bad one is skipped. When all are finite (the common
+      // case) this is exactly the previous full-rank update; the reduced matrices reuse the pre-sized scratch
+      // (reshape to a smaller size never allocates), so it stays allocation-free on the estimator thread.
+      int validEncoderCount = update.buildValidEncoderMeasurement();
+      if (validEncoderCount > 0)
       {
          update.josephUpdate(update.Henc, update.zEnc, update.Renc, JointKFUpdate.Channel.ENCODER);
          state.warnIfNonFiniteState("encoderUpdate", -1);

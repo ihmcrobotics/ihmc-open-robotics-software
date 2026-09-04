@@ -7,6 +7,7 @@ import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.dense.row.linsol.chol.LinearSolverChol_DDRM;
 import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -84,6 +85,11 @@ final class JointKFUpdate
 
    // Encoder position channel: H_enc = [I_n | 0 | 0].
    DMatrixRMaj Henc, Renc, zEnc;
+   /** Row r of the (possibly gated-down) encoder measurement observes state index encRowJointIndex[r]. Defaults
+    *  to the identity mapping (row i is joint i), which is what a full n-row call — direct test calls that
+    *  never go through {@link #buildValidEncoderMeasurement()} — has always assumed. Only
+    *  {@link #buildValidEncoderMeasurement()} ever compacts rows and departs from identity. */
+   private int[] encRowJointIndex;
    /** Wired per-joint encoder position measurement variance (rad^2), state order; the fallback where unwired. */
    private double[] encVarPerJoint;
    /** min_i encVarPerJoint[i]: the encoder-block S-pivot floor. A healthy S has every pivot >= its row's R_ii,
@@ -247,6 +253,9 @@ final class JointKFUpdate
       Renc = new DMatrixRMaj(n, n);
       zEnc = new DMatrixRMaj(n, 1);
       zqd = new DMatrixRMaj(n, 1);
+      encRowJointIndex = new int[n];
+      for (int i = 0; i < n; i++)
+         encRowJointIndex[i] = i;
 
       // IKH MUST start at dim x dim: the first josephUpdate does setIdentity(IKH) BEFORE multAdd reshapes it, so
       // on a 0x0 IKH the identity is silently dropped and the first covariance update becomes -KH, not I-KH.
@@ -271,6 +280,52 @@ final class JointKFUpdate
       Renc.zero();
       for (int i = 0; i < n; i++)
          Renc.set(i, i, encVarPerJoint[i]);
+   }
+
+   /**
+    * Rebuilds (Henc, zEnc, Renc) each tick over ONLY the joints whose encoder reads finite, one measurement row
+    * per good encoder, and returns the number of rows. This is the per-joint gate that replaces the old
+    * all-or-nothing skip: one intermittent encoder (Alex's are documented as such) no longer unpins every
+    * joint's position for the tick — see {@link JointLevelKFPreFilter#computeJointState()}.
+    *
+    * <p>Row r observes state index {@code encRowJointIndex[r]}, recorded so {@link #josephUpdate} still
+    * attributes each row's NIS/innovation to the right joint after compaction — row index alone stops being the
+    * state index once a bad joint's row is dropped. The scratch is grown to its full (n) size first, filled,
+    * then shrunk to the valid-row count; reshaping to a size no larger than the pre-allocated capacity never
+    * allocates, so this stays allocation-free on the estimator thread. When every encoder is finite this
+    * reproduces the previous full-rank identity encoder update exactly (r == n, mapping == identity). Returns 0
+    * when no encoder is finite (caller skips the update, as before).</p>
+    */
+   int buildValidEncoderMeasurement()
+   {
+      int n = state.numberOfJoints;
+      int dim = state.dim;
+      Henc.reshape(n, dim);
+      Henc.zero();
+      zEnc.reshape(n, 1);
+      int r = 0;
+      for (int i = 0; i < n; i++)
+      {
+         OneDoFJointBasics j = state.jointsByIndex[i];
+         double q = state.sensorMap.getOneDoFJointOutput(j).getPosition();
+         if (!Double.isFinite(q))
+         {
+            if (!state.warnedNonFiniteInput)
+               state.warnNonFiniteInputOnce("joint position of " + j.getName());
+            continue;
+         }
+         Henc.set(r, i, 1.0); // this measurement row pins joint state index i
+         zEnc.set(r, 0, q);
+         encRowJointIndex[r] = i;
+         r++;
+      }
+      Henc.reshape(r, dim);
+      zEnc.reshape(r, 1);
+      Renc.reshape(r, r);
+      Renc.zero();
+      for (int row = 0; row < r; row++)
+         Renc.set(row, row, encVarPerJoint[encRowJointIndex[row]]);
+      return r;
    }
 
    /**
@@ -401,14 +456,19 @@ final class JointKFUpdate
       CommonOps_DDRM.mult(Hm, state.x, nu);
       CommonOps_DDRM.changeSign(nu);
       CommonOps_DDRM.addEquals(nu, zm);
-      // Per-joint NIS for the two identity-block channels (row i IS joint i in state order). The channels are
-      // DISTINCT and must never cross-publish — an enum field, not a string prefix, is what keeps that true.
+      // Per-joint NIS for the two identity-block channels. VELOCITY still assumes row i IS joint i (always a
+      // full n-row call). ENCODER no longer can: buildValidEncoderMeasurement() may compact rows, so row i
+      // observes state index encRowJointIndex[i], not i itself — identity when nothing was gated (including
+      // every direct test call, which never touches encRowJointIndex and so keeps the identity allocate() seeds).
+      // The channels are DISTINCT and must never cross-publish — an enum field, not a string prefix, is what
+      // keeps that true.
       if (channel.nisChannel == Channel.NisChannel.ENCODER && yoEncNIS != null)
       {
          for (int i = 0; i < k; i++)
          {
-            yoEncNIS[i].set(nu.get(i, 0) * nu.get(i, 0) / S.get(i, i));
-            yoEncInnov[i].set(nu.get(i, 0)); // rad
+            int jointIndex = encRowJointIndex[i];
+            yoEncNIS[jointIndex].set(nu.get(i, 0) * nu.get(i, 0) / S.get(i, i));
+            yoEncInnov[jointIndex].set(nu.get(i, 0)); // rad
          }
       }
       else if (channel.nisChannel == Channel.NisChannel.VELOCITY && yoQdNIS != null)

@@ -189,6 +189,57 @@ public class JointLevelKFTrajectoryTest
       }
    }
 
+   /**
+    * Regression coverage for the divergence-to-~1e18 bug: a PERMANENTLY dead encoder (not a brief transient,
+    * unlike {@link #testTransientNonFiniteInputRecovers}) used to skip the encoder update wholesale every tick,
+    * unpinning EVERY joint's position — not just the dead one's — so the good-encoder joints' positions ramped
+    * on their own velocity estimate with no correction. {@link JointKFUpdate#buildValidEncoderMeasurement()}
+    * gates the encoder row per joint instead, so the good encoders should keep pinning their joints at encoder
+    * precision for the whole run; only the genuinely unmeasured joint is allowed to drift.
+    */
+   @Test
+   public void testSustainedDeadEncoderDoesNotDivergeTheOtherJoints()
+   {
+      JointLevelKFTestFixture f = JointLevelKFTestFixture.singlePair(9108L, 8, 1, 7);
+      int n = f.n;
+      double[] q = new double[n];
+      double[] qd = new double[n];
+
+      int warmup = 200;
+      for (int k = 0; k < warmup; k++)
+      {
+         trajectory(k, n, q, qd);
+         f.applyConsistentMotion(q, qd);
+         f.filter.computeJointState();
+      }
+
+      int deadJoint = 0;
+      int ticks = 7500; // matches the original bug report's hardware run length
+      for (int k = warmup; k < warmup + ticks; k++)
+      {
+         trajectory(k, n, q, qd);
+         f.applyConsistentMotion(q, qd);
+         f.sensorMap.setPosition(f.filteredJoints.get(deadJoint), Double.NaN); // dead from here on, not just one tick
+         f.filter.computeJointState();
+         assertAllFinite(f.filter.getStateVector(), "state stays finite through a sustained dead encoder, tick " + k);
+         assertAllFinite(f.filter.getCovariance(), "covariance stays finite through a sustained dead encoder, tick " + k);
+      }
+
+      DMatrixRMaj x = f.filter.getStateVector();
+      trajectory(warmup + ticks - 1, n, q, qd);
+      for (int i = 0; i < n; i++)
+      {
+         if (i == deadJoint)
+            continue; // unmeasured; only pair-gyro/velocity loosely constrain it, drift is expected and fine
+         assertEquals(q[i], x.get(i, 0), 5.0e-3,
+                      "good-encoder joint " + i + " must still track despite joint " + deadJoint + "'s permanently dead encoder");
+      }
+      // The old all-or-nothing skip drove even the GOOD joints to ~1e18 over a run this long; the dead joint's
+      // own position is allowed to drift since it is genuinely unmeasured, but not without bound.
+      assertTrue(Math.abs(x.get(deadJoint, 0)) < 10.0,
+                 "unmeasured joint drifts but must not diverge (pre-fix regression drove this to ~1e18): " + x.get(deadJoint, 0));
+   }
+
    @Test
    public void testPoisonedBiasCovarianceDoesNotLatchNaN()
    {
