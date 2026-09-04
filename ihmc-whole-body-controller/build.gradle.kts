@@ -4,6 +4,8 @@ plugins {
    id("us.ihmc.scs") version "0.4"
 }
 
+apply(from = "../gradle/java-compile-encoding.gradle.kts")
+
 ihmc {
    loadProductProperties("../product.properties")
    
