@@ -886,6 +886,13 @@ public class SCS2AvatarSimulationFactory
             if (headingAndVelocityEvaluationScript != null)
                headingAndVelocityEvaluationScript.reset();
          }
+
+         // No @Override so this compiles against SCS2 versions that predate Controller.isResetSupported();
+         // once SCS2 provides it, this method overrides it and reports that reset() above is safe to rely on.
+         public boolean isResetSupported()
+         {
+            return true;
+         }
       });
    }
 
@@ -962,7 +969,28 @@ public class SCS2AvatarSimulationFactory
    private void setupSimulatedRobotTimeProvider()
    {
       simulatedRobotTimeProvider = new SimulatedDRCRobotTimeProvider(simulationDT.get());
-      robot.getControllerManager().addController(() -> simulatedRobotTimeProvider.doControl());
+      robot.getControllerManager().addController(new Controller()
+      {
+         @Override
+         public void doControl()
+         {
+            simulatedRobotTimeProvider.doControl();
+         }
+
+         @Override
+         public void reset()
+         {
+            // The timestamp counter lives outside YoVariables and would otherwise keep counting from
+            // where it left off instead of restarting when the simulation is reset to its initial state.
+            simulatedRobotTimeProvider.set(0);
+         }
+
+         @Override
+         public boolean isResetSupported()
+         {
+            return true;
+         }
+      });
    }
 
    public void setSimulationName(String simulationName)
