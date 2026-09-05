@@ -26,6 +26,26 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       return Collections.emptyList();
    }
 
+   /**
+    * Which joint-level pre-filter implementation the estimator should construct.
+    * {@code ALPHA_COMPLEMENTARY} is the historical behavior (per-IMU-pair complementary joint fusion
+    * plus alpha-filtered IMU bias rejection); {@code JOINT_KF} selects the joint-level Kalman filter;
+    * {@code NONE} is an explicit pass-through (raw sensor values, zero biases) — the pre-seam
+    * behavior of the invariant pipeline, useful as a control condition. Note that on the DRC
+    * (kinematics-based) pipeline, {@code NONE} disables IMU-pair joint fusion AND IMU bias
+    * compensation, which is NOT that pipeline's historical behavior.
+    */
+   public enum JointLevelEstimatorType
+   {
+      NONE, ALPHA_COMPLEMENTARY, JOINT_KF
+   }
+
+   /** Selected once at construction time; the default preserves the historical behavior for all robots. */
+   public JointLevelEstimatorType getJointLevelEstimatorType()
+   {
+      return JointLevelEstimatorType.JOINT_KF;
+   }
+
    public boolean requestWristForceSensorCalibrationAtStart()
    {
       return false;
@@ -101,6 +121,51 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    public double getIMUYawDriftRateFilterFreqInHertz()
    {
       return 1.5e-3;
+   }
+
+   /**
+    * Per-joint encoder position measurement-noise standard deviation (rad), by joint name, consumed by the
+    * {@code JOINT_KF} joint-level pre-filter for its direct encoder q update's measurement covariance.
+    * Return {@code Double.NaN} (the default) to use the filter's built-in scalar fallback for that joint.
+    */
+   public double getEncoderPositionMeasurementStandardDeviation(String jointName)
+   {
+      return Double.NaN;
+   }
+
+   /**
+    * Per-joint encoder velocity measurement-noise standard deviation (rad/s), by joint name. Consumed by the
+    * {@code JOINT_KF} pre-filter's stance anchor for base->foot chain joints that are NOT filter states (their
+    * measured velocity enters the anchor as a known input, so its noise is propagated into the anchor's
+    * measurement covariance). Return {@code Double.NaN} (the default) to use the filter's built-in fallback.
+    */
+   public double getEncoderVelocityMeasurementStandardDeviation(String jointName)
+   {
+      return Double.NaN;
+   }
+
+   /**
+    * Whether the {@code JOINT_KF} pre-filter should consume the sensed joint velocity as a direct measurement
+    * of its q̇ states (in addition to the pair-gyro and stance-anchor observations). Enable only when the
+    * velocity signal's low-pass corner is known — see
+    * {@link #getJointVelocityMeasurementBreakFrequency(String)} — or verified to sit far above the motion band.
+    */
+   public boolean useDirectJointVelocityMeasurementInJointKF()
+   {
+      return false;
+   }
+
+   /**
+    * Effective first-order break frequency (Hz) of the low-pass cascade the sensed joint velocity passed
+    * through before reaching the estimator (e.g. drive-firmware LPF then the sensor-processing alpha filter;
+    * corners compose as {@code 1/f_eff = sum of 1/f_stage}). The {@code JOINT_KF} direct-velocity channel uses
+    * it to inflate that joint's measurement covariance by the instantaneous lag error. Return {@code NaN} (the
+    * default) to treat the measurement as instantaneous — correct when there is no filtering (sim) and honest
+    * on hardware only when the corner sits far above the motion band.
+    */
+   public double getJointVelocityMeasurementBreakFrequency(String jointName)
+   {
+      return Double.NaN;
    }
 
    public abstract boolean enableIMUBiasCompensation();

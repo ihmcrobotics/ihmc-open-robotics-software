@@ -7,5 +7,10 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 
 public interface StateEstimatorControllerFactory
 {
-   StateEstimatorController createStateEstimator(FullHumanoidRobotModel fullRobotModel, SensorReader sensorReader);
+   /**
+    * @param gravitationalAcceleration the same gravity the main estimator uses, passed by the estimator thread
+    *                                  factory so a secondary estimator cannot disagree with it. Sign not
+    *                                  considered; ignore it if the estimator is purely kinematic.
+    */
+   StateEstimatorController createStateEstimator(FullHumanoidRobotModel fullRobotModel, SensorReader sensorReader, double gravitationalAcceleration);
 }
