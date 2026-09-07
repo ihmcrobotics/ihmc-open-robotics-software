@@ -364,6 +364,21 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          stateTransitionFactories.add(new ControllerFailedTransitionFactory(currentControlStateEnum, HighLevelControllerName.FALLING_STATE));
    }
 
+   /**
+    * Adds a controller-failure transition that prefers {@code FALLING_STATE}, including while the
+    * robot is supported. If the falling transition is not selected, the normal fallback remains available.
+    */
+   public void addSupportedControllerFailureTransitionToFalling(HighLevelControllerName currentControlStateEnum,
+                                                                 HighLevelControllerName fallbackControlStateEnum)
+   {
+      stateTransitionFactories.add(new ControllerFailedTransitionFactory(currentControlStateEnum,
+                                                                          HighLevelControllerName.FALLING_STATE,
+                                                                          true));
+
+      if (!fallbackControlStateEnum.equals(HighLevelControllerName.FALLING_STATE))
+         stateTransitionFactories.add(new ControllerFailedTransitionFactory(currentControlStateEnum, fallbackControlStateEnum));
+   }
+
    public List<ControllerStateTransitionFactory<HighLevelControllerName>> getStateTransitionFactories()
    {
       return stateTransitionFactories;

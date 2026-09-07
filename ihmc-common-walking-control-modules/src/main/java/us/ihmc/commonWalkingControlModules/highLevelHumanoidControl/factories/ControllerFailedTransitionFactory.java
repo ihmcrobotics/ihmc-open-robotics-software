@@ -17,6 +17,7 @@ public class ControllerFailedTransitionFactory implements ControllerStateTransit
 
    private final HighLevelControllerName stateToAttachEnum;
    private final HighLevelControllerName nextStateEnum;
+   private final boolean transitionToFallingWhenSupported;
 
    /**
     * This transition will transition the robot from its current state into another state if the
@@ -27,8 +28,20 @@ public class ControllerFailedTransitionFactory implements ControllerStateTransit
     */
    public ControllerFailedTransitionFactory(HighLevelControllerName stateToAttachEnum, HighLevelControllerName nextStateEnum)
    {
+      this(stateToAttachEnum, nextStateEnum, false);
+   }
+
+   /**
+    * @param transitionToFallingWhenSupported when {@code true}, a controller failure may enter
+    *                                          {@code FALLING_STATE} even while the robot has support.
+    */
+   public ControllerFailedTransitionFactory(HighLevelControllerName stateToAttachEnum,
+                                            HighLevelControllerName nextStateEnum,
+                                            boolean transitionToFallingWhenSupported)
+   {
       this.stateToAttachEnum = stateToAttachEnum;
       this.nextStateEnum = nextStateEnum;
+      this.transitionToFallingWhenSupported = transitionToFallingWhenSupported;
    }
 
    /** {@inheritDoc} */
@@ -44,7 +57,8 @@ public class ControllerFailedTransitionFactory implements ControllerStateTransit
                                                                                                                 .getControllerFailedBoolean(),
                                                                                          () -> controllerFactoryHelper.getHighLevelControllerParameters()
                                                                                                                       .getIsRobotOffSupport(),
-                                                                                         nextStateEnum);
+                                                                                         nextStateEnum,
+                                                                                         transitionToFallingWhenSupported);
       stateTransition = new StateTransition<>(nextStateEnum, stateTransitionCondition);
 
       return stateTransition;
