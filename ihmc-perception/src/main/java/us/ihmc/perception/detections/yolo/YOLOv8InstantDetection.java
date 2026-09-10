@@ -113,8 +113,6 @@ public class YOLOv8InstantDetection extends InstantDetection implements Trackabl
       this.trackId = trackId;
    }
 
-   // ---------------- existing YOLO getters ----------------
-
    public List<Point3D32> getObjectPointCloud()
    {
       return objectPointCloud;

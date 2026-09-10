@@ -44,7 +44,6 @@ import java.util.function.Consumer;
 public class TrackedYOLOv8DetectionExecutor
 {
    private final ROS2Node ros2Node;
-   private final boolean ownsRos2Node;
 
    private final CUDAPointCloudExtractor extractor;
    private final CUDADepthImageSegmenter segmenter;
@@ -84,18 +83,6 @@ public class TrackedYOLOv8DetectionExecutor
    private final RepeatingTaskThread taskExecutorThread =
          new RepeatingTaskThread("YOLOExecutor", this::executeTasks, DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
-   /**
-    * New-style constructor: executor owns its own ROS2 node.
-    */
-   public TrackedYOLOv8DetectionExecutor(ROS2PeerClockOffsetEstimator peerClockEstimator, BooleanSupplier annotatedImageDemanded)
-   {
-      this(new ROS2Node("yolo_detection_manager"), true, peerClockEstimator, annotatedImageDemanded);
-   }
-
-   /**
-    * Old-style constructor: caller provides the ROS2 node.
-    * Kept for backward compatibility.
-    */
    public TrackedYOLOv8DetectionExecutor(ROS2Node ros2Node,
                                          ROS2PeerClockOffsetEstimator peerClockEstimator,
                                          BooleanSupplier annotatedImageDemanded)
@@ -109,7 +96,6 @@ public class TrackedYOLOv8DetectionExecutor
                                           BooleanSupplier annotatedImageDemanded)
    {
       this.ros2Node = ros2Node;
-      this.ownsRos2Node = ownsRos2Node;
       this.annotatedImageDemanded = annotatedImageDemanded;
       this.annotatedImagePublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_ANNOTATED_IMAGE);
 
@@ -197,18 +183,7 @@ public class TrackedYOLOv8DetectionExecutor
       parameters.getModelsToRun().clear();
    }
 
-   /**
-    * Backward-compatible alias for older code.
-    */
    public void runNextModel(RawImage colorImage, RawImage depthImage)
-   {
-      runNextEnabledModel(colorImage, depthImage);
-   }
-
-   /**
-    * Current preferred name.
-    */
-   public void runNextEnabledModel(RawImage colorImage, RawImage depthImage)
    {
       for (int i = 0; i < availableModels.size(); ++i)
       {
@@ -577,9 +552,6 @@ public class TrackedYOLOv8DetectionExecutor
       segmenter.close();
 
       parameters.close();
-
-      if (ownsRos2Node)
-         ros2Node.close();
 
       System.out.println("Destroyed " + getClass().getSimpleName());
    }
