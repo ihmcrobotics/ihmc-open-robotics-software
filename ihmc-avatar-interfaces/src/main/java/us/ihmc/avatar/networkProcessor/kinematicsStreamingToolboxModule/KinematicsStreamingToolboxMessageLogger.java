@@ -84,21 +84,21 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
             capturabilityBasedStatus.set(message);
       });
 
-      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getInputTopic(robotName).withType(ToolboxStateMessage.class),
+      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getInputTopic(robotName).withTypeName(ToolboxStateMessage.class),
                                   reader ->
                                   {
                                      ToolboxStateMessage message = reader.read();
                                      if (message != null)
                                         processToolboxStateMessage(message);
                                   });
-      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getInputTopic(robotName).withType(KinematicsToolboxConfigurationMessage.class),
+      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getInputTopic(robotName).withTypeName(KinematicsToolboxConfigurationMessage.class),
                                   reader ->
                                   {
                                      KinematicsToolboxConfigurationMessage message = reader.read();
                                      if (message != null)
                                         kinematicsToolboxConfigurationMessage.set(message);
                                   });
-      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getInputTopic(robotName).withType(KinematicsStreamingToolboxInputMessage.class),
+      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getInputTopic(robotName).withTypeName(KinematicsStreamingToolboxInputMessage.class),
                                   reader ->
                                   {
                                      KinematicsStreamingToolboxInputMessage message = reader.read();
@@ -106,7 +106,7 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
                                         kinematicsStreamingToolboxInputMessage.set(message);
                                   });
 
-      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getOutputTopic(robotName).withType(KinematicsToolboxOutputStatus.class),
+      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getOutputTopic(robotName).withTypeName(KinematicsToolboxOutputStatus.class),
                                   reader ->
                                   {
                                      KinematicsToolboxOutputStatus message = reader.read();
