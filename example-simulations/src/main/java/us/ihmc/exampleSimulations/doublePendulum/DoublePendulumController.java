@@ -1,28 +1,33 @@
 package us.ihmc.exampleSimulations.doublePendulum;
 
-import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.scs2.definition.controller.ControllerInput;
+import us.ihmc.scs2.definition.controller.ControllerOutput;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.definition.state.interfaces.OneDoFJointStateBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class DoublePendulumController implements RobotController
+public class DoublePendulumController implements Controller
 {
 
-   // tau_* is torque, q_* is position, qd_* is velocity for joint *
-   private YoDouble tau_joint1, tau_joint2, q_joint1, q_joint2, qd_joint1, qd_joint2;
+   // joint1/joint2 give read access to position/velocity, joint1Output/joint2Output give write access to torque
+   private final OneDoFJointReadOnly joint1, joint2;
+   private final OneDoFJointStateBasics joint1Output, joint2Output;
    private YoDouble k1, k2, k3, k4; // these are the controller gain parameters
    private final YoRegistry registry = new YoRegistry("DoublePendulumController");
    private String name;
-   public DoublePendulumController(DoublePendulumRobot rob, String name)
+
+   public DoublePendulumController(ControllerInput controllerInput, ControllerOutput controllerOutput, String name)
    {
       this.name = name;
 
-      // get variable references from the robot
-      q_joint1 = (YoDouble)rob.findVariable("q_joint1");
-      qd_joint1 = (YoDouble)rob.findVariable("qd_joint1");
-      tau_joint1 = (YoDouble)rob.findVariable("tau_joint1");
-      q_joint2 = (YoDouble)rob.findVariable("q_joint2");
-      qd_joint2 = (YoDouble)rob.findVariable("qd_joint2");
-      tau_joint2 = (YoDouble)rob.findVariable("tau_joint2");
+      // get joint state handles from the robot
+      joint1 = (OneDoFJointReadOnly) controllerInput.getInput().findJoint("joint1");
+      joint2 = (OneDoFJointReadOnly) controllerInput.getInput().findJoint("joint2");
+      joint1Output = controllerOutput.getOneDoFJointOutput("joint1");
+      joint2Output = controllerOutput.getOneDoFJointOutput("joint2");
+
       // set controller gains
       // gains taken from Mark Spong (1995) "The Swing Up Control Problem for the Acrobot"
       k1 = new YoDouble("k1", registry);
@@ -34,11 +39,13 @@ public class DoublePendulumController implements RobotController
       k4 = new YoDouble("k4", registry);
       k4.set(-49.05);
    }
+
    public void doControl()
    {
-      tau_joint1.set(0.0); // free bearing
+      joint1Output.setEffort(0.0); // free bearing
       // set the torque at the controlled second joint
-      tau_joint2.set(-k1.getDoubleValue() * q_joint1.getDoubleValue() - k2.getDoubleValue() * q_joint2.getDoubleValue() - k3.getDoubleValue() * qd_joint1.getDoubleValue() - k4.getDoubleValue() * qd_joint2.getDoubleValue());
+      joint2Output.setEffort(-k1.getDoubleValue() * joint1.getQ() - k2.getDoubleValue() * joint2.getQ() - k3.getDoubleValue() * joint1.getQd()
+                              - k4.getDoubleValue() * joint2.getQd());
    }
 
    public YoRegistry getYoRegistry()
@@ -53,9 +60,5 @@ public class DoublePendulumController implements RobotController
 
    public void initialize()
    {
-   }
-   public String getDescription()
-   {
-      return getName();
    }
 }

@@ -3,6 +3,7 @@ package us.ihmc.avatar.wholeBodyHardwareControl;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarEstimatorThreadFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.logging.SCS2YoGraphicLogTools;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.log.LogTools;
@@ -145,7 +146,7 @@ public class AvatarEstimatorProcessFactory
       // Set the root registry as the YoVariableServer's main registry
       yoVariableServer.setMainRegistry(rootRegistry,
                                        estimatorThread.get().getFullRobotModel().getRootJoint().subtreeList(),
-                                       estimatorThread.get().getSCS2YoGraphics());
+                                       SCS2YoGraphicLogTools.toYoGraphicsData(estimatorThread.get().getSCS2YoGraphics()));
 
       // Create threading manager
       threadingManager.set(new AvatarEstimatorThreadManager(robotModel.getSimpleRobotName().toLowerCase(),

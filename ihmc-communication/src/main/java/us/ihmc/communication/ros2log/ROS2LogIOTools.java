@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import gnu.trove.list.array.TLongArrayList;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
@@ -84,7 +85,17 @@ public class ROS2LogIOTools
             for (int message_idx = 0; message_idx < messagesToLog.size(); message_idx++)
             {
                timestamps.add(timestampsToLog.get(message_idx) - firstTimestamp);
-               serializeUnknownMessage(serialization, messagesToLog.get(message_idx), messages);
+               Object messageToLog = messagesToLog.get(message_idx);
+               if (message_idx == messagesToLog.size() - 1 && messageToLog instanceof KinematicsToolboxOutputStatus status)
+               {
+                  KinematicsToolboxOutputStatus lastStatus = new KinematicsToolboxOutputStatus(status);
+                  lastStatus.setEndReplay(true);
+                  serializeUnknownMessage(serialization, lastStatus, messages);
+               }
+               else
+               {
+                  serializeUnknownMessage(serialization, messageToLog, messages);
+               }
             }
          }
 

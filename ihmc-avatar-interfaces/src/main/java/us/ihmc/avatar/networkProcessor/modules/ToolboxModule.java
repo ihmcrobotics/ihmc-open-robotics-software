@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.modules;
 
 import com.google.common.base.CaseFormat;
 import toolbox_msgs.ToolboxStateMessage;
+import us.ihmc.avatar.logging.SCS2YoGraphicLogTools;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
 import us.ihmc.commons.Conversions;
@@ -184,7 +185,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
                yoVariableServer = new YoVariableServer(getClass(), modelProvider, yoVariableServerSettings, YO_VARIABLE_SERVER_DT);
                yoVariableServer.setMainRegistry(registry,
                                                 createYoVariableServerJointList(fullRobotModel.getElevator()),
-                                                graphicGroupDefinition);
+                                                SCS2YoGraphicLogTools.toYoGraphicsData(graphicGroupDefinition));
                yoVariableServer.start();
                break;
             }

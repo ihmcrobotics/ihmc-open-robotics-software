@@ -18,7 +18,7 @@ public class FlatGroundEnvironment implements CommonAvatarEnvironmentInterface
 
    public FlatGroundEnvironment()
    {
-      this(9, 9);
+      this(1, 1);
    }
 
    public FlatGroundEnvironment(int numberX, int numberY)

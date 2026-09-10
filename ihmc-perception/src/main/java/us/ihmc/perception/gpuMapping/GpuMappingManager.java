@@ -88,6 +88,7 @@ public class GpuMappingManager
       controllerHeightMapMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(HeightMapMessageForController.class, robotName));
    }
 
+   boolean firstTick = true;
    /**
     * Update the Height Map with the latest depth image from the sensor
     */
@@ -121,6 +122,17 @@ public class GpuMappingManager
       RigidBodyTransform heightMapFrameToWorldFrame = new RigidBodyTransform(heightMapCenter.getTransformToWorldFrame());
       Point3D heightMapCenterOrigin = new Point3D(heightMapFrameToWorldFrame.getTranslation());
 
+      // Keep the seed height for newly-exposed map cells tracking the robot's current elevation
+      double footHeight = computeFootHeight();
+      heightMapExtractor.updateResetOffset(footHeight);
+
+      if (firstTick)
+      {
+         // On the first tick of the update loop, call this reset, otherwise everything is initialized with value to 0 height, and things don't happen properly.
+         heightMapExtractor.reset(footHeight);
+         firstTick = false;
+      }
+
       // -------- Update the Height Map with the latest depth image from the sensor --------------
       // We expect to have knowledge of where the camera is in relation to the world so we can accurately display the height map
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
@@ -146,7 +158,7 @@ public class GpuMappingManager
                                 groundToWorld,
                                 driftOffsetInZ,
                                 heightMapCenterOrigin,
-                                computeFootHeight());
+                                footHeight);
 
       terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenterPoint);
 

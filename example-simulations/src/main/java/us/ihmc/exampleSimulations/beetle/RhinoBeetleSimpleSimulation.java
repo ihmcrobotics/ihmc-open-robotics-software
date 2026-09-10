@@ -2,104 +2,104 @@ package us.ihmc.exampleSimulations.beetle;
 
 import java.util.ArrayList;
 
-import javax.swing.JButton;
-
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.exampleSimulations.beetle.controller.HexapodSimulationController;
 import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleInverseDynamicsParameters;
 import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleModelFactory;
-import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleSimInitialSetup;
 import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleVirtualModelControlParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.simulationConstructionSetTools.dataExporter.TorqueSpeedDataExporter;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.GroundContactModel;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
-import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
-import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
-import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
-import us.ihmc.tools.inputDevices.joystick.Joystick;
-import us.ihmc.tools.inputDevices.joystick.JoystickModel;
-import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
+import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
+import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
+import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
+import us.ihmc.simulationConstructionSetTools.tools.TerrainObjectDefinitionTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RhinoBeetleSimpleSimulation
 {
    private static final double SIMULATION_DT = 0.0001;
    private static final double CONTROLLER_DT = 0.001;
-   private static final boolean SHOW_EXPORT_TORQUE_AND_SPEED = true;
+   private static final int CONTROL_TICKS_PER_SIMULATION_TICK = (int) Math.round(CONTROLLER_DT / SIMULATION_DT);
 
    public RhinoBeetleSimpleSimulation()
    {
       RhinoBeetleModelFactory modelFactory = new RhinoBeetleModelFactory();
-      FloatingRootJointRobot sdfRobot = modelFactory.createSdfRobot();
-      YoRegistry registry = sdfRobot.getRobotsYoRegistry();
+      RobotDefinition robotDefinition = modelFactory.getRobotDefinition();
       FullRobotModel fullRobotModel = modelFactory.createFullRobotModel();
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      
+
+      YoRegistry registry = new YoRegistry("RhinoBeetleParameters");
       ArrayList<String> jointsToControl = new ArrayList<>();
-      
+
       RhinoBeetleInverseDynamicsParameters idParameters = new RhinoBeetleInverseDynamicsParameters(registry);
       RhinoBeetleVirtualModelControlParameters vmcParameters = new RhinoBeetleVirtualModelControlParameters(registry);
-      HexapodSimulationController controller = new HexapodSimulationController(fullRobotModel, sdfRobot, jointsToControl, idParameters, vmcParameters, yoGraphicsListRegistry, CONTROLLER_DT);
-      sdfRobot.setController(controller, (int) (CONTROLLER_DT / SIMULATION_DT));
-      GroundContactModel groundContactModel = createGroundContactModel(sdfRobot);
-      sdfRobot.setGroundContactModel(groundContactModel);
-      
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
+      HexapodSimulationController[] controllerHolder = new HexapodSimulationController[1];
+      robotDefinition.addControllerDefinition((controllerInput, controllerOutput) -> controllerHolder[0] = new HexapodSimulationController(controllerInput,
+                                                                                                                                             controllerOutput,
+                                                                                                                                             fullRobotModel,
+                                                                                                                                             jointsToControl,
+                                                                                                                                             idParameters,
+                                                                                                                                             vmcParameters,
+                                                                                                                                             yoGraphicsListRegistry,
+                                                                                                                                             CONTROLLER_DT,
+                                                                                                                                             CONTROL_TICKS_PER_SIMULATION_TICK));
 
-      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
-      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
-      SimulationOverheadPlotter overheadPlotter = simulationOverheadPlotterFactory.createOverheadPlotter();
-      overheadPlotter.setXVariableToTrack((YoDouble) sdfRobot.findVariable("q_x"));
-      overheadPlotter.setYVariableToTrack((YoDouble) sdfRobot.findVariable("q_y"));
+      // Unlike SCS1's LinearGroundContactModel, SCS2's ContactPointBasedForceCalculator computes the
+      // normal force as Kz * penetration / (stiffeningLength - penetration), ramping to a hard wall as
+      // penetration approaches stiffeningLength (falling back to a fixed 0.002 denominator once within
+      // 2mm of it). stiffeningLength has no SCS1 analog and defaults to 0.0 when unset, which makes that
+      // denominator negative for any real penetration - so the model always took the hard-wall branch,
+      // Kz * penetration / 0.002 (an effective stiffness of Kz * 500 from the first millimeter of contact),
+      // which is what was driving the leg joints unstable.
+      //
+      // stiffeningLength should be picked as a genuine physical bound on how far a foot may sink before
+      // the ground goes rigid, sized to the robot: total mass here is ~9.5kg (5kg body + 18 * 0.25kg
+      // links, see model.sdf), so on a tripod stance each planted foot carries ~31N. Solving the engine's
+      // static equilibrium Kz * z / (L - z) = 31N for z with Kz=200 and L=0.015 gives ~2mm of sink at
+      // rest - a reasonable soft-ground look with 7x headroom below L before hitting the hard-wall regime,
+      // enough to absorb footstep-impact transients without saturating every step.
+      ContactPointBasedContactParameters contactParameters = new ContactPointBasedContactParameters();
+      contactParameters.setKz(200.0);
+      contactParameters.setBz(250.0);
+      contactParameters.setKxy(5000.0);
+      contactParameters.setBxy(100.0);
+      contactParameters.setStiffeningLength(0.015);
 
-      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      scs.setDT(SIMULATION_DT, 10);
+      SimulationConstructionSet2 scs = new SimulationConstructionSet2("RhinoBeetle",
+                                                                        PhysicsEngineFactory.newContactPointBasedPhysicsEngineFactory(contactParameters));
+      scs.getSimulationSession().setGravity(0.0, 0.0, -9.81);
+      scs.addTerrainObject(flatGround());
+      scs.addRobot(robotDefinition);
+      scs.getRootRegistry().addChild(registry);
+      scs.setDT(SIMULATION_DT);
 
-      if (SHOW_EXPORT_TORQUE_AND_SPEED)
-      {
-         JButton exportTorqueAndSpeedButton = new JButton("Export Torque And Speed");
-         TorqueSpeedDataExporter dataExporter = new TorqueSpeedDataExporter(scs, sdfRobot, RhinoBeetleSimpleSimulation.class, getClass().getSimpleName());
-         exportTorqueAndSpeedButton.addActionListener(dataExporter);
-         scs.addButton(exportTorqueAndSpeedButton);
-      }
-      
+      HexapodSimulationController controller = controllerHolder[0];
+      scs.addYoGraphic(controller.getSCS2YoGraphics());
+      scs.requestPlotter2DCoordinateTracking(controller.getBodyPosition2D().getYoX().getName(),
+                                              controller.getBodyPosition2D().getYoY().getName(),
+                                              ReferenceFrame.getWorldFrame().getName());
+
       DefaultParameterReader reader = new DefaultParameterReader();
       reader.readParametersInRegistry(registry);
 
-      RhinoBeetleSimInitialSetup initialSetup = new RhinoBeetleSimInitialSetup();
-      initialSetup.initializeRobot(sdfRobot, modelFactory.getJointNameMap());
-      scs.startOnAThread();
-      scs.simulate();
-      
-      try
-      {
-         final Joystick gamePad = new Joystick(JoystickModel.XBOX_ONE, 0);
-         HexapodGamePadManager gamePadManager = new HexapodGamePadManager(gamePad, registry);
-      }
-      catch (JoystickNotFoundException e)
-      {
-         PrintTools.warn("Xbox controller 1 (for body) not connected!");
-      }
+      scs.startSimulationThread();
+      scs.play();
    }
 
-   private GroundContactModel createGroundContactModel(FloatingRootJointRobot sdfRobot)
+   /**
+    * Same flat-ground terrain and SCS1-to-SCS2 conversion path used by ZuluFlatGroundWalkingTrack
+    * (via SCS2AvatarSimulationFactory.setCommonAvatarEnvrionmentInterface(...)), called directly here
+    * without pulling in the full avatar simulation factory.
+    */
+   private static TerrainObjectDefinition flatGround()
    {
-      FlatGroundProfile groundProfile3D = new FlatGroundProfile(0.0);
-
-      LinearGroundContactModel groundContactModel = new LinearGroundContactModel(sdfRobot, sdfRobot.getRobotsYoRegistry());
-      groundContactModel.setZStiffness(200.0);
-      groundContactModel.setZDamping(250.0);
-      groundContactModel.setXYStiffness(5000.0);
-      groundContactModel.setXYDamping(100.0);
-      groundContactModel.setGroundProfile3D(groundProfile3D);
-      return groundContactModel;
+      return TerrainObjectDefinitionTools.toTerrainObjectDefinition(new FlatGroundEnvironment());
    }
 
    public static void main(String[] args)

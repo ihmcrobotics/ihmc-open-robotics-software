@@ -253,6 +253,56 @@ public class ROS2LogReplay
       return replaySpeed;
    }
 
+   /**
+    * 0-based index of the latest message sent on any loaded topic, or {@code -1} if none yet.
+    */
+   public int getCurrentStepIndex()
+   {
+      if (!isReady())
+         return -1;
+
+      int index = -1;
+      for (ReplayTopicManager<?> topicManager : topicManagers)
+         index = Math.max(index, topicManager.getLastSentIndex());
+      return index;
+   }
+
+   /**
+    * Number of logged messages on the densest topic (typical UI "total steps").
+    */
+   public int getNumberOfSteps()
+   {
+      if (!isReady())
+         return 0;
+
+      int count = 0;
+      for (ReplayTopicManager<?> topicManager : topicManagers)
+         count = Math.max(count, topicManager.getMessageCount());
+      return count;
+   }
+
+   /**
+    * Current replay clock in nanoseconds (paused time excluded, speed applied), or {@code 0} before start.
+    */
+   public long getCurrentReplayTimeNanos()
+   {
+      return lastReplayTime;
+   }
+
+   /**
+    * Duration of the loaded log in nanoseconds (max end timestamp across topics).
+    */
+   public long getTotalDurationNanos()
+   {
+      if (!isReady())
+         return 0L;
+
+      long duration = 0L;
+      for (ReplayTopicManager<?> topicManager : topicManagers)
+         duration = Math.max(duration, topicManager.getEndTimestamp());
+      return duration;
+   }
+
    public <T extends ROS2Message<T>> void addReplayMutator(ROS2Topic<T> topic, ObjLongConsumer<T> mutator)
    {
       ReplayTopicManager<?> topicManager = topicManagersMap.get(topic.getName());

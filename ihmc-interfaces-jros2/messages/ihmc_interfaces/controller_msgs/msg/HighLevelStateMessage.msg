@@ -21,3 +21,6 @@ uint64 sequence_id
 
 # Specifies the which state the controller should transition into.
 byte high_level_controller_name 255
+# Optional trajectory duration for transitions into joint setpoint states (for example, stand prep or ground prep).
+# Values less than or equal to 0 use the controller’s default duration.
+float64 trajectory_time 0.0

@@ -90,7 +90,7 @@ public class WaitingToLandState implements State
       if (previousFootstepStatusMessage.getSequenceId() == footstepStatusMessage.getSequenceId())
          return false;
 
-      previousFootstepStatusMessage = footstepStatusMessage;
+      previousFootstepStatusMessage.set(footstepStatusMessage);
       return footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED;
    }
 }

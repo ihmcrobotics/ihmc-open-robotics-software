@@ -99,6 +99,9 @@ public class ControllerAPIDefinition
       commands.add(Point2DCommand.class);
       commands.add(RLModelSelectionCommand.class);
 
+      /** Commands supported by the RL controoler, in this repo*/
+      commands.add(HeightMapCommand.class);
+
       controllerSupportedCommands = new ArrayList<>(commands);
 
       controllerSupportedStatusMessages = ControllerAPI.outputMessageClasses.stream().toList();

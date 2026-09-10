@@ -24,6 +24,7 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulationSession
 {
@@ -35,6 +36,7 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
    private final List<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
    private SCS2AvatarSimulation avatarSimulation;
    private Consumer<SCS2AvatarSimulationFactory> externalFactorySetup = null;
+   private Supplier<SCS2AvatarSimulation> avatarSimulationSupplier = null;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    public RDXSCS2HumanoidSimulationManager(RDXBaseUI baseUI, DRCRobotModel robotModel)
@@ -60,7 +62,8 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
       });
       getDestroyables().add(() ->
       {
-         avatarSimulation.destroy();
+         if (avatarSimulation != null)
+            avatarSimulation.destroy();
       });
 
       robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, initialYaw, initialX, initialY);
@@ -71,53 +74,58 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
 
    public SimulationSession buildSession()
    {
-      AsyncROS2Node asyncROS2Node = new AsyncROS2Node("humanoid_simulation");
-
-      SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
-      avatarSimulationFactory.setRobotModel(robotModel);
-      avatarSimulationFactory.setAsyncROS2Node(asyncROS2Node);
-      avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
-      for (TerrainObjectDefinition terrainObjectDefinition : terrainObjectDefinitions)
+      if (avatarSimulationSupplier != null)
+         avatarSimulation = avatarSimulationSupplier.get();
+      else
       {
-         avatarSimulationFactory.addTerrainObjectDefinition(terrainObjectDefinition);
-      }
-      for (RobotDefinition secondaryRobotDefinition : secondaryRobotDefinitions)
-      {
-         // FIXME Technically the inertial frame could be different here
-         avatarSimulationFactory.addSecondaryRobot(new Robot(secondaryRobotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME));
-      }
-      avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
-      avatarSimulationFactory.setCreateYoVariableServer(true);
-      avatarSimulationFactory.setUseBulletPhysicsEngine(true);
-      avatarSimulationFactory.setUseRobotDefinitionCollisions(false);
-      avatarSimulationFactory.setShowGUI(false);
-      if (externalFactorySetup != null)
-         externalFactorySetup.accept(avatarSimulationFactory);
+         AsyncROS2Node asyncROS2Node = new AsyncROS2Node("humanoid_simulation");
 
-      avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
-      avatarSimulation.setSystemExitOnDestroy(false);
-
-      getAdditionalImGuiWidgets().add(() ->
-      {
-         if (ImGui.button(labels.get("Reinitialize State Estimator")))
+         SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
+         avatarSimulationFactory.setRobotModel(robotModel);
+         avatarSimulationFactory.setAsyncROS2Node(asyncROS2Node);
+         avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, walkingScriptParameters);
+         for (TerrainObjectDefinition terrainObjectDefinition : terrainObjectDefinitions)
          {
-            if (getSession().getPhysicsEngine() instanceof BulletPhysicsEngine bulletPhysicsEngine)
+            avatarSimulationFactory.addTerrainObjectDefinition(terrainObjectDefinition);
+         }
+         for (RobotDefinition secondaryRobotDefinition : secondaryRobotDefinitions)
+         {
+            // FIXME Technically the inertial frame could be different here
+            avatarSimulationFactory.addSecondaryRobot(new Robot(secondaryRobotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME));
+         }
+         avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
+         avatarSimulationFactory.setCreateYoVariableServer(true);
+         avatarSimulationFactory.setUseBulletPhysicsEngine(true);
+         avatarSimulationFactory.setUseRobotDefinitionCollisions(false);
+         avatarSimulationFactory.setShowGUI(false);
+         if (externalFactorySetup != null)
+            externalFactorySetup.accept(avatarSimulationFactory);
+
+         avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
+
+         getAdditionalImGuiWidgets().add(() ->
+         {
+            if (ImGui.button(labels.get("Reinitialize State Estimator")))
             {
-               for (BulletRobot bulletRobot : bulletPhysicsEngine.getBulletRobots())
+               if (getSession().getPhysicsEngine() instanceof BulletPhysicsEngine bulletPhysicsEngine)
                {
-                  if (bulletRobot.getName().equalsIgnoreCase(robotModel.getSimpleRobotName()))
+                  for (BulletRobot bulletRobot : bulletPhysicsEngine.getBulletRobots())
                   {
-                     TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
-                     SubtreeStreams.fromChildren(OneDoFJointBasics.class,
-                                                 bulletRobot.getRootBody()).forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
-                     avatarSimulation.getEstimatorThread().initializeStateEstimators(bulletRobot.getFloatingRootJoint().getFrameAfterJoint()
-                                                                                                .getTransformToParent(), jointPositions);
+                     if (bulletRobot.getName().equalsIgnoreCase(robotModel.getSimpleRobotName()))
+                     {
+                        TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
+                        SubtreeStreams.fromChildren(OneDoFJointBasics.class,
+                                                    bulletRobot.getRootBody()).forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
+                        avatarSimulation.getEstimatorThread().initializeStateEstimators(bulletRobot.getFloatingRootJoint().getFrameAfterJoint()
+                                                                                                   .getTransformToParent(), jointPositions);
+                     }
                   }
                }
             }
-         }
-      });
+         });
+      }
 
+      avatarSimulation.setSystemExitOnDestroy(false);
       return avatarSimulation.getSimulationConstructionSet().getSimulationSession();
    }
 
@@ -134,6 +142,11 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
    public void setExternalFactorySetup(Consumer<SCS2AvatarSimulationFactory> externalFactorySetup)
    {
       this.externalFactorySetup = externalFactorySetup;
+   }
+
+   public void setAvatarSimulationSupplier(Supplier<SCS2AvatarSimulation> avatarSimulationSupplier)
+   {
+      this.avatarSimulationSupplier = avatarSimulationSupplier;
    }
 
    public SCS2AvatarSimulation getAvatarSimulation()
