@@ -14,4 +14,3 @@
 *.bin filter=lfs diff=lfs merge=lfs -text
 *.raw filter=lfs diff=lfs merge=lfs -text
 *.webm filter=lfs diff=lfs merge=lfs -text
-ihmc-perception/src/main/resources/yolo/best_multi_04_09_2026/other/*.png filter=lfs diff=lfs merge=lfs -text
