@@ -1,5 +1,7 @@
 package us.ihmc.perception.detections.yolo;
 
+import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import org.ejml.data.FMatrixRMaj;
 import org.ejml.dense.row.CommonOps_FDRM;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -25,15 +27,9 @@ interface TrackableDetection
 
    double getConfidence();
 
-   float getX1();
-   float getY1();
-   float getX2();
-   float getY2();
+   BoundingBox2DReadOnly getBoundingBox();
 
-   boolean has3D();
-   float getCx();
-   float getCy();
-   float getCz();
+   Pose3DReadOnly getPose();
 
    void setTrackId(int id);
    int getTrackId();
