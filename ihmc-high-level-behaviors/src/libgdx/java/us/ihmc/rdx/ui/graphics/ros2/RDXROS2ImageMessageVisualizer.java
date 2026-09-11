@@ -51,22 +51,6 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2ImageVisualizer<ImageM
                                   });
    }
 
-//   public RDXROS2ImageMessageVisualizer(String title, ROS2Node ros2Node, ROS2Topic<ImageMessage> topic)
-//   {
-//      super(title, topic.getName(), false);
-//      this.topic = topic;
-//
-//      this.ros2Node = ros2Node;
-//
-//      addActivenessChangeCallback(isActive ->
-//      {
-//         if (isActive && subscription == null)
-//            subscribe();
-//         else if (!isActive && subscription != null)
-//            unsubscribe();
-//      });
-//   }
-
    private void subscribe()
    {
       if (subscription != null)
