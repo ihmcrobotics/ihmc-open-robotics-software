@@ -1,5 +1,7 @@
 package us.ihmc.perception.detections.yolo;
 
+import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
+
 import java.util.*;
 import static java.lang.Math.*;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -358,7 +360,8 @@ public class BoTSORTTracker
          for (int j = 0; j < dets.size(); j++)
          {
             TrackableDetection d = dets.get(j);
-            float iou = iou(tb[0], tb[1], tb[2], tb[3], d.getX1(), d.getY1(), d.getX2(), d.getY2());
+            BoundingBox2DReadOnly boundingBox = d.getBoundingBox();
+            float iou = iou(tb[0], tb[1], tb[2], tb[3], (float) boundingBox.getMinX(), (float) boundingBox.getMinY(), (float) boundingBox.getMaxX(), (float) boundingBox.getMaxY());
             float c;
             if (fuseScoreHere)
             {
@@ -820,10 +823,11 @@ public class BoTSORTTracker
 
       static float[] detToXYWH(TrackableDetection d)
       {
-         float x1 = d.getX1();
-         float y1 = d.getY1();
-         float x2 = d.getX2();
-         float y2 = d.getY2();
+         BoundingBox2DReadOnly boundingBox = d.getBoundingBox();
+         float x1 = (float) boundingBox.getMinX();
+         float y1 = (float) boundingBox.getMinY();
+         float x2 = (float) boundingBox.getMaxX();
+         float y2 = (float) boundingBox.getMaxY();
 
          float w = max(1f, x2 - x1);
          float h = max(1f, y2 - y1);

@@ -1,5 +1,7 @@
 package us.ihmc.perception.detections.yolo;
 
+import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
+
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -331,7 +333,8 @@ public class TrackedYOLOv8DetectionExecutor
 
                           for (YOLOv8InstantDetection d : trackableDetections)
                           {
-                             float[] bbox = {d.getX1(), d.getY1(), d.getX2(), d.getY2()};
+                             BoundingBox2DReadOnly boundingBox = d.getBoundingBox();
+                             float[] bbox = {(float) boundingBox.getMinX(), (float) boundingBox.getMinY(), (float) boundingBox.getMaxX(), (float) boundingBox.getMaxY()};
 
                              RawImage maskRaw = d.getObjectMask();
                              Mat maskCpu = maskRaw != null ? maskRaw.getCpuImageMat() : null;

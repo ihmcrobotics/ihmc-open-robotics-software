@@ -9,6 +9,10 @@ import us.ihmc.perception.detections.InstantDetection;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * YOLO detection with an image bounding box and a depth-derived centroid position.
+ * The YOLO executors supply identity orientation; they do not estimate object orientation.
+ */
 public class YOLOv8InstantDetection extends InstantDetection implements TrackableDetection
 {
    private final RawImage colorImage;
@@ -53,55 +57,6 @@ public class YOLOv8InstantDetection extends InstantDetection implements Trackabl
    }
 
    @Override
-   public float getX1()
-   {
-      return (float) boundingBox.getMinX();
-   }
-
-   @Override
-   public float getY1()
-   {
-      return (float) boundingBox.getMinY();
-   }
-
-   @Override
-   public float getX2()
-   {
-      return (float) boundingBox.getMaxX();
-   }
-
-   @Override
-   public float getY2()
-   {
-      return (float) boundingBox.getMaxY();
-   }
-
-   @Override
-   public boolean has3D()
-   {
-      // Pose should always exist, but keep it safe
-      return getPose() != null;
-   }
-
-   @Override
-   public float getCx()
-   {
-      return (float) getPose().getPosition().getX();
-   }
-
-   @Override
-   public float getCy()
-   {
-      return (float) getPose().getPosition().getY();
-   }
-
-   @Override
-   public float getCz()
-   {
-      return (float) getPose().getPosition().getZ();
-   }
-
-   @Override
    public int getTrackId()
    {
       return trackId;
@@ -133,6 +88,7 @@ public class YOLOv8InstantDetection extends InstantDetection implements Trackabl
       return objectMask;
    }
 
+   @Override
    public BoundingBox2DReadOnly getBoundingBox()
    {
       return boundingBox;
