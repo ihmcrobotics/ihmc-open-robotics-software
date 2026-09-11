@@ -33,8 +33,7 @@ public class SupervisePoseCommunicatorMap implements AutoCloseable
 
    public SupervisePoseCommunicator getOrCreateCommunicator(SupervisePoseTarget target)
    {
-      return communicators.computeIfAbsent(target.key(),
-                                           key -> new SupervisePoseCommunicator(target, crdtInfo));
+      return communicators.computeIfAbsent(target.key(), key -> new SupervisePoseCommunicator(target, crdtInfo));
    }
 
    public Collection<SupervisePoseCommunicator> getCommunicators()
@@ -44,8 +43,7 @@ public class SupervisePoseCommunicatorMap implements AutoCloseable
 
    public void updateCommunicators()
    {
-      for (SupervisePoseCommunicator communicator
-            : communicators.values())
+      for (SupervisePoseCommunicator communicator : communicators.values())
       {
          communicator.update();
       }
@@ -73,13 +71,11 @@ public class SupervisePoseCommunicatorMap implements AutoCloseable
     *
     * Call this once per shared camera frame, not once per object.
     */
-
    public boolean hasTrackedCommunicator()
    {
       for (SupervisePoseCommunicator communicator : communicators.values())
       {
-         if (communicator.isEnabled()
-             && communicator.getState() == SupervisePoseCommunicator.State.TRACKING)
+         if (communicator.isEnabled() && communicator.getState() == SupervisePoseCommunicator.State.TRACKING)
          {
             return true;
          }
@@ -95,8 +91,7 @@ public class SupervisePoseCommunicatorMap implements AutoCloseable
 
    public void resetAllExcept(SupervisePoseTarget activeTarget)
    {
-      for (SupervisePoseCommunicator communicator
-            : communicators.values())
+      for (SupervisePoseCommunicator communicator : communicators.values())
       {
          if (!communicator.getTarget().key().equals(activeTarget.key()))
          {
@@ -107,8 +102,7 @@ public class SupervisePoseCommunicatorMap implements AutoCloseable
 
    public void closeCommunicators()
    {
-      for (SupervisePoseCommunicator communicator
-            : communicators.values())
+      for (SupervisePoseCommunicator communicator : communicators.values())
       {
          communicator.close();
       }
