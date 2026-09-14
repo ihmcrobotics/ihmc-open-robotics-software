@@ -493,9 +493,11 @@ public class AvatarEstimatorThreadFactory
       // was configured at boot -- previously this only wrapped when JOINT_KF was the initial choice,
       // so booting into ALPHA_COMPLEMENTARY had no way to switch to JOINT_KF at runtime, an asymmetry
       // with no equivalent restriction the other way. Same InEKF base, joint q/qd source swappable
-      // mid-session; biases stay pinned to the JointKF inside the wrapper (see its class javadoc) so
-      // the switch is bumpless for the base state. NONE (raw sensor passthrough) has no counterpart
-      // to switch to and is left unwrapped.
+      // mid-session; biases stay pinned to whichever source was selected HERE at boot (see the wrapper's
+      // class javadoc) so the switch is bumpless for the base state -- which is also what makes
+      // ALPHA_COMPLEMENTARY a complete old-pipeline baseline (q, qd AND bias), not a hybrid running on
+      // the JointKF's bias. NONE (raw sensor passthrough) has no counterpart to switch to and is left
+      // unwrapped.
       if (preFilter instanceof us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter jointKF)
       {
          ProprioceptivePreFilter alpha = us.ihmc.stateEstimation.jointLevel.AlphaComplementaryPreFilter.createForKinematicsEstimator(getProcessedSensorOutputMap(),
