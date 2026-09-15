@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<YoChartGroupConfiguration name="jointKF_q__">
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="0" row="0"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_SPINE_Z</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_SPINE_Z_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_SPINE_Z_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="1" row="0"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_LEFT_HIP_X</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_LEFT_HIP_X_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_LEFT_HIP_X_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="2" row="0"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_LEFT_HIP_Z</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_LEFT_HIP_Z_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_LEFT_HIP_Z_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="3" row="0"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_LEFT_HIP_Y</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_LEFT_HIP_Y_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_LEFT_HIP_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="4" row="0"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_LEFT_KNEE_Y</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_LEFT_KNEE_Y_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_LEFT_KNEE_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="0" row="1"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_SPINE_Z</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_SPINE_Z_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_SPINE_Z_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="1" row="1"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_X</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_X_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_X_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="2" row="1"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_Z</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_Z_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_Z_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="3" row="1"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_Y</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_Y_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_LEFT_HIP_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="4" row="1"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_LEFT_KNEE_Y</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_LEFT_KNEE_Y_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_LEFT_KNEE_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="0" row="2"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_Z</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_Z_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_Z_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="1" row="2"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_Y</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_Y_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="2" row="2"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_RIGHT_KNEE_Y</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_RIGHT_KNEE_Y_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_RIGHT_KNEE_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="3" row="2"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_X</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_X_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_q_RIGHT_HIP_X_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="0" row="3"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_Z</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_Z_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_Z_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="1" row="3"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_Y</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_Y_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="2" row="3"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_RIGHT_KNEE_Y</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_RIGHT_KNEE_Y_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_RIGHT_KNEE_Y_lowerBound</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="3" row="3"/>
+        <negates>false</negates>
+        <negates>false</negates>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_X</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_X_upperBound</yoVariables>
+        <yoVariables>root.main.DRCEstimatorThread.EstimatorController.InvariantMainStateEstimator.ProprioceptivePreFilter.JointLevelKFPreFilter.jointKF_qd_RIGHT_HIP_X_lowerBound</yoVariables>
+    </chartConfigurations>
+    <numberOfColumns>5</numberOfColumns>
+    <numberOfRows>4</numberOfRows>
+</YoChartGroupConfiguration>

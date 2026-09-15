@@ -1,0 +1,396 @@
+package us.ihmc.stateEstimation.jointLevel;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.junit.jupiter.api.Test;
+
+import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
+
+/**
+ * Reconciliation harness for the Alex002 hardware-log finding: the joint VELOCITY covariance blows up in ONE
+ * predict() while the joint POSITION covariance stays sane, driven by the Schur process noise Qa = σ_τ² Λ⁻².
+ * These tests quantify Λ's conditioning, confirm predict()/Qa (not the gyro update) is the inflation source,
+ * rank the candidate fixes at the matrix level, and provide the property test the fix must pass.
+ */
+public class JointLevelKFStandingStabilityTest
+{
+   private static final double DT = JointLevelKFTestFixture.DT;
+   private static final double SIGMA_TAU = 5.0; // matches the (fixed) filter; CHECK #3 uses explicit 50/5/1 literals
+   // Physical cap on the joint-acceleration process-noise variance (σ_qdd_max = 30 rad/s²)² — mirrors the filter's
+   // JointKFParameters.QA_MAX after the fix, used to validate the conditioning cap independently.
+   private static final double QA_MAX = 900.0;
+
+   /** Λ = M_ff − M_jN M_NN⁻¹ M_Nf and M_ff, in filter state order — independent EJML/LU reference (copied from
+    *  JointLevelKFMassMatrixNoiseTest.referenceSchur so this test stands alone). */
+   private static DMatrixRMaj[] referenceSchur(JointLevelKFTestFixture f)
+   {
+      int n = f.n;
+      LinkedHashSet<JointReadOnly> spanning = new LinkedHashSet<>();
+      for (JointReadOnly filteredJoint : f.filteredJoints)
+      {
+         JointReadOnly joint = filteredJoint;
+         while (joint != null && joint != f.rootJoint)
+         {
+            spanning.add(joint);
+            joint = joint.getPredecessor().getParentJoint();
+         }
+      }
+      List<JointReadOnly> consider = new ArrayList<>();
+      consider.add(f.rootJoint);
+      consider.addAll(spanning);
+      MultiBodySystemReadOnly input = MultiBodySystemReadOnly.toMultiBodySystemInput(consider);
+      CompositeRigidBodyMassMatrixCalculator calc = new CompositeRigidBodyMassMatrixCalculator(input);
+      calc.reset();
+      DMatrixRMaj massMatrix = calc.getMassMatrix().copy();
+
+      int[] filteredCols = new int[n];
+      for (int i = 0; i < n; i++)
+         filteredCols[i] = input.getJointMatrixIndexProvider().getJointDoFIndices(f.filteredJoints.get(i))[0];
+      int[] baseCols = input.getJointMatrixIndexProvider().getJointDoFIndices(f.rootJoint);
+      List<Integer> torqueFree = new ArrayList<>();
+      for (int c : baseCols)
+         torqueFree.add(c);
+      for (JointReadOnly spanningJoint : spanning)
+         if (!f.filteredJoints.contains(spanningJoint))
+            torqueFree.add(input.getJointMatrixIndexProvider().getJointDoFIndices(spanningJoint)[0]);
+      int nN = torqueFree.size();
+
+      DMatrixRMaj mNN = new DMatrixRMaj(nN, nN), mNf = new DMatrixRMaj(nN, n), mff = new DMatrixRMaj(n, n);
+      for (int a = 0; a < nN; a++)
+      {
+         for (int b = 0; b < nN; b++)
+            mNN.set(a, b, massMatrix.get(torqueFree.get(a), torqueFree.get(b)));
+         for (int j = 0; j < n; j++)
+            mNf.set(a, j, massMatrix.get(torqueFree.get(a), filteredCols[j]));
+      }
+      for (int i = 0; i < n; i++)
+         for (int j = 0; j < n; j++)
+            mff.set(i, j, massMatrix.get(filteredCols[i], filteredCols[j]));
+
+      DMatrixRMaj mNNInv = new DMatrixRMaj(nN, nN);
+      CommonOps_DDRM.invert(mNN, mNNInv);
+      DMatrixRMaj x = new DMatrixRMaj(nN, n);
+      CommonOps_DDRM.mult(mNNInv, mNf, x);
+      DMatrixRMaj mjNX = new DMatrixRMaj(n, n);
+      CommonOps_DDRM.multTransA(mNf, x, mjNX);
+      DMatrixRMaj lambda = new DMatrixRMaj(n, n);
+      CommonOps_DDRM.subtract(mff, mjNX, lambda);
+      return new DMatrixRMaj[] {lambda, mff};
+   }
+
+   private static double condSPD(DMatrixRMaj a)
+   {
+      double[] e = JointLevelKFTestFixture.symmetricEigenvalues(a);
+      double min = Double.POSITIVE_INFINITY, max = 0.0;
+      for (double v : e) { min = Math.min(min, v); max = Math.max(max, v); }
+      return max / min;
+   }
+
+   private static double minEig(DMatrixRMaj a)
+   {
+      double[] e = JointLevelKFTestFixture.symmetricEigenvalues(a);
+      double min = Double.POSITIVE_INFINITY;
+      for (double v : e) min = Math.min(min, v);
+      return min;
+   }
+
+   /** Qa = σ_τ² Λ⁻² given Λ. */
+   private static DMatrixRMaj qaFromLambda(DMatrixRMaj lambda, double sigmaTau)
+   {
+      int n = lambda.numRows;
+      DMatrixRMaj inv = new DMatrixRMaj(n, n);
+      CommonOps_DDRM.invert(lambda, inv);
+      DMatrixRMaj sq = new DMatrixRMaj(n, n);
+      CommonOps_DDRM.mult(inv, inv, sq);
+      CommonOps_DDRM.scale(sigmaTau * sigmaTau, sq);
+      return sq;
+   }
+
+   private static double maxDiag(DMatrixRMaj a)
+   {
+      double m = 0.0;
+      for (int i = 0; i < a.numRows; i++) m = Math.max(m, Math.abs(a.get(i, i)));
+      return m;
+   }
+
+   private static final double ROTOR_DEFAULT = 0.005; // JointKFParameters.ROTOR_INERTIA_DEFAULT (synthetic joints match no table key)
+
+   /** New-model reference Qa (Part B items 1 &amp; 3, replacing the old QA_MAX-capped σ_τ² Λ⁻²): Lambda_eff =
+    *  Λ + rotorDefault·I, then Qa = σ_τ² Lambda_eff⁻². The synthetic chain's joints match no rotor-table key (so
+    *  each rotor term is the default) and have no finite effort limit (so σ_τ is the uniform SIGMA_TAU fallback),
+    *  which makes the Gram form collapse to σ_τ² Lambda_eff⁻². Mirrors the filter's updateProcessNoiseFromMassMatrix.
+    *  The QA_MAX cap is no longer applied (demoted to a tripwire). */
+   private static DMatrixRMaj qaFromLambdaEff(JointLevelKFTestFixture f, DMatrixRMaj lambda, double sigmaTau)
+   {
+      DMatrixRMaj lambdaEff = lambda.copy();
+      for (int i = 0; i < lambdaEff.numRows; i++) // per-joint rotor via the filter's own seam (exact match)
+         lambdaEff.add(i, i, JointKFParameters.reflectedRotorInertiaForNameOrDefault(f.filteredJoints.get(i).getName()));
+      return qaFromLambda(lambdaEff, sigmaTau);
+   }
+
+   // ============================ CHECK #1 + #2: Λ conditioning and predict-Qa mechanism ============================
+
+   @Test
+   public void testSchurConditioningAndPredictInflatesVelocityCovariance()
+   {
+      System.out.println("=== CHECK #1/#2: Λ conditioning + one-predict P_qdqd inflation (σ_τ=" + SIGMA_TAU + ") ===");
+      for (JointLevelKFTestFixture f : JointLevelKFTestFixture.shapesMassMatrix(9100L))
+      {
+         int n = f.n;
+         DMatrixRMaj lambda = referenceSchur(f)[0];
+         DMatrixRMaj qa = qaFromLambdaEff(f, lambda, SIGMA_TAU); // matches the fixed filter (rotor-inertia floor + Gram σ_τ, no cap)
+
+         double cond = condSPD(lambda);
+         double lmin = minEig(lambda);
+         System.out.printf("%s  cond(Λ)=%.3e  λ_min(Λ)=%.3e  max diag(Qa)=%.3e%n", f.describe(), cond, lmin, maxDiag(qa));
+         int worst = 0;
+         for (int i = 1; i < n; i++) if (qa.get(i, i) > qa.get(worst, worst)) worst = i;
+         System.out.printf("      worst joint idx=%d  Qa_ii=%.3e  Q_qdqd(one step)=dt*Qa_ii=%.3e%n",
+                           worst, qa.get(worst, worst), DT * qa.get(worst, worst));
+
+         // Seed a SANE standing covariance and run ONE predict(); the q̇q̇ block must jump by exactly the Van
+         // Loan term dt*Qa (this is what predict ADDS), proving predict/Qa — not a gyro-update gain — is the source.
+         DMatrixRMaj xPrior = new DMatrixRMaj(f.dim, 1);
+         DMatrixRMaj pPrior = CommonOps_DDRM.identity(f.dim);
+         CommonOps_DDRM.scale(1.0e-4, pPrior); // sane: ~1e-4 on every diagonal (positions AND velocities)
+         f.filter.setStateForTest(xPrior, pPrior);
+         DMatrixRMaj pBefore = f.filter.getCovariance();
+         f.filter.predict();
+         DMatrixRMaj pAfter = f.filter.getCovariance();
+
+         double pqdBefore = pBefore.get(n + worst, n + worst);
+         double pqdAfter = pAfter.get(n + worst, n + worst);
+         double pqBefore = pBefore.get(worst, worst);
+         double pqAfter = pAfter.get(worst, worst);
+         System.out.printf("      worst joint: P_qdqd %.3e -> %.3e (x%.1f)   P_qq %.3e -> %.3e (x%.1f)%n",
+                           pqdBefore, pqdAfter, pqdAfter / pqdBefore, pqBefore, pqAfter, pqAfter / pqBefore);
+
+         // predict adds Q; the q̇q̇ increment equals dt*Qa (Van Loan). Assert that identity holds (mechanism proof).
+         double expectedIncrement = DT * qa.get(worst, worst);
+         double actualIncrement = pqdAfter - pqdBefore;
+         // 1e-4 (was 1e-6): filter forms Qa via the Gram outer product Y Yᵀ over a Cholesky-inverted Lambda_eff,
+         // the reference via LU inv·inv — they diverge a few round-off orders on ill-conditioned random Λ_eff
+         // (pure numerics, not a model gap; the exact Gram algebra is pinned by JointLevelKFRotorAndGramTest).
+         assertTrue(Math.abs(actualIncrement - expectedIncrement) <= 1e-4 * Math.max(1.0, expectedIncrement),
+                    f.describe() + " one-predict P_qdqd increment must equal dt*Qa (predict is the inflation source): "
+                    + actualIncrement + " vs " + expectedIncrement);
+      }
+   }
+
+   // ============================ CHECK #3: rank the three candidate fixes at the matrix level ============================
+
+   @Test
+   public void testCandidateFixesBoundQa()
+   {
+      System.out.println("=== CHECK #3: candidate-fix max diag(Qa) at each config (smaller = better bounded) ===");
+      for (JointLevelKFTestFixture f : JointLevelKFTestFixture.shapesMassMatrix(9200L))
+      {
+         DMatrixRMaj[] schur = referenceSchur(f);
+         DMatrixRMaj lambda = schur[0];
+         DMatrixRMaj mff = schur[1];
+         int n = lambda.numRows;
+
+         double curr = maxDiag(qaFromLambda(lambda, 50.0));                 // current
+         double sig5 = maxDiag(qaFromLambda(lambda, 5.0));                  // (a) σ_τ=5
+         double sig1 = maxDiag(qaFromLambda(lambda, 1.0));                  // (a) σ_τ=1
+
+         // (b) eigenvalue floor: clamp Λ's spectrum from below at a physical floor, keep σ_τ=50.
+         DMatrixRMaj lambdaFloored = floorSpectrum(lambda, 0.05); // floor 0.05 kg m^2 (a sane min effective inertia)
+         double floored = maxDiag(qaFromLambda(lambdaFloored, 50.0));
+
+         // (c) locked-base Rev.1 map: Qa = σ_τ² M_ff⁻² (better conditioned since M_ff ⪰ Λ).
+         double locked = maxDiag(qaFromLambda(mff, 50.0));
+
+         System.out.printf("%s  n=%d  Qa_maxdiag: current(σ50)=%.3e  σ5=%.3e  σ1=%.3e  Λ-floor(σ50)=%.3e  lockedBase M_ff⁻²(σ50)=%.3e%n",
+                           f.describe(), n, curr, sig5, sig1, floored, locked);
+
+         // Locked-base must be no larger than the Schur Qa (Λ ⪯ M_ff  ⇒  Λ⁻² ⪰ M_ff⁻²), a PSD-ordering sanity check.
+         assertTrue(locked <= curr * (1.0 + 1e-6),
+                    f.describe() + " locked-base Qa (M_ff⁻²) must be ≤ Schur Qa (Λ⁻²) by the PSD ordering; got "
+                    + locked + " vs " + curr);
+      }
+   }
+
+   /** Clamp a symmetric PD matrix's eigenvalues to be ≥ floor (physical min effective inertia). */
+   private static DMatrixRMaj floorSpectrum(DMatrixRMaj a, double floor)
+   {
+      // Simple, robust: A_floored = A + max(0, floor - λ_min) * I brings the smallest eigenvalue up to `floor`
+      // (shifts the whole spectrum) — a conservative, allocation-simple conditioning that never lowers inertia.
+      double lmin = minEig(a);
+      DMatrixRMaj out = a.copy();
+      if (lmin < floor)
+         for (int i = 0; i < out.numRows; i++)
+            out.set(i, i, out.get(i, i) + (floor - lmin));
+      return out;
+   }
+
+   // ============================ CHECK #5: the per-joint ALPHA acceleration-equalization principle ============================
+
+   private static final double TARGET_QDD_STD = 20.0; // rad/s², mirrors JointKFParameters.TARGET_QDD_STD
+
+   @Test
+   public void testAccelerationEqualizedSigmaTauFloorsAtTargetAndEqualizesDominantTerm()
+   {
+      // PROPERTY (the per-joint ALPHA fix). Uniform ALPHA fixes σ_τ,i = α·τ_max,i at a fixed fraction of TORQUE
+      // capacity, but the torque→acceleration map Λ_eff⁻¹ spans orders of magnitude across joints, so the per-joint
+      // acceleration STD sqrt(diag(Qa)_i) = |Λ_eff⁻¹ column energy|·σ_τ also spans orders of magnitude and joints
+      // trip QA_MAX one after another (Alex002 log 20260710_135507: knee knocked to 0.03, a hip/spine_Z now binds
+      // EVERY tick). The fix equalizes the acceleration STD by σ_τ,i = TARGET/|Λ_eff⁻¹|_ii (≡ α_i = TARGET /
+      // (|Λ_eff⁻¹|_ii·τ_max,i)). Two model-independent theorems, proved on the synthetic mass matrices:
+      //   (a) FLOOR: diag(Qa)_i = Σ_j (Λ_eff⁻¹_ij σ_j)², whose own-column (j=i) term is exactly TARGET² ⇒
+      //       sqrt(diag(Qa)_i) ≥ TARGET for every joint — a common lower bound the uniform rule has no analogue of.
+      //   (b) DOMINANT-TERM EQUALIZATION: the own-column STD |Λ_eff⁻¹|_ii·σ_i = TARGET is IDENTICAL across joints,
+      //       whereas the uniform rule's own-column STD sigmaUni·|Λ_eff⁻¹|_ii inherits the full |Λ_eff⁻¹|_ii spread.
+      // Together: equalization removes the per-joint inertia spread that makes the uniform rule trip the cap.
+      StringBuilder report = new StringBuilder("=== PROPERTY: acceleration-equalized σ_τ (TARGET=" + TARGET_QDD_STD + " rad/s²) ===\n");
+      for (JointLevelKFTestFixture f : JointLevelKFTestFixture.shapesMassMatrix(9500L))
+      {
+         int n = f.n;
+         DMatrixRMaj lambdaEff = referenceSchur(f)[0].copy();
+         for (int i = 0; i < n; i++) // Λ_eff = Λ + diag(reflected rotor inertia), the filter's own seam (exact match)
+            lambdaEff.add(i, i, JointKFParameters.reflectedRotorInertiaForNameOrDefault(f.filteredJoints.get(i).getName()));
+         DMatrixRMaj inv = new DMatrixRMaj(n, n);
+         CommonOps_DDRM.invert(lambdaEff, inv);
+
+         double[] sigmaEq = new double[n];    // equalized σ_τ,i = TARGET / |Λ_eff⁻¹|_ii
+         double sumSq = 0.0, invMin = Double.POSITIVE_INFINITY, invMax = 0.0;
+         for (int i = 0; i < n; i++)
+         {
+            double aii = Math.abs(inv.get(i, i));
+            sigmaEq[i] = TARGET_QDD_STD / aii;
+            sumSq += sigmaEq[i] * sigmaEq[i];
+            invMin = Math.min(invMin, aii);
+            invMax = Math.max(invMax, aii);
+         }
+         double sigmaUni = Math.sqrt(sumSq / n); // uniform σ_τ at MATCHED total power Σσ² (fair comparison)
+
+         double[] stdEq = accelStd(inv, sigmaEq);
+         double eqLo = arrayMin(stdEq), eqHi = arrayMax(stdEq);
+         // own-column STDs: equalized = TARGET ∀i (spread 1); uniform = sigmaUni·|inv_ii| (spread = |inv_ii| range)
+         double uniOwnSpread = invMax / invMin;
+         report.append(String.format("%s n=%d  eq[full std %.2f..%.2f]  |Λ_eff⁻¹|_ii spread x%.2e (uniform own-term spread)%n",
+                                      f.describe(), n, eqLo, eqHi, uniOwnSpread));
+
+         for (int i = 0; i < n; i++)
+         {
+            // (a) floor: every equalized joint STD is at least TARGET.
+            assertTrue(stdEq[i] >= TARGET_QDD_STD * (1.0 - 1e-6),
+                       f.describe() + " equalized joint " + i + " STD " + stdEq[i] + " must be ≥ TARGET " + TARGET_QDD_STD);
+            // (b) dominant-term equalization is EXACT: |inv_ii|·σEq_i == TARGET for every joint.
+            double ownTerm = Math.abs(inv.get(i, i)) * sigmaEq[i];
+            assertTrue(Math.abs(ownTerm - TARGET_QDD_STD) <= 1e-9 * TARGET_QDD_STD,
+                       f.describe() + " equalized own-column STD " + ownTerm + " must equal TARGET " + TARGET_QDD_STD);
+         }
+         // Sanity: the fixtures must actually exercise a nontrivial inertia spread, else the property is vacuous.
+         assertTrue(uniOwnSpread > 1.0 + 1e-9, f.describe() + " fixture must have a nontrivial |Λ_eff⁻¹|_ii spread");
+      }
+      System.out.println(report);
+   }
+
+   /** sqrt(diag(Λ⁻¹ diag(σ²) Λ⁻ᵀ))_i — the per-joint acceleration process-noise STD for a given per-joint σ_τ. */
+   private static double[] accelStd(DMatrixRMaj inv, double[] sigma)
+   {
+      int n = inv.numRows;
+      double[] std = new double[n];
+      for (int i = 0; i < n; i++)
+      {
+         double d = 0.0;
+         for (int j = 0; j < n; j++) { double t = inv.get(i, j) * sigma[j]; d += t * t; }
+         std[i] = Math.sqrt(d);
+      }
+      return std;
+   }
+
+   private static double arrayMin(double[] a) { double m = Double.POSITIVE_INFINITY; for (double v : a) m = Math.min(m, v); return m; }
+   private static double arrayMax(double[] a) { double m = 0.0; for (double v : a) m = Math.max(m, v); return m; }
+
+   // ============================ CHECK #4: property test the fix must pass (run on current filter) ============================
+
+   // Physical bound on the velocity variance a SINGLE 1 ms predict() may inject. A joint accelerates at most
+   // ~50 rad/s², so in one tick Δq̇ ≲ 0.05 rad/s and the injected variance is ≪ 1 (rad/s)²; 1.0 is already ~10×
+   // generous. The injected variance is exactly the Van Loan term dt·Qa = dt·σ_τ²·(Λ⁻²)_ii, so this is a direct,
+   // model-independent bound on the mass-matrix process noise — the quantity that blew up on Alex002.
+   private static final double ONE_TICK_QDD_VARIANCE_BOUND = 1.0; // (rad/s)² injected per predict()
+
+   @Test
+   public void testSinglePredictVelocityVarianceInjectionIsPhysicallyBounded()
+   {
+      // PROPERTY (regression gate): seed a sane standing P, run ONE predict(), and require that no joint's
+      // velocity variance grew by more than ONE_TICK_QDD_VARIANCE_BOUND, and that P stayed symmetric PSD.
+      // FAILS on current code (σ_τ=50, uncapped Schur Qa) — the Alex002 mechanism; PASSES with the σ_τ retune +
+      // Λ-conditioning cap. Uses the filter's REAL process noise via predict()/getCovariance().
+      StringBuilder report = new StringBuilder("=== PROPERTY: one-predict velocity-variance injection ≤ "
+                                               + ONE_TICK_QDD_VARIANCE_BOUND + " (rad/s)² ===\n");
+      double worstInjectionOverall = 0.0;
+      for (JointLevelKFTestFixture f : JointLevelKFTestFixture.shapesMassMatrix(9300L))
+      {
+         int n = f.n;
+         DMatrixRMaj xPrior = new DMatrixRMaj(f.dim, 1);
+         DMatrixRMaj pPrior = CommonOps_DDRM.identity(f.dim);
+         CommonOps_DDRM.scale(1.0e-4, pPrior); // sane standing prior: 1e-4 on every diagonal
+         f.filter.setStateForTest(xPrior, pPrior);
+
+         DMatrixRMaj pBefore = f.filter.getCovariance();
+         f.filter.predict();
+         DMatrixRMaj pAfter = f.filter.getCovariance();
+
+         double worstInjection = 0.0;
+         for (int i = 0; i < n; i++)
+            worstInjection = Math.max(worstInjection, pAfter.get(n + i, n + i) - pBefore.get(n + i, n + i));
+         worstInjectionOverall = Math.max(worstInjectionOverall, worstInjection);
+         JointLevelKFTestFixture.assertPositiveSemiDefinite(pAfter, f.describe() + " P after predict PSD");
+         JointLevelKFTestFixture.assertSymmetric(pAfter, 1e-9 * maxAbs(pAfter) + 1e-12, f.describe() + " P symmetric");
+         report.append(String.format("%s  worst q̇-variance injected by one predict = %.3e (rad/s)²  -> %s%n",
+                                      f.describe(), worstInjection,
+                                      worstInjection <= ONE_TICK_QDD_VARIANCE_BOUND ? "PASS" : "FAIL"));
+      }
+      System.out.print(report);
+      assertTrue(worstInjectionOverall <= ONE_TICK_QDD_VARIANCE_BOUND,
+                 "a single predict() injected " + worstInjectionOverall + " (rad/s)² of joint-velocity variance "
+                 + "(bound " + ONE_TICK_QDD_VARIANCE_BOUND + "): the un-retuned/uncapped Schur Qa = σ_τ²Λ⁻² is the "
+                 + "Alex002 divergence mechanism.\n" + report);
+   }
+
+   @Test
+   public void testRotorInertiaFloorBoundsQaForNearSingularLambda()
+   {
+      // Independent validation of the STRUCTURAL half of the fix (Part B item 1, the reflected-rotor-inertia
+      // floor), which σ_τ retune alone cannot provide — and which REPLACES the old uniform QA_MAX rescale
+      // (now only a tripwire, item 2): a deliberately near-singular Λ (λ_min ~ 2e-2, Alex's proximal-hip regime)
+      // makes the UN-floored Qa = σ_τ² Λ⁻² blow up, but adding the rotor inertia diagonal (Lambda_eff = Λ +
+      // diag(J_rotor)) floors λ_min(Lambda_eff) by Weyl and bounds Qa — with NO uniform rescale.
+      double sigmaTau = 5.0;
+      double rotor = 0.05; // a realistic reflected rotor inertia (Alex ankle/hip scale)
+      double[] nearSingularLambdaDiag = {2.0, 0.02, 1.5}; // one near-singular (proximal-hip-like) mode
+      DMatrixRMaj lambda = CommonOps_DDRM.identity(3);
+      for (int i = 0; i < 3; i++) lambda.set(i, i, nearSingularLambdaDiag[i]);
+
+      DMatrixRMaj qaUnfloored = qaFromLambda(lambda, sigmaTau);
+      DMatrixRMaj lambdaEff = lambda.copy();
+      for (int i = 0; i < 3; i++) lambdaEff.add(i, i, rotor);
+      DMatrixRMaj qaFloored = qaFromLambda(lambdaEff, sigmaTau); // σ_τ² Lambda_eff⁻²
+
+      // Weyl: λ_min(Lambda_eff) ≥ λ_min(Λ) + rotor ⇒ max diag(Qa) ≤ σ_τ² / (λ_min(Λ) + rotor)².
+      double weylBound = sigmaTau * sigmaTau / Math.pow(minEig(lambda) + rotor, 2);
+      System.out.printf("=== rotor-floor validation (near-singular Λ, λ_min=%.2e): Qa maxdiag unfloored=%.3e floored=%.3e (Weyl bound %.3e) ===%n",
+                        minEig(lambda), maxDiag(qaUnfloored), maxDiag(qaFloored), weylBound);
+      assertTrue(maxDiag(qaUnfloored) > QA_MAX * 1.5, "near-singular Λ makes the UN-floored Qa exceed the physical scale (the old blow-up)");
+      assertTrue(maxDiag(qaFloored) <= weylBound * (1.0 + 1e-9), "the rotor-inertia floor bounds Qa by the Weyl λ_min(Lambda_eff) floor");
+      assertTrue(maxDiag(qaFloored) < maxDiag(qaUnfloored), "the rotor floor strictly reduces the worst Qa diagonal");
+   }
+
+   private static double maxAbs(DMatrixRMaj a)
+   {
+      double m = 0.0;
+      for (int i = 0; i < a.getNumElements(); i++) m = Math.max(m, Math.abs(a.get(i)));
+      return m;
+   }
+}
