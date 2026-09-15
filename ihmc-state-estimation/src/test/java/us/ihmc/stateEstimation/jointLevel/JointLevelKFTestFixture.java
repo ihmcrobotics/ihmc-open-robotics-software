@@ -134,6 +134,29 @@ final class JointLevelKFTestFixture
                    false); // scalar-CWNA process noise (no robot model)
    }
 
+   /** Like {@link #singlePair} but with a learned per-IMU gyro-variance multiplier keyed by sensor name. */
+   static JointLevelKFTestFixture singlePairWithGyroSigmaScale(long seed,
+                                                               int numJoints,
+                                                               int parentJointIndex,
+                                                               int childJointIndex,
+                                                               ToDoubleFunction<String> gyroSigmaScaleByImuName)
+   {
+      return build(seed,
+                   numJoints,
+                   new int[] {parentJointIndex, childJointIndex},
+                   new String[] {"imuA", "imuB"},
+                   new int[][] {{0, 1}},
+                   1,
+                   -1,
+                   false,
+                   -1,
+                   null,
+                   null,
+                   null,
+                   false,
+                   gyroSigmaScaleByImuName);
+   }
+
    /**
     * Like {@link #singlePair} but with a per-joint encoder position measurement-noise STD lookup (by joint
     * name; NaN / non-positive falls back to the filter's built-in scalar), for the per-joint R wiring and
@@ -300,6 +323,27 @@ final class JointLevelKFTestFixture
                                                 ToDoubleFunction<String> velocityBreakFrequencyHz,
                                                 boolean useDirectVelocityMeasurement)
    {
+      return build(seed, numJoints, imuBodyJointIndex, imuNames, pairParentChild, footImuIndex, poisonImuIndex,
+                   useMassMatrixProcessNoise, footJointIndex, encoderPositionNoiseStd, encoderVelocityNoiseStd,
+                   velocityBreakFrequencyHz, useDirectVelocityMeasurement, null);
+   }
+
+   /** @param gyroSigmaScaleByImuName per-IMU learned gyro-variance multiplier by sensor name, or null for unscaled. */
+   private static JointLevelKFTestFixture build(long seed,
+                                                int numJoints,
+                                                int[] imuBodyJointIndex,
+                                                String[] imuNames,
+                                                int[][] pairParentChild,
+                                                int footImuIndex,
+                                                int poisonImuIndex,
+                                                boolean useMassMatrixProcessNoise,
+                                                int footJointIndex,
+                                                ToDoubleFunction<String> encoderPositionNoiseStd,
+                                                ToDoubleFunction<String> encoderVelocityNoiseStd,
+                                                ToDoubleFunction<String> velocityBreakFrequencyHz,
+                                                boolean useDirectVelocityMeasurement,
+                                                ToDoubleFunction<String> gyroSigmaScaleByImuName)
+   {
       Random random = new Random(seed);
       Vector3D[] axes = new Vector3D[numJoints];
       for (int i = 0; i < numJoints; i++)
@@ -342,6 +386,7 @@ final class JointLevelKFTestFixture
                                                                velocityBreakFrequencyHz,
                                                                useDirectVelocityMeasurement,
                                                                Double.NaN,
+                                                               gyroSigmaScaleByImuName,
                                                                DT,
                                                                testRegistry);
       return new JointLevelKFTestFixture(filter, testRegistry, joints, imus, sensorMap, feet, chain.getElevator(), chain.getRootJoint());

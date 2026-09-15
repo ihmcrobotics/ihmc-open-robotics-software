@@ -16,6 +16,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.ToDoubleFunction;
 
 /**
  * The stacked gyro measurement — the only channel that observes the per-IMU gyro biases, and the reason this
@@ -41,6 +42,14 @@ final class JointKFBiasUpdate
    private final JointKFState state;
    private final JointKFUpdate update;
    private final JointKFParameters parameters;
+
+   /**
+    * Per-IMU boot-time VARIANCE multiplier on the raw gyro noise, keyed by {@code getSensorName()}; returns 1.0
+    * for every IMU by default. Applied in {@link #buildAndFloorSigma()} AFTER acquisition and flooring, which is
+    * the contract these multipliers are trained under offline — scaling before the floor, or re-flooring the
+    * scaled value, would deploy a different noise model than the one that was fit.
+    */
+   private final ToDoubleFunction<String> gyroSigmaScaleByImuName;
 
    DMatrixRMaj Hg;    // 3(E+K) x dim measurement Jacobian [ 0 | J_stack(q^) | L(q^) ]
    DMatrixRMaj zg;    // 3(E+K) x 1 stacked measurement (raw gyro samples)
@@ -84,9 +93,25 @@ final class JointKFBiasUpdate
 
    JointKFBiasUpdate(JointKFState state, JointKFUpdate update, JointKFParameters parameters, YoRegistry registry)
    {
+      this(state, update, parameters, null, registry);
+   }
+
+   /**
+    * @param gyroSigmaScaleByImuName per-IMU gyro-noise VARIANCE multiplier keyed by sensor name, or null for
+    *                                the unscaled baseline. See the field javadoc for why it is applied after
+    *                                flooring, and {@code ProprioceptivePreFilterFactory.create}'s
+    *                                {@code gyroSigmaScaleByImuName} for the offline-calibration use case.
+    */
+   JointKFBiasUpdate(JointKFState state,
+                     JointKFUpdate update,
+                     JointKFParameters parameters,
+                     ToDoubleFunction<String> gyroSigmaScaleByImuName,
+                     YoRegistry registry)
+   {
       this.state = state;
       this.update = update;
       this.parameters = parameters;
+      this.gyroSigmaScaleByImuName = gyroSigmaScaleByImuName;
 
       int m = state.numberOfIMUs;
       int dim = state.dim;
@@ -383,8 +408,31 @@ final class JointKFBiasUpdate
             for (int d = 0; d < 3; d++)
                Rimu.set(d, d, gyroFloor);
          }
-         insertScaledInto(Rimu, 1.0, Sigma, 3 * o, 3 * o);
+         // Learned per-IMU multiplier LAST, on the already-floored baseline: the offline fit is defined against
+         // the post-floor covariance, so scaling earlier (or re-flooring afterwards) deploys a different model
+         // than the one trained. A non-finite or non-positive multiplier is rejected loudly rather than
+         // silently degrading to 1.0 — a mis-keyed artifact must not look like a successful no-op deployment.
+         insertScaledInto(Rimu, gyroSigmaScale(state.imusByOrdinal[o].getSensorName()), Sigma, 3 * o, 3 * o);
       }
+   }
+
+   /** Sigma (3m x 3m) as actually built: floored first, then scaled by the learned per-IMU multipliers. */
+   DMatrixRMaj getSigmaForTest()
+   {
+      return Sigma.copy();
+   }
+
+   /** @return the learned VARIANCE multiplier for {@code imuName}, or 1.0 when no override was supplied. */
+   private double gyroSigmaScale(String imuName)
+   {
+      if (gyroSigmaScaleByImuName == null)
+         return 1.0;
+      double scale = gyroSigmaScaleByImuName.applyAsDouble(imuName);
+      if (!Double.isFinite(scale) || scale <= 0.0)
+         throw new IllegalArgumentException("gyro sigma scale for IMU '" + imuName + "' must be positive and finite, was " + scale);
+      if (scale != 1.0)
+         LogTools.info("JointLevelKFPreFilter: IMU '" + imuName + "' gyro noise covariance scaled by a learned factor of " + scale + ".");
+      return scale;
    }
 
    /**

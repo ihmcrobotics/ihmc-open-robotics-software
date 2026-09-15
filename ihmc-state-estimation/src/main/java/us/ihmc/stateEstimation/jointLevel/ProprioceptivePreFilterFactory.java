@@ -10,6 +10,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.ToDoubleFunction;
 
 /**
  * Construction-time dispatch for the joint-level pre-filter: consults
@@ -70,6 +71,41 @@ public final class ProprioceptivePreFilterFactory
                                                 double estimatorDT,
                                                 YoRegistry parentRegistry)
    {
+      return create(sensorOutputMap,
+                    stateEstimatorParameters,
+                    imuProcessedOutputs,
+                    feet,
+                    estimatorRootBody,
+                    gravitationalAcceleration,
+                    cancelGravityFromAccelerationMeasurement,
+                    sigmaTauOverride,
+                    null,
+                    estimatorDT,
+                    parentRegistry);
+   }
+
+   /**
+    * @param gyroSigmaScaleByImuName JOINT_KF-only boot-time per-IMU VARIANCE multiplier on the raw gyro noise
+    *                                covariance, keyed by {@code IMUSensorReadOnly#getSensorName()}; null leaves
+    *                                every IMU unscaled, and an unknown name simply never gets consulted.
+    *                                Ignored by the other {@code JointLevelEstimatorType}s. This is the
+    *                                deployment hook for the offline-learned {@code imu_gyro:<name>} channel of
+    *                                the distributed-IMU noise calibration — like {@code sigmaTauOverride} it
+    *                                must be a construction-time argument, because the joint filter builds and
+    *                                caches Sigma exactly once, on its first stacked measurement.
+    */
+   public static ProprioceptivePreFilter create(SensorOutputMapReadOnly sensorOutputMap,
+                                                StateEstimatorParameters stateEstimatorParameters,
+                                                List<? extends IMUSensorReadOnly> imuProcessedOutputs,
+                                                Collection<RigidBodyBasics> feet,
+                                                RigidBodyBasics estimatorRootBody,
+                                                double gravitationalAcceleration,
+                                                BooleanProvider cancelGravityFromAccelerationMeasurement,
+                                                double sigmaTauOverride,
+                                                ToDoubleFunction<String> gyroSigmaScaleByImuName,
+                                                double estimatorDT,
+                                                YoRegistry parentRegistry)
+   {
       // Switch expression, deliberately without a default arm: adding a new enum value makes this a
       // compile error here instead of a silent fallthrough.
       return switch (stateEstimatorParameters.getJointLevelEstimatorType())
@@ -92,6 +128,7 @@ public final class ProprioceptivePreFilterFactory
                                                                              gravitationalAcceleration,
                                                                              cancelGravityFromAccelerationMeasurement,
                                                                              sigmaTauOverride,
+                                                                             gyroSigmaScaleByImuName,
                                                                              estimatorDT,
                                                                              parentRegistry);
       };

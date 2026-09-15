@@ -153,6 +153,32 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                          double estimatorDT,
                          YoRegistry parentRegistry)
    {
+      this(sensorMap, pairParameters, feet, rootBody, encoderPositionNoiseStd, encoderVelocityNoiseStd,
+           jointVelocityMeasurementBreakFrequencyHz, useDirectVelocityMeasurement, sigmaTauOverride, null,
+           estimatorDT, parentRegistry);
+   }
+
+   /**
+    * @param gyroSigmaScaleByImuName JOINT_KF-only boot-time per-IMU VARIANCE multiplier on the raw gyro noise
+    *                                covariance, keyed by {@code IMUSensorReadOnly#getSensorName()}; null leaves
+    *                                every IMU unscaled. Like {@code sigmaTauOverride} this must be a
+    *                                construction-time argument: Sigma is built and cached once, on the first
+    *                                stacked measurement, and never rebuilt. See {@link JointKFBiasUpdate}'s
+    *                                {@code buildAndFloorSigma} for why the multiplier lands after flooring.
+    */
+   JointLevelKFPreFilter(SensorOutputMapReadOnly sensorMap,
+                         List<IMUBasedJointStateEstimatorParameters> pairParameters,
+                         Collection<RigidBodyBasics> feet,
+                         RigidBodyBasics rootBody,
+                         ToDoubleFunction<String> encoderPositionNoiseStd,
+                         ToDoubleFunction<String> encoderVelocityNoiseStd,
+                         ToDoubleFunction<String> jointVelocityMeasurementBreakFrequencyHz,
+                         boolean useDirectVelocityMeasurement,
+                         double sigmaTauOverride,
+                         ToDoubleFunction<String> gyroSigmaScaleByImuName,
+                         double estimatorDT,
+                         YoRegistry parentRegistry)
+   {
       // Parameters first: every component below reads its tuning from here, and the LIVE ones keep being
       // re-read on the hot path afterwards. The override, if any, must land here -- before State/Prediction
       // are built below -- since Prediction reads sigmaTau exactly once, at construction.
@@ -175,7 +201,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                                       useDirectVelocityMeasurement,
                                       parameters,
                                       registry);
-      this.biasUpdate = new JointKFBiasUpdate(state, update, parameters, registry);
+      this.biasUpdate = new JointKFBiasUpdate(state, update, parameters, gyroSigmaScaleByImuName, registry);
 
       validateConstantModel();
 
@@ -238,6 +264,35 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                                                                     double estimatorDT,
                                                                     YoRegistry parentRegistry)
    {
+      return createForKinematicsEstimator(sensorOutputMap,
+                                          stateEstimatorParameters,
+                                          imuProcessedOutputs,
+                                          feet,
+                                          estimatorRootBody,
+                                          gravitationalAcceleration,
+                                          cancelGravityFromAccelerationMeasurement,
+                                          sigmaTauOverride,
+                                          null,
+                                          estimatorDT,
+                                          parentRegistry);
+   }
+
+   /**
+    * @param sigmaTauOverride        see the 11-arg constructor's javadoc. NaN leaves the boot default.
+    * @param gyroSigmaScaleByImuName see the 12-arg constructor's javadoc. Null leaves every IMU unscaled.
+    */
+   public static JointLevelKFPreFilter createForKinematicsEstimator(SensorOutputMapReadOnly sensorOutputMap,
+                                                                    StateEstimatorParameters stateEstimatorParameters,
+                                                                    List<? extends IMUSensorReadOnly> imuProcessedOutputs,
+                                                                    Collection<RigidBodyBasics> feet,
+                                                                    RigidBodyBasics estimatorRootBody,
+                                                                    double gravitationalAcceleration,
+                                                                    BooleanProvider cancelGravityFromAccelerationMeasurement,
+                                                                    double sigmaTauOverride,
+                                                                    ToDoubleFunction<String> gyroSigmaScaleByImuName,
+                                                                    double estimatorDT,
+                                                                    YoRegistry parentRegistry)
+   {
       //TODO: this function should be removed and the factory should handle this part.
       if (stateEstimatorParameters == null)
          throw new UnsupportedOperationException("default estimator parameters for this type of estimator are not added yet.");
@@ -256,6 +311,7 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
                                        stateEstimatorParameters::getJointVelocityMeasurementBreakFrequency,
                                        stateEstimatorParameters.useDirectJointVelocityMeasurementInJointKF(),
                                        sigmaTauOverride,
+                                       gyroSigmaScaleByImuName,
                                        estimatorDT,
                                        parentRegistry);
    }
@@ -604,6 +660,8 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    DMatrixRMaj getStackedMeasurementResidual() { return biasUpdate.zg.copy(); }  // z_g (3(E+K) x 1)
    DMatrixRMaj getStackedMeasurementNoise()    { return biasUpdate.Rg.copy(); }  // R_g (3(E+K) x 3(E+K))
    DMatrixRMaj getMixingOperator()             { return biasUpdate.Lmix.copy(); } // L (3(E+K) x 3m); H_g bias columns == this
+   /** Sigma (3m x 3m), the floored and learned-scale-applied per-IMU gyro noise. Valid only after a build. */
+   DMatrixRMaj getGyroNoiseSigmaForTest()      { return biasUpdate.getSigmaForTest(); }
    int getStackedRowForPair(int pairIndex)     { return 3 * pairIndex; }      // pair e occupies rows [3e, 3e+3)
    int getBiasBlockColumn(IMUSensorReadOnly imu) { return 2 * state.numberOfJoints + 3 * state.requireImuOrdinal(imu); } // state col of imu's bias
    int getImuOrdinal(IMUSensorReadOnly imu)    { return state.requireImuOrdinal(imu); }
