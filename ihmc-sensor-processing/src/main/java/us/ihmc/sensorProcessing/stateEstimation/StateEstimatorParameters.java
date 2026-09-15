@@ -40,10 +40,18 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       NONE, ALPHA_COMPLEMENTARY, JOINT_KF
    }
 
-   /** Selected once at construction time; the default preserves the historical behavior for all robots. */
+   /**
+    * Selected once at construction time; the default preserves the historical behavior for all robots.
+    *
+    * <p>Keep this {@code ALPHA_COMPLEMENTARY}. {@code JOINT_KF} is an opt-in, and every user of it says so
+    * explicitly at its own construction site. Making it the default here silently re-pointed every robot's
+    * joint-level estimator, and on any target that does not eagerly build IMU-pair parameters it produces a
+    * filter with an empty pair list — which either builds as a zero-dimension filter that estimates nothing
+    * and never complains, or fails outright resolving a base IMU from an empty tree.</p>
+    */
    public JointLevelEstimatorType getJointLevelEstimatorType()
    {
-      return JointLevelEstimatorType.JOINT_KF;
+      return JointLevelEstimatorType.ALPHA_COMPLEMENTARY;
    }
 
    public boolean requestWristForceSensorCalibrationAtStart()
