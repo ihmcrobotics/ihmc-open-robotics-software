@@ -17,22 +17,19 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
@@ -218,8 +215,8 @@ public class IKStreamingRTPluginFactory
          timeOfLastInput.set(Double.NEGATIVE_INFINITY);
          timeWithoutInputsBeforeGoingToSleep.set(parameters.getTimeThresholdForSleeping());
 
-         ROS2Topic<?> inputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
-         ROS2Topic<?> outputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
+         HumanoidROS2Topic<?> inputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
+         HumanoidROS2Topic<?> outputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
 
          FullHumanoidRobotModel desiredFullRobotModel = robotModel.createFullRobotModel(false);
          this.commandInputManager = new CommandInputManager(KinematicsStreamingToolboxModule.supportedCommands());
@@ -283,12 +280,12 @@ public class IKStreamingRTPluginFactory
          contextDataFactory.setSensorDataContext(new SensorDataContext(desiredFullRobotModel));
          humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
-         ros2Node.createSubscription(inputTopic.withType(KinematicsStreamingToolboxInputMessage.class), s ->
+         ros2Node.createSubscription(inputTopic.withTypeName(KinematicsStreamingToolboxInputMessage.class), s ->
          {
             if (robotMotionStatusHolder.getCurrentRobotMotionStatus() != RobotMotionStatus.STANDING)
                newToolboxStateRequestedRef.set(ToolboxState.WAKE_UP);
          });
-         ros2Node.createSubscriptionSampler(inputTopic.withType(ToolboxStateMessage.class), sample ->
+         ros2Node.createSubscriptionSampler(inputTopic.withTypeName(ToolboxStateMessage.class), sample ->
          {
             if (robotMotionStatusHolder.getCurrentRobotMotionStatus() != RobotMotionStatus.STANDING)
                newToolboxStateRequestedRef.set(ToolboxState.fromByte(sample.getRequestedToolboxState()));
