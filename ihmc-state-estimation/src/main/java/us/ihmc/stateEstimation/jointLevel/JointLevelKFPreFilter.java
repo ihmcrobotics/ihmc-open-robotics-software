@@ -401,24 +401,17 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       // adaptive lag inflation on R. Skipped wholesale on any non-finite velocity, like the encoder block.
       if (update.isDirectVelocityEnabled())
       {
-         // Same identity as the encoder block above: z_qd row i is state index i, against Hqd = [0 | I_n | 0]
-         // and an Rqd diagonal keyed by state index. prevZqd[] and qdSlewSmoothed[] are state-index-keyed too.
-         boolean velocitiesValid = true;
-         for (int i = 0; i < state.numberOfJoints; i++)
+         // Gated PER JOINT, like the encoder block above and for the same reason: this used to be
+         // all-or-nothing, so one joint's bad reading dropped the q̇ pin for every joint on hardware whose
+         // encoders are documented as intermittent. The gate also drops a joint whose firmware q̇ is frozen
+         // while its encoder says it is moving — a case the adaptive R cannot see, because that inflation is
+         // driven by the measurement's own slew and a frozen signal has none. See
+         // JointKFUpdate#buildValidDirectVelocityMeasurement.
+         int validVelocityCount = update.buildValidDirectVelocityMeasurement();
+         if (validVelocityCount > 0)
          {
-            OneDoFJointBasics j = state.jointsByIndex[i];
-            double qd = state.sensorMap.getOneDoFJointOutput(j).getVelocity();
-            if (!Double.isFinite(qd))
-            {
-               velocitiesValid = false;
-               if (!state.warnedNonFiniteInput)
-                  state.warnNonFiniteInputOnce("joint velocity of " + j.getName());
-            }
-            update.zqd.set(i, 0, qd);
-         }
-         if (velocitiesValid)
-         {
-            // Inside the validity guard on purpose: the slew state must NOT advance on an invalid tick.
+            // After the build on purpose: the slew history must advance only for rows that survived the gate,
+            // and refreshDirectVelocityNoise maps rows back through qdRowJointIndex to do that.
             update.refreshDirectVelocityNoise();
             update.josephUpdate(update.Hqd, update.zqd, update.Rqd, JointKFUpdate.Channel.ENCODER_VELOCITY);
             state.warnIfNonFiniteState("encoderVelocityUpdate", -1);
@@ -660,6 +653,18 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
    DMatrixRMaj getStackedMeasurementResidual() { return biasUpdate.zg.copy(); }  // z_g (3(E+K) x 1)
    DMatrixRMaj getStackedMeasurementNoise()    { return biasUpdate.Rg.copy(); }  // R_g (3(E+K) x 3(E+K))
    DMatrixRMaj getMixingOperator()             { return biasUpdate.Lmix.copy(); } // L (3(E+K) x 3m); H_g bias columns == this
+   /** Whether this joint's direct-velocity row survived the per-joint gate on the last tick. */
+   boolean isDirectVelocityRowUsedForTest(OneDoFJointBasics joint)
+   {
+      return update.isDirectVelocityRowUsed(state.jointIndex(joint));
+   }
+
+   /** Live retune of the stuck-velocity hold; 0 disables the gate. */
+   void setQdStaleHoldSecondsForTest(double seconds)
+   {
+      parameters.qdStaleHoldSeconds.set(seconds);
+   }
+
    /** Sigma (3m x 3m), the floored and learned-scale-applied per-IMU gyro noise. Valid only after a build. */
    DMatrixRMaj getGyroNoiseSigmaForTest()      { return biasUpdate.getSigmaForTest(); }
    int getStackedRowForPair(int pairIndex)     { return 3 * pairIndex; }      // pair e occupies rows [3e, 3e+3)

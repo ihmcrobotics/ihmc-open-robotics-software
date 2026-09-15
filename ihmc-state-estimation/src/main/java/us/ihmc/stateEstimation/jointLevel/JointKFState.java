@@ -91,6 +91,7 @@ final class JointKFState
     * named. The singular-innovation diagnostic keeps its own flag so the two do not swallow each other.
     */
    boolean warnedNonFiniteInput = false;
+   boolean warnedStuckVelocity = false;
    private boolean nonFiniteStateReported = false;
 
    private final YoInteger yoStateDimension;
@@ -405,6 +406,26 @@ final class JointKFState
       warnedNonFiniteInput = true;
       LogTools.warn("Non-finite input to JointLevelKFPreFilter; first offender: " + source
             + ". Affected updates are skipped and consumers fall back to raw sensors / zero bias.");
+   }
+
+   /**
+    * Logs the FIRST stuck firmware velocity ever seen, once, then stays silent.
+    *
+    * <p>Worth a warning rather than silent gating: a frozen q̇ is invisible to the channel's adaptive R (that
+    * inflation reads the measurement's own slew, which a frozen signal has none of), so before the gate existed
+    * the filter trusted it at full confidence and the joint's velocity estimate collapsed toward the frozen
+    * value with nothing in the log to say why. If this fires on hardware the sensor needs attention — the gate
+    * keeps the estimate honest, it does not fix the encoder.</p>
+    */
+   void warnStuckVelocityOnce(String jointName, double frozenVelocity, double encoderTravel)
+   {
+      if (warnedStuckVelocity)
+         return;
+      warnedStuckVelocity = true;
+      LogTools.warn("Stuck firmware joint velocity in JointLevelKFPreFilter; first offender: " + jointName
+            + " held q̇ = " + frozenVelocity + " rad/s while its encoder moved " + encoderTravel
+            + " rad more than that reading accounts for. That joint's velocity row is dropped while the condition holds (the pair-gyro channel still "
+            + "observes it); tune with jointKFqdStaleHoldSeconds / jointKFqdStaleTravelTolerance.");
    }
 
    /**

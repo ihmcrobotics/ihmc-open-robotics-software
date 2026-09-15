@@ -8,6 +8,7 @@ import org.ejml.dense.row.linsol.chol.LinearSolverChol_DDRM;
 import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -108,6 +109,15 @@ final class JointKFUpdate
    private double[] invOmegaEffPerJoint;
    /** Last tick's measured q̇ (NaN before the first sample) and its smoothed slope. */
    private double[] prevZqd, qdSlewSmoothed;
+   /** Row r of the (possibly gated-down) velocity measurement observes state index qdRowJointIndex[r]. */
+   private int[] qdRowJointIndex;
+   /** Stuck-velocity detector state: the raw reading last tick, the encoder position when the current
+    *  bit-identical run began, and that run's length. Kept per joint and advanced every tick, including ticks
+    *  whose row is gated out — see buildValidDirectVelocityMeasurement. */
+   private double[] qdPrevRaw, qdRunStartPosition;
+   private int[] qdStaleTicks;
+   /** Whether each joint's q̇ row survived the gate on the last build; diagnostics and tests read it. */
+   private boolean[] qdRowUsed;
    private double lagSlewSmoothingAlpha;
    /** min_i qdMeasVarPerJoint[i]: S-pivot floor for the velocity rows (lag inflation only ever raises R).
     *  Seeded to the fallback then min-reduced, same shape and for the same reason as encVarFloorMin. */
@@ -157,6 +167,8 @@ final class JointKFUpdate
    private YoDouble[] yoQdInnov;
    private YoDouble[] yoQdNIS;
    private YoDouble[] yoQdR;
+   /** Per-joint stuck-velocity indicator; the reason a q̇ row vanished is otherwise invisible in a log. */
+   private YoBoolean[] yoQdStale;
    /** Live kill switch, settable from SCS mid-run for the hardware A/B. */
    private YoBoolean yoUseDirectVelocity;
 
@@ -203,6 +215,17 @@ final class JointKFUpdate
       invOmegaEffPerJoint = new double[n];
       prevZqd = new double[n];
       qdSlewSmoothed = new double[n];
+      qdRowJointIndex = new int[n];
+      qdPrevRaw = new double[n];
+      qdRunStartPosition = new double[n];
+      qdStaleTicks = new int[n];
+      qdRowUsed = new boolean[n];
+      for (int i = 0; i < n; i++)
+      {
+         qdRowJointIndex[i] = i;
+         qdPrevRaw[i] = Double.NaN;      // NaN never compares equal, so tick 1 can never start a "repeat" run
+         qdRunStartPosition[i] = Double.NaN;
+      }
       double sigmaQdUnfiltered = parameters.sigmaQdUnfiltered.getValue();
       double qdVarFallback = sigmaQdUnfiltered * sigmaQdUnfiltered;
       for (int stateIndex = 0; stateIndex < n; stateIndex++)
@@ -329,6 +352,114 @@ final class JointKFUpdate
    }
 
    /**
+    * Rebuilds (Hqd, zqd, Rqd) each tick over only the joints whose firmware q̇ is usable, one row per good
+    * joint, and returns the row count. The per-joint gate mirrors {@link #buildValidEncoderMeasurement()}: this
+    * channel used to be all-or-nothing, so one bad joint dropped the q̇ pin for every joint — the same shape of
+    * bug that was already fixed for the encoder block, on hardware whose encoders are documented as intermittent.
+    *
+    * <h2>Two ways a joint is skipped</h2>
+    * <ul>
+    *   <li><b>Non-finite</b> — the reading is absent. Already safe before this gate existed, just at whole-block
+    *       granularity.</li>
+    *   <li><b>Stuck</b> — the reading is finite but frozen while the joint is demonstrably moving. This is the
+    *       dangerous case, because it is <em>invisible</em> to the adaptive R in
+    *       {@link #refreshDirectVelocityNoise()}: that inflation is driven by the measurement's own slew, and a
+    *       frozen signal has zero slew, so R sits at its noise floor and the filter trusts a wrong measurement
+    *       most exactly when it is most wrong. Measured on the real Alex model: a q̇ frozen at 0 while the joint
+    *       truly moved at -0.06 rad/s pulled the estimate to -0.0002 rad/s, 0.3% of truth, while the same joint
+    *       reporting NaN instead estimated it perfectly. Reporting nothing was safer than reporting a stale
+    *       value; this gate removes that inversion.</li>
+    * </ul>
+    *
+    * <h2>Why staleness cannot be judged from q̇ alone</h2>
+    * <p>A joint genuinely at rest reports the same value every tick too — bit-identically, if the firmware
+    * quantises. A rule that drops any long identical run would therefore disable this channel throughout quiet
+    * stance, which is the regime it exists to sharpen (see {@link #refreshDirectVelocityNoise()}). The signal is
+    * simply not self-sufficient here, so the gate consults the one other thing already read in this loop: the
+    * joint's own encoder position, a different sensor path. A frozen q̇ is a contradiction only when the encoder
+    * says the joint travelled further than that q̇ can account for. At rest there is no travel and no
+    * contradiction, so the channel keeps its stance sharpness.</p>
+    *
+    * <p>Accumulated |Δq| rather than net displacement, so an oscillation that returns to its starting point
+    * still counts as motion the frozen reading failed to report.</p>
+    */
+   int buildValidDirectVelocityMeasurement()
+   {
+      int n = state.numberOfJoints;
+      int dim = state.dim;
+      Hqd.reshape(n, dim);
+      Hqd.zero();
+      zqd.reshape(n, 1);
+      double holdSeconds = parameters.qdStaleHoldSeconds.getValue();
+      double driftTolerance = parameters.qdStaleTravelTolerance.getValue();
+      int r = 0;
+      for (int i = 0; i < n; i++)
+      {
+         OneDoFJointBasics j = state.jointsByIndex[i];
+         OneDoFJointStateReadOnly output = state.sensorMap.getOneDoFJointOutput(j);
+         double qd = output.getVelocity();
+         double q = output.getPosition();
+
+         // Run bookkeeping advances on EVERY tick, including skipped ones: a run interrupted by a dropout is
+         // not the same evidence as an uninterrupted freeze, and resetting only on accepted rows would let a
+         // stale run accumulate across gaps it never actually spanned.
+         boolean repeated = Double.isFinite(qd) && qd == qdPrevRaw[i];
+         if (repeated)
+         {
+            qdStaleTicks[i]++;
+         }
+         else
+         {
+            qdStaleTicks[i] = 0;
+            qdRunStartPosition[i] = q; // anchor the run at the position where the value first froze
+         }
+         qdPrevRaw[i] = qd;
+
+         if (!Double.isFinite(qd))
+         {
+            if (!state.warnedNonFiniteInput)
+               state.warnNonFiniteInputOnce("joint velocity of " + j.getName());
+            if (yoQdStale != null)
+               yoQdStale[i].set(false);
+            qdRowUsed[i] = false;
+            continue;
+         }
+
+         // NET disagreement between where the encoder says the joint went and where the frozen reading says it
+         // should have gone. Signed and net, not accumulated |error|: a correct reading's residual is zero-mean
+         // encoder noise, whose NET drift grows only as sqrt(t) while an accumulated absolute value grows
+         // linearly and would false-positive on a healthy joint within a few ticks. Signed also catches a frozen
+         // reading of the right magnitude but the wrong sign, which an |q̇|-vs-travel comparison lets through.
+         double drift = Double.isFinite(q) && Double.isFinite(qdRunStartPosition[i])
+                        ? (q - qdRunStartPosition[i]) - qd * qdStaleTicks[i] * dt
+                        : 0.0;
+         boolean stale = holdSeconds > 0.0
+                         && qdStaleTicks[i] * dt >= holdSeconds
+                         && Math.abs(drift) > driftTolerance;
+         if (yoQdStale != null)
+            yoQdStale[i].set(stale);
+         if (stale)
+         {
+            if (!state.warnedStuckVelocity)
+               state.warnStuckVelocityOnce(j.getName(), qd, drift);
+            qdRowUsed[i] = false;
+            continue;
+         }
+
+         Hqd.set(r, n + i, 1.0); // this row observes joint state index i's velocity
+         zqd.set(r, 0, qd);
+         qdRowJointIndex[r] = i;
+         qdRowUsed[i] = true;
+         r++;
+      }
+      Hqd.reshape(r, dim);
+      zqd.reshape(r, 1);
+      Rqd.reshape(r, r);
+      Rqd.zero();
+      return r;
+   }
+
+   /**
     * H_qd = [0 | I_n | 0] observes the q̇ block; R_qd starts at the measured per-joint floor. Unlike Renc it is
     * NOT constant — {@link #refreshDirectVelocityNoise()} re-diagonals it every tick before the update.
     */
@@ -352,6 +483,7 @@ final class JointKFUpdate
       yoQdNIS = new YoDouble[n];
       yoQdR = new YoDouble[n];
       yoQdInnov = new YoDouble[n];
+      yoQdStale = new YoBoolean[n];
       yoUseDirectVelocity = new YoBoolean("jointKFUseDirectVelocityMeasurement", registry);
       yoUseDirectVelocity.set(useDirectVelocityMeasurement);
       for (int stateIndex = 0; stateIndex < n; stateIndex++)
@@ -369,6 +501,7 @@ final class JointKFUpdate
          yoQdInnov[stateIndex].set(Double.NaN); // signed innovation (rad/s); no direct-velocity update has run yet
          yoQdR[stateIndex] = new YoDouble("jointKF_qdR_" + jointName, registry);
          yoQdR[stateIndex].set(qdMeasVarPerJoint[stateIndex]); // per-tick: floor + adaptive lag inflation
+         yoQdStale[stateIndex] = new YoBoolean("jointKF_qdStale_" + jointName, registry);
       }
    }
 
@@ -389,9 +522,13 @@ final class JointKFUpdate
     */
    void refreshDirectVelocityNoise()
    {
-      for (int i = 0; i < state.numberOfJoints; i++)
+      // Indexed by ROW, mapped back through qdRowJointIndex: once a joint's row is gated out the row index
+      // stops being the state index, exactly as for the encoder block. Getting this wrong would quietly apply
+      // one joint's variance and slew history to another.
+      for (int row = 0; row < zqd.getNumRows(); row++)
       {
-         double z = zqd.get(i, 0);
+         int i = qdRowJointIndex[row];
+         double z = zqd.get(row, 0);
          if (Double.isFinite(prevZqd[i]))
          {
             double slew = (z - prevZqd[i]) / dt;
@@ -400,10 +537,16 @@ final class JointKFUpdate
          prevZqd[i] = z;
          double lagError = qdSlewSmoothed[i] * invOmegaEffPerJoint[i];
          double variance = qdMeasVarPerJoint[i] + lagError * lagError;
-         Rqd.set(i, i, variance);
+         Rqd.set(row, row, variance);
          if (yoQdR != null)
             yoQdR[i].set(variance);
       }
+   }
+
+   /** Whether joint state index {@code i}'s q̇ row survived the gate on the last build. */
+   boolean isDirectVelocityRowUsed(int i)
+   {
+      return qdRowUsed[i];
    }
 
    /** Loads a measured q̇ vector (filter state order) into zqd so tests can drive refreshDirectVelocityNoise(). */
@@ -456,10 +599,13 @@ final class JointKFUpdate
       CommonOps_DDRM.mult(Hm, state.x, nu);
       CommonOps_DDRM.changeSign(nu);
       CommonOps_DDRM.addEquals(nu, zm);
-      // Per-joint NIS for the two identity-block channels. VELOCITY still assumes row i IS joint i (always a
-      // full n-row call). ENCODER no longer can: buildValidEncoderMeasurement() may compact rows, so row i
-      // observes state index encRowJointIndex[i], not i itself — identity when nothing was gated (including
-      // every direct test call, which never touches encRowJointIndex and so keeps the identity allocate() seeds).
+      // Per-joint NIS for the two identity-block channels. NEITHER can assume row i is joint i any more: both
+      // buildValidEncoderMeasurement() and buildValidDirectVelocityMeasurement() may compact rows, so row i
+      // observes state index <channel>RowJointIndex[i]. Both mappings are identity when nothing was gated,
+      // including every direct test call, which never touches them and so keeps the allocate() seeds.
+      // (VELOCITY read row i as joint i until it gained a per-joint gate; with rows compacted that silently
+      // publishes one joint's NIS under another joint's name, which is exactly the kind of diagnostic lie that
+      // makes a real fault look like it is somewhere else.)
       // The channels are DISTINCT and must never cross-publish — an enum field, not a string prefix, is what
       // keeps that true.
       if (channel.nisChannel == Channel.NisChannel.ENCODER && yoEncNIS != null)
@@ -475,8 +621,9 @@ final class JointKFUpdate
       {
          for (int i = 0; i < k; i++)
          {
-            yoQdNIS[i].set(nu.get(i, 0) * nu.get(i, 0) / S.get(i, i));
-            yoQdInnov[i].set(nu.get(i, 0)); // rad/s
+            int jointIndex = qdRowJointIndex[i];
+            yoQdNIS[jointIndex].set(nu.get(i, 0) * nu.get(i, 0) / S.get(i, i));
+            yoQdInnov[jointIndex].set(nu.get(i, 0)); // rad/s
          }
       }
       if (!innovationSolver.setA(S))

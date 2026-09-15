@@ -76,6 +76,10 @@ final class JointKFParameters
    static final double SIGMA_QD_UNFILTERED = 0.1;
    /** Smoothing corner (Hz) for the measured-q̇ slew driving the direct-velocity lag inflation; CHANGES.md. */
    static final double LAG_SLEW_SMOOTHING_HZ = 5.0;
+   /** Seconds a bit-identical q̇ reading must persist before it can be judged stuck. */
+   static final double QD_STALE_HOLD_SECONDS = 0.05;
+   /** Encoder travel (rad) tolerated during that hold before the frozen q̇ is called a contradiction. */
+   static final double QD_STALE_TRAVEL_TOLERANCE = 5.0e-3;
    /** Seconds of continuous ground contact required before seeding; CHANGES.md. */
    static final double ON_GROUND_INIT_DEBOUNCE = 0.05;
 
@@ -101,6 +105,8 @@ final class JointKFParameters
    final YoDouble sigmaGyroFloorTrace;
    final YoDouble sigmaQdUnfiltered;
    final YoDouble lagSlewSmoothingHz;
+   final YoDouble qdStaleHoldSeconds;
+   final YoDouble qdStaleTravelTolerance;
    final YoDouble onGroundInitDebounce;
    final YoDouble initPosVar;
    final YoDouble initVelVar;
@@ -133,6 +139,12 @@ final class JointKFParameters
                                                       + "with no wired value.", SIGMA_QD_UNFILTERED, registry);
       lagSlewSmoothingHz = create("lagSlewSmoothingHz", BOOT + "Corner (Hz) of the low-pass on the measured-q̇ "
                                                         + "slew estimate.", LAG_SLEW_SMOOTHING_HZ, registry);
+      qdStaleHoldSeconds = create("qdStaleHoldSeconds", LIVE + "Seconds a bit-identical firmware q̇ reading must "
+                                                        + "persist before it is eligible to be judged stuck. 0 disables "
+                                                        + "the stuck-velocity gate entirely.", QD_STALE_HOLD_SECONDS, registry);
+      qdStaleTravelTolerance = create("qdStaleTravelTolerance", LIVE + "Encoder travel (rad) tolerated while q̇ is "
+                                                                + "frozen before the pair is called a contradiction and the "
+                                                                + "joint's q̇ row is dropped.", QD_STALE_TRAVEL_TOLERANCE, registry);
       onGroundInitDebounce = create("onGroundInitDebounce", BOOT + "Seconds of continuous ground contact required "
                                                             + "before the filter seeds.", ON_GROUND_INIT_DEBOUNCE, registry);
       initPosVar = create("initPosVar", INIT + "Initial joint-position variance (rad^2).", INIT_POS_VAR, registry);
