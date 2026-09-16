@@ -45,15 +45,10 @@ class ReplayTopicManager<T extends ROS2Message<T>>
       if (latestIndex < 0)
          return;
 
-      // Deliver every skipped frame, not only the latest. Hand-configuration and other
-      // one-frame fields are otherwise lost when the replay clock jumps over them.
-      if (latestIndex > lastSentIndex)
+      if (latestIndex != lastSentIndex)
       {
-         for (int index = lastSentIndex + 1; index <= latestIndex; index++)
-         {
-            mutator.accept(messages.get(index), currentTime);
-            messageConsumer.accept(messages.get(index));
-         }
+         mutator.accept(messages.get(latestIndex), currentTime);
+         messageConsumer.accept(messages.get(latestIndex));
          lastSentIndex = latestIndex;
       }
       isDone = latestIndex == timestamps.size() - 1;
