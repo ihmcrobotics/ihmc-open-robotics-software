@@ -100,6 +100,9 @@ public class ControllerAPIDefinition
       commands.add(RLModelSelectionCommand.class);
       commands.add(MimicManeuverCommand.class);
 
+      /** Commands supported by the RL controoler, in this repo*/
+      commands.add(HeightMapCommand.class);
+
       controllerSupportedCommands = new ArrayList<>(commands);
 
       controllerSupportedStatusMessages = ControllerAPI.outputMessageClasses.stream().toList();
