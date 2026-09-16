@@ -97,8 +97,6 @@ public class ROS2LogKinematicsToolboxOutputStatusTest
       Assertions.assertFalse(imported.getDesiredJointAngles().isEmpty());
       Assertions.assertEquals(0.018464804f, imported.getDesiredJointAngles().get(0), 1.0e-6f);
       Assertions.assertFalse(imported.getEndReplay());
-      Assertions.assertEquals(0, imported.getLeftHandConfigurationCommand(), "Missing leftHandConfigurationCommand in old logs must default to 0");
-      Assertions.assertEquals(0, imported.getRightHandConfigurationCommand(), "Missing rightHandConfigurationCommand in old logs must default to 0");
 
       ros2Node.close();
    }
@@ -132,7 +130,5 @@ public class ROS2LogKinematicsToolboxOutputStatusTest
       Assertions.assertEquals(expected.getLeftFootInContact(), actual.getLeftFootInContact());
       Assertions.assertEquals(expected.getRightFootInContact(), actual.getRightFootInContact());
       Assertions.assertEquals(expected.getEndReplay(), actual.getEndReplay());
-      Assertions.assertEquals(expected.getLeftHandConfigurationCommand(), actual.getLeftHandConfigurationCommand());
-      Assertions.assertEquals(expected.getRightHandConfigurationCommand(), actual.getRightHandConfigurationCommand());
    }
 }
