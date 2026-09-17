@@ -1,18 +1,16 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import controller_msgs.CapturabilityBasedStatus;
-import controller_msgs.MultiContactBalanceStatus;
-import controller_msgs.RobotConfigurationData;
 import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
@@ -24,7 +22,6 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -160,23 +157,23 @@ public class KinematicsToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2Topic<?> getOutputTopic()
+   public HumanoidROS2Topic<?> getOutputTopic()
    {
       return getOutputTopic(robotName);
    }
 
-   public static ROS2Topic<?> getOutputTopic(String robotName)
+   public static HumanoidROS2Topic<?> getOutputTopic(String robotName)
    {
       return ToolboxAPIs.KINEMATICS_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2Topic<?> getInputTopic()
+   public HumanoidROS2Topic<?> getInputTopic()
    {
       return getInputTopic(robotName);
    }
 
-   public static ROS2Topic<?> getInputTopic(String robotName)
+   public static HumanoidROS2Topic<?> getInputTopic(String robotName)
    {
       return ToolboxAPIs.KINEMATICS_TOOLBOX.withRobot(robotName).withInput();
    }

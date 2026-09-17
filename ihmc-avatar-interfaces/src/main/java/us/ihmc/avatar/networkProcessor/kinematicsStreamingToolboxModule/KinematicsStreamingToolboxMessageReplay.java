@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
-import static us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxMessageLogger.*;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.CapturabilityBasedStatus;
@@ -13,19 +11,21 @@ import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
-import us.ihmc.jros2.ROS2Topic;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
+
+import static us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxMessageLogger.*;
 
 /**
  * Loads and replays messages from file. There are two ways to do replay:
@@ -54,14 +54,14 @@ public class KinematicsStreamingToolboxMessageReplay
 
       ros2Node = new AsyncROS2Node("ihmc_" + name);
 
-      ROS2Topic controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
-      robotConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withType(RobotConfigurationData.class));
-      capturabilityBasedStatusPublisher = ros2Node.createPublisher(controllerOutputTopic.withType(CapturabilityBasedStatus.class));
+      HumanoidROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+      robotConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(RobotConfigurationData.class));
+      capturabilityBasedStatusPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(CapturabilityBasedStatus.class));
 
-      ROS2Topic toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
-      kinematicsToolboxConfigurationPublisher = ros2Node.createPublisher(toolboxInputTopic.withType(KinematicsToolboxConfigurationMessage.class));
-      kinematicsStreamingToolboxInputPublisher = ros2Node.createPublisher(toolboxInputTopic.withType(KinematicsStreamingToolboxInputMessage.class));
-      toolboxStatePublisher = ros2Node.createPublisher(toolboxInputTopic.withType(ToolboxStateMessage.class));
+      HumanoidROS2Topic<?> toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
+      kinematicsToolboxConfigurationPublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(KinematicsToolboxConfigurationMessage.class));
+      kinematicsStreamingToolboxInputPublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(KinematicsStreamingToolboxInputMessage.class));
+      toolboxStatePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ToolboxStateMessage.class));
    }
 
    public void replayAllMessages()
