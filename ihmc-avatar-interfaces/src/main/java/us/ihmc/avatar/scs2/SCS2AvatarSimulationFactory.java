@@ -222,6 +222,7 @@ public class SCS2AvatarSimulationFactory
    protected AvatarEstimatorThread estimatorThread;
    protected AvatarControllerThread controllerThread;
    protected AvatarStepGeneratorThread stepGeneratorThread;
+   protected HeadingAndVelocityEvaluationScript headingAndVelocityEvaluationScript;
    protected IKStreamingRTThread ikStreamingRTThread;
    protected DisposableRobotController robotController;
    protected SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
@@ -604,12 +605,13 @@ public class SCS2AvatarSimulationFactory
       if (useHeadingAndVelocityScript || parameters != null)
       {
          HumanoidSteppingManager steppingPlugin = stepGeneratorThread.getSteppingManager();
-         HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(robotModel.get()::getStepGeneratorDT,
-                                                                                            stepGeneratorThread.getYoTime(),
-                                                                                            parameters,
-                                                                                            steppingPlugin.getStepGeneratorCommandInputManager().getCommandInputManager(),
-                                                                                            stepGeneratorThread.getYoVariableRegistry());
-         steppingPlugin.addUpdatable(script);
+         headingAndVelocityEvaluationScript = new HeadingAndVelocityEvaluationScript(robotModel.get()::getStepGeneratorDT,
+                                                                                     stepGeneratorThread.getYoTime(),
+                                                                                     parameters,
+                                                                                     steppingPlugin.getStepGeneratorCommandInputManager()
+                                                                                                   .getCommandInputManager(),
+                                                                                     stepGeneratorThread.getYoVariableRegistry());
+         steppingPlugin.addUpdatable(headingAndVelocityEvaluationScript);
       }
       simulationConstructionSet.addYoGraphic(stepGeneratorThread.getSCS2YoGraphics());
    }
@@ -844,6 +846,15 @@ public class SCS2AvatarSimulationFactory
             TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
             SubtreeStreams.fromChildren(OneDoFJointBasics.class, robot.getRootBody())
                           .forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
+
+            // Refresh the raw sensor data before initializing the estimator so its first tick does not
+            // consume stale values, e.g. after the simulation has been reset to its initial state. This
+            // matters in particular in the single-threaded mode where the periodic sensor read only
+            // happens after the estimator has run.
+            SensorReader sensorReader = estimatorThread.getSensorReader();
+            long initialTimestamp = sensorReader.read(masterContext.getSensorDataContext());
+            masterContext.setTimestamp(initialTimestamp);
+
             estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
             controllerThread.initialize();
             stepGeneratorThread.initialize();
@@ -865,6 +876,22 @@ public class SCS2AvatarSimulationFactory
          {
             if (robotController instanceof BarrierScheduledRobotController)
                ((BarrierScheduledRobotController) robotController).waitUntilTasksDone();
+         }
+
+         // No @Override so this compiles against SCS2 versions that predate Controller.reset(); once
+         // SCS2 provides it, this method overrides it and gets invoked when the simulation is reset.
+         public void reset()
+         {
+            // The script's sequencer lives outside YoVariables, restart it when the simulation is reset to its initial state.
+            if (headingAndVelocityEvaluationScript != null)
+               headingAndVelocityEvaluationScript.reset();
+         }
+
+         // No @Override so this compiles against SCS2 versions that predate Controller.isResetSupported();
+         // once SCS2 provides it, this method overrides it and reports that reset() above is safe to rely on.
+         public boolean isResetSupported()
+         {
+            return true;
          }
       });
    }
@@ -942,7 +969,28 @@ public class SCS2AvatarSimulationFactory
    private void setupSimulatedRobotTimeProvider()
    {
       simulatedRobotTimeProvider = new SimulatedDRCRobotTimeProvider(simulationDT.get());
-      robot.getControllerManager().addController(() -> simulatedRobotTimeProvider.doControl());
+      robot.getControllerManager().addController(new Controller()
+      {
+         @Override
+         public void doControl()
+         {
+            simulatedRobotTimeProvider.doControl();
+         }
+
+         @Override
+         public void reset()
+         {
+            // The timestamp counter lives outside YoVariables and would otherwise keep counting from
+            // where it left off instead of restarting when the simulation is reset to its initial state.
+            simulatedRobotTimeProvider.set(0);
+         }
+
+         @Override
+         public boolean isResetSupported()
+         {
+            return true;
+         }
+      });
    }
 
    public void setSimulationName(String simulationName)
