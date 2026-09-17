@@ -75,8 +75,7 @@ public class SupervisePoseMeshOverlayRenderer
       this(meshFile, 1.0);
    }
 
-   public SupervisePoseMeshOverlayRenderer(Path meshFile,
-                                           double meshScale)
+   public SupervisePoseMeshOverlayRenderer(Path meshFile, double meshScale)
    {
       if (meshFile == null)
          throw new IllegalArgumentException("Mesh file path is null");
@@ -101,13 +100,12 @@ public class SupervisePoseMeshOverlayRenderer
       loadOBJ(meshFile);
       buildUniqueEdges();
 
-      LogTools.info(String.format(
-            "Loaded mesh overlay: file=%s vertices=%d triangles=%d edges=%d scale=%.6f",
-            meshFile,
-            meshVertices.size(),
-            meshTriangles.size(),
-            meshEdges.size(),
-            meshScale));
+      LogTools.info(String.format("Loaded mesh overlay: file=%s vertices=%d triangles=%d edges=%d scale=%.6f",
+                                  meshFile,
+                                  meshVertices.size(),
+                                  meshTriangles.size(),
+                                  meshEdges.size(),
+                                  meshScale));
    }
 
    private void loadOBJ(Path meshFile)
@@ -152,8 +150,7 @@ public class SupervisePoseMeshOverlayRenderer
       }
    }
 
-   private void parseVertex(String line,
-                            int lineNumber)
+   private void parseVertex(String line, int lineNumber)
    {
       String[] tokens = line.split("\\s+");
 
@@ -195,10 +192,9 @@ public class SupervisePoseMeshOverlayRenderer
          {
             int vertexIndex = parseOBJVertexIndex(tokens[tokenIndex]);
 
-            if (vertexIndex < 0
-                || vertexIndex >= meshVertices.size())
+            if (vertexIndex < 0 || vertexIndex >= meshVertices.size())
             {
-               LogTools.warn("Skipping invalid OBJ face at line "+ lineNumber + ": vertex index " + vertexIndex);
+               LogTools.warn("Skipping invalid OBJ face at line " + lineNumber + ": vertex index " + vertexIndex);
                return;
             }
 
@@ -225,26 +221,17 @@ public class SupervisePoseMeshOverlayRenderer
        */
       int firstVertex = faceVertexIndices.get(0);
 
-      for (int index = 1;
-           index < faceVertexIndices.size() - 1;
-           index++)
+      for (int index = 1; index < faceVertexIndices.size() - 1; index++)
       {
          int secondVertex = faceVertexIndices.get(index);
          int thirdVertex = faceVertexIndices.get(index + 1);
 
-         if (firstVertex == secondVertex
-             || secondVertex == thirdVertex
-             || thirdVertex == firstVertex)
+         if (firstVertex == secondVertex || secondVertex == thirdVertex || thirdVertex == firstVertex)
          {
             continue;
          }
 
-         meshTriangles.add(new int[]
-                                 {
-                                       firstVertex,
-                                       secondVertex,
-                                       thirdVertex
-                                 });
+         meshTriangles.add(new int[] {firstVertex, secondVertex, thirdVertex});
       }
    }
 
@@ -306,8 +293,7 @@ public class SupervisePoseMeshOverlayRenderer
 
       meshEdges.clear();
 
-      for (Map.Entry<MeshEdge, List<Integer>> entry
-            : edgeTriangleMap.entrySet())
+      for (Map.Entry<MeshEdge, List<Integer>> entry : edgeTriangleMap.entrySet())
       {
          meshEdges.add(new MeshEdgeInfo(entry.getKey(), List.copyOf(entry.getValue())));
       }
@@ -326,9 +312,7 @@ public class SupervisePoseMeshOverlayRenderer
       if (objectPoseInCamera == null || cameraIntrinsics == null)
          return;
 
-      if (meshVertices.isEmpty()
-          || meshTriangles.isEmpty()
-          || meshEdges.isEmpty())
+      if (meshVertices.isEmpty() || meshTriangles.isEmpty() || meshEdges.isEmpty())
       {
          return;
       }
@@ -444,8 +428,7 @@ public class SupervisePoseMeshOverlayRenderer
 
          boolean edgeHasFrontFacingTriangle = false;
 
-         for (int triangleIndex
-               : edgeInfo.adjacentTriangleIndices())
+         for (int triangleIndex : edgeInfo.adjacentTriangleIndices())
          {
             if (triangleFrontFacing[triangleIndex])
             {
@@ -487,10 +470,7 @@ public class SupervisePoseMeshOverlayRenderer
       double y = pointInCamera.getY();
       double z = pointInCamera.getZ();
 
-      if (!Double.isFinite(x)
-          || !Double.isFinite(y)
-          || !Double.isFinite(z)
-          || z <= 1.0e-6)
+      if (!Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(z) || z <= 1.0e-6)
       {
          return ProjectedVertex.invalid();
       }
@@ -508,10 +488,7 @@ public class SupervisePoseMeshOverlayRenderer
        * Edges are currently drawn only when both endpoints project inside the
        * image. Image-border line clipping can be added later if necessary.
        */
-      if (uDouble < 0.0
-          || uDouble >= imageWidth
-          || vDouble < 0.0
-          || vDouble >= imageHeight)
+      if (uDouble < 0.0 || uDouble >= imageWidth || vDouble < 0.0 || vDouble >= imageHeight)
       {
          return ProjectedVertex.invalid();
       }

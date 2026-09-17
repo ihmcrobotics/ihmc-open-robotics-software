@@ -26,19 +26,14 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2ImageVisualizer<ImageM
    private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
    private volatile boolean hasRenderedOne = false;
 
-   public RDXROS2ImageMessageVisualizer(String title,
-                                        ROS2Node ros2Node,
-                                        ROS2Topic<ImageMessage> topic)
+   public RDXROS2ImageMessageVisualizer(String title, ROS2Node ros2Node, ROS2Topic<ImageMessage> topic)
    {
       this(title, ros2Node, topic, topic.getName());
    }
 
-   public RDXROS2ImageMessageVisualizer(String title,
-                                        ROS2Node ros2Node,
-                                        ROS2Topic<ImageMessage> topic,
-                                        String displayedTopicName)
+   public RDXROS2ImageMessageVisualizer(String title, ROS2Node ros2Node, ROS2Topic<ImageMessage> topic, String panelName)
    {
-      super(title, displayedTopicName, false);
+      super(title, panelName, false);
       this.topic = topic;
       this.ros2Node = ros2Node;
 
@@ -84,20 +79,20 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2ImageVisualizer<ImageM
 
       // This is thread 2!
       submitImageUpdate(imageVisualizer ->
-      {
-         synchronized (imageMessageSwapReference)
-         {
-            ImageMessage imageMessageB = imageMessageSwapReference.getForThreadTwo();
+                        {
+                           synchronized (imageMessageSwapReference)
+                           {
+                              ImageMessage imageMessageB = imageMessageSwapReference.getForThreadTwo();
 
-            // Decode the message and get the decoded pixel format (it may be different from the pixel format in the message)
-            decoder.decodeMessage(imageMessageB, decompressedImage);
-            PixelFormat pixelFormat = decoder.getDecodedImagePixelFormat();
+                              // Decode the message and get the decoded pixel format (it may be different from the pixel format in the message)
+                              decoder.decodeMessage(imageMessageB, decompressedImage);
+                              PixelFormat pixelFormat = decoder.getDecodedImagePixelFormat();
 
-            // Update the visualized image
-            setImage(imageVisualizer, decompressedImage, pixelFormat);
-            hasRenderedOne = true;
-         }
-      });
+                              // Update the visualized image
+                              setImage(imageVisualizer, decompressedImage, pixelFormat);
+                              hasRenderedOne = true;
+                           }
+                        });
    }
 
    // Protected so child classes can override this method to modify the displayed image
