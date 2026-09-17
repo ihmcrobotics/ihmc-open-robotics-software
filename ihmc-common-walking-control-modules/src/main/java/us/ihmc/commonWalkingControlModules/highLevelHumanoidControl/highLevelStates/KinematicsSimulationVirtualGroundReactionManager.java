@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.FootstepStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
@@ -49,7 +49,9 @@ public class KinematicsSimulationVirtualGroundReactionManager
    private void processFootstepStatus(FootstepStatusMessage statusMessage)
    {
       RobotSide side = RobotSide.fromByte(statusMessage.getRobotSide());
-      desiredFootstep.setIncludingFrame(worldFrame, statusMessage.getDesiredFootPositionInWorld(), statusMessage.getDesiredFootOrientationInWorld());
+      desiredFootstep.setIncludingFrame(worldFrame,
+                                        statusMessage.getDesiredFootPositionInWorld().getPoint(),
+                                        statusMessage.getDesiredFootOrientationInWorld().getQuaternion());
 
       switch (statusMessage.getFootstepStatus())
       {

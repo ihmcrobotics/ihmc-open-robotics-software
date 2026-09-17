@@ -2,13 +2,12 @@ package us.ihmc.communication.ros2.sync;
 
 import imgui.ImGui;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.pubsub.common.Guid;
+import us.ihmc.jros2.Guid;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -38,7 +37,7 @@ public class RDXROS2PeerClockTest
             baseUI.create();
             baseUI.getImGuiPanelManager().addPanel("Main", this::renderImGuiWidgets);
 
-            ros2Node = new ROS2NodeBuilder().build("peer_clock_test");
+            ros2Node = new ROS2Node("peer_clock_test");
             clockEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
          }
 
@@ -53,7 +52,7 @@ public class RDXROS2PeerClockTest
          public void dispose()
          {
             clockEstimator.destroy();
-            ros2Node.destroy();
+            ros2Node.close();
             baseUI.dispose();
          }
 

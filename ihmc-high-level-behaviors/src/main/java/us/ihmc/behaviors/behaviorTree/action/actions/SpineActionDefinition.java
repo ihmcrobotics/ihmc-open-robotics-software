@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.SpineActionDefinitionMessage;
+import behavior_msgs.SpineActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;

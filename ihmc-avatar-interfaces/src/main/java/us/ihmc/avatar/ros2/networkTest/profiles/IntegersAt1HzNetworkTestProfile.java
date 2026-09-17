@@ -1,16 +1,17 @@
 package us.ihmc.avatar.ros2.networkTest.profiles;
 
+import static us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine.*;
+
 import org.apache.commons.lang3.mutable.MutableInt;
-import std_msgs.msg.dds.Int64;
+import std_msgs.Int64;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestProfile;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -18,11 +19,9 @@ import us.ihmc.yoVariables.variable.YoLong;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine.*;
-
 public class IntegersAt1HzNetworkTestProfile extends ROS2NetworkTestProfile
 {
-   private static final ROS2Topic<Int64> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule("ints1hz").withType(Int64.class);
+   private static final HumanoidROS2Topic<Int64> BASE_TOPIC = HumanoidROS2Topic.IHMC_ROOT.withModule("ints1hz").withType(Int64.class);
    private static final ROS2Topic<Int64> TO_OCU = BASE_TOPIC.withSuffix("toocu");
    private static final ROS2Topic<Int64> TO_CPU1 = BASE_TOPIC.withSuffix("tocpu1");
    private final MutableInt number = new MutableInt();
@@ -38,7 +37,7 @@ public class IntegersAt1HzNetworkTestProfile extends ROS2NetworkTestProfile
    {
       LogTools.info("Running on {}", getMachineName());
 
-      ROS2Node ros2Node = new ROS2NodeBuilder().build("profile");
+      ROS2Node ros2Node = new ROS2Node("profile");
 
       ROS2Topic<Int64> publisherTopic = null;
       ROS2Topic<Int64> subscriberTopic = null;
@@ -64,10 +63,7 @@ public class IntegersAt1HzNetworkTestProfile extends ROS2NetworkTestProfile
       publisher = ros2Node.createPublisher(publisherTopic);
       if (subscriberTopic != null)
       {
-         ros2Node.createSubscription2(subscriberTopic, message ->
-         {
-            messagesReceived.add(1);
-         });
+         ros2Node.createSubscriptionSampler(subscriberTopic, message -> messagesReceived.add(1));
       }
    }
 

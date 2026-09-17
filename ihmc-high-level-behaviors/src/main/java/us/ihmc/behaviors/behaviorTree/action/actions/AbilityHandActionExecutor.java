@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import ihmc_hands_ros2.msg.dds.AbilityHandCommand;
-import ihmc_hands_ros2.msg.dds.AbilityHandState;
+import ihmc_hands_ros2.AbilityHandCommand;
+import ihmc_hands_ros2.AbilityHandState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionDefinition.SuccessCriteria;

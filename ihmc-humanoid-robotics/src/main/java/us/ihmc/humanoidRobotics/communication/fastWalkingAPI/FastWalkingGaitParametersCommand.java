@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.fastWalkingAPI;
 
-import controller_msgs.msg.dds.FastWalkingGaitParametersMessage;
+import controller_msgs.FastWalkingGaitParametersMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
 public class FastWalkingGaitParametersCommand implements Command<FastWalkingGaitParametersCommand, FastWalkingGaitParametersMessage>

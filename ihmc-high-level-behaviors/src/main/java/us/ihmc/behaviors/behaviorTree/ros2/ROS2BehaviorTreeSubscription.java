@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import behavior_msgs.msg.dds.*;
+import behavior_msgs.*;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
@@ -9,11 +9,13 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.UnitConversions;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.AutonomyAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,29 +34,56 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
    private long outOfOrderCount = 0;
    private long sequenceId;
    private int numberOfOnRobotNodes = 0;
+   private final ROS2Node ros2Node;
+   private final ROS2Subscription<BehaviorTreeStateMessage> behaviorTreeStateMessageSubscription;
    private final ConcurrentRingBuffer<BehaviorTreeStateMessage> behaviorTreeStateMessageQueue;
    private final ROS2BehaviorTreeSubscriptionNode subscriptionRootNode = new ROS2BehaviorTreeSubscriptionNode();
    private final HashMap<Long, ROS2BehaviorTreeSubscriptionNode> idToSubscriptionNodesMap = new HashMap<>();
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
    private final HashMap<Long, T> idToLocalNodesMap = new HashMap<>();
 
-   public ROS2BehaviorTreeSubscription(BehaviorTree<?, T> behaviorTree, ROS2Helper ros2PublishSubscribeAPI)
+   public ROS2BehaviorTreeSubscription(BehaviorTree<?, T> behaviorTree, ROS2Node ros2Node)
    {
       this.behaviorTree = behaviorTree;
+      this.ros2Node = ros2Node;
 
       topic = AutonomyAPI.BEHAVIOR_TREE.getTopic(behaviorTree.getCRDTInfo().getActorDesignation().getIncomingQualifier());
       int maxClientSoftLimit = 3; // This buffer prevents race conditions between clients
-      behaviorTreeStateMessageQueue = ros2PublishSubscribeAPI.subscribeViaQueue(topic, maxClientSoftLimit, behaviorTreeStateMessage ->
+      behaviorTreeStateMessageQueue = new ConcurrentRingBuffer<>(BehaviorTreeStateMessage::new, maxClientSoftLimit);
+      Throttler warningThrottler = new Throttler().setFrequency(1.0);
+      MutableInt droppedMessages = new MutableInt(0);
+      behaviorTreeStateMessageSubscription = ros2Node.createSubscription(topic, reader ->
       {
-         ++numberOfMessagesReceived;
-         for (Runnable messageRecievedCallback : messageRecievedCallbacks)
+         BehaviorTreeStateMessage nextMessage;
+         while ((nextMessage = behaviorTreeStateMessageQueue.next()) == null)
          {
-            messageRecievedCallback.run();
+            droppedMessages.increment();
+
+            if (warningThrottler.run())
+            {
+               LogTools.warn("Concurrent ring buffer has been full! Queue size: {} Have dropped {} oldest messages...",
+                             maxClientSoftLimit,
+                             droppedMessages.intValue());
+               droppedMessages.setValue(0);
+            }
+
+            behaviorTreeStateMessageQueue.poll();
+            behaviorTreeStateMessageQueue.read();
+            behaviorTreeStateMessageQueue.flush();
          }
 
-         if (behaviorTreeStateMessage != null)
+         BehaviorTreeStateMessage readMessage = reader.read();
+         if (readMessage != null)
          {
-            long receivedSequenceID = behaviorTreeStateMessage.getSequenceId();
+            nextMessage.set(readMessage);
+
+            ++numberOfMessagesReceived;
+            for (Runnable messageRecievedCallback : messageRecievedCallbacks)
+            {
+               messageRecievedCallback.run();
+            }
+
+            long receivedSequenceID = readMessage.getSequenceId();
             long expectedSequenceID = previousSequenceID + 1;
             long difference = receivedSequenceID - expectedSequenceID;
 
@@ -71,6 +100,8 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
             }
 
             previousSequenceID = receivedSequenceID;
+
+            behaviorTreeStateMessageQueue.commit();
          }
       });
    }
@@ -252,7 +283,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
 
       ROS2BehaviorTreeMessageTools.packSubscriptionNode(nodeType, indexInTypesList, behaviorTreeStateMessage, subscriptionNode);
 
-      idToSubscriptionNodesMap.put(subscriptionNode.getBehaviorTreeNodeStateMessage().getId(), subscriptionNode);
+      idToSubscriptionNodesMap.put((long) subscriptionNode.getBehaviorTreeNodeStateMessage().getId(), subscriptionNode);
 
       for (int i = 0; i < subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getNumberOfChildren(); i++)
       {
@@ -265,7 +296,8 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
 
    public void destroy()
    {
-
+      messageRecievedCallbacks.clear();
+      ros2Node.destroySubscription(behaviorTreeStateMessageSubscription);
    }
 
    public void registerMessageReceivedCallback(Runnable callback)

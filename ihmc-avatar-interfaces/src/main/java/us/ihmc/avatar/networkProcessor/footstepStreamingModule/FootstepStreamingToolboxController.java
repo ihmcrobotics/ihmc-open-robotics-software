@@ -1,6 +1,9 @@
 package us.ihmc.avatar.networkProcessor.footstepStreamingModule;
 
-import controller_msgs.msg.dds.FootstepDataMessage;
+import static us.ihmc.avatar.networkProcessor.footstepStreamingModule.FootstepStreamingToolboxController.FSTState.SLEEP;
+import static us.ihmc.avatar.networkProcessor.footstepStreamingModule.FootstepStreamingToolboxController.FSTState.STREAMING;
+
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.avatar.networkProcessor.footstepStreamingModule.FootstepStreamingToolboxParameters.ClockType;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
@@ -9,20 +12,17 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import static us.ihmc.avatar.networkProcessor.footstepStreamingModule.FootstepStreamingToolboxController.FSTState.SLEEP;
-import static us.ihmc.avatar.networkProcessor.footstepStreamingModule.FootstepStreamingToolboxController.FSTState.STREAMING;
 
 /**
  * The main class for setting up the footstep streaming controller.

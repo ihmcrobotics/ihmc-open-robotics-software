@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.StepConstraintsListMessage;
+import controller_msgs.StepConstraintsListMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -8,8 +8,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
-import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
+
+import java.util.List;
 
 public class StepConstraintsListCommand implements Command<StepConstraintsListCommand, StepConstraintsListMessage>
 {
@@ -37,20 +38,20 @@ public class StepConstraintsListCommand implements Command<StepConstraintsListCo
       int vertexIndex = 0;
       int convexPolygonIndexStart = 0;
 
-      IDLSequence.Object<Point3D> vertexBuffer = message.getVertexBuffer();
+      var vertexBuffer = message.getVertexBuffer();
 
       for (int regionIndex = 0; regionIndex < message.getRegionOrigin().size(); regionIndex++)
       {
          StepConstraintRegionCommand planarRegionCommand = stepsConstraints.add();
-         Point3D origin = message.getRegionOrigin().get(regionIndex);
-         Quaternion orientation = message.getRegionOrientation().get(regionIndex);
+         var origin = message.getRegionOrigin().get(regionIndex).getPoint();
+         var orientation = message.getRegionOrientation().get(regionIndex).getQuaternion();
          planarRegionCommand.setRegionTransformProperties(origin, orientation);
 
          upperBound += message.getConcaveHullsSize().get(regionIndex);
 
          for (; vertexIndex < upperBound; vertexIndex++)
          {
-            planarRegionCommand.addConcaveHullVertex().set(vertexBuffer.get(vertexIndex));
+            planarRegionCommand.addConcaveHullVertex().set(vertexBuffer.get(vertexIndex).getPoint());
          }
 
          int polygonIndex = 0;
@@ -61,7 +62,7 @@ public class StepConstraintsListCommand implements Command<StepConstraintsListCo
             ConcavePolygon2D convexPolygon = planarRegionCommand.addHoleInRegion();
 
             for (; vertexIndex < upperBound; vertexIndex++)
-               convexPolygon.addVertex(vertexBuffer.get(vertexIndex));
+               convexPolygon.addVertex(vertexBuffer.get(vertexIndex).getPoint());
 
             convexPolygon.update();
          }
@@ -83,14 +84,14 @@ public class StepConstraintsListCommand implements Command<StepConstraintsListCo
       {
          StepConstraintRegionCommand regionCommand = stepsConstraints.get(regionIndex);
 
-         message.getRegionOrigin().add().set(regionCommand.getRegionOrigin());
-         message.getRegionOrientation().add().set(regionCommand.getTransformToWorld().getRotation()); // TODO check this
-         message.getRegionNormal().add().set(regionCommand.getRegionNormal());
+         message.getRegionOrigin().add().getPoint().set(regionCommand.getRegionOrigin());
+         message.getRegionOrientation().add().getQuaternion().set(regionCommand.getTransformToWorld().getRotation()); // TODO check this
+         message.getRegionNormal().add().getVector().set(regionCommand.getRegionNormal());
 
          int concaveHullSize = regionCommand.getConcaveHullVertices().size();
          message.getConcaveHullsSize().add(concaveHullSize);
          for (int vertexIndex = 0; vertexIndex < concaveHullSize; vertexIndex++)
-            message.getVertexBuffer().add().set(regionCommand.getConcaveHullVertices().get(vertexIndex));
+            message.getVertexBuffer().add().getPoint().set(regionCommand.getConcaveHullVertices().get(vertexIndex));
 
          int numberOfHoles = regionCommand.getHolesInRegion().size();
          message.getNumberOfHolesInRegion().add(numberOfHoles);
@@ -100,7 +101,7 @@ public class StepConstraintsListCommand implements Command<StepConstraintsListCo
             int holeVertices = hole.getNumberOfVertices();
             message.getHolePolygonsSize().add(holeVertices);
             for (int holeVertexIndex = 0; holeVertexIndex < holeVertices; holeVertexIndex++)
-               message.getVertexBuffer().add().set(hole.getVertex(holeVertexIndex));
+               message.getVertexBuffer().add().getPoint().set(hole.getVertex(holeVertexIndex));
          }
       }
    }

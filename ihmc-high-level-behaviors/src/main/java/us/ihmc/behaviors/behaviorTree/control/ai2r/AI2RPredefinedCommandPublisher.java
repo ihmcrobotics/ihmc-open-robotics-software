@@ -1,17 +1,16 @@
 package us.ihmc.behaviors.behaviorTree.control.ai2r;
 
-import behavior_msgs.msg.dds.AI2RActionFailureMessage;
-import behavior_msgs.msg.dds.AI2RCommandMessage;
-import behavior_msgs.msg.dds.AI2RNavigationMessage;
-import behavior_msgs.msg.dds.AI2RObjectMessage;
-import behavior_msgs.msg.dds.AI2RStatusMessage;
+import behavior_msgs.AI2RActionFailureMessage;
+import behavior_msgs.AI2RCommandMessage;
+import behavior_msgs.AI2RNavigationMessage;
+import behavior_msgs.AI2RObjectMessage;
+import behavior_msgs.AI2RStatusMessage;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Publisher;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -75,10 +74,10 @@ public class AI2RPredefinedCommandPublisher
 
    public AI2RPredefinedCommandPublisher()
    {
-      ros2Node = new ROS2NodeBuilder().build("ai2r_predefined_behavior_coordinator");
+      ros2Node = new ROS2Node("ai2r_predefined_behavior_coordinator");
       commandPublisher = ros2Node.createPublisher(AutonomyAPI.AI2R_COMMAND);
 
-      ros2Node.createSubscription2(AutonomyAPI.AI2R_STATUS, this::onStatus);
+      ros2Node.createSubscriptionSampler(AutonomyAPI.AI2R_STATUS, this::onStatus);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getSimpleName() + "Shutdown"));
 
@@ -96,7 +95,7 @@ public class AI2RPredefinedCommandPublisher
       List<String> availableBehaviors = new ArrayList<>();
       for (int i = 0; i < status.getAvailableBehaviors().size(); i++)
       {
-         availableBehaviors.add(status.getAvailableBehaviors().getString(i));
+         availableBehaviors.add(status.getAvailableBehaviors().getAsString(i));
       }
 
       if (!initialized)
@@ -225,10 +224,10 @@ public class AI2RPredefinedCommandPublisher
       {
          AI2RObjectMessage object = status.getObjects().get(i);
          sceneObjectNames.add(object.getObjectNameAsString());
-         sceneObjectPoses.add(object.getObjectPoseInWorld());
+         sceneObjectPoses.add(new Pose3D(object.getObjectPoseInWorld().getPose()));
       }
 
-      Pose3D robotPose = status.getRobotMidFeetUnderPelvisPoseInWorld();
+      Pose3D robotPose = new Pose3D(status.getRobotMidFeetUnderPelvisPoseInWorld().getPose());
 
       String target = config.targetObject;
       if (!sceneObjectNames.contains(target))
@@ -267,9 +266,9 @@ public class AI2RPredefinedCommandPublisher
 
    private void logFailure(AI2RActionFailureMessage failure, String failedBehavior)
    {
-      double norm = Math.sqrt(Math.pow(failure.getPositionError().getX(), 2)
-                              + Math.pow(failure.getPositionError().getY(), 2)
-                              + Math.pow(failure.getPositionError().getZ(), 2));
+      double norm = Math.sqrt(Math.pow(failure.getPositionError().getPoint().getX(), 2)
+                              + Math.pow(failure.getPositionError().getPoint().getY(), 2)
+                              + Math.pow(failure.getPositionError().getPoint().getZ(), 2));
 
       String missingFrame = failure.getMissingFrame() ? failure.getActionFrameAsString() : "null";
       String collision = "-".equals(failure.getCollisionNameAsString()) ? "null" : failure.getCollisionNameAsString();
@@ -431,7 +430,7 @@ public class AI2RPredefinedCommandPublisher
 
    private void destroy()
    {
-      ros2Node.destroy();
+      ros2Node.close();
    }
 
    private void maybeRepublishPendingCommand()

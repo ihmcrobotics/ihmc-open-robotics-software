@@ -1,34 +1,28 @@
 package us.ihmc.rdx.ui.tools;
 
-import us.ihmc.pubsub.participant.Participant;
-import us.ihmc.pubsub.publisher.Publisher;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.Statistics;
 
 public class PubSubPublisherStats extends PubSubCommonStats
 {
-   private final Publisher publisher;
+   private final ROS2Publisher<?> publisher;
 
-   public PubSubPublisherStats(Participant participant, Publisher publisher)
+   public PubSubPublisherStats(ROS2Node node, ROS2Publisher<?> publisher)
    {
-      super(participant);
-
+      super(node);
       this.publisher = publisher;
    }
 
-   public Publisher getPublisher()
+   @Override
+   protected void readSizeStatistics(Statistics statisticsToPack)
+   {
+      publisher.readMessageSizeStatistics(statisticsToPack);
+   }
+
+   public ROS2Publisher<?> getPublisher()
    {
       return publisher;
-   }
-
-   @Override
-   public long getNumberOfEvents()
-   {
-      return publisher.getNumberOfPublications();
-   }
-
-   @Override
-   public long getCumulativePayloadBytes()
-   {
-      return publisher.getCumulativePayloadBytes();
    }
 
    public double getPublishFrequency()

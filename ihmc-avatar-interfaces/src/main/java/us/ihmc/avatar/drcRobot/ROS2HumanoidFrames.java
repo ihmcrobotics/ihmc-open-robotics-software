@@ -21,7 +21,7 @@ import java.util.Set;
 /**
  * Stores {@link ROS2Frame} copies of all reference frames stemming from the robot's root frame.
  * <p>
- * The {@code ROS2Frame}s publish their respective {@link tf2_msgs.msg.dds.TFMessage}s,
+ * The {@code ROS2Frame}s publish their respective {@link tf2_msgs.TFMessage}s,
  * resulting in the robot's entire tf tree being published.
  * <p>
  * To read the ROS standards for reference frames, see:

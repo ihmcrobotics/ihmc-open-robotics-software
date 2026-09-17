@@ -2,28 +2,25 @@ package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
-import controller_msgs.msg.dds.RobotDesiredConfigurationData;
-import controller_msgs.msg.dds.RobotDesiredConfigurationDataPubSubType;
-import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.RobotConfigurationData;
+import controller_msgs.RobotDesiredConfigurationData;
+import toolbox_msgs.ExternalForceEstimationConfigurationMessage;
+import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class ExternalForceEstimationMessageReplay
 {
@@ -33,10 +30,7 @@ public class ExternalForceEstimationMessageReplay
 
    private final String robotName;
    private final List<MessageSet> messages;
-   private final RealtimeROS2Node ros2Node;
-
-   private final JSONSerializer<RobotConfigurationData> robotConfigurationDataSerializer = new JSONSerializer<>(new RobotConfigurationDataPubSubType());
-   private final JSONSerializer<RobotDesiredConfigurationData> robotDesiredConfigurationDataSerializer = new JSONSerializer<>(new RobotDesiredConfigurationDataPubSubType());
+   private final AsyncROS2Node ros2Node;
 
    private final ROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
    private final ROS2Publisher<RobotDesiredConfigurationData> robotDesiredConfigurationDataPublisher;
@@ -49,17 +43,15 @@ public class ExternalForceEstimationMessageReplay
       messages = loadMessages(inputStream);
 
       String name = getClass().getSimpleName();
-      ros2Node = new ROS2NodeBuilder().buildRealtime("ihmc_" + name);
+      ros2Node = new AsyncROS2Node("ihmc_" + name);
 
       ROS2Topic controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
-      robotConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(RobotConfigurationData.class));
-      robotDesiredConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(RobotDesiredConfigurationData.class));
+      robotConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withType(RobotConfigurationData.class));
+      robotDesiredConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withType(RobotDesiredConfigurationData.class));
 
       ROS2Topic toolboxInputTopic = ExternalForceEstimationToolboxModule.getInputTopic(robotName);
-      configMessagePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ExternalForceEstimationConfigurationMessage.class));
-      toolboxStatePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ToolboxStateMessage.class));
-
-      ros2Node.spin();
+      configMessagePublisher = ros2Node.createPublisher(toolboxInputTopic.withType(ExternalForceEstimationConfigurationMessage.class));
+      toolboxStatePublisher = ros2Node.createPublisher(toolboxInputTopic.withType(ToolboxStateMessage.class));
    }
 
    public void replayAllMessages()
@@ -73,7 +65,7 @@ public class ExternalForceEstimationMessageReplay
 
       // Valkyrie right elbow pitch
       configurationMessage.getRigidBodyHashCodes().add(601127246);
-      configurationMessage.getContactPointPositions().add().set(0.0, -0.35, -0.03);
+      configurationMessage.getContactPointPositions().add().getPoint().set(0.0, -0.35, -0.03);
 
       configurationMessage.setCalculateRootJointWrench(true);
       configMessagePublisher.publish(configurationMessage);
@@ -85,14 +77,13 @@ public class ExternalForceEstimationMessageReplay
       {
          sendMessagesAtIndex(i);
 
-         if(i != messages.size() - 1)
+         if (i != messages.size() - 1)
          {
             int timeDifferenceMillis = (int) (1e-6 * (messages.get(i + 1).timestamp - messages.get(i).timestamp));
             ThreadTools.sleep(timeDifferenceMillis);
          }
       }
 
-      // send sleep packet
       sendToolboxStateMessage(ToolboxState.SLEEP);
    }
 
@@ -111,12 +102,13 @@ public class ExternalForceEstimationMessageReplay
 
          if (childNode.has(robotConfigurationDataName))
          {
-            messageSet.robotConfigurationData = robotConfigurationDataSerializer.deserialize(childNode.get(robotConfigurationDataName).toString());
+            messageSet.robotConfigurationData = new RobotConfigurationData();
+            ROS2MessageCdrFileTools.deserializeFromJsonNode(childNode.get(robotConfigurationDataName), messageSet.robotConfigurationData);
          }
          if (childNode.has(robotDesiredConfigurationDataName))
          {
-            messageSet.robotDesiredConfigurationData = robotDesiredConfigurationDataSerializer.deserialize(childNode.get(robotDesiredConfigurationDataName)
-                                                                                                                    .toString());
+            messageSet.robotDesiredConfigurationData = new RobotDesiredConfigurationData();
+            ROS2MessageCdrFileTools.deserializeFromJsonNode(childNode.get(robotDesiredConfigurationDataName), messageSet.robotDesiredConfigurationData);
          }
 
          allMessages.add(messageSet);

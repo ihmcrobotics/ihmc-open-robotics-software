@@ -1,14 +1,10 @@
 package us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule;
 
-import java.util.Arrays;
-import java.util.Collection;
-
+import ihmc_common_msgs.SelectionMatrix3DMessage;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.NormOps_DDRM;
-
-import toolbox_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
-import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
-import toolbox_msgs.msg.dds.WaypointBasedTrajectoryMessage;
+import toolbox_msgs.RigidBodyExplorationConfigurationMessage;
+import toolbox_msgs.WaypointBasedTrajectoryMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -24,6 +20,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 public class WholeBodyTrajectoryToolboxHelper
 {
@@ -118,14 +117,15 @@ public class WholeBodyTrajectoryToolboxHelper
 
       if (explorationMessage != null)
       {
-         ConfigurationSpaceName[] degreesOfFreedomToExplore = ConfigurationSpaceName.fromBytes(explorationMessage.getConfigurationSpaceNamesToExplore());
-         for (int i = 0; i < degreesOfFreedomToExplore.length; i++)
+         for (int i = 0; i < explorationMessage.getConfigurationSpaceNamesToExplore().size(); i++)
          {
-            if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.X || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Y
-                  || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Z)
+            ConfigurationSpaceName degreeOfFreedomToExplore = ConfigurationSpaceName.fromByte(explorationMessage.getConfigurationSpaceNamesToExplore()
+                                                                                                              .get(i));
+            if (degreeOfFreedomToExplore == ConfigurationSpaceName.X || degreeOfFreedomToExplore == ConfigurationSpaceName.Y
+                  || degreeOfFreedomToExplore == ConfigurationSpaceName.Z)
                positionErrorQ.zero();
-            if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.ROLL || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.PITCH
-                  || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.YAW)
+            if (degreeOfFreedomToExplore == ConfigurationSpaceName.ROLL || degreeOfFreedomToExplore == ConfigurationSpaceName.PITCH
+                  || degreeOfFreedomToExplore == ConfigurationSpaceName.YAW)
                rotationErrorQ.zero();
          }
       }
@@ -164,14 +164,15 @@ public class WholeBodyTrajectoryToolboxHelper
 
       if (explorationMessage != null)
       {
-         ConfigurationSpaceName[] degreesOfFreedomToExplore = ConfigurationSpaceName.fromBytes(explorationMessage.getConfigurationSpaceNamesToExplore());
-         for (int i = 0; i < degreesOfFreedomToExplore.length; i++)
+         for (int i = 0; i < explorationMessage.getConfigurationSpaceNamesToExplore().size(); i++)
          {
-            if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.X || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Y
-                  || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Z)
+            ConfigurationSpaceName degreeOfFreedomToExplore = ConfigurationSpaceName.fromByte(explorationMessage.getConfigurationSpaceNamesToExplore()
+                                                                                                              .get(i));
+            if (degreeOfFreedomToExplore == ConfigurationSpaceName.X || degreeOfFreedomToExplore == ConfigurationSpaceName.Y
+                  || degreeOfFreedomToExplore == ConfigurationSpaceName.Z)
                positionErrorQ.zero();
-            if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.ROLL || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.PITCH
-                  || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.YAW)
+            if (degreeOfFreedomToExplore == ConfigurationSpaceName.ROLL || degreeOfFreedomToExplore == ConfigurationSpaceName.PITCH
+                  || degreeOfFreedomToExplore == ConfigurationSpaceName.YAW)
                rotationErrorQ.zero();
          }
       }

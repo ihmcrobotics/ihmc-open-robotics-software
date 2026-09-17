@@ -4,34 +4,32 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import us.ihmc.communication.PerceptionAPI;
+import controller_msgs.RigidBodyTransformMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.pubsub.common.SampleInfo;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.string.StringTools;
 
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RDXROS2RigidBodyPoseVisualizer extends RDXROS2SingleTopicVisualizer<Pose3D>
+public class RDXROS2RigidBodyPoseVisualizer extends RDXROS2SingleTopicVisualizer<RigidBodyTransformMessage>
 {
    private ModelInstance poseModel;
    private ReferenceFrame frame;
    private final FramePose3D framePose = new FramePose3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final ROS2Topic<Pose3D> topic;
+   private final ROS2Topic<RigidBodyTransformMessage> topic;
    private final AtomicReference<Pose3D> transformMessageReference = new AtomicReference<>();
-   private final SampleInfo sampleInfo = new SampleInfo();
 
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImGuiPlot numberOfRegionsPlot = new ImGuiPlot("# Regions", 1000, 230, 20);
@@ -39,10 +37,8 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXROS2SingleTopicVisualizer
 
    private ROS2Node ros2Node;
    private final String titleBeforeAdditions;
-   private final Object syncObject = new Object();
-   private final Pose3D message = new Pose3D();
 
-   public RDXROS2RigidBodyPoseVisualizer(String title, ROS2Topic<Pose3D> topic)
+   public RDXROS2RigidBodyPoseVisualizer(String title, ROS2Topic<RigidBodyTransformMessage> topic)
    {
       super(title);
       titleBeforeAdditions = title;
@@ -77,8 +73,6 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXROS2SingleTopicVisualizer
 
       if (transformMessage != null)
       {
-         RigidBodyTransform transform = new RigidBodyTransform();
-         // MessageTools.toEuclid(message, transform);
          this.framePose.changeFrame(ReferenceFrame.getWorldFrame());
          poseModel = RDXModelBuilder.createCoordinateFrameInstance(0.1);
          LibGDXTools.toLibGDX(this.framePose, this.tempTransform, poseModel.transform);
@@ -87,23 +81,27 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXROS2SingleTopicVisualizer
       }
    }
 
-   public void queueRenderRigidBodyPose(Pose3D message)
+   public void queueRenderRigidBodyPose(RigidBodyTransformMessage message)
    {
-      transformMessageReference.set(message);
+      if (message == null)
+         return;
+      RigidBodyTransform transform = MessageTools.toEuclid(message);
+      Pose3D pose = new Pose3D(transform);
+      transformMessageReference.set(pose);
    }
 
    private void subscribe()
    {
-      ros2Node = new ROS2NodeBuilder().build(StringTools.titleToSnakeCase(titleBeforeAdditions));
+      ros2Node = new ROS2Node(StringTools.titleToSnakeCase(titleBeforeAdditions));
 
-      ros2Node.createSubscription2(PerceptionAPI.MOCAP_RIGID_BODY, this::queueRenderRigidBodyPose);
+      ros2Node.createSubscriptionSampler(topic, this::queueRenderRigidBodyPose);
    }
 
    private void unsubscribe()
    {
       if (ros2Node != null)
       {
-         ros2Node.destroy();
+         ros2Node.close();
          ros2Node = null;
       }
    }
@@ -125,7 +123,7 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXROS2SingleTopicVisualizer
    }
 
    @Override
-   public ROS2Topic<Pose3D> getTopic()
+   public ROS2Topic<RigidBodyTransformMessage> getTopic()
    {
       return topic;
    }

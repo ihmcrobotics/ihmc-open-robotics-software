@@ -1,17 +1,10 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-
-import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
+import controller_msgs.ContinuousStepGeneratorStatusMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import controller_msgs.FootstepStatusMessage;
 import org.apache.commons.lang3.mutable.MutableObject;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepVisualizer;
@@ -29,6 +22,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ContinuousStepGeneratorMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -50,6 +44,12 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Use this class to generate a stream of footsteps which path can be controlled given desired
@@ -156,7 +156,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final YoBoolean enableHeightOffsetErrorCompensation = new YoBoolean("enableHeightOffsetErrorCompensation", registry);
 
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-   private final RecyclingArrayList<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
+   private final IDLObjectSequence<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
 
    private final SideDependentList<List<FootstepVisualizer>> footstepSideDependentVisualizers = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
@@ -300,14 +300,14 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       else
       {
          while (footsteps.size() > Math.max(1, parameters.getNumberOfFixedFootsteps()))
-            footsteps.fastRemove(footsteps.size() - 1);
+              footsteps.remove(footsteps.size() - 1);
 
          FootstepDataMessage previousFootstep = footsteps.get(footsteps.size() - 1);
-         footstepPose2D.getPosition().set(previousFootstep.getLocation());
-         footstepPose2D.getOrientation().set(previousFootstep.getOrientation());
+         footstepPose2D.getPosition().set(previousFootstep.getLocation().getPoint());
+         footstepPose2D.getOrientation().set(previousFootstep.getOrientation().getQuaternion());
          swingSide = RobotSide.fromByte(previousFootstep.getRobotSide()).getOppositeSide();
 
-         previousFootstepPose.set(previousFootstep.getLocation(), previousFootstep.getOrientation());
+         previousFootstepPose.getPosition().set(previousFootstep.getLocation().getPoint()); previousFootstepPose.getOrientation().set(previousFootstep.getOrientation().getQuaternion());
       }
 
       // Set footstep parameters
@@ -431,8 +431,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          nextFootstepPose3D.set(nextFootstepPose2D);
          FootstepDataMessage footstep = footsteps.add();
 
-         footstep.getLocation().set(nextFootstepPose2D.getPosition());
-         footstep.getOrientation().set(nextFootstepPose2D.getOrientation());
+         footstep.getLocation().set(nextFootstepPose3D.getPosition());
+         footstep.getOrientation().set(nextFootstepPose3D.getOrientation());
 
          for (int adjustorIndex = 0; adjustorIndex < footstepAdjustments.size(); adjustorIndex++)
             footstepAdjustments.get(adjustorIndex).adjustFootstep(currentSupportFootPose, nextFootstepPose2D, swingSide, footstep);
@@ -452,8 +452,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
          footstepPose2D.set(nextFootstepPose2D);
          swingSide = swingSide.getOppositeSide();
-         previousFootstepPose.getPosition().set(footstep.getLocation());
-         previousFootstepPose.getOrientation().set(footstep.getOrientation());
+         previousFootstepPose.getPosition().set(footstep.getLocation().getPoint());
+         previousFootstepPose.getOrientation().set(footstep.getOrientation().getQuaternion());
       }
 
       if (startingIndexToAdjust == 0)
@@ -464,8 +464,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       else
       {
          FootstepDataMessage footstepData = footstepDataListMessage.getFootstepDataList().get(startingIndexToAdjust - 1);
-         previousFootstepPose.getPosition().set(footstepData.getLocation());
-         previousFootstepPose.getOrientation().set(footstepData.getOrientation());
+         previousFootstepPose.getPosition().set(footstepData.getLocation().getPoint());
+         previousFootstepPose.getOrientation().set(footstepData.getOrientation().getQuaternion());
          footstepPose2D.set(previousFootstepPose);
       }
 
@@ -473,10 +473,10 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       for (int i = startingIndexToAdjust; i < footstepDataListMessage.getFootstepDataList().size(); i++)
       {
          FootstepDataMessage footstepData = footstepDataListMessage.getFootstepDataList().get(i);
-         nextFootstepPose2D.getPosition().set(footstepData.getLocation());
-         nextFootstepPose2D.getOrientation().set(footstepData.getOrientation());
-         nextFootstepPose3D.getPosition().set(footstepData.getLocation());
-         nextFootstepPose3D.getOrientation().set(footstepData.getOrientation());
+         nextFootstepPose2D.getPosition().set(footstepData.getLocation().getPoint());
+         nextFootstepPose2D.getOrientation().set(footstepData.getOrientation().getQuaternion());
+         nextFootstepPose3D.getPosition().set(footstepData.getLocation().getPoint());
+         nextFootstepPose3D.getOrientation().set(footstepData.getOrientation().getQuaternion());
          swingSide = RobotSide.fromByte(footstepData.getRobotSide());
 
          if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
@@ -490,8 +490,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
             }
          }
 
-         previousFootstepPose.getPosition().set(footstepData.getLocation());
-         previousFootstepPose.getOrientation().set(footstepData.getOrientation());
+         previousFootstepPose.getPosition().set(footstepData.getLocation().getPoint());
+         previousFootstepPose.getOrientation().set(footstepData.getOrientation().getQuaternion());
          footstepPose2D.set(previousFootstepPose);
       }
 
@@ -505,8 +505,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          {
             FootstepDataMessage footstepData = footstepDataListMessage.getFootstepDataList().get(i);
 
-            nextFootstepPose3D.getPosition().set(footstepData.getLocation());
-            nextFootstepPose3D.getOrientation().set(footstepData.getOrientation());
+            nextFootstepPose3D.getPosition().set(footstepData.getLocation().getPoint());
+            nextFootstepPose3D.getOrientation().set(footstepData.getOrientation().getQuaternion());
 
             FootstepVisualizer footstepVisualizer = footstepVisualizers.get(visualizerIndex);
             nextFootstepPose3DViz.setIncludingFrame(nextFootstepPose3D);
@@ -979,7 +979,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
                                        FootstepDataMessage adjustedPose)
          {
             adjustedPose.getLocation().set(footstepPose.getPosition());
-            adjustedPose.getLocation().setZ(supportFootPose.getZ());
+              adjustedPose.getLocation().getPoint().setZ(supportFootPose.getZ());
             if (adjustPitchAndRoll)
             {
                yawPitchRoll.set(supportFootPose.getOrientation());
@@ -988,7 +988,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
             }
             else
             {
-               adjustedPose.getOrientation().set(footstepPose.getOrientation());
+               yawPitchRoll.setYaw(footstepPose.getYaw());
+               adjustedPose.getOrientation().set(yawPitchRoll);
             }
             return true;
          }

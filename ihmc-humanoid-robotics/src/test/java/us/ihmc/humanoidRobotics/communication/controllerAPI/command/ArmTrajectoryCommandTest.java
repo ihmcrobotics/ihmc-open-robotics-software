@@ -6,19 +6,17 @@ import static us.ihmc.robotics.Assert.assertFalse;
 import static us.ihmc.robotics.Assert.assertNull;
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.Random;
-
+import controller_msgs.ArmTrajectoryMessage;
+import ihmc_common_msgs.TrajectoryPoint1DMessage;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.Random;
 
 public class ArmTrajectoryCommandTest
 {
@@ -29,12 +27,12 @@ public class ArmTrajectoryCommandTest
       ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand();
       armTrajectoryCommand.clear();
       assertNull(armTrajectoryCommand.getRobotSide());
-      assertEquals(Packet.VALID_MESSAGE_DEFAULT_ID, armTrajectoryCommand.getJointspaceTrajectory().getCommandId());
+      assertEquals(QueueableCommand.VALID_MESSAGE_DEFAULT_ID, armTrajectoryCommand.getJointspaceTrajectory().getCommandId());
       assertEquals(0.0, armTrajectoryCommand.getExecutionDelayTime(), 1e-9);
       assertEquals(ExecutionMode.OVERRIDE, armTrajectoryCommand.getJointspaceTrajectory().getExecutionMode());
       assertEquals(0.0, armTrajectoryCommand.getExecutionTime(), 1e-9);
       assertEquals(0, armTrajectoryCommand.getJointspaceTrajectory().getNumberOfJoints());
-      assertEquals(Packet.INVALID_MESSAGE_ID, armTrajectoryCommand.getJointspaceTrajectory().getPreviousCommandId());
+      assertEquals(QueueableCommand.INVALID_MESSAGE_ID, armTrajectoryCommand.getJointspaceTrajectory().getPreviousCommandId());
       assertEquals(0, armTrajectoryCommand.getJointspaceTrajectory().getTrajectoryPointLists().size());
       assertThrows(IndexOutOfBoundsException.class, () -> armTrajectoryCommand.getJointspaceTrajectory().getJointTrajectoryPoint(0, 0));
    }
@@ -62,12 +60,12 @@ public class ArmTrajectoryCommandTest
       armTrajectoryCommand.clear(RobotSide.LEFT);
       assertEquals(RobotSide.LEFT, armTrajectoryCommand.getRobotSide());
 
-      assertEquals(Packet.VALID_MESSAGE_DEFAULT_ID, armTrajectoryCommand.getJointspaceTrajectory().getCommandId());
+      assertEquals(QueueableCommand.VALID_MESSAGE_DEFAULT_ID, armTrajectoryCommand.getJointspaceTrajectory().getCommandId());
       assertEquals(0.0, armTrajectoryCommand.getExecutionDelayTime(), 1e-9);
       assertEquals(ExecutionMode.OVERRIDE, armTrajectoryCommand.getJointspaceTrajectory().getExecutionMode());
       assertEquals(0.0, armTrajectoryCommand.getExecutionTime(), 1e-9);
       assertEquals(0, armTrajectoryCommand.getJointspaceTrajectory().getNumberOfJoints());
-      assertEquals(Packet.INVALID_MESSAGE_ID, armTrajectoryCommand.getJointspaceTrajectory().getPreviousCommandId());
+      assertEquals(QueueableCommand.INVALID_MESSAGE_ID, armTrajectoryCommand.getJointspaceTrajectory().getPreviousCommandId());
       assertEquals(0, armTrajectoryCommand.getJointspaceTrajectory().getTrajectoryPointLists().size());
    }
 

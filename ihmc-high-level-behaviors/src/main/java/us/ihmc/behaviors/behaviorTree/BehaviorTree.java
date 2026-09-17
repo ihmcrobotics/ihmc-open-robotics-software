@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
+import behavior_msgs.BehaviorTreeStateMessage;
 import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -102,8 +102,8 @@ public abstract class BehaviorTree<R extends BehaviorTreeRootNode<T>, T extends 
 
    public void toMessage(BehaviorTreeStateMessage message)
    {
-      message.setSequenceId(crdtInfo.getUpdateNumber());
-      message.setNextId(nextID.longValue());
+      message.setSequenceId((int) crdtInfo.getUpdateNumber());
+      message.setNextId((int) nextID.longValue());
       rootReferenceModification.toMessage(message.getLatestModificationToRootReference());
       dataModification.toMessage(message.getLatestModificationToData());
       ROS2BehaviorTreeMessageTools.clearLists(message);

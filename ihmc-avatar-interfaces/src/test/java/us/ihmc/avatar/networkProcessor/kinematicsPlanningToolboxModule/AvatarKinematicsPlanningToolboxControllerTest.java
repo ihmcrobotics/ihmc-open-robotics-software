@@ -2,20 +2,16 @@ package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import controller_msgs.RobotConfigurationData;
+import gnu.trove.list.array.TDoubleArrayList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import gnu.trove.list.array.TDoubleArrayList;
+import toolbox_msgs.KinematicsPlanningToolboxCenterOfMassMessage;
+import toolbox_msgs.KinematicsPlanningToolboxInputMessage;
+import toolbox_msgs.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.KinematicsPlanningToolboxRigidBodyMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest;
@@ -55,6 +51,9 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Tag("humanoid-toolbox")
 public abstract class AvatarKinematicsPlanningToolboxControllerTest implements MultiRobotTestInterface

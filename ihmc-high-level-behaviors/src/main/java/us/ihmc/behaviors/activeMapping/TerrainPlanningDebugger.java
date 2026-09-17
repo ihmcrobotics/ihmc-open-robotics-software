@@ -1,8 +1,8 @@
 package us.ihmc.behaviors.activeMapping;
 
-import behavior_msgs.msg.dds.ContinuousWalkingStatusMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import ihmc_common_msgs.msg.dds.PoseListMessage;
+import behavior_msgs.ContinuousWalkingStatusMessage;
+import controller_msgs.FootstepDataListMessage;
+import ihmc_common_msgs.PoseListMessage;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -20,13 +20,13 @@ import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepNode;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlannerRequest;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloTreeNode;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,7 +1,9 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -22,8 +24,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 /**
  * This class uses the shorthand: compute a mesh = using a FootstepDataMessage generate a Mesh and

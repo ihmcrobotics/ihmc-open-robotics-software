@@ -1,26 +1,26 @@
 package us.ihmc.behaviors.tools.walkingController;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepQueueStatusMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
+import static us.ihmc.communication.HumanoidControllerAPI.getLowFrequencyTopic;
+import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
+import static us.ihmc.tools.string.StringTools.format;
+
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import controller_msgs.FootstepQueueStatusMessage;
+import controller_msgs.FootstepStatusMessage;
+import controller_msgs.QueuedFootstepStatusMessage;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Subscription;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Subscription;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static us.ihmc.communication.HumanoidControllerAPI.getLowFrequencyTopic;
-import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
-import static us.ihmc.tools.string.StringTools.format;
 
 /**
  * The purpose of this class is to check on the robot progress
@@ -30,6 +30,7 @@ import static us.ihmc.tools.string.StringTools.format;
  */
 public class WalkingFootstepTracker
 {
+   private final ROS2Node ros2Node;
    private final ROS2Subscription<FootstepDataListMessage> footstepDataListSubscriber;
    private final ROS2Subscription<FootstepStatusMessage> footstepStatusSubscriber;
    private final ROS2Subscription<FootstepQueueStatusMessage> footstepQueueStatusSubscriber;
@@ -45,12 +46,13 @@ public class WalkingFootstepTracker
 
    public WalkingFootstepTracker(ROS2Node ros2Node, String robotName)
    {
-      footstepDataListSubscriber = ros2Node.createSubscription2(getTopic(FootstepDataListMessage.class, robotName),
-                                                                this::interceptFootstepDataListMessage);
-      footstepStatusSubscriber = ros2Node.createSubscription2(getTopic(FootstepStatusMessage.class, robotName),
-                                                              this::acceptFootstepStatusMessage);
-      footstepQueueStatusSubscriber = ros2Node.createSubscription2(getLowFrequencyTopic(FootstepQueueStatusMessage.class, robotName),
-                                                                   this::acceptFootstepQueueStatusMessage);
+      this.ros2Node = ros2Node;
+      var footstepDataListTopic = getTopic(FootstepDataListMessage.class, robotName);
+      footstepDataListSubscriber = ros2Node.createSubscriptionSampler(footstepDataListTopic, this::interceptFootstepDataListMessage);
+      var footstepStatusTopic = getTopic(FootstepStatusMessage.class, robotName);
+      footstepStatusSubscriber = ros2Node.createSubscriptionSampler(footstepStatusTopic, this::acceptFootstepStatusMessage);
+      var footstepQueueStatusTopic = getLowFrequencyTopic(FootstepQueueStatusMessage.class, robotName);
+      footstepQueueStatusSubscriber = ros2Node.createSubscriptionSampler(footstepQueueStatusTopic, this::acceptFootstepQueueStatusMessage);
    }
 
    public void registerFootstepQueuedMessageListener(TypedNotification<FootstepQueueStatusMessage> footstepQueueListener)
@@ -58,15 +60,22 @@ public class WalkingFootstepTracker
       footstepQueueListeners.add(footstepQueueListener);
    }
 
-   private void acceptFootstepQueueStatusMessage(FootstepQueueStatusMessage footstepQueueStatusMessage)
+   private void acceptFootstepQueueStatusMessage(FootstepQueueStatusMessage sample)
    {
+      FootstepQueueStatusMessage footstepQueueStatusMessage = new FootstepQueueStatusMessage();
+      footstepQueueStatusMessage.set(sample);
+
       for (TypedNotification<FootstepQueueStatusMessage> footstepQueueListener : footstepQueueListeners)
       {
-         footstepQueueListener.set(footstepQueueStatusMessage);
+         FootstepQueueStatusMessage copy = new FootstepQueueStatusMessage();
+         copy.set(footstepQueueStatusMessage);
+         footstepQueueListener.set(copy);
       }
 
       totalIncompleteFootsteps = footstepQueueStatusMessage.getQueuedFootstepList().size();
-      queuedFootsteps = footstepQueueStatusMessage.getQueuedFootstepList();
+      queuedFootsteps = new ArrayList<>();
+      for (int i = 0; i < footstepQueueStatusMessage.getQueuedFootstepList().size(); i++)
+         queuedFootsteps.add(footstepQueueStatusMessage.getQueuedFootstepList().get(i));
    }
 
    private void acceptFootstepStatusMessage(FootstepStatusMessage footstepStatusMessage)
@@ -149,8 +158,8 @@ public class WalkingFootstepTracker
       while (i >= 1 && queuedFootsteps.get(i).getRobotSide() == candidateFootstepSide.toByte())
          --i;
 
-      previousFootstepPose.getPosition().set(queuedFootsteps.get(i).getLocation());
-      previousFootstepPose.getRotation().setToYawOrientation(queuedFootsteps.get(i).getOrientation().getYaw());
+      previousFootstepPose.getPosition().set(queuedFootsteps.get(i).getLocation().getPoint());
+      previousFootstepPose.getRotation().setToYawOrientation(queuedFootsteps.get(i).getOrientation().getQuaternion().getYaw());
 
       return previousFootstepPose;
    }
@@ -176,8 +185,8 @@ public class WalkingFootstepTracker
 
    public void destroy()
    {
-      footstepDataListSubscriber.remove();
-      footstepStatusSubscriber.remove();
-      footstepQueueStatusSubscriber.remove();
+      ros2Node.destroySubscription(footstepDataListSubscriber);
+      ros2Node.destroySubscription(footstepStatusSubscriber);
+      ros2Node.destroySubscription(footstepQueueStatusSubscriber);
    }
 }

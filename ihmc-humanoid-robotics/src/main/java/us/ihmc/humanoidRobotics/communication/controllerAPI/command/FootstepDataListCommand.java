@@ -1,14 +1,14 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.List;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.StepConstraintsListMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import controller_msgs.StepConstraintsListMessage;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.commons.lists.RecyclingArrayList;
+
+import java.util.List;
 
 public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCommand, FootstepDataListMessage>
 {
@@ -64,7 +64,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       offsetFootstepsWithExecutionError = message.getOffsetFootstepsWithExecutionError();
       offsetFootstepsHeightWithExecutionError = message.getOffsetFootstepsHeightWithExecutionError();
       shouldCheckForReachability = message.getShouldCheckForReachability();
-      List<FootstepDataMessage> dataList = message.getFootstepDataList();
+      var dataList = message.getFootstepDataList();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       if (dataList != null)
       {

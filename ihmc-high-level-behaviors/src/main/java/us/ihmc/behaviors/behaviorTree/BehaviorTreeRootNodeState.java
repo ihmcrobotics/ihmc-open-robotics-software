@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage;
+import behavior_msgs.BehaviorTreeRootNodeStateMessage;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -14,9 +14,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 
 public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTreeRootNodeDefinition>
 {
@@ -99,7 +99,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       super.toMessage(message.getState());
       scene.toMessage(message.getScene());
       message.setAutomaticExecution(automaticExecution.toMessage());
-      message.setExecutionNextIndex(executionNextIndex.toMessage());
+      message.setExecutionNextIndex((short) executionNextIndex.toMessage());
       message.setManualExecutionRequested(manualExecutionRequested.toMessage());
       message.setConcurrencyEnabled(concurrencyEnabled.toMessage());
       message.setPreviewModeEnabled(previewModeEnabled.toMessage());

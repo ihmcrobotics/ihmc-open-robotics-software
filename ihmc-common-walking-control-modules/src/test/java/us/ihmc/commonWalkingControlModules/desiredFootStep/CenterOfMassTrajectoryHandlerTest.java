@@ -3,13 +3,12 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import static us.ihmc.robotics.Assert.*;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.communication.packets.ExecutionMode;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -156,7 +155,7 @@ public class CenterOfMassTrajectoryHandlerTest
       command2.getEuclideanTrajectory().addTrajectoryPoint(1.0, new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
       command2.getEuclideanTrajectory().addTrajectoryPoint(2.0, new Point3D(1.0, 1.0, 0.0), new Vector3D(1.5, 1.5, 0.0));
       command2.getEuclideanTrajectory().addTrajectoryPoint(3.0, new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
-      command1.getEuclideanTrajectory().setPreviousCommandId(0L);
+      command2.getEuclideanTrajectory().setPreviousCommandId(0L);
       command2.getEuclideanTrajectory().setExecutionMode(ExecutionMode.QUEUE);
 
       yoTime.set(-20.9);

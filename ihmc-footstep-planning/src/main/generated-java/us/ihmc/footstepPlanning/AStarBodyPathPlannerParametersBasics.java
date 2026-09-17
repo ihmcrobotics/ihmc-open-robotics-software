@@ -1,9 +1,9 @@
 package us.ihmc.footstepPlanning;
 
-import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket;
-import us.ihmc.tools.property.StoredPropertySetBasics;
-
 import static us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters.collisionStartTolerance;
+
+import toolbox_msgs.AStarBodyPathPlannerParametersPacket;
+import us.ihmc.tools.property.StoredPropertySetBasics;
 
 /**
  * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file

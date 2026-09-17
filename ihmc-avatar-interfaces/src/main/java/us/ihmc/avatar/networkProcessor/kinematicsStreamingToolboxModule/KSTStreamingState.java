@@ -1,14 +1,14 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
+import toolbox_msgs.KinematicsToolboxOneDoFJointMessage;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters.InputStateEstimatorType;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.input.KSTInputFBControllerStateEstimator;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.input.KSTInputFirstOrderStateEstimator;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.input.KSTInputStateEstimator;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTCompiledOutputProcessor;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTOutputDataReadOnly;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -40,7 +40,6 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePose3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -49,6 +48,7 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.yoVariables.euclid.YoVector3D;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -213,9 +213,9 @@ public class KSTStreamingState implements State
                                        .map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
                                        .collect(Collectors.toList());
       defaultPelvisMessage.setEndEffectorHashCode(pelvis.hashCode());
-      defaultPelvisMessage.getDesiredOrientationInWorld().setToZero();
+      defaultPelvisMessage.getDesiredOrientationInWorld().getQuaternion().setToZero();
       defaultChestMessage.setEndEffectorHashCode(chest.hashCode());
-      defaultChestMessage.getDesiredOrientationInWorld().setToZero();
+      defaultChestMessage.getDesiredOrientationInWorld().getQuaternion().setToZero();
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics hand = desiredFullRobotModel.getHand(robotSide);
@@ -384,8 +384,8 @@ public class KSTStreamingState implements State
       {
          lockPelvisPose.setFromReferenceFrame(controllerFullRobotModel.getPelvis().getBodyFixedFrame());
          lockPelvisPoseFiltered.update();
-         defaultPelvisMessage.getDesiredPositionInWorld().set(lockPelvisPoseFiltered.getPosition());
-         defaultPelvisMessage.getDesiredOrientationInWorld().set(lockPelvisPoseFiltered.getOrientation());
+         defaultPelvisMessage.getDesiredPositionInWorld().getPoint().set(lockPelvisPoseFiltered.getPosition());
+         defaultPelvisMessage.getDesiredOrientationInWorld().getQuaternion().set(lockPelvisPoseFiltered.getOrientation());
          defaultPelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
          defaultPelvisMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
          MessageTools.packWeightMatrix3DMessage(lockPelvisWeight.getValue(), defaultPelvisMessage.getLinearWeightMatrix());
@@ -395,8 +395,8 @@ public class KSTStreamingState implements State
       {
          lockPelvisPoseFiltered.reset();
          lockPelvisPose.setFromReferenceFrame(pelvis.getBodyFixedFrame());
-         defaultPelvisMessage.getDesiredPositionInWorld().set(lockPelvisPose.getPosition());
-         defaultPelvisMessage.getDesiredOrientationInWorld().setToYawOrientation(lockPelvisPose.getYaw());
+         defaultPelvisMessage.getDesiredPositionInWorld().getPoint().set(lockPelvisPose.getPosition());
+         defaultPelvisMessage.getDesiredOrientationInWorld().getQuaternion().setToYawOrientation(lockPelvisPose.getYaw());
          defaultPelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, true, worldFrame));
          defaultPelvisMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
          MessageTools.packWeightMatrix3DMessage(holdPelvisLinearWeight, defaultPelvisMessage.getLinearWeightMatrix());
@@ -409,8 +409,8 @@ public class KSTStreamingState implements State
       {
          lockChestPose.setFromReferenceFrame(controllerFullRobotModel.getChest().getBodyFixedFrame());
          lockChestPoseFiltered.update();
-         defaultChestMessage.getDesiredPositionInWorld().set(lockChestPoseFiltered.getPosition());
-         defaultChestMessage.getDesiredOrientationInWorld().set(lockChestPoseFiltered.getOrientation());
+         defaultChestMessage.getDesiredPositionInWorld().getPoint().set(lockChestPoseFiltered.getPosition());
+         defaultChestMessage.getDesiredOrientationInWorld().getQuaternion().set(lockChestPoseFiltered.getOrientation());
          defaultChestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
          defaultChestMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
          MessageTools.packWeightMatrix3DMessage(lockChestWeight.getValue(), defaultChestMessage.getLinearWeightMatrix());
@@ -420,8 +420,8 @@ public class KSTStreamingState implements State
       {
          lockChestPoseFiltered.reset();
          lockChestPose.setFromReferenceFrame(chest.getBodyFixedFrame());
-         defaultChestMessage.getDesiredPositionInWorld().setToZero();
-         defaultChestMessage.getDesiredOrientationInWorld().setToYawOrientation(lockChestPose.getYaw());
+         defaultChestMessage.getDesiredPositionInWorld().getPoint().setToZero();
+         defaultChestMessage.getDesiredOrientationInWorld().getQuaternion().setToYawOrientation(lockChestPose.getYaw());
          defaultChestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, false, worldFrame));
          defaultChestMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
          MessageTools.packWeightMatrix3DMessage(0.0, defaultChestMessage.getLinearWeightMatrix());
@@ -470,8 +470,8 @@ public class KSTStreamingState implements State
       {
          lockPelvisPose.setFromReferenceFrame(controllerFullRobotModel.getPelvis().getBodyFixedFrame());
          lockPelvisPoseFiltered.update();
-         defaultPelvisMessage.getDesiredPositionInWorld().set(lockPelvisPoseFiltered.getPosition());
-         defaultPelvisMessage.getDesiredOrientationInWorld().set(lockPelvisPoseFiltered.getOrientation());
+         defaultPelvisMessage.getDesiredPositionInWorld().getPoint().set(lockPelvisPoseFiltered.getPosition());
+         defaultPelvisMessage.getDesiredOrientationInWorld().getQuaternion().set(lockPelvisPoseFiltered.getOrientation());
       }
       else
       {
@@ -482,8 +482,8 @@ public class KSTStreamingState implements State
       {
          lockChestPose.setFromReferenceFrame(controllerFullRobotModel.getChest().getBodyFixedFrame());
          lockChestPoseFiltered.update();
-         defaultChestMessage.getDesiredPositionInWorld().set(lockChestPoseFiltered.getPosition());
-         defaultChestMessage.getDesiredOrientationInWorld().set(lockChestPoseFiltered.getOrientation());
+         defaultChestMessage.getDesiredPositionInWorld().getPoint().set(lockChestPoseFiltered.getPosition());
+         defaultChestMessage.getDesiredOrientationInWorld().getQuaternion().set(lockChestPoseFiltered.getOrientation());
       }
       else
       {

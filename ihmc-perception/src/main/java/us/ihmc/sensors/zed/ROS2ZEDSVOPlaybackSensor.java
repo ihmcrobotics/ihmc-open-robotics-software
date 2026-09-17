@@ -1,27 +1,41 @@
 package us.ihmc.sensors.zed;
 
-import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
+import perception_msgs.ZEDSVOCurrentFileMessage;
+import std_msgs.Int64;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
+import us.ihmc.jros2.ROS2Node;
 
 public class ROS2ZEDSVOPlaybackSensor extends ZEDSVOPlaybackSensor
 {
    private final ZEDSVOCurrentFileMessage svoStatusMessage = new ZEDSVOCurrentFileMessage();
-   private final ROS2Helper ros2;
+   private final ROS2PublisherMap publisherMap;
 
-   public ROS2ZEDSVOPlaybackSensor(ROS2Helper ros2, int cameraID, ZEDModelData zedModel, int slDepthMode, String svoFileName)
+   public ROS2ZEDSVOPlaybackSensor(ROS2Node ros2Node, int cameraID, ZEDModelData zedModel, int slDepthMode, String svoFileName)
    {
       super(cameraID, zedModel, slDepthMode, svoFileName);
 
-      this.ros2 = ros2;
+      this.publisherMap = new ROS2PublisherMap(ros2Node);
 
-      ros2.subscribeViaCallback(PerceptionAPI.ZED_SVO_PAUSE, this::pause);
-      ros2.subscribeViaCallback(PerceptionAPI.ZED_SVO_PLAY, this::play);
-      ros2.subscribeViaCallback(PerceptionAPI.ZED_SVO_SET_POSITION, position ->
+      ros2Node.createSubscription(PerceptionAPI.ZED_SVO_PAUSE, reader ->
       {
-         setCurrentPosition((int) position.getData() + 1); // +1 is required to set the SVO to the correct frame. Otherwise, sets to 1 frame behind. Idk why.
-         if (getGrabThread().getScheduled() == 0)
-            getGrabThread().setScheduled(1);
+         if (reader.read() != null)
+            pause();
+      });
+      ros2Node.createSubscription(PerceptionAPI.ZED_SVO_PLAY, reader ->
+      {
+         if (reader.read() != null)
+            play();
+      });
+      ros2Node.createSubscription(PerceptionAPI.ZED_SVO_SET_POSITION, reader ->
+      {
+         Int64 position = reader.read();
+         if (position != null)
+         {
+            setCurrentPosition((int) position.getData() + 1); // +1 is required to set the SVO to the correct frame. Otherwise, sets to 1 frame behind. Idk why.
+            if (getGrabThread().getScheduled() == 0)
+               getGrabThread().setScheduled(1);
+         }
       });
    }
 
@@ -31,7 +45,7 @@ public class ROS2ZEDSVOPlaybackSensor extends ZEDSVOPlaybackSensor
       svoStatusMessage.setRecordMode((byte) 1); // playback
       svoStatusMessage.setCurrentPosition(getCurrentPosition());
       svoStatusMessage.setLength(getLength());
-      ros2.publish(PerceptionAPI.ZED_SVO_CURRENT_FILE, svoStatusMessage);
+      publisherMap.publish(PerceptionAPI.ZED_SVO_CURRENT_FILE, svoStatusMessage);
    }
 
    @Override

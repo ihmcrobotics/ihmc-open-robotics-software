@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
-import controller_msgs.msg.dds.ControllerWaypointGoalListMessage;
+import controller_msgs.ControllerWaypointGoalListMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 

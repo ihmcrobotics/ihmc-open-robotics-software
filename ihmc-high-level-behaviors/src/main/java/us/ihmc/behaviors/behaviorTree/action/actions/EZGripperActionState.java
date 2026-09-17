@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.EZGripperActionStateMessage;
+import behavior_msgs.EZGripperActionStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 

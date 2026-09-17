@@ -1,12 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import controller_msgs.msg.dds.*;
-import ihmc_common_msgs.msg.dds.*;
+import controller_msgs.*;
+import ihmc_common_msgs.*;
 import us.ihmc.communication.packets.ObjectValidityChecker;
 import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
@@ -36,7 +37,7 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getLocation());
+      packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getLocation().getPoint());
       if (packetFieldErrorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -44,7 +45,7 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      packetFieldErrorType = ObjectValidityChecker.validateQuat4d(message.getOrientation());
+      packetFieldErrorType = ObjectValidityChecker.validateQuat4d(message.getOrientation().getQuaternion());
       if (packetFieldErrorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -56,7 +57,7 @@ public abstract class PacketValidityChecker
       {
          for (int arrayListIndex = 0; arrayListIndex < message.getPredictedContactPoints2d().size(); arrayListIndex++)
          {
-            packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getPredictedContactPoints2d().get(arrayListIndex));
+            packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getPredictedContactPoints2d().get(arrayListIndex).getPoint());
 
             if (packetFieldErrorType != null)
             {
@@ -88,7 +89,7 @@ public abstract class PacketValidityChecker
       if (trajectoryType == TrajectoryType.WAYPOINTS)
       {
          String messageClassName = message.getClass().getSimpleName();
-         List<SE3TrajectoryPointMessage> swingTrajectory = message.getSwingTrajectory();
+         IDLObjectSequence<SE3TrajectoryPointMessage> swingTrajectory = message.getSwingTrajectory();
 
          if (swingTrajectory == null)
          {
@@ -142,7 +143,7 @@ public abstract class PacketValidityChecker
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
          String messageClassName = message.getClass().getSimpleName();
-         List<Point3D> positionWaypoints = message.getCustomPositionWaypoints();
+         IDLObjectSequence<EuclidPoint3DMessage> positionWaypoints = message.getCustomPositionWaypoints();
          if (positionWaypoints == null)
          {
             String errorMessage = messageClassName + "'s type is custom but no position waypoints were specified.";
@@ -206,7 +207,7 @@ public abstract class PacketValidityChecker
     */
    public static String validateFootstepStatus(FootstepStatusMessage message)
    {
-      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getActualFootPositionInWorld());
+      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getActualFootPositionInWorld().getPoint());
       if (packetFieldErrorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -214,7 +215,7 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      packetFieldErrorType = ObjectValidityChecker.validateQuat4d(message.getActualFootOrientationInWorld());
+      packetFieldErrorType = ObjectValidityChecker.validateQuat4d(message.getActualFootOrientationInWorld().getQuaternion());
       if (packetFieldErrorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -695,19 +696,19 @@ public abstract class PacketValidityChecker
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.getPosition());
+      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.getPosition().getPoint());
       if (errorType != null)
          return "SE3 waypoint position field " + errorType.getMessage();
 
-      errorType = ObjectValidityChecker.validateQuat4d(se3TrajectoryPoint.getOrientation());
+      errorType = ObjectValidityChecker.validateQuat4d(se3TrajectoryPoint.getOrientation().getQuaternion());
       if (errorType != null)
          return "SE3 waypoint orientation field " + errorType.getMessage();
 
-      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.getLinearVelocity());
+      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.getLinearVelocity().getVector());
       if (errorType != null)
          return "SE3 waypoint linear velocity field " + errorType.getMessage();
 
-      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.getAngularVelocity());
+      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.getAngularVelocity().getVector());
       if (errorType != null)
          return "SE3 waypoint angular velocity field " + errorType.getMessage();
       ;
@@ -732,11 +733,11 @@ public abstract class PacketValidityChecker
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.getPosition());
+      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.getPosition().getPoint());
       if (errorType != null)
          return "SE3 waypoint position field " + errorType.getMessage();
 
-      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.getLinearVelocity());
+      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.getLinearVelocity().getVector());
       if (errorType != null)
          return "SE3 waypoint linear velocity field " + errorType.getMessage();
 
@@ -761,11 +762,11 @@ public abstract class PacketValidityChecker
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateQuat4d(so3TrajectoryPoint.getOrientation());
+      errorType = ObjectValidityChecker.validateQuat4d(so3TrajectoryPoint.getOrientation().getQuaternion());
       if (errorType != null)
          return "SO3 waypoint orientation field " + errorType.getMessage();
 
-      errorType = ObjectValidityChecker.validateTuple3d(so3TrajectoryPoint.getAngularVelocity());
+      errorType = ObjectValidityChecker.validateTuple3d(so3TrajectoryPoint.getAngularVelocity().getVector());
       if (errorType != null)
          return "SO3 waypoint angular velocity field " + errorType.getMessage();
 
@@ -847,7 +848,8 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   public static String validatePacket(Packet<?> packet)
+   // TODO: Refactor to not use Packet class
+   public static String validatePacket(Object packet)
    {
       if (packet == null)
          return "is null.";

@@ -1,19 +1,19 @@
 package us.ihmc.footstepPlanning;
 
-import perception_msgs.msg.dds.TerrainMapMessage;
-import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
+import perception_msgs.TerrainMapMessage;
+import toolbox_msgs.FootstepPlanningRequestPacket;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
-import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
+import us.ihmc.perception.gpuMapping.HeightMapData;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.gpuMapping.HeightMapData;
 
 import java.util.ArrayList;
 
@@ -423,10 +423,10 @@ public class FootstepPlannerRequest
       RobotSide requestedInitialStanceSide = RobotSide.fromByte(requestPacket.getRequestedInitialStanceSide());
       if (requestedInitialStanceSide != null)
          setRequestedInitialStanceSide(requestedInitialStanceSide);
-      setStartFootPose(RobotSide.LEFT, requestPacket.getStartLeftFootPose());
-      setStartFootPose(RobotSide.RIGHT, requestPacket.getStartRightFootPose());
-      setGoalFootPose(RobotSide.LEFT, requestPacket.getGoalLeftFootPose());
-      setGoalFootPose(RobotSide.RIGHT, requestPacket.getGoalRightFootPose());
+      setStartFootPose(RobotSide.LEFT, requestPacket.getStartLeftFootPose().getPose());
+      setStartFootPose(RobotSide.RIGHT, requestPacket.getStartRightFootPose().getPose());
+      setGoalFootPose(RobotSide.LEFT, requestPacket.getGoalLeftFootPose().getPose());
+      setGoalFootPose(RobotSide.RIGHT, requestPacket.getGoalRightFootPose().getPose());
       setSnapGoalSteps(requestPacket.getSnapGoalSteps());
       setAbortIfGoalStepSnappingFails(requestPacket.getAbortIfGoalStepSnappingFails());
       setAbortIfBodyPathPlannerFails(requestPacket.getAbortIfBodyPathPlannerFails());
@@ -449,7 +449,7 @@ public class FootstepPlannerRequest
 
       for (int i = 0; i < requestPacket.getBodyPathWaypoints().size(); i++)
       {
-         bodyPathWaypoints.add(new Pose3D(requestPacket.getBodyPathWaypoints().get(i)));
+         bodyPathWaypoints.add(new Pose3D(requestPacket.getBodyPathWaypoints().get(i).getPose()));
       }
 
       if (requestPacket.getTerrainMapMessage() != null)

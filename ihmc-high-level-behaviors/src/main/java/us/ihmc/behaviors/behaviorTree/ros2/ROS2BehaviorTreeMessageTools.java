@@ -1,17 +1,17 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import behavior_msgs.msg.dds.*;
+import behavior_msgs.*;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
+import us.ihmc.behaviors.behaviorTree.action.actions.*;
+import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
+import us.ihmc.behaviors.behaviorTree.control.ActionSequenceState;
+import us.ihmc.behaviors.behaviorTree.control.CheckpointNodeState;
+import us.ihmc.behaviors.behaviorTree.control.FallbackNodeState;
+import us.ihmc.behaviors.behaviorTree.control.GotoNodeState;
 import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeState;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationState;
 import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalState;
-import us.ihmc.behaviors.behaviorTree.control.CheckpointNodeState;
-import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
-import us.ihmc.behaviors.behaviorTree.control.GotoNodeState;
-import us.ihmc.behaviors.behaviorTree.control.ActionSequenceState;
-import us.ihmc.behaviors.behaviorTree.control.FallbackNodeState;
-import us.ihmc.behaviors.behaviorTree.action.actions.*;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusSE3Trajectory;
@@ -28,7 +28,7 @@ public class ROS2BehaviorTreeMessageTools
 {
    public static void clearLists(BehaviorTreeStateMessage treeStateMessage)
    {
-      treeStateMessage.getBehaviorTreeTypes().resetQuick();
+      treeStateMessage.getBehaviorTreeTypes().clear();
       treeStateMessage.getBehaviorTreeIndices().clear();
       treeStateMessage.getPartialDataNodes().clear();
       treeStateMessage.getRootNodes().clear();
@@ -48,7 +48,6 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getWalkActions().clear();
       treeStateMessage.getArmActions().clear();
       treeStateMessage.getHandWrenchActions().clear();
-      treeStateMessage.getScrewPrimitiveActions().clear();
       treeStateMessage.getPelvisActions().clear();
       treeStateMessage.getAbilityHandActions().clear();
       treeStateMessage.getEzGripperActions().clear();
@@ -178,12 +177,6 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getHandWrenchActions().size());
             handWrenchActionState.toMessage(treeStateMessage.getHandWrenchActions().add());
          }
-         else if (nodeState instanceof ScrewPrimitiveActionState screwPrimitiveActionState)
-         {
-            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.SCREW_PRIMITIVE_ACTION);
-            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getScrewPrimitiveActions().size());
-            screwPrimitiveActionState.toMessage(treeStateMessage.getScrewPrimitiveActions().add());
-         }
          else if (nodeState instanceof PelvisActionState pelvisActionState)
          {
             treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.PELVIS_ACTION);
@@ -294,10 +287,6 @@ public class ROS2BehaviorTreeMessageTools
       else if (nodeState instanceof HandWrenchActionState handWrenchActionState)
       {
          handWrenchActionState.fromMessage(subscriptionNode.getHandWrenchActionStateMessage());
-      }
-      else if (nodeState instanceof ScrewPrimitiveActionState screwPrimitiveActionState)
-      {
-         screwPrimitiveActionState.fromMessage(subscriptionNode.getScrewPrimitiveActionStateMessage());
       }
       else if (nodeState instanceof PelvisActionState pelvisActionState)
       {
@@ -466,15 +455,6 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setBehaviorTreeNodeStateMessage(handWrenchActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(handWrenchActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
-         case BehaviorTreeStateMessage.SCREW_PRIMITIVE_ACTION ->
-         {
-            ScrewPrimitiveActionStateMessage screwPrimitiveActionStateMessage = treeStateMessage.getScrewPrimitiveActions().get(indexInTypesList);
-            subscriptionNode.setScrewPrimitiveActionStateMessage(screwPrimitiveActionStateMessage);
-            subscriptionNode.setActionNodeStateMessage(screwPrimitiveActionStateMessage.getState());
-            subscriptionNode.setLeafNodeStateMessage(screwPrimitiveActionStateMessage.getState().getState());
-            subscriptionNode.setBehaviorTreeNodeStateMessage(screwPrimitiveActionStateMessage.getState().getState().getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(screwPrimitiveActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
-         }
          case BehaviorTreeStateMessage.PELVIS_ACTION ->
          {
             PelvisActionStateMessage pelvisActionStateMessage = treeStateMessage.getPelvisActions().get(indexInTypesList);
@@ -537,7 +517,7 @@ public class ROS2BehaviorTreeMessageTools
             if (scene.getObjects().size() > i)
                yoDataMessage.getSceneObjectPose()[i].set(scene.getObjects().get(i).getTransformToWorld());
             else
-               yoDataMessage.getSceneObjectPose()[i].setToNaN();
+               yoDataMessage.getSceneObjectPose()[i].getPose().setToNaN();
          }
 
          yoDataMessage.setAutomaticExecution(rootNode.getState().getAutomaticExecution());
@@ -574,8 +554,8 @@ public class ROS2BehaviorTreeMessageTools
             yoDataMessage.getCurrentHandPose()[side.ordinal()].set(action.getState().getCurrentPose().getValueReadOnly());
             CRDTStatusSE3Trajectory commandedTrajectory = action.getState().getCommandedTrajectory();
             if (!commandedTrajectory.isEmpty())
-               yoDataMessage.getGoalHandPose()[side.ordinal()].set(commandedTrajectory.getLastValueReadOnly().getOrientation(),
-                                                                   commandedTrajectory.getLastValueReadOnly().getPosition());
+               yoDataMessage.getGoalHandPose()[side.ordinal()].getPose().set(commandedTrajectory.getLastValueReadOnly().getOrientation(),
+                                                                             commandedTrajectory.getLastValueReadOnly().getPosition());
          }
       }
    }

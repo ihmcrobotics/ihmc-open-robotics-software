@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.MultiContactTrajectoryMessage;
+import controller_msgs.MultiContactTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -29,7 +29,7 @@ public class MultiContactTrajectoryCommand
    {
       sequenceId = message.getSequenceId();
       trajectoryDuration = message.getTrajectoryDuration();
-      pelvisPose.set(message.getRootJointPose());
+      pelvisPose.set(message.getRootJointPose().getPose());
 
       for (int i = 0; i < message.getJointAngles().size(); i++)
       {

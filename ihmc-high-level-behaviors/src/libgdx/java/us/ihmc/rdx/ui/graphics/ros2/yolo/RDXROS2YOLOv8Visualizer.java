@@ -2,25 +2,26 @@ package us.ihmc.rdx.ui.graphics.ros2.yolo;
 
 import imgui.ImGui;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.YOLOv8AnnotationInfoList;
+import perception_msgs.ImageMessage;
+import perception_msgs.YOLOv8AnnotationInfoList;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.detections.yolo.YOLOv8AnnotationInfo;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2MultiTopicVisualizer;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Subscription;
-import us.ihmc.ros2.ROS2Topic;
 
 import java.util.List;
 
 public class RDXROS2YOLOv8Visualizer extends RDXROS2MultiTopicVisualizer
 {
+   private final ROS2Node ros2Node;
    private final ROS2Topic<ImageMessage> colorImageTopic;
    private final RDXROS2ImageMessageVisualizer imageMessageVisualizer;
 
@@ -47,6 +48,7 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2MultiTopicVisualizer
    {
       super(title);
 
+      this.ros2Node = ros2Node;
       this.colorImageTopic = colorImageTopic;
       imageMessageVisualizer = new RDXROS2ImageMessageVisualizer(title, intraProcessNode, colorImageTopic)
       {
@@ -60,7 +62,7 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2MultiTopicVisualizer
       };
 
       latestAnnotationInfo = new YOLOv8AnnotationInfoList();
-      annotationInfoSubscription = ros2Node.createSubscription2(PerceptionAPI.YOLO_ANNOTATION_INFO, this::setLatestAnnotationInfo);
+      annotationInfoSubscription = ros2Node.createSubscriptionSampler(PerceptionAPI.YOLO_ANNOTATION_INFO, this::setLatestAnnotationInfo);
 
       demandYOLO = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_YOLO);
 
@@ -107,7 +109,7 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2MultiTopicVisualizer
    {
       super.destroy();
       imageMessageVisualizer.destroy();
-      annotationInfoSubscription.remove();
+      ros2Node.destroySubscription(annotationInfoSubscription);
       settings.destroy();
       demandYOLO.destroy();
    }

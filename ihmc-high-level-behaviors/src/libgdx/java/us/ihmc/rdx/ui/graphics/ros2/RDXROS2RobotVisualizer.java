@@ -4,19 +4,20 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.FootstepStatusMessage;
+import controller_msgs.RobotConfigurationData;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.StateEstimatorAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.rdx.RDXFocusBasedCamera;
 import us.ihmc.rdx.imgui.ImGuiSliderFloat;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -30,7 +31,6 @@ import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotConfigurationData>
 {
-   private final ROS2Helper ros2;
+   private final ROS2Node ros2Node;
    private final RDXMultiBodyGraphic multiBodyGraphic;
    private final ROS2Topic<RobotConfigurationData> topic;
    private final ImBoolean trackRobot = new ImBoolean(false);
@@ -63,11 +63,11 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
 
    private boolean snappedToRobotOnStart = false;
 
-   public RDXROS2RobotVisualizer(ROS2Helper ros2, ROS2SyncedRobotModel syncedRobot)
+   public RDXROS2RobotVisualizer(ROS2Node ros2Node, ROS2SyncedRobotModel syncedRobot)
    {
       super(syncedRobot.getRobotModel().getSimpleRobotName() + " Robot Visualizer");
 
-      this.ros2 = ros2;
+      this.ros2Node = ros2Node;
       this.topic = StateEstimatorAPI.getRobotConfigurationDataTopic(syncedRobot.getRobotModel().getSimpleRobotName());
       this.syncedRobot = syncedRobot;
 
@@ -105,10 +105,10 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
       multiBodyGraphic.create();
       multiBodyGraphic.loadRobotModelAndGraphics(syncedRobot.getRobotModel().getRobotDefinition(), syncedRobot.getFullRobotModel().getElevator());
 
-      ros2.subscribeViaVolatileCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()), footstepStatusMessage ->
+      ros2Node.createSubscriptionSampler(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()), sample ->
       {
-         if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
-            completedFootstepThreadBarrier.add(new MinimalFootstep(footstepStatusMessage));
+         if (sample.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
+            completedFootstepThreadBarrier.add(new MinimalFootstep(sample));
       });
    }
 

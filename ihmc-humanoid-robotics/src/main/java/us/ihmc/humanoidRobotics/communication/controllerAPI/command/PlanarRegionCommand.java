@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import perception_msgs.msg.dds.PlanarRegionMessage;
+import perception_msgs.PlanarRegionMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -49,7 +49,7 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
    public void setFromMessage(PlanarRegionMessage message)
    {
       sequenceId = message.getSequenceId();
-      setRegionProperties(message.getRegionId(), message.getRegionOrigin(), message.getRegionNormal());
+      setRegionProperties(message.getRegionId(), message.getRegionOrigin().getPoint(), message.getRegionNormal().getVector());
 
       concaveHullsVertices.clear();
 
@@ -57,7 +57,7 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       int upperBound = message.getConcaveHullSize();
 
       for (; vertexIndex < upperBound; vertexIndex++)
-         addConcaveHullVertex().set(message.getVertexBuffer().get(vertexIndex));
+         addConcaveHullVertex().set(message.getVertexBuffer().get(vertexIndex).getPoint());
 
       convexPolygons.clear();
 
@@ -69,7 +69,7 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
 
          for (; vertexIndex < upperBound; vertexIndex++)
          {
-            convexPolygon.addVertex(message.getVertexBuffer().get(vertexIndex));
+            convexPolygon.addVertex(message.getVertexBuffer().get(vertexIndex).getPoint());
          }
          convexPolygon.update();
       }

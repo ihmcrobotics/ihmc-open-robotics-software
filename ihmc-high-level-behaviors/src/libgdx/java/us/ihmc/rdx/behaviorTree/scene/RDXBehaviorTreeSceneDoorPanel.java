@@ -1,8 +1,8 @@
 package us.ihmc.rdx.behaviorTree.scene;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
-import behavior_msgs.msg.dds.PersistentDetectionStatusMessage;
+import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.BehaviorTreeSceneObjectStateMessage;
+import behavior_msgs.PersistentDetectionStatusMessage;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;

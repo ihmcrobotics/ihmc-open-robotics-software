@@ -1,17 +1,13 @@
 package us.ihmc.avatar.multiContact;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import controller_msgs.msg.dds.*;
+import controller_msgs.*;
+import controller_msgs.RobotConfigurationData;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TFloatArrayList;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import ihmc_common_msgs.TrajectoryPoint1DMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -20,6 +16,11 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class implement preliminary work for post-processing a pre-generated script defined in
@@ -117,7 +118,8 @@ public class MultiContactScriptPostProcessor
       for (KinematicsToolboxSnapshotDescription item : rawScript)
       {
          KinematicsToolboxOutputStatus ikSolution = item.getIkSolution();
-         rootJoint.getJointPose().set(ikSolution.getDesiredRootPosition(), ikSolution.getDesiredRootOrientation());
+         rootJoint.getJointPose()
+                  .set(ikSolution.getDesiredRootPosition().getPoint(), ikSolution.getDesiredRootOrientation().getQuaternion());
          for (int i = 0; i < ikSolution.getDesiredJointAngles().size(); i++)
          {
             oneDoFJoints[i].setQ(ikSolution.getDesiredJointAngles().get(i));
@@ -234,6 +236,14 @@ public class MultiContactScriptPostProcessor
       {
          output.add(input.get(i));
       }
+      return output;
+   }
+
+   private static TDoubleArrayList toTDoubleArrayList(IDLFloatSequence input)
+   {
+      TDoubleArrayList output = new TDoubleArrayList(input.size());
+      for (int i = 0; i < input.size(); i++)
+         output.add(input.get(i));
       return output;
    }
 

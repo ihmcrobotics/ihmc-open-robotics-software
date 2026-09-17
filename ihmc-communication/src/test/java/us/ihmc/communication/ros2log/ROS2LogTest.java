@@ -1,20 +1,20 @@
 package us.ihmc.communication.ros2log;
 
 import com.google.common.base.CaseFormat;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.RobotConfigurationData;
 import gnu.trove.list.array.TLongArrayList;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ROS2LogTest
 {
@@ -27,8 +27,8 @@ public class ROS2LogTest
       for (ROS2LogSerialization serialization : ROS2LogSerialization.values())
       {
          ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
-         ROS2Topic<RobotConfigurationData> robotConfigurationData = controllerOutputTopic.withTypeName(RobotConfigurationData.class);
-         ROS2Node ros2Node = new ROS2NodeBuilder().build("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "test_node"));
+         ROS2Topic<RobotConfigurationData> robotConfigurationData = controllerOutputTopic.withType(RobotConfigurationData.class);
+         ROS2Node ros2Node = new ROS2Node("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "test_node"));
 
          // Test record/writing
          List<RecordTopicManager<?>> rosTopicManagers = new ArrayList<>();
@@ -62,8 +62,32 @@ public class ROS2LogTest
          Assertions.assertTrue(importedTimestamps.get(1) == 100L);
 
          Assertions.assertTrue(importedMessages.size() == 2);
-         Assertions.assertTrue(messageExport0.epsilonEquals((RobotConfigurationData) importedMessages.get(0), 1.0e-12));
-         Assertions.assertTrue(messageExport1.epsilonEquals((RobotConfigurationData) importedMessages.get(1), 1.0e-12));
+         Assertions.assertEquals(1L, ((RobotConfigurationData) importedMessages.get(0)).getSequenceId());
+         Assertions.assertEquals(2L, ((RobotConfigurationData) importedMessages.get(1)).getSequenceId());
+
+         ros2Node.close();
       }
+   }
+
+   @Test
+   public void testReplayWaitsUntilFirstTimestamp()
+   {
+      ROS2Topic<RobotConfigurationData> topic = HumanoidControllerAPI.getOutputTopic("Robot").withType(RobotConfigurationData.class);
+      AtomicInteger publishCount = new AtomicInteger();
+      ReplayTopicManager<RobotConfigurationData> replayTopicManager = new ReplayTopicManager<>(topic, ignored -> publishCount.incrementAndGet());
+
+      RobotConfigurationData message = new RobotConfigurationData();
+      message.setSequenceId(1L);
+      replayTopicManager.getTimestamps().add(10L);
+      replayTopicManager.getMessages().add(message);
+
+      Assertions.assertFalse(replayTopicManager.update(0L));
+      Assertions.assertEquals(0, publishCount.get());
+
+      Assertions.assertFalse(replayTopicManager.update(9L));
+      Assertions.assertEquals(0, publishCount.get());
+
+      Assertions.assertTrue(replayTopicManager.update(11L));
+      Assertions.assertEquals(1, publishCount.get());
    }
 }

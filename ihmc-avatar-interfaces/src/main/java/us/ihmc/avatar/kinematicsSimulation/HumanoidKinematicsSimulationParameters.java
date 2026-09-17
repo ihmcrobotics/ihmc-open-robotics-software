@@ -1,7 +1,7 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
 import us.ihmc.commons.UnitConversions;
-import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class HumanoidKinematicsSimulationParameters
    private double dt = UnitConversions.hertzToSeconds(70);
    private boolean runNoFasterThanMaxRealtimeRate = true;
    private double maxRealtimeRate = 2.0;
-   private ROS2NodeBuilder ros2NodeBuilder = null;
+   private ROS2Node ros2Node = null;
    private final List<YoRegistry> registriesToInclude = new ArrayList<>();
 
    public double getInitialGroundHeight()
@@ -147,14 +147,14 @@ public class HumanoidKinematicsSimulationParameters
       this.createPeriodicThread = createPeriodicThread;
    }
 
-   public void setRos2NodeBuilder(ROS2NodeBuilder ros2NodeBuilder)
+   public void setROS2Node(ROS2Node ros2Node)
    {
-      this.ros2NodeBuilder = ros2NodeBuilder;
+      this.ros2Node = ros2Node;
    }
 
-   public ROS2NodeBuilder getRos2NodeBuilder()
+   public ROS2Node getROS2Node()
    {
-      return ros2NodeBuilder;
+      return ros2Node;
    }
 
    public List<YoRegistry> getRegistriesToInclude()

@@ -1,9 +1,14 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import static toolbox_msgs.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
+import static toolbox_msgs.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
+import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
+import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHandsIndices;
+
+import controller_msgs.CapturabilityBasedStatus;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.HumanoidKinematicsToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
@@ -20,6 +25,8 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage;
+import us.ihmc.euclid.jros2.messages.EuclidVector3DMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -36,10 +43,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -70,11 +77,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
-import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
-import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
-import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHandsIndices;
 
 public class HumanoidKinematicsToolboxController extends KinematicsToolboxController
 {
@@ -585,7 +587,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          return;
 
       KinematicsToolboxOutputStatus solution = getSolution();
-      solution.getDesiredJointVelocitiesPublishingPeriod().reset();
+      solution.getDesiredJointVelocitiesPublishingPeriod().clear();
 
       double dt = currentTime - previousPublishedSolutionTime;
       boolean hasPreviousPublishedSolution = Double.isFinite(previousPublishedSolutionTime) && dt > 1.0e-6;
@@ -599,14 +601,14 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             solution.getDesiredJointVelocitiesPublishingPeriod().add((float) qdPublishingPeriod);
          }
 
-         solution.getDesiredRootLinearVelocityPublishingPeriod().sub(solution.getDesiredRootPosition(), previousPublishedRootPosition);
-         solution.getDesiredRootLinearVelocityPublishingPeriod().scale(1.0 / dt);
-         solution.getDesiredRootOrientation().inverseTransform(solution.getDesiredRootLinearVelocityPublishingPeriod());
+         solution.getDesiredRootLinearVelocityPublishingPeriod().getVector().sub(solution.getDesiredRootPosition().getPoint(), previousPublishedRootPosition);
+         solution.getDesiredRootLinearVelocityPublishingPeriod().getVector().scale(1.0 / dt);
+         solution.getDesiredRootOrientation().getQuaternion().inverseTransform(solution.getDesiredRootLinearVelocityPublishingPeriod().getVector());
 
          computeAngularVelocityLocalByFiniteDifference(dt,
                                                        previousPublishedRootOrientation,
-                                                       solution.getDesiredRootOrientation(),
-                                                       solution.getDesiredRootAngularVelocityPublishingPeriod());
+                                                       solution.getDesiredRootOrientation().getQuaternion(),
+                                                       solution.getDesiredRootAngularVelocityPublishingPeriod().getVector());
       }
       else
       {
@@ -614,8 +616,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          {
             solution.getDesiredJointVelocitiesPublishingPeriod().add(solution.getDesiredJointVelocities().get(jointIdx));
          }
-         solution.getDesiredRootLinearVelocityPublishingPeriod().set(solution.getDesiredRootLinearVelocity());
-         solution.getDesiredRootAngularVelocityPublishingPeriod().set(solution.getDesiredRootAngularVelocity());
+         solution.getDesiredRootLinearVelocityPublishingPeriod().getVector().set(solution.getDesiredRootLinearVelocity().getVector());
+         solution.getDesiredRootAngularVelocityPublishingPeriod().getVector().set(solution.getDesiredRootAngularVelocity().getVector());
       }
 
       for (int jointIdx = 0; jointIdx < desiredOneDoFJoints.length; jointIdx++)
@@ -623,8 +625,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          previousPublishedJointPositions[jointIdx] = solution.getDesiredJointAngles().get(jointIdx);
       }
 
-      previousPublishedRootPosition.set(solution.getDesiredRootPosition());
-      previousPublishedRootOrientation.set(solution.getDesiredRootOrientation());
+      previousPublishedRootPosition.set(solution.getDesiredRootPosition().getPoint());
+      previousPublishedRootOrientation.set(solution.getDesiredRootOrientation().getQuaternion());
       previousPublishedSolutionTime = currentTime;
    }
 
@@ -850,12 +852,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       activeContactPointPositions.clear();
 
       // CoM constraint polygon is the convex hull of the feet contact points. Even when upper body is load-bearing, initialize to this.
-      Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
-      Object<Point3D> rightFootSupportPolygon2d = capturabilityBasedStatus.getRightFootSupportPolygon3d();
+      var leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
+      var rightFootSupportPolygon2d = capturabilityBasedStatus.getRightFootSupportPolygon3d();
       for (int i = 0; i < leftFootSupportPolygon2d.size(); i++)
-         activeContactPointPositions.add().setIncludingFrame(worldFrame, leftFootSupportPolygon2d.get(i));
+         activeContactPointPositions.add().setIncludingFrame(worldFrame, leftFootSupportPolygon2d.get(i).getPoint());
       for (int i = 0; i < rightFootSupportPolygon2d.size(); i++)
-         activeContactPointPositions.add().setIncludingFrame(worldFrame, rightFootSupportPolygon2d.get(i));
+         activeContactPointPositions.add().setIncludingFrame(worldFrame, rightFootSupportPolygon2d.get(i).getPoint());
 
       updateSupportPolygonConstraint(activeContactPointPositions);
    }
@@ -881,19 +883,19 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       multiContactRegionCalculator.updateContactState(wholeBodyContactState, true);
    }
 
-   private void packFootContactPoints(RobotSide robotSide, List<Point3D> contactPoints)
+   private void packFootContactPoints(RobotSide robotSide, IDLObjectSequence<EuclidPoint3DMessage> contactPoints)
    {
       for (int i = 0; i < contactPoints.size(); i++)
       {
-         tempContactPoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), contactPoints.get(i));
+         tempContactPoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), contactPoints.get(i).getPoint());
          tempContactNormal.setIncludingFrame(desiredFullRobotModel.getSoleFrame(robotSide), Axis3D.Z);
          wholeBodyContactState.addContactPoint(desiredFullRobotModel.getFoot(robotSide), tempContactPoint, tempContactNormal, FOOT_COEFFICIENT_OF_FRICTION);
       }
    }
 
-   private void packHandContactPoint(RobotSide robotSide, Vector3DBasics contactNormalInWorld)
+   private void packHandContactPoint(RobotSide robotSide, EuclidVector3DMessage contactNormalInWorld)
    {
-      tempContactNormal.setIncludingFrame(ReferenceFrame.getWorldFrame(), contactNormalInWorld);
+      tempContactNormal.setIncludingFrame(ReferenceFrame.getWorldFrame(), contactNormalInWorld.getVector());
       wholeBodyContactState.addContactPoint(desiredFullRobotModel.getHand(robotSide), handContactPointInBodyFrame.get(robotSide), tempContactNormal, HAND_COEFFICIENT_OF_FRICTION);
    }
 

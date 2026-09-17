@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.ui.components;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.FootstepDataListMessage;
 import javafx.animation.AnimationTimer;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -339,8 +339,8 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
             firstStep.set(false);
             lastStepSide = lastStepSide.getOppositeSide();
-            lastStepPose.set(footstepDataListMessage.getFootstepDataList().get(0).getLocation(),
-                             footstepDataListMessage.getFootstepDataList().get(0).getOrientation());
+            lastStepPose.set(footstepDataListMessage.getFootstepDataList().get(0).getLocation().getPoint(),
+                             footstepDataListMessage.getFootstepDataList().get(0).getOrientation().getQuaternion());
             steps.add(new Pose3D(lastStepPose));
             previousStepMessageId = messageId;
             logger.logSession();

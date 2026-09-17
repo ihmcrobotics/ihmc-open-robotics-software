@@ -1,12 +1,7 @@
 package us.ihmc.humanoidRobotics.frames;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -26,6 +21,10 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 public class MovingWalkingReferenceFrameTest
 {
    @AfterEach
@@ -40,7 +39,7 @@ public class MovingWalkingReferenceFrameTest
       Random random = new Random(23423L);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      YoDouble timeProvider = new YoDouble("time", new YoRegistry(""));
+      YoDouble timeProvider = new YoDouble("time", new YoRegistry("testRegistry"));
       double updateDT = 1.0e-8;
 
       MovingReferenceFrame frameOne = createMovingReferenceFrame("frameOne", worldFrame, random, timeProvider);

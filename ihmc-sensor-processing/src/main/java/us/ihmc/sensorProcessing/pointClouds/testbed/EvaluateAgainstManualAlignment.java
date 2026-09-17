@@ -7,8 +7,6 @@ import java.util.Arrays;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
-import com.thoughtworks.xstream.XStream;
-
 import georegression.geometry.ConvertRotation3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.struct.so.Rodrigues_F64;
@@ -22,8 +20,7 @@ public class EvaluateAgainstManualAlignment {
 
       int N = 16;
 
-      Se3_F64 estimatedToModel = (Se3_F64) new XStream().fromXML(directory.getClass().
-              getResourceAsStream("/testbed/estimatedToModel.xml"));
+      Se3_F64 estimatedToModel = Se3F64XmlIO.read(directory.getClass().getResourceAsStream("/testbed/estimatedToModel.xml"));
 
       double errorsT[] = new double[N];
       double errorsR[] = new double[N];
@@ -37,8 +34,8 @@ public class EvaluateAgainstManualAlignment {
 
          Se3_F64 estimatedToWorld, modelToWorld;
          try {
-            estimatedToWorld = (Se3_F64) new XStream().fromXML(new FileInputStream(nameEstimated));
-            modelToWorld = (Se3_F64) new XStream().fromXML(new FileInputStream(nameModel));
+            estimatedToWorld = Se3F64XmlIO.read(new FileInputStream(nameEstimated));
+            modelToWorld = Se3F64XmlIO.read(new FileInputStream(nameModel));
          } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
          }

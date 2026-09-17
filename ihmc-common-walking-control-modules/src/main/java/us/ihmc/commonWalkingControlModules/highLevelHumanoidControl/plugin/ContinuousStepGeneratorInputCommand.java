@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
-import controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage;
+import controller_msgs.ContinuousStepGeneratorInputMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
 public class ContinuousStepGeneratorInputCommand implements Command<ContinuousStepGeneratorInputCommand, ContinuousStepGeneratorInputMessage>

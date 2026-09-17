@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI;
 
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.KinematicsStreamingToolboxInputMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;

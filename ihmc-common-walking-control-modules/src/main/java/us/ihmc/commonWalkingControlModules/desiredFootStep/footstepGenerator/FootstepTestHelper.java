@@ -1,10 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,6 +13,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FootstepTestHelper
 {
@@ -88,7 +88,7 @@ public class FootstepTestHelper
    {
       RobotSide robotSide = RobotSide.fromByte(footstepDataMessage.getRobotSide());
       RigidBodyBasics foot = contactableFeet.get(robotSide).getRigidBody();
-      FramePose3D solePose = new FramePose3D(worldFrame, footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
+      FramePose3D solePose = new FramePose3D(worldFrame, footstepDataMessage.getLocation().getPoint(), footstepDataMessage.getOrientation().getQuaternion());
       Footstep footstep = new Footstep(robotSide, solePose);
       if (footstepDataMessage.getPredictedContactPoints2d() != null && !footstepDataMessage.getPredictedContactPoints2d().isEmpty())
          footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(footstepDataMessage));

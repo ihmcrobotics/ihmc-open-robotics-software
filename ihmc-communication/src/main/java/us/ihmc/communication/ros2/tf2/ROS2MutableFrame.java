@@ -1,6 +1,6 @@
 package us.ihmc.communication.ros2.tf2;
 
-import geometry_msgs.msg.dds.TransformStamped;
+import geometry_msgs.TransformStamped;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -89,7 +89,7 @@ public class ROS2MutableFrame extends ROS2Frame
       if (hasNewTransform.getAndSet(false))
          transformToParent.set(newestTransformToParent);
       else if (remoteTransform != null && MessageTools.compareTime(updateTime, remoteTransform.getHeader().getStamp()) < 0)
-         transformToParent.set(remoteTransform.getTransform());
+         MessageTools.toEuclid(remoteTransform.getTransform(), transformToParent);
 
       markUpdateTime();
       publishTFMessages();

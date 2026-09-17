@@ -1,11 +1,13 @@
 package us.ihmc.avatar.controllerAPI;
 
-import controller_msgs.msg.dds.FootLoadBearingMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import static org.junit.jupiter.api.Assertions.*;
+
+import controller_msgs.FootLoadBearingMessage;
+import controller_msgs.FootTrajectoryMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import controller_msgs.TaskspaceTrajectoryStatusMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,10 +41,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.MecanoTestTools;
@@ -75,8 +77,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -295,15 +295,15 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       FootstepDataMessage leftStep = footstepDataListMessage.getFootstepDataList().add();
       FootstepDataMessage rightStep = footstepDataListMessage.getFootstepDataList().add();
-      leftStep.getLocation().set(0.3, 0.12, 0.0);
+      leftStep.getLocation().getPoint().set(0.3, 0.12, 0.0);
       leftStep.setRobotSide(RobotSide.LEFT.toByte());
-      rightStep.getLocation().set(0.3, -0.12, 0.0);
+      rightStep.getLocation().getPoint().set(0.3, -0.12, 0.0);
       rightStep.setRobotSide(RobotSide.RIGHT.toByte());
       leftStep = footstepDataListMessage.getFootstepDataList().add();
       rightStep = footstepDataListMessage.getFootstepDataList().add();
-      leftStep.getLocation().set(0.6, 0.12, 0.0);
+      leftStep.getLocation().getPoint().set(0.6, 0.12, 0.0);
       leftStep.setRobotSide(RobotSide.LEFT.toByte());
-      rightStep.getLocation().set(0.6, -0.12, 0.0);
+      rightStep.getLocation().getPoint().set(0.6, -0.12, 0.0);
       rightStep.setRobotSide(RobotSide.RIGHT.toByte());
 
       simulationTestHelper.publishToController(footstepDataListMessage);
@@ -490,8 +490,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       double trajectoryTime = 0.5;
       FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryTime, desiredPose);
       footTrajectoryMessage.getSe3Trajectory().setUseCustomControlFrame(true);
-      footTrajectoryMessage.getSe3Trajectory().getControlFramePose().getOrientation().set(new Quaternion(controlFrameTransform.getRotation()));
-      footTrajectoryMessage.getSe3Trajectory().getControlFramePose().getPosition().set(new Point3D(controlFrameTransform.getTranslation()));
+      footTrajectoryMessage.getSe3Trajectory().getControlFramePose().getPose().getOrientation().set(new Quaternion(controlFrameTransform.getRotation()));
+      footTrajectoryMessage.getSe3Trajectory().getControlFramePose().getPose().getPosition().set(new Point3D(controlFrameTransform.getTranslation()));
       footTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(trajectoryFrame));
 
       simulationTestHelper.publishToController(footTrajectoryMessage);
@@ -628,11 +628,11 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       for (int inputIndex = 0; inputIndex < footTrajectoryMessages.size(); inputIndex++)
       {
          FootTrajectoryMessage footTrajectoryMessage = footTrajectoryMessages.get(inputIndex);
-         Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = footTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints();
+         IDLObjectSequence<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = footTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints();
 
          double endTime = startTime + taskspaceTrajectoryPoints.getLast().getTime();
          if (inputIndex > 0)
-            startTime += taskspaceTrajectoryPoints.getFirst().getTime();
+            startTime += taskspaceTrajectoryPoints.get(0).getTime();
 
          TaskspaceTrajectoryStatusMessage startedStatus = statusMessages.remove(0);
          TaskspaceTrajectoryStatusMessage completedStatus = statusMessages.remove(0);

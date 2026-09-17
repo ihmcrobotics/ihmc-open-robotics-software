@@ -4,22 +4,20 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.BigVideoPacket;
+import perception_msgs.BigVideoPacket;
+import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.imageMessage.PixelFormat;
-import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
 
 public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPacket>
 {
    private final String titleBeforeAdditions;
    private final ROS2Topic<BigVideoPacket> topic;
-   private RealtimeROS2Node realtimeROS2Node = null;
+   private AsyncROS2Node asyncROS2Node = null;
    private final BigVideoPacket videoPacket = new BigVideoPacket();
-   private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();
    private final BytePointer messageEncodedBytePointer = new BytePointer(25000000);
    private final Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
@@ -35,11 +33,11 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPa
 
       addActivenessChangeCallback(isAlive ->
       {
-         if (isAlive && realtimeROS2Node == null)
+         if (isAlive && asyncROS2Node == null)
          {
             subscribe();
          }
-         else if (!isAlive && realtimeROS2Node != null)
+         else if (!isAlive && asyncROS2Node != null)
          {
             unsubscribe();
          }
@@ -48,16 +46,15 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPa
 
    private void subscribe()
    {
-      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime(StringTools.titleToSnakeCase(titleBeforeAdditions));
+      asyncROS2Node = new AsyncROS2Node(StringTools.titleToSnakeCase(titleBeforeAdditions));
       // imdecode takes the longest by far out of all this stuff
       // synchronize with the update method
       // YUV I420 has 1.5 times the height of the image
-      realtimeROS2Node.createSubscription(topic, subscriber ->
+      asyncROS2Node.createSubscriptionSampler(topic, sample ->
       {
          synchronized (syncObject)
          {
-            videoPacket.getData().resetQuick();
-            subscriber.takeNextData(videoPacket, sampleInfo);
+            videoPacket.set(sample);
             //            delayPlot.addValue(TimeTools.calculateDelay(videoPacket.getAcquisitionTimeSecondsSinceEpoch(), videoPacket.getAcquisitionTimeAdditionalNanos()));
          }
          submitImageUpdate(imageVisualizer ->
@@ -65,7 +62,8 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPa
             synchronized (syncObject)
             {
                int numberOfBytes = videoPacket.getData().size();
-               messageEncodedBytePointer.put(videoPacket.getData().getBuffer().array(), 0, numberOfBytes);
+               IDLByteSequence data = videoPacket.getData();
+               messageEncodedBytePointer.put(data.getBuffer().array(), data.getBuffer().arrayOffset(), data.size());
                messageEncodedBytePointer.limit(numberOfBytes);
 
                inputJPEGMat.cols(numberOfBytes);
@@ -85,7 +83,6 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPa
             getFrequency().ping();
          });
       });
-      realtimeROS2Node.spin();
    }
 
    @Override
@@ -107,10 +104,10 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPa
 
    private void unsubscribe()
    {
-      if (realtimeROS2Node != null)
+      if (asyncROS2Node != null)
       {
-         realtimeROS2Node.destroy();
-         realtimeROS2Node = null;
+         asyncROS2Node.close();
+         asyncROS2Node = null;
       }
    }
 

@@ -1,8 +1,8 @@
 package us.ihmc.footstepPlanning;
 
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataMessage;
 import gnu.trove.list.array.TDoubleArrayList;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -56,7 +56,7 @@ public interface PlannedFootstepReadOnly
 
       for (int i = 0; i < getFoothold().getNumberOfVertices(); i++)
       {
-         footstepDataMessage.getPredictedContactPoints2d().add().set(getFoothold().getVertex(i), 0.0);
+         footstepDataMessage.getPredictedContactPoints2d().add().getPoint().set(getFoothold().getVertex(i), 0.0);
       }
 
       if (getTrajectoryType() != null)

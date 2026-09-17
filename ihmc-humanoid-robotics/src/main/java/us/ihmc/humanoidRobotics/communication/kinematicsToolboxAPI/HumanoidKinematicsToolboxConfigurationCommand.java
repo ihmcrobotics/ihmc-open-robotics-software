@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
-import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
+import toolbox_msgs.HumanoidKinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
 public class HumanoidKinematicsToolboxConfigurationCommand

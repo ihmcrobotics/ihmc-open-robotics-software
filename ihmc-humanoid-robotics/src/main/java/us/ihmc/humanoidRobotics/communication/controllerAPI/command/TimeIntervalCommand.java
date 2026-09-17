@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import ihmc_common_msgs.msg.dds.TimeIntervalMessage;
+import ihmc_common_msgs.TimeIntervalMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.TimeIntervalBasics;
 import us.ihmc.communication.controllerAPI.command.Command;

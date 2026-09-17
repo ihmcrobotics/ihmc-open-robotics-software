@@ -4,17 +4,17 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.RigidBodyTransformMessage;
+import controller_msgs.RigidBodyTransformMessage;
+import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
-import imgui.ImGui;
 import imgui.type.ImString;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -23,8 +23,8 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
@@ -79,9 +79,9 @@ public class RDXInteractableFrameModel
       panel3D.addImGuiOverlayAddition(this, this::renderTooltipsAndContextMenu);
    }
 
-   public void addRemoteTuning(ROS2Helper ros2, ROS2IOTopicPair<RigidBodyTransformMessage> topicPair, RigidBodyTransform rigidBodyTransformToSync)
+   public void addRemoteTuning(ROS2Node ros2Node, ROS2IOTopicPair<RigidBodyTransformMessage> topicPair, RigidBodyTransform rigidBodyTransformToSync)
    {
-      syncedTransformForTuning = ROS2TunedRigidBodyTransform.remoteTuner(ros2, topicPair, rigidBodyTransformToSync);
+      syncedTransformForTuning = ROS2TunedRigidBodyTransform.remoteTuner(ros2Node, topicPair, rigidBodyTransformToSync);
    }
 
    public void update()

@@ -1,12 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.PlanarRegionsListMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.idl.IDLSequence.Object;
+
+import java.util.List;
 
 public class PlanarRegionsListCommand implements Command<PlanarRegionsListCommand, PlanarRegionsListMessage>
 {
@@ -37,7 +38,7 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
       int vertexIndex = 0;
       int convexPolygonIndexStart = 0;
 
-      Object<Point3D> vertexBuffer = message.getVertexBuffer();
+      var vertexBuffer = message.getVertexBuffer();
 
       for (int regionIndex = 0; regionIndex < message.getRegionId().size(); regionIndex++)
       {
@@ -45,15 +46,15 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
          planarRegionCommand.clear();
 
          int regionId = message.getRegionId().get(regionIndex);
-         Point3D origin = message.getRegionOrigin().get(regionIndex);
-         Vector3D normal = message.getRegionNormal().get(regionIndex);
+         Point3D origin = message.getRegionOrigin().get(regionIndex).getPoint();
+         Vector3D normal = message.getRegionNormal().get(regionIndex).getVector();
          planarRegionCommand.setRegionProperties(regionId, origin, normal);
 
          upperBound += message.getConcaveHullsSize().get(regionIndex);
 
          for (; vertexIndex < upperBound; vertexIndex++)
          {
-            planarRegionCommand.addConcaveHullVertex().set(vertexBuffer.get(vertexIndex));
+            planarRegionCommand.addConcaveHullVertex().set(vertexBuffer.get(vertexIndex).getPoint());
          }
 
          for ( int polygonIndex = 0; polygonIndex < message.getNumberOfConvexPolygons().get(regionIndex); polygonIndex++)
@@ -62,7 +63,7 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
             ConvexPolygon2D convexPolygon = planarRegionCommand.addConvexPolygon();
 
             for (; vertexIndex < upperBound; vertexIndex++)
-               convexPolygon.addVertex(vertexBuffer.get(vertexIndex));
+               convexPolygon.addVertex(vertexBuffer.get(vertexIndex).getPoint());
 
             convexPolygon.update();
          }

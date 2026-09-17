@@ -1,7 +1,7 @@
 package us.ihmc.avatar.drcRobot;
 
-import controller_msgs.msg.dds.HandJointAnglePacket;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.HandJointAnglePacket;
+import controller_msgs.RobotConfigurationData;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;

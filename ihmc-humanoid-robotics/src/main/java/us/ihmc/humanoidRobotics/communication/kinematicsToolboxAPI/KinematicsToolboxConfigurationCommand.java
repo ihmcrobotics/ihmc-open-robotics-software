@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.JointHashCodeResolver;

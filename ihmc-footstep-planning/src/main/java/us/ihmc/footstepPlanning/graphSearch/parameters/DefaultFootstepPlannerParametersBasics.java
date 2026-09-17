@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
-import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.FootstepPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepPlannerParametersReadOnly, StoredPropertySetBasics

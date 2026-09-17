@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.ui.components;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.SubScene;
 import javafx.scene.input.KeyCode;
@@ -128,7 +128,7 @@ public class ManualFootstepAdjustmentListener extends AnimationTimer
          }
 
          FootstepDataMessage selectedStepPose = selectedStep.getValue();
-         footstepPose.set(selectedStepPose.getLocation(), selectedStepPose.getOrientation());
+         footstepPose.set(selectedStepPose.getLocation().getPoint(), selectedStepPose.getOrientation().getQuaternion());
       }
 
       if (selectedStepIndex == -1)

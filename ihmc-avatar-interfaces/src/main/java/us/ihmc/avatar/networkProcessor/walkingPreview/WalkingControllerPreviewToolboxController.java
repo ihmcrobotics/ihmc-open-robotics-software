@@ -1,14 +1,8 @@
 package us.ihmc.avatar.networkProcessor.walkingPreview;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
-import controller_msgs.msg.dds.RobotConfigurationData;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
+import controller_msgs.RobotConfigurationData;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import toolbox_msgs.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
@@ -71,6 +65,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class WalkingControllerPreviewToolboxController extends ToolboxController implements SCS2YoGraphicHolder
 {

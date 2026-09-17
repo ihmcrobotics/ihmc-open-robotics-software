@@ -1,5 +1,8 @@
 package us.ihmc.perception.imageMessage;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.perception.imageMessage.PixelFormat.*;
+
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
@@ -7,7 +10,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.ImageMessage;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImageTest;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
@@ -21,9 +24,6 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.perception.imageMessage.PixelFormat.*;
 
 public class ImageMessageDecoderTest
 {
@@ -137,8 +137,8 @@ public class ImageMessageDecoderTest
 
       // Create and pack parts of the image message
       ImageMessage message = new ImageMessage();
-      message.setImageWidth(encoderInputImage.cols());
-      message.setImageHeight(encoderInputImage.rows());
+      message.setImageWidth((short) encoderInputImage.cols());
+      message.setImageHeight((short) encoderInputImage.rows());
       message.setPixelFormat(encodingInputPixelFormat.toByte());
 
       // Compress the image and pack into image message
@@ -187,8 +187,8 @@ public class ImageMessageDecoderTest
       Mat expectedImage = new Mat();
 
       ImageMessage message = new ImageMessage();
-      message.setImageWidth(encoderInputImage.cols());
-      message.setImageHeight(encoderInputImage.rows());
+      message.setImageWidth((short) encoderInputImage.cols());
+      message.setImageHeight((short) encoderInputImage.rows());
       message.setPixelFormat(encodedPixelFormat.toByte());
 
       // Compress the image and pack into the message

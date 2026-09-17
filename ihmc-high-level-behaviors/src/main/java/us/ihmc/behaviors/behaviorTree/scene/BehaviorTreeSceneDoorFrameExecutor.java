@@ -1,7 +1,9 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
+import static behavior_msgs.BehaviorTreeSceneObjectStateMessage.*;
+
+import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.BehaviorTreeSceneObjectStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -15,8 +17,6 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDAShapePointCounter;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensors.zed.ZEDImageSensor;
-
-import static behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage.*;
 
 public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectExecutor
 {
@@ -137,8 +137,8 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
       super.toMessage(message);
 
       message.getPersistentDetection().setIsStable(isStable());
-      message.setLatchPostPoints(latchPostPoints);
-      message.setHingeRecessPoints(hingeRecessPoints);
+      message.setLatchPostPoints((short) latchPostPoints);
+      message.setHingeRecessPoints((short) hingeRecessPoints);
       message.setDoorType(doorType);
       message.setHingeSide(hingeSide == null ? -1 : hingeSide.toByte());
       message.setDoorOpenAngle(doorOpenAngle);

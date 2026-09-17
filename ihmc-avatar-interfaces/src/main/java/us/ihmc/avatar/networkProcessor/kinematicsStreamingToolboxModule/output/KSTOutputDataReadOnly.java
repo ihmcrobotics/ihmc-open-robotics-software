@@ -1,6 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -148,25 +148,25 @@ public interface KSTOutputDataReadOnly
          @Override
          public Point3DReadOnly getRootJointPosition()
          {
-            return outputStatus.getDesiredRootPosition();
+            return outputStatus.getDesiredRootPosition().getPoint();
          }
 
          @Override
          public QuaternionReadOnly getRootJointOrientation()
          {
-            return outputStatus.getDesiredRootOrientation();
+            return outputStatus.getDesiredRootOrientation().getQuaternion();
          }
 
          @Override
          public Vector3DReadOnly getRootJointLinearVelocity()
          {
-            return outputStatus.getDesiredRootLinearVelocity();
+            return outputStatus.getDesiredRootLinearVelocity().getVector();
          }
 
          @Override
          public Vector3DReadOnly getRootJointAngularVelocity()
          {
-            return outputStatus.getDesiredRootAngularVelocity();
+            return outputStatus.getDesiredRootAngularVelocity().getVector();
          }
 
          @Override

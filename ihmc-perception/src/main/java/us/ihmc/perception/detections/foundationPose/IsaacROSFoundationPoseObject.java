@@ -1,14 +1,15 @@
 package us.ihmc.perception.detections.foundationPose;
 
-import ihmc_common_msgs.msg.dds.Box3DMessage;
-import perception_msgs.msg.dds.FoundationPoseParameters;
-import sensor_msgs.msg.dds.CameraInfo;
-import sensor_msgs.msg.dds.Image;
-import std_msgs.msg.dds.Empty;
-import us.ihmc.ros2.ROS2Topic;
-import vision_msgs.msg.dds.Detection3DArray;
-
 import static us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseAPI.*;
+
+import ihmc_common_msgs.Box3DMessage;
+import perception_msgs.FoundationPoseParameters;
+import sensor_msgs.CameraInfo;
+import sensor_msgs.Image;
+import std_msgs.Empty;
+import us.ihmc.communication.HumanoidROS2Topic;
+import us.ihmc.jros2.ROS2Topic;
+import vision_msgs.Detection3DArray;
 
 public enum IsaacROSFoundationPoseObject
 {
@@ -41,28 +42,34 @@ public enum IsaacROSFoundationPoseObject
                                       ROS2Topic<Detection3DArray> poseEstimationOutput, ROS2Topic<Image> trackingDepthImage, ROS2Topic<Image> trackingRGBImage,
                                       ROS2Topic<CameraInfo> trackingCameraInfo, ROS2Topic<Detection3DArray> trackingOutput, ROS2Topic<Image> depthImage,
                                       ROS2Topic<Image> rgbImage, ROS2Topic<Image> segmentation, ROS2Topic<CameraInfo> cameraInfo, ROS2Topic<Empty> reset,
-                                      ROS2Topic<Box3DMessage> ihmcResult, ROS2Topic<std_msgs.msg.dds.Byte> ihmcState,
+                                      ROS2Topic<Box3DMessage> ihmcResult, ROS2Topic<std_msgs.Byte_> ihmcState,
                                       ROS2Topic<FoundationPoseParameters> ihmcParameters)
    {
       public FoundationPoseTopics(String object)
       {
-         this(POSE_ESTIMATION_DEPTH_IMAGE.withModule(object),
-              POSE_ESTIMATION_RGB_IMAGE.withModule(object),
-              POSE_ESTIMATION_SEGMENTATION.withModule(object),
-              POSE_ESTIMATION_CAMERA_INFO.withModule(object),
-              POSE_ESTIMATION_OUTPUT.withModule(object),
-              TRACKING_DEPTH_IMAGE.withModule(object),
-              TRACKING_RGB_IMAGE.withModule(object),
-              TRACKING_CAMERA_INFO.withModule(object),
-              TRACKING_OUTPUT.withModule(object),
-              DEPTH_IMAGE.withModule(object),
-              RGB_IMAGE.withModule(object),
-              SEGMENTATION.withModule(object),
-              CAMERA_INFO.withModule(object),
-              RESET.withModule(object),
-              IHMC_RESULT.withModule(object),
-              IHMC_STATE.withModule(object),
-              IHMC_PARAMETERS.withModule(object));
+         this(withObjectSuffix(POSE_ESTIMATION_DEPTH_IMAGE, object),
+              withObjectSuffix(POSE_ESTIMATION_RGB_IMAGE, object),
+              withObjectSuffix(POSE_ESTIMATION_SEGMENTATION, object),
+              withObjectSuffix(POSE_ESTIMATION_CAMERA_INFO, object),
+              withObjectSuffix(POSE_ESTIMATION_OUTPUT, object),
+              withObjectSuffix(TRACKING_DEPTH_IMAGE, object),
+              withObjectSuffix(TRACKING_RGB_IMAGE, object),
+              withObjectSuffix(TRACKING_CAMERA_INFO, object),
+              withObjectSuffix(TRACKING_OUTPUT, object),
+              withObjectSuffix(DEPTH_IMAGE, object),
+              withObjectSuffix(RGB_IMAGE, object),
+              withObjectSuffix(SEGMENTATION, object),
+              withObjectSuffix(CAMERA_INFO, object),
+              withObjectSuffix(RESET, object),
+              withObjectSuffix(IHMC_RESULT, object),
+              withObjectSuffix(IHMC_STATE, object),
+              withObjectSuffix(IHMC_PARAMETERS, object));
       }
+   }
+
+   @SuppressWarnings("unchecked")
+   private static <T extends us.ihmc.jros2.ROS2Message<T>> ROS2Topic<T> withObjectSuffix(ROS2Topic<T> baseTopic, String object)
+   {
+      return ((HumanoidROS2Topic<T>) baseTopic).withSuffix(object);
    }
 }

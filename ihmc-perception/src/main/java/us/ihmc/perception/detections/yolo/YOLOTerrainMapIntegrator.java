@@ -1,20 +1,20 @@
 package us.ihmc.perception.detections.yolo;
 
-import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.TerrainMapMessage;
+import perception_msgs.HeightMapMessage;
+import perception_msgs.TerrainMapMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.gpuMapping.HeightMapData;
 import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
 import us.ihmc.perception.gpuMapping.HeightMapTools;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
-import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
 
 import java.util.List;
 

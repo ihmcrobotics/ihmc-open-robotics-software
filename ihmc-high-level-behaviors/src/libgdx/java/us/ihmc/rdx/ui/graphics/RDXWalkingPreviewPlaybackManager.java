@@ -1,11 +1,13 @@
 package us.ihmc.rdx.ui.graphics;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
-import us.ihmc.communication.ToolboxAPIs;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import toolbox_msgs.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.MathTools;
-import us.ihmc.ros2.ROS2Input;
+import us.ihmc.communication.ROS2Input;
+import us.ihmc.communication.ToolboxAPIs;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -100,7 +102,7 @@ public class RDXWalkingPreviewPlaybackManager
          return;
       }
 
-      us.ihmc.idl.IDLSequence.Object<KinematicsToolboxOutputStatus> robotConfigurations = walkingControllerPreviewOutputMessage.getRobotConfigurations();
+      IDLObjectSequence<KinematicsToolboxOutputStatus> robotConfigurations = walkingControllerPreviewOutputMessage.getRobotConfigurations();
 
       if (frameIndex >= robotConfigurations.size())
       {
@@ -111,7 +113,7 @@ public class RDXWalkingPreviewPlaybackManager
 
       KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus = robotConfigurations.get(frameIndex);
 
-      us.ihmc.idl.IDLSequence.Float jointAngles = kinematicsToolboxOutputStatus.getDesiredJointAngles();
+      IDLFloatSequence jointAngles = kinematicsToolboxOutputStatus.getDesiredJointAngles();
 
       if (jointAngles.size() != previewModelOneDoFJoints.length)
       {
@@ -125,7 +127,7 @@ public class RDXWalkingPreviewPlaybackManager
          previewModelOneDoFJoints[i].setQ(jointAngles.get(i));
       }
 
-      previewRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootPosition());
-      previewRobotModel.getRootJoint().setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
+      previewRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootPosition().getPoint());
+      previewRobotModel.getRootJoint().setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation().getQuaternion());
    }
 }

@@ -1,28 +1,30 @@
 package us.ihmc.perception.streaming;
 
+import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
+import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_YUV444P;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.SRTStreamStatus;
+import perception_msgs.SRTStreamStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImageTest;
-import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.sensors.CameraIntrinsics;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -40,14 +42,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
-import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_YUV444P;
-import static org.junit.jupiter.api.Assertions.*;
-
 public class SRTStreamerSubscriberTest
 {
-   private static final ROS2Node ROS2_NODE = new ROS2NodeBuilder().build("srt_streaming_test");
-   private static final ROS2Helper ROS2_HELPER = new ROS2Helper(ROS2_NODE);
+   private static final ROS2Node ROS2_NODE = new ROS2Node("srt_streaming_test");
    private static final double FPS = 30.0;
    private static final double TEST_TIMEOUT = 5.0;
    private static final double CALL_TIMEOUT = 0.5 * TEST_TIMEOUT;
@@ -267,7 +264,7 @@ public class SRTStreamerSubscriberTest
       throttler.setFrequency(FPS);
 
       // ROS2 topic for the streamer and subscriber
-      ROS2Topic<SRTStreamStatus> requestTopic = new ROS2Topic<SRTStreamStatus>().withSuffix("srt_status_test").withType(SRTStreamStatus.class);
+      ROS2Topic<SRTStreamStatus> requestTopic = new ROS2Topic<SRTStreamStatus>().appendedWith("srt_status_test").withType(SRTStreamStatus.class);
 
       float depthDescretization = -1.0f;
       CameraIntrinsics cameraIntrinsics = new CameraIntrinsics(sampleImage.rows(),
@@ -286,7 +283,7 @@ public class SRTStreamerSubscriberTest
       streamer.initializeForColor(rawImage, AV_PIX_FMT_BGR24);
 
       // Create the subscriber
-      ROS2SRTVideoSubscriber subscriber = new ROS2SRTVideoSubscriber(ROS2_HELPER, requestTopic, PixelFormat.BGR8);
+      ROS2SRTVideoSubscriber subscriber = new ROS2SRTVideoSubscriber(ROS2_NODE, requestTopic, PixelFormat.BGR8);
       AtomicBoolean subscriberHasReceivedFrame = new AtomicBoolean(false);
       subscriber.addNewFrameConsumer(receivedImage ->
       {

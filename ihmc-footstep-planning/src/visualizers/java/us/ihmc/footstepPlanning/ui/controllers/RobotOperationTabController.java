@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
-import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.BipedalSupportPlanarRegionParametersMessage;
+import controller_msgs.GoHomeMessage;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;

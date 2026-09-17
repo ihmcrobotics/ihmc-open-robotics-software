@@ -3,13 +3,12 @@ package us.ihmc.avatar.controllerAPI;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
+import controller_msgs.ClearDelayQueueMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.HandTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.ClearDelayQueueMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;

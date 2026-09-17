@@ -323,7 +323,7 @@ public class ZEDImageSensor extends ImageSensor
 
    protected int openCamera()
    {
-      return sl_open_camera(cameraID, zedInitParameters, serialNumber, svoFilePath, remoteStreamingAddress, remoteStreamingPort, "", "", "");
+      return sl_open_camera(cameraID, zedInitParameters, serialNumber, svoFilePath, remoteStreamingAddress, remoteStreamingPort, -1, "", "", "");
    }
 
    @Override

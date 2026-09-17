@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import controller_msgs.msg.dds.FootTrajectoryMessage;
+import controller_msgs.FootTrajectoryMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.TrajectoryTrackingErrorCalculator;

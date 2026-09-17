@@ -1,11 +1,11 @@
 package us.ihmc.communication.crdt;
 
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.OneDoFJointTrajectoryMessage;
+import ihmc_common_msgs.TrajectoryPoint1DMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointReadOnly;
 
@@ -46,7 +46,7 @@ public class CRDTStatusOneDoFJointTrajectoryList extends CRDTStatusMutableField<
       return getValueInternal().get(jointIndex).size();
    }
 
-   public void toMessage(IDLSequence.Object<OneDoFJointTrajectoryMessage> trajectoryMessage)
+   public void toMessage(IDLObjectSequence<OneDoFJointTrajectoryMessage> trajectoryMessage)
    {
       trajectoryMessage.clear();
 
@@ -62,7 +62,7 @@ public class CRDTStatusOneDoFJointTrajectoryList extends CRDTStatusMutableField<
       }
    }
 
-   public void fromMessage(IDLSequence.Object<OneDoFJointTrajectoryMessage> trajectoryMessage)
+   public void fromMessage(IDLObjectSequence<OneDoFJointTrajectoryMessage> trajectoryMessage)
    {
       if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
       {

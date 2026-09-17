@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.SpineActionStateMessage;
+import behavior_msgs.SpineActionStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;

@@ -1,8 +1,8 @@
 package us.ihmc.footstepPlanning;
 
-import controller_msgs.msg.dds.FootstepDataMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import controller_msgs.FootstepDataMessage;
 import gnu.trove.list.array.TDoubleArrayList;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -242,11 +242,14 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
    public static PlannedFootstep getFromMessage(FootstepDataMessage footstepDataMessage)
    {
       RobotSide robotSide = RobotSide.fromByte(footstepDataMessage.getRobotSide());
-      FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
+      FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                 footstepDataMessage.getLocation().getPoint(),
+                                                 footstepDataMessage.getOrientation().getQuaternion());
 
       PlannedFootstep plannedFootstep = new PlannedFootstep(robotSide, footstepPose);
 
-      footstepDataMessage.getPredictedContactPoints2d().forEach(plannedFootstep.getFoothold()::addVertex);
+      for (int i = 0; i < footstepDataMessage.getPredictedContactPoints2d().size(); i++)
+         plannedFootstep.getFoothold().addVertex(footstepDataMessage.getPredictedContactPoints2d().get(i).getPoint());
       plannedFootstep.getFoothold().update();
 
       plannedFootstep.setTrajectoryType(TrajectoryType.fromByte(footstepDataMessage.getTrajectoryType()));
@@ -263,7 +266,7 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
          plannedFootstep.getCustomWaypointPositions().clear();
          for (int i = 0; i < footstepDataMessage.getCustomPositionWaypoints().size(); i++)
          {
-            Point3D waypoint = footstepDataMessage.getCustomPositionWaypoints().get(i);
+            Point3D waypoint = footstepDataMessage.getCustomPositionWaypoints().get(i).getPoint();
             plannedFootstep.getCustomWaypointPositions().add(waypoint);
          }
       }
@@ -272,10 +275,10 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
          SE3TrajectoryPointMessage trajectoryPoint = footstepDataMessage.getSwingTrajectory().get(i);
          FrameSE3TrajectoryPoint trajectoryPointToSet = new FrameSE3TrajectoryPoint();
          trajectoryPointToSet.set(trajectoryPoint.getTime(),
-                                  trajectoryPoint.getPosition(),
-                                  trajectoryPoint.getOrientation(),
-                                  trajectoryPoint.getLinearVelocity(),
-                                  trajectoryPoint.getAngularVelocity());
+                                  trajectoryPoint.getPosition().getPoint(),
+                                  trajectoryPoint.getOrientation().getQuaternion(),
+                                  trajectoryPoint.getLinearVelocity().getVector(),
+                                  trajectoryPoint.getAngularVelocity().getVector());
          plannedFootstep.getSwingTrajectory().add(trajectoryPointToSet);
       }
 

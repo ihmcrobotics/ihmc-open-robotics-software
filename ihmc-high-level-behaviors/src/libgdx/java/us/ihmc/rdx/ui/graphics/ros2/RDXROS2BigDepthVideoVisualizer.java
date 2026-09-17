@@ -3,24 +3,22 @@ package us.ihmc.rdx.ui.graphics.ros2;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.BigVideoPacket;
-import us.ihmc.idl.IDLSequence;
+import perception_msgs.BigVideoPacket;
+import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
 
 public class RDXROS2BigDepthVideoVisualizer extends RDXROS2ImageVisualizer<BigVideoPacket>
 {
    private final String titleBeforeAdditions;
    private final ROS2Topic<BigVideoPacket> topic;
-   private RealtimeROS2Node realtimeROS2Node = null;
+   private AsyncROS2Node asyncROS2Node = null;
    private final BigVideoPacket videoPacket = new BigVideoPacket();
-   private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();
    private BytePointer messageBytePointer;
    private Mat inputDepthMat;
@@ -36,11 +34,11 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2ImageVisualizer<BigVi
 
       addActivenessChangeCallback(isActive ->
       {
-         if (isActive && realtimeROS2Node == null)
+         if (isActive && asyncROS2Node == null)
          {
             subscribe();
          }
-         else if (!isActive && realtimeROS2Node != null)
+         else if (!isActive && asyncROS2Node != null)
          {
             unsubscribe();
          }
@@ -49,21 +47,20 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2ImageVisualizer<BigVi
 
    private void subscribe()
    {
-      this.realtimeROS2Node = new ROS2NodeBuilder().buildRealtime(StringTools.titleToSnakeCase(titleBeforeAdditions));
+      this.asyncROS2Node = new AsyncROS2Node(StringTools.titleToSnakeCase(titleBeforeAdditions));
       // synchronize with the update method
-      realtimeROS2Node.createSubscription(topic, subscriber ->
+      asyncROS2Node.createSubscriptionSampler(topic, sample ->
       {
          synchronized (syncObject)
          {
-            videoPacket.getData().resetQuick();
-            subscriber.takeNextData(videoPacket, sampleInfo);
+            videoPacket.set(sample);
 //            delayPlot.addValue(TimeTools.calculateDelay(videoPacket.getAcquisitionTimeSecondsSinceEpoch(), videoPacket.getAcquisitionTimeAdditionalNanos()));
          }
          submitImageUpdate(imageVisualizer ->
          {
             synchronized (syncObject)
             {
-               IDLSequence.Byte imageTByteArrayList = videoPacket.getData();
+               IDLByteSequence imageTByteArrayList = videoPacket.getData();
                int numberOfBytes = imageTByteArrayList.size();
 
                if (messageBytePointer == null || messageBytePointer.capacity() < imageTByteArrayList.capacity())
@@ -72,7 +69,7 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2ImageVisualizer<BigVi
                }
 
                messageBytePointer.position(0);
-               messageBytePointer.put(imageTByteArrayList.getBuffer().array(), 0, imageTByteArrayList.size());
+               messageBytePointer.put(imageTByteArrayList.getBuffer().array(), imageTByteArrayList.getBuffer().arrayOffset(), imageTByteArrayList.size());
                messageBytePointer.limit(imageTByteArrayList.size());
 
                if (inputDepthMat == null)
@@ -100,7 +97,6 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2ImageVisualizer<BigVi
             }
          });
       });
-      realtimeROS2Node.spin();
    }
 
    @Override
@@ -122,10 +118,10 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2ImageVisualizer<BigVi
 
    private void unsubscribe()
    {
-      if (realtimeROS2Node != null)
+      if (asyncROS2Node != null)
       {
-         realtimeROS2Node.destroy();
-         realtimeROS2Node = null;
+         asyncROS2Node.close();
+         asyncROS2Node = null;
       }
    }
 

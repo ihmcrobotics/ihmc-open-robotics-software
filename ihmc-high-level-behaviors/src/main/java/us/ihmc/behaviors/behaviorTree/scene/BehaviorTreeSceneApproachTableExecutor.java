@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
+import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.BehaviorTreeSceneObjectStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -56,7 +56,7 @@ public class BehaviorTreeSceneApproachTableExecutor extends BehaviorTreeSceneObj
          {
             capsuleCenter.get(side).setToZero(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame());
             capsuleCenter.get(side).addX(getSearchStartX());
-            capsuleCenter.get(side).addY(side.negateIfLeftSide(0.3));
+            capsuleCenter.get(side).addY(side.negateIfRightSide(0.3));
             capsuleCenter.get(side).setZ(0.8);
             tablePoints.put(side, 0L);
          }
@@ -94,9 +94,9 @@ public class BehaviorTreeSceneApproachTableExecutor extends BehaviorTreeSceneObj
          }
 
          RotationMatrix rotationMatrix = new RotationMatrix();
-         Vector3D leftToRight = new Vector3D();
-         leftToRight.sub(capsuleBottom.get(RobotSide.RIGHT), capsuleBottom.get(RobotSide.LEFT));
-         EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(new Vector3D(0.0, 1.0, 0.0), leftToRight, rotationMatrix);
+         Vector3D rightToLeft = new Vector3D();
+         rightToLeft.sub(capsuleBottom.get(RobotSide.LEFT), capsuleBottom.get(RobotSide.RIGHT));
+         EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(new Vector3D(0.0, 1.0, 0.0), rightToLeft, rotationMatrix);
 
          transform.getValue().getTranslation().interpolate(capsuleBottom.get(RobotSide.LEFT), capsuleBottom.get(RobotSide.RIGHT), 0.5);
          transform.getValue().getTranslation().setZ(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getTransformToRoot().getTranslation().getZ());
@@ -123,8 +123,8 @@ public class BehaviorTreeSceneApproachTableExecutor extends BehaviorTreeSceneObj
       super.toMessage(message);
 
       message.getPersistentDetection().setIsStable(isStable());
-      message.setLeftTablePoints(tablePoints.get(RobotSide.LEFT));
-      message.setRightTablePoints(tablePoints.get(RobotSide.RIGHT));
+      message.setLeftTablePoints(tablePoints.get(RobotSide.LEFT).intValue());
+      message.setRightTablePoints(tablePoints.get(RobotSide.RIGHT).intValue());
       capsuleCenter.get(RobotSide.LEFT).changeFrame(ReferenceFrame.getWorldFrame());
       capsuleCenter.get(RobotSide.RIGHT).changeFrame(ReferenceFrame.getWorldFrame());
       message.getLeftCapsuleCenter().set(capsuleCenter.get(RobotSide.LEFT));

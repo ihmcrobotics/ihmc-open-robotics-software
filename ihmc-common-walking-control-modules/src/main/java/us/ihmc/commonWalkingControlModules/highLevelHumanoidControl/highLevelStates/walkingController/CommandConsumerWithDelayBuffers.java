@@ -1,16 +1,17 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
-import java.util.*;
-
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.*;
 
 /**
  * Pulls commands from the CommandInputManager and checks the delay time, If there is no delay or the delay is negative, it is available to be consumed
@@ -28,7 +29,7 @@ public class CommandConsumerWithDelayBuffers
    private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> queuedCommands = new HashMap<>();
    private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> outgoingCommands = new HashMap<>();
    private final Map<Class<?>, PriorityQueue<Command<?, ?>>> priorityQueues = new HashMap<>();
-   private final Map<Class<? extends Settable<?>>, Class<? extends Command<?,?>>> messageToCommandMap = new HashMap<>();
+   private final Map<Class<? extends ROS2Message<?>>, Class<? extends Command<?,?>>> messageToCommandMap = new HashMap<>();
    private final List<Class<? extends Command<?, ?>>> listOfSupportedCommands = new ArrayList<>();
 
    public CommandConsumerWithDelayBuffers(CommandInputManager commandInputManager, List<Class<? extends Command<?, ?>>> commandsToRegister, DoubleProvider yoTime)
@@ -39,7 +40,7 @@ public class CommandConsumerWithDelayBuffers
    }
    
    @SuppressWarnings("unchecked")
-   private <C extends Command<C, M>, M extends Settable<M>> void registerNewCommands(List<Class<? extends Command<?, ?>>> commandClasses)
+   private <C extends Command<C, M>, M extends ROS2Message<M>> void registerNewCommands(List<Class<? extends Command<?, ?>>> commandClasses)
    {
       for (int i = 0; i < commandClasses.size(); i++)
       {
@@ -52,7 +53,7 @@ public class CommandConsumerWithDelayBuffers
       }
    }
 
-   private <C extends Command<C, M>, M extends Settable<M>> void registerNewCommand(Class<C> commandClass)
+   private <C extends Command<C, M>, M extends ROS2Message<M>> void registerNewCommand(Class<C> commandClass)
    {
       listOfSupportedCommands.add(commandClass);
 
@@ -108,7 +109,7 @@ public class CommandConsumerWithDelayBuffers
             clearDelayQueue(commandClassToFlush);
          }
       }
-      Class<? extends Settable<?>> messageClassToClear = clearDelayQueueCommand.getMessageClassToClear();
+      Class<? extends ROS2Message<?>> messageClassToClear = clearDelayQueueCommand.getMessageClassToClear();
       if(messageClassToClear != null)
       {
          Class<? extends Command<?, ?>> commandClassToClear = messageToCommandMap.get(messageClassToClear);

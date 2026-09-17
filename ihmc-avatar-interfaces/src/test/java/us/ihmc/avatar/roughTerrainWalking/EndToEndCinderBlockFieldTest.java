@@ -2,16 +2,11 @@ package us.ihmc.avatar.roughTerrainWalking;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
+import controller_msgs.FootstepDataListMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
@@ -41,6 +36,10 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockField
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInterface
 {
@@ -125,8 +124,8 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       success = simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters) + 10.0);
       assertTrue(success);
 
-      Point3D step1 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 1).getLocation();
-      Point3D step2 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 2).getLocation();
+      Point3D step1 = new Point3D(footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 1).getLocation().getPoint());
+      Point3D step2 = new Point3D(footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 2).getLocation().getPoint());
       Point3D expectedPelvis = new Point3D();
       expectedPelvis.interpolate(step1, step2, 0.5);
       expectedPelvis.setZ(desiredHeight);
@@ -265,7 +264,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       setupSimulation(cinderBlockFieldEnvironment);
       ImpulseBasedPhysicsEngine physicsEngine = (ImpulseBasedPhysicsEngine) simulationTestHelper.getSimulationConstructionSet().getPhysicsEngine();
       ContactParameters contactParameters = ContactParameters.defaultIneslasticContactParameters(true);
-      contactParameters.setCoefficientOfFriction(0.80);
+      contactParameters.setCoefficientOfFriction(1.2);
       contactParameters.setCoulombMomentFrictionRatio(0.6);
       physicsEngine.setGlobalContactParameters(contactParameters);
       simulationTestHelper.start();

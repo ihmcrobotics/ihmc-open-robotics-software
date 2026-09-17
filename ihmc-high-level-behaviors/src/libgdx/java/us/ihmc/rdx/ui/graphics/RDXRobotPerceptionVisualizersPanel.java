@@ -1,8 +1,8 @@
 package us.ihmc.rdx.ui.graphics;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
@@ -12,13 +12,12 @@ import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.foundationPose.RDXIsaacROSFoundationPoseVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.zed.ZEDModelData;
 
 public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVisualizersPanel
 {
    protected final ROS2SyncedRobotModel syncedRobot;
-   protected final ROS2Helper ros2Helper;
+   protected final ROS2Node ros2Node;
    protected final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator;
 
    // Common — always present
@@ -44,19 +43,27 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    {
       this.syncedRobot = syncedRobot;
       this.peerClockOffsetEstimator = peerClockOffsetEstimator;
-      this.ros2Helper = new ROS2Helper(ros2Node);
+      this.ros2Node = ros2Node;
 
       // Common robot visualizer
-      robotVisualizer = new RDXROS2RobotVisualizer(ros2Helper, syncedRobot);
+      robotVisualizer = createRobotVisualizer(ros2Node, syncedRobot);
       robotVisualizer.setPinned(true);
       robotVisualizer.setActive(true);
       addVisualizer(robotVisualizer);
 
       // Kinematics streaming solution visualizer
-      kinematicsStreamingSolutionVisualizer = new RDXROS2KSTRobotVisualizer(ros2Helper.getROS2Node(), syncedRobot.getRobotModel());
+      kinematicsStreamingSolutionVisualizer = new RDXROS2KSTRobotVisualizer(ros2Node, syncedRobot.getRobotModel());
       addVisualizer(kinematicsStreamingSolutionVisualizer);
 
       // Additional visualizers instantiated in robot specific class
+   }
+
+   /**
+    * Hook for robot-specific visualizers (e.g. collision mesh overlays).
+    */
+   protected RDXROS2RobotVisualizer createRobotVisualizer(ROS2Node ros2Node, ROS2SyncedRobotModel syncedRobot)
+   {
+      return new RDXROS2RobotVisualizer(ros2Node, syncedRobot);
    }
 
    @Override

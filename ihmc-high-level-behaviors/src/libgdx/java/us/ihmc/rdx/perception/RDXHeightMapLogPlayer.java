@@ -2,16 +2,17 @@ package us.ihmc.rdx.perception;
 
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.HeightMapMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.gpuMapping.HeightMapExtractor;
 import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
@@ -23,9 +24,6 @@ import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
@@ -58,20 +56,19 @@ public class RDXHeightMapLogPlayer
 
    public RDXHeightMapLogPlayer()
    {
-      ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName());
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
+      ros2Node = new ROS2Node(getClass().getSimpleName());
       baseUI = new RDXBaseUI();
 
-      zedPlaybackSensor = new ROS2ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_X_MINI, zed.SL_DEPTH_MODE_NEURAL_LIGHT, SVO_FILE);
+      zedPlaybackSensor = new ROS2ZEDSVOPlaybackSensor(ros2Node, 0, ZEDModelData.ZED_X_MINI, zed.SL_DEPTH_MODE_NEURAL_LIGHT, SVO_FILE);
       zedPlaybackSensor.setTrackedPoseOffset(new Pose3D(0.0, 0.0, 1.0, 0.0, 0.0, 0.0));
       zedPlaybackSensor.useTrackedPose(true);
       BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
       zedPlaybackSensor.registerImageQueue(rawImageCollection, ZEDImageSensor.DEPTH_IMAGE_KEY);
-      zedSVOPanel = new RDXZEDSVORecorderPanel(ros2Helper);
+      zedSVOPanel = new RDXZEDSVORecorderPanel(ros2Node);
 
       heightMapVisualizer = new RDXROS2HeightMapVisualizer("Height Map Visualizer");
-      heightMapVisualizer.setupForImageMessage(ros2Helper);
-      heightMapVisualizer.setupForChunkMessage(ros2Helper);
+      heightMapVisualizer.setupForImageMessage(ros2Node);
+      heightMapVisualizer.setupForChunkMessage(ros2Node);
 
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       chunkedMapManager = new ChunkedMapManager(ros2Node, heightMapParameters);
@@ -124,7 +121,7 @@ public class RDXHeightMapLogPlayer
             zedPlaybackSensor.close();
             zedFrameGraphic.dispose();
 
-            ros2Node.destroy();
+            ros2Node.close();
             baseUI.dispose();
          }
       });

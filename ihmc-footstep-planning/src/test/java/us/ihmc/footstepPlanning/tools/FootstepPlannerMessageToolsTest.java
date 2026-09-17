@@ -2,7 +2,7 @@ package us.ihmc.footstepPlanning.tools;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.FootstepPlannerParametersPacket;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;

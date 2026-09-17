@@ -1,14 +1,12 @@
 package us.ihmc.avatar;
 
-import java.util.ArrayList;
-import java.util.Random;
+import static org.junit.jupiter.api.Assertions.*;
 
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -31,7 +29,8 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.ArrayList;
+import java.util.Random;
 
 public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTestInterface
 {
@@ -230,7 +229,7 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
    private void addFootstep(Point3D stepLocation, Quaternion orient, RobotSide robotSide, FootstepDataListMessage message)
    {
       FootstepDataMessage footstepData = new FootstepDataMessage();
-      footstepData.getLocation().set(stepLocation);
+      footstepData.getLocation().getPoint().set(stepLocation);
       footstepData.getOrientation().set(orient);
       footstepData.setRobotSide(robotSide.toByte());
       message.getFootstepDataList().add().set(footstepData);

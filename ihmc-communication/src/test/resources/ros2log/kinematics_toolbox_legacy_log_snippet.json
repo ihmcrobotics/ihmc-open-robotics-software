@@ -1,0 +1,10 @@
+{
+  "toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus": {
+    "timestamps": [
+      0
+    ],
+    "messages": [
+      "{\"toolbox_msgs::msg::dds_::KinematicsToolboxOutputStatus_\":{\"sequenceId\":0,\"currentToolboxState\":3,\"jointNameHash\":-1087810655,\"desiredJointAngles\":[0.018464804,-0.0010407863,-0.17352305]}}"
+    ]
+  }
+}

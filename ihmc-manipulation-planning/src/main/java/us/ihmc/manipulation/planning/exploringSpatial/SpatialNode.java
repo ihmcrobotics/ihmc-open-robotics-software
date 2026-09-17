@@ -1,6 +1,6 @@
 package us.ihmc.manipulation.planning.exploringSpatial;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -42,7 +42,10 @@ public class SpatialNode
 
       validity = other.validity;
       if (other.configuration != null)
-         configuration = new KinematicsToolboxOutputStatus(other.configuration);
+      {
+         configuration = new KinematicsToolboxOutputStatus();
+         configuration.set(other.configuration);
+      }
    }
 
    public void initializeSpatialData()
@@ -208,7 +211,8 @@ public class SpatialNode
 
    public void setConfiguration(KinematicsToolboxOutputStatus configuration)
    {
-      this.configuration = new KinematicsToolboxOutputStatus(configuration);
+      this.configuration = new KinematicsToolboxOutputStatus();
+      this.configuration.set(configuration);
    }
 
    public KinematicsToolboxOutputStatus getConfiguration()
@@ -255,7 +259,8 @@ public class SpatialNode
    {
       time = other.time;
       spatialData = new SpatialData(other.getSpatialData());
-      configuration = new KinematicsToolboxOutputStatus(other.configuration);
+      configuration = new KinematicsToolboxOutputStatus();
+      configuration.set(other.configuration);
       validity = other.validity;
    }
 }

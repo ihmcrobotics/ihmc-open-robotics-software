@@ -1,6 +1,6 @@
 package us.ihmc.avatar;
 
-import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.ControllerCrashNotificationPacket;
 import gnu.trove.map.TObjectDoubleMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
@@ -10,17 +10,20 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commons.lists.PairList;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotController.ModularRobotController;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
@@ -153,6 +156,29 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
       {
          jointDesiredOutputList.getJointDesiredOutput(i).clear();
       }
+
+      // The context data lives outside YoVariables; bring it back to its initial state so the first
+      // estimator and controller ticks do not consume stale measurements, e.g. mid-gait wrenches
+      // after the simulation has been reset to its initial state.
+      ForceSensorDataHolder forceSensorDataHolder = humanoidRobotContextData.getForceSensorDataHolder();
+      for (int i = 0; i < forceSensorDataHolder.getNumberOfForceSensors(); i++)
+      {
+         forceSensorDataHolder.getForceSensorDatas().get(i).setWrench(EuclidCoreTools.zeroVector3D, EuclidCoreTools.zeroVector3D);
+      }
+      humanoidRobotContextData.getCenterOfMassDataHolder().clear();
+      humanoidRobotContextData.getRobotMotionStatusHolder().setCurrentRobotMotionStatus(RobotMotionStatus.UNKNOWN);
+   }
+
+   public void requestReinitializeEstimator()
+   {
+      if (mainStateEstimator != null)
+         mainStateEstimator.requestReinitializeEstimator();
+   }
+
+   public void requestReinitializeEstimatorToWorldOrigin()
+   {
+      if (mainStateEstimator != null)
+         mainStateEstimator.requestReinitializeEstimatorToWorldOrigin();
    }
 
    public void setupHighLevelControllerCallback(HighLevelHumanoidControllerFactory controllerFactory,

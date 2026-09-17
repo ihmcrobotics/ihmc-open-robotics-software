@@ -1,6 +1,6 @@
 package us.ihmc.avatar.sakeGripper;
 
-import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
+import controller_msgs.SakeHandDesiredCommandMessage;
 
 public class SakeHandParameters
 {

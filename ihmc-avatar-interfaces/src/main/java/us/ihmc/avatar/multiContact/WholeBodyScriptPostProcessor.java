@@ -1,22 +1,17 @@
 package us.ihmc.avatar.multiContact;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.FrameInformation;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.ChestTrajectoryMessage;
+import controller_msgs.FootTrajectoryMessage;
+import controller_msgs.PelvisTrajectoryMessage;
+import controller_msgs.WholeBodyTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TFloatArrayList;
+import ihmc_common_msgs.FrameInformation;
+import ihmc_common_msgs.SE3TrajectoryMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.SO3TrajectoryMessage;
+import ihmc_common_msgs.SO3TrajectoryPointMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -24,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -37,6 +33,11 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 import us.ihmc.robotics.partNames.RigidBodyName;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class implement preliminary work for post-processing a pre-generated script defined in
@@ -188,15 +189,10 @@ public class WholeBodyScriptPostProcessor
          System.out.println("waypointTime: " + waypointTime);
          KinematicsToolboxOutputStatus robotConfiguration = desiredRobotConfigurations.get(configurationIndex);
       
-         Point3D desiredRootPosition = robotConfiguration.getDesiredRootPosition();
-         Quaternion desiredRootOrientation = robotConfiguration.getDesiredRootOrientation();
-         Vector3D desiredRootLinearVelocity = robotConfiguration.getDesiredRootLinearVelocity();
-         Vector3D desiredRootAngularVelocity = robotConfiguration.getDesiredRootAngularVelocity();
-         
-         rootJoint.setJointPosition(desiredRootPosition);
-         rootJoint.setJointOrientation(desiredRootOrientation);
-         rootJoint.setJointLinearVelocity(desiredRootLinearVelocity);
-         rootJoint.setJointAngularVelocity(desiredRootAngularVelocity);
+         rootJoint.setJointPosition(robotConfiguration.getDesiredRootPosition().getPoint());
+         rootJoint.setJointOrientation(robotConfiguration.getDesiredRootOrientation().getQuaternion());
+         rootJoint.setJointLinearVelocity(robotConfiguration.getDesiredRootLinearVelocity().getVector());
+         rootJoint.setJointAngularVelocity(robotConfiguration.getDesiredRootAngularVelocity().getVector());
          
          
          TDoubleArrayList jointAngles = waypoints.get(configurationIndex);
@@ -288,6 +284,14 @@ public class WholeBodyScriptPostProcessor
       {
          output.add(input.get(i));
       }
+      return output;
+   }
+
+   private static TDoubleArrayList toTDoubleArrayList(IDLFloatSequence input)
+   {
+      TDoubleArrayList output = new TDoubleArrayList(input.size());
+      for (int i = 0; i < input.size(); i++)
+         output.add(input.get(i));
       return output;
    }
 

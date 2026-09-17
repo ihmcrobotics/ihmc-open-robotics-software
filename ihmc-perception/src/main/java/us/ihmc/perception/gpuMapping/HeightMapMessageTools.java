@@ -5,10 +5,12 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.HeightMapMessageForController;
+import perception_msgs.HeightMapMessage;
+import perception_msgs.HeightMapMessageForController;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.idl.IDLSequence.Float;
+import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 
 public class HeightMapMessageTools
 {
@@ -31,7 +33,7 @@ public class HeightMapMessageTools
                                                       heightMapMessage.getGridCenterY());
 
       // Decode the PNG compressed height map data
-      Mat compressedMat = new Mat(heightMapMessage.getHeights().getBuffer().array());
+      Mat compressedMat = new Mat(MessageTools.toByteArray(heightMapMessage.getHeights()));
       Mat heightMapMat = new Mat(heightMapMessage.getCellsPerAxis(), 2 * heightMapMessage.getCellsPerAxis(), opencv_core.CV_16UC1);
       opencv_imgcodecs.imdecode(compressedMat, opencv_imgcodecs.IMREAD_UNCHANGED, heightMapMat);
 
@@ -76,8 +78,11 @@ public class HeightMapMessageTools
 
       // Pack the compressed data into the message
       int compressedDataSize = (int) compressedData.limit();
-      compressedData.get(messageToPack.getHeights().getBuffer().array(), 0, compressedDataSize);
-      messageToPack.getHeights().getBuffer().position(compressedDataSize);
+      byte[] compressedBytes = new byte[compressedDataSize];
+      compressedData.get(compressedBytes);
+      IDLByteSequence heights = messageToPack.getHeights();
+      heights.clear();
+      heights.addAll(compressedBytes);
 
       // Close pointers
       dataPointer.close();
@@ -103,9 +108,9 @@ public class HeightMapMessageTools
 
       float[] heightsFromData = heightMapData.getHeights();
 
-      messageToPack.getHeights().resetQuick();
-      Float heights = messageToPack.getHeights();
-      heights.add(heightsFromData);
+      messageToPack.getHeights().clear();
+      IDLFloatSequence heights = messageToPack.getHeights();
+      heights.addAll(heightsFromData);
    }
    /**
     * We don't want to do this unless we have too, it's too slow
@@ -116,6 +121,6 @@ public class HeightMapMessageTools
       messageToClear.setGridCenterX(-1.0);
       messageToClear.setGridCenterY(-1.0);
 
-      messageToClear.getHeights().resetQuick();
+      messageToClear.getHeights().clear();
    }
 }

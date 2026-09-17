@@ -1,13 +1,12 @@
 package us.ihmc.communication.ros2;
 
-import std_msgs.msg.dds.Empty;
+import std_msgs.Empty;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.tools.Timer;
 
 import java.util.function.Consumer;
@@ -37,15 +36,14 @@ public class ROS2HeartbeatMonitor
 
    public ROS2HeartbeatMonitor(ROS2Node ros2Node, ROS2Topic<Empty> heartbeatTopic)
    {
-      ros2Node.createSubscription(heartbeatTopic, this::receivedHeartbeat);
+      ros2Node.createSubscription(heartbeatTopic, reader -> receivedHeartbeat());
       ThreadTools.startAsDaemon(() -> ExceptionTools.handle(this::monitorThread, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE),
                                 "HeartbeatMonitor");
    }
 
-   private synchronized void receivedHeartbeat(Subscriber<Empty> subscriber)
+   private synchronized void receivedHeartbeat()
    {
-      if (subscriber.takeNextData(heartbeatMessage, null))
-         timer.reset();
+      timer.reset();
    }
 
    /**

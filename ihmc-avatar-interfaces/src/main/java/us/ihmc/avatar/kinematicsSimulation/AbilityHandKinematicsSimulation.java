@@ -1,20 +1,22 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
-import ihmc_hands_ros2.msg.dds.AbilityHandCommand;
-import ihmc_hands_ros2.msg.dds.AbilityHandState;
+import static us.ihmc.handsros2.abilityHand.AbilityHand.*;
+
+import ihmc_hands_ros2.AbilityHandCommand;
+import ihmc_hands_ros2.AbilityHandState;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.handsros2.HandModel;
 import us.ihmc.handsros2.abilityHand.AbilityHandControlMode;
 import us.ihmc.handsros2.abilityHand.AbilityHandGrip;
+import us.ihmc.handsros2.abilityHand.AbilityHandModel;
 import us.ihmc.handsros2.abilityHand.AbilityHandModel.AbilityHandJointName;
 import us.ihmc.handsros2.abilityHand.AbilityHandROS2API;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-
-import static us.ihmc.handsros2.abilityHand.AbilityHand.*;
 
 public class AbilityHandKinematicsSimulation
 {
@@ -26,24 +28,47 @@ public class AbilityHandKinematicsSimulation
    private final double[] goalPositions = new double[ACTUATOR_COUNT];
    private final double[] goalVelocities = new double[ACTUATOR_COUNT];
    private final double[] actuatorPositions = new double[ACTUATOR_COUNT];
+   private final boolean enabled;
 
    private AbilityHandControlMode controlMode = AbilityHandControlMode.POSITION;
    private int gripStage = 0;
    private long lastTime = -1;
 
-   public AbilityHandKinematicsSimulation(RobotSide side, ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel)
+   public AbilityHandKinematicsSimulation(RobotSide side, ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HandModel handModel)
    {
-      for (AbilityHandJointName jointName : AbilityHandJointName.values)
-         joints[jointName.ordinal()] = (RevoluteJoint) fullRobotModel.getOneDoFJointByName(jointName.getJointName(side));
+      // Resolve joint names from the robot hand model so this works when the URDF does not use default Ability Hand names.
+      AbilityHandModel abilityHandModel = handModel instanceof AbilityHandModel model ? model : new AbilityHandModel();
+      boolean allJointsFound = true;
 
-      ros2Node.createSubscription2(AbilityHandROS2API.COMMAND_TOPICS.get(side), commandNotification::set);
+      for (AbilityHandJointName jointName : AbilityHandJointName.values)
+      {
+         String jointNameString = abilityHandModel.getAbilityHandJointName(side, jointName);
+         RevoluteJoint joint = (RevoluteJoint) fullRobotModel.getOneDoFJointByName(jointNameString);
+         joints[jointName.ordinal()] = joint;
+         allJointsFound &= joint != null;
+      }
+
+      enabled = allJointsFound;
+
+      ros2Node.createSubscriptionSampler(AbilityHandROS2API.COMMAND_TOPICS.get(side), sample -> {
+         AbilityHandCommand message = new AbilityHandCommand();
+         message.set(sample);
+         commandNotification.set(message);
+      });
       statePublisher = ros2Node.createPublisher(AbilityHandROS2API.STATE_TOPICS.get(side));
 
       setGripGoals(AbilityHandGrip.RELAX);
    }
 
+   public boolean isEnabled()
+   {
+      return enabled;
+   }
+
    public void update()
    {
+      if (!enabled)
+         return;
       if (commandNotification.poll())
       {
          AbilityHandCommand commandMessage = commandNotification.read();

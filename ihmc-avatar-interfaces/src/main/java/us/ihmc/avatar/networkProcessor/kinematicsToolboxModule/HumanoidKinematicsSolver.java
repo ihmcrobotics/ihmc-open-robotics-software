@@ -1,10 +1,10 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import controller_msgs.CapturabilityBasedStatus;
+import controller_msgs.RobotConfigurationData;
+import toolbox_msgs.KinematicsToolboxCenterOfMassMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -83,8 +83,8 @@ public class HumanoidKinematicsSolver implements SCS2YoGraphicHolder
       RobotConfigurationData configurationData = new RobotConfigurationData();
       configurationData.setJointNameHash(kinematicsToolboxOutputStatus.getJointNameHash());
       MessageTools.copyData(kinematicsToolboxOutputStatus.getDesiredJointAngles(), configurationData.getJointAngles());
-      configurationData.getRootPosition().set(new Vector3D32(kinematicsToolboxOutputStatus.getDesiredRootPosition()));
-      configurationData.getRootOrientation().set(new Quaternion32(kinematicsToolboxOutputStatus.getDesiredRootOrientation()));
+      configurationData.getRootPosition().getPoint().set(kinematicsToolboxOutputStatus.getDesiredRootPosition().getPoint());
+      configurationData.getRootOrientation().getQuaternion().set(kinematicsToolboxOutputStatus.getDesiredRootOrientation().getQuaternion());
       setInitialConfiguration(configurationData);
    }
 

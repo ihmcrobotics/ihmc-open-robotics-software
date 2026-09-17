@@ -1,8 +1,10 @@
 package us.ihmc.avatar.stateEstimationEndToEndTests;
 
-import controller_msgs.msg.dds.LocalizationPacket;
-import controller_msgs.msg.dds.PelvisPoseErrorPacket;
-import ihmc_common_msgs.msg.dds.StampedPosePacket;
+import static us.ihmc.robotics.Assert.assertTrue;
+
+import controller_msgs.LocalizationPacket;
+import controller_msgs.PelvisPoseErrorPacket;
+import ihmc_common_msgs.StampedPosePacket;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -42,8 +44,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.Random;
-
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 {

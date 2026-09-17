@@ -1,15 +1,16 @@
 package us.ihmc.perception.gpuMapping.worldModel;
 
-import com.esotericsoftware.kryo.util.IntMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ChunkMessage;
+import perception_msgs.ChunkMessage;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.perception.gpuMapping.HeightMapParameters;
 import us.ihmc.perception.gpuMapping.HeightMapTools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayDeque;
@@ -31,15 +32,17 @@ public class ChunkedMapManager
    private static final double CHUNK_PUBLISH_FREQUENCY = 8.0;
    private final HeightMapParameters heightMapParameters;
 
-   private final IntMap<Chunk> chunksHashMap = new IntMap<>();
+   private final TIntObjectMap<Chunk> chunksHashMap = new TIntObjectHashMap<>();
    private final HashSet<Chunk> chunks = new HashSet<>();
    private final Deque<Integer> queueOfChunks = new ArrayDeque<>();
+   private final ROS2Node ros2Node;
    private final ROS2Publisher<ChunkMessage> chunkMessagePublisher;
    private final ChunkMessage chunkMessage;
-   private final IntMap<Throttler> chunkThrottlers = new IntMap<>();
+   private final TIntObjectMap<Throttler> chunkThrottlers = new TIntObjectHashMap<>();
 
    public ChunkedMapManager(ROS2Node ros2Node, HeightMapParameters heightMapParameters)
    {
+      this.ros2Node = ros2Node;
       this.heightMapParameters = heightMapParameters;
       chunkMessagePublisher = ros2Node.createPublisher(PerceptionAPI.CHUNK);
       chunkMessage = new ChunkMessage();
@@ -118,13 +121,13 @@ public class ChunkedMapManager
          chunkThrottlers.put(hash, new Throttler().setFrequency(CHUNK_PUBLISH_FREQUENCY));
 
          // Resources aren't free, at some point there is a limit on how much we can store, time to see if we should remove any
-         if (chunksHashMap.size > MAX_CHUNKS_TO_STORE)
+         if (chunksHashMap.size() > MAX_CHUNKS_TO_STORE)
          {
             Integer oldestHash = queueOfChunks.pollFirst();
             if (oldestHash != null)
             {
-               chunksHashMap.remove(oldestHash);
-               chunkThrottlers.remove(oldestHash);
+               chunksHashMap.remove(oldestHash.intValue());
+               chunkThrottlers.remove(oldestHash.intValue());
             }
          }
       }
@@ -162,7 +165,7 @@ public class ChunkedMapManager
 
    public void destroy()
    {
-      chunkMessagePublisher.remove();
+      ros2Node.destroyPublisher(chunkMessagePublisher);
       chunks.clear();
       chunksHashMap.clear();
       queueOfChunks.clear();

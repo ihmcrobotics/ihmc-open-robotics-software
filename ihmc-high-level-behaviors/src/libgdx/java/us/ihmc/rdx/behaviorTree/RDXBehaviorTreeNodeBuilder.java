@@ -19,10 +19,10 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
+import javax.annotation.Nullable;
 
 public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBehaviorTreeNode<?, ?>>
 {
@@ -45,7 +45,6 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       REGISTRY.put(WalkActionDefinition.class, RDXWalkAction::new);
       REGISTRY.put(ArmActionDefinition.class, RDXArmAction::new);
       REGISTRY.put(HandWrenchActionDefinition.class, RDXHandWrenchAction::new);
-      REGISTRY.put(ScrewPrimitiveActionDefinition.class, RDXScrewPrimitiveAction::new);
       REGISTRY.put(PelvisActionDefinition.class, RDXPelvisAction::new);
       REGISTRY.put(AbilityHandActionDefinition.class, RDXAbilityHandAction::new);
       REGISTRY.put(EZGripperActionDefinition.class, RDXEZGripperAction::new);

@@ -1,8 +1,10 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -29,8 +31,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 public class SwingPlanMeshViewer extends AnimationTimer
 {
@@ -102,16 +102,16 @@ public class SwingPlanMeshViewer extends AnimationTimer
          TrajectoryType trajectoryType = TrajectoryType.fromByte(footstepDataMessage.getTrajectoryType());
          if (trajectoryType == TrajectoryType.CUSTOM)
          {
-            for (Point3D waypoint : footstepDataMessage.getCustomPositionWaypoints())
+            for (int waypointIndex = 0; waypointIndex < footstepDataMessage.getCustomPositionWaypoints().size(); waypointIndex++)
             {
-               meshBuilder.addSphere(footWaypointRadius, waypoint, footWaypointColor);
+               meshBuilder.addSphere(footWaypointRadius, footstepDataMessage.getCustomPositionWaypoints().get(waypointIndex).getPoint(), footWaypointColor);
             }
          }
          if (trajectoryType == TrajectoryType.WAYPOINTS)
          {
             for (SE3TrajectoryPointMessage waypoint : footstepDataMessage.getSwingTrajectory())
             {
-               meshBuilder.addSphere(footWaypointRadius, waypoint.getPosition(), footWaypointColor);
+               meshBuilder.addSphere(footWaypointRadius, waypoint.getPosition().getPoint(), footWaypointColor);
             }
          }
 

@@ -25,36 +25,49 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.scs2.definition.controller.ControllerInput;
+import us.ihmc.scs2.definition.controller.ControllerOutput;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.definition.state.interfaces.OneDoFJointStateBasics;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.scs2.simulation.robot.controller.SimControllerInput;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointReadOnly;
+import us.ihmc.scs2.simulation.robot.trackers.GroundContactPoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
-import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.sensorProcessing.simulatedSensors.SCS2SensorReader;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
-public class HexapodSimulationController implements RobotController
+public class HexapodSimulationController implements Controller
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double gravity = -9.81;
    private final double controllerDt;
+   private final int controlTicksPerSimulationTick;
 
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final YoBoolean useInverseDynamics = new YoBoolean("useInverseDynamics", registry);
 
-   private final SDFPerfectSimulatedSensorReader sensorReader;
-   private final PerfectSimulatedOutputWriter outputWriter;
+   private final SimControllerInput controllerInput;
+   private final ControllerOutput controllerOutput;
+   private final SCS2SensorReader sensorReader;
+   private final JointDesiredOutputList lowLevelControllerCoreOutput;
    private final SegmentDependentList<RobotSextant, RigidBodyBasics> footRigidBodies = new SegmentDependentList<>(RobotSextant.class);
    private final SegmentDependentList<RobotSextant, SimulatedPlaneContactStateUpdater> contactStateUpdaters = new SegmentDependentList<>(RobotSextant.class);
 
@@ -68,19 +81,30 @@ public class HexapodSimulationController implements RobotController
 
    private final ArrayList<YoGraphicReferenceFrame> referenceFrameGraphics = new ArrayList<>();
    private ContactPointVisualizer contactPointVisualizer;
+   private final YoFramePoint2D bodyPosition2D = new YoFramePoint2D("bodyPosition", worldFrame, registry);
 
-   public HexapodSimulationController(FullRobotModel fullRobotModel, FloatingRootJointRobot sdfRobot, ArrayList<String> jointsToControl, HexapodControllerParameters idParameters, HexapodControllerParameters vmcParameters, YoGraphicsListRegistry yoGraphicsListRegistry, double controllerDt)
+   public HexapodSimulationController(ControllerInput controllerInput,
+                                       ControllerOutput controllerOutput,
+                                       FullRobotModel fullRobotModel,
+                                       ArrayList<String> jointsToControl,
+                                       HexapodControllerParameters idParameters,
+                                       HexapodControllerParameters vmcParameters,
+                                       YoGraphicsListRegistry yoGraphicsListRegistry,
+                                       double controllerDt,
+                                       int controlTicksPerSimulationTick)
    {
       this.controllerDt = controllerDt;
+      this.controlTicksPerSimulationTick = controlTicksPerSimulationTick;
+      this.controllerInput = (SimControllerInput) controllerInput;
+      this.controllerOutput = controllerOutput;
       this.fullRobotModel = fullRobotModel;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-      this.sensorReader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, null);
+      this.sensorReader = SCS2SensorReader.newPerfectSensorReader(this.controllerInput, fullRobotModel.getRootJoint(), null);
       this.referenceFrames = new HexapodReferenceFrames(fullRobotModel, RhinoBeetlePhysicalProperties.getOffsetsFromJointBeforeFootToSoleAlignedWithWorld());
-      setupPlaneContactStateUpdaters(fullRobotModel, sdfRobot);
+      setupPlaneContactStateUpdaters(fullRobotModel);
 
-      JointDesiredOutputList lowLevelControllerCoreOutput = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
-      this.outputWriter = new PerfectSimulatedOutputWriter(sdfRobot, fullRobotModel, lowLevelControllerCoreOutput);
-      
+      lowLevelControllerCoreOutput = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
+
       highLevelController = new HexapodHighLevelControlManager(fullRobotModel, referenceFrames, contactStateUpdaters, jointsToControl, idParameters, vmcParameters, yoGraphicsListRegistry, controllerDt, registry);
 
       FeedbackControlCommandList feedbackControlCommandList = createFeedbackControlTemplate();
@@ -95,9 +119,8 @@ public class HexapodSimulationController implements RobotController
       }
    }
 
-   private void setupPlaneContactStateUpdaters(FullRobotModel fullRobotModel, FloatingRootJointRobot sdfRobot)
+   private void setupPlaneContactStateUpdaters(FullRobotModel fullRobotModel)
    {
-      List<GroundContactPoint> groundContactPoints = sdfRobot.getAllGroundContactPoints();
       ArrayList<SimulatedPlaneContactStateUpdater> contactStateUpdatersList = new ArrayList<>();
       RhinoBeetleJointNameMapAndContactDefinition jointMap = new RhinoBeetleJointNameMapAndContactDefinition();
       for (RobotSextant robotSextant : RobotSextant.values)
@@ -106,18 +129,14 @@ public class HexapodSimulationController implements RobotController
          footRigidBodies.set(robotSextant, endEffector);
 
          String jointNameBeforeFoot = jointMap.getJointNameBeforeFoot(robotSextant);
-         OneDoFJointBasics oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointNameBeforeFoot);
          ReferenceFrame soleFrame = referenceFrames.getFootFrame(robotSextant);
-         for (GroundContactPoint groundContactPoint : groundContactPoints)
-         {
-            if (groundContactPoint.getParentJoint().getName().equals(oneDoFJoint.getName()))
-            {
 
-               SimulatedPlaneContactStateUpdater contactStateUpdater = new SimulatedPlaneContactStateUpdater(groundContactPoint, endEffector, soleFrame);
-               contactStateUpdaters.set(robotSextant, contactStateUpdater);
-               contactStateUpdatersList.add(contactStateUpdater);
-            }
-         }
+         SimJointReadOnly simJoint = controllerInput.getInput().findJoint(jointNameBeforeFoot);
+         GroundContactPoint groundContactPoint = simJoint.getAuxiliaryData().getGroundContactPoints().get(0);
+
+         SimulatedPlaneContactStateUpdater contactStateUpdater = new SimulatedPlaneContactStateUpdater(groundContactPoint, endEffector, soleFrame);
+         contactStateUpdaters.set(robotSextant, contactStateUpdater);
+         contactStateUpdatersList.add(contactStateUpdater);
       }
       contactPointVisualizer = new ContactPointVisualizer(contactStateUpdatersList, yoGraphicsListRegistry, registry);
    }
@@ -194,19 +213,14 @@ public class HexapodSimulationController implements RobotController
       return getClass().getSimpleName();
    }
 
-   @Override
-   public String getDescription()
-   {
-      return null;
-   }
-
    private boolean firstTick = true;
+   private int simulationTickCounter = 0;
 
    @Override
    public void doControl()
    {
       long startTime = System.nanoTime();
-      sensorReader.read();
+      sensorReader.read(null);
       contactPointVisualizer.update(0.0);
       for (YoGraphicReferenceFrame frame : referenceFrameGraphics)
       {
@@ -214,6 +228,8 @@ public class HexapodSimulationController implements RobotController
       }
 
       referenceFrames.updateFrames();
+      bodyPosition2D.set(fullRobotModel.getRootJoint().getJointPose().getPosition().getX(),
+                          fullRobotModel.getRootJoint().getJointPose().getPosition().getY());
 
       if (firstTick)
       {
@@ -221,12 +237,44 @@ public class HexapodSimulationController implements RobotController
          firstTick = false;
       }
 
-      highLevelController.doControl();
-      ControllerCoreCommand controllerCoreCommandList = highLevelController.getControllerCoreCommand();
-      controllerCore.compute(controllerCoreCommandList);
-      outputWriter.write();
+      // The whole-body controller core is tuned for controllerDt, which is coarser than the simulation's
+      // integration step (the contact spring-damper model needs the finer step to stay stable). Only
+      // recompute torques every controlTicksPerSimulationTick ticks; the physics engine holds the
+      // previously written torques on the ticks in between, mirroring SCS1's setController(controller, ticksPerControl).
+      if (simulationTickCounter == 0)
+      {
+         highLevelController.doControl();
+         ControllerCoreCommand controllerCoreCommandList = highLevelController.getControllerCoreCommand();
+         controllerCore.compute(controllerCoreCommandList);
+         writeControllerOutput();
+      }
+      simulationTickCounter = (simulationTickCounter + 1) % controlTicksPerSimulationTick;
 
       totalTimeToCompleteTick.set(System.nanoTime() - startTime);
       totalTimeToCompleteTickInSeconds.set(Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
+   }
+
+   private void writeControllerOutput()
+   {
+      for (int i = 0; i < lowLevelControllerCoreOutput.getNumberOfJointsWithDesiredOutput(); i++)
+      {
+         OneDoFJointReadOnly joint = lowLevelControllerCoreOutput.getOneDoFJoint(i);
+         JointDesiredOutputReadOnly jointDesiredOutput = lowLevelControllerCoreOutput.getJointDesiredOutput(i);
+         OneDoFJointStateBasics jointOutput = controllerOutput.getOneDoFJointOutput(joint.getName());
+         jointOutput.setEffort(jointDesiredOutput.getDesiredTorque());
+      }
+   }
+
+   public YoFramePoint2D getBodyPosition2D()
+   {
+      return bodyPosition2D;
+   }
+
+   public YoGraphicGroupDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(name);
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("bodyPosition", bodyPosition2D, 0.02, ColorDefinitions.Black(), DefaultPoint2DGraphic.CIRCLE));
+      group.addChild(highLevelController.getSCS2YoGraphics());
+      return group;
    }
 }

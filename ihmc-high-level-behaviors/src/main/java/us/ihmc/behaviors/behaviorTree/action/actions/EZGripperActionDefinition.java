@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.EZGripperActionDefinitionMessage;
+import behavior_msgs.EZGripperActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;

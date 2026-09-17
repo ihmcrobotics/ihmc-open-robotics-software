@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.MomentumTrajectoryMessage;
+import controller_msgs.MomentumTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;

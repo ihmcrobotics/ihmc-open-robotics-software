@@ -1,13 +1,12 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
 
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.PelvisHeightTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.avatar.DRCFlatGroundRewindabilityTest;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -37,7 +36,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifferenc
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
 
 public abstract class AvatarObstacleCoursePlatformTest implements MultiRobotTestInterface
 {
@@ -663,8 +662,8 @@ public abstract class AvatarObstacleCoursePlatformTest implements MultiRobotTest
          footstepPose.appendTranslation(0.025, 0.0, -0.084);
 
       FootstepDataListMessage desiredFootsteps = EndToEndTestTools.generateFootstepsFromPose3Ds(RobotSide.LEFT, footstepPoses);
-      double zClearHeight = desiredFootsteps.getFootstepDataList().get(0).getLocation().getZ() + 0.07;
-      double swingHeightForClear = zClearHeight - desiredFootsteps.getFootstepDataList().get(2).getLocation().getZ(); //should really be the last height (height before swing), not step 2, but they're approximate.
+      double zClearHeight = desiredFootsteps.getFootstepDataList().get(0).getLocation().getPoint().getZ() + 0.07;
+      double swingHeightForClear = zClearHeight - desiredFootsteps.getFootstepDataList().get(2).getLocation().getPoint().getZ(); //should really be the last height (height before swing), not step 2, but they're approximate.
       desiredFootsteps.getFootstepDataList().get(1).setSwingHeight(swingHeightForClear);
       desiredFootsteps.getFootstepDataList().get(1).setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       return desiredFootsteps;

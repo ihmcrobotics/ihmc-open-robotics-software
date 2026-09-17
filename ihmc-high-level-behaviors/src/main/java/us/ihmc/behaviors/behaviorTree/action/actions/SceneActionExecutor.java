@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionDefinition.SceneActionType;
@@ -168,6 +168,12 @@ public class SceneActionExecutor extends ActionNodeExecutor<SceneActionState, Sc
 
       if (rootNode.getState().getPreviewModeEnabled())
       {
+         if (definition.getSceneObjectDefinition().getObjectType() == BehaviorTreeSceneObjectType.COMPOSITE_FRAME)
+         {
+            setupCompositeFrameDetection();
+            return;
+         }
+
          state.getLogger().info("Preview mode enabled. Adding nominal object pose for: {}", definition.getSceneObjectDefinition().getName());
 
          BehaviorTreeSceneObjectState target = null;

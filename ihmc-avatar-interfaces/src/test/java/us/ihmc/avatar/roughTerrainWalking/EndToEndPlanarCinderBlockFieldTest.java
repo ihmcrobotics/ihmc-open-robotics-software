@@ -2,12 +2,11 @@ package us.ihmc.avatar.roughTerrainWalking;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
+import controller_msgs.ContinuousStepGeneratorInputMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;

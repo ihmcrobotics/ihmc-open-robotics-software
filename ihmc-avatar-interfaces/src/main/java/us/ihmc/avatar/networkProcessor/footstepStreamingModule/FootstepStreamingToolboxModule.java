@@ -1,9 +1,9 @@
 package us.ihmc.avatar.networkProcessor.footstepStreamingModule;
 
-import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
-import toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.FootstepStreamingToolboxOutputStatus;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.ControllerCrashNotificationPacket;
+import toolbox_msgs.FootstepStreamingToolboxInputMessage;
+import toolbox_msgs.FootstepStreamingToolboxOutputStatus;
+import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -11,9 +11,10 @@ import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI.FootstepStreamingToolboxInputCommand;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,14 +92,14 @@ public class FootstepStreamingToolboxModule extends ToolboxModule
    }
 
    @Override
-   public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
+   public List<Class<? extends ROS2Message<?>>> createListOfSupportedStatus()
    {
       return supportedStatus();
    }
 
-   public static List<Class<? extends Settable<?>>> supportedStatus()
+   public static List<Class<? extends ROS2Message<?>>> supportedStatus()
    {
-      List<Class<? extends Settable<?>>> status = new ArrayList<>();
+      List<Class<? extends ROS2Message<?>>> status = new ArrayList<>();
       status.add(FootstepStreamingToolboxOutputStatus.class);
       status.add(ControllerCrashNotificationPacket.class);
       return status;
@@ -128,16 +129,17 @@ public class FootstepStreamingToolboxModule extends ToolboxModule
 
    public static ROS2Topic<ToolboxStateMessage> getInputStateTopic(String robotName)
    {
-      return getInputTopic(robotName).withTypeName(ToolboxStateMessage.class);
+      return getInputTopic(robotName).withType(ToolboxStateMessage.class);
    }
 
    public static ROS2Topic<FootstepStreamingToolboxInputMessage> getInputCommandTopic(String robotName)
    {
-      return getInputTopic(robotName).withTypeName(FootstepStreamingToolboxInputMessage.class);
+      return getInputTopic(robotName).withType(FootstepStreamingToolboxInputMessage.class);
    }
 
    public static ROS2Topic<FootstepStreamingToolboxOutputStatus> getOutputStatusTopic(String robotName)
    {
-      return getOutputTopic(robotName).withTypeName(FootstepStreamingToolboxOutputStatus.class);
+      // HumanoidROS2Topic.withType() suffixes the topic with the message type name (legacy withTypeName behavior).
+      return getOutputTopic(robotName).withType(FootstepStreamingToolboxOutputStatus.class);
    }
 }

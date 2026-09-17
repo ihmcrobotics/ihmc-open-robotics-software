@@ -1,10 +1,10 @@
 package us.ihmc.communication.crdt;
 
-import behavior_msgs.msg.dds.WalkActionFootstepDefinitionMessage;
+import behavior_msgs.WalkActionFootstepDefinitionMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -21,7 +21,7 @@ public class CRDTStatusFootstepList extends CRDTStatusMutableField<RecyclingArra
 
    public Pose3DReadOnly getPoseReadOnly(int index)
    {
-      return getValueInternal().get(index).getSolePose();
+      return getValueInternal().get(index).getSolePose().getPose();
    }
 
    public RobotSide getSide(int index)
@@ -34,7 +34,7 @@ public class CRDTStatusFootstepList extends CRDTStatusMutableField<RecyclingArra
       return getValueInternal().size();
    }
 
-   public void toMessage(IDLSequence.Object<WalkActionFootstepDefinitionMessage> message)
+   public void toMessage(IDLObjectSequence<WalkActionFootstepDefinitionMessage> message)
    {
       message.clear();
 
@@ -44,7 +44,7 @@ public class CRDTStatusFootstepList extends CRDTStatusMutableField<RecyclingArra
       }
    }
 
-   public void fromMessage(IDLSequence.Object<WalkActionFootstepDefinitionMessage> message)
+   public void fromMessage(IDLObjectSequence<WalkActionFootstepDefinitionMessage> message)
    {
       if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
       {

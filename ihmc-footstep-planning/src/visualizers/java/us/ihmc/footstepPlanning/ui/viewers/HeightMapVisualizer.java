@@ -8,17 +8,18 @@ import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.util.Pair;
-import perception_msgs.msg.dds.TerrainMapMessage;
+import perception_msgs.TerrainMapMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.perception.gpuMapping.HeightMapTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -94,10 +95,14 @@ public class HeightMapVisualizer extends AnimationTimer
    {
       /* Compute mesh */
       meshBuilder.clear();
-      IDLSequence.Float heights = terrainMapMessage.getHeightMap();
+      IDLFloatSequence heights = terrainMapMessage.getHeightMap();
       double gridResolutionXY = terrainMapMessage.getCellSizeInMeters();
       int centerIndex = HeightMapTools.computeCenterIndex(terrainMapMessage.getWidthInMeters(), gridResolutionXY);
-      double groundPlaneHeight = heights.min();
+      double groundPlaneHeight = Double.POSITIVE_INFINITY;
+      for (int heightIndex = 0; heightIndex < heights.size(); heightIndex++)
+      {
+         groundPlaneHeight = Math.min(groundPlaneHeight, heights.get(heightIndex));
+      }
 
       ConvexPolygon2D heightMapCell = new ConvexPolygon2D();
       heightMapCell.addVertex(-0.5 * gridResolutionXY, -0.5 * gridResolutionXY);

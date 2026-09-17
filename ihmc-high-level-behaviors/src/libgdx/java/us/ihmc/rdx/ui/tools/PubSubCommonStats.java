@@ -1,50 +1,70 @@
 package us.ihmc.rdx.ui.tools;
 
-import us.ihmc.pubsub.participant.Participant;
+import static us.ihmc.jros2.Statistics.StatisticDataType.LATEST;
+import static us.ihmc.jros2.Statistics.StatisticDataType.MAXIMUM;
+import static us.ihmc.jros2.Statistics.StatisticDataType.SAMPLE_COUNT;
+import static us.ihmc.jros2.Statistics.StatisticDataType.TOTAL;
+
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.Statistics;
 
 public abstract class PubSubCommonStats
 {
-   /**
-    * We have observed issues when messages are larger than this.
-    */
-   public static final int HIGH_PAYLOAD_LIMIT = 250000;
-
-   private final Participant participant;
-
-   // Analysis fields -- not modified by pubsub threads
+   private final ROS2Node node;
+   private final Statistics sizeStatistics = new Statistics();
    private final PubSubRateCalculator eventFrequencyCalculator = new PubSubRateCalculator();
    private final PubSubRateCalculator bandwidthCalculator = new PubSubRateCalculator();
-   private double publishFrequency = 0.0;
+   private double eventFrequency = 0.0;
    private double bandwidth = 0.0;
 
-   public PubSubCommonStats(Participant participant)
+   protected PubSubCommonStats(ROS2Node node)
    {
-      this.participant = participant;
+      this.node = node;
    }
+
+   protected abstract void readSizeStatistics(Statistics statisticsToPack);
 
    /** This should be called at a periodic rate to update the derivative calculations. */
    public void update()
    {
-      publishFrequency = eventFrequencyCalculator.finiteDifference(getNumberOfEvents());
-      bandwidth = bandwidthCalculator.finiteDifference(getCumulativePayloadBytes());
+      readSizeStatistics(sizeStatistics);
+
+      eventFrequency = eventFrequencyCalculator.finiteDifference(getSampleCount());
+      bandwidth = bandwidthCalculator.finiteDifference(getTotalBytes());
    }
 
-   public abstract long getNumberOfEvents();
+   public ROS2Node getNode()
+   {
+      return node;
+   }
 
-   public abstract long getCumulativePayloadBytes();
+   public long getSampleCount()
+   {
+      return (long) sizeStatistics.get(SAMPLE_COUNT);
+   }
+
+   public long getTotalBytes()
+   {
+      return (long) sizeStatistics.get(TOTAL);
+   }
+
+   public long getLargestMessageSize()
+   {
+      return (long) sizeStatistics.get(MAXIMUM);
+   }
+
+   public long getCurrentMessageSize()
+   {
+      return (long) sizeStatistics.get(LATEST);
+   }
 
    public double getEventFrequency()
    {
-      return publishFrequency;
+      return eventFrequency;
    }
 
    public double getBandwidth()
    {
       return bandwidth;
-   }
-
-   public Participant getParticipant()
-   {
-      return participant;
    }
 }

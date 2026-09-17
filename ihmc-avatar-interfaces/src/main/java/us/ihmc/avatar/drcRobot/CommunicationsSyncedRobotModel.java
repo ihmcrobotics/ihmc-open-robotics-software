@@ -1,8 +1,8 @@
 package us.ihmc.avatar.drcRobot;
 
-import controller_msgs.msg.dds.HandJointAnglePacket;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.SpatialVectorMessage;
+import controller_msgs.HandJointAnglePacket;
+import controller_msgs.RobotConfigurationData;
+import controller_msgs.SpatialVectorMessage;
 import us.ihmc.commonWalkingControlModules.contact.HandWrenchCalculator;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -105,8 +105,8 @@ public abstract class CommunicationsSyncedRobotModel
    /** This is synchronized to allow multiple threads to consume robot data by synchronizing on this object. */
    protected synchronized void updateInternal()
    {
-      fullRobotModel.getRootJoint().setJointOrientation(robotConfigurationData.getRootOrientation());
-      fullRobotModel.getRootJoint().setJointPosition(robotConfigurationData.getRootPosition());
+      fullRobotModel.getRootJoint().setJointOrientation(robotConfigurationData.getRootOrientation().getQuaternion());
+      fullRobotModel.getRootJoint().setJointPosition(robotConfigurationData.getRootPosition().getPoint());
 
       for (int i = 0; i < robotConfigurationData.getJointAngles().size(); i++)
       {

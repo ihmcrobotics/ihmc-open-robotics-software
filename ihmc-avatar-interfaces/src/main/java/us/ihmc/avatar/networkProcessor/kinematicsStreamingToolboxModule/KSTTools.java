@@ -1,21 +1,21 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
+import controller_msgs.CapturabilityBasedStatus;
+import controller_msgs.RobotConfigurationData;
+import controller_msgs.WholeBodyStreamingMessage;
+import controller_msgs.WholeBodyTrajectoryMessage;
+import toolbox_msgs.KinematicsToolboxOneDoFJointMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyStreamingMessagePublisher;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyTrajectoryMessagePublisher;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.input.KSTInputFilter;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTOutputDataBasics;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTOutputDataReadOnly;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
@@ -33,9 +33,9 @@ import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxContactConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInitialConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInitialConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
@@ -600,19 +600,6 @@ public class KSTTools implements SCS2YoGraphicHolder
       message.getNeckTrajectoryMessage().setSequenceId(id);
       message.getHeadTrajectoryMessage().setSequenceId(id);
 
-      message.setUniqueId(id);
-      message.getLeftHandTrajectoryMessage().setUniqueId(id);
-      message.getRightHandTrajectoryMessage().setUniqueId(id);
-      message.getLeftArmTrajectoryMessage().setUniqueId(id);
-      message.getRightArmTrajectoryMessage().setUniqueId(id);
-      message.getChestTrajectoryMessage().setUniqueId(id);
-      message.getSpineTrajectoryMessage().setUniqueId(id);
-      message.getPelvisTrajectoryMessage().setUniqueId(id);
-      message.getLeftFootTrajectoryMessage().setUniqueId(id);
-      message.getRightFootTrajectoryMessage().setUniqueId(id);
-      message.getNeckTrajectoryMessage().setUniqueId(id);
-      message.getHeadTrajectoryMessage().setUniqueId(id);
-
       message.getLeftHandTrajectoryMessage().getSe3Trajectory().getQueueingProperties().setMessageId(id);
       message.getRightHandTrajectoryMessage().getSe3Trajectory().getQueueingProperties().setMessageId(id);
       message.getLeftArmTrajectoryMessage().getJointspaceTrajectory().getQueueingProperties().setMessageId(id);
@@ -730,7 +717,7 @@ public class KSTTools implements SCS2YoGraphicHolder
       }
 
       Pose3DBasics rootJointPose = fullRobotModelToUpdate.getRootJoint().getJointPose();
-      rootJointPose.set(robotConfigurationData.getRootPosition(), robotConfigurationData.getRootOrientation());
+      rootJointPose.set(robotConfigurationData.getRootPosition().getPoint(), robotConfigurationData.getRootOrientation().getQuaternion());
    }
 
    public static void copyRobotState(FullHumanoidRobotModel source, FullHumanoidRobotModel destination, JointStateType stateSelection)

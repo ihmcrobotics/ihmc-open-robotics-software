@@ -5,14 +5,9 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.jMonkeyEngineToolkit.NullGraphics3DAdapter;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.Domain;
-import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.pubsub.attributes.ParticipantProfile;
-import us.ihmc.pubsub.common.DiscoveryStatus;
-import us.ihmc.pubsub.participant.Participant;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -23,9 +18,13 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 import javax.swing.*;
 
+/**
+ * Debug tool that plots ROS 2 discovery statistics in Simulation Construction Set.
+ * Participant and endpoint discovery counting is not yet exposed by jros2; the YoVariables remain for API compatibility.
+ */
 public class SCSROS2Visualizer
 {
-   private Participant participant;
+   private ROS2Node ros2Node;
    private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private final SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Robot"),
                                                                                new NullGraphics3DAdapter(),
@@ -69,41 +68,12 @@ public class SCSROS2Visualizer
       updateThread.start();
    }
 
-   private void setupROS2Debugger() throws Exception
+   private void setupROS2Debugger()
    {
-      int domainID = NetworkParameters.getRTPSDomainID();
-      Domain domain = DomainFactory.getDomain();
-      ParticipantProfile attributes = domain.createParticipantAttributes(domainID, getClass().getSimpleName());
-
-      participant = domain.createParticipant(attributes, (participant, info) ->
-      {
-         if (!info.getGuid().equals(this.participant.getGuid()))
-         {
-            if (info.getStatus() == DiscoveryStatus.DISCOVERED_RTPSPARTICIPANT)
-            {
-               numberOfParticipants.add(1);
-               LogTools.info("Discovered participant: {}", info.getName());
-            }
-            else if (info.getStatus() == DiscoveryStatus.REMOVED_RTPSPARTICIPANT)
-            {
-               numberOfParticipants.subtract(1);
-               LogTools.info("Participant removed: {}", info.getName());
-            }
-         }
-      });
-      participant.registerEndpointDiscoveryListeners(
-      ((isAlive, guid, participantGuid, typeName, topicName, userDefinedId, typeMaxSerialized) ->
-      {
-         numberOfPublishers.add(1);
-         numberOfEndpoints.add(1);
-         LogTools.info("Discovered publisher on topic: {}", topicName);
-      }),
-      ((isAlive, guid, expectsInlineQos, participantGuid, typeName, topicName, userDefinedId) ->
-      {
-         numberOfSubscribers.add(1);
-         numberOfEndpoints.add(1);
-         LogTools.info("Discovered subscriber on topic: {}", topicName);
-      }));
+      ros2Node = new ROS2Node(getClass().getSimpleName());
+      LogTools.info("Created jros2 node for SCS ROS 2 visualizer on domain {}", ros2Node.getDomainId());
+      // JROS2_TODO: RTPS participant/endpoint discovery counting is not exposed by jros2 yet; YoVariables stay at zero.
+      LogTools.warn("RTPS participant and endpoint discovery counting is not yet available in jros2");
    }
 
    private void update()

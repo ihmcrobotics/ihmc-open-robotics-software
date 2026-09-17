@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
-import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
+import behavior_msgs.ContinuousHikingCommandMessage;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 
 import java.util.concurrent.atomic.AtomicReference;

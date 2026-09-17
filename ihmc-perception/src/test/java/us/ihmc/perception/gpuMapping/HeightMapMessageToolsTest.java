@@ -1,10 +1,10 @@
 package us.ihmc.perception.gpuMapping;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.HeightMapMessage;
-
-import static org.junit.jupiter.api.Assertions.*;
+import perception_msgs.HeightMapMessage;
 
 public class HeightMapMessageToolsTest
 {

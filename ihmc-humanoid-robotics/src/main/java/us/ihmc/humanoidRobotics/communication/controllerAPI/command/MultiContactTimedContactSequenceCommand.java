@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.MultiContactTimedContactSequenceMessage;
+import controller_msgs.MultiContactTimedContactSequenceMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.robotics.robotSide.RobotSide;

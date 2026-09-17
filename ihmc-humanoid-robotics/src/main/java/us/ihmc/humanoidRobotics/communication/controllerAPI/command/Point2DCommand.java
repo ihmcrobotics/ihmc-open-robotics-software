@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import ihmc_common_msgs.msg.dds.Point2DMessage;
+import ihmc_common_msgs.Point2DMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
 public class Point2DCommand implements Command<Point2DCommand, Point2DMessage>

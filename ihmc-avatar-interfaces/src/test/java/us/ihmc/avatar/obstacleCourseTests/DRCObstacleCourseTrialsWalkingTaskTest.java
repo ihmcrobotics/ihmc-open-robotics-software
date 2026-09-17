@@ -1,16 +1,16 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import java.io.InputStream;
+import static org.junit.jupiter.api.Assertions.*;
 
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.PelvisHeightTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.scriptCommandGenerator.ExerciseAndJUnitScript;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.thread.ThreadTools;
@@ -27,8 +27,6 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRobotTestInterface
 {
@@ -61,8 +59,6 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOn_LeftFootTest.xml";
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -78,8 +74,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisHeight.getZ() + 0.05);
       simulationTestHelper.publishToController(message);
 
-      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-      simulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
+      simulationTestHelper.runExerciseScript(ExerciseAndJUnitScript.TWO_CINDER_BLOCKS_STEP_ON_LEFT_FOOT_TEST, fullRobotModel.getSoleFrame(RobotSide.LEFT));
 
       setupCameraForWalkingOverCinderBlocks();
 
@@ -186,8 +181,6 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOn_LeftFootTest_slow.xml";
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -195,16 +188,16 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
-      setupCameraForWalkingOverCinderBlocks();
-
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
-      simulationTestHelper.simulateNow(0.25);
+      simulationTestHelper.simulateNow(0.01);
+
       FramePoint3D pelvisHeight = new FramePoint3D(fullRobotModel.getRootJoint().getFrameAfterJoint());
       pelvisHeight.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisHeight.getZ() + 0.1);
       simulationTestHelper.publishToController(message);
-      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-      simulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
+      simulationTestHelper.runExerciseScript(ExerciseAndJUnitScript.TWO_CINDER_BLOCKS_STEP_ON_LEFT_FOOT_TEST_SLOW, fullRobotModel.getSoleFrame(RobotSide.LEFT));
+
+      setupCameraForWalkingOverCinderBlocks();
 
       assertTrue(simulationTestHelper.simulateNow(6.0));
 

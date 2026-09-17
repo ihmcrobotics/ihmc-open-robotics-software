@@ -1,8 +1,8 @@
 package us.ihmc.rdx.behaviorTree.actions;
 
 import imgui.ImGui;
-import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTree;
+import us.ihmc.rdx.imgui.*;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class RDXActionProgressWidgetsManager
 
          if (action instanceof RDXWalkAction)
             containsFootsteps = true;
-         if (action instanceof RDXArmAction || action instanceof RDXScrewPrimitiveAction)
+         if (action instanceof RDXArmAction)
             containsHandMovements = true;
          if (action instanceof RDXEZGripperAction)
             containsEzGripperConfiguration = true;

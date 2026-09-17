@@ -1,6 +1,6 @@
 package us.ihmc.communication.ros2.tf2;
 
-import geometry_msgs.msg.dds.TransformStamped;
+import geometry_msgs.TransformStamped;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 

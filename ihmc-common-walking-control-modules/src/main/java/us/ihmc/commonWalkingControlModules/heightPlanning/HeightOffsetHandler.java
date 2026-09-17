@@ -1,8 +1,9 @@
 package us.ihmc.commonWalkingControlModules.heightPlanning;
 
+import static us.ihmc.communication.controllerAPI.command.QueueableCommand.INVALID_MESSAGE_ID;
+
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
@@ -16,8 +17,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
-
-import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
 public class HeightOffsetHandler
 {
@@ -74,7 +73,7 @@ public class HeightOffsetHandler
 
       String namePrefix = "pelvisHeight";
       lastCommandId = new YoLong(namePrefix + "LastCommandId", registry);
-      lastCommandId.set(Packet.INVALID_MESSAGE_ID);
+      lastCommandId.set(INVALID_MESSAGE_ID);
 
       isReadyToHandleQueuedCommands = new YoBoolean(namePrefix + "IsReadyToHandleQueuedPelvisHeightTrajectoryCommands", registry);
       numberOfQueuedCommands = new YoLong(namePrefix + "NumberOfQueuedCommands", registry);
@@ -89,7 +88,7 @@ public class HeightOffsetHandler
 
    public void reset()
    {
-      lastCommandId.set(Packet.INVALID_MESSAGE_ID);
+      lastCommandId.set(INVALID_MESSAGE_ID);
       isReadyToHandleQueuedCommands.set(false);
       numberOfQueuedCommands.set(0);
 

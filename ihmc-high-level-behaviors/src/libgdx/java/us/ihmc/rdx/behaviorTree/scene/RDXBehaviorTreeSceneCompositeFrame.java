@@ -1,6 +1,6 @@
 package us.ihmc.rdx.behaviorTree.scene;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectDefinitionMessage;
+import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
 import imgui.ImGui;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.ui.RDXBaseUI;

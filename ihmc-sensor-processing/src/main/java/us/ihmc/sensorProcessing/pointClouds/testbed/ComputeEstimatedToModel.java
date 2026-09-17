@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.thoughtworks.xstream.XStream;
-
 import georegression.struct.se.Se3_F64;
 
 /**
@@ -36,8 +34,8 @@ public class ComputeEstimatedToModel {
 
          Se3_F64 estimatedToWorld, modelToWorld;
          try {
-            estimatedToWorld = (Se3_F64) new XStream().fromXML(new FileInputStream(nameEstimated));
-            modelToWorld = (Se3_F64) new XStream().fromXML(new FileInputStream(nameModel));
+            estimatedToWorld = Se3F64XmlIO.read(new FileInputStream(nameEstimated));
+            modelToWorld = Se3F64XmlIO.read(new FileInputStream(nameModel));
          } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
          }
@@ -77,7 +75,7 @@ public class ComputeEstimatedToModel {
       System.out.println("Best.  Translation error 50% = "+ bestError);
 
       try {
-         new XStream().toXML(best, new FileOutputStream("estimatedToModel.xml"));
+         Se3F64XmlIO.write(best, new FileOutputStream("estimatedToModel.xml"));
       } catch (FileNotFoundException e) {
          throw new RuntimeException(e);
       }

@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class RDXZEDShapePointCounterWithColorDemo
 {
-   private static final String SVO_FILE = "/home/duncan/Downloads/20260220_105325_AlexPushPullDoorDataCloser.svo2";
+   private static final String SVO_FILE = "/home/duncan/Downloads/20260331_165223_AlexTennisBallPickAndPlace2.svo2";
 
    private static final String[] SHAPES = new String[] {"Sphere", "Capsule"};
    private static final Color DEFAULT_COLOR = new Color(0.45f, 0.75f, 1.0f, 1.0f);

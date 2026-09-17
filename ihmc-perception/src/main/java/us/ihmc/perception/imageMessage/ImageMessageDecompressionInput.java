@@ -3,7 +3,8 @@ package us.ihmc.perception.imageMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.ImageMessage;
+import us.ihmc.communication.packets.MessageTools;
 
 import java.nio.ByteBuffer;
 
@@ -17,6 +18,7 @@ public class ImageMessageDecompressionInput
    private BytePointer decompressionInputBytePointer = new BytePointer();
    private final Mat decompressionInputMat = new Mat(1, 1, opencv_core.CV_8UC1);
    private boolean matIsUpToDate = false;
+   private byte[] copyBuffer = new byte[0];
 
    public void extract(ImageMessage imageMessage)
    {
@@ -31,7 +33,7 @@ public class ImageMessageDecompressionInput
       }
       else
       {  // For non-direct buffers, reallocate only if more space is needed and copy the data
-         long messageDataSize = imageMessage.getData().size();
+         int messageDataSize = imageMessage.getData().size();
 
          // Reallocate buffer if it doesn't have enough space
          if (decompressionInputBytePointer.isNull() || decompressionInputBytePointer.capacity() < messageDataSize)
@@ -40,16 +42,12 @@ public class ImageMessageDecompressionInput
             decompressionInputBytePointer = new BytePointer(messageDataSize + (messageDataSize / 20));
          }
 
+         if (copyBuffer.length < messageDataSize)
+            copyBuffer = new byte[messageDataSize];
+
          decompressionInputBytePointer.position(0);
-         if (dataBuffer.hasArray())
-         {  // If the buffer has a backing array, copy data from that
-            decompressionInputBytePointer.put(imageMessage.getData().getBuffer().array(), 0, (int) messageDataSize);
-         }
-         else
-         {  // Otherwise loop over the buffer and copy into the pointer
-            for (int i = 0; i < messageDataSize; ++i)
-               decompressionInputBytePointer.put(i, dataBuffer.get(i));
-         }
+         MessageTools.copyTo(imageMessage.getData(), copyBuffer, 0);
+         decompressionInputBytePointer.put(copyBuffer, 0, messageDataSize);
       }
 
       decompressionInputBytePointer.limit(imageMessage.getData().size());

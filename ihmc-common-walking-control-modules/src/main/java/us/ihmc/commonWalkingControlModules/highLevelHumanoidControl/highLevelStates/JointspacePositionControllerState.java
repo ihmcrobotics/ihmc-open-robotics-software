@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
+import controller_msgs.JointspaceTrajectoryStatusMessage;
 import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TIntIntHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -14,7 +14,6 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WholeBodyJointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -184,8 +183,8 @@ public class JointspacePositionControllerState extends HighLevelControllerState
       {
          matchingCombinedStatus = combinedStatuses.add();
          matchingCombinedStatus.getJointNames().clear();
-         matchingCombinedStatus.getActualJointPositions().reset();
-         matchingCombinedStatus.getDesiredJointPositions().reset();
+           matchingCombinedStatus.getActualJointPositions().clear();
+           matchingCombinedStatus.getDesiredJointPositions().clear();
          matchingCombinedStatus.setTimestamp(jointStatus.getTimestamp());
          matchingCombinedStatus.setSequenceId(jointStatus.getSequenceId());
          matchingCombinedStatus.setTrajectoryExecutionStatus(jointStatus.getTrajectoryExecutionStatus());
@@ -193,7 +192,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
 
       for (int i = 0; i < jointStatus.getJointNames().size(); i++)
       { // There should be only one joint, but oh well
-         matchingCombinedStatus.getJointNames().add(jointStatus.getJointNames().getString(i));
+           matchingCombinedStatus.getJointNames().add(jointStatus.getJointNames().getAsString(i));
          matchingCombinedStatus.getActualJointPositions().add(jointStatus.getActualJointPositions().get(i));
          matchingCombinedStatus.getDesiredJointPositions().add(jointStatus.getDesiredJointPositions().get(i));
       }
@@ -280,7 +279,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
          statusHelper = new OneDoFJointTrajectoryStatusMessageHelper(joint);
 
          lastCommandId = new YoLong(joint.getName() + "LastCommandId", registry);
-         lastCommandId.set(Packet.INVALID_MESSAGE_ID);
+         lastCommandId.set(QueueableCommand.INVALID_MESSAGE_ID);
       }
 
       public void doControl(JointDesiredOutputBasics jointDesiredOutput)
@@ -399,7 +398,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
 
       private boolean validateQueueableProperties(QueueableCommand<?, ?> queueingProperties)
       {
-         if (queueingProperties.getCommandId() == Packet.INVALID_MESSAGE_ID)
+         if (queueingProperties.getCommandId() == QueueableCommand.INVALID_MESSAGE_ID)
          {
             LogTools.warn(warningPrefix + "Recieved packet with invalid ID.");
             return false;
@@ -450,7 +449,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
 
       private void resetLastCommandId()
       {
-         lastCommandId.set(Packet.INVALID_MESSAGE_ID);
+         lastCommandId.set(QueueableCommand.INVALID_MESSAGE_ID);
       }
 
       public void queueInitialPointAtCurrent()

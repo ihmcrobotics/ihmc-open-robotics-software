@@ -1,11 +1,12 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.MultiContactTrajectoryMessage;
-import controller_msgs.msg.dds.MultiContactTrajectorySequenceMessage;
+import controller_msgs.MultiContactTrajectoryMessage;
+import controller_msgs.MultiContactTrajectorySequenceMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
-import us.ihmc.idl.IDLSequence;
+
+import java.util.List;
 
 public class MultiContactTrajectorySequenceCommand implements Command<MultiContactTrajectorySequenceCommand, MultiContactTrajectorySequenceMessage>,
       EpsilonComparable<MultiContactTrajectorySequenceCommand>
@@ -37,7 +38,7 @@ public class MultiContactTrajectorySequenceCommand implements Command<MultiConta
       clear();
       sequenceId = message.getSequenceId();
 
-      IDLSequence.Object<MultiContactTrajectoryMessage> trajectoryMessages = message.getTrajectorySequence();
+      var trajectoryMessages = message.getTrajectorySequence();
       for (int i = 0; i < trajectoryMessages.size(); i++)
       {
          this.trajectorySequence.add().setFromMessage(trajectoryMessages.get(i));

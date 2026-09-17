@@ -1,11 +1,11 @@
 package us.ihmc.rdx.velocityBasedLocomotion;
 
-import controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage;
-import controller_msgs.msg.dds.ContinuousStepGeneratorParametersMessage;
-import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
-import controller_msgs.msg.dds.ControllerWalkToGoalStatusMessage;
-import controller_msgs.msg.dds.ControllerWaypointGoalMessage;
-import controller_msgs.msg.dds.VelocityBasedWalkingInputMessage;
+import controller_msgs.ContinuousStepGeneratorInputMessage;
+import controller_msgs.ContinuousStepGeneratorParametersMessage;
+import controller_msgs.ContinuousStepGeneratorStatusMessage;
+import controller_msgs.ControllerWalkToGoalStatusMessage;
+import controller_msgs.ControllerWaypointGoalMessage;
+import controller_msgs.VelocityBasedWalkingInputMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
@@ -18,11 +18,11 @@ import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
 
 public class RDXCSGPanel extends RDXPanel
 {

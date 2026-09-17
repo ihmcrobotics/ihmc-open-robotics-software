@@ -354,7 +354,10 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
 
          yoPositionTau.set(kp.getValue() * yoPositionError.getValue());
          yoVelocityTau.set(kd.getValue() * yoVelocityError.getValue());
-         simInput.setEffort(yoControllerTau.getValue() + yoPositionTau.getValue() + yoVelocityTau.getValue());
+         double torque = MathTools.clamp(yoControllerTau.getValue() + yoPositionTau.getValue() + yoVelocityTau.getValue(),
+                                         simOutput.getEffortLimitLower(),
+                                         simOutput.getEffortLimitUpper());
+         simInput.setEffort(torque);
          previousVelocity.set(simOutput.getQd());
       }
 

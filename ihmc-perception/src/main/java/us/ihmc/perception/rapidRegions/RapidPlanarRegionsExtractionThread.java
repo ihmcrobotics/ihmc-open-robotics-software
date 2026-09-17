@@ -4,16 +4,16 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.perception.RawImage;
-import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.perception.comms.PerceptionComms;
-import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.perception.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensors.CameraIntrinsics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
 {
    private static final double UPDATE_FREQUENCY = 10.0;
 
-   private final ROS2Helper ros2Helper;
+   private final ROS2PublisherMap publisherMap;
 
    private final MutableReferenceFrame sensorFrame;
    private final BlockingQueue<RawImage> rawImageCollection;
@@ -46,7 +46,7 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
 
       this.rawImageCollection = rawImageCollection;
       this.ros2StoredPropertySetGroup = new ROS2StoredPropertySetGroup(ros2Node);
-      this.ros2Helper = new ROS2Helper(ros2Node);
+      this.publisherMap = new ROS2PublisherMap(ros2Node);
       this.sensorFrame = new MutableReferenceFrame("PlanarRegionExtractionSensorFrame", ReferenceFrame.getWorldFrame());
    }
 
@@ -82,7 +82,7 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
             consumer.accept(framePlanarRegions.copy());
 
          // Publish the frame planar regions
-         PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegions, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
+         PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegions, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, publisherMap);
 
          depthImage.release();
       }

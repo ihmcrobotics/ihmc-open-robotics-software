@@ -1,15 +1,14 @@
 package us.ihmc.communication.ros2.tf2;
 
-import geometry_msgs.msg.dds.TransformStamped;
-import tf2_msgs.msg.dds.TFMessage;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import geometry_msgs.TransformStamped;
+import tf2_msgs.TFMessage;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Subscription;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
+import us.ihmc.jros2.ROS2MessageReader;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Subscription;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -17,10 +16,8 @@ import java.util.concurrent.ConcurrentSkipListMap;
 @SuppressWarnings("ForLoopReplaceableByForEach")
 public class ROS2TFTree
 {
-   public static final ROS2Topic<TFMessage> TF_TOPIC = new ROS2Topic<>().withModule("tf").withQoS(ROS2QosProfile.RELIABLE()).withType(TFMessage.class);
-   public static final ROS2Topic<TFMessage> TF_STATIC_TOPIC = new ROS2Topic<>().withModule("tf_static")
-                                                                               .withQoS(ROS2QosProfile.KEEP_HISTORY(1))
-                                                                               .withType(TFMessage.class);
+   public static final ROS2Topic<TFMessage> TF_TOPIC = new HumanoidROS2Topic<>().withModule("tf").withType(TFMessage.class);
+   public static final ROS2Topic<TFMessage> TF_STATIC_TOPIC = new HumanoidROS2Topic<>().withModule("tf_static").withType(TFMessage.class);
 
    private static ROS2TFTree instance = null;
 
@@ -49,7 +46,7 @@ public class ROS2TFTree
 
       transforms = new ConcurrentSkipListMap<>(CharSequence::compare);
 
-      ros2Node = new ROS2NodeBuilder().build("TFNode");
+      ros2Node = new ROS2Node("TFNode");
 
       tfMessage = new TFMessage();
       tfSubscription = ros2Node.createSubscription(TF_TOPIC, subscriber -> receiveTFMessage(subscriber, tfMessage));
@@ -68,17 +65,17 @@ public class ROS2TFTree
       return ros2Node;
    }
 
-   private void receiveTFMessage(@SuppressWarnings("deprecation") Subscriber<TFMessage> subscriber, TFMessage tfMessage)
+   private void receiveTFMessage(ROS2MessageReader<TFMessage> reader, TFMessage tfMessage)
    {
       // Read the new message
-      subscriber.takeNextData(tfMessage, null);
+      reader.read(tfMessage);
 
       // Ignore null or empty messages
       if (tfMessage == null || tfMessage.getTransforms().isEmpty())
          return;
 
       // Update the transforms
-      RecyclingArrayList<TransformStamped> receivedTransforms = tfMessage.getTransforms();
+      IDLObjectSequence<TransformStamped> receivedTransforms = tfMessage.getTransforms();
       for (int i = 0; i < receivedTransforms.size(); ++i)
       {
          TransformStamped receivedMessage = receivedTransforms.get(i);
@@ -98,10 +95,10 @@ public class ROS2TFTree
    private void close()
    {
       if (tfSubscription != null)
-         tfSubscription.remove();
+         ros2Node.destroySubscription(tfSubscription);
       if (tfStaticSubscription != null)
-         tfStaticSubscription.remove();
+         ros2Node.destroySubscription(tfStaticSubscription);
       if (ros2Node != null)
-         ros2Node.destroy();
+         ros2Node.close();
    }
 }

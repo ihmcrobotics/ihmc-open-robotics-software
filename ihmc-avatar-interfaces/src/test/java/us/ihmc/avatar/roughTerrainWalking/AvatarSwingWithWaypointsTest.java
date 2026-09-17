@@ -1,15 +1,13 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
 
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -47,7 +45,8 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInterface
 {
@@ -81,7 +80,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
          FootstepDataListMessage footsteps = new FootstepDataListMessage();
          FootstepDataMessage footstepData = footsteps.getFootstepDataList().add();
          footstepData.setRobotSide(robotSide.toByte());
-         footstepData.getLocation().set(footstepPose.getPosition());
+         footstepData.getLocation().getPoint().set(footstepPose.getPosition());
          footstepData.getOrientation().set(footstepPose.getOrientation());
 
          simulationTestHelper.publishToController(footsteps);
@@ -95,14 +94,14 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
          FootstepDataListMessage footsteps = new FootstepDataListMessage();
          FootstepDataMessage footstepData = footsteps.getFootstepDataList().add();
          footstepData.setRobotSide(robotSide.toByte());
-         footstepData.getLocation().set(footstepPose.getPosition());
+         footstepData.getLocation().getPoint().set(footstepPose.getPosition());
          footstepData.getOrientation().set(footstepPose.getOrientation());
 
          footstepData.setTrajectoryType(TrajectoryType.CUSTOM.toByte());
          footstepData.getCustomPositionWaypoints().add().set(footstepPose.getPosition());
          footstepData.getCustomPositionWaypoints().add().set(footstepPose.getPosition());
 
-         footstepData.getCustomPositionWaypoints().get(0).addY(1.0);
+         footstepData.getCustomPositionWaypoints().get(0).getPoint().addY(1.0);
 
          simulationTestHelper.publishToController(footsteps);
          assertTrue(simulationTestHelper.simulateNow(0.25));
@@ -136,7 +135,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       FootstepDataMessage footstepData = footsteps.getFootstepDataList().add();
       footstepData.setRobotSide(robotSide.toByte());
-      footstepData.getLocation().set(footstepPose.getPosition());
+      footstepData.getLocation().getPoint().set(footstepPose.getPosition());
       footstepData.getOrientation().set(footstepPose.getOrientation());
 
       int waypoints = 4;

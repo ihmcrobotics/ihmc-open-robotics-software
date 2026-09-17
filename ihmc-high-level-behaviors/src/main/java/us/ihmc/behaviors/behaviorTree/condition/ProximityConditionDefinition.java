@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.condition;
 
-import behavior_msgs.msg.dds.ConditionNodeDefinitionMessage;
+import behavior_msgs.ConditionNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;

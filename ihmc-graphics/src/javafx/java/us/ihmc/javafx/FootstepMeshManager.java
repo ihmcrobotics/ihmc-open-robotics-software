@@ -1,6 +1,6 @@
 package us.ihmc.javafx;
 
-import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.FootstepDataMessage;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
@@ -64,7 +64,7 @@ public class FootstepMeshManager
       Color footColor = getFootstepColor(footstepDataMessage);
       RobotSide robotSide = RobotSide.fromByte(footstepDataMessage.getRobotSide());
 
-      transformToWorld.set(footstepDataMessage.getOrientation(), footstepDataMessage.getLocation());
+      transformToWorld.set(footstepDataMessage.getOrientation().getQuaternion(), footstepDataMessage.getLocation().getPoint());
 
       if (ignorePartialFootholds.getAsBoolean() || footstepDataMessage.getPredictedContactPoints2d().isEmpty())
       {
@@ -72,7 +72,7 @@ public class FootstepMeshManager
       }
       else
       {
-         footstepDataMessage.getPredictedContactPoints2d().forEach(p -> foothold.addVertex(p.getX(), p.getY()));
+         footstepDataMessage.getPredictedContactPoints2d().forEach(p -> foothold.addVertex(p.getPoint().getX(), p.getPoint().getY()));
          foothold.update();
       }
 

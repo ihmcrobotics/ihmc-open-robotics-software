@@ -1,5 +1,7 @@
 package us.ihmc.perception.detections.yolo;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
@@ -11,10 +13,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.stream.Stream;
 
 public class YOLOv8ToolsTest
 {
@@ -34,29 +37,35 @@ public class YOLOv8ToolsTest
    @BeforeAll
    public static void createTestingDirectory() throws IOException
    {
-      // create temporary testing directory
-      assertTrue(testDirectory.mkdir());
+      if (Files.exists(testDirectoryPath))
+         deleteRecursively(testDirectoryPath);
+
+      Files.createDirectories(goodYoloModelDirectory.toPath());
+      Files.createDirectories(badYoloModelDirectory.toPath());
+      Files.createFile(validONNXFile.toPath());
+      Files.createFile(validClassNameFile.toPath());
+      Files.createFile(someOtherFile.toPath());
+      Files.createFile(randomFile.toPath());
+
       testDirectory.deleteOnExit();
+   }
 
-      // create good model directory
-      assertTrue(goodYoloModelDirectory.mkdir());
-      goodYoloModelDirectory.deleteOnExit();
-
-      assertTrue(validONNXFile.createNewFile());
-      validONNXFile.deleteOnExit();
-
-      assertTrue(validClassNameFile.createNewFile());
-      validClassNameFile.deleteOnExit();
-
-      assertTrue(someOtherFile.createNewFile());
-      someOtherFile.deleteOnExit();
-
-      // create bad model directory
-      assertTrue(badYoloModelDirectory.mkdir());
-      badYoloModelDirectory.deleteOnExit();
-
-      assertTrue(randomFile.createNewFile());
-      randomFile.deleteOnExit();
+   private static void deleteRecursively(Path root) throws IOException
+   {
+      try (Stream<Path> paths = Files.walk(root))
+      {
+         paths.sorted(Comparator.reverseOrder()).forEach(path ->
+         {
+            try
+            {
+               Files.delete(path);
+            }
+            catch (IOException e)
+            {
+               throw new RuntimeException(e);
+            }
+         });
+      }
    }
 
    @Test

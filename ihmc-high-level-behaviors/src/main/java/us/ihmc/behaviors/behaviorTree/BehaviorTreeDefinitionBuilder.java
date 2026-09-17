@@ -38,7 +38,6 @@ public class BehaviorTreeDefinitionBuilder
       MAP.put(PelvisActionDefinition.class, PelvisActionDefinition::new);
       MAP.put(AbilityHandActionDefinition.class, AbilityHandActionDefinition::new);
       MAP.put(EZGripperActionDefinition.class, EZGripperActionDefinition::new);
-      MAP.put(ScrewPrimitiveActionDefinition.class, ScrewPrimitiveActionDefinition::new);
       MAP.put(WaitActionDefinition.class, WaitActionDefinition::new);
       MAP.put(LegActionDefinition.class, LegActionDefinition::new);
    }

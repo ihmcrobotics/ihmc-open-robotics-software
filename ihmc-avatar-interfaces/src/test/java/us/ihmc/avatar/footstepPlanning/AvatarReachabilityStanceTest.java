@@ -2,18 +2,13 @@ package us.ihmc.avatar.footstepPlanning;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-
+import controller_msgs.HandTrajectoryMessage;
+import controller_msgs.HeadTrajectoryMessage;
+import controller_msgs.PelvisHeightTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
@@ -27,8 +22,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -41,6 +37,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInterface
 {
@@ -108,9 +108,9 @@ public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInte
          KinematicsToolboxSnapshotDescription snapshotToTest = feasibleSolutions.get(indexToTest);
          feasibleSolutions.remove(indexToTest);
 
-         IDLSequence.Float jointAngles = snapshotToTest.getIkSolution().getDesiredJointAngles();
-         Point3D rootPosition = snapshotToTest.getIkSolution().getDesiredRootPosition();
-         Quaternion rootOrientation = snapshotToTest.getIkSolution().getDesiredRootOrientation();
+         IDLFloatSequence jointAngles = snapshotToTest.getIkSolution().getDesiredJointAngles();
+         Point3D rootPosition = new Point3D(snapshotToTest.getIkSolution().getDesiredRootPosition().getPoint());
+         Quaternion rootOrientation = new Quaternion(snapshotToTest.getIkSolution().getDesiredRootOrientation().getQuaternion());
 
          FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
          OneDoFJointBasics[] ikJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);

@@ -15,6 +15,11 @@ public interface HighLevelControllerParameters
 
    WholeBodySetpointParameters getStandPrepParameters();
 
+   default WholeBodySetpointParameters getGroundPrepParameters()
+   {
+      return null;
+   }
+
    default WholeBodySetpointParameters getFallingControllerParameters()
    {
       return null;
@@ -32,6 +37,15 @@ public interface HighLevelControllerParameters
    boolean automaticallyTransitionToWalkingWhenReady();
 
    double getTimeToMoveInStandPrep();
+
+   /**
+    * Duration of the ground-prep joint spline. Separate from {@link #getTimeToMoveInStandPrep()}.
+    * Mimic stand-up / lie-down can override this per request via {@code HighLevelStateMessage.trajectory_time}.
+    */
+   default double getTimeToMoveInGroundPrep()
+   {
+      return 4.0;
+   }
 
    double getMinimumTimeInStandReady();
 

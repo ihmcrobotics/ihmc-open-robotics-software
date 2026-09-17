@@ -1,16 +1,16 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
-import controller_msgs.msg.dds.IMUPacket;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.SpatialVectorMessage;
+import controller_msgs.IMUPacket;
+import controller_msgs.RobotConfigurationData;
+import controller_msgs.SpatialVectorMessage;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.FloatingJointStateReadOnly;
@@ -29,7 +29,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    private final List<? extends IMUSensorReadOnly> imuSensorData;
    private final List<? extends ForceSensorDataReadOnly> forceSensorData;
 
-   private List<RobotFrameDataPublisher> robotFrameDataPublishers = new ArrayList<>();
+   private final List<RobotFrameDataPublisher> robotFrameDataPublishers = new ArrayList<>();
    private final SensorTimestampHolder timestampHolder;
    private final RobotMotionStatusHolder robotMotionStatusHolder;
 
@@ -44,8 +44,8 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
 
    /**
     * Intended to be instantiated only using {@link RobotConfigurationDataPublisherFactory}.
-    * 
-    * @param realtimeROS2Node        the ROS 2 node to create the publisher with.
+    *
+    * @param ros2Node                the ROS 2 node to create the publisher with.
     * @param outputTopic             the generator to use to create the name of the topic.
     * @param rootJointSensorData     the data provider for the root joint.
     * @param jointSensorData         the data providers for the 1-DoF joints.
@@ -55,7 +55,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
     * @param robotMotionStatusHolder the data provider for the robot motion status.
     * @param publishPeriod           period in nanoseconds to publish.
     */
-   public RobotConfigurationDataPublisher(RealtimeROS2Node realtimeROS2Node,
+   public RobotConfigurationDataPublisher(ROS2Node ros2Node,
                                           ROS2Topic<?> outputTopic,
                                           FloatingJointStateReadOnly rootJointSensorData,
                                           List<? extends OneDoFJointStateReadOnly> jointSensorData,
@@ -75,12 +75,12 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       this.publishPeriod = publishPeriod;
 
       robotConfigurationData.setJointNameHash(RobotConfigurationDataFactory.calculateJointNameHash(jointSensorData, forceSensorData, imuSensorData));
-      robotConfigurationDataPublisher = realtimeROS2Node.createPublisher(StateEstimatorAPI.getRobotConfigurationDataTopic(outputTopic));
+      robotConfigurationDataPublisher = ros2Node.createPublisher(StateEstimatorAPI.getRobotConfigurationDataTopic(outputTopic));
 
       // Create RobotFrameDataPublishers here.
       for (ReferenceFrame frame : frameData)
       {
-         robotFrameDataPublishers.add(new RobotFrameDataPublisher(frame, realtimeROS2Node, outputTopic));
+         robotFrameDataPublishers.add(new RobotFrameDataPublisher(frame, ros2Node, outputTopic));
       }
    }
 
@@ -103,16 +103,16 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       robotConfigurationData.setSyncTimestamp(timestampHolder.getSyncTimestamp());
 
       // Write root joint data
-      robotConfigurationData.getRootOrientation().set(rootJointSensorData.getPose().getOrientation());
-      robotConfigurationData.getRootPosition().set(rootJointSensorData.getPose().getPosition());
-      robotConfigurationData.getPelvisAngularVelocity().set(rootJointSensorData.getTwist().getAngularPart());
-      robotConfigurationData.getPelvisLinearVelocity().set(rootJointSensorData.getTwist().getLinearPart());
-      robotConfigurationData.getPelvisLinearAcceleration().set(rootJointSensorData.getAcceleration().getLinearPart());
+      robotConfigurationData.getRootOrientation().getQuaternion().set(rootJointSensorData.getPose().getOrientation());
+      robotConfigurationData.getRootPosition().getPoint().set(rootJointSensorData.getPose().getPosition());
+      robotConfigurationData.getPelvisAngularVelocity().getVector().set(rootJointSensorData.getTwist().getAngularPart());
+      robotConfigurationData.getPelvisLinearVelocity().getVector().set(rootJointSensorData.getTwist().getLinearPart());
+      robotConfigurationData.getPelvisLinearAcceleration().getVector().set(rootJointSensorData.getAcceleration().getLinearPart());
 
       // Write 1-DoF joint data
-      robotConfigurationData.getJointAngles().reset();
-      robotConfigurationData.getJointVelocities().reset();
-      robotConfigurationData.getJointTorques().reset();
+      robotConfigurationData.getJointAngles().clear();
+      robotConfigurationData.getJointVelocities().clear();
+      robotConfigurationData.getJointTorques().clear();
 
       for (int i = 0; i < jointSensorData.size(); i++)
       {
@@ -132,9 +132,9 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
             IMUSensorReadOnly imuSensor = imuSensorData.get(i);
             IMUPacket imuPacketToPack = robotConfigurationData.getImuSensorData().add();
 
-            imuPacketToPack.getOrientation().set(imuSensor.getOrientationMeasurement());
-            imuPacketToPack.getAngularVelocity().set(imuSensor.getAngularVelocityMeasurement());
-            imuPacketToPack.getLinearAcceleration().set(imuSensor.getLinearAccelerationMeasurement());
+            imuPacketToPack.getOrientation().getQuaternion().set(imuSensor.getOrientationMeasurement());
+            imuPacketToPack.getAngularVelocity().getVector().set(imuSensor.getAngularVelocityMeasurement());
+            imuPacketToPack.getLinearAcceleration().getVector().set(imuSensor.getLinearAccelerationMeasurement());
          }
       }
 
@@ -146,8 +146,8 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
          for (int i = 0; i < forceSensorData.size(); i++)
          {
             SpatialVectorMessage forceDataToPack = robotConfigurationData.getForceSensorData().add();
-            forceDataToPack.getAngularPart().set(forceSensorData.get(i).getWrench().getAngularPart());
-            forceDataToPack.getLinearPart().set(forceSensorData.get(i).getWrench().getLinearPart());
+            forceDataToPack.getAngularPart().getVector().set(forceSensorData.get(i).getWrench().getAngularPart());
+            forceDataToPack.getLinearPart().getVector().set(forceSensorData.get(i).getWrench().getLinearPart());
          }
       }
 
@@ -169,9 +169,9 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       robotConfigurationDataPublisher.publish(robotConfigurationData);
 
       // publish robot frame data
-      for (RobotFrameDataPublisher robotFrameDataPublisher : robotFrameDataPublishers)
+      for (int i = 0; i < robotFrameDataPublishers.size(); i++)
       {
-         robotFrameDataPublisher.publish();
+         robotFrameDataPublishers.get(i).publish();
       }
    }
 

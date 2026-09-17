@@ -1,19 +1,19 @@
 package us.ihmc.behaviors.behaviorTree.control.ai2r;
 
-import behavior_msgs.msg.dds.AI2RCommandMessage;
-import behavior_msgs.msg.dds.AI2RNavigationMessage;
-import behavior_msgs.msg.dds.AI2RReceiveObjectMessage;
+import behavior_msgs.AI2RCommandMessage;
+import behavior_msgs.AI2RNavigationMessage;
+import behavior_msgs.AI2RReceiveObjectMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.SceneActionState;
-import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionFootstepState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionState;
+import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.idl.IDLSequence.StringBuilderHolder;
+import us.ihmc.fastddsjava.cdr.idl.IDLStringSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -78,7 +78,7 @@ public class AI2RSkillEditor
       if (!behaviorToExecuteName.contains("SCAN") || !message.getAdaptingBehavior())
          return;
 
-      StringBuilderHolder objectsToScan = message.getScan().getObjectNames();
+      IDLStringSequence objectsToScan = message.getScan().getObjectNames();
 
       // Collect all existing "Setup object" SceneActions
       List<SceneActionState> allSetupActions = new ArrayList<>();
@@ -101,7 +101,7 @@ public class AI2RSkillEditor
       // For each object i, try to update its left/right/front if they exist
       for (int i = 0; i < objectsToScan.size(); i++)
       {
-         String objectName = objectsToScan.getString(i);
+         String objectName = objectsToScan.getAsString(i);
          String idToken = Integer.toString(i + 1); // "1", "2", ...
 
          SceneActionState left  = null;

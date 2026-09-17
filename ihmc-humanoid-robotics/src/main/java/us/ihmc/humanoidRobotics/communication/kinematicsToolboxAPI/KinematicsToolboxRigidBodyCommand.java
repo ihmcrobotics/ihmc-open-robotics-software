@@ -1,8 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
-import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
-import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import ihmc_common_msgs.SelectionMatrix3DMessage;
+import ihmc_common_msgs.WeightMatrix3DMessage;
+import toolbox_msgs.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -84,10 +84,10 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       sequenceId = message.getSequenceId();
       endEffectorHashCode = message.getEndEffectorHashCode();
       endEffector = rigidBodyHashCodeResolver.castAndGetRigidBody(endEffectorHashCode);
-      desiredPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredPositionInWorld(), message.getDesiredOrientationInWorld());
+      desiredPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredPositionInWorld().getPoint(), message.getDesiredOrientationInWorld().getQuaternion());
       desiredVelocity.setToZero(ReferenceFrame.getWorldFrame()); // TODO Consider adding desired velocity to the message
       ReferenceFrame referenceFrame = endEffector == null ? null : endEffector.getBodyFixedFrame();
-      controlFramePose.setIncludingFrame(referenceFrame, message.getControlFramePositionInEndEffector(), message.getControlFrameOrientationInEndEffector());
+      controlFramePose.setIncludingFrame(referenceFrame, message.getControlFramePositionInEndEffector().getPoint(), message.getControlFrameOrientationInEndEffector().getQuaternion());
       weightMatrix.clear();
       WeightMatrix3DMessage angularWeight = message.getAngularWeightMatrix();
       WeightMatrix3DMessage linearWeight = message.getLinearWeightMatrix();
@@ -108,7 +108,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
 
       hasDesiredVelocity = message.getHasDesiredAngularVelocity() && message.getHasDesiredLinearVelocity();
-      desiredVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredAngularVelocityInWorld(), message.getDesiredLinearVelocityInWorld());
+      desiredVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredAngularVelocityInWorld().getVector(), message.getDesiredLinearVelocityInWorld().getVector());
 
       linearRateLimitation = message.getLinearRateLimitation();
       angularRateLimitation = message.getAngularRateLimitation();

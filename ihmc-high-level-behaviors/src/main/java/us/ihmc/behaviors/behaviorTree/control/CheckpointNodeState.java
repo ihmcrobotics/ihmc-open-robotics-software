@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.control;
 
-import behavior_msgs.msg.dds.CheckpointNodeStateMessage;
+import behavior_msgs.CheckpointNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 

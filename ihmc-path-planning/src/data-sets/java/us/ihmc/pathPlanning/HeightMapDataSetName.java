@@ -1,9 +1,7 @@
 package us.ihmc.pathPlanning;
 
-import perception_msgs.msg.dds.TerrainMapMessage;
-import perception_msgs.msg.dds.TerrainMapMessagePubSubType;
+import perception_msgs.TerrainMapMessage;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 
@@ -41,11 +39,9 @@ public enum HeightMapDataSetName
       Class<DataSetIOTools> loadingClass = DataSetIOTools.class;
       String dataSetPlanarRegionsPath = DATA_SET_DIRECTORY_PATH + "/" + name().toLowerCase() + ".json";
       InputStream inputStream = loadingClass.getClassLoader().getResourceAsStream(dataSetPlanarRegionsPath);
-      JSONSerializer<TerrainMapMessage> serializer = new JSONSerializer<>(new TerrainMapMessagePubSubType());
-
       try
       {
-         message = serializer.deserialize(inputStream);
+         message = HeightMapDataSetIOTools.loadTerrainMapMessage(inputStream);
          terrainMapData = TerrainMapMessageTools.unpackMessage(message);
       }
       catch (IOException e)

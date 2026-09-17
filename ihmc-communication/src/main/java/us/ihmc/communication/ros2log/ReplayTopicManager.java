@@ -1,14 +1,15 @@
 package us.ihmc.communication.ros2log;
 
 import gnu.trove.list.array.TLongArrayList;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.ObjLongConsumer;
 
-class ReplayTopicManager<T>
+class ReplayTopicManager<T extends ROS2Message<T>>
 {
    private final String topicName;
    private final Consumer<T> messageConsumer;
@@ -34,7 +35,15 @@ class ReplayTopicManager<T>
 
    private void updateInternal(long currentTime)
    {
+      if (timestamps.isEmpty())
+      {
+         isDone = true;
+         return;
+      }
+
       int latestIndex = getLatestIndex(currentTime);
+      if (latestIndex < 0)
+         return;
 
       if (latestIndex != lastSentIndex)
       {
@@ -72,7 +81,26 @@ class ReplayTopicManager<T>
       return topicName;
    }
 
-   public void setMutator(ObjLongConsumer<?> mutator)
+   int getLastSentIndex()
+   {
+      return lastSentIndex;
+   }
+
+   int getMessageCount()
+   {
+      return messages.size();
+   }
+
+   /**
+    * Timestamp of the last logged message, or {@code 0} if the topic has no messages.
+    */
+   long getEndTimestamp()
+   {
+      return timestamps.isEmpty() ? 0L : timestamps.get(timestamps.size() - 1);
+   }
+
+   @SuppressWarnings("unchecked")
+   public <S extends ROS2Message<S>> void setMutator(ObjLongConsumer<S> mutator)
    {
       this.mutator = (ObjLongConsumer<T>) mutator;
    }
@@ -80,6 +108,19 @@ class ReplayTopicManager<T>
    List<T> getMessages()
    {
       return messages;
+   }
+
+   long replayTimeUntilNextMessage(long currentTime)
+   {
+      if (isDone || timestamps.isEmpty())
+         return Long.MAX_VALUE;
+
+      int nextIndex = lastSentIndex + 1;
+      if (nextIndex >= timestamps.size())
+         return Long.MAX_VALUE;
+
+      long nextTimestamp = timestamps.get(nextIndex);
+      return Math.max(0L, nextTimestamp - currentTime);
    }
 
    TLongArrayList getTimestamps()

@@ -1,15 +1,13 @@
 package us.ihmc.avatar;
 
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
+import static org.junit.jupiter.api.Assertions.*;
 
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import controller_msgs.FootstepStatusMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
@@ -26,7 +24,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterface
 {
@@ -53,9 +52,9 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
       AtomicInteger stepCounter = new AtomicInteger();
       simulationTestHelper.getROS2Node().createSubscription(HumanoidControllerAPI.getOutputTopic(getSimpleRobotName())
-                                                                                 .withTypeName(FootstepStatusMessage.class), (p) ->
+                                                                                 .withType(FootstepStatusMessage.class), (p) ->
       {
-         if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
+         if (FootstepStatus.fromByte(p.read().getFootstepStatus()) == FootstepStatus.STARTED)
          {
             stepCounter.incrementAndGet();
          }
@@ -129,9 +128,9 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
       AtomicInteger stepCounter = new AtomicInteger();
       simulationTestHelper.getROS2Node().createSubscription(HumanoidControllerAPI.getOutputTopic(getSimpleRobotName())
-                                                                                 .withTypeName(FootstepStatusMessage.class), (p) ->
+                                                                                 .withType(FootstepStatusMessage.class), (p) ->
       {
-         if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
+         if (FootstepStatus.fromByte(p.read().getFootstepStatus()) == FootstepStatus.STARTED)
          {
             stepCounter.incrementAndGet();
          }
@@ -210,9 +209,9 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
       AtomicInteger stepCounter = new AtomicInteger();
       simulationTestHelper.getROS2Node().createSubscription(HumanoidControllerAPI.getOutputTopic(getSimpleRobotName())
-                                                                                 .withTypeName(FootstepStatusMessage.class), (p) ->
+                                                                                 .withType(FootstepStatusMessage.class), (p) ->
       {
-         if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
+         if (FootstepStatus.fromByte(p.read().getFootstepStatus()) == FootstepStatus.STARTED)
          {
             stepCounter.incrementAndGet();
          }
@@ -263,7 +262,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
    private FootstepDataMessage createFootstepDataMessage(Point3D stepLocation, Quaternion orient, RobotSide robotSide)
    {
       FootstepDataMessage footstepData = new FootstepDataMessage();
-      footstepData.getLocation().set(stepLocation);
+      footstepData.getLocation().getPoint().set(stepLocation);
       footstepData.getOrientation().set(orient);
       footstepData.setRobotSide(robotSide.toByte());
       return footstepData;

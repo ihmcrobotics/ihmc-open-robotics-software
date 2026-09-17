@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import behavior_msgs.msg.dds.LeafNodeStateMessage;
+import behavior_msgs.LeafNodeStateMessage;
 import us.ihmc.communication.crdt.CRDTStatusBoolean;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.log.LogTools;

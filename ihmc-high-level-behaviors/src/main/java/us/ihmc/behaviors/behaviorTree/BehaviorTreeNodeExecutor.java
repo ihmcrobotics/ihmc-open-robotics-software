@@ -8,9 +8,9 @@ import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * The base class for an executor node, which is the type that solely exists
@@ -51,7 +51,7 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
       this.state = state;
       this.rootNode = rootNode;
       this.robotModel = rootNode.getDefinition().getRobotModel();
-      this.ros2ControllerHelper = rootNode.getRos2ControllerHelper();
+      this.ros2ControllerHelper = rootNode.getROS2ControllerHelper();
       this.syncedRobot = rootNode.getSyncedRobot();
       this.controllerStatusTracker = rootNode.getControllerStatusTracker();
       this.abilityHandComms = rootNode.getAbilityHandComms();

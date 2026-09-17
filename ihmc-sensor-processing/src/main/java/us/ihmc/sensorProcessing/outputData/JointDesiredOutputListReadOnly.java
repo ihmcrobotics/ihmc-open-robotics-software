@@ -1,8 +1,8 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import controller_msgs.msg.dds.JointDesiredOutputMessage;
-import controller_msgs.msg.dds.RobotDesiredConfigurationData;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import controller_msgs.JointDesiredOutputMessage;
+import controller_msgs.RobotDesiredConfigurationData;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 
@@ -248,7 +248,7 @@ public interface JointDesiredOutputListReadOnly
 
    default void copyToMessage(RobotDesiredConfigurationData jointDesiredOutputListMessage)
    {
-      RecyclingArrayList<JointDesiredOutputMessage> jointDesiredOutputList = jointDesiredOutputListMessage.getJointDesiredOutputList();
+      IDLObjectSequence<JointDesiredOutputMessage> jointDesiredOutputList = jointDesiredOutputListMessage.getJointDesiredOutputList();
       jointDesiredOutputList.clear();
 
       for (int i = 0; i < getNumberOfJointsWithDesiredOutput(); i++)

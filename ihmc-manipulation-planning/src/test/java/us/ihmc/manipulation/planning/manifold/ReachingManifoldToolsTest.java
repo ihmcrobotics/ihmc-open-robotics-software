@@ -1,7 +1,9 @@
 package us.ihmc.manipulation.planning.manifold;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Test;
-import toolbox_msgs.msg.dds.ReachingManifoldMessage;
+import toolbox_msgs.ReachingManifoldMessage;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
@@ -16,8 +18,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class ReachingManifoldToolsTest
 {

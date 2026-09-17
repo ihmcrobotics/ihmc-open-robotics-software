@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.CapturabilityBasedStatus;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.external.ExternalControlCommandConsumer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.external.WholeBodyConfigurationManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;

@@ -6,8 +6,8 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionTaskspaceTrajectoryMode;
 import us.ihmc.behaviors.behaviorTree.action.actions.EZGripperActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.ScrewPrimitiveActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.SpineActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionDefinition;
@@ -17,7 +17,6 @@ import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeNode;
 import us.ihmc.rdx.behaviorTree.RDXLeafNode;
 import us.ihmc.rdx.behaviorTree.actions.RDXArmAction;
 import us.ihmc.rdx.behaviorTree.actions.RDXEZGripperAction;
-import us.ihmc.rdx.behaviorTree.actions.RDXScrewPrimitiveAction;
 import us.ihmc.rdx.behaviorTree.actions.RDXSpineAction;
 import us.ihmc.rdx.behaviorTree.actions.RDXWaitAction;
 import us.ihmc.rdx.behaviorTree.actions.RDXWalkAction;
@@ -114,7 +113,10 @@ public class RDXBehaviorTreeSVGNode
       }
       else if (node instanceof RDXArmAction action)
       {
-         duration = action.getDefinition().getTrajectoryDuration();
+         if (action.getDefinition().getTaskspaceTrajectoryMode() == ArmActionTaskspaceTrajectoryMode.SCREW_PRIMITIVE)
+            duration = action.getState().getPreviewTrajectoryDuration().getValue();
+         else
+            duration = action.getDefinition().getTrajectoryDuration();
       }
       else if (node instanceof RDXSpineAction action)
       {
@@ -128,12 +130,6 @@ public class RDXBehaviorTreeSVGNode
       {
          duration = 0.5; // TODO
       }
-      else if (node instanceof RDXScrewPrimitiveAction action)
-      {
-         duration = 2.0; // TODO
-      }
-
-
       timeViewX += (int) Math.round(duration * secondsToPixels);
 
 //      svgGraphics2D.setColor(color);
@@ -207,16 +203,15 @@ public class RDXBehaviorTreeSVGNode
          return "Action Sequence";
       if (node instanceof WaitActionDefinition)
          return "Wait Action";
-      if (node instanceof ArmActionDefinition)
-         return "Arm Action";
+      if (node instanceof ArmActionDefinition armActionDefinition)
+         return armActionDefinition.getTaskspaceTrajectoryMode() == ArmActionTaskspaceTrajectoryMode.SCREW_PRIMITIVE
+                ? "Screw Trajectory Action" : "Arm Action";
       if (node instanceof WalkActionDefinition)
          return "Walk Action";
       if (node instanceof SpineActionDefinition)
          return "Spine Action";
       if (node instanceof EZGripperActionDefinition)
          return "Finger Trajectory Action";
-      if (node instanceof ScrewPrimitiveActionDefinition)
-         return "Screw Trajectory Action";
       return "";
    }
 }

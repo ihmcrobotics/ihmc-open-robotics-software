@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
+import controller_msgs.SakeHandDesiredCommandMessage;
 import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;

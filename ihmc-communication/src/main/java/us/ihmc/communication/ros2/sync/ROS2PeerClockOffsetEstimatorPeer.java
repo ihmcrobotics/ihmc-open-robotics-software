@@ -1,7 +1,7 @@
 package us.ihmc.communication.ros2.sync;
 
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.pubsub.common.Guid;
+import us.ihmc.jros2.Guid;
 
 import java.time.Duration;
 import java.time.Instant;

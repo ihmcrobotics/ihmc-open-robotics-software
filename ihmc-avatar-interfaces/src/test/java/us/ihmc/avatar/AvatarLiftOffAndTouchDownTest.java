@@ -1,10 +1,8 @@
 package us.ihmc.avatar;
 
-import java.util.Arrays;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
@@ -24,6 +22,8 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
+
+import java.util.Arrays;
 
 public class AvatarLiftOffAndTouchDownTest
 {
@@ -51,7 +51,7 @@ public class AvatarLiftOffAndTouchDownTest
       footstepPose.setZ(0.0);
       footstepPose.getOrientation().setYawPitchRoll(footstepPose.getYaw(), 0.0, 0.0);
       step.setRobotSide(side.toByte());
-      step.getLocation().set(footstepPose.getPosition());
+      step.getLocation().getPoint().set(footstepPose.getPosition());
       step.getOrientation().set(footstepPose.getOrientation());
 
       step.setTrajectoryType(TrajectoryType.WAYPOINTS.toByte());
@@ -105,7 +105,7 @@ public class AvatarLiftOffAndTouchDownTest
       waypoint1.getOrientation().set(waypointPose1.getOrientation());
       waypoint1.getAngularVelocity().set(waypoint1AngularVelocity);
       waypoint2.getPosition().set(waypointPose2.getPosition());
-      waypoint2.getLinearVelocity().set(0.0, 0.0, touchdownVelocity);
+      waypoint2.getLinearVelocity().getVector().set(0.0, 0.0, touchdownVelocity);
       waypoint2.getOrientation().set(waypointPose2.getOrientation());
       waypoint2.getAngularVelocity().set(waypoint1AngularVelocity);
 

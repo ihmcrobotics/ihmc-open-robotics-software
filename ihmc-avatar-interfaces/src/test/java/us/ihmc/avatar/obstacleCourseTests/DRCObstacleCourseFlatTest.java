@@ -1,19 +1,17 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import static org.junit.jupiter.api.Assertions.*;
 
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.scriptCommandGenerator.ExerciseAndJUnitScript;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
@@ -55,7 +53,7 @@ import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface
 {
@@ -99,15 +97,12 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
-
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
 
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), flatGround, simulationTestingParameters);
       simulationTestHelper.start();
-      simulationTestHelper.simulateNow(0.001);
-      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-      simulationTestHelper.loadScriptFile(scriptInputStream, ReferenceFrame.getWorldFrame());
+      simulationTestHelper.simulateNow(1.0);
+      simulationTestHelper.runExerciseScript(ExerciseAndJUnitScript.SIMPLE_FLAT_GROUND_SCRIPT, ReferenceFrame.getWorldFrame());
 
       setupCameraForWalkingUpToRamp();
 
@@ -196,7 +191,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    }
 
    @Test
-   public void testSimpleScripts() throws IOException
+   public void testSimpleScripts()
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -216,24 +211,16 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       leftSole.changeFrame(ReferenceFrame.getWorldFrame());
       System.out.println("leftSole = " + leftSole);
 
-      String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleSingleStepScript.xml";
-      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-      simulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame);
+      simulationTestHelper.runExerciseScript(ExerciseAndJUnitScript.SIMPLE_SINGLE_STEP_SCRIPT, leftSoleFrame);
       success = success && simulationTestHelper.simulateNow(3.0);
 
-      scriptName = "scripts/ExerciseAndJUnitScripts/SimpleSingleHandTrajectoryScript.xml";
-      scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-      simulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame);
+      simulationTestHelper.runExerciseScript(ExerciseAndJUnitScript.SIMPLE_SINGLE_HAND_TRAJECTORY_SCRIPT, leftSoleFrame);
       success = success && simulationTestHelper.simulateNow(4.0);
 
-      scriptName = "scripts/ExerciseAndJUnitScripts/SimpleSingleFootTrajectoryScript.xml";
-      scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-      simulationTestHelper.loadScriptFile(scriptInputStream, rightSoleFrame);
+      simulationTestHelper.runExerciseScript(ExerciseAndJUnitScript.SIMPLE_SINGLE_FOOT_TRAJECTORY_SCRIPT, rightSoleFrame);
       success = success && simulationTestHelper.simulateNow(4.0);
 
-      scriptName = "scripts/ExerciseAndJUnitScripts/SimpleSinglePelvisHeightScript.xml";
-      scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-      simulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame);
+      simulationTestHelper.runExerciseScript(ExerciseAndJUnitScript.SIMPLE_SINGLE_PELVIS_HEIGHT_SCRIPT, leftSoleFrame);
       success = success && simulationTestHelper.simulateNow(4.0);
 
       // TODO GITHUB WORKFLOWS
@@ -520,12 +507,11 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private void loadScriptFileInLeftSoleFrame(String scriptName)
+   private void runExerciseScriptInLeftSoleFrame(ExerciseAndJUnitScript script)
    {
       FullHumanoidRobotModel controllerFullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       ReferenceFrame leftSoleFrame = controllerFullRobotModel.getSoleFrame(RobotSide.LEFT);
-      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-      simulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame);
+      simulationTestHelper.runExerciseScript(script, leftSoleFrame);
    }
 
    public void testLongStepsMaxHeightPauseAndResume()
@@ -541,8 +527,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       boolean success = simulationTestHelper.simulateNow(1.0);
 
-      String scriptName = "scripts/ExerciseAndJUnitScripts/LongStepsMaxHeightPauseAndRestart_LeftFootTest.xml";
-      loadScriptFileInLeftSoleFrame(scriptName);
+      runExerciseScriptInLeftSoleFrame(ExerciseAndJUnitScript.LONG_STEPS_MAX_HEIGHT_PAUSE_AND_RESTART_LEFT_FOOT_TEST);
 
       ThreadTools.sleep(1000);
       
@@ -755,7 +740,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
          FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
          FramePose3D pose = new FramePose3D(soleFrames.get(side));
          pose.changeFrame(ReferenceFrame.getWorldFrame());
-         footstep.getLocation().set(pose.getPosition());
+         footstep.getLocation().getPoint().set(pose.getPosition());
          footstep.getOrientation().set(pose.getOrientation());
          footstep.setRobotSide(side.toByte());
       }

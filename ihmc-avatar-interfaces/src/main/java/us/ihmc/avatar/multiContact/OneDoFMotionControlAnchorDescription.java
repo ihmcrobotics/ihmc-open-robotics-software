@@ -1,15 +1,13 @@
 package us.ihmc.avatar.multiContact;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import toolbox_msgs.KinematicsToolboxOneDoFJointMessage;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessagePubSubType;
-import us.ihmc.idl.serializers.extra.JSONSerializer;
+import java.io.IOException;
 
 public class OneDoFMotionControlAnchorDescription
 {
@@ -19,7 +17,6 @@ public class OneDoFMotionControlAnchorDescription
    public static final String IK_SOLVER_MESSAGE_JSON = SixDoFMotionControlAnchorDescription.IK_SOLVER_MESSAGE_JSON;
 
    private static final ObjectMapper objectMapper = new ObjectMapper(new JsonFactory());
-   private static final JSONSerializer<KinematicsToolboxOneDoFJointMessage> messageSerializer = new JSONSerializer<>(new KinematicsToolboxOneDoFJointMessagePubSubType());
 
    public String jointName;
    private boolean isTrackingController;
@@ -45,7 +42,9 @@ public class OneDoFMotionControlAnchorDescription
          OneDoFMotionControlAnchorDescription description = new OneDoFMotionControlAnchorDescription();
          description.setJointName(anchorNode.get(JOINT_NAME_JSON).asText());
          description.setTrackingController(anchorNode.get(IS_TRACKING_CONTROLLER_JSON).asBoolean());
-         description.setInputMessage(messageSerializer.deserialize(anchorNode.get(IK_SOLVER_MESSAGE_JSON).toString()));
+         KinematicsToolboxOneDoFJointMessage inputMessage = new KinematicsToolboxOneDoFJointMessage();
+         ROS2MessageCdrFileTools.deserializeFromJsonNode(anchorNode.get(IK_SOLVER_MESSAGE_JSON), inputMessage);
+         description.setInputMessage(inputMessage);
          return description;
       }
       catch (IOException e)
@@ -62,22 +61,8 @@ public class OneDoFMotionControlAnchorDescription
       anchorJSON.put(JOINT_NAME_JSON, jointName);
       anchorJSON.put(IS_TRACKING_CONTROLLER_JSON, isTrackingController);
 
-      try
-      {
-         anchorJSON.set(IK_SOLVER_MESSAGE_JSON, messageToJSON(messageSerializer, inputMessage));
-
-         return root;
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-         return null;
-      }
-   }
-
-   private static <T> JsonNode messageToJSON(JSONSerializer<T> serializer, T message) throws IOException
-   {
-      return objectMapper.readTree(serializer.serializeToString(message));
+      anchorJSON.set(IK_SOLVER_MESSAGE_JSON, ROS2MessageCdrFileTools.messageToJsonNode(objectMapper, inputMessage));
+      return root;
    }
 
    public String getJointName()

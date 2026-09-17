@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import java.util.Map;
-
-import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
+import controller_msgs.JointspaceTrajectoryStatusMessage;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.JointspaceTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -28,6 +26,8 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.Map;
 
 /**
  * Manages control of a rigid body by controlling a number of joint ancestors

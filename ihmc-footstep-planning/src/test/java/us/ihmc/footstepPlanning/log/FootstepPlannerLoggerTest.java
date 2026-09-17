@@ -1,14 +1,17 @@
 package us.ihmc.footstepPlanning.log;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket;
-import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
-import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
-import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import toolbox_msgs.msg.dds.SwingPlannerParametersPacket;
+import toolbox_msgs.AStarBodyPathPlannerParametersPacket;
+import toolbox_msgs.FootstepPlannerParametersPacket;
+import toolbox_msgs.FootstepPlanningRequestPacket;
+import toolbox_msgs.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.SwingPlannerParametersPacket;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -23,8 +26,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class FootstepPlannerLoggerTest
 {
@@ -133,27 +134,34 @@ public class FootstepPlannerLoggerTest
       // Expected request packet, this variable gets packed with the data from the request
       FootstepPlanningRequestPacket expectedRequestPacket = new FootstepPlanningRequestPacket();
       request.setPacket(expectedRequestPacket);
-      assertTrue(expectedRequestPacket.epsilonEquals(log.getRequestPacket(), EPSILON));
+      assertArrayEquals(ROS2MessageCdrFileTools.serializeToBytes(expectedRequestPacket),
+                        ROS2MessageCdrFileTools.serializeToBytes(log.getRequestPacket()));
 
       // Expected footstep planner parameters
       FootstepPlannerParametersPacket expectedFootstepPlannerParameters = new FootstepPlannerParametersPacket();
       FootstepPlannerMessageTools.copyParametersToPacket(expectedFootstepPlannerParameters, planningModule.getFootstepPlannerParameters());
-      assertTrue(expectedFootstepPlannerParameters.epsilonEquals(log.getFootstepParametersPacket(), EPSILON));
+      assertArrayEquals(ROS2MessageCdrFileTools.serializeToBytes(expectedFootstepPlannerParameters),
+                        ROS2MessageCdrFileTools.serializeToBytes(log.getFootstepParametersPacket()));
 
-      // Expected output status packet, this variable gets packed with the data from the planner output
+      // Expected output status packet, packed the same way as FootstepPlannerLogger.logSession
       FootstepPlanningToolboxOutputStatus expectedOutputStatusPacket = new FootstepPlanningToolboxOutputStatus();
-      plannerOutput.setPacket(expectedOutputStatusPacket);
-      assertTrue(expectedOutputStatusPacket.epsilonEquals(log.getStatusPacket(), EPSILON));
+      planningModule.getOutput().setPacket(expectedOutputStatusPacket);
+      FootstepPlanningToolboxOutputStatus loggedOutputStatusPacket = log.getStatusPacket();
+      assertEquals(expectedOutputStatusPacket.getPlanId(), loggedOutputStatusPacket.getPlanId());
+      assertEquals(expectedOutputStatusPacket.getFootstepPlanningResult(), loggedOutputStatusPacket.getFootstepPlanningResult());
+      assertEquals(expectedOutputStatusPacket.getBodyPathPlanningResult(), loggedOutputStatusPacket.getBodyPathPlanningResult());
 
       // Expected body path planner packet
       AStarBodyPathPlannerParametersPacket expectedBodyPathParameters = new AStarBodyPathPlannerParametersPacket();
       expectedBodyPathParameters.set(planningModule.getAStarBodyPathPlannerParameters().getAsPacket());
-      assertTrue(expectedBodyPathParameters.epsilonEquals(log.getAStarBodyPathPlannerParametersPacket(), EPSILON));
+      assertArrayEquals(ROS2MessageCdrFileTools.serializeToBytes(expectedBodyPathParameters),
+                        ROS2MessageCdrFileTools.serializeToBytes(log.getAStarBodyPathPlannerParametersPacket()));
 
       // Expected swing planner parameters
       SwingPlannerParametersPacket expectedSwingPlannerParameters = new SwingPlannerParametersPacket();
       expectedSwingPlannerParameters.set(planningModule.getSwingPlannerParameters().getAsPacket());
-      assertTrue(expectedSwingPlannerParameters.epsilonEquals(log.getSwingPlannerParametersPacket(), EPSILON));
+      assertArrayEquals(ROS2MessageCdrFileTools.serializeToBytes(expectedSwingPlannerParameters),
+                        ROS2MessageCdrFileTools.serializeToBytes(log.getSwingPlannerParametersPacket()));
 
       // Delete the log to avoid creating a bunch of logs when running these tests
       FootstepPlannerLogger.deleteOldLogs(0, logDirectory);

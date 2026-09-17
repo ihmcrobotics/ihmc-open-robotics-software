@@ -2,16 +2,9 @@ package us.ihmc.communication.packets;
 
 import static us.ihmc.robotics.Assert.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import org.junit.jupiter.api.Test;
-
-import perception_msgs.msg.dds.PlanarRegionMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.PlanarRegionMessage;
+import perception_msgs.PlanarRegionsListMessage;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -24,10 +17,23 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTestTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 public class PlanarRegionMessageConverterTest
 {
    private static final int ITERATIONS = 30;
    private static final double EPSILON = 1.0e-12;
+
+   // Per region: vertex_buffer[<=1000], convex_polygons_size[<=20]. Stay safely under limits.
+   private static final int MAX_CONVEX_POLYGONS_PER_REGION = 10;
+   private static final int MAX_VERTICES_PER_CONVEX_POLYGON = 50;
+   private static final int MAX_CONCAVE_HULL_VERTICES = 100;
+   // Per list: region_id[<=3000], vertex_buffer[<=50000].
+   private static final int MAX_REGIONS_PER_LIST = 20;
 
    @Test
    public void testPlanarRegionConversion()
@@ -100,7 +106,7 @@ public class PlanarRegionMessageConverterTest
 
    private static List<PlanarRegion> nextPlanarRegionList(Random random)
    {
-      int size = random.nextInt(100);
+      int size = random.nextInt(MAX_REGIONS_PER_LIST + 1);
       return IntStream.range(0, size).mapToObj(i -> nextPlanarRegion(random)).collect(Collectors.toList());
    }
 
@@ -123,13 +129,15 @@ public class PlanarRegionMessageConverterTest
 
    private static List<ConvexPolygon2D> nextConvexPolygon2Ds(Random random)
    {
-      int size = random.nextInt(100);
-      return IntStream.range(0, size).mapToObj(i -> EuclidGeometryRandomTools.nextConvexPolygon2D(random, 10.0, 100)).collect(Collectors.toList());
+      int size = random.nextInt(MAX_CONVEX_POLYGONS_PER_REGION + 1);
+      return IntStream.range(0, size)
+                      .mapToObj(i -> EuclidGeometryRandomTools.nextConvexPolygon2D(random, 10.0, MAX_VERTICES_PER_CONVEX_POLYGON))
+                      .collect(Collectors.toList());
    }
 
    private static List<Point2D> nextPoint2DList(Random random)
    {
-      int size = random.nextInt(500);
+      int size = random.nextInt(MAX_CONCAVE_HULL_VERTICES + 1);
       return IntStream.range(0, size).mapToObj(i -> EuclidCoreRandomTools.nextPoint2D(random)).collect(Collectors.toList());
    }
 }

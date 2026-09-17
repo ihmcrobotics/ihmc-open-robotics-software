@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import toolbox_msgs.WholeBodyTrajectoryToolboxConfigurationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
 public class WholeBodyTrajectoryToolboxConfigurationCommand

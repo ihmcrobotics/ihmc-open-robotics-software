@@ -1,9 +1,9 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.MultiContactBalanceStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.CapturabilityBasedStatus;
+import controller_msgs.MultiContactBalanceStatus;
+import controller_msgs.RobotConfigurationData;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -21,9 +21,10 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxSupportRegionCommand;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.jros2.AsyncROS2Node;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,9 +36,9 @@ public class KinematicsToolboxModule extends ToolboxModule
    private final HumanoidKinematicsToolboxController kinematicsToolBoxController;
    private final RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
 
-   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node realtimeROS2Node)
+   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, AsyncROS2Node asyncROS2Node)
    {
-      this(robotModel, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS, DEFAULT_SETUP_INITIAL_CONFIGURATION, realtimeROS2Node);
+      this(robotModel, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS, DEFAULT_SETUP_INITIAL_CONFIGURATION, asyncROS2Node);
    }
 
    public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer)
@@ -64,14 +65,14 @@ public class KinematicsToolboxModule extends ToolboxModule
                                    boolean startYoVariableServer,
                                    int updatePeriodMilliseconds,
                                    boolean setupInitialConfiguration,
-                                   RealtimeROS2Node realtimeROS2Node)
+                                   AsyncROS2Node asyncROS2Node)
    {
       super(robotModel.getSimpleRobotName(),
             robotModel.createFullRobotModel(),
             robotModel.getLogModelProvider(),
             startYoVariableServer,
             updatePeriodMilliseconds,
-            realtimeROS2Node);
+            asyncROS2Node);
       kinematicsToolBoxController = new HumanoidKinematicsToolboxController(commandInputManager,
                                                                             statusOutputManager,
                                                                             fullRobotModel,
@@ -89,26 +90,16 @@ public class KinematicsToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2Node ros2Node)
    {
-      RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
-
-      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), s ->
+      ros2Node.createSubscriptionSampler(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), sample ->
       {
          if (kinematicsToolBoxController != null)
-         {
-            s.takeNextData(robotConfigurationData, null);
-            robotStateUpdater.setRobotConfigurationData(robotConfigurationData);
-         }
+            robotStateUpdater.setRobotConfigurationData(sample);
       });
 
-      CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
-
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName), s ->
+      ros2Node.createSubscriptionSampler(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName), sample ->
       {
          if (kinematicsToolBoxController != null)
-         {
-            s.takeNextData(capturabilityBasedStatus, null);
-            kinematicsToolBoxController.updateCapturabilityBasedStatus(capturabilityBasedStatus);
-         }
+            kinematicsToolBoxController.updateCapturabilityBasedStatus(sample);
       });
    }
 
@@ -145,14 +136,14 @@ public class KinematicsToolboxModule extends ToolboxModule
     * directed to the source the of the input messages.
     */
    @Override
-   public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
+   public List<Class<? extends ROS2Message<?>>> createListOfSupportedStatus()
    {
       return supportedStatus();
    }
 
-   public static List<Class<? extends Settable<?>>> supportedStatus()
+   public static List<Class<? extends ROS2Message<?>>> supportedStatus()
    {
-      List<Class<? extends Settable<?>>> status = new ArrayList<>();
+      List<Class<? extends ROS2Message<?>>> status = new ArrayList<>();
       status.add(KinematicsToolboxOutputStatus.class);
       return status;
    }

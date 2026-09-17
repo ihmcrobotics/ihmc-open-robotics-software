@@ -1,14 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.EnumMap;
-
+import controller_msgs.GoHomeMessage;
 import org.apache.commons.lang3.mutable.MutableBoolean;
-
-import controller_msgs.msg.dds.GoHomeMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.EnumMap;
 
 /**
  * Upon receiving a {@link GoHomeCommand} the controller will bring the given part of the body back

@@ -1,8 +1,8 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsStreamingToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsStreamingToolboxInitialConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxConfigurationMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTFBOutputProcessor;
@@ -16,9 +16,9 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import java.util.HashMap;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

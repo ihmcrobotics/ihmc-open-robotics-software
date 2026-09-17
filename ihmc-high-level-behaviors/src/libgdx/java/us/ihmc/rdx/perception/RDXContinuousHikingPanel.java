@@ -1,6 +1,9 @@
 package us.ihmc.rdx.perception;
 
-import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
+import static us.ihmc.communication.HumanoidControllerAPI.getLowFrequencyTopic;
+import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
+
+import behavior_msgs.ContinuousHikingCommandMessage;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -8,22 +11,21 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.studiohartman.jamepad.ControllerButton;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.PlanOffsetStatus;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import ihmc_common_msgs.msg.dds.PoseListMessage;
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepStatusMessage;
+import controller_msgs.PlanOffsetStatus;
+import controller_msgs.WalkingControllerFailureStatusMessage;
+import ihmc_common_msgs.PoseListMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import std_msgs.msg.dds.Empty;
-import std_msgs.msg.dds.Float32;
+import std_msgs.Empty;
+import std_msgs.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commons.thread.Throttler;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
-import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.euclid.Axis3D;
@@ -39,11 +41,17 @@ import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
+import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.filters.DepthImageFilteringParameters;
+import us.ihmc.perception.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.perception.gpuMapping.HeightMapParameters;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.perception.gpuMapping.TerrainMapParameters;
+import us.ihmc.perception.rapidRegions.PolygonizerParameters;
 import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -51,23 +59,15 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
-import us.ihmc.perception.geometry.ConcaveHullFactoryParameters;
-import us.ihmc.perception.rapidRegions.PolygonizerParameters;
-import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.perception.gpuMapping.HeightMapParameters;
+import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-
-import static us.ihmc.communication.HumanoidControllerAPI.getLowFrequencyTopic;
-import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 
 public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProvider
 {
@@ -98,6 +98,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
 
+   private final ROS2Node ros2Node;
    private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitorUI;
    private final ContinuousHikingCommandMessage commandMessage = new ContinuousHikingCommandMessage();
    private final ROS2Publisher<ContinuousHikingCommandMessage> commandPublisher;
@@ -128,6 +129,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    {
       super("Continuous Hiking");
       setRenderMethod(this::renderImGuiWidgets);
+      this.ros2Node = ros2Node;
 
       footstepStatusMessagePublisher = ros2Node.createPublisher(getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()));
       walkingControllerFailureStatusPublisher = ros2Node.createPublisher(getTopic(WalkingControllerFailureStatusMessage.class,
@@ -141,12 +143,12 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                                                                monteCarloPlannerParameters,
                                                                robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
 
-      ros2Node.createSubscription(getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
-                                  (s) -> terrainPlanningDebugger.reset());
+      ros2Node.createSubscriptionSampler(getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
+                                           sample -> terrainPlanningDebugger.reset());
 
-      ros2Node.createSubscription2(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
-      ros2Node.createSubscription2(ContinuousHikingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
-      ros2Node.createSubscription2(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
+      ros2Node.createSubscriptionSampler(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
+      ros2Node.createSubscriptionSampler(ContinuousHikingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
+      ros2Node.createSubscriptionSampler(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
 
       commandPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND);
       squareUpPublisher = ros2Node.createPublisher(ContinuousHikingAPI.SQUARE_UP_STEP);
@@ -248,7 +250,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       if (ros2Throttler.run())
       {
-         updateRos2StoredPropertySets();
+         updateROS2StoredPropertySets();
       }
    }
 
@@ -257,7 +259,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
     * These are all the parameters that are getting synced back and forth between the remote process and the local process.
     * There are three situations that can occur when trying to use Continuous Hiking.
     */
-   private void updateRos2StoredPropertySets()
+   private void updateROS2StoredPropertySets()
    {
       hostStoredPropertySets.setPropertyChanged();
    }
@@ -586,7 +588,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    public void destroy()
    {
-      commandPublisher.remove();
+      ros2Node.destroyPublisher(commandPublisher);
       stancePoseSelectionPanel.destroy();
       terrainPlanningDebugger.destroy();
    }

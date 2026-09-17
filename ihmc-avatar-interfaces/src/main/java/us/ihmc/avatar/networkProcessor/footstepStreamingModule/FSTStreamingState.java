@@ -1,6 +1,6 @@
 package us.ihmc.avatar.networkProcessor.footstepStreamingModule;
 
-import toolbox_msgs.msg.dds.FootstepStreamingToolboxOutputStatus;
+import toolbox_msgs.FootstepStreamingToolboxOutputStatus;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;

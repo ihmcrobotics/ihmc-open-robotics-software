@@ -87,4 +87,49 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    {
       set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
    }
+
+   default void setICPFilter(boolean icpFilter)
+   {
+      set(HeightMapParameters.icpFilter, icpFilter);
+   }
+
+   default void setICPRotationEnabled(boolean icpRotationEnabled)
+   {
+      set(HeightMapParameters.icpRotationEnabled, icpRotationEnabled);
+   }
+
+   default void setICPMaxIterations(int icpMaxIterations)
+   {
+      set(HeightMapParameters.icpMaxIterations, icpMaxIterations);
+   }
+
+   default void setICPMinCorrespondenceCount(int icpMinCorrespondenceCount)
+   {
+      set(HeightMapParameters.icpMinCorrespondenceCount, icpMinCorrespondenceCount);
+   }
+
+   default void setICPMaxHorizontalDrift(double icpMaxHorizontalDrift)
+   {
+      set(HeightMapParameters.icpMaxHorizontalDrift, icpMaxHorizontalDrift);
+   }
+
+   default void setICPOutlierDistanceThreshold(double icpOutlierDistanceThreshold)
+   {
+      set(HeightMapParameters.icpOutlierDistanceThreshold, icpOutlierDistanceThreshold);
+   }
+
+   default void setICPVariancePerMeterOfCorrection(double icpVariancePerMeterOfCorrection)
+   {
+      set(HeightMapParameters.icpVariancePerMeterOfCorrection, icpVariancePerMeterOfCorrection);
+   }
+
+   default void setICPConvergenceZMeters(double icpConvergenceZMeters)
+   {
+      set(HeightMapParameters.icpConvergenceZMeters, icpConvergenceZMeters);
+   }
+
+   default void setICPConvergenceYawDegrees(double icpConvergenceYawDegrees)
+   {
+      set(HeightMapParameters.icpConvergenceYawDegrees, icpConvergenceYawDegrees);
+   }
 }

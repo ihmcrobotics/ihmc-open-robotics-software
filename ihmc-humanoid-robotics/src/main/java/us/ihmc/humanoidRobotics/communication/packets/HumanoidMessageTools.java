@@ -1,43 +1,43 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import controller_msgs.msg.dds.*;
+import static us.ihmc.euclid.tools.EuclidCoreTools.zeroVector3D;
+
+import controller_msgs.*;
 import gnu.trove.list.array.TDoubleArrayList;
-import ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
-import ihmc_common_msgs.msg.dds.FrameInformation;
-import ihmc_common_msgs.msg.dds.QueueableMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
-import ihmc_common_msgs.msg.dds.StampedPosePacket;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
-import perception_msgs.msg.dds.DetectedObjectPacket;
-import perception_msgs.msg.dds.IntrinsicParametersMessage;
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.ReachingManifoldMessage;
-import toolbox_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
-import toolbox_msgs.msg.dds.WaypointBasedTrajectoryMessage;
-import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
+import ihmc_common_msgs.EuclideanTrajectoryMessage;
+import ihmc_common_msgs.EuclideanTrajectoryPointMessage;
+import ihmc_common_msgs.FrameInformation;
+import ihmc_common_msgs.QueueableMessage;
+import ihmc_common_msgs.SE3TrajectoryMessage;
+import ihmc_common_msgs.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.SO3TrajectoryMessage;
+import ihmc_common_msgs.SO3TrajectoryPointMessage;
+import ihmc_common_msgs.StampedPosePacket;
+import ihmc_common_msgs.TrajectoryPoint1DMessage;
+import perception_msgs.DetectedObjectPacket;
+import perception_msgs.IntrinsicParametersMessage;
+import toolbox_msgs.KinematicsPlanningToolboxCenterOfMassMessage;
+import toolbox_msgs.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.KinematicsPlanningToolboxRigidBodyMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import toolbox_msgs.ReachingManifoldMessage;
+import toolbox_msgs.RigidBodyExplorationConfigurationMessage;
+import toolbox_msgs.WaypointBasedTrajectoryMessage;
+import toolbox_msgs.WholeBodyTrajectoryToolboxConfigurationMessage;
+import toolbox_msgs.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
+import us.ihmc.euclid.jros2.messages.EuclidPoint3DMessage;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
@@ -50,6 +50,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
@@ -59,7 +60,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
@@ -71,7 +71,6 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.partNames.HandJointName;
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -80,8 +79,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static us.ihmc.euclid.tools.EuclidCoreTools.zeroVector3D;
 
 public class HumanoidMessageTools
 {
@@ -94,7 +91,7 @@ public class HumanoidMessageTools
    public static DesiredAccelerationsMessage createDesiredAccelerationsMessage(double[] desiredJointAccelerations)
    {
       DesiredAccelerationsMessage message = new DesiredAccelerationsMessage();
-      message.getDesiredJointAccelerations().add(desiredJointAccelerations);
+      message.getDesiredJointAccelerations().addAll(desiredJointAccelerations);
       return message;
    }
 
@@ -105,8 +102,8 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static ChestHybridJointspaceTaskspaceTrajectoryMessage createChestHybridJointspaceTaskspaceTrajectoryMessage(SO3TrajectoryMessage taskspaceTrajectoryMessage,
-                                                                                                                       JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   public static ChestHybridJointspaceTaskspaceTrajectoryMessage createChestHybridTrajectoryMessage(SO3TrajectoryMessage taskspaceTrajectoryMessage,
+                                                                                                    JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
       ChestHybridJointspaceTaskspaceTrajectoryMessage message = new ChestHybridJointspaceTaskspaceTrajectoryMessage();
       message.getTaskspaceTrajectoryMessage().set(taskspaceTrajectoryMessage);
@@ -137,7 +134,8 @@ public class HumanoidMessageTools
    public static ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide robotSide, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
       ArmTrajectoryMessage message = new ArmTrajectoryMessage();
-      message.getJointspaceTrajectory().set(new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage));
+      JointspaceTrajectoryMessage copy = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
+      message.getJointspaceTrajectory().set(copy);
       message.setRobotSide(robotSide.toByte());
       return message;
    }
@@ -338,7 +336,7 @@ public class HumanoidMessageTools
    public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBodyBasics rigidBody)
    {
       ConfigurationSpaceName[] configurations = {ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z, ConfigurationSpaceName.YAW,
-            ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
+                                                 ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
       double[] regionAmplitude = new double[] {0, 0, 0, 0, 0, 0};
 
       return createRigidBodyExplorationConfigurationMessage(rigidBody, configurations, regionAmplitude);
@@ -367,13 +365,13 @@ public class HumanoidMessageTools
       byte[] degreesOfFreedomToExplore1 = ConfigurationSpaceName.toBytes(degreesOfFreedomToExplore);
       if (degreesOfFreedomToExplore1.length != explorationRangeAmplitudes.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore1.length
-               + ", explorationRangeLowerLimits.length = ");
+                                    + ", explorationRangeLowerLimits.length = ");
 
-      message.getConfigurationSpaceNamesToExplore().resetQuick();
-      message.getExplorationRangeUpperLimits().reset();
-      message.getExplorationRangeLowerLimits().reset();
+      message.getConfigurationSpaceNamesToExplore().clear();
+      message.getExplorationRangeUpperLimits().clear();
+      message.getExplorationRangeLowerLimits().clear();
 
-      message.getConfigurationSpaceNamesToExplore().add(degreesOfFreedomToExplore1);
+      message.getConfigurationSpaceNamesToExplore().addAll(degreesOfFreedomToExplore1);
 
       for (int i = 0; i < degreesOfFreedomToExplore1.length; i++)
       {
@@ -397,15 +395,15 @@ public class HumanoidMessageTools
       byte[] degreesOfFreedomToExplore1 = ConfigurationSpaceName.toBytes(degreesOfFreedomToExplore);
       if (degreesOfFreedomToExplore1.length != explorationRangeUpperLimits.length || degreesOfFreedomToExplore1.length != explorationRangeLowerLimits.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore1.length
-               + ", explorationRangeLowerLimits.length = ");
+                                    + ", explorationRangeLowerLimits.length = ");
 
-      message.getConfigurationSpaceNamesToExplore().resetQuick();
-      message.getExplorationRangeUpperLimits().reset();
-      message.getExplorationRangeLowerLimits().reset();
+      message.getConfigurationSpaceNamesToExplore().clear();
+      message.getExplorationRangeUpperLimits().clear();
+      message.getExplorationRangeLowerLimits().clear();
 
-      message.getConfigurationSpaceNamesToExplore().add(degreesOfFreedomToExplore1);
-      message.getExplorationRangeUpperLimits().add(explorationRangeUpperLimits);
-      message.getExplorationRangeLowerLimits().add(explorationRangeLowerLimits);
+      message.getConfigurationSpaceNamesToExplore().addAll(degreesOfFreedomToExplore1);
+      message.getExplorationRangeUpperLimits().addAll(explorationRangeUpperLimits);
+      message.getExplorationRangeLowerLimits().addAll(explorationRangeLowerLimits);
 
       return message;
    }
@@ -425,8 +423,8 @@ public class HumanoidMessageTools
       if (waypointTimes.length != waypoints.length)
          throw new RuntimeException("Inconsistent array lengths.");
 
-      message.getWaypointTimes().reset();
-      message.getWaypointTimes().add(waypointTimes);
+      message.getWaypointTimes().clear();
+      message.getWaypointTimes().addAll(waypointTimes);
       MessageTools.copyData(waypoints, message.getWaypoints());
       if (selectionMatrix != null)
       {
@@ -596,7 +594,7 @@ public class HumanoidMessageTools
    }
 
    public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime,
-                                                                       Orientation3DReadOnly desiredOrientation)
+                                                                     Orientation3DReadOnly desiredOrientation)
    {
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
       message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, ReferenceFrame.getWorldFrame()));
@@ -723,72 +721,65 @@ public class HumanoidMessageTools
     * Generates and publishes the head hybrid trajectory (SO3 + Jointspace).
     * Used for both UI widgets and N-pose.
     *
-    * @param neckJointNamesArray The array of the neck joint names
-    * @param desiredNeckPositions Array of desired joint positions (length = neck joints).
+    * @param spineJointNamesArray The array of the spine joint names
+    * @param desiredSpinePositions Array of desired joint positions (length = spine joints).
     * @param trajectoryTime Duration for the trajectory.
     */
-   public static HeadHybridJointspaceTaskspaceTrajectoryMessage createHeadJointspaceTaskspaceTrajectoryMessage(HumanoidReferenceFrames referenceFrames,
-                                                                                                               NeckJointName[] neckJointNamesArray,
-                                                                                                               double[] desiredNeckPositions,
-                                                                                                               double trajectoryTime)
+   public static ChestHybridJointspaceTaskspaceTrajectoryMessage createChestHybridTrajectoryMessage(ReferenceFrame desiredChestFrame,
+                                                                                                    ReferenceFrame pelvisFrame,
+                                                                                                    double[] desiredSpinePositions,
+                                                                                                    double trajectoryTime)
    {
-      FrameYawPitchRoll frameHeadYawPitchRoll = new FrameYawPitchRoll();
+      FrameOrientation3DBasics chestOrientation = new FrameQuaternion(desiredChestFrame);
+      chestOrientation.changeFrame(pelvisFrame);
 
-      // Compose the yaw/pitch/roll from desiredNeckPositions
-      for (int i = 0; i < neckJointNamesArray.length; i++)
-      {
-         switch (neckJointNamesArray[i])
-         {
-            case PROXIMAL_NECK_PITCH ->
-            {
-               frameHeadYawPitchRoll.changeFrame(referenceFrames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setPitch(desiredNeckPositions[i]);
-            }
-            case PROXIMAL_NECK_YAW ->
-            {
-               frameHeadYawPitchRoll.changeFrame(referenceFrames.getNeckFrame(NeckJointName.PROXIMAL_NECK_YAW));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setYaw(desiredNeckPositions[i]);
-            }
-            case PROXIMAL_NECK_ROLL ->
-            {
-               frameHeadYawPitchRoll.changeFrame(referenceFrames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setRoll(desiredNeckPositions[i]);
-            }
-            case DISTAL_NECK_PITCH ->
-            {
-               frameHeadYawPitchRoll.changeFrame(referenceFrames.getNeckFrame(NeckJointName.DISTAL_NECK_PITCH));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setPitch(desiredNeckPositions[i]);
-            }
-            case DISTAL_NECK_YAW ->
-            {
-               frameHeadYawPitchRoll.changeFrame(referenceFrames.getNeckFrame(NeckJointName.DISTAL_NECK_YAW));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setYaw(desiredNeckPositions[i]);
-            }
-            case DISTAL_NECK_ROLL ->
-            {
-               frameHeadYawPitchRoll.changeFrame(referenceFrames.getNeckFrame(NeckJointName.DISTAL_NECK_ROLL));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setRoll(desiredNeckPositions[i]);
-            }
-         }
-      }
-
-      frameHeadYawPitchRoll.changeFrame(referenceFrames.getChestFrame());
       SO3TrajectoryMessage taskspaceTrajectoryMessage = HumanoidMessageTools.createSO3TrajectoryMessage(trajectoryTime,
-                                                                                                        frameHeadYawPitchRoll,
+                                                                                                        chestOrientation,
                                                                                                         EuclidCoreTools.zeroVector3D,
-                                                                                                        referenceFrames.getChestFrame());
+                                                                                                        pelvisFrame);
 
       taskspaceTrajectoryMessage.getWeightMatrix().setXWeight(0.01);
       taskspaceTrajectoryMessage.getWeightMatrix().setYWeight(0.01);
       taskspaceTrajectoryMessage.getWeightMatrix().setZWeight(0.01);
 
-      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildHeadJointspaceTrajectoryMessage(desiredNeckPositions, trajectoryTime);
+      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildJointspaceTrajectoryMessage(QueueableMessage.EXECUTION_MODE_OVERRIDE,
+                                                                                                 desiredSpinePositions,
+                                                                                                 trajectoryTime);
+
+      ChestHybridJointspaceTaskspaceTrajectoryMessage hybridMessage = new ChestHybridJointspaceTaskspaceTrajectoryMessage();
+      hybridMessage.getTaskspaceTrajectoryMessage().set(taskspaceTrajectoryMessage);
+      hybridMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
+
+      return hybridMessage;
+   }
+
+   /**
+    * Generates and publishes the head hybrid trajectory (SO3 + Jointspace).
+    * Used for both UI widgets and N-pose.
+    *
+    * @param desiredNeckPositions Array of desired joint positions (length = neck joints).
+    * @param trajectoryTime Duration for the trajectory.
+    */
+   public static HeadHybridJointspaceTaskspaceTrajectoryMessage createHeadHybridTrajectoryMessage(ReferenceFrame desiredHeadFrame,
+                                                                                                  ReferenceFrame chestFrame,
+                                                                                                  double[] desiredNeckPositions,
+                                                                                                  double trajectoryTime)
+   {
+      FrameOrientation3DBasics headOrientation = new FrameQuaternion(desiredHeadFrame);
+      headOrientation.changeFrame(chestFrame);
+
+      SO3TrajectoryMessage taskspaceTrajectoryMessage = HumanoidMessageTools.createSO3TrajectoryMessage(trajectoryTime,
+                                                                                                        headOrientation,
+                                                                                                        EuclidCoreTools.zeroVector3D,
+                                                                                                        chestFrame);
+
+      taskspaceTrajectoryMessage.getWeightMatrix().setXWeight(0.01);
+      taskspaceTrajectoryMessage.getWeightMatrix().setYWeight(0.01);
+      taskspaceTrajectoryMessage.getWeightMatrix().setZWeight(0.01);
+
+      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildJointspaceTrajectoryMessage(QueueableMessage.EXECUTION_MODE_OVERRIDE,
+                                                                                                 desiredNeckPositions,
+                                                                                                 trajectoryTime);
 
       HeadHybridJointspaceTaskspaceTrajectoryMessage hybridMessage = new HeadHybridJointspaceTaskspaceTrajectoryMessage();
       hybridMessage.getTaskspaceTrajectoryMessage().set(taskspaceTrajectoryMessage);
@@ -800,11 +791,10 @@ public class HumanoidMessageTools
    /**
     * Build JointspaceTrajectoryMessage for head, parametrized.
     */
-   private static JointspaceTrajectoryMessage buildHeadJointspaceTrajectoryMessage(double[] jointAngles,
-                                                                                   double trajectoryTime)
+   private static JointspaceTrajectoryMessage buildJointspaceTrajectoryMessage(byte executionMode, double[] jointAngles, double trajectoryTime)
    {
       JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
-      jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+      jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(executionMode);
 
       for (double q : jointAngles)
       {
@@ -818,6 +808,7 @@ public class HumanoidMessageTools
 
       return jointspaceTrajectoryMessage;
    }
+
 
    /**
     * set a single point
@@ -963,10 +954,10 @@ public class HumanoidMessageTools
       FootstepStatusMessage message = new FootstepStatusMessage();
       message.setFootstepStatus(status.toByte());
       message.setFootstepIndex(footstepIndex);
-      message.getDesiredFootPositionInWorld().setToNaN();
-      message.getDesiredFootOrientationInWorld().setToNaN();
-      message.getActualFootPositionInWorld().setToNaN();
-      message.getActualFootOrientationInWorld().setToNaN();
+      message.getDesiredFootPositionInWorld().getPoint().setToNaN();
+      message.getDesiredFootOrientationInWorld().getQuaternion().setToNaN();
+      message.getActualFootPositionInWorld().getPoint().setToNaN();
+      message.getActualFootOrientationInWorld().getQuaternion().setToNaN();
       message.setRobotSide((byte) 255);
       return message;
    }
@@ -976,10 +967,10 @@ public class HumanoidMessageTools
       FootstepStatusMessage message = new FootstepStatusMessage();
       message.setFootstepStatus(status.toByte());
       message.setFootstepIndex(footstepIndex);
-      message.getDesiredFootPositionInWorld().setToNaN();
-      message.getDesiredFootOrientationInWorld().setToNaN();
-      message.getActualFootPositionInWorld().setToNaN();
-      message.getActualFootOrientationInWorld().setToNaN();
+      message.getDesiredFootPositionInWorld().getPoint().setToNaN();
+      message.getDesiredFootOrientationInWorld().getQuaternion().setToNaN();
+      message.getActualFootPositionInWorld().getPoint().setToNaN();
+      message.getActualFootOrientationInWorld().getQuaternion().setToNaN();
       message.setRobotSide(robotSide.toByte());
       return message;
    }
@@ -992,8 +983,8 @@ public class HumanoidMessageTools
       FootstepStatusMessage message = new FootstepStatusMessage();
       message.setFootstepStatus(status.toByte());
       message.setFootstepIndex(footstepIndex);
-      message.getDesiredFootPositionInWorld().setToNaN();
-      message.getDesiredFootOrientationInWorld().setToNaN();
+      message.getDesiredFootPositionInWorld().getPoint().setToNaN();
+      message.getDesiredFootOrientationInWorld().getQuaternion().setToNaN();
       message.getActualFootPositionInWorld().set(actualFootPositionInWorld);
       message.getActualFootOrientationInWorld().set(actualFootOrientationInWorld);
 
@@ -1010,8 +1001,8 @@ public class HumanoidMessageTools
       FootstepStatusMessage message = new FootstepStatusMessage();
       message.setFootstepStatus(status.toByte());
       message.setFootstepIndex(footstepIndex);
-      message.getDesiredFootPositionInWorld().setToNaN();
-      message.getDesiredFootOrientationInWorld().setToNaN();
+      message.getDesiredFootPositionInWorld().getPoint().setToNaN();
+      message.getDesiredFootOrientationInWorld().getQuaternion().setToNaN();
       message.getActualFootPositionInWorld().set(actualFootPositionInWorld);
       message.getActualFootOrientationInWorld().set(actualFootOrientationInWorld);
       message.setRobotSide(robotSide.toByte());
@@ -1067,7 +1058,7 @@ public class HumanoidMessageTools
    {
       HandJointAnglePacket message = new HandJointAnglePacket();
       message.setRobotSide(robotSide == null ? -1 : robotSide.toByte());
-      message.getJointAngles().add(jointAngles);
+      message.getJointAngles().addAll(jointAngles);
       message.setConnected(connected);
       message.setCalibrated(calibrated);
       return message;
@@ -1703,9 +1694,17 @@ public class HumanoidMessageTools
       WrenchTrajectoryPointMessage message = new WrenchTrajectoryPointMessage();
       message.setTime(time);
       if (torque != null)
-         message.getWrench().getTorque().set(torque);
+      {
+         message.getWrench().getTorque().setX(torque.getX());
+         message.getWrench().getTorque().setY(torque.getY());
+         message.getWrench().getTorque().setZ(torque.getZ());
+      }
       if (force != null)
-         message.getWrench().getForce().set(force);
+      {
+         message.getWrench().getForce().setX(force.getX());
+         message.getWrench().getForce().setY(force.getY());
+         message.getWrench().getForce().setZ(force.getZ());
+      }
       return message;
    }
 
@@ -1776,7 +1775,7 @@ public class HumanoidMessageTools
          if (footstep.getCustomPositionWaypoints().size() != 2)
          {
             LogTools.warn("Received footstep object without the correct number of waypoint positions. Should be 0 or 2, received: "
-                  + footstep.getCustomPositionWaypoints().size());
+                          + footstep.getCustomPositionWaypoints().size());
          }
          else
          {
@@ -1794,7 +1793,7 @@ public class HumanoidMessageTools
          if (footstep.getCustomWaypointProportions().size() != 2)
          {
             LogTools.warn("Received footstep object without the correct number of waypoint proportions. Should be 0 or 2, received: "
-                  + footstep.getCustomWaypointProportions().size());
+                          + footstep.getCustomWaypointProportions().size());
          }
          else
          {
@@ -1837,7 +1836,7 @@ public class HumanoidMessageTools
 
       if (keyFrameTimes.size() != keyFramePoses.size())
          throw new RuntimeException("Inconsistent list lengths: keyFrameTimes.size() = " + keyFrameTimes.size() + ", keyFramePoses.size() = "
-               + keyFramePoses.size());
+                                    + keyFramePoses.size());
 
       for (int i = 0; i < keyFrameTimes.size(); i++)
       {
@@ -1864,7 +1863,7 @@ public class HumanoidMessageTools
 
       if (keyFrameTimes.size() != keyFramePoses.size())
          throw new RuntimeException("Inconsistent list lengths: keyFrameTimes.size() = " + keyFrameTimes.size() + ", keyFramePoses.size() = "
-               + keyFramePoses.size());
+                                    + keyFramePoses.size());
 
       for (int i = 0; i < keyFrameTimes.size(); i++)
       {
@@ -1882,7 +1881,7 @@ public class HumanoidMessageTools
       KinematicsPlanningToolboxCenterOfMassMessage message = new KinematicsPlanningToolboxCenterOfMassMessage();
       if (keyFrameTimes.size() != keyFramePoints.size())
          throw new RuntimeException("Inconsistent list lengths: keyFrameTimes.size() = " + keyFrameTimes.size() + ", keyFramePoints.size() = "
-               + keyFramePoints.size());
+                                    + keyFramePoints.size());
       for (int i = 0; i < keyFrameTimes.size(); i++)
       {
          message.getWayPointTimes().add(keyFrameTimes.get(i));
@@ -1933,7 +1932,7 @@ public class HumanoidMessageTools
     *
     * @param clazz the class you want to clear
     */
-   public static ClearDelayQueueMessage createClearDelayQueueMessage(Class<? extends Packet<?>> clazz)
+   public static ClearDelayQueueMessage createClearDelayQueueMessage(Class<?> clazz)
    {
       ClearDelayQueueMessage message = new ClearDelayQueueMessage();
       message.setClassSimpleNameBasedHashCode(clazz.getSimpleName().hashCode());
@@ -1943,7 +1942,8 @@ public class HumanoidMessageTools
    public static LegTrajectoryMessage createLegTrajectoryMessage(RobotSide robotSide, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
       LegTrajectoryMessage message = new LegTrajectoryMessage();
-      message.getJointspaceTrajectory().set(new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage));
+      JointspaceTrajectoryMessage copy = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
+      message.getJointspaceTrajectory().set(copy);
       message.setRobotSide(robotSide.toByte());
       return message;
    }
@@ -2098,35 +2098,35 @@ public class HumanoidMessageTools
    public static IntrinsicParametersMessage toIntrinsicParametersMessage(Object intrinsicParameters)
    {
       IntrinsicParametersMessage intrinsicParametersMessage = new IntrinsicParametersMessage();
-//      intrinsicParametersMessage.setWidth(intrinsicParameters.width);
-//      intrinsicParametersMessage.setHeight(intrinsicParameters.height);
-//      intrinsicParametersMessage.setFx(intrinsicParameters.fx);
-//      intrinsicParametersMessage.setFy(intrinsicParameters.fy);
-//      intrinsicParametersMessage.setSkew(intrinsicParameters.skew);
-//      intrinsicParametersMessage.setCx(intrinsicParameters.cx);
-//      intrinsicParametersMessage.setCy(intrinsicParameters.cy);
-//      if (intrinsicParameters.radial != null)
-//         intrinsicParametersMessage.getRadial().add(intrinsicParameters.radial);
-//      intrinsicParametersMessage.setT1(intrinsicParameters.t1);
-//      intrinsicParametersMessage.setT2(intrinsicParameters.t2);
+      //      intrinsicParametersMessage.setWidth(intrinsicParameters.width);
+      //      intrinsicParametersMessage.setHeight(intrinsicParameters.height);
+      //      intrinsicParametersMessage.setFx(intrinsicParameters.fx);
+      //      intrinsicParametersMessage.setFy(intrinsicParameters.fy);
+      //      intrinsicParametersMessage.setSkew(intrinsicParameters.skew);
+      //      intrinsicParametersMessage.setCx(intrinsicParameters.cx);
+      //      intrinsicParametersMessage.setCy(intrinsicParameters.cy);
+      //      if (intrinsicParameters.radial != null)
+      //         intrinsicParametersMessage.getRadial().add(intrinsicParameters.radial);
+      //      intrinsicParametersMessage.setT1(intrinsicParameters.t1);
+      //      intrinsicParametersMessage.setT2(intrinsicParameters.t2);
       return intrinsicParametersMessage;
    }
 
    @Deprecated
    public static Object toIntrinsicParameters(IntrinsicParametersMessage message)
    {
-//      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
-//      intrinsicParameters.width = message.getWidth();
-//      intrinsicParameters.height = message.getHeight();
-//      intrinsicParameters.fx = message.getFx();
-//      intrinsicParameters.fy = message.getFy();
-//      intrinsicParameters.skew = message.getSkew();
-//      intrinsicParameters.cx = message.getCx();
-//      intrinsicParameters.cy = message.getCy();
-//      if (!message.getRadial().isEmpty())
-//         intrinsicParameters.radial = message.getRadial().toArray();
-//      intrinsicParameters.t1 = message.getT1();
-//      intrinsicParameters.t2 = message.getT2();
+      //      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
+      //      intrinsicParameters.width = message.getWidth();
+      //      intrinsicParameters.height = message.getHeight();
+      //      intrinsicParameters.fx = message.getFx();
+      //      intrinsicParameters.fy = message.getFy();
+      //      intrinsicParameters.skew = message.getSkew();
+      //      intrinsicParameters.cx = message.getCx();
+      //      intrinsicParameters.cy = message.getCy();
+      //      if (!message.getRadial().isEmpty())
+      //         intrinsicParameters.radial = message.getRadial().toArray();
+      //      intrinsicParameters.t1 = message.getT1();
+      //      intrinsicParameters.t2 = message.getT2();
       return new Object();
    }
 
@@ -2146,13 +2146,20 @@ public class HumanoidMessageTools
 
       for (int i = 0; i < contactPoints.size(); i++)
       {
-         message.getPredictedContactPoints2d().add().set(contactPoints.get(i), 0.0);
+         message.getPredictedContactPoints2d().add().getPoint().set(contactPoints.get(i), 0.0);
       }
    }
 
    public static List<Point2D> unpackPredictedContactPoints(FootstepDataMessage message)
    {
-      return message.getPredictedContactPoints2d().stream().map(Point2D::new).collect(Collectors.toList());
+      List<Point2D> list = new ArrayList<>();
+
+      for (EuclidPoint3DMessage euclidPoint3DMessage : message.getPredictedContactPoints2d())
+      {
+         list.add(new Point2D(euclidPoint3DMessage.getPoint()));
+      }
+
+      return list;
    }
 
 
@@ -2222,9 +2229,9 @@ public class HumanoidMessageTools
          Point3D vertex3D;
 
          if (robotSide == RobotSide.LEFT)
-            vertex3D = capturabilityBasedStatus.getLeftFootSupportPolygon3d().add();
+            vertex3D = capturabilityBasedStatus.getLeftFootSupportPolygon3d().add().getPoint();
          else
-            vertex3D = capturabilityBasedStatus.getRightFootSupportPolygon3d().add();
+            vertex3D = capturabilityBasedStatus.getRightFootSupportPolygon3d().add().getPoint();
 
          vertex3D.set(footPolygon.getVertex(i), 0.0);
          footPolygon.getReferenceFrame().transformFromThisToDesiredFrame(ReferenceFrame.getWorldFrame(), vertex3D);
@@ -2234,14 +2241,18 @@ public class HumanoidMessageTools
 
    public static FrameConvexPolygon2D unpackFootSupportPolygon(CapturabilityBasedStatus capturabilityBasedStatus, RobotSide robotSide)
    {
+      IDLObjectSequence<EuclidPoint3DMessage> footSupportPolygon3d;
       if (robotSide == RobotSide.LEFT && !capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty())
-         return new FrameConvexPolygon2D(ReferenceFrame.getWorldFrame(),
-                                         Vertex3DSupplier.asVertex3DSupplier(capturabilityBasedStatus.getLeftFootSupportPolygon3d()));
-      else if (capturabilityBasedStatus.getRightFootSupportPolygon3d() != null)
-         return new FrameConvexPolygon2D(ReferenceFrame.getWorldFrame(),
-                                         Vertex3DSupplier.asVertex3DSupplier(capturabilityBasedStatus.getRightFootSupportPolygon3d()));
+         footSupportPolygon3d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
+      else if (!capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty())
+         footSupportPolygon3d = capturabilityBasedStatus.getRightFootSupportPolygon3d();
       else
          return new FrameConvexPolygon2D(ReferenceFrame.getWorldFrame());
+
+      FrameConvexPolygon2D footSupportPolygon = new FrameConvexPolygon2D(ReferenceFrame.getWorldFrame());
+      for (int i = 0; i < footSupportPolygon3d.size(); i++)
+         footSupportPolygon.addVertex(footSupportPolygon3d.get(i).getPoint());
+      return footSupportPolygon;
    }
 
    public static boolean unpackIsInDoubleSupport(CapturabilityBasedStatus capturabilityBasedStatus)
@@ -2267,11 +2278,11 @@ public class HumanoidMessageTools
 
    public static boolean unpackIsSupportHand(CapturabilityBasedStatus capturabilityBasedStatus, RobotSide robotSide, FullHumanoidRobotModel fullRobotModel, FramePoint3DBasics contactPointToPack)
    {
-      List<Point3D> handContactPointList = robotSide == RobotSide.LEFT ? capturabilityBasedStatus.getLeftHandContactPoints() : capturabilityBasedStatus.getRightHandContactPoints();
+      var handContactPointList = robotSide == RobotSide.LEFT ? capturabilityBasedStatus.getLeftHandContactPoints() : capturabilityBasedStatus.getRightHandContactPoints();
       boolean isLoadBearing = !handContactPointList.isEmpty();
 
       if (isLoadBearing)
-         contactPointToPack.setIncludingFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame(), handContactPointList.get(0));
+         contactPointToPack.setIncludingFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame(), handContactPointList.get(0).getPoint());
       else
          contactPointToPack.setToNaN();
 
@@ -2283,21 +2294,21 @@ public class HumanoidMessageTools
       if (configurationSpaces.length != lowerLimits.length || configurationSpaces.length != upperLimits.length || lowerLimits.length != upperLimits.length)
          throw new RuntimeException("Inconsistent array lengths: configurationSpaces = " + configurationSpaces.length);
 
-      reachingManifoldMessage.getManifoldConfigurationSpaceNames().resetQuick();
-      reachingManifoldMessage.getManifoldLowerLimits().reset();
-      reachingManifoldMessage.getManifoldUpperLimits().reset();
-      reachingManifoldMessage.getManifoldConfigurationSpaceNames().add(configurationSpaces);
-      reachingManifoldMessage.getManifoldLowerLimits().add(lowerLimits);
-      reachingManifoldMessage.getManifoldUpperLimits().add(upperLimits);
+      reachingManifoldMessage.getManifoldConfigurationSpaceNames().clear();
+      reachingManifoldMessage.getManifoldLowerLimits().clear();
+      reachingManifoldMessage.getManifoldUpperLimits().clear();
+      reachingManifoldMessage.getManifoldConfigurationSpaceNames().addAll(configurationSpaces);
+      reachingManifoldMessage.getManifoldLowerLimits().addAll(lowerLimits);
+      reachingManifoldMessage.getManifoldUpperLimits().addAll(upperLimits);
    }
 
    public static Pose3D unpackPose(WaypointBasedTrajectoryMessage waypointBasedTrajectoryMessage, double time)
    {
       if (time <= 0.0)
-         return waypointBasedTrajectoryMessage.getWaypoints().get(0);
+         return waypointBasedTrajectoryMessage.getWaypoints().get(0).getPose();
 
       else if (time >= waypointBasedTrajectoryMessage.getWaypointTimes().get(waypointBasedTrajectoryMessage.getWaypointTimes().size() - 1))
-         return waypointBasedTrajectoryMessage.getWaypoints().getLast();
+         return waypointBasedTrajectoryMessage.getWaypoints().getLast().getPose();
 
       else
       {
@@ -2316,8 +2327,8 @@ public class HumanoidMessageTools
             }
          }
 
-         Pose3D poseOne = waypointBasedTrajectoryMessage.getWaypoints().get(indexOfFrame - 1);
-         Pose3D poseTwo = waypointBasedTrajectoryMessage.getWaypoints().get(indexOfFrame);
+         Pose3D poseOne = waypointBasedTrajectoryMessage.getWaypoints().get(indexOfFrame - 1).getPose();
+         Pose3D poseTwo = waypointBasedTrajectoryMessage.getWaypoints().get(indexOfFrame).getPose();
 
          double timeOne = waypointBasedTrajectoryMessage.getWaypointTimes().get(indexOfFrame - 1);
          double timeTwo = waypointBasedTrajectoryMessage.getWaypointTimes().get(indexOfFrame);

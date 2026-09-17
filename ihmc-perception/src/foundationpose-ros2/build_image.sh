@@ -27,7 +27,7 @@ docker run -it --name "foundationpose-build-$random_id" ihmc/foundationpose:late
 	cd /root/ihmc_ros2_ws
 	git clone -b feature/foundation-pose-integration https://github.com/ihmcrobotics/ihmc-open-robotics-software.git /root/ihmc-open-robotics-software
 	mkdir -p src
-	cp -r /root/ihmc-open-robotics-software/ihmc-interfaces/src/main/messages/ihmc_interfaces ./src/ihmc_interfaces
+	cp -r /root/ihmc-open-robotics-software/ihmc-interfaces-jros2/messages/ihmc_interfaces ./src/ihmc_interfaces
 	rm -rf /root/ihmc-open-robotics-software
 	source /opt/ros/humble/setup.bash && cd /root/ihmc_ros2_ws
 	colcon build

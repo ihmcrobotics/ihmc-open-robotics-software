@@ -1,7 +1,5 @@
 package us.ihmc.avatar;
 
-import java.util.Arrays;
-
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
@@ -17,11 +15,11 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
@@ -31,6 +29,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
+
+import java.util.Arrays;
 
 public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
 {
@@ -56,7 +56,7 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
                                     CommandInputManager controllerCommandInputManager,
                                     DRCRobotModel drcRobotModel,
                                     FootstepAdjustment footstepAdjustment,
-                                    RealtimeROS2Node ros2Node)
+                                    AsyncROS2Node ros2Node)
    {
       this.fullRobotModel = drcRobotModel.createFullRobotModel();
 

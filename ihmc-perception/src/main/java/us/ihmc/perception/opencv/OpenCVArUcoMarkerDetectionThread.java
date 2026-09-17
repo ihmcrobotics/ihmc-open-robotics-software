@@ -1,8 +1,8 @@
 package us.ihmc.perception.opencv;
 
 import us.ihmc.commons.thread.RepeatingTaskThread;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.perception.RawImage;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.sensors.ImageSensor;
@@ -31,10 +31,10 @@ public class OpenCVArUcoMarkerDetectionThread extends RepeatingTaskThread
       this.colorImageKey = colorImageKey;
    }
 
-   public OpenCVArUcoMarkerDetectionThread enablePublishing(ROS2Helper ros2, Function<Integer, Double> markerSizeProvider)
+   public OpenCVArUcoMarkerDetectionThread enablePublishing(ROS2Node ros2Node, Function<Integer, Double> markerSizeProvider)
    {
       resultsToPublish = new OpenCVArUcoMarkerDetectionResults();
-      publisher = new OpenCVArUcoMarkerROS2Publisher(resultsToPublish, ros2, markerSizeProvider, sensorFrame.getReferenceFrame());
+      publisher = new OpenCVArUcoMarkerROS2Publisher(resultsToPublish, ros2Node, markerSizeProvider, sensorFrame.getReferenceFrame());
       return this;
    }
 

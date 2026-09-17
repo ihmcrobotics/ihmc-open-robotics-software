@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.PauseWalkingMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
 public class PauseWalkingCommand implements Command<PauseWalkingCommand, PauseWalkingMessage>

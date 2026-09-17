@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.graphics.ros2;
 import com.badlogic.gdx.graphics.Texture;
 import imgui.type.ImBoolean;
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.jros2.ROS2Message;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXImagePanel;
@@ -11,7 +12,7 @@ import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-public abstract class RDXROS2ImageVisualizer<T> extends RDXROS2SingleTopicVisualizer<T>
+public abstract class RDXROS2ImageVisualizer<T extends ROS2Message<T>> extends RDXROS2SingleTopicVisualizer<T>
 {
    private final RDXImageVisualizer imageVisualizer;
    private final ImBoolean subscriptionOnly = new ImBoolean();

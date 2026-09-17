@@ -1,17 +1,17 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import java.util.Random;
+import static org.junit.jupiter.api.Assertions.*;
 
+import controller_msgs.LocalizationPacket;
+import controller_msgs.PelvisPoseErrorPacket;
+import ihmc_common_msgs.StampedPosePacket;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.LocalizationPacket;
-import controller_msgs.msg.dds.PelvisPoseErrorPacket;
-import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -24,7 +24,6 @@ import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -35,7 +34,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Random;
 
 public class NewPelvisPoseHistoryCorrectionTest
 {

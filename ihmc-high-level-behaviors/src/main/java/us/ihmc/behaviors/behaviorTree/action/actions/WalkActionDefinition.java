@@ -1,7 +1,9 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.WalkActionDefinitionMessage;
-import behavior_msgs.msg.dds.WalkActionFootstepDefinitionMessage;
+import static behavior_msgs.WalkActionDefinitionMessage.*;
+
+import behavior_msgs.WalkActionDefinitionMessage;
+import behavior_msgs.WalkActionFootstepDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
@@ -24,8 +26,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
 
 import java.util.ArrayList;
-
-import static behavior_msgs.msg.dds.WalkActionDefinitionMessage.*;
 
 public class WalkActionDefinition extends ActionNodeDefinition
 {
@@ -466,8 +466,8 @@ public class WalkActionDefinition extends ActionNodeDefinition
       message.getFootsteps().clear();
       for (int i = 0; i < manuallyPlacedFootsteps.getSize(); i++)
          manuallyPlacedFootsteps.getValueReadOnly(i).toMessage(message.getFootsteps().add());
-      goalStancePoint.toMessage(message.getGoalStancePoint());
-      goalFocalPoint.toMessage(message.getGoalFocalPoint());
+      message.getGoalStancePoint().set(goalStancePoint.getValueReadOnly());
+      message.getGoalFocalPoint().set(goalFocalPoint.getValueReadOnly());
       message.setLeftGoalFootXToGizmo(goalFootstepToGoalXs.get(RobotSide.LEFT).toMessage());
       message.setLeftGoalFootYToGizmo(goalFootstepToGoalYs.get(RobotSide.LEFT).toMessage());
       message.setLeftGoalFootYawToGizmo(goalFootstepToGoalYaws.get(RobotSide.LEFT).toMessage());
@@ -507,8 +507,8 @@ public class WalkActionDefinition extends ActionNodeDefinition
       waypoints.fromMessage(writableList ->
       {
          writableList.clear();
-         for (Pose3D waypoint : message.getWaypoints())
-            writableList.add().set(waypoint);
+         for (int i = 0; i < message.getWaypoints().size(); i++)
+            writableList.add().set(message.getWaypoints().get(i).getPose());
       });
       manuallyPlacedFootsteps.fromMessage(writableList ->
       {
@@ -516,8 +516,8 @@ public class WalkActionDefinition extends ActionNodeDefinition
          for (WalkActionFootstepDefinitionMessage footstepMessage : message.getFootsteps())
             writableList.add().fromMessage(footstepMessage);
       });
-      goalStancePoint.fromMessage(message.getGoalStancePoint());
-      goalFocalPoint.fromMessage(message.getGoalFocalPoint());
+      goalStancePoint.fromMessage(message.getGoalStancePoint().getPoint());
+      goalFocalPoint.fromMessage(message.getGoalFocalPoint().getPoint());
       goalFootstepToGoalXs.get(RobotSide.LEFT).fromMessage(message.getLeftGoalFootXToGizmo());
       goalFootstepToGoalYs.get(RobotSide.LEFT).fromMessage(message.getLeftGoalFootYToGizmo());
       goalFootstepToGoalYaws.get(RobotSide.LEFT).fromMessage(message.getLeftGoalFootYawToGizmo());

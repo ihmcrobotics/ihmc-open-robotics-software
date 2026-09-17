@@ -1,10 +1,10 @@
 package us.ihmc.avatar.drcRobot;
 
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.RobotConfigurationData;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.jros2.ROS2Node;
 
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;

@@ -1,15 +1,16 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 
+import gnu.trove.set.hash.TLongHashSet;
+import ihmc_common_msgs.MessageCollection;
+import ihmc_common_msgs.MessageCollectionNotification;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.fastddsjava.cdr.idl.IDLIntSequence;
+import us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence;
+import us.ihmc.jros2.ROS2Message;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import ihmc_common_msgs.msg.dds.MessageCollection;
-import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
-import gnu.trove.set.hash.TLongHashSet;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.idl.IDLSequence;
 
 /**
  * A {@code MessageCollector} can be added to a {@link ControllerNetworkSubscriber}.
@@ -35,9 +36,9 @@ public class MessageCollector
     */
    private final TLongHashSet expectedMessageIDs;
    /** The list of the collection messages that have already been collected. */
-   private final List<Settable<?>> interceptedMessages;
+   private final List<ROS2Message<?>> interceptedMessages;
    /** A view list of {@link #interceptedMessages}, it is for read-only purposes. */
-   private final List<Settable<?>> interceptedMessagesView;
+   private final List<ROS2Message<?>> interceptedMessagesView;
    /**
     * The internal buffer used to save a copy of the intercepted messages without holding onto the
     * reference of a message that was created outside this collector.
@@ -80,7 +81,7 @@ public class MessageCollector
     * @param messageIDExtractor provides the method for getting the IDs from the messages.
     * @param supportedMessages the list of messages that this collector can handle.
     */
-   public MessageCollector(MessageIDExtractor messageIDExtractor, List<Class<? extends Settable<?>>> supportedMessages)
+   public MessageCollector(MessageIDExtractor messageIDExtractor, List<Class<? extends ROS2Message<?>>> supportedMessages)
    {
       this.messageIDExtractor = messageIDExtractor;
       messagePool = new MessagePool(supportedMessages);
@@ -126,9 +127,9 @@ public class MessageCollector
       }
       reset();
       isCollecting = true;
-      notification.setMessageCollectionSequenceId(collection.getSequenceId());
+      notification.setMessageCollectionSequenceId((int) collection.getSequenceId());
 
-      IDLSequence.Long sequences = collection.getSequences();
+      IDLIntSequence sequences = collection.getSequences();
       for (int i = 0; i < sequences.size(); i++)
       {
          expectedMessageIDs.add(sequences.get(i));
@@ -150,7 +151,7 @@ public class MessageCollector
     *         current collection gathered by this collector.
     */
    @SuppressWarnings({"unchecked", "rawtypes"})
-   public boolean interceptMessage(Settable<?> message)
+   public boolean interceptMessage(ROS2Message<?> message)
    {
       if (messagePool == null)
          return false;
@@ -164,7 +165,8 @@ public class MessageCollector
 
       if (intercept)
       {
-         Settable copy = messagePool.requestMessage(message.getClass());
+         @SuppressWarnings({"unchecked", "rawtypes"})
+         ROS2Message copy = messagePool.requestMessage(message.getClass());
          copy.set(message);
          interceptedMessages.add(copy);
       }
@@ -197,7 +199,7 @@ public class MessageCollector
     * 
     * @return the collected messages.
     */
-   public List<Settable<?>> getCollectedMessages()
+   public List<ROS2Message<?>> getCollectedMessages()
    {
       return interceptedMessagesView;
    }

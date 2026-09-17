@@ -2,16 +2,12 @@ package us.ihmc.avatar.obstacleCourseTests;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Random;
-
+import controller_msgs.FootstepDataListMessage;
+import controller_msgs.FootstepDataMessage;
+import controller_msgs.PelvisHeightTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
@@ -29,6 +25,9 @@ import us.ihmc.simulationConstructionSetTools.util.environments.SmallStepDownEnv
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 {
@@ -629,7 +628,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       FramePoint3D placeToStepInWorld = new FramePoint3D(placeToStep);
       placeToStepInWorld.changeFrame(worldFrame);
 
-      footstepData.getLocation().set(placeToStepInWorld);
+      footstepData.getLocation().getPoint().set(placeToStepInWorld);
       footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(robotSide.toByte());
 

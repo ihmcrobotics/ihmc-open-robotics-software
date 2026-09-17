@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.ui;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -9,7 +11,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import perception_msgs.msg.dds.TerrainMapMessage;
+import perception_msgs.TerrainMapMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -67,8 +69,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 /**
  * User interface for {@link us.ihmc.footstepPlanning.FootstepPlanningModule}. - Compute footstep

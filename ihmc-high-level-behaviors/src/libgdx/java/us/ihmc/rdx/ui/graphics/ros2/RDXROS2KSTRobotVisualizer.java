@@ -4,22 +4,22 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -34,6 +34,7 @@ public class RDXROS2KSTRobotVisualizer extends RDXROS2SingleTopicVisualizer<Kine
    private final OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private final ROS2Topic<KinematicsToolboxOutputStatus> topic;
    private final TypedNotification<KinematicsToolboxOutputStatus> statusSubscription = new TypedNotification<>();
+   private final KinematicsToolboxOutputStatus statusCopy = new KinematicsToolboxOutputStatus();
    private ROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private RDXMultiBodyGraphic multiBodyGraphic;
    private String text;
@@ -64,15 +65,16 @@ public class RDXROS2KSTRobotVisualizer extends RDXROS2SingleTopicVisualizer<Kine
       multiBodyGraphic.setActive(true);
       multiBodyGraphic.create();
 
-      ros2Node.createSubscription2(topic, status ->
+      ros2Node.createSubscriptionSampler(topic, sample ->
       {
          getFrequency().ping();
-         statusSubscription.set(status);
+         statusCopy.set(sample);
+         statusSubscription.set(statusCopy);
       });
 
       toolboxStatePublisher = ros2Node.createPublisher(ToolboxAPIs.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotModel.getSimpleRobotName())
                                                                                                .withInput()
-                                                                                               .withTypeName(ToolboxStateMessage.class));
+                                                                                               .withType(ToolboxStateMessage.class));
    }
 
    @Override
@@ -95,8 +97,8 @@ public class RDXROS2KSTRobotVisualizer extends RDXROS2SingleTopicVisualizer<Kine
             }
             else
             {
-               ghostFullRobotModel.getRootJoint().setJointPosition(status.getDesiredRootPosition());
-               ghostFullRobotModel.getRootJoint().setJointOrientation(status.getDesiredRootOrientation());
+               ghostFullRobotModel.getRootJoint().setJointPosition(status.getDesiredRootPosition().getPoint());
+               ghostFullRobotModel.getRootJoint().setJointOrientation(status.getDesiredRootOrientation().getQuaternion());
                for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
                   ghostOneDoFJointsExcludingHands[i].setQ(status.getDesiredJointAngles().get(i));
                ghostFullRobotModel.getElevator().updateFramesRecursively();

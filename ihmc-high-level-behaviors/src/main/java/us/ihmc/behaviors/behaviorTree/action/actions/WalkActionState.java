@@ -1,10 +1,11 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.WalkActionFootstepStateMessage;
-import behavior_msgs.msg.dds.WalkActionStateMessage;
+import behavior_msgs.WalkActionFootstepStateMessage;
+import behavior_msgs.WalkActionStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayListTools;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTStatusEnumField;
 import us.ihmc.communication.crdt.CRDTStatusFootstepList;
@@ -15,7 +16,6 @@ import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.commons.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -123,12 +123,12 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
 
       stateDataSynchronizer.toMessage(message.getLatestModificationStateData());
       goalToParentTransform.toMessage(message.getGoalTransformToParent());
-      message.setTotalNumberOfFootsteps(totalNumberOfFootsteps.toMessage());
-      message.setNumberOfIncompleteFootsteps(numberOfIncompleteFootsteps.toMessage());
+      message.setTotalNumberOfFootsteps((short) totalNumberOfFootsteps.toMessage());
+      message.setNumberOfIncompleteFootsteps((short) numberOfIncompleteFootsteps.toMessage());
       desiredFootPoses.get(RobotSide.LEFT).toMessage(message.getDesiredLeftFootsteps());
       desiredFootPoses.get(RobotSide.RIGHT).toMessage(message.getDesiredRightFootsteps());
-      currentFootPoses.get(RobotSide.LEFT).toMessage(message.getCurrentLeftFootPose());
-      currentFootPoses.get(RobotSide.RIGHT).toMessage(message.getCurrentRightFootPose());
+      message.getCurrentLeftFootPose().set(currentFootPoses.get(RobotSide.LEFT).getValueReadOnly());
+      message.getCurrentRightFootPose().set(currentFootPoses.get(RobotSide.RIGHT).getValueReadOnly());
 
       message.getFootsteps().clear();
       for (WalkActionFootstepState footstep : manuallyPlacedFootsteps)
@@ -152,8 +152,8 @@ public class WalkActionState extends ActionNodeState<WalkActionDefinition>
       numberOfIncompleteFootsteps.fromMessage(message.getNumberOfIncompleteFootsteps());
       desiredFootPoses.get(RobotSide.LEFT).fromMessage(message.getDesiredLeftFootsteps());
       desiredFootPoses.get(RobotSide.RIGHT).fromMessage(message.getDesiredRightFootsteps());
-      currentFootPoses.get(RobotSide.LEFT).fromMessage(message.getCurrentLeftFootPose());
-      currentFootPoses.get(RobotSide.RIGHT).fromMessage(message.getCurrentRightFootPose());
+      currentFootPoses.get(RobotSide.LEFT).fromMessage(message.getCurrentLeftFootPose().getPose());
+      currentFootPoses.get(RobotSide.RIGHT).fromMessage(message.getCurrentRightFootPose().getPose());
 
       manuallyPlacedFootsteps.clear();
       for (WalkActionFootstepStateMessage footstep : message.getFootsteps())

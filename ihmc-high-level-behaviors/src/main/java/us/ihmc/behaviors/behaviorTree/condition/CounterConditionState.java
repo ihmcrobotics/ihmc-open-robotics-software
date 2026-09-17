@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.condition;
 
-import behavior_msgs.msg.dds.ConditionNodeStateMessage;
+import behavior_msgs.ConditionNodeStateMessage;
 import us.ihmc.communication.crdt.CRDTBidirectionalLong;
 
 public class CounterConditionState
@@ -14,7 +14,7 @@ public class CounterConditionState
 
    public void toMessage(ConditionNodeStateMessage message)
    {
-      message.setCount(count.toMessage());
+      message.setCount((int) count.toMessage());
    }
 
    public void fromMessage(ConditionNodeStateMessage message)

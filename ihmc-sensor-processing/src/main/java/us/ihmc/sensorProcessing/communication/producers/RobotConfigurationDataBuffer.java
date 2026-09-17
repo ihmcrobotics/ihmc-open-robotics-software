@@ -1,17 +1,11 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
-import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
-
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.SpatialVectorMessage;
-import gnu.trove.list.array.TFloatArrayList;
-import us.ihmc.communication.net.PacketConsumer;
+import controller_msgs.RobotConfigurationData;
+import controller_msgs.SpatialVectorMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -22,13 +16,18 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * Buffer for RobotConfigurationData. Allows updating a FullRobotModel based on timestamps. Make
  * sure not to share FullRobotModels between threads.
  *
  * @author jesper
  */
-public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigurationData>
+public class RobotConfigurationDataBuffer
 {
    final static int BUFFER_SIZE = 1000;
 
@@ -175,8 +174,8 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
          throw new RuntimeException("Joint names do not match for RobotConfigurationData");
       }
 
-      TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
-      TFloatArrayList newJointVelocities = robotConfigurationData.getJointVelocities();
+      IDLFloatSequence newJointAngles = robotConfigurationData.getJointAngles();
+      IDLFloatSequence newJointVelocities = robotConfigurationData.getJointVelocities();
 
       for (int i = 0; i < newJointAngles.size(); i++)
       {
@@ -184,15 +183,15 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
          fullRobotModelCache.allJoints[i].setQd(newJointVelocities.get(i));
       }
 
-      Point3D translation = robotConfigurationData.getRootPosition();
+      Point3D translation = robotConfigurationData.getRootPosition().getPoint();
       rootJoint.getJointPose().getPosition().set(translation.getX(), translation.getY(), translation.getZ());
-      Quaternion orientation = robotConfigurationData.getRootOrientation();
+      Quaternion orientation = robotConfigurationData.getRootOrientation().getQuaternion();
       rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
 
       Twist rootJointTwist = new Twist();
       rootJointTwist.setIncludingFrame(rootJoint.getJointTwist());
-      Vector3D pelvisAngularVelocity = robotConfigurationData.getPelvisAngularVelocity();
-      Vector3D pelvisLinearVelocity = robotConfigurationData.getPelvisLinearVelocity();
+      Vector3D pelvisAngularVelocity = robotConfigurationData.getPelvisAngularVelocity().getVector();
+      Vector3D pelvisLinearVelocity = robotConfigurationData.getPelvisLinearVelocity().getVector();
       rootJointTwist.getAngularPart().set(pelvisAngularVelocity);
       rootJointTwist.getLinearPart().set(pelvisLinearVelocity);
       rootJoint.setJointTwist(rootJointTwist);
@@ -205,7 +204,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
          {
             SpatialVectorMessage momentAndForceVectorForSensor = robotConfigurationData.getForceSensorData().get(i);
             forceSensorDataHolder.getData(forceSensorDataHolder.getForceSensorDefinitions().get(i))
-                                 .setWrench(momentAndForceVectorForSensor.getAngularPart(), momentAndForceVectorForSensor.getLinearPart());
+                                 .setWrench(momentAndForceVectorForSensor.getAngularPart().getVector(), momentAndForceVectorForSensor.getLinearPart().getVector());
          }
       }
    }
@@ -241,7 +240,6 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       }
    }
 
-   @Override
    public void receivedPacket(RobotConfigurationData packet)
    {
       update(packet);

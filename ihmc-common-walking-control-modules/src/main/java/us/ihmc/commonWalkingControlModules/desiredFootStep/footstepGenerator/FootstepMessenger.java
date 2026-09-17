@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.FootstepDataListMessage;
 
 /**
  * This interface is part of the API of {@link ContinuousStepGenerator}.

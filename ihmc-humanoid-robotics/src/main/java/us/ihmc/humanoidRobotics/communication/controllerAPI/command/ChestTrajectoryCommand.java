@@ -1,12 +1,12 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.Random;
-
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.ChestTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+
+import java.util.Random;
 
 public class ChestTrajectoryCommand
       implements Command<ChestTrajectoryCommand, ChestTrajectoryMessage>, FrameBasedCommand<ChestTrajectoryMessage>, EpsilonComparable<ChestTrajectoryCommand>

@@ -1,7 +1,5 @@
 package us.ihmc.rdx.ui.tools;
 
-import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.attributes.CommonAttributes;
 
 public class PubSubStatsTools
 {
@@ -25,13 +23,5 @@ public class PubSubStatsTools
          return "%.2f kb".formatted(numberOfBits / 1000.0);
       else
          return "%.2f Mb".formatted(numberOfBits / 1000000.0);
-   }
-
-   public static void printLargePayloadWarning(CommonAttributes attributes, int payloadSize)
-   {
-      LogTools.warn(1, "Message payload is high for topic: %s Type: %s Size: %s"
-                          .formatted(attributes.getTopicName(),
-                                     attributes.getTopicDataType().getName(),
-                                     getHumanReadableByteSize(payloadSize)));
    }
 }

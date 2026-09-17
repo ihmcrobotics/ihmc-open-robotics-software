@@ -1,11 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import toolbox_msgs.msg.dds.ReachingManifoldMessage;
 import gnu.trove.list.array.TDoubleArrayList;
+import toolbox_msgs.ReachingManifoldMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -13,6 +9,10 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class ReachingManifoldCommand
       implements Command<ReachingManifoldCommand, ReachingManifoldMessage>, WholeBodyTrajectoryToolboxAPI<ReachingManifoldMessage>
@@ -86,8 +86,8 @@ public class ReachingManifoldCommand
       else
          rigidBody = rigidBodyHashMap.get(rigidBodyHashCode);
 
-      this.manifoldOriginPosition.set(message.getManifoldOriginPosition());
-      this.manifoldOriginOrientation.set(message.getManifoldOriginOrientation());
+      this.manifoldOriginPosition.set(message.getManifoldOriginPosition().getPoint());
+      this.manifoldOriginOrientation.set(message.getManifoldOriginOrientation().getQuaternion());
 
       for (int i = 0; i < message.getManifoldConfigurationSpaceNames().size(); i++)
       {

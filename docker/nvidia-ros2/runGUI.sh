@@ -22,7 +22,7 @@ if [ ! "$(docker ps -a | grep ' nvidia-ros2$')" ]; then
         --volume /tmp/.X11-unix:/tmp/.X11-unix:rw \
         `# Provides an absolute path from a relative path, since docker` \
         `# will not accept relative paths in a volume command` \
-        --volume $(readlink -f ../../ihmc-interfaces/src/main/messages/ihmc_interfaces):/home/robotlab/colcon_ws/src \
+        --volume $(readlink -f ../../ihmc-interfaces-jros2/messages/ihmc_interfaces):/home/robotlab/colcon_ws/src \
         ihmcrobotics/nvidia-ros2:0.4
 else
     docker start --attach nvidia-ros2

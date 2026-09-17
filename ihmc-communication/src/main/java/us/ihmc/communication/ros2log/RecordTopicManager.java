@@ -2,15 +2,16 @@ package us.ihmc.communication.ros2log;
 
 import gnu.trove.list.array.TLongArrayList;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.jros2.ROS2Message;
+import us.ihmc.jros2.ROS2Node;
+import us.ihmc.jros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
 
-class RecordTopicManager<T>
+class RecordTopicManager<T extends ROS2Message<T>>
 {
    private final ROS2Topic<T> ros2Topic;
    private final AtomicReference<Pair<Long, T>> latestData = new AtomicReference<>();
@@ -35,10 +36,14 @@ class RecordTopicManager<T>
 
       if (subscribeToTopic)
       {
-         ros2Node.createSubscription(ros2Topic, s ->
+         ros2Node.createSubscription(ros2Topic, reader ->
          {
+            T message = reader.read();
+            if (message == null)
+               return;
+
             long timestamp = timestampSupplier.getAsLong();
-            latestData.set(Pair.of(timestamp, s.takeNextData()));
+            latestData.set(Pair.of(timestamp, message));
          });
       }
    }

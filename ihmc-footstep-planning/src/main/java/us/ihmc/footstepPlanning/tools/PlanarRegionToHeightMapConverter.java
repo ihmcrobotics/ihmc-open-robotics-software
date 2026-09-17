@@ -1,22 +1,22 @@
 package us.ihmc.footstepPlanning.tools;
 
-import perception_msgs.msg.dds.TerrainMapMessage;
+import static us.ihmc.perception.gpuMapping.TerrainMapData.*;
+
+import perception_msgs.TerrainMapMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
 import us.ihmc.perception.gpuMapping.SnapResult;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.perception.gpuMapping.HeightMapTools;
 
 import java.util.List;
-
-import static us.ihmc.perception.gpuMapping.TerrainMapData.*;
 
 public class PlanarRegionToHeightMapConverter
 {

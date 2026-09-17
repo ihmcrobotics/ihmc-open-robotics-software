@@ -2,18 +2,18 @@ package us.ihmc.rdx.behaviorTree;
 
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTree;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.jros2.ROS2Node;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
-import us.ihmc.commons.thread.Throttler;
 
 /**
  * Top level class for the operator's behavior tree.
@@ -38,7 +38,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       super(treeFilesDirectory, syncedRobot, peerClockEstimator, selectionCollisionModel, baseUI, panel3D);
 
       ros2ControllerHelper = ros2;
-      ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2);
+      ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2.getROS2Node());
 
       ros2BehaviorTree.getBehaviorTreeSubscription().registerMessageReceivedCallback(subscriptionFrequencyText::ping);
    }
@@ -90,6 +90,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       super.renderImGuiWidgetsPost();
    }
 
+   @Override
    public void destroy()
    {
       ros2BehaviorTree.destroy();

@@ -20,6 +20,9 @@ import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -27,6 +30,12 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FootStepPlanner
 {
+   // Below this yaw rate, treating the projected motion as an arc means dividing by a near-zero
+   // angular velocity to get the turn radius, which blows up (or NaNs, if linear velocity is also
+   // zero). A circular arc of infinite radius is just a straight line, so fall back to projecting
+   // the body position straight ahead instead of computing a turn radius/center at all.
+   private static final double MIN_ANGULAR_VELOCITY_FOR_TURN_PROJECTION = 0.003;
+
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
    private FullRobotModel fullRobotModel;
@@ -59,8 +68,11 @@ public class FootStepPlanner
    private final CircleArtifact bodyFrameProjectedInFutureCircleArtifact = new CircleArtifact("bodyFrameProjectedInFutureArtifact", 0.0, 0.0, 0.03, false);
    private final LineArtifact bodyFrameProjectedInFutureLineArtifact = new LineArtifact("bodyFrameProjectedInFutureLineArtifact");
 
-   public FootStepPlanner(String prefix, FullRobotModel fullRobotModel, HexapodReferenceFrames hexapodReferenceFrames,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   public FootStepPlanner(String prefix,
+                          FullRobotModel fullRobotModel,
+                          HexapodReferenceFrames hexapodReferenceFrames,
+                          YoGraphicsListRegistry yoGraphicsListRegistry,
+                          YoRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = hexapodReferenceFrames;
@@ -74,7 +86,7 @@ public class FootStepPlanner
       bodyFrameProjectedInFuture = new PoseReferenceFrame("bodyProjectedInFuture", bodyZUpFrame);
       bodyFrameEndRotationProjectedInFuture = new PoseReferenceFrame("bodyFrameEndRotationProjectedInFuture", bodyFrameProjectedInFuture);
       bodyFrameProjectedInFutureViz = new YoGraphicReferenceFrame(bodyFrameEndRotationProjectedInFuture, registry, true, 0.3);
-      
+
       yoGraphicsListRegistry.registerYoGraphic("bodyFrameProjectedInFutureViz", bodyFrameProjectedInFutureViz);
 
       yoGraphicsListRegistry.registerArtifact("turnRadiusVisual", turnRadiusVisual);
@@ -132,76 +144,67 @@ public class FootStepPlanner
    private final FramePoint2D frameEndPoint = new FramePoint2D();
    private final FramePoint3D bodyPositionProjectedInFuture = new FramePoint3D();
    private final FrameQuaternion rotationAtEnd = new FrameQuaternion();
-   
-   public void getDesiredFootPosition(RobotSextant robotSextant, FrameVector3D desiredLinearVelocity, FrameVector3D desiredAngularVelocity, double swingTime, FramePoint3D framePointToPack)
+
+   public void getDesiredFootPosition(RobotSextant robotSextant,
+                                      FrameVector3D desiredLinearVelocity,
+                                      FrameVector3D desiredAngularVelocity,
+                                      double swingTime,
+                                      FramePoint3D framePointToPack)
    {
       YoFrameVector3D offsetFromBodyToFootDesired = nominalOffsetsFromBodyToFeet.get(robotSextant);
       offsetFromBodyToFoot.setIncludingFrame(offsetFromBodyToFootDesired);
       offsetFromBodyToFoot.scale(footScalarFromNominalToBody.getX(), footScalarFromNominalToBody.getY(), footScalarFromNominalToBody.getZ());
-      
+
       desiredVelocityScaled.setToNaN(desiredLinearVelocity.getReferenceFrame());
       desiredVelocityScaled.setAndScale(swingTime * swingTimeScalar.getDoubleValue(), desiredLinearVelocity);
       desiredVelocityScaled.changeFrame(centerOfMassFrameWithOrientation);
-      
-//      if(desiredAngularVelocity.length() > 0.003)
-//      {
-         double radius = desiredLinearVelocity.length() / desiredAngularVelocity.getZ();
-         turnRadiusVisual.setDiameter(radius * 2.0);
-         perpindicularToCenterOfMassVelocity.set(-desiredLinearVelocity.getY(), desiredLinearVelocity.getX(), 0.0);
-         perpindicularToCenterOfMassVelocity.normalize();
-         perpindicularToCenterOfMassVelocity.scale(radius);
-         
-         centerOfTurn.setToZero(centerOfMassFrameWithOrientation);
-         centerOfTurn.changeFrame(ReferenceFrame.getWorldFrame());
-         centerOfTurn.add(perpindicularToCenterOfMassVelocity);
-         turnRadiusVisual.setPosition(centerOfTurn.getX(), centerOfTurn.getY());
-         
-         bodyPoseProjectedInFuture.setToZero(bodyZUpFrame);
-         bodyPositionProjectedInFuture.setIncludingFrame(bodyPoseProjectedInFuture.getPosition());
-         centerOfTurn.changeFrame(bodyZUpFrame);
-         GeometryTools.yawAboutPoint(bodyPositionProjectedInFuture, centerOfTurn, desiredAngularVelocity.getZ() * swingTime, bodyPositionProjectedInFuture);
-         bodyPoseProjectedInFuture.getPosition().set(bodyPositionProjectedInFuture);
-         bodyFrameProjectedInFuture.setPoseAndUpdate(bodyPoseProjectedInFuture);
-         
-         rotationAtEnd.setToZero(bodyFrameProjectedInFuture);
-         rotationAtEnd.setYawPitchRoll(desiredAngularVelocity.getZ() * swingTime, 0.0, 0.0);
-         bodyFrameEndRotationProjectedInFuture.setOrientationAndUpdate(rotationAtEnd);
 
-         bodyFrameProjectedInFutureViz.update();
-         bodyPoseProjectedInFuture.changeFrame(ReferenceFrame.getWorldFrame());
-         bodyFrameProjectedInFutureCircleArtifact.setPosition(bodyPoseProjectedInFuture.getX(), bodyPoseProjectedInFuture.getY());
-         startPoint.set(bodyPoseProjectedInFuture.getX(), bodyPoseProjectedInFuture.getY());
-         frameEndPoint.setToZero(bodyFrameEndRotationProjectedInFuture);
-         frameEndPoint.setX(0.3);
-         frameEndPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      double radius = desiredLinearVelocity.length() / desiredAngularVelocity.getZ();
+      turnRadiusVisual.setDiameter(radius * 2.0);
+      perpindicularToCenterOfMassVelocity.set(-desiredLinearVelocity.getY(), desiredLinearVelocity.getX(), 0.0);
+      perpindicularToCenterOfMassVelocity.normalize();
+      perpindicularToCenterOfMassVelocity.scale(radius);
 
-         bodyFrameProjectedInFutureLineArtifact.setPoints(startPoint, frameEndPoint);
-//      }
-//      else
-//      {
-//         bodyPoseProjectedInFuture.setToZero(centerOfMassFrameWithOrientation);
-//         bodyPoseProjectedInFuture.setPosition(desiredVelocityScaled.getVector());
-//         bodyPoseProjectedInFuture.changeFrame(bodyZUpFrame);
-//         bodyFrameProjectedInFuture.setPoseAndUpdate(bodyPoseProjectedInFuture);
-//         rotationAtEnd.setToZero(bodyFrameProjectedInFuture);
-//         bodyFrameEndRotationProjectedInFuture.setOrientationAndUpdate(rotationAtEnd);
-//      }
-      
+      centerOfTurn.setToZero(centerOfMassFrameWithOrientation);
+      centerOfTurn.changeFrame(ReferenceFrame.getWorldFrame());
+      centerOfTurn.add(perpindicularToCenterOfMassVelocity);
+      turnRadiusVisual.setPosition(centerOfTurn.getX(), centerOfTurn.getY());
+
+      bodyPoseProjectedInFuture.setToZero(bodyZUpFrame);
+      bodyPositionProjectedInFuture.setIncludingFrame(bodyPoseProjectedInFuture.getPosition());
+      centerOfTurn.changeFrame(bodyZUpFrame);
+      GeometryTools.yawAboutPoint(bodyPositionProjectedInFuture, centerOfTurn, desiredAngularVelocity.getZ() * swingTime, bodyPositionProjectedInFuture);
+      bodyPoseProjectedInFuture.getPosition().set(bodyPositionProjectedInFuture);
+      bodyFrameProjectedInFuture.setPoseAndUpdate(bodyPoseProjectedInFuture);
+
+      rotationAtEnd.setToZero(bodyFrameProjectedInFuture);
+      rotationAtEnd.setYawPitchRoll(desiredAngularVelocity.getZ() * swingTime, 0.0, 0.0);
+      bodyFrameEndRotationProjectedInFuture.setOrientationAndUpdate(rotationAtEnd);
+
+      bodyFrameProjectedInFutureViz.update();
+      bodyPoseProjectedInFuture.changeFrame(ReferenceFrame.getWorldFrame());
+      bodyFrameProjectedInFutureCircleArtifact.setPosition(bodyPoseProjectedInFuture.getX(), bodyPoseProjectedInFuture.getY());
+      startPoint.set(bodyPoseProjectedInFuture.getX(), bodyPoseProjectedInFuture.getY());
+      frameEndPoint.setToZero(bodyFrameEndRotationProjectedInFuture);
+      frameEndPoint.setX(0.3);
+      frameEndPoint.changeFrame(ReferenceFrame.getWorldFrame());
+
+      bodyFrameProjectedInFutureLineArtifact.setPoints(startPoint, frameEndPoint);
+
       framePointToPack.setToZero(bodyFrameEndRotationProjectedInFuture);
-      
-      
-//      framePointToPack.add(offsetFromBodyToFoot.getVector());
-//      framePointToPack.add(feetOffsetFromBody.getFrameTuple().getVector());
-      
+
+      //      framePointToPack.add(offsetFromBodyToFoot.getVector());
+      //      framePointToPack.add(feetOffsetFromBody.getFrameTuple().getVector());
+
       offset.set(offsetFromBodyToFoot);
       framePointToPack.add(offset);
-      
+
       offset.set(feetOffsetFromBody);
       framePointToPack.add(offset);
-      
+
       framePointToPack.changeFrame(ReferenceFrame.getWorldFrame());
       framePointToPack.setZ(0.0);
-      
+
       //      YoFrameVector offsetFromBodyToFootDesired = nominalOffsetsFromBodyToFeet.get(robotSextant);
       //      framePointToPack.setToZero(bodyZUpFrame);
       //      offsetFromBodyToFootDesired.getFrameTupleIncludingFrame(offsetFromBodyToFoot);
@@ -249,9 +252,16 @@ public class FootStepPlanner
          footPosition.setToZero(footFrame);
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
          polygon.addVertex(footPosition.getX(), footPosition.getY());
-
       }
       polygon.update();
       yoFramePolygon.set(polygon);
+   }
+
+   public YoGraphicGroupDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(name);
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("stancePolygon", stancePolygon, ColorDefinitions.Blue()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("swingPolygon", swingPolygon, ColorDefinitions.Red()));
+      return group;
    }
 }

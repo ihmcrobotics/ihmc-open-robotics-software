@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import behavior_msgs.msg.dds.WalkActionFootstepDefinitionMessage;
+import behavior_msgs.WalkActionFootstepDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
@@ -82,12 +82,12 @@ public class WalkActionFootstepDefinition implements SidedObject
    public void toMessage(WalkActionFootstepDefinitionMessage message)
    {
       message.setRobotSide(side.toMessage().toByte());
-      soleToPlanFrameTransform.toMessage(message.getSolePose());
+      message.getSolePose().set(soleToPlanFrameTransform.getValueReadOnly());
    }
 
    public void fromMessage(WalkActionFootstepDefinitionMessage message)
    {
       side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
-      soleToPlanFrameTransform.fromMessage(message.getSolePose());
+      soleToPlanFrameTransform.fromMessage(message.getSolePose().getPose());
    }
 }

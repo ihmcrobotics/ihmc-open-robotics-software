@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.control.ai2r;
 
-import behavior_msgs.msg.dds.AI2RNodeStateMessage;
+import behavior_msgs.AI2RNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.control.CheckpointNodeState;

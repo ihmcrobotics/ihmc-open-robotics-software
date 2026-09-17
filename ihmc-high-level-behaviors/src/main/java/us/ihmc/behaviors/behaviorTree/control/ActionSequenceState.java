@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.control;
 
-import behavior_msgs.msg.dds.ActionSequenceStateMessage;
+import behavior_msgs.ActionSequenceStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 

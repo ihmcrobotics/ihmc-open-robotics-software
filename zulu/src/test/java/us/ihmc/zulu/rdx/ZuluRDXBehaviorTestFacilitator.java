@@ -20,12 +20,13 @@ public class ZuluRDXBehaviorTestFacilitator
       super(SVO_FILE,
             "zulu",
             () -> new ZuluRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS),
-            (robotModel, nodeBuilder, initialWalkingPose) ->
+            (robotModel, ros2Node, initialWalkingPose) ->
             {
                HumanoidKinematicsSimulationParameters parameters = new HumanoidKinematicsSimulationParameters();
-               parameters.setRos2NodeBuilder(nodeBuilder);
+               parameters.setROS2Node(ros2Node);
                return HumanoidKinematicsSimulation.create(robotModel, parameters);
             },
+            null,
             () -> new RDXBaseUI(ZuluRDXBehaviorTestFacilitator.class),
             new WorkspaceResourceDirectory(ZuluRDXBehaviorTestFacilitator.class, "/behaviorTrees"),
             robotModel -> new ZuluSimulationCollisionModel(robotModel.getJointMap()));

@@ -1,6 +1,6 @@
 package us.ihmc.communication.crdt;
 
-import us.ihmc.idl.IDLSequence.StringBuilderHolder;
+import us.ihmc.fastddsjava.cdr.idl.IDLStringSequence;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +59,7 @@ public class CRDTBidirectionalStringList extends CRDTBidirectionalMutableField<L
       }
    }
 
-   public void toMessage(StringBuilderHolder message)
+   public void toMessage(IDLStringSequence message)
    {
       message.clear();
       for (int i = 0; i < getSize(); ++i)
@@ -80,14 +80,14 @@ public class CRDTBidirectionalStringList extends CRDTBidirectionalMutableField<L
       }
    }
 
-   public void fromMessage(StringBuilderHolder message)
+   public void fromMessage(IDLStringSequence message)
    {
       if (isModificationIncoming())
       {
          getValueInternal().clear();
          for (int i = 0; i < message.size(); ++i)
          {
-            getValueInternal().add(message.getString(i));
+            getValueInternal().add(message.get(i).toString());
          }
       }
    }
