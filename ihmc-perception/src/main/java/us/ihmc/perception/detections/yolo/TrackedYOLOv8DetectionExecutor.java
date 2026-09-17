@@ -70,24 +70,14 @@ public class TrackedYOLOv8DetectionExecutor
 
    private final BoTSORTTracker botSortTracker = new BoTSORTTracker();
 
-   private final Target2DTracker target2DTracker = new Target2DTracker(
-         80,
-         0.7f, 0.05f,
-         10,
-         50,
-         0.05f, 0.4f,
-         0.0f, 0.35f,
-         100,
-         new Target2DTracker.Weights()
-   );
+   private final Target2DTracker target2DTracker = new Target2DTracker(80, 0.7f, 0.05f, 10, 50, 0.05f, 0.4f, 0.0f, 0.35f, 100, new Target2DTracker.Weights());
 
    private final BlockingQueue<Runnable> taskQueue;
-   private final RepeatingTaskThread taskExecutorThread =
-         new RepeatingTaskThread("YOLOExecutor", this::executeTasks, DefaultExceptionHandler.RUNTIME_EXCEPTION);
+   private final RepeatingTaskThread taskExecutorThread = new RepeatingTaskThread("YOLOExecutor",
+                                                                                  this::executeTasks,
+                                                                                  DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
-   public TrackedYOLOv8DetectionExecutor(ROS2Node ros2Node,
-                                         ROS2PeerClockOffsetEstimator peerClockEstimator,
-                                         BooleanSupplier annotatedImageDemanded)
+   public TrackedYOLOv8DetectionExecutor(ROS2Node ros2Node, ROS2PeerClockOffsetEstimator peerClockEstimator, BooleanSupplier annotatedImageDemanded)
    {
       this(ros2Node, false, peerClockEstimator, annotatedImageDemanded);
    }
@@ -139,8 +129,9 @@ public class TrackedYOLOv8DetectionExecutor
       taskExecutorThread.setDaemon(true);
       taskExecutorThread.startRepeating();
 
-      annotatedImagePublishedThread =
-            new RepeatingTaskThread("YOLOAnnotatedImagePublisher", this::annotateAndPublishImage, DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      annotatedImagePublishedThread = new RepeatingTaskThread("YOLOAnnotatedImagePublisher",
+                                                              this::annotateAndPublishImage,
+                                                              DefaultExceptionHandler.RUNTIME_EXCEPTION);
       annotatedImagePublishedThread.setDaemon(true);
       annotatedImagePublishedThread.startRepeating();
    }
@@ -286,27 +277,25 @@ public class TrackedYOLOv8DetectionExecutor
                              {
                                 Point3D32 centroid = YOLOv8Tools.computeCentroidOfPointCloud(filteredPoints, 128);
 
-                                YOLOv8InstantDetection detForTrackingAndCallbacks =
-                                      new YOLOv8InstantDetection(detection.objectClass(),
-                                                                 detection.confidence(),
-                                                                 new Pose3D(centroid, new RotationMatrix()),
-                                                                 erodedObjectMask.getAcquisitionTime(),
-                                                                 bgrImage,
-                                                                 erodedObjectMask,
-                                                                 depthRef,
-                                                                 detection.boundingBox(),
-                                                                 filteredPoints);
+                                YOLOv8InstantDetection detForTrackingAndCallbacks = new YOLOv8InstantDetection(detection.objectClass(),
+                                                                                                               detection.confidence(),
+                                                                                                               new Pose3D(centroid, new RotationMatrix()),
+                                                                                                               erodedObjectMask.getAcquisitionTime(),
+                                                                                                               bgrImage,
+                                                                                                               erodedObjectMask,
+                                                                                                               depthRef,
+                                                                                                               detection.boundingBox(),
+                                                                                                               filteredPoints);
 
-                                YOLOv8InstantDetection detForAnnotation =
-                                      new YOLOv8InstantDetection(detection.objectClass(),
-                                                                 detection.confidence(),
-                                                                 new Pose3D(centroid, new RotationMatrix()),
-                                                                 erodedObjectMask.getAcquisitionTime(),
-                                                                 bgrImage,
-                                                                 erodedObjectMask,
-                                                                 depthRef,
-                                                                 detection.boundingBox(),
-                                                                 filteredPoints);
+                                YOLOv8InstantDetection detForAnnotation = new YOLOv8InstantDetection(detection.objectClass(),
+                                                                                                     detection.confidence(),
+                                                                                                     new Pose3D(centroid, new RotationMatrix()),
+                                                                                                     erodedObjectMask.getAcquisitionTime(),
+                                                                                                     bgrImage,
+                                                                                                     erodedObjectMask,
+                                                                                                     depthRef,
+                                                                                                     detection.boundingBox(),
+                                                                                                     filteredPoints);
 
                                 trackableDetections.add(detForTrackingAndCallbacks);
                                 yoloInstantDetections.add(detForTrackingAndCallbacks);
@@ -334,7 +323,10 @@ public class TrackedYOLOv8DetectionExecutor
                           for (YOLOv8InstantDetection d : trackableDetections)
                           {
                              BoundingBox2DReadOnly boundingBox = d.getBoundingBox();
-                             float[] bbox = {(float) boundingBox.getMinX(), (float) boundingBox.getMinY(), (float) boundingBox.getMaxX(), (float) boundingBox.getMaxY()};
+                             float[] bbox = {(float) boundingBox.getMinX(),
+                                             (float) boundingBox.getMinY(),
+                                             (float) boundingBox.getMaxX(),
+                                             (float) boundingBox.getMaxY()};
 
                              RawImage maskRaw = d.getObjectMask();
                              Mat maskCpu = maskRaw != null ? maskRaw.getCpuImageMat() : null;
@@ -342,16 +334,10 @@ public class TrackedYOLOv8DetectionExecutor
                              Mat maskAligned = maskCpu;
                              Mat resized = null;
 
-                             if (textureMap01 != null && maskCpu != null
-                                 && (maskCpu.cols() != textureMap01.cols() || maskCpu.rows() != textureMap01.rows()))
+                             if (textureMap01 != null && maskCpu != null && (maskCpu.cols() != textureMap01.cols() || maskCpu.rows() != textureMap01.rows()))
                              {
                                 resized = new Mat();
-                                opencv_imgproc.resize(maskCpu,
-                                                      resized,
-                                                      new Size(textureMap01.cols(), textureMap01.rows()),
-                                                      0,
-                                                      0,
-                                                      opencv_imgproc.INTER_NEAREST);
+                                opencv_imgproc.resize(maskCpu, resized, new Size(textureMap01.cols(), textureMap01.rows()), 0, 0, opencv_imgproc.INTER_NEAREST);
                                 maskAligned = resized;
                              }
 
@@ -362,12 +348,7 @@ public class TrackedYOLOv8DetectionExecutor
                              if (resized != null)
                                 resized.release();
 
-                             obs.add(new Target2DTracker.Obs(maskRaw,
-                                                             bbox,
-                                                             d.getTrackId(),
-                                                             (float) d.getConfidence(),
-                                                             d.getObjectClass(),
-                                                             texture01));
+                             obs.add(new Target2DTracker.Obs(maskRaw, bbox, d.getTrackId(), (float) d.getConfidence(), d.getObjectClass(), texture01));
                           }
 
                           if (textureMap01 != null)
@@ -381,13 +362,7 @@ public class TrackedYOLOv8DetectionExecutor
                              float[] bb = t.latestBbox != null ? Arrays.copyOf(t.latestBbox, 4) : null;
                              RawImage mask = t.latestMask != null ? t.latestMask.get() : null;
 
-                             newAnnotatedTargets.add(new AnnotatedTarget2D(
-                                   t.targetId,
-                                   t.lastTrackId,
-                                   t.name,
-                                   t.score,
-                                   bb,
-                                   mask));
+                             newAnnotatedTargets.add(new AnnotatedTarget2D(t.targetId, t.lastTrackId, t.name, t.score, bb, mask));
                           }
 
                           synchronized (annotatedTargetsLock)
@@ -475,9 +450,7 @@ public class TrackedYOLOv8DetectionExecutor
          Mat src = colorImage.getCpuImageMat();
          if (src == null || src.isNull())
          {
-            LogTools.error("Annotated publisher got NULL CPU Mat. seq={} refs={}",
-                           colorImage.getSequenceNumber(),
-                           colorImage.getReferenceCount());
+            LogTools.error("Annotated publisher got NULL CPU Mat. seq={} refs={}", colorImage.getSequenceNumber(), colorImage.getReferenceCount());
             return;
          }
 

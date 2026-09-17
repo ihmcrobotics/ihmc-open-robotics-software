@@ -63,15 +63,7 @@ final class TrackedYOLOv8Tools
          int textY = MathTools.clamp(y1 - textSize.height(), 0, image.rows() - textSize.height());
          Rect textBox = new Rect(textX, textY, textSize.width(), textSize.height());
          opencv_imgproc.rectangle(image, textBox, color, opencv_imgproc.FILLED, LINE_TYPE, 0);
-         opencv_imgproc.putText(image,
-                               label,
-                               new Point(textX, textY + textSize.height()),
-                               FONT,
-                               FONT_SCALE,
-                               WHITE,
-                               FONT_THICKNESS,
-                               TEXT_LINE_TYPE,
-                               false);
+         opencv_imgproc.putText(image, label, new Point(textX, textY + textSize.height()), FONT, FONT_SCALE, WHITE, FONT_THICKNESS, TEXT_LINE_TYPE, false);
          textBox.close();
       }
    }

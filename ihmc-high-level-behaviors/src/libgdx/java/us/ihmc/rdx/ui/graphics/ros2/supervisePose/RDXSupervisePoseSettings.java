@@ -28,9 +28,7 @@ public class RDXSupervisePoseSettings
    private final ImBooleanWrapper autoResetEnabled;
    private final ImDoubleWrapper resetDistance;
 
-   public RDXSupervisePoseSettings(ROS2Node ros2Node,
-                                   ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator,
-                                   SupervisePoseObject object)
+   public RDXSupervisePoseSettings(ROS2Node ros2Node, ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator, SupervisePoseObject object)
    {
       this.object = object;
       this.ros2Node = ros2Node;

@@ -49,17 +49,12 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
    private final Map<String, List<SupervisePoseObject>> objectsByCategory;
    private final Set<String> selectedCategories;
 
-   public RDXSupervisePoseVisualizer(String title,
-                                     ROS2Node ros2Node,
-                                     ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator)
+   public RDXSupervisePoseVisualizer(String title, ROS2Node ros2Node, ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator)
    {
       this(title, ros2Node, ros2ClockOffsetEstimator, Collections.emptySet());
    }
 
-   public RDXSupervisePoseVisualizer(String title,
-                                     ROS2Node ros2Node,
-                                     ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator,
-                                     Set<String> selectedCategories)
+   public RDXSupervisePoseVisualizer(String title, ROS2Node ros2Node, ROS2PeerClockOffsetEstimator ros2ClockOffsetEstimator, Set<String> selectedCategories)
    {
       super(title);
 
@@ -77,8 +72,7 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
          {
             if (category != null && !category.isBlank())
             {
-               this.selectedCategories.add(category.trim()
-                                                   .toLowerCase(Locale.ROOT));
+               this.selectedCategories.add(category.trim().toLowerCase(Locale.ROOT));
             }
          }
       }
@@ -95,14 +89,9 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
 
          resultTopics.add(object.topics.ihmcResult());
 
-         settingsMap.put(object,
-                         new RDXSupervisePoseSettings(ros2Node,
-                                                      ros2ClockOffsetEstimator,
-                                                      object));
+         settingsMap.put(object, new RDXSupervisePoseSettings(ros2Node, ros2ClockOffsetEstimator, object));
 
-         objectsByCategory.computeIfAbsent(object.category,
-                                           key -> new ArrayList<>())
-                          .add(object);
+         objectsByCategory.computeIfAbsent(object.category, key -> new ArrayList<>()).add(object);
       }
 
       setSceneLevels(RDXSceneLevel.VIRTUAL);
@@ -123,10 +112,7 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
 
       for (SupervisePoseObject object : settingsMap.keySet())
       {
-         resultVisualizers.put(object,
-                               new SupervisePoseResultVisualizer(ros2Node,
-                                                                 object,
-                                                                 getFrequency(object.topics.ihmcResult())));
+         resultVisualizers.put(object, new SupervisePoseResultVisualizer(ros2Node, object, getFrequency(object.topics.ihmcResult())));
       }
    }
 
@@ -153,18 +139,11 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
    {
       final ImGuiStyle style = new ImGuiStyle();
 
-      int tableFlags = ImGuiTableFlags.BordersV
-                       | ImGuiTableFlags.BordersOuterH
-                       | ImGuiTableFlags.NoKeepColumnsVisible
-                       | ImGuiTableFlags.RowBg;
+      int tableFlags = ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.NoKeepColumnsVisible | ImGuiTableFlags.RowBg;
 
-      float resetButtonWidth =
-            ImGui.calcTextSize("Reset").x
-            + (2.0f * style.getItemInnerSpacingX())
-            + 1.0f;
+      float resetButtonWidth = ImGui.calcTextSize("Reset").x + (2.0f * style.getItemInnerSpacingX()) + 1.0f;
 
-      float distanceWidgetWidth =
-            Math.max(110.0f, resetButtonWidth);
+      float distanceWidgetWidth = Math.max(110.0f, resetButtonWidth);
 
       for (Map.Entry<String, List<SupervisePoseObject>> entry : objectsByCategory.entrySet())
       {
@@ -175,28 +154,17 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
          {
             String tableName = "SupervisePoseTable_" + category;
 
-            if (ImGui.beginTable(labels.getHidden(tableName),
-                                 TABLE_COLUMN_COUNT,
-                                 tableFlags))
+            if (ImGui.beginTable(labels.getHidden(tableName), TABLE_COLUMN_COUNT, tableFlags))
             {
-               ImGui.tableSetupColumn(labels.get("Enable"),
-                                      ImGuiTableColumnFlags.WidthFixed
-                                      | ImGuiTableColumnFlags.NoHeaderWidth);
+               ImGui.tableSetupColumn(labels.get("Enable"), ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoHeaderWidth);
 
-               ImGui.tableSetupColumn(labels.get("Instance"),
-                                      ImGuiTableColumnFlags.WidthStretch);
+               ImGui.tableSetupColumn(labels.get("Instance"), ImGuiTableColumnFlags.WidthStretch);
 
-               ImGui.tableSetupColumn(labels.get("Reset"),
-                                      ImGuiTableColumnFlags.WidthFixed,
-                                      resetButtonWidth);
+               ImGui.tableSetupColumn(labels.get("Reset"), ImGuiTableColumnFlags.WidthFixed, resetButtonWidth);
 
-               ImGui.tableSetupColumn(labels.get("Enable Auto Reset"),
-                                      ImGuiTableColumnFlags.WidthFixed
-                                      | ImGuiTableColumnFlags.NoHeaderWidth);
+               ImGui.tableSetupColumn(labels.get("Enable Auto Reset"), ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoHeaderWidth);
 
-               ImGui.tableSetupColumn(labels.get("Auto Reset Distance"),
-                                      ImGuiTableColumnFlags.WidthFixed,
-                                      distanceWidgetWidth);
+               ImGui.tableSetupColumn(labels.get("Auto Reset Distance"), ImGuiTableColumnFlags.WidthFixed, distanceWidgetWidth);
 
                ImGui.tableHeadersRow();
                ImGui.setItemAllowOverlap();
@@ -218,9 +186,7 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables,
-                              Pool<Renderable> pool,
-                              Set<RDXSceneLevel> sceneLevels)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (!sceneLevelCheck(sceneLevels))
          return;
@@ -229,11 +195,9 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
       {
          RDXSupervisePoseSettings settings = settingsMap.get(object);
 
-         if (settings != null
-             && settings.getParameters().getEnabled().getValue())
+         if (settings != null && settings.getParameters().getEnabled().getValue())
          {
-            SupervisePoseResultVisualizer visualizer =
-                  resultVisualizers.get(object);
+            SupervisePoseResultVisualizer visualizer = resultVisualizers.get(object);
 
             if (visualizer != null)
                visualizer.getRenderables(renderables, pool);
@@ -260,8 +224,8 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
     * SupervisePose Overlay Image
     * ├── Combined
     * └── Category
-    *     ├── Instance 1
-    *     └── Instance 2
+    * ├── Instance 1
+    * └── Instance 2
     *
     * Each image visualizer still owns an independent, dockable RDX panel.
     */
@@ -271,21 +235,16 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
       private final ImBoolean combinedEnabled = new ImBoolean(false);
       private final RDXPanel panel;
 
-      private final Map<String, List<ObjectOverlayVisualizer>> visualizersByCategory =
-            new LinkedHashMap<>();
+      private final Map<String, List<ObjectOverlayVisualizer>> visualizersByCategory = new LinkedHashMap<>();
 
-      private final List<RDXROS2ImageMessageVisualizer> individualVisualizers =
-            new ArrayList<>();
+      private final List<RDXROS2ImageMessageVisualizer> individualVisualizers = new ArrayList<>();
 
-      private final List<ROS2Topic<?>> overlayTopics =
-            new ArrayList<>();
+      private final List<ROS2Topic<?>> overlayTopics = new ArrayList<>();
 
       private boolean childrenCreated = false;
       private boolean childPanelsRegistered = false;
 
-      public OverlayImageVisualizer(String title,
-                                    ROS2Node ros2Node,
-                                    Set<String> selectedCategories)
+      public OverlayImageVisualizer(String title, ROS2Node ros2Node, Set<String> selectedCategories)
       {
          super(title);
 
@@ -294,10 +253,7 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
 
          Set<String> normalizedSelectedCategories = normalizeSelectedCategories(selectedCategories);
 
-         combinedVisualizer =
-               new RDXROS2ImageMessageVisualizer("SupervisePose Overlay Combined",
-                                                 ros2Node,
-                                                 SupervisePoseAPI.SUPERVISE_POSE_OVERLAY_IMAGE);
+         combinedVisualizer = new RDXROS2ImageMessageVisualizer("SupervisePose Overlay Combined", ros2Node, SupervisePoseAPI.SUPERVISE_POSE_OVERLAY_IMAGE);
 
          combinedVisualizer.setActive(false);
          combinedVisualizer.getPanel().getIsShowing().set(false);
@@ -306,16 +262,15 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
 
          for (SupervisePoseObject object : SupervisePoseObject.VALUES)
          {
-            if (!shouldIncludeCategory(object.category,
-                                       normalizedSelectedCategories))
+            if (!shouldIncludeCategory(object.category, normalizedSelectedCategories))
             {
                continue;
             }
 
-            RDXROS2ImageMessageVisualizer imageVisualizer =
-                  new RDXROS2ImageMessageVisualizer("SupervisePose Overlay " + object.titleCaseName,
-                                                    ros2Node,
-                                                    object.topics.overlayedImage(), "/supervisepose/overlayed_image");
+            RDXROS2ImageMessageVisualizer imageVisualizer = new RDXROS2ImageMessageVisualizer("SupervisePose Overlay " + object.titleCaseName,
+                                                                                              ros2Node,
+                                                                                              object.topics.overlayedImage(),
+                                                                                              "/supervisepose/overlayed_image");
 
             imageVisualizer.setActive(false);
             imageVisualizer.getPanel().getIsShowing().set(false);
@@ -323,14 +278,9 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
             individualVisualizers.add(imageVisualizer);
             overlayTopics.add(object.topics.overlayedImage());
 
-            ObjectOverlayVisualizer objectOverlayVisualizer =
-                  new ObjectOverlayVisualizer(object,
-                                              imageVisualizer,
-                                              new ImBoolean(false));
+            ObjectOverlayVisualizer objectOverlayVisualizer = new ObjectOverlayVisualizer(object, imageVisualizer, new ImBoolean(false));
 
-            visualizersByCategory.computeIfAbsent(object.category,
-                                                  ignored -> new ArrayList<>())
-                                 .add(objectOverlayVisualizer);
+            visualizersByCategory.computeIfAbsent(object.category, ignored -> new ArrayList<>()).add(objectOverlayVisualizer);
          }
       }
 
@@ -366,13 +316,11 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
          if (baseUI == null)
             return;
 
-         baseUI.getImGuiPanelManager()
-               .addPanel(combinedVisualizer.getPanel());
+         baseUI.getImGuiPanelManager().addPanel(combinedVisualizer.getPanel());
 
          for (RDXROS2ImageMessageVisualizer visualizer : individualVisualizers)
          {
-            baseUI.getImGuiPanelManager()
-                  .addPanel(visualizer.getPanel());
+            baseUI.getImGuiPanelManager().addPanel(visualizer.getPanel());
          }
 
          childPanelsRegistered = true;
@@ -418,11 +366,9 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
       {
          renderCombinedControls();
 
-         for (Map.Entry<String, List<ObjectOverlayVisualizer>> categoryEntry
-               : visualizersByCategory.entrySet())
+         for (Map.Entry<String, List<ObjectOverlayVisualizer>> categoryEntry : visualizersByCategory.entrySet())
          {
-            String categoryDisplayName =
-                  toTitleCase(categoryEntry.getKey());
+            String categoryDisplayName = toTitleCase(categoryEntry.getKey());
 
             if (ImGui.treeNode(labels.get(categoryDisplayName)))
             {
@@ -456,8 +402,7 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
 
       private void renderObjectControls(ObjectOverlayVisualizer objectVisualizer)
       {
-         if (ImGui.checkbox(labels.get(objectVisualizer.object().titleCaseName),
-                            objectVisualizer.enabled()))
+         if (ImGui.checkbox(labels.get(objectVisualizer.object().titleCaseName), objectVisualizer.enabled()))
          {
             boolean enabled = objectVisualizer.enabled().get();
 
@@ -513,16 +458,14 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
          {
             if (category != null && !category.isBlank())
             {
-               normalizedCategories.add(category.trim()
-                                                .toLowerCase(Locale.ROOT));
+               normalizedCategories.add(category.trim().toLowerCase(Locale.ROOT));
             }
          }
 
          return normalizedCategories;
       }
 
-      private static boolean shouldIncludeCategory(String category,
-                                                   Set<String> selectedCategories)
+      private static boolean shouldIncludeCategory(String category, Set<String> selectedCategories)
       {
          if (selectedCategories.isEmpty())
             return true;
@@ -548,9 +491,7 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
          return result.toString();
       }
 
-      private record ObjectOverlayVisualizer(SupervisePoseObject object,
-                                             RDXROS2ImageMessageVisualizer visualizer,
-                                             ImBoolean enabled)
+      private record ObjectOverlayVisualizer(SupervisePoseObject object, RDXROS2ImageMessageVisualizer visualizer, ImBoolean enabled)
       {
       }
    }
@@ -567,9 +508,7 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
       private final RDXBoxVisualizer boxVisualizer;
       private final RDXReferenceFrameGraphic referenceFrameGraphic;
 
-      public SupervisePoseResultVisualizer(ROS2Node ros2Node,
-                                           SupervisePoseObject object,
-                                           ImGuiAveragedFrequencyText frequencyText)
+      public SupervisePoseResultVisualizer(ROS2Node ros2Node, SupervisePoseObject object, ImGuiAveragedFrequencyText frequencyText)
       {
          this.ros2Node = ros2Node;
          latestResult = new Box3D();
@@ -583,31 +522,26 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
 
          referenceFrameGraphic = new RDXReferenceFrameGraphic(0.1);
 
-         stateSubscription =
-               ros2Node.createSubscription(object.topics.ihmcState(), reader ->
-               {
-                  std_msgs.Byte_ message = reader.read();
-                  if (message != null)
-                     state = State.fromByte(message.getData());
-               });
+         stateSubscription = ros2Node.createSubscription(object.topics.ihmcState(), reader ->
+         {
+            std_msgs.Byte_ message = reader.read();
+            if (message != null)
+               state = State.fromByte(message.getData());
+         });
 
-         resultSubscription =
-               ros2Node.createSubscription(object.topics.ihmcResult(), reader ->
-                                            {
-                                               Box3DMessage message = reader.read();
-                                               if (message == null)
-                                                  return;
-                                               frequencyText.ping();
+         resultSubscription = ros2Node.createSubscription(object.topics.ihmcResult(), reader ->
+         {
+            Box3DMessage message = reader.read();
+            if (message == null)
+               return;
+            frequencyText.ping();
 
-                                               latestResult.getPose()
-                                                           .set(message.getPose().getPose());
+            latestResult.getPose().set(message.getPose().getPose());
 
-                                               latestResult.getSize()
-                                                           .set(message.getSize().getVector());
+            latestResult.getSize().set(message.getSize().getVector());
 
-                                               referenceFrameGraphic.getFramePose3D()
-                                                                    .set(message.getPose().getPose());
-                                            });
+            referenceFrameGraphic.getFramePose3D().set(message.getPose().getPose());
+         });
       }
 
       public void update()
@@ -625,8 +559,7 @@ public class RDXSupervisePoseVisualizer extends RDXROS2MultiTopicVisualizer
       }
 
       @Override
-      public void getRenderables(Array<Renderable> renderables,
-                                 Pool<Renderable> pool)
+      public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
       {
          boxVisualizer.getRenderables(renderables, pool);
          referenceFrameGraphic.getRenderables(renderables, pool);

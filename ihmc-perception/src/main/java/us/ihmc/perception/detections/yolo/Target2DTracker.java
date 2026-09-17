@@ -13,38 +13,37 @@ import static java.lang.Math.*;
  * optional BoT-SORT track IDs.
  *
  * Pipeline:
- *  - Associate each observation to an existing target, preferring BoT-SORT trackId
- *    when available and otherwise falling back to bbox IoU matching.
- *  - Create a new target when no suitable existing target is found.
- *  - Mark unmatched targets as missed and remove stale targets that exceed
- *    maxMissedFrames.
+ * - Associate each observation to an existing target, preferring BoT-SORT trackId
+ * when available and otherwise falling back to bbox IoU matching.
+ * - Create a new target when no suitable existing target is found.
+ * - Mark unmatched targets as missed and remove stale targets that exceed
+ * maxMissedFrames.
  *
  * Scoring / publishing:
- *  - Each target maintains short history buffers for detection probability,
- *    texture, and observation persistence.
- *  - A composite score is computed from:
- *      detection confidence,
- *      temporal stability,
- *      texture quality,
- *      distance from image border,
- *      and bbox size relative to the frame.
- *  - Targets are published only if they are stable enough:
- *      score >= scoreStart,
- *      seen for at least minFrameCount frames,
- *      and not missed recently.
- *  - Targets whose score falls below scoreStop are removed.
+ * - Each target maintains short history buffers for detection probability,
+ * texture, and observation persistence.
+ * - A composite score is computed from:
+ * detection confidence,
+ * temporal stability,
+ * texture quality,
+ * distance from image border,
+ * and bbox size relative to the frame.
+ * - Targets are published only if they are stable enough:
+ * score >= scoreStart,
+ * seen for at least minFrameCount frames,
+ * and not missed recently.
+ * - Targets whose score falls below scoreStop are removed.
  *
  * Identity handling:
- *  - trackIdToTargetId provides a fast mapping from BoT-SORT track IDs to
- *    persistent Target2D instances.
- *  - If no valid track ID is available, identity is recovered using bbox IoU.
+ * - trackIdToTargetId provides a fast mapping from BoT-SORT track IDs to
+ * persistent Target2D instances.
+ * - If no valid track ID is available, identity is recovered using bbox IoU.
  *
  * Notes:
- *  - This tracker is not a motion-model tracker by itself; it is a higher-level
- *    persistence/filtering layer over detector / tracker observations.
- *  - Masks are optional and retained per target for downstream use.
+ * - This tracker is not a motion-model tracker by itself; it is a higher-level
+ * persistence/filtering layer over detector / tracker observations.
+ * - Masks are optional and retained per target for downstream use.
  */
-
 
 public class Target2DTracker
 {
@@ -76,10 +75,14 @@ public class Target2DTracker
    private final Map<Integer, Integer> trackIdToTargetId = new HashMap<>();
 
    public Target2DTracker(int historySize,
-                          float scoreStart, float scoreStop,
-                          int minFrameCount, int maxMissedFrames,
-                          float minAreaRatio, float maxAreaRatio,
-                          float minTexture, float maxTexture,
+                          float scoreStart,
+                          float scoreStop,
+                          int minFrameCount,
+                          int maxMissedFrames,
+                          float minAreaRatio,
+                          float maxAreaRatio,
+                          float minTexture,
+                          float maxTexture,
                           int borderSafeDistance,
                           Weights weights)
    {
@@ -188,9 +191,7 @@ public class Target2DTracker
          float s = computeScore(t, frameW, frameH);
          t.score = s;  // keep internal value updated
 
-         if (s >= scoreStart &&
-             t.totalSeenFrames() >= minFrameCount &&
-             t.missedFrames <= 5)
+         if (s >= scoreStart && t.totalSeenFrames() >= minFrameCount && t.missedFrames <= 5)
          {
             published.add(t);
          }
@@ -199,9 +200,7 @@ public class Target2DTracker
       return published;
    }
 
-   private static float maskIou(RawImage aMask, RawImage bMask,
-                                float[] aBbox, float[] bBbox,
-                                int frameW, int frameH)
+   private static float maskIou(RawImage aMask, RawImage bMask, float[] aBbox, float[] bBbox, int frameW, int frameH)
    {
       if (aMask == null || bMask == null)
          return 0f;
@@ -231,8 +230,10 @@ public class Target2DTracker
       Rect roi = new Rect(x1, y1, w, h);
 
       // bounds check against mask mats (they should be full-res, but be defensive)
-      if (roi.x() + roi.width() > A.cols() || roi.y() + roi.height() > A.rows()) return 0f;
-      if (roi.x() + roi.width() > B.cols() || roi.y() + roi.height() > B.rows()) return 0f;
+      if (roi.x() + roi.width() > A.cols() || roi.y() + roi.height() > A.rows())
+         return 0f;
+      if (roi.x() + roi.width() > B.cols() || roi.y() + roi.height() > B.rows())
+         return 0f;
 
       Mat aR = null, bR = null, aBin = null, bBin = null, inter = null, uni = null;
       try
@@ -243,10 +244,8 @@ public class Target2DTracker
          aBin = new Mat();
          bBin = new Mat();
 
-         org.bytedeco.opencv.global.opencv_imgproc.threshold(aR, aBin, 0.0, 255.0,
-                                                             org.bytedeco.opencv.global.opencv_imgproc.THRESH_BINARY);
-         org.bytedeco.opencv.global.opencv_imgproc.threshold(bR, bBin, 0.0, 255.0,
-                                                             org.bytedeco.opencv.global.opencv_imgproc.THRESH_BINARY);
+         org.bytedeco.opencv.global.opencv_imgproc.threshold(aR, aBin, 0.0, 255.0, org.bytedeco.opencv.global.opencv_imgproc.THRESH_BINARY);
+         org.bytedeco.opencv.global.opencv_imgproc.threshold(bR, bBin, 0.0, 255.0, org.bytedeco.opencv.global.opencv_imgproc.THRESH_BINARY);
 
          inter = new Mat();
          uni = new Mat();
@@ -264,12 +263,18 @@ public class Target2DTracker
       }
       finally
       {
-         if (inter != null) inter.release();
-         if (uni != null) uni.release();
-         if (aBin != null) aBin.release();
-         if (bBin != null) bBin.release();
-         if (aR != null) aR.release();
-         if (bR != null) bR.release();
+         if (inter != null)
+            inter.release();
+         if (uni != null)
+            uni.release();
+         if (aBin != null)
+            aBin.release();
+         if (bBin != null)
+            bBin.release();
+         if (aR != null)
+            aR.release();
+         if (bR != null)
+            bR.release();
       }
    }
 
@@ -325,7 +330,7 @@ public class Target2DTracker
       normTexture = clamp01(normTexture);
 
       float leftDist = x1;
-      float topDist  = y1;
+      float topDist = y1;
       float rightDist = frameW - x2;
       float minBorderDist = min(leftDist, min(topDist, rightDist));
       float borderFactor = clamp01(minBorderDist / (float) borderSafeDistance);
@@ -340,11 +345,8 @@ public class Target2DTracker
 
       float wSum = weights.prob + weights.temporal + weights.texture + weights.border + weights.size;
 
-      return (weights.prob * avgProb +
-              weights.temporal * temporal +
-              weights.texture * normTexture +
-              weights.border * borderFactor +
-              weights.size * sizeFactor) / max(1e-6f, wSum);
+      return (weights.prob * avgProb + weights.temporal * temporal + weights.texture * normTexture + weights.border * borderFactor + weights.size * sizeFactor)
+             / max(1e-6f, wSum);
    }
 
    private static float iou(float[] a, float[] b)

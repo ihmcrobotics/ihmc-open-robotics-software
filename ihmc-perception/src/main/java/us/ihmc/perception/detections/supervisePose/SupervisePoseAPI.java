@@ -22,11 +22,10 @@ public class SupervisePoseAPI
     *
     * /ihmc/supervisepose/overlayed_image
     */
-   public static final ROS2Topic<ImageMessage> SUPERVISE_POSE_OVERLAY_IMAGE = new ROS2Topic<ImageMessage>("/ihmc")
-                                                                              .appendedWith("supervisepose")
-                                                                              .appendedWith("overlayed_image")
-                                                                              .withType(ImageMessage.class)
-                                                                              .withQoS(ROS2QoSProfile.RELIABLE);
+   public static final ROS2Topic<ImageMessage> SUPERVISE_POSE_OVERLAY_IMAGE = new ROS2Topic<ImageMessage>("/ihmc").appendedWith("supervisepose")
+                                                                                                                  .appendedWith("overlayed_image")
+                                                                                                                  .withType(ImageMessage.class)
+                                                                                                                  .withQoS(ROS2QoSProfile.RELIABLE);
 
    /**
     * jros2 cannot currently publish std_msgs/Empty in a form accepted by the
@@ -34,43 +33,31 @@ public class SupervisePoseAPI
     * "category instance" requests on this topic into native Empty messages.
     */
    public static final ROS2Topic<String_> RESET_REQUEST = new ROS2Topic<String_>("/supervisepose").appendedWith("reset_request")
-                                                          .withType(String_.class)
-                                                          .withQoS(ROS2QoSProfile.RELIABLE);
+                                                                                                  .withType(String_.class)
+                                                                                                  .withQoS(ROS2QoSProfile.RELIABLE);
 
    public static SupervisePoseTopics topics(String category, String instance)
    {
       ROS2Topic<?> foundationPoseBase = FOUNDATION_POSE_TOPIC.appendedWith(category).appendedWith(instance);
       ROS2Topic<?> supervisePoseBase = SUPERVISE_POSE_TOPIC.appendedWith(category).appendedWith(instance);
 
-      ROS2Topic<ImageMessage> perObjectOverlay = new ROS2Topic<ImageMessage>("/ihmc")
-                                                 .appendedWith("supervisepose")
-                                                 .appendedWith(category)
-                                                 .appendedWith(instance)
-                                                 .appendedWith("overlayed_image")
-                                                 .withType(ImageMessage.class)
-                                                 .withQoS(ROS2QoSProfile.RELIABLE);
+      ROS2Topic<ImageMessage> perObjectOverlay = new ROS2Topic<ImageMessage>("/ihmc").appendedWith("supervisepose")
+                                                                                     .appendedWith(category)
+                                                                                     .appendedWith(instance)
+                                                                                     .appendedWith("overlayed_image")
+                                                                                     .withType(ImageMessage.class)
+                                                                                     .withQoS(ROS2QoSProfile.RELIABLE);
 
       return new SupervisePoseTopics(foundationPoseBase, supervisePoseBase, perObjectOverlay);
    }
 
-   public record SupervisePoseTopics(ROS2Topic<Image> poseEstimationDepthImage,
-                                    ROS2Topic<Image> poseEstimationRGBImage,
-                                    ROS2Topic<Image> poseEstimationSegmentation,
-                                    ROS2Topic<CameraInfo> poseEstimationCameraInfo,
-                                    ROS2Topic<Detection3DArray> poseEstimationOutput,
-                                    ROS2Topic<Image> trackingDepthImage,
-                                    ROS2Topic<Image> trackingRGBImage,
-                                    ROS2Topic<CameraInfo> trackingCameraInfo,
-                                    ROS2Topic<Detection3DArray> trackingOutput,
-                                    ROS2Topic<Image> depthImage,
-                                    ROS2Topic<Image> rgbImage,
-                                    ROS2Topic<Image> segmentation,
-                                    ROS2Topic<CameraInfo> cameraInfo,
-                                    ROS2Topic<Empty> reset,
-                                    ROS2Topic<ImageMessage> overlayedImage,
-                                    ROS2Topic<Box3DMessage> ihmcResult,
-                                    ROS2Topic<Byte_> ihmcState,
-                                    ROS2Topic<FoundationPoseParameters> ihmcParameters)
+   public record SupervisePoseTopics(ROS2Topic<Image> poseEstimationDepthImage, ROS2Topic<Image> poseEstimationRGBImage,
+                                     ROS2Topic<Image> poseEstimationSegmentation, ROS2Topic<CameraInfo> poseEstimationCameraInfo,
+                                     ROS2Topic<Detection3DArray> poseEstimationOutput, ROS2Topic<Image> trackingDepthImage, ROS2Topic<Image> trackingRGBImage,
+                                     ROS2Topic<CameraInfo> trackingCameraInfo, ROS2Topic<Detection3DArray> trackingOutput, ROS2Topic<Image> depthImage,
+                                     ROS2Topic<Image> rgbImage, ROS2Topic<Image> segmentation, ROS2Topic<CameraInfo> cameraInfo, ROS2Topic<Empty> reset,
+                                     ROS2Topic<ImageMessage> overlayedImage, ROS2Topic<Box3DMessage> ihmcResult, ROS2Topic<Byte_> ihmcState,
+                                     ROS2Topic<FoundationPoseParameters> ihmcParameters)
    {
       public SupervisePoseTopics(ROS2Topic<?> foundationPoseBase, ROS2Topic<?> supervisePoseBase, ROS2Topic<ImageMessage> overlayedImage)
       {

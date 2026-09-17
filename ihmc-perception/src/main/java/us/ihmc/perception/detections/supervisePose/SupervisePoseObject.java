@@ -48,8 +48,8 @@ public enum SupervisePoseObject
     *
     * meshes/
     * └── category/
-    *     └── instance/
-    *         └── instance.obj
+    * └── instance/
+    * └── instance.obj
     *
     * Example:
     *
@@ -78,15 +78,13 @@ public enum SupervisePoseObject
    {
       for (SupervisePoseObject object : VALUES)
       {
-         if (object.category.equals(category)
-             && object.instance.equals(instance))
+         if (object.category.equals(category) && object.instance.equals(instance))
          {
             return object;
          }
       }
 
-      throw new IllegalArgumentException(
-            "No SupervisePoseObject for " + category + "/" + instance);
+      throw new IllegalArgumentException("No SupervisePoseObject for " + category + "/" + instance);
    }
 
    public String key()

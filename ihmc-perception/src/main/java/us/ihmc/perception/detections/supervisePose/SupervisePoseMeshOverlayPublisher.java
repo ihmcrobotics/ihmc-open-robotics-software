@@ -37,9 +37,7 @@ public class SupervisePoseMeshOverlayPublisher implements AutoCloseable
     */
    public void publish(RawImage colorImage, Collection<SupervisePoseCommunicator> communicators)
    {
-      if (colorImage == null
-          || communicators == null
-          || communicators.isEmpty())
+      if (colorImage == null || communicators == null || communicators.isEmpty())
       {
          return;
       }
@@ -48,9 +46,7 @@ public class SupervisePoseMeshOverlayPublisher implements AutoCloseable
 
       for (SupervisePoseCommunicator communicator : communicators)
       {
-         if (communicator.isEnabled()
-             && communicator.getState()
-                == SupervisePoseCommunicator.State.TRACKING)
+         if (communicator.isEnabled() && communicator.getState() == SupervisePoseCommunicator.State.TRACKING)
          {
             hasTrackedCommunicator = true;
             break;
@@ -81,9 +77,7 @@ public class SupervisePoseMeshOverlayPublisher implements AutoCloseable
 
          for (SupervisePoseCommunicator communicator : communicators)
          {
-            if (!communicator.isEnabled()
-                || communicator.getState()
-                   != SupervisePoseCommunicator.State.TRACKING)
+            if (!communicator.isEnabled() || communicator.getState() != SupervisePoseCommunicator.State.TRACKING)
             {
                continue;
             }

@@ -11,9 +11,7 @@ public class SupervisePoseInstantDetection extends InstantDetection
    private final SupervisePoseTarget trackedTarget;
    private final Box3DReadOnly boundingBox;
 
-   public SupervisePoseInstantDetection(SupervisePoseTarget trackedTarget,
-                                        Box3DReadOnly boundingBox,
-                                        Instant detectionTime)
+   public SupervisePoseInstantDetection(SupervisePoseTarget trackedTarget, Box3DReadOnly boundingBox, Instant detectionTime)
    {
       super(trackedTarget.instance(), 1.0, new Pose3D(boundingBox.getPose()), detectionTime);
 

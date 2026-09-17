@@ -55,18 +55,18 @@ public final class PerceptionAPI
                                                                                                    .withType(YOLOv8AnnotationInfoList.class)
                                                                                                    .withSuffix("annotation_info_list");
    public static final ROS2Topic<YOLOv8ExecutorParameters> YOLO_PARAMETERS = HumanoidROS2Topic.IHMC_ROOT.withModule("yolo")
-                                                                                      .withSuffix("settings")
-                                                                                      .withType(YOLOv8ExecutorParameters.class);
+                                                                                                        .withSuffix("settings")
+                                                                                                        .withType(YOLOv8ExecutorParameters.class);
    public static final ROS2Topic<Image> YOLO_VLM_ANNOTATED_IMAGE = HumanoidROS2Topic.IHMC_ROOT.withModule("yolo")
-                                                                            .withSuffix("vlm/image")
-                                                                            .withType(Image.class)
-                                                                            .withQoS(ROS2QoSProfile.RELIABLE);
+                                                                                              .withSuffix("vlm/image")
+                                                                                              .withType(Image.class)
+                                                                                              .withQoS(ROS2QoSProfile.RELIABLE);
    public static final ROS2Topic<ImageMessage> YOLO_ANNOTATED_IMAGE = PERCEPTION_MODULE.withModule("yolo")
                                                                                        .withType(ImageMessage.class)
                                                                                        .withSuffix("annotated_image");
    public static final ROS2Topic<CameraInfo> YOLO_VML_ANNOTATED_IMAGE_CAMERA_INFO = HumanoidROS2Topic.IHMC_ROOT.withModule("yolo")
-                                                                                             .withSuffix("vlm/camera_Info")
-                                                                                             .withType(CameraInfo.class);
+                                                                                                               .withSuffix("vlm/camera_Info")
+                                                                                                               .withType(CameraInfo.class);
 
    /*
     * Aruco markers
@@ -89,20 +89,19 @@ public final class PerceptionAPI
    public static final ROS2Topic<Empty> REQUEST_EXPERIMENTAL_ZED = EXPERIMENTAL_ZED.withSuffix("request").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_EXPERIMENTAL_ZED_PUBLICATION = EXPERIMENTAL_ZED.withSuffix("request_publication").withType(Empty.class);
    public static final ROS2Topic<ImageMessage> EXPERIMENTAL_ZED_DEPTH = EXPERIMENTAL_ZED.withType(ImageMessage.class).withSuffix("depth");
-   public static final SideDependentList<ROS2Topic<ImageMessage>> EXPERIMENTAL_ZED_COLOR
-         = new SideDependentList<>(EXPERIMENTAL_ZED.withType(ImageMessage.class).withSuffix("left_color"),
-                                   EXPERIMENTAL_ZED.withType(ImageMessage.class).withSuffix("right_color"));
+   public static final SideDependentList<ROS2Topic<ImageMessage>> EXPERIMENTAL_ZED_COLOR = new SideDependentList<>(EXPERIMENTAL_ZED.withType(ImageMessage.class)
+                                                                                                                                   .withSuffix("left_color"),
+                                                                                                                   EXPERIMENTAL_ZED.withType(ImageMessage.class)
+                                                                                                                                   .withSuffix("right_color"));
 
    /*
     * Experimental ZED image topics (official ROS 2 Image and CameraInfo types)
     */
    private static final HumanoidROS2Topic<?> ROS2_EXPERIMENTAL_ZED = ROS2_EXPERIMENTAL_CAMERA.withModule("zed");
-   public static final SideDependentList<ROS2Topic<Image>> ROS2_EXPERIMENTAL_ZED_COLOR
-         = new SideDependentList<>(ROS2_EXPERIMENTAL_ZED.withSuffix("color/left/image").withType(Image.class),
-                                   ROS2_EXPERIMENTAL_ZED.withSuffix("color/right/image").withType(Image.class));
-   public static final SideDependentList<ROS2Topic<CameraInfo>> ROS2_EXPERIMENTAL_ZED_COLOR_CAMERA_INFO
-         = new SideDependentList<>(ROS2_EXPERIMENTAL_ZED.withSuffix("color/left/camera_info").withType(CameraInfo.class),
-                                   ROS2_EXPERIMENTAL_ZED.withSuffix("color/right/camera_info").withType(CameraInfo.class));
+   public static final SideDependentList<ROS2Topic<Image>> ROS2_EXPERIMENTAL_ZED_COLOR = new SideDependentList<>(ROS2_EXPERIMENTAL_ZED.withSuffix(
+         "color/left/image").withType(Image.class), ROS2_EXPERIMENTAL_ZED.withSuffix("color/right/image").withType(Image.class));
+   public static final SideDependentList<ROS2Topic<CameraInfo>> ROS2_EXPERIMENTAL_ZED_COLOR_CAMERA_INFO = new SideDependentList<>(ROS2_EXPERIMENTAL_ZED.withSuffix(
+         "color/left/camera_info").withType(CameraInfo.class), ROS2_EXPERIMENTAL_ZED.withSuffix("color/right/camera_info").withType(CameraInfo.class));
    public static final ROS2Topic<Image> ROS2_EXPERIMENTAL_ZED_DEPTH = ROS2_EXPERIMENTAL_ZED.withSuffix("depth/image").withType(Image.class);
    public static final ROS2Topic<CameraInfo> ROS2_EXPERIMENTAL_ZED_DEPTH_CAMERA_INFO = ROS2_EXPERIMENTAL_ZED.withSuffix("depth/camera_info")
                                                                                                             .withType(CameraInfo.class);
@@ -114,20 +113,21 @@ public final class PerceptionAPI
    public static final ROS2Topic<Empty> REQUEST_STEPPING_ZED = STEPPING_ZED.withSuffix("request").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_STEPPING_ZED_PUBLICATION = STEPPING_ZED.withSuffix("request_publication").withType(Empty.class);
    public static final ROS2Topic<ImageMessage> STEPPING_ZED_DEPTH = STEPPING_ZED.withType(ImageMessage.class).withSuffix("depth");
-   public static final SideDependentList<ROS2Topic<ImageMessage>> STEPPING_ZED_COLOR
-         = new SideDependentList<>(STEPPING_ZED.withType(ImageMessage.class).withSuffix("left_color"),
-                                   STEPPING_ZED.withType(ImageMessage.class).withSuffix("right_color"));
+   public static final SideDependentList<ROS2Topic<ImageMessage>> STEPPING_ZED_COLOR = new SideDependentList<>(STEPPING_ZED.withType(ImageMessage.class)
+                                                                                                                           .withSuffix("left_color"),
+                                                                                                               STEPPING_ZED.withType(ImageMessage.class)
+                                                                                                                           .withSuffix("right_color"));
 
    /*
     * Stepping ZED image topics (official ROS 2 Image and CameraInfo types)
     */
    private static final HumanoidROS2Topic<?> ROS2_STEPPING_ZED = ROS2_STEPPING_CAMERA.withModule("zed");
-   public static final SideDependentList<ROS2Topic<Image>> ROS2_STEPPING_ZED_COLOR
-         = new SideDependentList<>(ROS2_STEPPING_ZED.withSuffix("color/left/image").withType(Image.class),
-                                   ROS2_STEPPING_ZED.withSuffix("color/right/image").withType(Image.class));
-   public static final SideDependentList<ROS2Topic<CameraInfo>> ROS2_STEPPING_ZED_COLOR_CAMERA_INFO
-         = new SideDependentList<>(ROS2_STEPPING_ZED.withSuffix("color/left/camera_info").withType(CameraInfo.class),
-                                   ROS2_STEPPING_ZED.withSuffix("color/right/camera_info").withType(CameraInfo.class));
+   public static final SideDependentList<ROS2Topic<Image>> ROS2_STEPPING_ZED_COLOR = new SideDependentList<>(ROS2_STEPPING_ZED.withSuffix("color/left/image")
+                                                                                                                              .withType(Image.class),
+                                                                                                             ROS2_STEPPING_ZED.withSuffix("color/right/image")
+                                                                                                                              .withType(Image.class));
+   public static final SideDependentList<ROS2Topic<CameraInfo>> ROS2_STEPPING_ZED_COLOR_CAMERA_INFO = new SideDependentList<>(ROS2_STEPPING_ZED.withSuffix(
+         "color/left/camera_info").withType(CameraInfo.class), ROS2_STEPPING_ZED.withSuffix("color/right/camera_info").withType(CameraInfo.class));
    public static final ROS2Topic<Image> ROS2_STEPPING_ZED_DEPTH = ROS2_STEPPING_ZED.withSuffix("depth/image").withType(Image.class);
    public static final ROS2Topic<CameraInfo> ROS2_STEPPING_ZED_DEPTH_CAMERA_INFO = ROS2_STEPPING_ZED.withSuffix("depth/camera_info").withType(CameraInfo.class);
 
@@ -155,7 +155,9 @@ public final class PerceptionAPI
    /*
     * Planar regions
     */
-   public static final ROS2Topic<Empty> REQUEST_PLANAR_REGIONS = HumanoidROS2Topic.IHMC_ROOT.withModule("planar_regions").withSuffix("request").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_PLANAR_REGIONS = HumanoidROS2Topic.IHMC_ROOT.withModule("planar_regions")
+                                                                                            .withSuffix("request")
+                                                                                            .withType(Empty.class);
    public static final ROS2Topic<FramePlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS = PERCEPTION_MODULE.withOutput()
                                                                                                              .withTypeName(FramePlanarRegionsListMessage.class)
                                                                                                              .withSuffix("perspective");
@@ -168,7 +170,8 @@ public final class PerceptionAPI
     */
    public static final ROS2Topic<Empty> REQUEST_CHUNK_MAP = PERCEPTION_MODULE.withSuffix("request_chunk_map").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_height_map").withType(Empty.class);
-   public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP_FOR_CONTROLLER = PERCEPTION_MODULE.withSuffix("request_height_map_for_controller").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP_FOR_CONTROLLER = PERCEPTION_MODULE.withSuffix("request_height_map_for_controller")
+                                                                                             .withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_TERRAIN_MAP = PERCEPTION_MODULE.withSuffix("request_terrain_map").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_YOLO_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_yolo_height_map").withType(Empty.class);
    public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_MESSAGE = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapMessage.class);
@@ -193,8 +196,8 @@ public final class PerceptionAPI
    /*
     * Transform tuning
     */
-   private static final HumanoidROS2Topic<RigidBodyTransformMessage> TRANSFORM_TUNING_BASE_TOPIC = HumanoidROS2Topic.IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
-                                                                                                            .withModule("transform_tuning");
+   private static final HumanoidROS2Topic<RigidBodyTransformMessage> TRANSFORM_TUNING_BASE_TOPIC = HumanoidROS2Topic.IHMC_ROOT.withTypeName(
+         RigidBodyTransformMessage.class).withModule("transform_tuning");
    public static final ROS2IOTopicPair<RigidBodyTransformMessage> STEPPING_CAMERA_TO_PARENT_TUNING = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix(
          "stepping_camera_to_parent"));
    public static final ROS2IOTopicPair<RigidBodyTransformMessage> EXPERIMENTAL_CAMERA_TO_PARENT_TUNING = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix(

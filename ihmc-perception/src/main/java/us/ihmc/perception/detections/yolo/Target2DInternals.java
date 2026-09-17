@@ -37,14 +37,7 @@ class Target2D
 
    public float score = 0.0f;
 
-   public Target2D(int targetId,
-                   int initialTrackId,
-                   String name,
-                   RawImage mask,
-                   float[] bbox,
-                   float prob,
-                   float texture,
-                   int historySize)
+   public Target2D(int targetId, int initialTrackId, String name, RawImage mask, float[] bbox, float prob, float texture, int historySize)
    {
       this.targetId = targetId;
       this.lastTrackId = initialTrackId;
@@ -62,13 +55,7 @@ class Target2D
       textureHistory.addLast(texture);
    }
 
-   public void update(int trackId,
-                      String name,
-                      RawImage mask,
-                      float[] bbox,
-                      float prob,
-                      float texture,
-                      int historySize)
+   public void update(int trackId, String name, RawImage mask, float[] bbox, float prob, float texture, int historySize)
    {
       this.lastTrackId = trackId;
       this.name = name;
@@ -95,7 +82,8 @@ class Target2D
    public int totalSeenFrames()
    {
       int s = 0;
-      for (int v : frameCount) s += v;
+      for (int v : frameCount)
+         s += v;
       return s;
    }
 
@@ -145,7 +133,9 @@ class AnnotatedTarget2D
 
 class TextureTools
 {
-   private TextureTools() {}
+   private TextureTools()
+   {
+   }
 
    public static Mat computeTextureMap01(Mat bgr)
    {
@@ -208,8 +198,18 @@ class TextureTools
       int x2 = Math.round(bbox[2]);
       int y2 = Math.round(bbox[3]);
 
-      if (x2 < x1) { int tmp = x1; x1 = x2; x2 = tmp; }
-      if (y2 < y1) { int tmp = y1; y1 = y2; y2 = tmp; }
+      if (x2 < x1)
+      {
+         int tmp = x1;
+         x1 = x2;
+         x2 = tmp;
+      }
+      if (y2 < y1)
+      {
+         int tmp = y1;
+         y1 = y2;
+         y2 = tmp;
+      }
 
       x1 = clamp(x1, 0, W - 1);
       y1 = clamp(y1, 0, H - 1);
@@ -219,8 +219,10 @@ class TextureTools
       int rw = Math.max(1, x2 - x1);
       int rh = Math.max(1, y2 - y1);
 
-      if (x1 + rw > W) rw = W - x1;
-      if (y1 + rh > H) rh = H - y1;
+      if (x1 + rw > W)
+         rw = W - x1;
+      if (y1 + rh > H)
+         rh = H - y1;
       if (rw <= 0 || rh <= 0)
          return 0f;
 

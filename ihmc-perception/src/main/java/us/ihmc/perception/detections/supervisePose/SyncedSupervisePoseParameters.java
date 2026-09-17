@@ -22,9 +22,7 @@ public class SyncedSupervisePoseParameters extends LatestTimestampModifiable
    private final CRDTBidirectionalBoolean autoResetEnabled;
    private final CRDTBidirectionalDouble resetDistance;
 
-   public SyncedSupervisePoseParameters(ROS2Node ros2Node,
-                                        CRDTInfo crdtInfo,
-                                        SupervisePoseObject object)
+   public SyncedSupervisePoseParameters(ROS2Node ros2Node, CRDTInfo crdtInfo, SupervisePoseObject object)
    {
       this(ros2Node,
            crdtInfo,

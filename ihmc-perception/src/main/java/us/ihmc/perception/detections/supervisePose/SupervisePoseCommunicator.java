@@ -57,10 +57,7 @@ import java.util.function.Consumer;
 
 public class SupervisePoseCommunicator implements AutoCloseable
 {
-   private static final RotationMatrix SUPERVISE_POSE_TO_IHMC_ROTATION =
-         new RotationMatrix(new double[] {0, 0, 1,
-                                          -1, 0, 0,
-                                          0, -1, 0});
+   private static final RotationMatrix SUPERVISE_POSE_TO_IHMC_ROTATION = new RotationMatrix(new double[] {0, 0, 1, -1, 0, 0, 0, -1, 0});
 
    private final ROS2Node ros2Node;
    private final RawImagePublisher imagePublisher;
@@ -130,26 +127,22 @@ public class SupervisePoseCommunicator implements AutoCloseable
             updateLatestResult(message);
       });
 
-      resetRequestSubscription =
-            ros2Node.createSubscription(SupervisePoseAPI.RESET_REQUEST, reader ->
-            {
-               String_ message = reader.read();
-               if (message == null || !message.getData().toString().equals(target.category() + " " + target.instance()))
-                  return;
+      resetRequestSubscription = ros2Node.createSubscription(SupervisePoseAPI.RESET_REQUEST, reader ->
+      {
+         String_ message = reader.read();
+         if (message == null || !message.getData().toString().equals(target.category() + " " + target.instance()))
+            return;
 
-               if (internallyPublishingReset)
-               {
-                  internallyPublishingReset = false;
-                  return;
-               }
+         if (internallyPublishingReset)
+         {
+            internallyPublishingReset = false;
+            return;
+         }
 
-               LogTools.info(String.format(
-                     "Resetting SupervisePose for %s/%s. Source=UI_OR_EXTERNAL",
-                     target.category(),
-                     target.instance()));
+         LogTools.info(String.format("Resetting SupervisePose for %s/%s. Source=UI_OR_EXTERNAL", target.category(), target.instance()));
 
-               changeState(State.ESTIMATING_POSE);
-            });
+         changeState(State.ESTIMATING_POSE);
+      });
 
       SupervisePoseObject object = SupervisePoseObject.fromCategoryAndInstance(target.category(), target.instance());
 
@@ -178,10 +171,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
 
    public enum ResetReason
    {
-      UI,
-      YOLO_POSITION,
-      ENABLED,
-      UNKNOWN
+      UI, YOLO_POSITION, ENABLED, UNKNOWN
    }
 
    public SupervisePoseAPI.SupervisePoseTopics getTopics()
@@ -268,45 +258,30 @@ public class SupervisePoseCommunicator implements AutoCloseable
          if (sourceImage == null || sourceImage.isNull())
             return;
 
-         try (Mat overlayImage = sourceImage.clone();
-              BytePointer encodedImage = new BytePointer())
+         try (Mat overlayImage = sourceImage.clone(); BytePointer encodedImage = new BytePointer())
          {
-            CameraIntrinsics cameraIntrinsics =
-                  imageSnapshot.getIntrinsicsCopy();
+            CameraIntrinsics cameraIntrinsics = imageSnapshot.getIntrinsicsCopy();
 
-            meshOverlayRenderer.renderWireframe(overlayImage,
-                                                poseSnapshot,
-                                                cameraIntrinsics);
+            meshOverlayRenderer.renderWireframe(overlayImage, poseSnapshot, cameraIntrinsics);
 
-            boolean encoded =
-                  opencv_imgcodecs.imencode(".jpg",
-                                            overlayImage,
-                                            encodedImage);
+            boolean encoded = opencv_imgcodecs.imencode(".jpg", overlayImage, encodedImage);
 
             if (!encoded)
             {
-               LogTools.error("Failed to encode mesh overlay for {}/{}",
-                              target.category(),
-                              target.instance());
+               LogTools.error("Failed to encode mesh overlay for {}/{}", target.category(), target.instance());
                return;
             }
 
             ImageMessage imageMessage = new ImageMessage();
 
-            PerceptionMessageTools.packImageMessage(imageSnapshot,
-                                                    encodedImage,
-                                                    CompressionType.JPEG,
-                                                    imageMessage);
+            PerceptionMessageTools.packImageMessage(imageSnapshot, encodedImage, CompressionType.JPEG, imageMessage);
 
             overlayImagePublisher.publish(imageMessage);
          }
       }
       catch (Exception exception)
       {
-         LogTools.error("Failed to publish mesh overlay for {}/{}: {}",
-                        target.category(),
-                        target.instance(),
-                        exception.getMessage());
+         LogTools.error("Failed to publish mesh overlay for {}/{}: {}", target.category(), target.instance(), exception.getMessage());
       }
       finally
       {
@@ -326,12 +301,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
       stateMessage.setData(state.toByte());
       statePublisher.publish(stateMessage);
 
-      LogTools.info(String.format(
-            "SupervisePose state changed for %s/%s: %s -> %s",
-            target.category(),
-            target.instance(),
-            previousState,
-            state));
+      LogTools.info(String.format("SupervisePose state changed for %s/%s: %s -> %s", target.category(), target.instance(), previousState, state));
    }
 
    public void updatePoseEstimation(List<InstantDetection> detections)
@@ -352,15 +322,14 @@ public class SupervisePoseCommunicator implements AutoCloseable
          targetPoint.set(sensorFrame.getTransformToRoot().getTranslation());
       }
 
-      Optional<InstantDetection> closestYOLODetection =
-            detections.stream()
-                      .filter(detection -> detection instanceof YOLOv8InstantDetection
-                                           && detection.getDetectedObjectClass().equals(target.yoloClass()))
-                      .min(Comparator.comparingDouble(detection ->
-                                                            detection.getPose().getPosition().distanceSquared(targetPoint)));
+      Optional<InstantDetection> closestYOLODetection = detections.stream()
+                                                                  .filter(detection -> detection instanceof YOLOv8InstantDetection
+                                                                                       && detection.getDetectedObjectClass().equals(target.yoloClass()))
+                                                                  .min(Comparator.comparingDouble(detection -> detection.getPose()
+                                                                                                                        .getPosition()
+                                                                                                                        .distanceSquared(targetPoint)));
 
-      closestYOLODetection.ifPresent(detection ->
-                                           updatePoseEstimation((YOLOv8InstantDetection) detection));
+      closestYOLODetection.ifPresent(detection -> updatePoseEstimation((YOLOv8InstantDetection) detection));
    }
 
    public void updatePoseEstimation(YOLOv8InstantDetection yoloDetection)
@@ -381,9 +350,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
          targetPoint.set(sensorFrame.getTransformToRoot().getTranslation());
       }
 
-      updatePoseEstimation(yoloDetection.getColorImage(),
-                           yoloDetection.getDepthImage(),
-                           yoloDetection.getObjectMask());
+      updatePoseEstimation(yoloDetection.getColorImage(), yoloDetection.getDepthImage(), yoloDetection.getObjectMask());
    }
 
    private void cacheLatestRGBImage(RawImage rgbImage)
@@ -505,23 +472,16 @@ public class SupervisePoseCommunicator implements AutoCloseable
 
       double resetDistance = parameters.getResetDistance().getValue();
 
-      double distanceSquared =
-            yoloDetection.getPose()
-                         .getPosition()
-                         .distanceSquared(
-                               latestResult.getPose().getPosition());
+      double distanceSquared = yoloDetection.getPose().getPosition().distanceSquared(latestResult.getPose().getPosition());
 
       if (distanceSquared <= resetDistance * resetDistance)
          return false;
 
-      LogTools.info(String.format(
-            "Auto reset triggered for %s/%s: "
-            + "YOLO detection differs from the tracked pose. "
-            + "distance=%.4f, resetDistance=%.4f",
-            target.category(),
-            target.instance(),
-            Math.sqrt(distanceSquared),
-            resetDistance));
+      LogTools.info(String.format("Auto reset triggered for %s/%s: " + "YOLO detection differs from the tracked pose. " + "distance=%.4f, resetDistance=%.4f",
+                                  target.category(),
+                                  target.instance(),
+                                  Math.sqrt(distanceSquared),
+                                  resetDistance));
 
       resetTracking(ResetReason.YOLO_POSITION);
       return true;
@@ -637,26 +597,13 @@ public class SupervisePoseCommunicator implements AutoCloseable
 
          CameraIntrinsics intrinsics = rgbExport.getIntrinsicsCopy();
 
-         try (PrintWriter writer =
-                    new PrintWriter(Files.newBufferedWriter(targetDirectory.resolve("cam_K.txt"))))
+         try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(targetDirectory.resolve("cam_K.txt"))))
          {
-            writer.printf(Locale.US,
-                          "%.18e %.18e %.18e%n",
-                          intrinsics.getFx(),
-                          0.0,
-                          intrinsics.getCx());
+            writer.printf(Locale.US, "%.18e %.18e %.18e%n", intrinsics.getFx(), 0.0, intrinsics.getCx());
 
-            writer.printf(Locale.US,
-                          "%.18e %.18e %.18e%n",
-                          0.0,
-                          intrinsics.getFy(),
-                          intrinsics.getCy());
+            writer.printf(Locale.US, "%.18e %.18e %.18e%n", 0.0, intrinsics.getFy(), intrinsics.getCy());
 
-            writer.printf(Locale.US,
-                          "%.18e %.18e %.18e%n",
-                          0.0,
-                          0.0,
-                          1.0);
+            writer.printf(Locale.US, "%.18e %.18e %.18e%n", 0.0, 0.0, 1.0);
          }
 
          SupervisePoseInstantDetection resultToExport = latestResult;
@@ -673,9 +620,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
       }
       catch (Exception exception)
       {
-         LogTools.error("Failed to export SupervisePose inputs for {}",
-                        target.key(),
-                        exception);
+         LogTools.error("Failed to export SupervisePose inputs for {}", target.key(), exception);
       }
       finally
       {
@@ -707,8 +652,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
       double y = pose.getPosition().getY();
       double z = pose.getPosition().getZ();
 
-      try (PrintWriter writer =
-                 new PrintWriter(Files.newBufferedWriter(jsonPath)))
+      try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(jsonPath)))
       {
          writer.printf(Locale.US, "{%n");
          writer.printf(Locale.US, "  \"camera_data\": {%n");
@@ -755,11 +699,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
          writer.printf(Locale.US, "        [0.0, 0.0, 0.0, 1.0]%n");
          writer.printf(Locale.US, "      ],%n");
 
-         writer.printf(Locale.US,
-                       "      \"location\": [%.9f, %.9f, %.9f],%n",
-                       x,
-                       y,
-                       z);
+         writer.printf(Locale.US, "      \"location\": [%.9f, %.9f, %.9f],%n", x, y, z);
 
          writer.printf(Locale.US,
                        "      \"quaternion_xyzw\": [%.9f, %.9f, %.9f, %.9f],%n",
@@ -768,11 +708,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
                        quaternion.getZ(),
                        quaternion.getS());
 
-         writer.printf(Locale.US,
-                       "      \"scale\": [%.9f, %.9f, %.9f]%n",
-                       size.getX(),
-                       size.getY(),
-                       size.getZ());
+         writer.printf(Locale.US, "      \"scale\": [%.9f, %.9f, %.9f]%n", size.getX(), size.getY(), size.getZ());
 
          writer.printf(Locale.US, "    }%n");
          writer.printf(Locale.US, "  ]%n");
@@ -780,8 +716,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
       }
    }
 
-   public void renderMeshOverlay(Mat image,
-                                 CameraIntrinsics cameraIntrinsics)
+   public void renderMeshOverlay(Mat image, CameraIntrinsics cameraIntrinsics)
    {
       if (image == null || image.isNull())
          return;
@@ -797,10 +732,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
       if (poseSnapshot == null)
          return;
 
-      meshOverlayRenderer.renderWireframe(
-            image,
-            new Pose3D(poseSnapshot),
-            cameraIntrinsics);
+      meshOverlayRenderer.renderWireframe(image, new Pose3D(poseSnapshot), cameraIntrinsics);
    }
 
    @Override
@@ -834,9 +766,7 @@ public class SupervisePoseCommunicator implements AutoCloseable
 
    public enum State
    {
-      DISABLED,
-      ESTIMATING_POSE,
-      TRACKING;
+      DISABLED, ESTIMATING_POSE, TRACKING;
 
       public byte toByte()
       {

@@ -3,7 +3,9 @@ package us.ihmc.perception.detections.yolo;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 
 import java.util.*;
+
 import static java.lang.Math.*;
+
 import org.bytedeco.opencv.opencv_core.Mat;
 
 /**
@@ -11,30 +13,30 @@ import org.bytedeco.opencv.opencv_core.Mat;
  * two-stage association, and global motion compensation (GMC).
  *
  * Pipeline:
- *  - Split detections into HIGH (>= trackHighThresh) and LOW (>= trackLowThresh) sets.
- *  - Predict all tracks (tracked, unconfirmed, lost) using a Kalman filter.
- *  - Optionally apply GMC to compensate for camera motion before matching.
+ * - Split detections into HIGH (>= trackHighThresh) and LOW (>= trackLowThresh) sets.
+ * - Predict all tracks (tracked, unconfirmed, lost) using a Kalman filter.
+ * - Optionally apply GMC to compensate for camera motion before matching.
  *
  * Association:
- *  - Stage 1: (confirmed tracked + lost) tracks are matched with HIGH detections
- *             using IoU-based cost (optionally fused with detection score).
- *  - Stage 2: remaining TRACKED tracks are matched with LOW detections (IoU only).
- *  - Unconfirmed tracks are matched separately with remaining HIGH detections;
- *    unmatched ones are removed.
+ * - Stage 1: (confirmed tracked + lost) tracks are matched with HIGH detections
+ * using IoU-based cost (optionally fused with detection score).
+ * - Stage 2: remaining TRACKED tracks are matched with LOW detections (IoU only).
+ * - Unconfirmed tracks are matched separately with remaining HIGH detections;
+ * unmatched ones are removed.
  *
  * Track management:
- *  - New tracks are initialized from unmatched HIGH detections (>= newTrackThresh).
- *  - Unmatched tracked tracks become LOST.
- *  - LOST tracks are retained up to trackBuffer frames before being removed.
- *  - Duplicate tracks between tracked and lost sets are pruned based on IoU and age.
+ * - New tracks are initialized from unmatched HIGH detections (>= newTrackThresh).
+ * - Unmatched tracked tracks become LOST.
+ * - LOST tracks are retained up to trackBuffer frames before being removed.
+ * - Duplicate tracks between tracked and lost sets are pruned based on IoU and age.
  *
  * Cost definition:
- *  - Matching is performed in cost space: cost = 1 - IoU
- *    (or 1 - IoU * score if score fusion is enabled).
- *  - A match is accepted if cost <= threshold (Hungarian assignment with cost limit).
+ * - Matching is performed in cost space: cost = 1 - IoU
+ * (or 1 - IoU * score if score fusion is enabled).
+ * - A match is accepted if cost <= threshold (Hungarian assignment with cost limit).
  *
  * Assumes a KalmanFilter in xywh state:
- *   [cx, cy, w, h, vcx, vcy, vw, vh]
+ * [cx, cy, w, h, vcx, vcy, vw, vh]
  */
 
 public class BoTSORTTracker
@@ -153,16 +155,22 @@ public class BoTSORTTracker
             }
 
             // ---- Predict all states ----
-            for (STrack t : confirmedTracked) t.predict();
-            for (STrack t : unconfirmed) t.predict();
-            for (STrack t : lost) t.predict();
+            for (STrack t : confirmedTracked)
+               t.predict();
+            for (STrack t : unconfirmed)
+               t.predict();
+            for (STrack t : lost)
+               t.predict();
 
             // ---- Apply GMC AFTER predict, BEFORE association ----
             if (H != null)
             {
-               for (STrack t : confirmedTracked) t.applyGmc(H);
-               for (STrack t : unconfirmed) t.applyGmc(H);
-               for (STrack t : lost) t.applyGmc(H);
+               for (STrack t : confirmedTracked)
+                  t.applyGmc(H);
+               for (STrack t : unconfirmed)
+                  t.applyGmc(H);
+               for (STrack t : lost)
+                  t.applyGmc(H);
             }
 
             // ---- First association: (confirmed tracked + lost) <-> HIGH ----
@@ -361,7 +369,14 @@ public class BoTSORTTracker
          {
             TrackableDetection d = dets.get(j);
             BoundingBox2DReadOnly boundingBox = d.getBoundingBox();
-            float iou = iou(tb[0], tb[1], tb[2], tb[3], (float) boundingBox.getMinX(), (float) boundingBox.getMinY(), (float) boundingBox.getMaxX(), (float) boundingBox.getMaxY());
+            float iou = iou(tb[0],
+                            tb[1],
+                            tb[2],
+                            tb[3],
+                            (float) boundingBox.getMinX(),
+                            (float) boundingBox.getMinY(),
+                            (float) boundingBox.getMaxX(),
+                            (float) boundingBox.getMaxY());
             float c;
             if (fuseScoreHere)
             {
@@ -380,8 +395,7 @@ public class BoTSORTTracker
       int[] assignment = hungarianWithCostLimit(cost, costThresh);
 
       boolean[] detUsed = new boolean[dets.size()];
-      for(
-            int i = 0; i<tracks.size();i++)
+      for (int i = 0; i < tracks.size(); i++)
 
       {
          int j = assignment[i];
@@ -396,8 +410,7 @@ public class BoTSORTTracker
             res.unmatchedTrackIdx.add(i);
          }
       }
-      for(
-            int j = 0; j<dets.size();j++)
+      for (int j = 0; j < dets.size(); j++)
 
       {
          if (!detUsed[j])
@@ -406,6 +419,7 @@ public class BoTSORTTracker
 
       return res;
    }
+
    /**
     * Hungarian assignment with a BoT-SORT-like cost limit.
     *
@@ -423,8 +437,10 @@ public class BoTSORTTracker
       int[] result = new int[n];
       Arrays.fill(result, -1);
 
-      if (n == 0) return result;
-      if (m == 0) return result;
+      if (n == 0)
+         return result;
+      if (m == 0)
+         return result;
 
       // Augment with dummy columns so every track can be "assigned" (meaning: unmatched)
       // This mimics LAPJV cost_limit behavior.
@@ -512,7 +528,8 @@ public class BoTSORTTracker
 
             for (int j = 1; j <= m; j++)
             {
-               if (used[j]) continue;
+               if (used[j])
+                  continue;
 
                double cur = a[i0 - 1][j - 1] - u[i0] - v[j];
                if (cur < minv[j])
@@ -541,8 +558,8 @@ public class BoTSORTTracker
             }
 
             j0 = j1;
-
-         } while (p[j0] != 0);
+         }
+         while (p[j0] != 0);
 
          // Augmenting
          do
@@ -550,7 +567,8 @@ public class BoTSORTTracker
             int j1 = way[j0];
             p[j0] = p[j1];
             j0 = j1;
-         } while (j0 != 0);
+         }
+         while (j0 != 0);
       }
 
       // Build row->col assignment from p (col->row)
@@ -609,7 +627,8 @@ public class BoTSORTTracker
    private static void subById(List<STrack> a, List<STrack> b)
    {
       Set<Integer> bIds = new HashSet<>();
-      for (STrack t : b) bIds.add(t.id);
+      for (STrack t : b)
+         bIds.add(t.id);
       a.removeIf(t -> bIds.contains(t.id));
    }
 
@@ -631,8 +650,10 @@ public class BoTSORTTracker
             {
                int timeA = tracked.get(i).frameId - tracked.get(i).startFrame;
                int timeB = lost.get(j).frameId - lost.get(j).startFrame;
-               if (timeA > timeB) dupLost.add(j);
-               else dupTracked.add(i);
+               if (timeA > timeB)
+                  dupLost.add(j);
+               else
+                  dupTracked.add(i);
             }
          }
       }
@@ -640,12 +661,15 @@ public class BoTSORTTracker
       // remove in reverse order
       dupTracked.sort(Comparator.reverseOrder());
       dupLost.sort(Comparator.reverseOrder());
-      for (int idx : new LinkedHashSet<>(dupTracked)) if (idx >= 0 && idx < tracked.size()) tracked.remove(idx);
-      for (int idx : new LinkedHashSet<>(dupLost))    if (idx >= 0 && idx < lost.size())    lost.remove(idx);
+      for (int idx : new LinkedHashSet<>(dupTracked))
+         if (idx >= 0 && idx < tracked.size())
+            tracked.remove(idx);
+      for (int idx : new LinkedHashSet<>(dupLost))
+         if (idx >= 0 && idx < lost.size())
+            lost.remove(idx);
    }
 
-   private static float iou(float ax1, float ay1, float ax2, float ay2,
-                            float bx1, float by1, float bx2, float by2)
+   private static float iou(float ax1, float ay1, float ax2, float ay2, float bx1, float by1, float bx2, float by2)
    {
       float ix1 = max(ax1, bx1);
       float iy1 = max(ay1, by1);
@@ -680,24 +704,32 @@ public class BoTSORTTracker
    {
       final int i; // track index
       final int j; // det index
-      IntPair(int i, int j) { this.i = i; this.j = j; }
+
+      IntPair(int i, int j)
+      {
+         this.i = i;
+         this.j = j;
+      }
    }
 
    private static class Triplet
    {
       final int i, j;
       final float cost;
-      Triplet(int i, int j, float cost) { this.i = i; this.j = j; this.cost = cost; }
+
+      Triplet(int i, int j, float cost)
+      {
+         this.i = i;
+         this.j = j;
+         this.cost = cost;
+      }
    }
 
    // ---------------- Track state ----------------
 
    private enum TrackState
    {
-      New,
-      Tracked,
-      Lost,
-      Removed
+      New, Tracked, Lost, Removed
    }
 
    // ---------------- Track (KF + lifecycle) ----------------
@@ -762,14 +794,15 @@ public class BoTSORTTracker
 
       void applyGmc(Mat H)
       {
-         if (H == null) return;
+         if (H == null)
+            return;
 
          // H is 2x3 (double). Read affine params.
-         double a  = H.ptr(0, 0).getDouble();
-         double b  = H.ptr(0, 1).getDouble();
+         double a = H.ptr(0, 0).getDouble();
+         double b = H.ptr(0, 1).getDouble();
          double tx = H.ptr(0, 2).getDouble();
-         double c  = H.ptr(1, 0).getDouble();
-         double d  = H.ptr(1, 1).getDouble();
+         double c = H.ptr(1, 0).getDouble();
+         double d = H.ptr(1, 1).getDouble();
          double ty = H.ptr(1, 2).getDouble();
 
          float[] mean = kf.getMean();   // [cx, cy, w, h, ...]
@@ -837,7 +870,6 @@ public class BoTSORTTracker
          //         LogTools.info(String.format(
          //               "TRACKER INPUT: x1=%.3f y1=%.3f x2=%.3f y2=%.3f -> cx=%.3f cy=%.3f",
          //               x1, y1, x2, y2, cx, cy));
-
 
          return new float[] {cx, cy, w, h};
       }

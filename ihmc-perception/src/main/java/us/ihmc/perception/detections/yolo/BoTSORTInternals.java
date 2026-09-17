@@ -32,6 +32,7 @@ interface TrackableDetection
    Pose3DReadOnly getPose();
 
    void setTrackId(int id);
+
    int getTrackId();
 }
 
@@ -145,7 +146,8 @@ class KalmanFilter
 
 class GMC
 {
-   public enum Method { sparseOptFlow, none }
+   public enum Method
+   {sparseOptFlow, none}
 
    private final Method method;
    private final int downscale;
@@ -199,22 +201,26 @@ class GMC
 
          keypoints.release();
          gray.release();
-         if (grayTmp != null) grayTmp.release();
+         if (grayTmp != null)
+            grayTmp.release();
 
          return H;
       }
 
       if (prevKeypoints == null || prevKeypoints.empty() || keypoints.empty())
       {
-         if (prevFrameGray != null) prevFrameGray.release();
+         if (prevFrameGray != null)
+            prevFrameGray.release();
          prevFrameGray = graySmall.clone();
 
-         if (prevKeypoints != null) prevKeypoints.release();
+         if (prevKeypoints != null)
+            prevKeypoints.release();
          prevKeypoints = keypoints.clone();
 
          keypoints.release();
          gray.release();
-         if (grayTmp != null) grayTmp.release();
+         if (grayTmp != null)
+            grayTmp.release();
 
          return H;
       }
@@ -287,21 +293,25 @@ class GMC
             H = Hsmall.clone();
          }
 
-         if (Hsmall != null) Hsmall.release();
+         if (Hsmall != null)
+            Hsmall.release();
          inliers.release();
          prevMat.release();
          currMat.release();
       }
 
-      if (prevFrameGray != null) prevFrameGray.release();
+      if (prevFrameGray != null)
+         prevFrameGray.release();
       prevFrameGray = graySmall.clone();
 
-      if (prevKeypoints != null) prevKeypoints.release();
+      if (prevKeypoints != null)
+         prevKeypoints.release();
       prevKeypoints = keypoints.clone();
 
       keypoints.release();
       gray.release();
-      if (grayTmp != null) grayTmp.release();
+      if (grayTmp != null)
+         grayTmp.release();
       nextPts.release();
       status.release();
       err.release();
@@ -317,7 +327,15 @@ class GMC
    public void reset()
    {
       initializedFirstFrame = false;
-      if (prevFrameGray != null) { prevFrameGray.release(); prevFrameGray = null; }
-      if (prevKeypoints != null) { prevKeypoints.release(); prevKeypoints = null; }
+      if (prevFrameGray != null)
+      {
+         prevFrameGray.release();
+         prevFrameGray = null;
+      }
+      if (prevKeypoints != null)
+      {
+         prevKeypoints.release();
+         prevKeypoints = null;
+      }
    }
 }
