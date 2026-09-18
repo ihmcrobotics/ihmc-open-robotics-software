@@ -23,14 +23,6 @@ uint64 sequence_id
 float64 goal_x_position
 float64 goal_y_position
 float64 goal_yaw
-
-# Number of waypoints remaining in the queue after this event (not counting the waypoint
-# described by this message).
-int32 waypoints_remaining
-
-# True if the robot just started walking toward this waypoint.
-# False if the robot just reached this waypoint.
-bool is_started false
 }</pre>
 */
 public class ControllerWaypointStatusMessage implements ROS2Message<ControllerWaypointStatusMessage>
@@ -47,21 +39,9 @@ public class ControllerWaypointStatusMessage implements ROS2Message<ControllerWa
    private double goal_x_position_;
    private double goal_y_position_;
    private double goal_yaw_;
-   /**
-      Number of waypoints remaining in the queue after this event (not counting the waypoint
-      described by this message).
-   */
-   private int waypoints_remaining_;
-   /**
-      True if the robot just started walking toward this waypoint.
-      False if the robot just reached this waypoint.
-   */
-   private boolean is_started_;
 
    public ControllerWaypointStatusMessage()
    {
-      is_started_ = (boolean) false;
-
    }
 
    public ControllerWaypointStatusMessage(ControllerWaypointStatusMessage from)
@@ -79,8 +59,6 @@ public class ControllerWaypointStatusMessage implements ROS2Message<ControllerWa
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // goal_x_position_
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // goal_y_position_
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // goal_yaw_
-      currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // waypoints_remaining_
-      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // is_started_
 
       return currentAlignment - initialAlignment;
    }
@@ -92,8 +70,6 @@ public class ControllerWaypointStatusMessage implements ROS2Message<ControllerWa
       buffer.writeDouble(goal_x_position_);
       buffer.writeDouble(goal_y_position_);
       buffer.writeDouble(goal_yaw_);
-      buffer.writeInt(waypoints_remaining_);
-      buffer.writeBoolean(is_started_);
 
    }
 
@@ -104,8 +80,6 @@ public class ControllerWaypointStatusMessage implements ROS2Message<ControllerWa
       goal_x_position_ = buffer.readDouble();
       goal_y_position_ = buffer.readDouble();
       goal_yaw_ = buffer.readDouble();
-      waypoints_remaining_ = buffer.readInt();
-      is_started_ = buffer.readBoolean();
 
    }
 
@@ -116,8 +90,6 @@ public class ControllerWaypointStatusMessage implements ROS2Message<ControllerWa
       goal_x_position_ = from.goal_x_position_;
       goal_y_position_ = from.goal_y_position_;
       goal_yaw_ = from.goal_yaw_;
-      waypoints_remaining_ = from.waypoints_remaining_;
-      is_started_ = from.is_started_;
 
    }
 
@@ -161,26 +133,6 @@ public class ControllerWaypointStatusMessage implements ROS2Message<ControllerWa
       this.goal_yaw_ = goal_yaw_;
    }
 
-   public int getWaypointsRemaining()
-   {
-      return waypoints_remaining_;
-   }
-
-   public void setWaypointsRemaining(int waypoints_remaining_)
-   {
-      this.waypoints_remaining_ = waypoints_remaining_;
-   }
-
-   public boolean getIsStarted()
-   {
-      return is_started_;
-   }
-
-   public void setIsStarted(boolean is_started_)
-   {
-      this.is_started_ = is_started_;
-   }
-
 
    @Override
    public java.lang.String toString()
@@ -195,10 +147,6 @@ public class ControllerWaypointStatusMessage implements ROS2Message<ControllerWa
       builder.append(goal_y_position_);
       builder.append("goal_yaw_=");
       builder.append(goal_yaw_);
-      builder.append("waypoints_remaining_=");
-      builder.append(waypoints_remaining_);
-      builder.append("is_started_=");
-      builder.append(is_started_);
 
       builder.append("}");
       return builder.toString();

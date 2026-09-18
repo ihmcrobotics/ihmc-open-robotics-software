@@ -4,12 +4,10 @@ import controller_msgs.ControllerWaypointGoalListMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ControllerWaypointGoalListCommand implements Command<ControllerWaypointGoalListCommand, ControllerWaypointGoalListMessage>
 {
    private long sequenceId;
+   private boolean queueWaypoints;
    private final RecyclingArrayList<ControllerWaypointGoalCommand> waypoints = new RecyclingArrayList<>(ControllerWaypointGoalCommand::new);
 
    public ControllerWaypointGoalListCommand()
@@ -20,6 +18,7 @@ public class ControllerWaypointGoalListCommand implements Command<ControllerWayp
    public void clear()
    {
       sequenceId = 0;
+      queueWaypoints = false;
       waypoints.clear();
    }
 
@@ -27,6 +26,7 @@ public class ControllerWaypointGoalListCommand implements Command<ControllerWayp
    public void setFromMessage(ControllerWaypointGoalListMessage message)
    {
       sequenceId = message.getSequenceId();
+      queueWaypoints = message.getQueueWaypoints();
       waypoints.clear();
       for (int i = 0; i < message.getWaypoints().size(); i++)
       {
@@ -56,11 +56,17 @@ public class ControllerWaypointGoalListCommand implements Command<ControllerWayp
    public void set(ControllerWaypointGoalListCommand other)
    {
       sequenceId = other.sequenceId;
+      queueWaypoints = other.queueWaypoints;
       waypoints.clear();
       for (int i = 0; i < other.waypoints.size(); i++)
       {
          waypoints.add().set(other.waypoints.get(i));
       }
+   }
+
+   public boolean getQueueWaypoints()
+   {
+      return queueWaypoints;
    }
 
    public int getNumberOfWaypoints()
