@@ -500,6 +500,15 @@ public class RDXLocomotionManager
          RDXSphereAndArrowGraphic newWaypoint = goalPoseGraphics.add();
          newWaypoint.create(0.05, 0.2, Color.BLUE);
          newWaypoint.setToPose(goalPose);
+         if (numGoals == 0)
+         {
+            // Anchor the path preview at the ROBOT, not the walk-path control ring: the ring's
+            // pose is identity until it has been placed, which drew the line from world origin
+            // when waypoints were used without the ring.
+            goalPoseConnector.clear();
+            goalPoseConnector.createStart(new us.ihmc.euclid.tuple3D.Point3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation()),
+                                          Color.BLACK);
+         }
          goalPoseConnector.createAdditionalPoint(goalPoses.get(numGoals).getPosition(), Color.BLUE);
          numGoals++;
          goalPosePlacement.clear();
@@ -530,7 +539,8 @@ public class RDXLocomotionManager
    private void clearWaypoints()
    {
       goalPoseConnector.clear();
-      goalPoseConnector.createStart(walkPathControlRing.getGoalPose().getPosition(), Color.BLACK);
+      goalPoseConnector.createStart(new us.ihmc.euclid.tuple3D.Point3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation()),
+                                    Color.BLACK);
       goalPoses.clear();
       goalMessages.clear();
       goalPoseGraphics.clear();
