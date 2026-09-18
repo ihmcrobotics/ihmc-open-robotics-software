@@ -1,0 +1,15 @@
+names:
+- robot_hand
+- door_panel
+- door_lever
+- person
+- charge
+- traffic_barrier
+- door_knob
+- door_push_bar
+- door_pull_handle
+- trash_can
+- bottle
+- storage_container
+nc: 12
+
