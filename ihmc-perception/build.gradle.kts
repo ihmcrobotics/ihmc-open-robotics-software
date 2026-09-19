@@ -9,6 +9,8 @@ plugins {
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
+apply(from = "../gradle/java-compile-encoding.gradle.kts")
+
 ihmc {
    loadProductProperties("../product.properties")
    configureDependencyResolution()
