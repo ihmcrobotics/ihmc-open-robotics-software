@@ -32,6 +32,24 @@ public class ROS2ImageSensors
                                                                                                         PerceptionAPI.EXPERIMENTAL_ZED_DEPTH,
                                                                                                         ZEDImageSensor.DEPTH_IMAGE_KEY);
 
+   /** Left color + depth only — what alex-commands consumes; skips unused right-eye ImageMessage encode. */
+   public static final Map<ROS2Topic<? extends ROS2Message<?>>, Integer> EXPERIMENTAL_ZED_LEFT_DEPTH_TOPIC_MAP = Map.of(
+         PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT),
+         ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
+         PerceptionAPI.EXPERIMENTAL_ZED_DEPTH,
+         ZEDImageSensor.DEPTH_IMAGE_KEY);
+
+   /** Left color + depth + camera_info for standard ROS image topics (no right eye). */
+   public static final Map<ROS2Topic<? extends ROS2Message<?>>, Integer> ROS2_EXPERIMENTAL_ZED_LEFT_DEPTH_TOPIC_MAP = Map.of(
+         PerceptionAPI.ROS2_EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT),
+         ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
+         PerceptionAPI.ROS2_EXPERIMENTAL_ZED_COLOR_CAMERA_INFO.get(RobotSide.LEFT),
+         ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
+         PerceptionAPI.ROS2_EXPERIMENTAL_ZED_DEPTH,
+         ZEDImageSensor.DEPTH_IMAGE_KEY,
+         PerceptionAPI.ROS2_EXPERIMENTAL_ZED_DEPTH_CAMERA_INFO,
+         ZEDImageSensor.DEPTH_IMAGE_KEY);
+
    public static final Map<ROS2Topic<? extends ROS2Message<?>>, Integer> STEPPING_ZED_TOPIC_MAP = Map.of(PerceptionAPI.STEPPING_ZED_COLOR.get(RobotSide.LEFT),
                                                                                                         ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
                                                                                                         PerceptionAPI.STEPPING_ZED_COLOR.get(RobotSide.RIGHT),
