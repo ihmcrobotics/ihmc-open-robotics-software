@@ -1,6 +1,6 @@
 package us.ihmc.perception.detections.yolo;
 
-import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.jros2.ROS2Node;
@@ -52,12 +52,11 @@ public class YOLOv8DetectionThread extends RepeatingTaskThread
          RawImage colorImage = imageSensor.getImage(colorImageKey);
          RawImage depthImage = imageSensor.getImage(depthImageKey);
 
-         // CPU convert — uploading the full color frame just to get BGR is a GpuMat allocate that
-         // OOMs when Ollama / other YOLO nets already own the device. YOLOv8Model.run() is CPU-in too.
+         // Ensure color image is in BGR8
          if (colorImage.getPixelFormat() != PixelFormat.BGR8)
          {
-            Mat bgrMat = new Mat();
-            colorImage.getPixelFormat().convertToPixelFormat(colorImage.getCpuImageMat(), bgrMat, PixelFormat.BGR8);
+            GpuMat bgrMat = new GpuMat();
+            colorImage.getPixelFormat().convertToPixelFormat(colorImage.getGpuImageMat(), bgrMat, PixelFormat.BGR8);
             colorImage.release();
             colorImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
          }
@@ -72,11 +71,9 @@ public class YOLOv8DetectionThread extends RepeatingTaskThread
       }
       catch (RuntimeException e)
       {
-         if (!isCudaOutOfMemory(e))
+         if (!isCUDAOutOfMemory(e))
             throw e;
-         LogTools.error("YOLO ran out of GPU memory and will stop. Load fewer nets with -Dyolo.models.load=yolov8n-seg, "
-                        + "or disable person YOLO with -Dalex.commands.vision.personViaYolo=false. {}",
-                        e.getMessage());
+         LogTools.error("YOLO ran out of GPU memory and will stop. {}", e.getMessage());
          yoloExecutor.disableAllModels();
          interrupt();
       }
@@ -95,7 +92,7 @@ public class YOLOv8DetectionThread extends RepeatingTaskThread
       return yoloExecutor;
    }
 
-   private static boolean isCudaOutOfMemory(Throwable error)
+   private static boolean isCUDAOutOfMemory(Throwable error)
    {
       while (error != null)
       {

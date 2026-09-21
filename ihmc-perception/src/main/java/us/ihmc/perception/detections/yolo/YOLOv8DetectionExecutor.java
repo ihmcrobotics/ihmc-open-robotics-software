@@ -24,11 +24,8 @@ import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.tools.RawImageTools;
 
-import java.io.File;
 import java.net.URL;
 import java.time.Instant;
-import java.util.LinkedHashSet;
-import java.util.regex.Pattern;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,9 +55,8 @@ public class YOLOv8DetectionExecutor
 
    private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
    /**
-    * Person follow only needs the 2D box. Mask erosion, CUDA depth segment, and the CPU
-    * point-cloud centroid are the expensive leftover of object pick; skip them when the
-    * callback will unproject the box itself.
+    * When true, skip mask erosion, CUDA depth segment, and the CPU point-cloud centroid,
+    * and emit boxes only. Use this when the callback will unproject the box itself.
     */
    private volatile boolean skipPointCloud;
 
@@ -91,19 +87,9 @@ public class YOLOv8DetectionExecutor
          throw new RuntimeException(e);
       }
 
-      // Each YOLOv8Model puts the ONNX net on CUDA. Loading every directory at once is how a
-      // follow/sim process that only needs yolov8n-seg still OOMs next to Ollama + OpenCV GpuMats.
-      // -Dyolo.models.load=yolov8n-seg  (comma-separated) loads only those; "none" loads zero nets.
-      Set<String> loadOnly = parseModelsToLoad(System.getProperty("yolo.models.load", ""));
+      // Read available YOLO models
       for (URL yoloModelDirectory : YOLOv8Tools.getYOLOModelDirectories())
       {
-         String directoryName = modelNameFromDirectory(yoloModelDirectory);
-         if (loadOnly != null && !loadOnly.contains(directoryName))
-         {
-            LogTools.info("Skipping YOLO model {} (not in yolo.models.load)", directoryName);
-            continue;
-         }
-
          YOLOv8Model model = new YOLOv8Model(yoloModelDirectory);
 
          LogTools.info("Loaded YOLOv8 model: " + model.getName());
@@ -112,25 +98,8 @@ public class YOLOv8DetectionExecutor
          availableModels.put(model.getName(), model);
       }
 
-      if (loadOnly != null)
-      {
-         for (String requested : loadOnly)
-         {
-            if (!availableModels.containsKey(requested))
-               LogTools.error("YOLO model {} was in yolo.models.load but was not loaded. "
-                              + "Need a valid /yolo/{}/ folder (one .onnx and class_names.yaml) on the classpath.",
-                              requested,
-                              requested);
-         }
-      }
-
       if (availableModels.isEmpty())
-      {
-         if (loadOnly != null)
-            LogTools.info("No YOLO models loaded onto CUDA (yolo.models.load={})", System.getProperty("yolo.models.load"));
-         else
-            LogTools.error("No YOLO models found. YOLO will not run.");
-      }
+         LogTools.error("No YOLO models found. YOLO will not run.");
 
       // Create YOLO parameters
       parameters = new SyncedYOLOv8ExecutorParameters(ros2Node, crdtInfo);
@@ -385,39 +354,5 @@ public class YOLOv8DetectionExecutor
                modelParameters.applyToModel(model);
          });
       }
-   }
-
-   /**
-    * {@code null} means load every directory (legacy default). An empty set means load none.
-    */
-   static Set<String> parseModelsToLoad(String property)
-   {
-      if (property == null)
-         return null;
-      String trimmed = property.trim();
-      if (trimmed.isEmpty() || trimmed.equalsIgnoreCase("all"))
-         return null;
-      if (trimmed.equalsIgnoreCase("none"))
-         return Set.of();
-
-      Set<String> names = new LinkedHashSet<>();
-      for (String part : trimmed.split(","))
-      {
-         String name = part.trim();
-         if (!name.isEmpty())
-            names.add(name);
-      }
-      return names.isEmpty() ? null : names;
-   }
-
-   static String modelNameFromDirectory(URL modelBaseDirectory)
-   {
-      String[] path = modelBaseDirectory.getPath().split(Pattern.quote(File.separator));
-      for (int i = path.length - 1; i >= 0; i--)
-      {
-         if (!path[i].isEmpty())
-            return path[i];
-      }
-      return modelBaseDirectory.getPath();
    }
 }
