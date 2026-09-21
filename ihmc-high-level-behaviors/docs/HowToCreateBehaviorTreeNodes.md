@@ -31,7 +31,7 @@ Build the messages from `ihmc-interfaces-jros2`:
 
 ```bash
 cd ihmc-interfaces-jros2
-./gradlew generateMessages
+gradle generateMessages
 ```
 
 ## 2. Definition and state Java classes
