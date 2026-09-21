@@ -17,6 +17,7 @@ import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.sensors.CameraIntrinsics;
 import us.ihmc.sensors.ImageSensor;
+import us.ihmc.sensors.TransformCsvLogger;
 import us.ihmc.zed.SL_CalibrationParameters;
 import us.ihmc.zed.SL_InitParameters;
 import us.ihmc.zed.SL_PositionalTrackingParameters;
@@ -30,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.zed.ZEDTools.throwOnError;
 import static us.ihmc.zed.global.zed.*;
@@ -80,6 +82,9 @@ public class ZEDImageSensor extends ImageSensor
 
    private long grabSequenceNumber = 0L;
    private Instant lastGrabTime;
+
+   /** Local wall-clock time of the last successful grab, used only for {@link #isSensorRunning()}'s liveness check. */
+   private Instant lastGrabReceivedTime;
    private boolean lastGrabFailed = false;
    private long lastGrabTimestamp;
 
@@ -90,6 +95,18 @@ public class ZEDImageSensor extends ImageSensor
    private final SL_Vector3 sensorTranslation = new SL_Vector3();
 
    private final CUstream_st cudaStream;
+
+   /**
+    * Debug aid: when set (via {@link #enablePoseDebugLogging}), dumps every grabbed frame's sensor pose to a CSV,
+    * to check offline whether the frame-to-robot sync is smooth (see {@code plot_zed_pose_debug.py}).
+    */
+   private final AtomicReference<TransformCsvLogger> poseDebugLogger = new AtomicReference<>();
+
+   /**
+    * Optional monitor to synchronize {@code sensorFrame}'s transform-to-world reads against, set via
+    * {@link #setFrameTreeLock}. See that method's doc for why this exists.
+    */
+   private Object frameTreeLock;
 
    /**
     * The most basic constructor that sets parameters to some default value.
@@ -219,6 +236,40 @@ public class ZEDImageSensor extends ImageSensor
       trackedPoseOffset.set(offset);
    }
 
+   /**
+    * If {@code sensorFrame} (see {@link #setSensorFrame}) is backed by a robot model that's mutated from another
+    * thread - e.g. a {@code ROS2SyncedRobotModel} whose {@code update()} is applied on its own thread as new robot
+    * state messages arrive - that update thread can race the grab thread's {@code getTransformToWorldFrame()} read
+    * of the same frame tree, since {@code ReferenceFrame}'s transform cache isn't otherwise thread-safe. Pass the
+    * same object that update is synchronized on (e.g. the {@code ROS2SyncedRobotModel} instance itself) here, and
+    * the grab thread will synchronize its frame reads on it too. Leave unset (default {@code null}) if
+    * {@code sensorFrame} isn't concurrently mutated by anything else, e.g. a fixed gizmo frame in a demo.
+    */
+   public void setFrameTreeLock(Object frameTreeLock)
+   {
+      this.frameTreeLock = frameTreeLock;
+   }
+
+   /**
+    * Starts logging every grabbed frame's sensor pose to a CSV at {@code outputFile}, for debugging frame-sync
+    * smoothness offline. Overwrites {@code outputFile} if it exists. Call {@link #disablePoseDebugLogging()} when
+    * done to close the file.
+    */
+   public void enablePoseDebugLogging(Path outputFile)
+   {
+      TransformCsvLogger newLogger = new TransformCsvLogger(outputFile, "grabSequenceNumber", "imageAgeNanos");
+      TransformCsvLogger oldLogger = poseDebugLogger.getAndSet(newLogger);
+      if (oldLogger != null)
+         oldLogger.close();
+   }
+
+   public void disablePoseDebugLogging()
+   {
+      TransformCsvLogger oldLogger = poseDebugLogger.getAndSet(null);
+      if (oldLogger != null)
+         oldLogger.close();
+   }
+
    public SL_InitParameters getInitParameters()
    {
       return zedInitParameters;
@@ -321,6 +372,11 @@ public class ZEDImageSensor extends ImageSensor
       return true;
    }
 
+   private static long instantToEpochNanos(Instant instant)
+   {
+      return instant.getEpochSecond() * 1_000_000_000L + instant.getNano();
+   }
+
    protected int openCamera()
    {
       return sl_open_camera(cameraID, zedInitParameters, serialNumber, svoFilePath, remoteStreamingAddress, remoteStreamingPort, -1, "", "", "");
@@ -329,7 +385,7 @@ public class ZEDImageSensor extends ImageSensor
    @Override
    public boolean isSensorRunning()
    {
-      boolean recentlyGrabbed = lastGrabTime != null && lastGrabTime.isAfter(Instant.now().minusSeconds(1));
+      boolean recentlyGrabbed = lastGrabReceivedTime != null && lastGrabReceivedTime.isAfter(Instant.now().minusSeconds(1));
       return sl_is_opened(cameraID) && !lastGrabFailed && recentlyGrabbed;
    }
 
@@ -341,9 +397,6 @@ public class ZEDImageSensor extends ImageSensor
       {
          // Grab images now
          returnCode = sl_grab(cameraID, zedRuntimeParameters);
-         RigidBodyTransform leftSensorTransformAtGrab = leftSensorFrame.getTransformToWorldFrame();
-         RigidBodyTransform rightSensorTransformAtGrab = rightSensorFrame.getTransformToWorldFrame();
-         Instant grabTime = Instant.now();
          if (returnCode == SL_ERROR_CODE_END_OF_SVOFILE_REACHED)
          {
             sl_set_svo_position(0, 0);
@@ -367,10 +420,48 @@ public class ZEDImageSensor extends ImageSensor
          }
 
          throwOnError(returnCode);
+
+         // ReferenceFrame's transform-to-root cache is a plain, unsynchronized mutable field, recomputed in place
+         // on read. sensorFrame (and its ancestors up to world) can be mutated from another thread - e.g. a
+         // ROS2SyncedRobotModel applying newly-received robot state on its own update thread - so reading it here
+         // unguarded can return a torn, transiently wrong transform. See setFrameTreeLock().
+         RigidBodyTransform leftSensorTransformAtGrab;
+         RigidBodyTransform rightSensorTransformAtGrab;
+         if (frameTreeLock != null)
+         {
+            synchronized (frameTreeLock)
+            {
+               leftSensorTransformAtGrab = leftSensorFrame.getTransformToWorldFrame();
+               rightSensorTransformAtGrab = rightSensorFrame.getTransformToWorldFrame();
+            }
+         }
+         else
+         {
+            leftSensorTransformAtGrab = leftSensorFrame.getTransformToWorldFrame();
+            rightSensorTransformAtGrab = rightSensorFrame.getTransformToWorldFrame();
+         }
+
+         // Don't assume the ZED SDK's clock domain lines up with Instant.now() (SL_TIMESTAMP_CLOCK_SYSTEM_CLOCK
+         // doesn't reliably produce Unix-epoch nanoseconds on all hardware/SDK builds). Instead, use
+         // sl_get_current_timestamp() the way it's documented to be used: diffed against sl_get_image_timestamp()
+         // to get the frame's age in nanoseconds, on the ZED SDK's own clock. That age is then subtracted from a
+         // local Instant.now() taken right alongside it, translating the real capture time into our local clock
+         // domain, without needing the two clocks' epochs to agree.
+         long imageTimestampZed = sl_get_image_timestamp(cameraID);
+         long currentTimestampZed = sl_get_current_timestamp(cameraID);
+         Instant localNow = Instant.now();
+
+         long imageAgeNanos = Math.max(0L, currentTimestampZed - imageTimestampZed);
+         Instant grabTime = localNow.minusNanos(imageAgeNanos);
+         lastGrabTimestamp = instantToEpochNanos(grabTime);
+
          lastGrabTime = grabTime;
+         lastGrabReceivedTime = Instant.now();
          ++grabSequenceNumber;
 
-         lastGrabTimestamp = sl_get_current_timestamp(cameraID);
+         TransformCsvLogger logger = poseDebugLogger.get();
+         if (logger != null)
+            logger.log("grab", lastGrabTimestamp, leftSensorTransformAtGrab, grabSequenceNumber, imageAgeNanos);
 
          // Update tracked position if tracking enabled
          if (positionalTrackingEnabled)
@@ -513,6 +604,8 @@ public class ZEDImageSensor extends ImageSensor
    {
       System.out.println("Closing " + getClass().getSimpleName());
       super.close();
+
+      disablePoseDebugLogging();
 
       for (Pointer slMat : slMatPointers)
       {
