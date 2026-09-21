@@ -26,7 +26,28 @@ public class RDXShader implements ShaderProvider
       create(null, null);
    }
 
+   public void create(boolean enableBlending)
+   {
+      create(null, null, enableBlending, !enableBlending);
+   }
+
+   /** @param cullBackFaces false for two-sided surfaces (e.g. thin manifolds like marching cubes) */
+   public void create(boolean enableBlending, boolean cullBackFaces)
+   {
+      create(null, null, enableBlending, cullBackFaces);
+   }
+
    public void create(String[] vertexFlags, String[] fragmentFlags)
+   {
+      create(vertexFlags, fragmentFlags, false, true);
+   }
+
+   public void create(String[] vertexFlags, String[] fragmentFlags, boolean enableBlending)
+   {
+      create(vertexFlags, fragmentFlags, enableBlending, !enableBlending);
+   }
+
+   public void create(String[] vertexFlags, String[] fragmentFlags, boolean enableBlending, boolean cullBackFaces)
    {
       String path = clazz.getName().replace(".", "/") + ".glsl";
       Pair<String, String> shaderStrings = LibGDXTools.loadCombinedShader(path);
@@ -46,15 +67,10 @@ public class RDXShader implements ShaderProvider
          @Override
          public void render(Renderable renderable)
          {
-            // TODO: Set these here?
-            // - blending
-            // - cull face
-            // - depth test
-            // - depth mask
-            context.setBlending(false, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-            context.setCullFace(GL20.GL_BACK);
+            context.setBlending(enableBlending, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+            context.setCullFace(cullBackFaces ? GL20.GL_BACK : GL20.GL_NONE);
             context.setDepthTest(GL20.GL_LEQUAL, 0.0f, 50.0f);
-            context.setDepthMask(true);
+            context.setDepthMask(!enableBlending);
             super.render(renderable);
          }
       };
