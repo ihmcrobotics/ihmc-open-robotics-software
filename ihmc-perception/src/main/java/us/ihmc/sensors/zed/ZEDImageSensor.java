@@ -341,8 +341,6 @@ public class ZEDImageSensor extends ImageSensor
       {
          // Grab images now
          returnCode = sl_grab(cameraID, zedRuntimeParameters);
-         RigidBodyTransform leftSensorTransformAtGrab = leftSensorFrame.getTransformToWorldFrame();
-         RigidBodyTransform rightSensorTransformAtGrab = rightSensorFrame.getTransformToWorldFrame();
          Instant grabTime = Instant.now();
          if (returnCode == SL_ERROR_CODE_END_OF_SVOFILE_REACHED)
          {
@@ -387,6 +385,10 @@ public class ZEDImageSensor extends ImageSensor
                                             transformToWorld.prependTranslation(trackedPoseOffset.getTranslation());
                                          });
          }
+
+         // Snapshot this grab's pose after updating tracking, before another grab can change it.
+         RigidBodyTransform leftSensorTransformAtGrab = new RigidBodyTransform(leftSensorFrame.getTransformToWorldFrame());
+         RigidBodyTransform rightSensorTransformAtGrab = new RigidBodyTransform(rightSensorFrame.getTransformToWorldFrame());
 
          // Retrieve the grabbed depth image
          Pointer depthImagePointer = slMatPointers[DEPTH_IMAGE_KEY];
