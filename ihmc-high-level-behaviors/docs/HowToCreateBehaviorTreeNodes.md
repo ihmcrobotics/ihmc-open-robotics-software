@@ -4,13 +4,13 @@ These steps are in the rough order you should follow when adding a new node type
 
 Use `WaitAction` as a simple reference implementation when in doubt:
 
-- Messages: `ihmc-interfaces/src/main/messages/ihmc_interfaces/behavior_msgs/msg/WaitAction*Message.msg`
+- Messages: `ihmc-interfaces-jros2/messages/ihmc_interfaces/behavior_msgs/msg/WaitAction*Message.msg`
 - Core classes: `ihmc-high-level-behaviors/src/main/java/us/ihmc/behaviors/behaviorTree/action/actions/WaitAction*.java`
 - RDX UI: `ihmc-high-level-behaviors/src/libgdx/java/us/ihmc/rdx/behaviorTree/actions/RDXWaitAction.java`
 
 ## 1. ROS2 message classes
 
-Create node-specific messages in `ihmc-interfaces/src/main/messages/ihmc_interfaces/behavior_msgs/msg/`:
+Create node-specific messages in `ihmc-interfaces-jros2/messages/ihmc_interfaces/behavior_msgs/msg/`:
 
 - `MyNodeDefinitionMessage.msg`
 - `MyNodeStateMessage.msg`
@@ -27,11 +27,11 @@ Register the node in `BehaviorTreeStateMessage.msg`:
 1. Add a new `byte MY_NODE = N` constant (use the next available number).
 2. Add a typed list field, e.g. `behavior_msgs/MyNodeStateMessage[<=120] my_nodes`.
 
-Build the messages from `ihmc-interfaces`:
+Build the messages from `ihmc-interfaces-jros2`:
 
 ```bash
-cd ihmc-interfaces
-gradle generateMessages
+cd ihmc-interfaces-jros2
+./gradlew generateMessages
 ```
 
 ## 2. Definition and state Java classes
