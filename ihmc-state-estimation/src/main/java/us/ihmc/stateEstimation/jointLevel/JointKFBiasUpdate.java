@@ -74,6 +74,28 @@ final class JointKFBiasUpdate
     *  must use the previous tick's set. Pre-sized to the anchor count; only cleared/refilled, never grown. */
    private final List<RigidBodyBasics> trustedFeetFromLastTick;
 
+   /**
+    * Optional per-tick, per-pair ADDITIVE variance on each pair's own 3x3 diagonal block of
+    * {@code Rg}, for a time-varying measurement noise. {@code null} (the default) is the frozen-R
+    * path and is bit-identical to the code before this field existed.
+    *
+    * <p>Additive rather than a multiplier on the block because {@code Rg = L Sigma L^T} is
+    * correlated across pairs that share an IMU: scaling one diagonal block of a correlated
+    * positive-definite matrix can destroy that property, while adding a non-negative diagonal
+    * cannot. The Python pipeline's {@code pair_r_extra} is the same quantity by the same argument,
+    * so a value fitted offline transfers here unchanged.</p>
+    */
+   private double[] pairExtraVariance = null;
+
+   /**
+    * Optional provider that DERIVES {@link #pairExtraVariance} from this tick's own pair residuals
+    * instead of having it handed in. Mutually exclusive with an externally-set array in practice:
+    * whenever it is present it overwrites the field every assembly.
+    */
+   private PairOffAxisNoiseProvider offAxisNoiseProvider = null;
+   /** Views onto each pair's {@code Jang}, filled once; the provider needs the span, not a copy. */
+   private DMatrixRMaj[] pairJacobians = null;
+
    private boolean sigmaFloorInitialized = false; // Sigma validated/floored/cached on first buildStackedMeasurement
    private boolean gyroSigmaFloored = false;      // any IMU's gyro noise was floored
    private boolean warnedGyroFloorRegression = false; // one-shot: R_g pair-row diagonal fell below the floor at runtime
@@ -266,6 +288,13 @@ final class JointKFBiasUpdate
          insertScaledInto(rotationToJacobianFrame, -1.0, Lmix, row0, pair.parentBias - 2 * n);
       }
 
+      // The off-axis noise law, if one is installed: it reads the pair rows of z and the pair
+      // Jacobians that were just built, and nothing else. Placed here — after the pair loop, before
+      // anything is used — because those are exactly the two quantities it needs and this is the
+      // only point in the tick where both are current and neither has yet influenced an estimate.
+      if (offAxisNoiseProvider != null)
+         pairExtraVariance = offAxisNoiseProvider.update(zg, pairJacobians());
+
       // Active stance-anchor rows. A planted foot has zero angular velocity, so
       //    omega_base^meas = -J_F qd_F - J_U qd_U + b_base + noise
       // over filtered F and unfiltered U leg joints (U = the ankles on Alex, which have no foot IMU and so never
@@ -337,6 +366,22 @@ final class JointKFBiasUpdate
       LSigma.reshape(rows, 3 * m);
       CommonOps_DDRM.mult(Lmix, Sigma, LSigma);
       CommonOps_DDRM.multTransB(LSigma, Lmix, Rg);
+
+      // Time-varying pair noise, if a provider supplied any for this tick. Applied AFTER the
+      // congruence and BEFORE the anchor blocks and the symmetrize, so it lands on exactly the pair
+      // rows and nothing else. A null array leaves Rg as it was.
+      if (pairExtraVariance != null)
+      {
+         for (int e = 0; e < E; e++)
+         {
+            double extra = pairExtraVariance[e];
+            if (!Double.isFinite(extra) || extra < 0.0)
+               throw new IllegalStateException("pair " + e + " extra variance must be finite and non-negative, was " + extra);
+            for (int d = 0; d < 3; d++)
+               Rg.add(3 * e + d, 3 * e + d, extra);
+         }
+      }
+
       int anchorNoiseRow = 3 * E;
       for (int i = 0; i < state.footAnchors.size(); i++)
       {
@@ -414,6 +459,112 @@ final class JointKFBiasUpdate
          // silently degrading to 1.0 — a mis-keyed artifact must not look like a successful no-op deployment.
          insertScaledInto(Rimu, gyroSigmaScale(state.imusByOrdinal[o].getSensorName()), Sigma, 3 * o, 3 * o);
       }
+   }
+
+   /**
+    * Sets this tick's additive per-pair variance, or clears it with {@code null}.
+    *
+    * <p>Call before {@code computeJointState} for the tick it applies to. The array is retained by
+    * reference and read on the next assembly, so a caller reusing one buffer must fill it every
+    * tick rather than assuming the previous tick's values were copied.</p>
+    *
+    * @throws IllegalArgumentException if the length is not the pair count.
+    */
+   public void setPairExtraVariance(double[] extraVariancePerPair)
+   {
+      if (extraVariancePerPair != null && extraVariancePerPair.length != state.numberOfIMUPairs)
+         throw new IllegalArgumentException("expected " + state.numberOfIMUPairs + " pair variances, got "
+                                            + extraVariancePerPair.length);
+      this.pairExtraVariance = extraVariancePerPair;
+   }
+
+   /**
+    * Installs the off-axis noise law, which from now on supplies the per-pair extra variance itself
+    * every assembly. {@code null} removes it and returns the filter to the frozen-R path.
+    *
+    * <p>The provider's fitted {@code sigma0} is cross-checked against this filter's own gyro Sigma
+    * on installation: a disagreement means the artifact was fitted against a different noise model
+    * than the one about to run it, which would otherwise show up only as an unexplained difference
+    * against the offline arm.</p>
+    */
+   public void setOffAxisNoiseProvider(PairOffAxisNoiseProvider provider)
+   {
+      this.offAxisNoiseProvider = provider;
+      if (provider == null)
+      {
+         this.pairExtraVariance = null;
+         return;
+      }
+      if (!sigmaFloorInitialized)
+      {
+         buildAndFloorSigma();
+         sigmaFloorInitialized = true;
+      }
+      provider.checkSigmaZero(sigmaZeroPerPair());
+      checkPairChains(provider.getPairChains());
+   }
+
+   /** Live views onto each pair's Jang, bound once; their contents are refreshed by the pair loop. */
+   private DMatrixRMaj[] pairJacobians()
+   {
+      if (pairJacobians == null)
+      {
+         pairJacobians = new DMatrixRMaj[state.numberOfIMUPairs];
+         for (int e = 0; e < pairJacobians.length; e++)
+            pairJacobians[e] = state.pairs.get(e).Jang;
+      }
+      return pairJacobians;
+   }
+
+   /**
+    * The per-pair isotropic baseline variance this filter's own Sigma implies:
+    * {@code (tr(Sigma_child) + tr(Sigma_parent)) / 3}. Rotation-invariant, hence a constant.
+    */
+   double[] sigmaZeroPerPair()
+   {
+      if (!sigmaFloorInitialized)
+      {
+         buildAndFloorSigma(); // Sigma is built lazily on the first assembly; a caller may arrive earlier.
+         sigmaFloorInitialized = true;
+      }
+      double[] sigmaZero = new double[state.numberOfIMUPairs];
+      for (int e = 0; e < sigmaZero.length; e++)
+      {
+         JointKFState.Pair pair = state.pairs.get(e);
+         // Sigma is indexed by IMU ordinal; the Pair stores the bias COLUMN, which is 2n + 3*ordinal.
+         int child = (pair.childBias - 2 * state.numberOfJoints) / 3;
+         int parent = (pair.parentBias - 2 * state.numberOfJoints) / 3;
+         double trace = 0.0;
+         for (int d = 0; d < 3; d++)
+            trace += Sigma.get(3 * child + d, 3 * child + d) + Sigma.get(3 * parent + d, 3 * parent + d);
+         sigmaZero[e] = trace / 3.0;
+      }
+      return sigmaZero;
+   }
+
+   /**
+    * The one failure this wiring must not have: the artifact's pair ordering silently disagreeing
+    * with the filter's, which would apply every pair's fitted constant to a different pair and
+    * still produce perfectly plausible numbers.
+    */
+   private void checkPairChains(String[] artifactChains)
+   {
+      if (artifactChains.length != state.numberOfIMUPairs)
+         throw new IllegalArgumentException("artifact has " + artifactChains.length + " pairs, filter has " + state.numberOfIMUPairs);
+      for (int e = 0; e < artifactChains.length; e++)
+      {
+         JointKFState.Pair pair = state.pairs.get(e);
+         String chain = pair.parent.getSensorName() + "->" + pair.child.getSensorName();
+         if (!chain.equals(artifactChains[e]))
+            throw new IllegalArgumentException("pair " + e + ": artifact was fitted for '" + artifactChains[e] + "' but this filter's pair " + e
+                  + " is '" + chain + "'. Applying it would give every pair another pair's constants.");
+      }
+   }
+
+   /** Rg as actually assembled for the last tick: L Sigma L^T, plus any pair extra, plus anchor noise. */
+   DMatrixRMaj getRgForTest()
+   {
+      return Rg.copy();
    }
 
    /** Sigma (3m x 3m) as actually built: floored first, then scaled by the learned per-IMU multipliers. */

@@ -667,6 +667,49 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
 
    /** Sigma (3m x 3m), the floored and learned-scale-applied per-IMU gyro noise. Valid only after a build. */
    DMatrixRMaj getGyroNoiseSigmaForTest()      { return biasUpdate.getSigmaForTest(); }
+
+   /** The assembled stacked measurement noise from the last {@link #buildStackedMeasurementForTest}. */
+   DMatrixRMaj getStackedNoiseForTest()        { return biasUpdate.getRgForTest(); }
+
+   /**
+    * Sets this tick's additive per-pair variance on the stacked measurement noise, or clears it
+    * with {@code null}. See {@link JointKFBiasUpdate#setPairExtraVariance}.
+    */
+   public void setPairExtraVariance(double[] extraVariancePerPair)
+   {
+      biasUpdate.setPairExtraVariance(extraVariancePerPair);
+   }
+
+   /**
+    * Installs the off-axis noise law, which derives the per-pair extra variance from the array's own
+    * residual every tick. {@code null} restores the frozen-R path. See
+    * {@link PairOffAxisNoiseProvider} for what it measures and why it is strictly causal.
+    */
+   public void setOffAxisNoiseProvider(PairOffAxisNoiseProvider provider)
+   {
+      biasUpdate.setOffAxisNoiseProvider(provider);
+   }
+
+   /**
+    * The IMU pairs this filter actually built, as {@code "parentImu->childImu"}, in state order.
+    *
+    * <p>Public because it is the key an off-axis artifact's per-pair constants are matched against,
+    * and because "which pairs did this robot really build" is not the same as "which pairs were
+    * configured" -- Alex declares foot IMUs it does not have.</p>
+    */
+   public java.util.List<String> getPairChains()
+   {
+      java.util.List<String> chains = new java.util.ArrayList<>(state.pairs.size());
+      for (JointKFState.Pair pair : state.pairs)
+         chains.add(pair.parent.getSensorName() + "->" + pair.child.getSensorName());
+      return chains;
+   }
+
+   /** Per-pair {@code (tr(Sigma_child) + tr(Sigma_parent)) / 3} from this filter's own gyro Sigma. */
+   public double[] getSigmaZeroPerPair()
+   {
+      return biasUpdate.sigmaZeroPerPair();
+   }
    int getStackedRowForPair(int pairIndex)     { return 3 * pairIndex; }      // pair e occupies rows [3e, 3e+3)
    int getBiasBlockColumn(IMUSensorReadOnly imu) { return 2 * state.numberOfJoints + 3 * state.requireImuOrdinal(imu); } // state col of imu's bias
    int getImuOrdinal(IMUSensorReadOnly imu)    { return state.requireImuOrdinal(imu); }
