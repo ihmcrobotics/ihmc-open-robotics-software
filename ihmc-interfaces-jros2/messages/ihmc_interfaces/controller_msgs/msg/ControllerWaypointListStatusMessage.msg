@@ -4,7 +4,4 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint64 sequence_id
 
-# The waypoint goal pose associated with this event.
-float64 goal_x_position
-float64 goal_y_position
-float64 goal_yaw
+ControllerWaypointStatusMessage[] waypoints

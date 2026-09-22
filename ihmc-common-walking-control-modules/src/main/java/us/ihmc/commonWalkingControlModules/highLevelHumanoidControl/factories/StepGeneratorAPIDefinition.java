@@ -2,7 +2,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import controller_msgs.ContinuousStepGeneratorStatusMessage;
 import controller_msgs.ControllerWalkToGoalStatusMessage;
-import controller_msgs.ControllerWaypointStatusMessage;
+import controller_msgs.ControllerWaypointChangeStatusMessage;
+import controller_msgs.ControllerWaypointListStatusMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorInputCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorParametersCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ControllerReleaseGoalCommand;
@@ -62,7 +63,8 @@ public class StepGeneratorAPIDefinition
       List<Class<? extends ROS2Message<?>>> statusMessages = new ArrayList<>();
       statusMessages.add(ContinuousStepGeneratorStatusMessage.class);
       statusMessages.add(ControllerWalkToGoalStatusMessage.class);
-      statusMessages.add(ControllerWaypointStatusMessage.class);
+      statusMessages.add(ControllerWaypointChangeStatusMessage.class);
+      statusMessages.add(ControllerWaypointListStatusMessage.class);
 
       stepGeneratorSupportedStatusMessages = Collections.unmodifiableList(statusMessages);
       outputMessageClasses.addAll(stepGeneratorSupportedStatusMessages);
