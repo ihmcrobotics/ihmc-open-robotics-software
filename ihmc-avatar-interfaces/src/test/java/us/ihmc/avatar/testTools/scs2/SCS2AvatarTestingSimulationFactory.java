@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.jros2.AsyncROS2Node;
@@ -169,7 +170,7 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
    @SuppressWarnings({"unchecked", "rawtypes"})
    public <T extends ROS2Message<T>> ROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic<?> generator)
    {
-      return ros2Node.createPublisher(generator.withType((Class) messageType));
+      return ros2Node.createPublisher(((HumanoidROS2Topic) generator).withTypeName((Class) messageType));
    }
 
    public <T extends ROS2Message<T>> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
@@ -180,6 +181,6 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
    @SuppressWarnings({"unchecked", "rawtypes"})
    public <T extends ROS2Message<T>> void createSubscriber(Class<T> messageType, ROS2Topic<?> generator, ObjectConsumer<T> consumer)
    {
-      ros2Node.createSubscription(generator.withType((Class) messageType), s -> consumer.consumeObject(messageType.cast(s.read())));
+      ros2Node.createSubscription(((HumanoidROS2Topic) generator).withTypeName((Class) messageType), s -> consumer.consumeObject(messageType.cast(s.read())));
    }
 }
