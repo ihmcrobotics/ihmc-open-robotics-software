@@ -70,6 +70,7 @@ public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMess
    @Override
    public void set(HeightMapCommand other)
    {
+      this.sequenceId = other.sequenceId;
       this.centerIndex = other.centerIndex;
       this.cellsPerAxis = other.cellsPerAxis;
       this.cellSize = other.cellSize;
