@@ -24,7 +24,7 @@ mainDependencies {
    api("org.yaml:snakeyaml:1.17") //1.11
 
    api("us.ihmc:euclid-frame-shape:0.22.4")
-   api("us.ihmc:mecano:17-0.19.3")
+   api("us.ihmc:mecano:17-0.19.4")
    api("us.ihmc:mecano-yovariables:17-0.19.3")
    api("us.ihmc:ihmc-commons:0.35.1")
    api("us.ihmc:ihmc-matrix-library:0.19.3")
