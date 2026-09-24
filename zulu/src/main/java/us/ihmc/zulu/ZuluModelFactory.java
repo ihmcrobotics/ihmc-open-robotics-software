@@ -84,7 +84,7 @@ public class ZuluModelFactory
                                                                          urdfParameters.getURDFModelName(),
                                                                          contactPointParameters,
                                                                          jointMap,
-                                                                         true,
+                                                                         false,
                                                                          parserProperties);
          if (zuluVersion.getSensorInformation() != null)
          {

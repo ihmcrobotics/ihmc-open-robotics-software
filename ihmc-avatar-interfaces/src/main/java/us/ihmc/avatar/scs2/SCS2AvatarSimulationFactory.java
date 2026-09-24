@@ -65,10 +65,10 @@ import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
@@ -100,7 +100,6 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.tools.TerrainObjectDefinitionTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorControllerFactory;
 import us.ihmc.tools.factories.FactoryFieldNotSetException;
@@ -187,9 +186,6 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>(
          "enableSimulatedRobotDamping",
          true);
-   protected final OptionalFactoryField<Boolean> useRobotDefinitionCollisions = new OptionalFactoryField<>(
-         "useRobotDefinitionCollisions",
-         false);
    protected final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots",
                                                                                                   new ArrayList<>());
    protected final OptionalFactoryField<String> simulationName = new OptionalFactoryField<>("simulationName");
@@ -306,47 +302,32 @@ public class SCS2AvatarSimulationFactory
          }
       }
 
-      if (!useRobotDefinitionCollisions.get())
+      // The shape-based engines collide the RobotDefinition's own (URDF) collision geometry, which is the geometry the
+      // controllers and planners are built against. A robot model constructed with removeURDFCollisions=true has none,
+      // which those engines show as the robot falling through the terrain with no error, so fail loudly instead.
+      if (!kinematicsSimulation.get() && (useImpulseBasedPhysicsEngine.get() || useBulletPhysicsEngine.get() || useMujocoPhysicsEngine.get()))
       {
-         RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper,
-                                                                                          robotCollisionName,
-                                                                                          terrainCollisionName);
-         if (collisionModel != null)
-         {
-            // Clear all existing collidables that may be present
-            for (RigidBodyDefinition rigidBody : robotDefinition.getAllRigidBodies())
-               rigidBody.getCollisionShapeDefinitions().clear();
-
-            RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel()
-                                                                                                             .getElevator()),
-                                                                robotDefinition);
-         }
-      }
-      else
-      {
-         // useRobotDefinitionCollisions=true keeps whatever is already on the RobotDefinition.
-         // Many robot models strip URDF collisions at load time (removeURDFCollisions=true), which
-         // leaves MuJoCo with no robot geoms and no ground contact. Fall back to the simulation
-         // collision model in that case so the robot does not free-fall.
+         // Collision shapes loaded from a URDF collide with everything, which on a humanoid means neighboring links are
+         // in permanent contact. Restrict them to the terrain, as the hand-written collision models used to do through
+         // this same helper. MuJoCo does the equivalent itself with contype/conaffinity and ignores these masks.
+         long robotCollisionMask = collidableHelper.getCollisionMask(robotCollisionName);
+         long terrainCollisionGroup = collidableHelper.createCollisionGroup(terrainCollisionName);
          int collisionShapeCount = 0;
-         for (RigidBodyDefinition rigidBody : robotDefinition.getAllRigidBodies())
-            collisionShapeCount += rigidBody.getCollisionShapeDefinitions().size();
 
-         if (collisionShapeCount == 0)
+         for (RigidBodyDefinition rigidBody : robotDefinition.getAllRigidBodies())
          {
-            LogTools.warn("useRobotDefinitionCollisions=true but RobotDefinition has no collision shapes; "
-                          + "falling back to getSimulationRobotCollisionModel(). "
-                          + "If you intended to use URDF collisions, construct the robot model with removeURDFCollisions=false.");
-            RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper,
-                                                                                             robotCollisionName,
-                                                                                             terrainCollisionName);
-            if (collisionModel != null)
+            for (CollisionShapeDefinition collisionShape : rigidBody.getCollisionShapeDefinitions())
             {
-               RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel()
-                                                                                                                .getElevator()),
-                                                                   robotDefinition);
+               collisionShape.setCollisionMask(robotCollisionMask);
+               collisionShape.setCollisionGroup(terrainCollisionGroup);
+
+               collisionShapeCount++;
             }
          }
+
+         if (collisionShapeCount == 0)
+            throw new RuntimeException("The selected physics engine collides shapes, but " + robotDefinition.getName()
+                                       + " has no collision shapes. Construct the robot model with removeURDFCollisions=false, or give its URDF collision geometry.");
       }
 
       if (useBulletPhysicsEngine.get() && bulletCollisionMutator.hasValue())
@@ -1258,10 +1239,6 @@ public class SCS2AvatarSimulationFactory
       this.enableSimulatedRobotDamping.set(enableSimulatedRobotDamping);
    }
 
-   public void setUseRobotDefinitionCollisions(boolean useRobotDefinitionCollisions)
-   {
-      this.useRobotDefinitionCollisions.set(useRobotDefinitionCollisions);
-   }
 
    public void addSecondaryRobot(Robot secondaryRobot)
    {

@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.parameterEstimation.YoInertiaEllipsoi
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.zulu.parameters.model.ZuluSelectionCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.SCS2DefinitionTools;
 import us.ihmc.scs2.definition.YawPitchRollTransformDefinition;
@@ -35,7 +36,7 @@ public class ZuluModelViewer
    private static final boolean SHOW_IMU_FRAMES = false;
    private static final boolean SHOW_HAND_CONTROL_FRAME = false;
    private static final boolean SHOW_INERTIA_FRAME = false;
-   private static final boolean SHOW_SIM_COLLISIONS = false;
+   private static final boolean SHOW_SELECTION_COLLISIONS = false;
    private static final boolean SHOW_KINEMATICS_COLLISIONS = false;
    private static final boolean SHOW_INERTIA_ELLIPSOIDS = false;
 
@@ -73,10 +74,10 @@ public class ZuluModelViewer
          }
       }
 
-      if (SHOW_SIM_COLLISIONS)
+      if (SHOW_SELECTION_COLLISIONS)
       {
-         RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(new CollidableHelper(), "robot", "ground");
-         if (collisionModel != null)
+         ZuluSelectionCollisionModel collisionModel = new ZuluSelectionCollisionModel(robotModel.getJointMap());
+         collisionModel.setCollidableHelper(new CollidableHelper(), "robot", "ground");
          {
             RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
                                                                 robotDefinition);

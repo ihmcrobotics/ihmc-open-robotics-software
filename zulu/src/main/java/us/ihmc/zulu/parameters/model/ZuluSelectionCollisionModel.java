@@ -23,11 +23,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Collision model for Zulu used for simulating shape-to-shape collisions.
+ * Coarse collision model the RDX UIs pass as the selection collision model, to pick robot parts with the mouse. It
+ * covers the head, torso, pelvis, hands and feet, and the shapes are deliberately larger than the real geometry so
+ * they are easy to click.
+ * <p>
+ * It is not a simulation collision model. The SCS2 physics engines take the robot's collision geometry from the
+ * RobotDefinition (i.e. the URDF), which is both correctly sized and covers the legs.
+ * </p>
  *
  * @author Sylvain Bertrand
  */
-public class ZuluSimulationCollisionModel implements RobotCollisionModel
+public class ZuluSelectionCollisionModel implements RobotCollisionModel
 {
    private final HumanoidJointNameMap jointMap;
    private final boolean useSTPShapesForSmoothContact;
@@ -40,12 +46,12 @@ public class ZuluSimulationCollisionModel implements RobotCollisionModel
    private long collisionMask;
    private long collisionGroup;
 
-   public ZuluSimulationCollisionModel(HumanoidJointNameMap jointMap)
+   public ZuluSelectionCollisionModel(HumanoidJointNameMap jointMap)
    {
       this(jointMap, true);
    }
 
-   public ZuluSimulationCollisionModel(HumanoidJointNameMap jointMap, boolean useSTPShapesForSmoothContact)
+   public ZuluSelectionCollisionModel(HumanoidJointNameMap jointMap, boolean useSTPShapesForSmoothContact)
    {
       this.jointMap = jointMap;
       this.useSTPShapesForSmoothContact = useSTPShapesForSmoothContact;
