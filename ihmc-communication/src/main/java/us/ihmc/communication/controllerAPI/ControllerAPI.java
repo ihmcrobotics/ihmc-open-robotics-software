@@ -82,6 +82,7 @@ public final class ControllerAPI
       // Commands supported by the RL controller, not in this repo
       inputMessageClasses.add(Point2DMessage.class);
       inputMessageClasses.add(RLModelSelectionMessage.class);
+      inputMessageClasses.add(MimicManeuverCommandMessage.class);
 
       // Toolbox management
       inputMessageClasses.add(ToolboxStateMessage.class);
@@ -140,6 +141,7 @@ public final class ControllerAPI
 
       // RL policy state (available models and current selection)
       outputMessageClasses.add(RLPolicyState.class);
+      outputMessageClasses.add(MimicManeuverStatusMessage.class);
 
       // Setting the input messages with specific QoS
       inputMessageClassSpecificQoS.put(WholeBodyStreamingMessage.class, ROS2QoSProfile.BEST_EFFORT);

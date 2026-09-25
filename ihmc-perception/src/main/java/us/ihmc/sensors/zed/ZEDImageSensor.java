@@ -42,6 +42,8 @@ public class ZEDImageSensor extends ImageSensor
    }
 
    private static final AtomicInteger nextStreamingPort = new AtomicInteger(30000);
+   /** Argus cannot open two GMSL cameras at once; a concurrent sl_open_camera times out in libnvargus_socketclient. */
+   private static final Object START_LOCK = new Object();
 
    public static final int LEFT_COLOR_IMAGE_KEY = 0;
    public static final int RIGHT_COLOR_IMAGE_KEY = 1;
@@ -250,6 +252,14 @@ public class ZEDImageSensor extends ImageSensor
 
    @Override
    protected boolean startSensor()
+   {
+      synchronized (START_LOCK)
+      {
+         return startSensorLocked();
+      }
+   }
+
+   private boolean startSensorLocked()
    {
       try
       {

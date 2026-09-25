@@ -96,6 +96,7 @@ public class ROS2LogKinematicsToolboxOutputStatusTest
       Assertions.assertEquals(-1087810655, imported.getJointNameHash());
       Assertions.assertFalse(imported.getDesiredJointAngles().isEmpty());
       Assertions.assertEquals(0.018464804f, imported.getDesiredJointAngles().get(0), 1.0e-6f);
+      Assertions.assertFalse(imported.getEndReplay());
 
       ros2Node.close();
    }
@@ -128,5 +129,6 @@ public class ROS2LogKinematicsToolboxOutputStatusTest
       Assertions.assertEquals(expected.getSolutionQuality(), actual.getSolutionQuality(), 1.0e-9);
       Assertions.assertEquals(expected.getLeftFootInContact(), actual.getLeftFootInContact());
       Assertions.assertEquals(expected.getRightFootInContact(), actual.getRightFootInContact());
+      Assertions.assertEquals(expected.getEndReplay(), actual.getEndReplay());
    }
 }
