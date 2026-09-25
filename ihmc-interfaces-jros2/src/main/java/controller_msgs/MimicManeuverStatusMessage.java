@@ -26,13 +26,8 @@ byte PHASE_WAITING_POSTCONDITION = 7
 byte COVER_STAGE_DOWN = 0
 byte COVER_STAGE_UP = 1
 
-byte DIG_STAGE_RECEIVE_TROWEL = 0
-byte DIG_STAGE_DIG = 1
-byte DIG_STAGE_DIGGING = 2
-
 byte phase
 byte cover_stage
-byte dig_stage
 bool busy
 string status_message
 }</pre>
@@ -51,12 +46,8 @@ public class MimicManeuverStatusMessage implements ROS2Message<MimicManeuverStat
    public static final byte PHASE_WAITING_POSTCONDITION = 7;
    public static final byte COVER_STAGE_DOWN = 0;
    public static final byte COVER_STAGE_UP = 1;
-   public static final byte DIG_STAGE_RECEIVE_TROWEL = 0;
-   public static final byte DIG_STAGE_DIG = 1;
-   public static final byte DIG_STAGE_DIGGING = 2;
    private byte phase_;
    private byte cover_stage_;
-   private byte dig_stage_;
    private boolean busy_;
    private final StringBuilder status_message_;
 
@@ -80,7 +71,6 @@ public class MimicManeuverStatusMessage implements ROS2Message<MimicManeuverStat
 
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // phase_
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // cover_stage_
-      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // dig_stage_
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // busy_
       currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4) + (1 * status_message_.length()) + 1; // status_message_
 
@@ -92,7 +82,6 @@ public class MimicManeuverStatusMessage implements ROS2Message<MimicManeuverStat
    {
       buffer.writeByte(phase_);
       buffer.writeByte(cover_stage_);
-      buffer.writeByte(dig_stage_);
       buffer.writeBoolean(busy_);
       buffer.writeString(status_message_);
 
@@ -103,7 +92,6 @@ public class MimicManeuverStatusMessage implements ROS2Message<MimicManeuverStat
    {
       phase_ = buffer.readByte();
       cover_stage_ = buffer.readByte();
-      dig_stage_ = buffer.readByte();
       busy_ = buffer.readBoolean();
       buffer.readString(status_message_);
 
@@ -114,7 +102,6 @@ public class MimicManeuverStatusMessage implements ROS2Message<MimicManeuverStat
    {
       phase_ = from.phase_;
       cover_stage_ = from.cover_stage_;
-      dig_stage_ = from.dig_stage_;
       busy_ = from.busy_;
       status_message_.delete(0, status_message_.length());
       status_message_.insert(0, from.status_message_);
@@ -139,16 +126,6 @@ public class MimicManeuverStatusMessage implements ROS2Message<MimicManeuverStat
    public void setCoverStage(byte cover_stage_)
    {
       this.cover_stage_ = cover_stage_;
-   }
-
-   public byte getDigStage()
-   {
-      return dig_stage_;
-   }
-
-   public void setDigStage(byte dig_stage_)
-   {
-      this.dig_stage_ = dig_stage_;
    }
 
    public boolean getBusy()
@@ -202,18 +179,10 @@ public class MimicManeuverStatusMessage implements ROS2Message<MimicManeuverStat
       builder.append(COVER_STAGE_DOWN);
       builder.append("COVER_STAGE_UP=");
       builder.append(COVER_STAGE_UP);
-      builder.append("DIG_STAGE_RECEIVE_TROWEL=");
-      builder.append(DIG_STAGE_RECEIVE_TROWEL);
-      builder.append("DIG_STAGE_DIG=");
-      builder.append(DIG_STAGE_DIG);
-      builder.append("DIG_STAGE_DIGGING=");
-      builder.append(DIG_STAGE_DIGGING);
       builder.append("phase_=");
       builder.append(phase_);
       builder.append("cover_stage_=");
       builder.append(cover_stage_);
-      builder.append("dig_stage_=");
-      builder.append(dig_stage_);
       builder.append("busy_=");
       builder.append(busy_);
       builder.append("status_message_=");

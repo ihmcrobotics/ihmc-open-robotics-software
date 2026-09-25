@@ -12,12 +12,7 @@ byte PHASE_WAITING_POSTCONDITION = 7
 byte COVER_STAGE_DOWN = 0
 byte COVER_STAGE_UP = 1
 
-byte DIG_STAGE_RECEIVE_TROWEL = 0
-byte DIG_STAGE_DIG = 1
-byte DIG_STAGE_DIGGING = 2
-
 byte phase
 byte cover_stage
-byte dig_stage
 bool busy
 string status_message
