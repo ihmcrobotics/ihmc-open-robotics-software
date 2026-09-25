@@ -96,7 +96,6 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
          avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
          avatarSimulationFactory.setCreateYoVariableServer(true);
          avatarSimulationFactory.setUseBulletPhysicsEngine(true);
-         avatarSimulationFactory.setUseRobotDefinitionCollisions(false);
          avatarSimulationFactory.setShowGUI(false);
          if (externalFactorySetup != null)
             externalFactorySetup.accept(avatarSimulationFactory);
