@@ -21,7 +21,10 @@ import us.ihmc.sensors.ImageSensor;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
+
+import us.ihmc.communication.PerceptionAPI;
 
 import static us.ihmc.perception.voxelMap.TSDFVoxelMapExtractor.FREE_SPACE_VALUE;
 
@@ -67,6 +70,8 @@ public class TSDFVoxelMappingThread extends RepeatingTaskThread
    // Scratch buffers for the warp, reused across calls
    private final float[] warpedGrid;
 
+   private final AtomicBoolean resetRequested = new AtomicBoolean(false);
+
    public TSDFVoxelMappingThread(ROS2Node ros2Node,
                                  ROS2Topic<VoxelMapMessage> ros2Topic,
                                  int mapSize,
@@ -109,11 +114,24 @@ public class TSDFVoxelMappingThread extends RepeatingTaskThread
       previousTSDFGrid = new float[voxelCount];
       Arrays.fill(previousTSDFGrid, FREE_SPACE_VALUE);
       warpedGrid = new float[voxelCount];
+
+      ros2Node.createSubscription(PerceptionAPI.RESET_TSDF_VOXEL_MAP, message -> resetRequested.set(true));
+   }
+
+   public void resetHistory()
+   {
+      resetRequested.set(true);
    }
 
    @Override
    protected void runTask()
    {
+      if (resetRequested.getAndSet(false))
+      {
+         Arrays.fill(previousTSDFGrid, FREE_SPACE_VALUE);
+         previousOrigin.setToZero();
+      }
+
       RawImage[] depthImages = new RawImage[sensorDepthImageKeyMap.size()];
       int arrayIndex = 0;
       for (ImageSensor imageSensor : sensorDepthImageKeyMap.keySet())
