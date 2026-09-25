@@ -81,10 +81,12 @@ import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoPhysicsEngine;
+import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoActuationMode;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParameters;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
+import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
 import us.ihmc.scs2.simulation.physicsEngine.contactPointBased.ContactPointBasedPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.impulseBased.ImpulseBasedPhysicsEngine;
@@ -180,6 +182,7 @@ public class SCS2AvatarSimulationFactory
          false);
    protected final OptionalFactoryField<MujocoSimulationParametersReadOnly> mujocoSimulationParameters = new OptionalFactoryField<>(
          "mujocoSimulationParameters");
+   protected final OptionalFactoryField<Boolean> useMujocoJointServo = new OptionalFactoryField<>("useMujocoJointServo", false);
    protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>(
          "impulseBasedPhysicsEngineParameters");
    protected final OptionalFactoryField<GroundContactModelParameters> groundContactModelParameters = new OptionalFactoryField<>(
@@ -244,7 +247,9 @@ public class SCS2AvatarSimulationFactory
 
       setupSimulationConstructionSet();
       setupYoVariableServer();
-      if (simulationThreadOutputWriterFactory.hasValue())
+      if (useMujocoJointServo.get())
+         setupMujocoSetpointOutputWriter();
+      else if (simulationThreadOutputWriterFactory.hasValue())
          setupOutputWriterOnSimulatorThread();
       else
          setupOutputWriterOnEstimatorThread();
@@ -390,6 +395,13 @@ public class SCS2AvatarSimulationFactory
          if (mujocoSimulationParameters.hasValue())
             mujocoParameters.set(mujocoSimulationParameters.get());
          mujocoParameters.setTimestep(simulationDT.get());
+         if (useMujocoJointServo.get())
+         {
+            // Hand MuJoCo the setpoints and gains rather than a finished torque; see
+            // MujocoSetpointOutputWriter. Compile-time, because it decides whether the generated
+            // MJCF carries an <actuator> block.
+            mujocoParameters.setActuationMode(MujocoActuationMode.JOINT_SERVO);
+         }
          physicsEngineFactory = (inertialFrame, rootRegistry) -> new MujocoPhysicsEngine(inertialFrame, rootRegistry, mujocoParameters);
       }
       else
@@ -480,6 +492,26 @@ public class SCS2AvatarSimulationFactory
       simulationOutputWriter = outputWriterFactory.get()
                                                   .build(robot.getControllerManager().getControllerInput(),
                                                          robot.getControllerManager().getControllerOutput());
+   }
+
+   /**
+    * Replaces {@link SCS2OutputWriter} with the writer that forwards setpoints and gains to
+    * MuJoCo's actuators. Wired here rather than through
+    * {@link #setSimulationThreadOutputWriterFactory} because the writer needs the physics engine,
+    * which only exists once the simulation construction set has been built.
+    */
+   private void setupMujocoSetpointOutputWriter()
+   {
+      PhysicsEngine physicsEngine = simulationConstructionSet.getPhysicsEngine();
+      if (!(physicsEngine instanceof MujocoPhysicsEngine mujocoPhysicsEngine))
+      {
+         throw new IllegalStateException("useMujocoJointServo is set, but the physics engine is " + physicsEngine.getClass().getSimpleName()
+                                         + ". Call setUseMujocoPhysicsEngine(true) as well.");
+      }
+
+      simulationThreadOutputWriter = new MujocoSetpointOutputWriter(robot.getControllerManager().getControllerInput(),
+                                                                    robot.getControllerManager().getControllerOutput(),
+                                                                    mujocoPhysicsEngine);
    }
 
    private void setupOutputWriterOnSimulatorThread()
@@ -1251,6 +1283,18 @@ public class SCS2AvatarSimulationFactory
    public void setMujocoSimulationParameters(MujocoSimulationParametersReadOnly mujocoSimulationParameters)
    {
       this.mujocoSimulationParameters.set(mujocoSimulationParameters);
+   }
+
+   /**
+    * Sends MuJoCo the controller's setpoints and gains instead of the torque SCS2 would otherwise
+    * compute from them, so MuJoCo closes the low-level loop on every physics step. Requires
+    * {@link #setUseMujocoPhysicsEngine(boolean)}, and replaces {@link SCS2OutputWriter} with
+    * {@link MujocoSetpointOutputWriter}. Off by default: with it off, nothing about the simulation
+    * changes.
+    */
+   public void setUseMujocoJointServo(boolean useMujocoJointServo)
+   {
+      this.useMujocoJointServo.set(useMujocoJointServo);
    }
 
    public void setEnableSimulatedRobotDamping(boolean enableSimulatedRobotDamping)
