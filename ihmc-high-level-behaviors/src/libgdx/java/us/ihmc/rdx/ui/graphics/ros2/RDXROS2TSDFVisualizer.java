@@ -3,11 +3,15 @@ package us.ihmc.rdx.ui.graphics.ros2;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
 import perception_msgs.VoxelMapMessage;
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Subscription;
 import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.perception.voxelMap.VoxelMap;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMarchingCubesVoxelMapRenderer;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
@@ -23,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * {@link RDXMarchingCubesVoxelMapRenderer}, which runs the CPU marching cubes algorithm and
  * uploads the resulting triangle mesh to the GPU for opaque, height-colored rendering.</p>
  */
-public class RDXROS2MarchingCubesVoxelMapVisualizer extends RDXROS2SingleTopicVisualizer<VoxelMapMessage>
+public class RDXROS2TSDFVisualizer extends RDXROS2SingleTopicVisualizer<VoxelMapMessage>
 {
    private final ROS2Node ros2Node;
    private final ROS2Topic<VoxelMapMessage> topic;
@@ -31,15 +35,18 @@ public class RDXROS2MarchingCubesVoxelMapVisualizer extends RDXROS2SingleTopicVi
 
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
    private final RDXMarchingCubesVoxelMapRenderer renderer = new RDXMarchingCubesVoxelMapRenderer();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ROS2PublisherMap publisherMap;
    private int rendererMaxVoxels = 0;
 
    private final AtomicReference<VoxelMap> pendingVoxelMap = new AtomicReference<>();
 
-   public RDXROS2MarchingCubesVoxelMapVisualizer(String title, ROS2Node ros2Node, ROS2Topic<VoxelMapMessage> topic)
+   public RDXROS2TSDFVisualizer(String title, ROS2Node ros2Node, ROS2Topic<VoxelMapMessage> topic)
    {
       super(title);
       this.ros2Node = ros2Node;
       this.topic = topic;
+      this.publisherMap = new ROS2PublisherMap(ros2Node);
 
       addActivenessChangeCallback(isActive ->
       {
@@ -81,6 +88,8 @@ public class RDXROS2MarchingCubesVoxelMapVisualizer extends RDXROS2SingleTopicVi
    @Override
    public void renderImGuiWidgets()
    {
+      if (ImGui.button(labels.get("Reset History")))
+         publisherMap.publish(PerceptionAPI.RESET_TSDF_VOXEL_MAP);
       getFrequency().render();
       messageSizeReadout.renderImGuiWidgets();
    }

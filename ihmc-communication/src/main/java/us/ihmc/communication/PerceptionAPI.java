@@ -225,6 +225,7 @@ public final class PerceptionAPI
     * Voxel Map
     */
    public static final ROS2Topic<VoxelMapMessage> VOXEL_MAP = PERCEPTION_MODULE.withSuffix("voxel_map").withType(VoxelMapMessage.class);
+   public static final ROS2Topic<Empty> RESET_TSDF_VOXEL_MAP = PERCEPTION_MODULE.withSuffix("reset_tsdf_voxel_map").withType(Empty.class);
 
    /*
     * Mocap
