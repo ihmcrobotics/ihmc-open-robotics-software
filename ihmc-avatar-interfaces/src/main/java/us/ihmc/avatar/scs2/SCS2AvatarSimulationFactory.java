@@ -246,12 +246,11 @@ public class SCS2AvatarSimulationFactory
 
       setupSimulationConstructionSet();
       setupYoVariableServer();
-      if (useMujocoJointServo.get())
-         setupMujocoSetpointOutputWriter();
-      else if (simulationThreadOutputWriterFactory.hasValue())
+      if (simulationThreadOutputWriterFactory.hasValue())
          setupOutputWriterOnSimulatorThread();
       else
          setupOutputWriterOnEstimatorThread();
+      setupMujocoJointServo();
 
       setupStateEstimationThread();
       setupControllerThread();
@@ -487,13 +486,21 @@ public class SCS2AvatarSimulationFactory
    }
 
    /**
-    * Replaces {@link SCS2OutputWriter} with the writer that forwards setpoints and gains to
-    * MuJoCo's actuators. Wired here rather than through
-    * {@link #setSimulationThreadOutputWriterFactory} because the writer needs the physics engine,
-    * which only exists once the simulation construction set has been built.
+    * Hands the controller's low-level command to MuJoCo's actuators instead of the torque
+    * {@link SCS2OutputWriter} would otherwise compute from it, so MuJoCo closes the loop on every
+    * physics step.
+    *
+    * <p>Installed as a sink on the existing output writer rather than replacing it. That is not
+    * incidental: the command has to be taken after corruption, velocity scaling and the
+    * feedback-error clamps, and after {@code InterpolatedSCS2OutputWriter} and the low-level output
+    * processor have had their turn. Anything that replaced the writer would sit upstream of all of
+    * those and drop them without saying so.
     */
-   private void setupMujocoSetpointOutputWriter()
+   private void setupMujocoJointServo()
    {
+      if (!useMujocoJointServo.get())
+         return;
+
       PhysicsEngine physicsEngine = simulationConstructionSet.getPhysicsEngine();
       if (!(physicsEngine instanceof MujocoPhysicsEngine mujocoPhysicsEngine))
       {
@@ -501,9 +508,15 @@ public class SCS2AvatarSimulationFactory
                                          + ". Call setUseMujocoPhysicsEngine(true) as well.");
       }
 
-      simulationThreadOutputWriter = new MujocoSetpointOutputWriter(robot.getControllerManager().getControllerInput(),
-                                                                    robot.getControllerManager().getControllerOutput(),
-                                                                    mujocoPhysicsEngine);
+      MujocoJointCommandSink sink = new MujocoJointCommandSink(mujocoPhysicsEngine);
+      if (simulationOutputWriter instanceof InterpolatedSCS2OutputWriter interpolatedWriter)
+         interpolatedWriter.setJointCommandSink(sink);
+      else if (simulationOutputWriter instanceof SCS2OutputWriter outputWriter)
+         outputWriter.setJointCommandSink(sink);
+      else
+         throw new IllegalStateException("useMujocoJointServo needs an SCS2OutputWriter to take the command from, but the output writer is "
+                                         + (simulationOutputWriter == null ? "null" : simulationOutputWriter.getClass().getSimpleName())
+                                         + ". A simulation-thread output writer bypasses it.");
    }
 
    private void setupOutputWriterOnSimulatorThread()
@@ -1281,12 +1294,12 @@ public class SCS2AvatarSimulationFactory
     * Sends MuJoCo the controller's setpoints and gains instead of the torque SCS2 would otherwise
     * compute from them, so MuJoCo closes the low-level loop on every physics step rather than
     * holding one torque between controller ticks. Requires
-    * {@link #setUseMujocoPhysicsEngine(boolean)}, and replaces {@link SCS2OutputWriter} with
-    * {@link MujocoSetpointOutputWriter}.
+    * {@link #setUseMujocoPhysicsEngine(boolean)}.
     * <p>
     * Off by default, in which case SCS2OutputWriter computes the torque as it always has and MuJoCo
     * applies it as a pure feedforward command -- the same force, through the same actuator. This
-    * flag chooses where the loop is closed, not whether actuators are used.
+    * flag chooses where the loop is closed, not whether actuators are used, and it keeps the
+    * corruptors, interpolation and cross-four-bar handling either way.
     */
    public void setUseMujocoJointServo(boolean useMujocoJointServo)
    {
