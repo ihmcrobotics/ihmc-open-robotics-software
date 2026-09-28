@@ -191,6 +191,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       // When you initialize into this controller, reset the estimator positions to current. Otherwise it might be in a bad state
       // where the feet are all jacked up. For example, after falling and getting back up.
       optimizationControlModule.initialize();
+      optimizationControlModule.notifyResetActiveSet();
       planeContactWrenchProcessor.initialize();
 
       if (updateDynamicMatrixCalculator.getValue() || useDynamicMatrixCalculatorForInverseDynamics.getBooleanValue())

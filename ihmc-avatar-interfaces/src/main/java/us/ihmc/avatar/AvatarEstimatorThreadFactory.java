@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.PairList;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -113,8 +114,8 @@ public class AvatarEstimatorThreadFactory
    private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisPoseSubscriberField = new OptionalFactoryField<>(
          "externalPelvisPoseSubscriberField");
    private final OptionalFactoryField<AsyncROS2Node> asyncROS2NodeField = new OptionalFactoryField<>("asyncROS2Node");
-   private final OptionalFactoryField<ROS2Topic<?>> outputTopicField = new OptionalFactoryField<>("outputTopic");
-   private final OptionalFactoryField<ROS2Topic<?>> inputTopicField = new OptionalFactoryField<>("inputTopic");
+   private final OptionalFactoryField<HumanoidROS2Topic<?>> outputTopicField = new OptionalFactoryField<>("outputTopic");
+   private final OptionalFactoryField<HumanoidROS2Topic<?>> inputTopicField = new OptionalFactoryField<>("inputTopic");
    private final OptionalFactoryField<SensorDataContext> sensorDataContextField = new OptionalFactoryField<>("sensorDataContext");
    private final OptionalFactoryField<HumanoidRobotContextData> humanoidRobotContextDataField = new OptionalFactoryField<>("humanoidRobotContextData");
    private final OptionalFactoryField<HumanoidRobotContextJointData> humanoidRobotContextJointDataField = new OptionalFactoryField<>(
@@ -245,7 +246,7 @@ public class AvatarEstimatorThreadFactory
     * @param outputTopic the generator to use for creating the topic name for publishers.
     * @param inputTopic  the generator to use for creating the topic name for subscribers.
     */
-   public void setROS2Info(AsyncROS2Node ros2Node, ROS2Topic<?> outputTopic, ROS2Topic<?> inputTopic)
+   public void setROS2Info(AsyncROS2Node ros2Node, HumanoidROS2Topic<?> outputTopic, HumanoidROS2Topic<?> inputTopic)
    {
       asyncROS2NodeField.set(ros2Node);
       outputTopicField.set(outputTopic);
@@ -418,9 +419,9 @@ public class AvatarEstimatorThreadFactory
       if (asyncROS2NodeField.hasValue())
       {
          ForceSensorStateUpdater forceSensorStateUpdater = stateEstimator.getForceSensorStateUpdater();
-         asyncROS2NodeField.get().createSubscription(inputTopicField.get().withType(RequestWristForceSensorCalibrationPacket.class),
+         asyncROS2NodeField.get().createSubscription(inputTopicField.get().withTypeName(RequestWristForceSensorCalibrationPacket.class),
                                      subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
-         asyncROS2NodeField.get().createSubscriptionSampler(inputTopicField.get().withType(ReinitializeStateEstimatorMessage.class),
+         asyncROS2NodeField.get().createSubscriptionSampler(inputTopicField.get().withTypeName(ReinitializeStateEstimatorMessage.class),
                                                             sample ->
                                                             {
                                                                if (!sample.getRequestReinitialize())
