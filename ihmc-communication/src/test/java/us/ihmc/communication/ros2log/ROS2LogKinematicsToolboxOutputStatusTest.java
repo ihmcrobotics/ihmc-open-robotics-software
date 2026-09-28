@@ -59,6 +59,8 @@ public class ROS2LogKinematicsToolboxOutputStatusTest
       Assertions.assertEquals(1, replayManagers.size());
 
       KinematicsToolboxOutputStatus imported = (KinematicsToolboxOutputStatus) replayManagers.get(0).getMessages().get(0);
+      // writeLogFile marks the final kinematics status so replay can detect the end of the log.
+      exported.setEndReplay(true);
       assertKinematicsToolboxOutputStatusEqual(exported, imported);
 
       ros2Node.close();
