@@ -107,7 +107,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    /**
     * Minimum normalized speed the robot may travel through the current intermediate waypoint.
     * Derived from the dot product of the incoming and outgoing leg directions: 1.0 means the robot
-    * can pass through at full speed (legs are collinear); 0.0 means the robot must stop (turn >= 90°
+    * can pass through at full speed (legs are collinear); 0.0 means the robot must stop (turn >= 90deg
     * or this is the terminal waypoint).
     */
    private final YoDouble waypointThroughputSpeedScalar = new YoDouble("waypointThroughputSpeedScalar", registry);
