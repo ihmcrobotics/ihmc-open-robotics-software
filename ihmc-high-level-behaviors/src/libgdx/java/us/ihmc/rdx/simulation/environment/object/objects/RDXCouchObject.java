@@ -20,11 +20,11 @@ public class RDXCouchObject extends RDXEnvironmentObject
       Model realisticModel = RDXModelLoader.load("environmentObjects/couch/Couch.g3dj");
       setRealisticModel(realisticModel);
 
-      double sizeX = 0.2;
-      double sizeY = 0.2;
-      double sizeZ = 0.3;
+      double sizeX = 2.0;
+      double sizeY = 0.8;
+      double sizeZ = 0.6;
       setMass(60.0f);
-      getCollisionShapeOffset().getTranslation().add(sizeX / 2.0 - 0.08 , 0, sizeZ / 2.0);
+      getCollisionShapeOffset().getTranslation().add(sizeX / 2.0 + 0.05, -sizeY / 2.0, sizeZ / 2.0);
       getBoundingSphere().setRadius(5.0);
       getBoundingSphere().getPosition().add(sizeX / 2.0, sizeY / 2.0, sizeZ / 2.0);
       Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);

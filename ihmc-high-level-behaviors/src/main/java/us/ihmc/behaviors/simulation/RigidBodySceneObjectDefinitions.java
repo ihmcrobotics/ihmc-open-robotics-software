@@ -84,12 +84,53 @@ public class RigidBodySceneObjectDefinitions
    public static final RigidBodyTransform CHARGE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
    public static final String PERSON_NAME = "Person";
-   public static final String PERSON_VISUAL_MODEL_FILE_PATH = "environmentObjects/person/person.glb";
+   /**
+    * Photoreal RenderPeople scan weighted to Mixamo (idle / walk / run / point / stop).
+    * Every RDX person object uses this poseable file — not the static person*.glb statues.
+    */
+   public static final String PERSON_ANIMATED_MODEL_FILE_PATH = "environmentObjects/person/personAnimated.glb";
+   public static final String PERSON_VISUAL_MODEL_FILE_PATH = PERSON_ANIMATED_MODEL_FILE_PATH;
+   public static final String PERSON_SHIRT_GREY_TEXTURE_FILE_PATH = "environmentObjects/person/personShirtGrey.jpg";
+   public static final String PERSON_SHIRT_ORANGE_TEXTURE_FILE_PATH = "environmentObjects/person/personShirtOrange.jpg";
+   public static final String PERSON_SHIRT_GREEN_TEXTURE_FILE_PATH = "environmentObjects/person/personShirtGreen.jpg";
+   public static final String PERSON_SHIRT_BLUE_TEXTURE_FILE_PATH = "environmentObjects/person/personShirtBlue.jpg";
+   public static final String PERSON_SHIRT_YELLOW_TEXTURE_FILE_PATH = "environmentObjects/person/personShirtYellow.jpg";
+   public static final String PERSON_SHIRT_RED_TEXTURE_FILE_PATH = "environmentObjects/person/personShirtRed.jpg";
+   public static final String PERSON_SHIRT_BLACK_PANTS_TEXTURE_FILE_PATH = "environmentObjects/person/personShirtBlackPants.jpg";
    public static final RigidBodyTransform PERSON_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
+   public static final String PERSON_ORANGE_SHIRT_NAME = "Person (orange shirt)";
+   public static final String PERSON_ORANGE_SHIRT_VISUAL_MODEL_FILE_PATH = PERSON_ANIMATED_MODEL_FILE_PATH;
+   public static final RigidBodyTransform PERSON_ORANGE_SHIRT_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
+   public static final String PERSON_GREEN_SHIRT_NAME = "Person (green shirt)";
+   public static final String PERSON_GREEN_SHIRT_VISUAL_MODEL_FILE_PATH = PERSON_ANIMATED_MODEL_FILE_PATH;
+   public static final RigidBodyTransform PERSON_GREEN_SHIRT_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
+   public static final String PERSON_BLACK_PANTS_NAME = "Person (black pants)";
+   public static final String PERSON_BLACK_PANTS_VISUAL_MODEL_FILE_PATH = PERSON_ANIMATED_MODEL_FILE_PATH;
+   public static final RigidBodyTransform PERSON_BLACK_PANTS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
+   public static final String PERSON_RED_SHIRT_NAME = "Person (red shirt)";
+   public static final String PERSON_RED_SHIRT_VISUAL_MODEL_FILE_PATH = PERSON_ANIMATED_MODEL_FILE_PATH;
+   public static final RigidBodyTransform PERSON_RED_SHIRT_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
+   public static final String PERSON_BLUE_SHIRT_NAME = "Person (blue shirt)";
+   public static final String PERSON_BLUE_SHIRT_VISUAL_MODEL_FILE_PATH = PERSON_ANIMATED_MODEL_FILE_PATH;
+   public static final RigidBodyTransform PERSON_BLUE_SHIRT_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
+   public static final String PERSON_YELLOW_SHIRT_NAME = "Person (yellow shirt)";
+   public static final String PERSON_YELLOW_SHIRT_VISUAL_MODEL_FILE_PATH = PERSON_ANIMATED_MODEL_FILE_PATH;
+   public static final RigidBodyTransform PERSON_YELLOW_SHIRT_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
    public static final String BARRIER_NAME = "Barrier";
    public static final String BARRIER_VISUAL_MODEL_FILE_PATH = "environmentObjects/barrier/barrier.g3dj";
    public static final RigidBodyTransform BARRIER_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
+   /** Matches the {@code traffic_barrier} YOLO class and the FoundationPose mesh of the same name. */
+   public static final String TRAFFIC_BARRIER_NAME = "Traffic Barrier";
+   public static final String TRAFFIC_BARRIER_VISUAL_MODEL_FILE_PATH = "environmentObjects/traffic_barrier/traffic_barrier.glb";
+   public static final RigidBodyTransform TRAFFIC_BARRIER_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
    public static final String TABLE_NAME = "Table";
    public static final String TABLE_VISUAL_MODEL_FILE_PATH = "environmentObjects/table/Table.g3dj";
