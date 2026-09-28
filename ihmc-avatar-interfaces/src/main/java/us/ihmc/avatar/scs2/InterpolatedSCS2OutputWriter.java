@@ -42,17 +42,6 @@ public class InterpolatedSCS2OutputWriter implements JointDesiredOutputWriter
       registry.addChild(scs2OutputWriter.getYoVariableRegistry());
    }
 
-   /**
-    * Forwards to the wrapped {@link SCS2OutputWriter}, so a command taken here carries the
-    * interpolated, processed desireds rather than the raw ones.
-    *
-    * @see SCS2OutputWriter#setJointCommand(JointCommand)
-    */
-   public void setJointCommand(JointCommand jointCommand)
-   {
-      scs2OutputWriter.setJointCommand(jointCommand);
-   }
-
    public void enableInterpolation(boolean enable)
    {
       outputProcessor.enableInterpolation(enable);

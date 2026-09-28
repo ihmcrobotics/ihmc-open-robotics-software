@@ -36,7 +36,6 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
    private final ControllerOutput controllerOutput;
    private final boolean writeBeforeEstimatorTick;
    private final List<JointController> jointControllers = new ArrayList<>();
-   private JointCommand jointCommand;
    private final Map<String, JointController> jointControllerMap = new HashMap<>();
 
    private final YoDouble unstableVelocityThreshold = new YoDouble("unstableVelocityThreshold", registry);
@@ -142,25 +141,6 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
             jointControllerMap.put(simJointOutput.getName(), jointController);
          }
       }
-   }
-
-   /**
-    * Forward each joint's command to {@code jointCommand} instead of collapsing it into a torque,
-    * wherever it is accepted, so a physics engine that models actuators can close the impedance loop
-    * at its own rate rather than at the controller's.
-    *
-    * <p>The hand-off happens at the point the effort would have been written, which is deliberate:
-    * that is after corruption, velocity scaling and the feedback-error clamps, and downstream of
-    * {@link InterpolatedSCS2OutputWriter} and the low-level output processor. A command taken here
-    * therefore carries interpolated, processed desireds; anything that replaced this writer would
-    * sit upstream of all of it.
-    *
-    * <p>Cross-four-bar joints are never offered: their torque is split across the loop through the
-    * loop Jacobian, which a setpoint and a pair of gains cannot express.
-    */
-   public void setJointCommand(JointCommand jointCommand)
-   {
-      this.jointCommand = jointCommand;
    }
 
    protected void write()
@@ -375,31 +355,26 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
          yoPositionTau.set(kp.getValue() * yoPositionError.getValue());
          yoVelocityTau.set(kd.getValue() * yoVelocityError.getValue());
 
-         if (jointCommand != null)
-         {
-            // Hand the command over whole rather than collapsing it to a torque, so an engine that
-            // models actuators can close the loop at its own rate. The setpoints are reconstructed
-            // from the clamped errors, which preserves the feedback-error limits exactly: adding a
-            // clamped error back onto the measurement is the same as clamping the setpoint around it.
-            double effectiveDesiredPosition = simOutput.getQ() + yoPositionError.getValue();
-            double effectiveDesiredVelocity = simOutput.getQd() + yoVelocityError.getValue();
-
-            if (jointCommand.setJointCommand(simOutput.getName(),
-                                                 yoControllerTau.getValue(),
-                                                 effectiveDesiredPosition,
-                                                 effectiveDesiredVelocity,
-                                                 kp.getValue(),
-                                                 kd.getValue()))
-            {
-               previousVelocity.set(simOutput.getQd());
-               return;
-            }
-         }
-
          double torque = MathTools.clamp(yoControllerTau.getValue() + yoPositionTau.getValue() + yoVelocityTau.getValue(),
                                          simOutput.getEffortLimitLower(),
                                          simOutput.getEffortLimitUpper());
-         simInput.setEffort(torque);
+
+         // Publish the impedance command alongside the torque it collapses to, so a physics engine
+         // that models actuators can close the loop at its own rate instead of holding a
+         // controller-rate torque constant between physics steps. An engine that cannot simply reads
+         // the effort, as it always has.
+         //
+         // The setpoints are reconstructed from the clamped errors, which preserves the
+         // feedback-error limits exactly: adding a clamped error back onto the measurement is the
+         // same as clamping the setpoint around it. Publishing here rather than from a separate
+         // writer is what keeps the command downstream of corruption, velocity scaling, the clamps,
+         // InterpolatedSCS2OutputWriter and the low-level output processor.
+         simInput.setEffortAndCommand(torque,
+                                      yoControllerTau.getValue(),
+                                      simOutput.getQ() + yoPositionError.getValue(),
+                                      simOutput.getQd() + yoVelocityError.getValue(),
+                                      kp.getValue(),
+                                      kd.getValue());
          previousVelocity.set(simOutput.getQd());
       }
 
