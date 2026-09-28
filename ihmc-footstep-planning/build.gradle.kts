@@ -31,5 +31,5 @@ visualizersDependencies {
 
    api("us.ihmc:ihmc-path-planning-visualizers:source")
    api("us.ihmc:ihmc-common-walking-control-modules-test:source")
-
+   api("us.ihmc:ihmc-messager-javafx:0.2.1")
 }

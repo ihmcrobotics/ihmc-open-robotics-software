@@ -1,9 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.*;
-import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.RelativeEndEffectorControlTest.circlePositionAt;
-
 import controller_msgs.CapturabilityBasedStatus;
 import controller_msgs.RobotConfigurationData;
 import controller_msgs.WholeBodyStreamingMessage;
@@ -30,6 +26,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
@@ -43,13 +40,11 @@ import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.jros2.ROS2Subscription;
-import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
@@ -92,6 +87,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.*;
+import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.RelativeEndEffectorControlTest.circlePositionAt;
+
 @Tag("humanoid-toolbox")
 public abstract class KinematicsStreamingToolboxControllerTest
 {
@@ -112,10 +111,10 @@ public abstract class KinematicsStreamingToolboxControllerTest
    protected ROS2Node ros2Node;
    protected ROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
    protected ROS2Publisher<ToolboxStateMessage> statePublisher;
-   protected ROS2Topic<?> controllerInputTopic;
-   protected ROS2Topic<?> controllerOutputTopic;
-   protected ROS2Topic<?> toolboxInputTopic;
-   protected ROS2Topic<?> toolboxOutputTopic;
+   protected HumanoidROS2Topic<?> controllerInputTopic;
+   protected HumanoidROS2Topic<?> controllerOutputTopic;
+   protected HumanoidROS2Topic<?> toolboxInputTopic;
+   protected HumanoidROS2Topic<?> toolboxOutputTopic;
 
    private List<Runnable> cleanupTasks;
 
@@ -189,7 +188,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       cleanupTasks.add(() -> toolboxROS2Node.destroySubscription(cbsSubscription));
 
       inputPublisher = ros2Node.createPublisher(ControllerAPI.getTopic(toolboxInputTopic, KinematicsStreamingToolboxInputMessage.class));
-      statePublisher = ros2Node.createPublisher(toolboxInputTopic.withType(ToolboxStateMessage.class));
+      statePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ToolboxStateMessage.class));
 
       AtomicReference<KinematicsToolboxOutputStatus> toolboxViz = new AtomicReference<>(null);
       ros2Node.createSubscription(ControllerAPI.getTopic(toolboxOutputTopic, KinematicsToolboxOutputStatus.class), s -> toolboxViz.set(s.read()));

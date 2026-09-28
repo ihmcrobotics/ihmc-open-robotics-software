@@ -103,9 +103,9 @@ public class SCS2LogSessionWithVideo extends LogSession
    private void disposeScrubbers()
    {
       for (MagewellScrubber magewellScrubber : magewellScrubbers)
-         magewellScrubber.getMagewellDemuxer().stop();
+         magewellScrubber.getFfmpegDemuxer().stop();
       for (BlackMagicScrubber blackMagicScrubber : blackMagicScrubbers)
-         blackMagicScrubber.getDemuxer().delete();
+         blackMagicScrubber.getDemuxer().stop();
       for (ZEDSVOScrubber zedSVOScrubber : zedSVOScrubbers)
          zedSVOScrubber.close();
 

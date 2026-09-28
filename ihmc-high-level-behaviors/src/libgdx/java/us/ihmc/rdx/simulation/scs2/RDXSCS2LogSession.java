@@ -13,7 +13,6 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
-import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -63,7 +62,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    private final List<ZEDLogVideo> zedLogVideos = new ArrayList<>();
    private record MagewellLogVideo(MagewellScrubber scrubber, OpenCVFrameConverter.ToMat converter, RDXImageVisualizer visualizer) { }
    private final List<MagewellLogVideo> magewellLogVideos = new ArrayList<>();
-   private record BlackmagicLogVideo(BlackMagicScrubber scrubber, RDXImageVisualizer visualizer) { }
+   private record BlackmagicLogVideo(BlackMagicScrubber scrubber, OpenCVFrameConverter.ToMat converter, RDXImageVisualizer visualizer) { }
    private final List<BlackmagicLogVideo> blackmagicLogVideos = new ArrayList<>();
 
    public RDXSCS2LogSession(RDXBaseUI baseUI, RDXPerceptionVisualizersPanel perceptionVisualizersPanel)
@@ -132,7 +131,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
             RDXImageVisualizer visualizer = new RDXImageVisualizer(camera.getNameAsString(), camera.getNameAsString(), false);
             visualizer.setActive(true);
             perceptionVisualizersPanel.addVisualizer(visualizer);
-            BlackmagicLogVideo blackmagicLogVideo = new BlackmagicLogVideo(blackMagicScrubber, visualizer);
+            BlackmagicLogVideo blackmagicLogVideo = new BlackmagicLogVideo(blackMagicScrubber, new OpenCVFrameConverter.ToMat(), visualizer);
             blackmagicLogVideos.add(blackmagicLogVideo);
          }
          for (ZEDSVOScrubber zedSVOScrubber : logSession.getZedSVOScrubbers())
@@ -179,11 +178,11 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          {
             try
             {
-               YUVPicture yuvPicture = blackmagicLogVideo.scrubber.readVideoFrame(yoTimestamp.getValueAsLongBits());
-               if (yuvPicture != null)
+               Frame frame = blackmagicLogVideo.scrubber.readVideoFrame(yoTimestamp.getValueAsLongBits());
+               if (frame != null)
                {
-                  // TODO: Convert YUVPicture to Mat
-                  yuvPicture.delete();
+                  blackmagicLogVideo.visualizer.setImage(blackmagicLogVideo.converter.convertToMat(frame), PixelFormat.BGR8);
+                  frame.close();
                }
             }
             catch (Exception e)

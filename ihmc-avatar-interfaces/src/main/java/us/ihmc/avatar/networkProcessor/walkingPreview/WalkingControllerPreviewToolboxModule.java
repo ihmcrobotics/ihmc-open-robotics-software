@@ -5,15 +5,14 @@ import toolbox_msgs.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.walkingPreviewToolboxAPI.WalkingControllerPreviewInputCommand;
 import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.io.IOException;
@@ -44,9 +43,9 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2Node ros2Node)
    {
-      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+      HumanoidROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 
-      ros2Node.createSubscriptionSampler(controllerOutputTopic.withType(RobotConfigurationData.class), sample ->
+      ros2Node.createSubscriptionSampler(controllerOutputTopic.withTypeName(RobotConfigurationData.class), sample ->
       {
          if (controller != null)
             controller.updateRobotConfigurationData(sample);
@@ -82,23 +81,23 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2Topic<?> getOutputTopic()
+   public HumanoidROS2Topic<?> getOutputTopic()
    {
       return getOutputTopic(robotName);
    }
 
-   public static ROS2Topic<?> getOutputTopic(String robotName)
+   public static HumanoidROS2Topic<?> getOutputTopic(String robotName)
    {
       return ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2Topic<?> getInputTopic()
+   public HumanoidROS2Topic<?> getInputTopic()
    {
       return getInputTopic(robotName);
    }
 
-   public static ROS2Topic<?> getInputTopic(String robotName)
+   public static HumanoidROS2Topic<?> getInputTopic(String robotName)
    {
       return ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withInput();
    }
