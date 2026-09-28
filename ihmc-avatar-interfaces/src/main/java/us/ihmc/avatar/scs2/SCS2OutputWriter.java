@@ -36,7 +36,7 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
    private final ControllerOutput controllerOutput;
    private final boolean writeBeforeEstimatorTick;
    private final List<JointController> jointControllers = new ArrayList<>();
-   private MujocoJointCommandSink jointCommandSink;
+   private JointCommand jointCommand;
    private final Map<String, JointController> jointControllerMap = new HashMap<>();
 
    private final YoDouble unstableVelocityThreshold = new YoDouble("unstableVelocityThreshold", registry);
@@ -145,22 +145,22 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
    }
 
    /**
-    * Forward each joint's command to {@code sink} instead of collapsing it into a torque, wherever
-    * the sink accepts it, so a physics engine that models actuators can close the impedance loop at
-    * its own rate rather than at the controller's.
+    * Forward each joint's command to {@code jointCommand} instead of collapsing it into a torque,
+    * wherever it is accepted, so a physics engine that models actuators can close the impedance loop
+    * at its own rate rather than at the controller's.
     *
     * <p>The hand-off happens at the point the effort would have been written, which is deliberate:
     * that is after corruption, velocity scaling and the feedback-error clamps, and downstream of
-    * {@link InterpolatedSCS2OutputWriter} and the low-level output processor. A sink installed here
-    * therefore sees interpolated, processed desireds; anything that replaced this writer would sit
-    * upstream of all of it.
+    * {@link InterpolatedSCS2OutputWriter} and the low-level output processor. A command taken here
+    * therefore carries interpolated, processed desireds; anything that replaced this writer would
+    * sit upstream of all of it.
     *
     * <p>Cross-four-bar joints are never offered: their torque is split across the loop through the
     * loop Jacobian, which a setpoint and a pair of gains cannot express.
     */
-   public void setJointCommandSink(MujocoJointCommandSink jointCommandSink)
+   public void setJointCommand(JointCommand jointCommand)
    {
-      this.jointCommandSink = jointCommandSink;
+      this.jointCommand = jointCommand;
    }
 
    protected void write()
@@ -375,7 +375,7 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
          yoPositionTau.set(kp.getValue() * yoPositionError.getValue());
          yoVelocityTau.set(kd.getValue() * yoVelocityError.getValue());
 
-         if (jointCommandSink != null)
+         if (jointCommand != null)
          {
             // Hand the command over whole rather than collapsing it to a torque, so an engine that
             // models actuators can close the loop at its own rate. The setpoints are reconstructed
@@ -384,7 +384,7 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
             double effectiveDesiredPosition = simOutput.getQ() + yoPositionError.getValue();
             double effectiveDesiredVelocity = simOutput.getQd() + yoVelocityError.getValue();
 
-            if (jointCommandSink.setJointCommand(simOutput.getName(),
+            if (jointCommand.setJointCommand(simOutput.getName(),
                                                  yoControllerTau.getValue(),
                                                  effectiveDesiredPosition,
                                                  effectiveDesiredVelocity,

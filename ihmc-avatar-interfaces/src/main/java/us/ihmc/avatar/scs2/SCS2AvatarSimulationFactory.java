@@ -508,11 +508,11 @@ public class SCS2AvatarSimulationFactory
                                          + ". Call setUseMujocoPhysicsEngine(true) as well.");
       }
 
-      MujocoJointCommandSink sink = new MujocoJointCommandSink(mujocoPhysicsEngine);
+      MujocoJointCommand jointCommand = new MujocoJointCommand(mujocoPhysicsEngine);
       if (simulationOutputWriter instanceof InterpolatedSCS2OutputWriter interpolatedWriter)
-         interpolatedWriter.setJointCommandSink(sink);
+         interpolatedWriter.setJointCommand(jointCommand);
       else if (simulationOutputWriter instanceof SCS2OutputWriter outputWriter)
-         outputWriter.setJointCommandSink(sink);
+         outputWriter.setJointCommand(jointCommand);
       else
          throw new IllegalStateException("useMujocoJointServo needs an SCS2OutputWriter to take the command from, but the output writer is "
                                          + (simulationOutputWriter == null ? "null" : simulationOutputWriter.getClass().getSimpleName())

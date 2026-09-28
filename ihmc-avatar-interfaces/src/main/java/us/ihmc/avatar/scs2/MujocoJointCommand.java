@@ -12,11 +12,11 @@ import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoPhysicsEngine;
  * {@code tau_ff + kp * (q_d - q) + kd * (qd_d - qd)} on every physics step instead of applying a
  * torque computed once per controller tick.
  *
- * <p>This is the whole MuJoCo side of the joint servo. It is a sink rather than an output writer
- * because the command has to be taken from inside {@link SCS2OutputWriter}, at the point the effort
- * would have been written: that is downstream of the corruptors, the velocity scaling, the
- * feedback-error clamps, {@code InterpolatedSCS2OutputWriter} and the low-level output processor.
- * A writer that replaced SCS2OutputWriter would sit upstream of all of them and silently lose them.
+ * <p>This is the whole MuJoCo side of the joint servo. It hooks into {@link SCS2OutputWriter}
+ * rather than replacing it because the command has to be taken at the point the effort would have
+ * been written: downstream of the corruptors, the velocity scaling, the feedback-error clamps,
+ * {@code InterpolatedSCS2OutputWriter} and the low-level output processor. A writer that replaced
+ * SCS2OutputWriter would sit upstream of all of them and silently lose them.
  *
  * <p>{@link #setJointCommand} returns false for joints MuJoCo has no actuator for -- cross-four-bars,
  * anything the MJCF builder cannot drive -- and {@link SCS2OutputWriter} writes their effort as it
@@ -27,27 +27,19 @@ import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoPhysicsEngine;
  * object and the engine copies it into {@code mjData} when it steps -- so this is the same benign
  * cross-thread hand-off SCS2 already does through {@code ControllerOutput}.
  */
-public class MujocoJointCommandSink
+public class MujocoJointCommand implements JointCommand
 {
    private final MujocoPhysicsEngine physicsEngine;
    /** Caches the lookup, including the misses, so an undrivable joint is not re-resolved every tick. */
    private final Map<String, MujocoJointActuation> actuationByJointName = new HashMap<>();
    private boolean warnedAboutUndrivableJoints = false;
 
-   public MujocoJointCommandSink(MujocoPhysicsEngine physicsEngine)
+   public MujocoJointCommand(MujocoPhysicsEngine physicsEngine)
    {
       this.physicsEngine = physicsEngine;
    }
 
-   /**
-    * @param jointName the simulated joint the command is for.
-    * @param feedforwardTorque the controller's desired torque, after any effort corruption.
-    * @param desiredPosition the position setpoint, already clamped to the feedback error limit.
-    * @param desiredVelocity the velocity setpoint, already scaled and clamped.
-    * @param stiffness position feedback gain.
-    * @param damping velocity feedback gain.
-    * @return true if the command was consumed; false to leave the writer to write a torque.
-    */
+   @Override
    public boolean setJointCommand(String jointName,
                                   double feedforwardTorque,
                                   double desiredPosition,
