@@ -208,6 +208,8 @@ public class SCS2AvatarSimulationFactory
    private boolean invariantMainEstimatorYawSeeding = true;
    /** Contact source for the invariant main estimator; forwarded to the estimator thread factory (shared by sim and hardware). */
    private InvariantContactSource invariantMainEstimatorContactSource = InvariantContactSource.FOOT_SWITCHES;
+   private java.util.function.Consumer<us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter> jointLevelKFConfigurator = null;
+   private double invariantStaticAccelerometerBiasWindow = Double.NaN;
    private final OptionalFactoryField<Boolean> createIKStreamingRealTimeController = new OptionalFactoryField<>(
          "createIKStreamingRealTimeController",
          false);
@@ -559,6 +561,8 @@ public class SCS2AvatarSimulationFactory
          avatarEstimatorThreadFactory.setUseInvariantStateEstimator(true);
          avatarEstimatorThreadFactory.setInvariantEstimatorYawSeeding(invariantMainEstimatorYawSeeding);
          avatarEstimatorThreadFactory.setInvariantContactSource(invariantMainEstimatorContactSource);
+         avatarEstimatorThreadFactory.setInvariantStaticAccelerometerBiasWindow(invariantStaticAccelerometerBiasWindow);
+         avatarEstimatorThreadFactory.setJointLevelKFConfigurator(jointLevelKFConfigurator);
       }
       estimatorThread = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
    }
@@ -1307,6 +1311,18 @@ public class SCS2AvatarSimulationFactory
     * ({@link InvariantContactSource#KINEMATIC_DETECTOR}, circular when the filter is main; A/B only). This is
     * forwarded to the shared estimator thread factory, so the same source runs in sim and on hardware.
     */
+   /** Same as the hardware threading factory's: applied to every joint-level KF the estimator builds. */
+   public void setJointLevelKFConfigurator(java.util.function.Consumer<us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter> configurator)
+   {
+      this.jointLevelKFConfigurator = configurator;
+   }
+
+   /** Same as the hardware threading factory's: held start-up accelerometer bias for the invariant main estimator. */
+   public void setInvariantStaticAccelerometerBiasWindow(double windowSeconds)
+   {
+      this.invariantStaticAccelerometerBiasWindow = windowSeconds;
+   }
+
    public void setInvariantMainEstimatorContactSource(InvariantContactSource invariantMainEstimatorContactSource)
    {
       this.invariantMainEstimatorContactSource = invariantMainEstimatorContactSource;

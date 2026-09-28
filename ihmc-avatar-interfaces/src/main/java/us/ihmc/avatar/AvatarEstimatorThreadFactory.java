@@ -140,6 +140,10 @@ public class AvatarEstimatorThreadFactory
    /** When set, {@link #getMainStateEstimator()} builds the invariant InEKF main estimator instead of the DRC one. */
    private boolean useInvariantStateEstimator = false;
    private boolean invariantEstimatorYawSeeding = true;
+   /** Applied to every joint-level KF this factory builds (the boot source and a switchable counterpart), e.g. to install a per-tick pair-noise law. */
+   private java.util.function.Consumer<us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter> jointLevelKFConfigurator = null;
+   /** Seconds of start-up standing over which the invariant filter estimates and then holds its accelerometer bias; NaN or <= 0 disables. */
+   private double invariantStaticAccelerometerBiasWindow = Double.NaN;
    /**
     * Source for the invariant main estimator's per-foot contact probability. Default
     * {@link InvariantContactSource#FOOT_SWITCHES}: the robot's production foot switches
@@ -442,6 +446,28 @@ public class AvatarEstimatorThreadFactory
       this.useInvariantStateEstimator = useInvariantStateEstimator;
    }
 
+   /**
+    * Configures every joint-level KF pre-filter this factory builds, before the estimator starts -- the hook
+    * through which a robot installs, e.g., the redundancy-observed pair-noise law
+    * ({@code JointLevelKFPreFilter.setOffAxisNoiseProvider}). Null (default) leaves the filters as built.
+    */
+   public void setJointLevelKFConfigurator(java.util.function.Consumer<us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter> configurator)
+   {
+      this.jointLevelKFConfigurator = configurator;
+   }
+
+   /**
+    * Makes the invariant main estimator estimate its accelerometer bias once, from the first
+    * {@code windowSeconds} of standing still after start-up, and hold it
+    * ({@link us.ihmc.stateEstimation.invariantEstimator.StaticAccelerometerBiasEstimator}). Without it the
+    * invariant filter uses the joint-level provider's accelerometer bias, which the joint-level KF publishes as
+    * zero. NaN or a non-positive value disables it (default).
+    */
+   public void setInvariantStaticAccelerometerBiasWindow(double windowSeconds)
+   {
+      this.invariantStaticAccelerometerBiasWindow = windowSeconds;
+   }
+
    /** Enables/disables foot-referenced yaw seeding on the invariant main estimator (default true). */
    public void setInvariantEstimatorYawSeeding(boolean invariantEstimatorYawSeeding)
    {
@@ -501,6 +527,8 @@ public class AvatarEstimatorThreadFactory
       // unwrapped.
       if (preFilter instanceof us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter jointKF)
       {
+         if (jointLevelKFConfigurator != null)
+            jointLevelKFConfigurator.accept(jointKF);
          ProprioceptivePreFilter alpha = us.ihmc.stateEstimation.jointLevel.AlphaComplementaryPreFilter.createForKinematicsEstimator(getProcessedSensorOutputMap(),
                                                                                                                                      getStateEstimatorParameters(),
                                                                                                                                      imuProcessedOutputs,
@@ -525,6 +553,8 @@ public class AvatarEstimatorThreadFactory
                                                                                                                                  () -> cancelGravityFromAccelerationMeasurement,
                                                                                                                                  estimatorDT,
                                                                                                                                  preFilterRegistry);
+         if (jointLevelKFConfigurator != null)
+            jointLevelKFConfigurator.accept((us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter) jointKF);
          preFilter = new us.ihmc.stateEstimation.jointLevel.SwitchableJointLevelSource(jointKF,
                                                                                        alpha,
                                                                                        us.ihmc.stateEstimation.jointLevel.SwitchableJointLevelSource.JointLevelSource.ALPHA_COMPLEMENTARY,
@@ -545,6 +575,16 @@ public class AvatarEstimatorThreadFactory
                                                                                        invariantEstimatorYawSeeding,
                                                                                        preFilter);
       mainStateEstimator.getYoRegistry().addChild(preFilterRegistry);
+
+      if (invariantStaticAccelerometerBiasWindow > 0.0)
+      {
+         us.ihmc.stateEstimation.invariantEstimator.InvariantEKFStateEstimator invariantEKF = mainStateEstimator.getInvariantEKFStateEstimator();
+         invariantEKF.setStaticAccelerometerBiasEstimator(new us.ihmc.stateEstimation.invariantEstimator.StaticAccelerometerBiasEstimator(
+               getGravity(),
+               invariantStaticAccelerometerBiasWindow,
+               us.ihmc.stateEstimation.invariantEstimator.StaticAccelerometerBiasEstimator.DEFAULT_STILL_GYRO_NORM,
+               invariantEKF.getYoRegistry()));
+      }
 
       switch (invariantContactSource)
       {

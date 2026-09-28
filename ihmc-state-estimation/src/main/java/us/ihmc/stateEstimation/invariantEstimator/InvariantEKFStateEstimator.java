@@ -91,6 +91,11 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final SensorOutputMapReadOnly sensorOutputMap;
    private final IMUSensorReadOnly imuSensor;
    private final IMUBiasProvider imuBiasProvider;
+   /**
+    * When installed, replaces the provider's accelerometer bias (zero from the joint-level KF) with a bias
+    * estimated once from the start-up standing window and held. See {@link StaticAccelerometerBiasEstimator}.
+    */
+   private StaticAccelerometerBiasEstimator staticAccelerometerBias = null;
 
    private ContactMeasurementNoiseProvider contactMeasurementNoiseProvider;
 
@@ -558,7 +563,16 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       angularVelocity.sub(appliedGyroBias);
       angularVelocity.changeFrame(pelvisFrame);
       linearAcceleration.setIncludingFrame(imuSensor.getMeasurementFrame(), imuSensor.getLinearAccelerationMeasurement());
-      linearAcceleration.sub(imuBiasProvider.getLinearAccelerationBiasInIMUFrame(imuSensor));
+      if (staticAccelerometerBias != null)
+      {
+         // Raw specific force and raw gyro (norm is frame-invariant), before any bias: the estimate is of the sensor.
+         staticAccelerometerBias.update(linearAcceleration, rawAngularVelocity.norm(), dt);
+         linearAcceleration.sub(staticAccelerometerBias.getBias());
+      }
+      else
+      {
+         linearAcceleration.sub(imuBiasProvider.getLinearAccelerationBiasInIMUFrame(imuSensor));
+      }
       linearAcceleration.changeFrame(pelvisFrame);
 
       // Advance the gate's sensor-only gravity reference every tick, on both the held and the normal path.
@@ -935,6 +949,17 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    public void initialize()
    {
       referenceFrames.updateFrames();
+   }
+
+   /** Installs the start-up static accelerometer bias; null restores the provider's bias. */
+   public void setStaticAccelerometerBiasEstimator(StaticAccelerometerBiasEstimator estimator)
+   {
+      this.staticAccelerometerBias = estimator;
+   }
+
+   public StaticAccelerometerBiasEstimator getStaticAccelerometerBiasEstimator()
+   {
+      return staticAccelerometerBias;
    }
 
    @Override

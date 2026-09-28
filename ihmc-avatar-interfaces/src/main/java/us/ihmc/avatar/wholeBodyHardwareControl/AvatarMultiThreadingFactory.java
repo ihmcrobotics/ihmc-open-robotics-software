@@ -114,6 +114,10 @@ public class AvatarMultiThreadingFactory
    private final List<Runnable> postEstimatorRunnables = new ArrayList<>();
    private final boolean useInvariantMainEstimator;
    private final InvariantContactSource invariantContactSource;
+   /** Applied to every joint-level KF the estimator builds (e.g. to install the redundancy-observed pair-noise law); null for none. */
+   private final java.util.function.Consumer<us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter> jointLevelKFConfigurator;
+   /** Seconds of start-up standing for the invariant filter's held accelerometer bias; NaN or <= 0 disables. */
+   private final double invariantStaticAccelerometerBiasWindow;
 
    // Controller
    private final HighLevelHumanoidControllerFactory avatarControllerFactory;
@@ -167,6 +171,41 @@ public class AvatarMultiThreadingFactory
                                       boolean useInvariantMainEstimator,
                                       InvariantContactSource invariantContactSource)
    {
+      this(robotModel, fullRobotModel, hardwareCommunicationInterface, lowLevelOutputProcessor, sensorReaderFactory, standPrepStateFactory,
+           freezeStateFactory, affinity, useRealtimeThreads, useMultiThreading, period, masterThreadDt, monotonicTimeProvider, registry,
+           yoVariableServer, useInvariantMainEstimator, invariantContactSource, null, Double.NaN);
+   }
+
+   /**
+    * @param jointLevelKFConfigurator               applied to every joint-level KF the estimator builds, before it
+    *                                               starts (e.g. installs the redundancy-observed pair-noise law); null
+    *                                               for none.
+    * @param invariantStaticAccelerometerBiasWindow seconds of start-up standing over which the invariant main
+    *                                               estimator estimates, then holds, its accelerometer bias; NaN or <= 0
+    *                                               disables (the joint-level KF itself publishes a zero accelerometer bias).
+    */
+   public AvatarMultiThreadingFactory(DRCRobotModel robotModel,
+                                      FullHumanoidRobotModel fullRobotModel,
+                                      HardwareCommunicationInterface hardwareCommunicationInterface,
+                                      AvatarLowLevelOutputProcessor lowLevelOutputProcessor,
+                                      SensorReaderFactory sensorReaderFactory,
+                                      HighLevelControllerStateFactory standPrepStateFactory,
+                                      HighLevelControllerStateFactory freezeStateFactory,
+                                      AvatarAffinityInterface affinity,
+                                      boolean useRealtimeThreads,
+                                      boolean useMultiThreading,
+                                      MonotonicTime period,
+                                      double masterThreadDt,
+                                      TimestampProvider monotonicTimeProvider,
+                                      YoRegistry registry,
+                                      YoVariableServer yoVariableServer,
+                                      boolean useInvariantMainEstimator,
+                                      InvariantContactSource invariantContactSource,
+                                      java.util.function.Consumer<us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter> jointLevelKFConfigurator,
+                                      double invariantStaticAccelerometerBiasWindow)
+   {
+      this.jointLevelKFConfigurator = jointLevelKFConfigurator;
+      this.invariantStaticAccelerometerBiasWindow = invariantStaticAccelerometerBiasWindow;
       this.masterRobotModel = robotModel;
       this.masterFullRobotModel = fullRobotModel;
       this.period = period;
@@ -269,6 +308,8 @@ public class AvatarMultiThreadingFactory
       avatarEstimatorThreadFactory.setGravity(GRAVITY);
       avatarEstimatorThreadFactory.setUseInvariantStateEstimator(useInvariantMainEstimator);
       avatarEstimatorThreadFactory.setInvariantContactSource(invariantContactSource);
+      avatarEstimatorThreadFactory.setJointLevelKFConfigurator(jointLevelKFConfigurator);
+      avatarEstimatorThreadFactory.setInvariantStaticAccelerometerBiasWindow(invariantStaticAccelerometerBiasWindow);
       //      if (secondaryEstimatorFactory != null)
       //         avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryEstimatorFactory);
       StateEstimatorController stateEstimator = avatarEstimatorThreadFactory.getMainStateEstimator();
