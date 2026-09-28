@@ -43,14 +43,14 @@ public class InterpolatedSCS2OutputWriter implements JointDesiredOutputWriter
    }
 
    /**
-    * Forwards to the wrapped {@link SCS2OutputWriter}, so a sink installed here sees the
+    * Forwards to the wrapped {@link SCS2OutputWriter}, so a command taken here carries the
     * interpolated, processed desireds rather than the raw ones.
     *
-    * @see SCS2OutputWriter#setJointCommandSink(MujocoJointCommandSink)
+    * @see SCS2OutputWriter#setJointCommand(JointCommand)
     */
-   public void setJointCommandSink(MujocoJointCommandSink jointCommandSink)
+   public void setJointCommand(JointCommand jointCommand)
    {
-      scs2OutputWriter.setJointCommandSink(jointCommandSink);
+      scs2OutputWriter.setJointCommand(jointCommand);
    }
 
    public void enableInterpolation(boolean enable)
