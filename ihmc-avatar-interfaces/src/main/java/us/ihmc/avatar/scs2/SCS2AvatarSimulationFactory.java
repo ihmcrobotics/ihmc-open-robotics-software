@@ -85,7 +85,6 @@ import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationP
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
-import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
 import us.ihmc.scs2.simulation.physicsEngine.contactPointBased.ContactPointBasedPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.impulseBased.ImpulseBasedPhysicsEngine;
@@ -181,7 +180,6 @@ public class SCS2AvatarSimulationFactory
          false);
    protected final OptionalFactoryField<MujocoSimulationParametersReadOnly> mujocoSimulationParameters = new OptionalFactoryField<>(
          "mujocoSimulationParameters");
-   protected final OptionalFactoryField<Boolean> useMujocoJointServo = new OptionalFactoryField<>("useMujocoJointServo", false);
    protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>(
          "impulseBasedPhysicsEngineParameters");
    protected final OptionalFactoryField<GroundContactModelParameters> groundContactModelParameters = new OptionalFactoryField<>(
@@ -250,7 +248,6 @@ public class SCS2AvatarSimulationFactory
          setupOutputWriterOnSimulatorThread();
       else
          setupOutputWriterOnEstimatorThread();
-      setupMujocoJointServo();
 
       setupStateEstimationThread();
       setupControllerThread();
@@ -483,40 +480,6 @@ public class SCS2AvatarSimulationFactory
       simulationOutputWriter = outputWriterFactory.get()
                                                   .build(robot.getControllerManager().getControllerInput(),
                                                          robot.getControllerManager().getControllerOutput());
-   }
-
-   /**
-    * Hands the controller's low-level command to MuJoCo's actuators instead of the torque
-    * {@link SCS2OutputWriter} would otherwise compute from it, so MuJoCo closes the loop on every
-    * physics step.
-    *
-    * <p>Installed as a sink on the existing output writer rather than replacing it. That is not
-    * incidental: the command has to be taken after corruption, velocity scaling and the
-    * feedback-error clamps, and after {@code InterpolatedSCS2OutputWriter} and the low-level output
-    * processor have had their turn. Anything that replaced the writer would sit upstream of all of
-    * those and drop them without saying so.
-    */
-   private void setupMujocoJointServo()
-   {
-      if (!useMujocoJointServo.get())
-         return;
-
-      PhysicsEngine physicsEngine = simulationConstructionSet.getPhysicsEngine();
-      if (!(physicsEngine instanceof MujocoPhysicsEngine mujocoPhysicsEngine))
-      {
-         throw new IllegalStateException("useMujocoJointServo is set, but the physics engine is " + physicsEngine.getClass().getSimpleName()
-                                         + ". Call setUseMujocoPhysicsEngine(true) as well.");
-      }
-
-      MujocoJointCommand jointCommand = new MujocoJointCommand(mujocoPhysicsEngine);
-      if (simulationOutputWriter instanceof InterpolatedSCS2OutputWriter interpolatedWriter)
-         interpolatedWriter.setJointCommand(jointCommand);
-      else if (simulationOutputWriter instanceof SCS2OutputWriter outputWriter)
-         outputWriter.setJointCommand(jointCommand);
-      else
-         throw new IllegalStateException("useMujocoJointServo needs an SCS2OutputWriter to take the command from, but the output writer is "
-                                         + (simulationOutputWriter == null ? "null" : simulationOutputWriter.getClass().getSimpleName())
-                                         + ". A simulation-thread output writer bypasses it.");
    }
 
    private void setupOutputWriterOnSimulatorThread()
@@ -1288,22 +1251,6 @@ public class SCS2AvatarSimulationFactory
    public void setMujocoSimulationParameters(MujocoSimulationParametersReadOnly mujocoSimulationParameters)
    {
       this.mujocoSimulationParameters.set(mujocoSimulationParameters);
-   }
-
-   /**
-    * Sends MuJoCo the controller's setpoints and gains instead of the torque SCS2 would otherwise
-    * compute from them, so MuJoCo closes the low-level loop on every physics step rather than
-    * holding one torque between controller ticks. Requires
-    * {@link #setUseMujocoPhysicsEngine(boolean)}.
-    * <p>
-    * Off by default, in which case SCS2OutputWriter computes the torque as it always has and MuJoCo
-    * applies it as a pure feedforward command -- the same force, through the same actuator. This
-    * flag chooses where the loop is closed, not whether actuators are used, and it keeps the
-    * corruptors, interpolation and cross-four-bar handling either way.
-    */
-   public void setUseMujocoJointServo(boolean useMujocoJointServo)
-   {
-      this.useMujocoJointServo.set(useMujocoJointServo);
    }
 
    public void setEnableSimulatedRobotDamping(boolean enableSimulatedRobotDamping)
