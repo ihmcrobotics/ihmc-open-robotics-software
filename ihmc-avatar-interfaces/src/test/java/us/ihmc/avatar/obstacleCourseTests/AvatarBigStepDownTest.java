@@ -70,7 +70,6 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(false);
-      simulationTestHelperFactory.setUseRobotDefinitionCollisions(false);
 
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
@@ -132,7 +131,6 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
       simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(false);
-      simulationTestHelperFactory.setUseRobotDefinitionCollisions(false);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start(false);
 
