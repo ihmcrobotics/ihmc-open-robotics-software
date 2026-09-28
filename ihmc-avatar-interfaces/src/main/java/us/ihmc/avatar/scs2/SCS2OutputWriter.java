@@ -36,7 +36,7 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
    private final ControllerOutput controllerOutput;
    private final boolean writeBeforeEstimatorTick;
    private final List<JointController> jointControllers = new ArrayList<>();
-   private JointCommandSink jointCommandSink;
+   private MujocoJointCommandSink jointCommandSink;
    private final Map<String, JointController> jointControllerMap = new HashMap<>();
 
    private final YoDouble unstableVelocityThreshold = new YoDouble("unstableVelocityThreshold", registry);
@@ -145,13 +145,20 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
    }
 
    /**
-    * Forward each joint's command to {@code sink} instead of writing a torque, wherever the sink
-    * accepts it. Cross-four-bar joints are never offered: their torque is split across the loop
-    * through the loop Jacobian, which is not something a setpoint and a pair of gains can express.
+    * Forward each joint's command to {@code sink} instead of collapsing it into a torque, wherever
+    * the sink accepts it, so a physics engine that models actuators can close the impedance loop at
+    * its own rate rather than at the controller's.
     *
-    * @see JointCommandSink
+    * <p>The hand-off happens at the point the effort would have been written, which is deliberate:
+    * that is after corruption, velocity scaling and the feedback-error clamps, and downstream of
+    * {@link InterpolatedSCS2OutputWriter} and the low-level output processor. A sink installed here
+    * therefore sees interpolated, processed desireds; anything that replaced this writer would sit
+    * upstream of all of it.
+    *
+    * <p>Cross-four-bar joints are never offered: their torque is split across the loop through the
+    * loop Jacobian, which a setpoint and a pair of gains cannot express.
     */
-   public void setJointCommandSink(JointCommandSink jointCommandSink)
+   public void setJointCommandSink(MujocoJointCommandSink jointCommandSink)
    {
       this.jointCommandSink = jointCommandSink;
    }
