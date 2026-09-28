@@ -10,7 +10,6 @@ import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.scs2.definition.state.interfaces.OneDoFJointStateBasics;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoJointActuation;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoPhysicsEngine;
-import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoActuationMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.SimulationThreadOutputWriter;
@@ -21,11 +20,10 @@ import us.ihmc.yoVariables.variable.YoDouble;
  * Forwards the controller's low-level command to MuJoCo instead of collapsing it into a torque.
  *
  * <p>{@link SCS2OutputWriter} computes {@code tau_ff + kp * (q_d - q) + kd * (qd_d - qd)} on the
- * estimator thread and writes the result as a joint effort, which the engine then holds constant
- * across every physics step until the next controller tick. The hardware does not work that way:
- * the drives are sent the setpoints and gains and close the loop themselves at their own rate. This
- * writer sends MuJoCo the same five numbers, and {@link MujocoActuationMode#JOINT_SERVO} has MuJoCo
- * evaluate the law on every physics step.
+ * estimator thread and writes the result as a joint effort, which MuJoCo then applies unchanged as a
+ * feedforward command until the next controller tick. The hardware does not work that way: the
+ * drives are sent the setpoints and gains and close the loop themselves at their own rate. This
+ * writer sends MuJoCo the same five numbers so it evaluates the law on every physics step instead.
  *
  * <p>The torque decomposition stays visible. It is published by the engine, from the per-actuator
  * forces MuJoCo reports, under the {@code <joint>LowLevel{Controller,Position,Velocity}Tau} names
@@ -55,12 +53,6 @@ public class MujocoSetpointOutputWriter implements SimulationThreadOutputWriter
       this.controllerOutput = controllerOutput;
       this.physicsEngine = physicsEngine;
 
-      if (physicsEngine.getActuationMode() != MujocoActuationMode.JOINT_SERVO)
-      {
-         throw new IllegalArgumentException("MujocoSetpointOutputWriter needs the engine in " + MujocoActuationMode.JOINT_SERVO
-                                            + ", but it is in " + physicsEngine.getActuationMode()
-                                            + ". Set the actuation mode on the MujocoSimulationParameters before the simulation is created.");
-      }
    }
 
    @Override

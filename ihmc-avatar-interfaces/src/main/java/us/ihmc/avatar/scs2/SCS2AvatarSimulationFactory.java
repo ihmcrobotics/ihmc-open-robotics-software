@@ -81,7 +81,6 @@ import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoPhysicsEngine;
-import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoActuationMode;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParameters;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
@@ -395,13 +394,6 @@ public class SCS2AvatarSimulationFactory
          if (mujocoSimulationParameters.hasValue())
             mujocoParameters.set(mujocoSimulationParameters.get());
          mujocoParameters.setTimestep(simulationDT.get());
-         if (useMujocoJointServo.get())
-         {
-            // Hand MuJoCo the setpoints and gains rather than a finished torque; see
-            // MujocoSetpointOutputWriter. Compile-time, because it decides whether the generated
-            // MJCF carries an <actuator> block.
-            mujocoParameters.setActuationMode(MujocoActuationMode.JOINT_SERVO);
-         }
          physicsEngineFactory = (inertialFrame, rootRegistry) -> new MujocoPhysicsEngine(inertialFrame, rootRegistry, mujocoParameters);
       }
       else
@@ -1287,10 +1279,14 @@ public class SCS2AvatarSimulationFactory
 
    /**
     * Sends MuJoCo the controller's setpoints and gains instead of the torque SCS2 would otherwise
-    * compute from them, so MuJoCo closes the low-level loop on every physics step. Requires
+    * compute from them, so MuJoCo closes the low-level loop on every physics step rather than
+    * holding one torque between controller ticks. Requires
     * {@link #setUseMujocoPhysicsEngine(boolean)}, and replaces {@link SCS2OutputWriter} with
-    * {@link MujocoSetpointOutputWriter}. Off by default: with it off, nothing about the simulation
-    * changes.
+    * {@link MujocoSetpointOutputWriter}.
+    * <p>
+    * Off by default, in which case SCS2OutputWriter computes the torque as it always has and MuJoCo
+    * applies it as a pure feedforward command -- the same force, through the same actuator. This
+    * flag chooses where the loop is closed, not whether actuators are used.
     */
    public void setUseMujocoJointServo(boolean useMujocoJointServo)
    {
