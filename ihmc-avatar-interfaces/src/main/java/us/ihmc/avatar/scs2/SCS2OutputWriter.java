@@ -36,6 +36,7 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
    private final ControllerOutput controllerOutput;
    private final boolean writeBeforeEstimatorTick;
    private final List<JointController> jointControllers = new ArrayList<>();
+   private JointCommandSink jointCommandSink;
    private final Map<String, JointController> jointControllerMap = new HashMap<>();
 
    private final YoDouble unstableVelocityThreshold = new YoDouble("unstableVelocityThreshold", registry);
@@ -141,6 +142,18 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
             jointControllerMap.put(simJointOutput.getName(), jointController);
          }
       }
+   }
+
+   /**
+    * Forward each joint's command to {@code sink} instead of writing a torque, wherever the sink
+    * accepts it. Cross-four-bar joints are never offered: their torque is split across the loop
+    * through the loop Jacobian, which is not something a setpoint and a pair of gains can express.
+    *
+    * @see JointCommandSink
+    */
+   public void setJointCommandSink(JointCommandSink jointCommandSink)
+   {
+      this.jointCommandSink = jointCommandSink;
    }
 
    protected void write()
@@ -354,6 +367,28 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
 
          yoPositionTau.set(kp.getValue() * yoPositionError.getValue());
          yoVelocityTau.set(kd.getValue() * yoVelocityError.getValue());
+
+         if (jointCommandSink != null)
+         {
+            // Hand the command over whole rather than collapsing it to a torque, so an engine that
+            // models actuators can close the loop at its own rate. The setpoints are reconstructed
+            // from the clamped errors, which preserves the feedback-error limits exactly: adding a
+            // clamped error back onto the measurement is the same as clamping the setpoint around it.
+            double effectiveDesiredPosition = simOutput.getQ() + yoPositionError.getValue();
+            double effectiveDesiredVelocity = simOutput.getQd() + yoVelocityError.getValue();
+
+            if (jointCommandSink.setJointCommand(simOutput.getName(),
+                                                 yoControllerTau.getValue(),
+                                                 effectiveDesiredPosition,
+                                                 effectiveDesiredVelocity,
+                                                 kp.getValue(),
+                                                 kd.getValue()))
+            {
+               previousVelocity.set(simOutput.getQd());
+               return;
+            }
+         }
+
          double torque = MathTools.clamp(yoControllerTau.getValue() + yoPositionTau.getValue() + yoVelocityTau.getValue(),
                                          simOutput.getEffortLimitLower(),
                                          simOutput.getEffortLimitUpper());
