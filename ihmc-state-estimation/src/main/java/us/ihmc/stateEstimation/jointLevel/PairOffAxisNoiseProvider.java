@@ -76,9 +76,11 @@ import us.ihmc.log.LogTools;
  * has nothing to do with the variable under study.
  *
  * <h2>Not yet real-time</h2>
- * The trailing median re-sorts its window every tick, which is fine for log replay and NOT fine in a
- * 1 kHz control loop. Deploying this on the robot needs a streaming median (two heaps or a sorted
- * ring) first. Stated here because "it ran in replay" is not evidence that it runs on the robot.
+ * Real-time: the trailing median is a {@link SortedSlidingWindow} per pair and component (one binary
+ * search and one array shift per sample, bit-identical to re-sorting the window), the SVD works in
+ * preallocated storage, and {@link #update} allocates nothing after its first call per chain shape. It
+ * previously re-sorted every window every tick and copied the Jacobian, which is fine for log replay and
+ * not for a 1 kHz control loop.
  */
 public class PairOffAxisNoiseProvider
 {
@@ -97,10 +99,11 @@ public class PairOffAxisNoiseProvider
    private final DMatrixRMaj offAxis = new DMatrixRMaj(3, 1);
 
    /** Trailing history of the off-axis vector, per pair, per component: [pair][component][slot]. */
-   private final double[][][] offHistory;
+   private final SortedSlidingWindow[][] offHistory;
+   private final DMatrixRMaj[] jacobianCopy;
+   private final DMatrixRMaj[] uStorage;
    /** Trailing history of the raw same-tick inflation, per pair. Emission reads this, never the current tick. */
    private final double[][] extraHistory;
-   private final double[] sortScratch;
    private final double[] emitted;
 
    private long tick = 0L;
@@ -132,12 +135,16 @@ public class PairOffAxisNoiseProvider
       this.causalWindow = causalWindow;
 
       this.svd = new SingularValueDecomposition_F64[numberOfPairs];
-      this.offHistory = new double[numberOfPairs][3][medianWindow];
+      this.offHistory = new SortedSlidingWindow[numberOfPairs][3];
+      for (int e = 0; e < numberOfPairs; e++)
+         for (int r = 0; r < 3; r++)
+            offHistory[e][r] = new SortedSlidingWindow(medianWindow);
+      this.jacobianCopy = new DMatrixRMaj[numberOfPairs];
+      this.uStorage = new DMatrixRMaj[numberOfPairs];
       // causalWindow + 1 slots: the emitted value reads causalWindow PAST ticks while the current
       // tick already occupies its own slot, so a ring of exactly causalWindow would overwrite the
       // oldest of them before it had been read.
       this.extraHistory = new double[numberOfPairs][causalWindow + 1];
-      this.sortScratch = new double[medianWindow];
       this.emitted = new double[numberOfPairs];
    }
 
@@ -187,9 +194,6 @@ public class PairOffAxisNoiseProvider
       if (jacobians.length != numberOfPairs)
          throw new IllegalArgumentException("expected " + numberOfPairs + " pair Jacobians, got " + jacobians.length);
 
-      int slot = (int) (tick % medianWindow);
-      int available = (int) Math.min(tick + 1, medianWindow);
-
       for (int e = 0; e < numberOfPairs; e++)
       {
          for (int r = 0; r < 3; r++)
@@ -202,8 +206,8 @@ public class PairOffAxisNoiseProvider
          double fastSquared = 0.0;
          for (int r = 0; r < 3; r++)
          {
-            offHistory[e][r][slot] = offAxis.get(r, 0);
-            double fast = offAxis.get(r, 0) - trailingMedian(offHistory[e][r], available);
+            offHistory[e][r].add(offAxis.get(r, 0));
+            double fast = offAxis.get(r, 0) - offHistory[e][r].median();
             fastSquared += fast * fast;
          }
 
@@ -228,7 +232,7 @@ public class PairOffAxisNoiseProvider
       for (int e = 0; e < numberOfPairs; e++)
       {
          for (int r = 0; r < 3; r++)
-            Arrays.fill(offHistory[e][r], 0.0);
+            offHistory[e][r].clear();
          Arrays.fill(extraHistory[e], 0.0);
       }
       Arrays.fill(emitted, 0.0);
@@ -243,15 +247,21 @@ public class PairOffAxisNoiseProvider
          return; // no joint in the span: everything the pair sees is off-axis, which is the correct reading.
 
       if (svd[pair] == null || svd[pair].numCols() != columns)
+      {
+         // Built once per chain shape; every later tick reuses the decomposition and both storages.
          svd[pair] = DecompositionFactory_DDRM.svd(3, columns, true, false, true);
-      if (!svd[pair].decompose(jacobian.copy())) // decompose() is destructive
+         jacobianCopy[pair] = new DMatrixRMaj(3, columns);
+         uStorage[pair] = new DMatrixRMaj(3, Math.min(3, columns));
+      }
+      jacobianCopy[pair].set(jacobian);
+      if (!svd[pair].decompose(jacobianCopy[pair])) // decompose() is destructive, hence the copy
       {
          // No span means no on-axis part to remove; off = z is already packed. Silent rather than
          // thrown because one failed SVD must not stop a replay, and the reading is still defined.
          return;
       }
 
-      DMatrixRMaj u = svd[pair].getU(null, false);
+      DMatrixRMaj u = svd[pair].getU(uStorage[pair], false);
       double[] singular = svd[pair].getSingularValues();
       double largest = 0.0;
       for (double s : singular)
@@ -267,14 +277,6 @@ public class PairOffAxisNoiseProvider
          for (int r = 0; r < 3; r++)
             offToPack.add(r, 0, -component * u.get(r, k));
       }
-   }
-
-   private double trailingMedian(double[] ring, int available)
-   {
-      System.arraycopy(ring, 0, sortScratch, 0, available);
-      Arrays.sort(sortScratch, 0, available);
-      int half = available / 2;
-      return available % 2 == 1 ? sortScratch[half] : 0.5 * (sortScratch[half - 1] + sortScratch[half]);
    }
 
    /**
