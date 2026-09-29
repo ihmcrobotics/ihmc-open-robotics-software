@@ -1,0 +1,85 @@
+{
+  "ambientLight": 0.4,
+  "objects": [
+    {
+      "type": "RDXProceduralGroundObject",
+      "x": 10.0,
+      "y": 0.0,
+      "z": 0.0,
+      "qx": 0.0,
+      "qy": 0.0,
+      "qz": 0.0,
+      "qs": 1.0,
+      "sizeX": 40.0,
+      "sizeY": 30.0
+    },
+    {
+      "type": "RDXUnevenTilesObject",
+      "x": 2.5,
+      "y": 0.0,
+      "z": 0.0,
+      "qx": 0.0,
+      "qy": 0.0,
+      "qz": 0.0,
+      "qs": 1.0,
+      "tileSize": 0.45,
+      "maxHeightDelta": 0.05,
+      "gridSize": 2.7,
+      "seed": 42
+    },
+    {
+      "type": "RDXPyramidStairsObject",
+      "x": 8.0,
+      "y": 0.0,
+      "z": 0.0,
+      "qx": 0.0,
+      "qy": 0.0,
+      "qz": 0.0,
+      "qs": 1.0,
+      "platformSize": 2.0,
+      "baseSize": 5.0,
+      "stepRise": 0.12,
+      "stepRun": 0.3
+    },
+    {
+      "type": "RDXPyramidSlopeObject",
+      "x": 15.0,
+      "y": 0.0,
+      "z": 0.0,
+      "qx": 0.0,
+      "qy": 0.0,
+      "qz": 0.0,
+      "qs": 1.0,
+      "platformSize": 2.0,
+      "baseSize": 6.0,
+      "slopeDegrees": 12.0
+    },
+    {
+      "type": "RDXPyramidStairsObject",
+      "x": 8.0,
+      "y": 7.0,
+      "z": 0.0,
+      "qx": 0.0,
+      "qy": 0.0,
+      "qz": 0.0,
+      "qs": 1.0,
+      "platformSize": 2.0,
+      "baseSize": 5.0,
+      "stepRise": -0.12,
+      "stepRun": 0.3
+    },
+    {
+      "type": "RDXPyramidSlopeObject",
+      "x": 15.0,
+      "y": 7.0,
+      "z": 0.0,
+      "qx": 0.0,
+      "qy": 0.0,
+      "qz": 0.0,
+      "qs": 1.0,
+      "platformSize": 2.0,
+      "baseSize": 6.0,
+      "slopeDegrees": -12.0
+    }
+  ]
+}

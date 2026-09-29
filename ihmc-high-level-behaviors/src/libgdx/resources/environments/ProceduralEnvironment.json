@@ -1,0 +1,79 @@
+{
+  "ambientLight" : 0.01,
+  "objects" : [ {
+    "type" : "RDXPyramidStairsObject",
+    "x" : -0.07448329067820403,
+    "y" : 6.70521795381914,
+    "z" : 0.0,
+    "qx" : -0.003345538001880277,
+    "qy" : 2.8189256484623115E-18,
+    "qz" : 1.1657341758564146E-15,
+    "qs" : 0.9999944036720795,
+    "platformSize" : 1.5,
+    "baseSize" : 6.0,
+    "stepRise" : 0.3,
+    "stepRun" : 0.35
+  }, {
+    "type" : "RDXPyramidStairsObject",
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0,
+    "platformSize" : 2.0,
+    "baseSize" : 6.0,
+    "stepRise" : -0.2,
+    "stepRun" : 0.3
+  }, {
+    "type" : "RDXPyramidSlopeObject",
+    "x" : -7.0588225987992885,
+    "y" : 0.12718290021892997,
+    "z" : 0.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0,
+    "platformSize" : 2.0,
+    "baseSize" : 6.0,
+    "slopeDegrees" : 30.0
+  }, {
+    "type" : "RDXPyramidSlopeObject",
+    "x" : -7.318681307711659,
+    "y" : 7.4584301142386575,
+    "z" : 0.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0,
+    "platformSize" : 2.0,
+    "baseSize" : 6.0,
+    "slopeDegrees" : -20.0
+  }, {
+    "type" : "RDXUnevenTilesObject",
+    "x" : -0.3491692474653405,
+    "y" : -7.179867705165399,
+    "z" : 0.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0,
+    "tileSize" : 0.7,
+    "maxHeightDelta" : 0.3,
+    "gridSize" : 6.0,
+    "seed" : -5022598101616753036
+  }, {
+    "type" : "RDXProceduralGroundObject",
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0,
+    "sizeX" : 40.0,
+    "sizeY" : 40.0,
+    "color" : [ 0.824, 0.706, 0.549 ]
+  } ]
+}

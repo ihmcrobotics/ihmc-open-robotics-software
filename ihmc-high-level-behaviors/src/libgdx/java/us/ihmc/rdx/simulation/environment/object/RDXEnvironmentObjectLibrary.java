@@ -1,6 +1,10 @@
 package us.ihmc.rdx.simulation.environment.object;
 
 import us.ihmc.rdx.simulation.environment.object.objects.*;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXProceduralGroundObject;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXPyramidSlopeObject;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXPyramidStairsObject;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXUnevenTilesObject;
 
 import java.util.ArrayList;
 
@@ -15,6 +19,10 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXLabFloorObject.FACTORY);
       objectFactories.add(RDXPalletObject.FACTORY);
       objectFactories.add(RDXStairsObject.FACTORY);
+      objectFactories.add(RDXPyramidStairsObject.FACTORY);
+      objectFactories.add(RDXPyramidSlopeObject.FACTORY);
+      objectFactories.add(RDXUnevenTilesObject.FACTORY);
+      objectFactories.add(RDXProceduralGroundObject.FACTORY);
       objectFactories.add(RDXWorkPlatformObject.FACTORY);
       objectFactories.add(RDXArUcoBoxObject.FACTORY);
       objectFactories.add(RDXPointLightObject.FACTORY);
