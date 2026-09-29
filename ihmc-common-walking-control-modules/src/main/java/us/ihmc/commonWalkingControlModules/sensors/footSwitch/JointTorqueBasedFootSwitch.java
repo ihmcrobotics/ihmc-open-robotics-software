@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
@@ -26,6 +27,7 @@ import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -37,6 +39,31 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 
+/**
+ * Foot contact from joint torques: the Jacobian-transpose foot wrench (force and CoP tests), optionally
+ * gated on the sole's velocity.
+ * <p>
+ * Three options, each a parameter (see {@link JointTorqueBasedFootSwitchFactory}); the defaults keep the
+ * historical behavior (gate on, the other two off):
+ * <ul>
+ * <li><b>Velocity gate</b> -- the sole's world velocity must be small. That velocity is computed from the
+ * root twist the owning estimator writes, so the gate reads the estimator's own output: harmless when the
+ * estimate stays inside the gate (the DRC estimator), a feedback loop when it does not -- a drifting
+ * estimate un-trusts the loaded stance foot, the contact update that would correct it stops, and the
+ * drift grows (measured on the invariant filter, Alex 2026-09-28 RL log).</li>
+ * <li><b>Inertial compensation</b> -- the wrench is solved from {@code tau - ID(q, qd, qdd)} of the leg
+ * chain instead of {@code tau - g(q)}, with {@code qdd} a filtered finite difference of {@code qd}. A
+ * swing leg's own inertial torques otherwise read as a phantom foot force above the contact threshold,
+ * which is what the velocity gate was also, silently, filtering out. The pelvis is treated as a fixed
+ * base: its own acceleration is not compensated.</li>
+ * <li><b>Relative velocity check</b> -- needs the other foot's switch ({@link #setOtherFootSwitch}).
+ * When both feet pass the force test while their soles move apart faster than a threshold, the foot
+ * carrying less force is rejected: one of them is in swing. The difference of the two soles' world
+ * velocities contains no root linear velocity -- it cancels -- so this check reads only joint
+ * velocities and the angular velocity, never the estimator's linear velocity. The other foot's force is
+ * the one from its latest update (one tick old if it updates after this one).</li>
+ * </ul>
+ */
 public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 {
    private static final double GRAVITY_Z = -9.81;
@@ -72,6 +99,12 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                      DoubleProvider verticalVelocityHighThreshold,
                                      DoubleProvider jacobianDeterminantSingularityThreshold,
                                      BooleanProvider useJacobianTranspose,
+                                     BooleanProvider useVelocityGate,
+                                     BooleanProvider compensateInertia,
+                                     DoubleProvider inertiaAccelerationBreakFrequency,
+                                     BooleanProvider useRelativeVelocityCheck,
+                                     DoubleProvider relativeHorizontalVelocityThreshold,
+                                     DoubleProvider relativeVerticalVelocityThreshold,
                                      YoRegistry parentRegistry)
    {
       this.useJacobianTranspose = useJacobianTranspose;
@@ -133,15 +166,31 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                                                verticalVelocityThreshold,
                                                                verticalVelocityHighThreshold,
                                                                jacobianDeterminantSingularityThreshold,
+                                                               useVelocityGate,
+                                                               compensateInertia,
+                                                               inertiaAccelerationBreakFrequency,
+                                                               useRelativeVelocityCheck,
+                                                               relativeHorizontalVelocityThreshold,
+                                                               relativeVerticalVelocityThreshold,
+                                                               switchDT,
                                                                registry);
 
       parentRegistry.addChild(registry);
+   }
+
+   /**
+    * The other foot's switch, for the relative velocity check. Without one the check never rejects.
+    */
+   public void setOtherFootSwitch(JointTorqueBasedFootSwitch other)
+   {
+      wrenchDetector.other = other == null ? null : other.wrenchDetector;
    }
 
    @Override
    public void reset()
    {
       touchdownDetector.reset();
+      wrenchDetector.resetAccelerationEstimate();
    }
 
    @Override
@@ -326,6 +375,25 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       private final YoFrameVector3D linearVelocity;
       private final YoDouble horizontalVelocity, verticalVelocity;
 
+      private final BooleanProvider useVelocityGate;
+      private final BooleanProvider compensateInertia;
+      private final DoubleProvider inertiaAccelerationBreakFrequency;
+      private final DoubleProvider switchDT;
+      private final InverseDynamicsCalculator inertialTorqueCalculator;
+      private final DMatrixRMaj estimatedQdd = new DMatrixRMaj(6, 1);
+      private final double[] previousQd = new double[6];
+      private boolean hasPreviousQd = false;
+      private final YoDouble[] legJointInertialTaus;
+
+      private final BooleanProvider useRelativeVelocityCheck;
+      private final DoubleProvider relativeHorizontalVelocityThreshold;
+      private final DoubleProvider relativeVerticalVelocityThreshold;
+      private final YoFrameVector3D relativeVelocity;
+      private final YoBoolean relativeVelocityVeto;
+      private final YoDouble forceZ;
+      private final FrameVector3D otherSoleVelocity = new FrameVector3D();
+      private JacobianBasedBasedTouchdownDetector other;
+
       private final BooleanProvider compensateGravity;
 
       private final double robotTotalWeight;
@@ -368,8 +436,22 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                                  DoubleProvider verticalVelocityThreshold,
                                                  DoubleProvider verticalVelocityHighThreshold,
                                                  DoubleProvider jacobianDeterminantThreshold,
+                                                 BooleanProvider useVelocityGate,
+                                                 BooleanProvider compensateInertia,
+                                                 DoubleProvider inertiaAccelerationBreakFrequency,
+                                                 BooleanProvider useRelativeVelocityCheck,
+                                                 DoubleProvider relativeHorizontalVelocityThreshold,
+                                                 DoubleProvider relativeVerticalVelocityThreshold,
+                                                 DoubleProvider switchDT,
                                                  YoRegistry registry)
       {
+         this.useVelocityGate = useVelocityGate;
+         this.compensateInertia = compensateInertia;
+         this.inertiaAccelerationBreakFrequency = inertiaAccelerationBreakFrequency;
+         this.useRelativeVelocityCheck = useRelativeVelocityCheck;
+         this.relativeHorizontalVelocityThreshold = relativeHorizontalVelocityThreshold;
+         this.relativeVerticalVelocityThreshold = relativeVerticalVelocityThreshold;
+         this.switchDT = switchDT;
          this.soleFrame = soleFrame;
          this.robotTotalWeight = robotTotalWeight;
          this.contactForceThresholdLow = contactForceThresholdLow;
@@ -397,6 +479,19 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
             legJointGravityTaus[i] = new YoDouble("tau_gravity_" + legJoints[i].getName(), registry);
          }
          String namePrefix = foot.getName() + "JTrans";
+
+         // Full inverse dynamics of the leg chain (fixed pelvis) at the estimated joint accelerations.
+         inertialTorqueCalculator = new InverseDynamicsCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(legJoints));
+         inertialTorqueCalculator.setConsiderJointAccelerations(true);
+         inertialTorqueCalculator.setConsiderCoriolisAndCentrifugalForces(true);
+         inertialTorqueCalculator.setGravitionalAcceleration(GRAVITY_Z);
+         legJointInertialTaus = new YoDouble[6];
+         for (int i = 0; i < legJointInertialTaus.length; i++)
+            legJointInertialTaus[i] = new YoDouble("tau_inertial_" + legJoints[i].getName(), registry);
+
+         relativeVelocity = new YoFrameVector3D(namePrefix + "RelativeVelocity", ReferenceFrame.getWorldFrame(), registry);
+         relativeVelocityVeto = new YoBoolean(namePrefix + "RelativeVelocityVeto", registry);
+         forceZ = new YoDouble(namePrefix + "ForceZ", registry);
 
          wrench = new YoFixedFrameWrench(foot.getBodyFixedFrame(),
                                          new YoFrameVector3D(namePrefix + "EstimatedTorque", soleFrame, registry),
@@ -458,11 +553,21 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          wrench.set(wrenchVector);
 
          gravityTorqueCalculator.compute();
+         boolean inertial = compensateInertia.getValue();
+         updateAccelerationEstimate();
+         if (inertial)
+            inertialTorqueCalculator.compute(estimatedQdd);
 
          for (int i = 0; i < legJoints.length; i++)
          {
             legJointGravityTaus[i].set(gravityTorqueCalculator.getComputedJointTau(legJoints[i]).get(0));
-            torqueVector.set(i, 0, legJoints[i].getTau() - legJointGravityTaus[i].getValue());
+            double modelTau = legJointGravityTaus[i].getValue();
+            if (inertial)
+            {
+               legJointInertialTaus[i].set(inertialTorqueCalculator.getComputedJointTau(legJoints[i]).get(0));
+               modelTau = legJointInertialTaus[i].getValue();
+            }
+            torqueVector.set(i, 0, legJoints[i].getTau() - modelTau);
          }
 
          CommonOps_DDRM.scale(-1.0, torqueVector);
@@ -473,6 +578,30 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          updateFootSwitch(compensateGravity.getValue() ? wrenchNoGravity : wrench);
       }
 
+      /** Filtered finite difference of the leg joints' qd, always running so it is warm when switched on. */
+      private void updateAccelerationEstimate()
+      {
+         double dt = switchDT.getValue();
+         double alpha = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(inertiaAccelerationBreakFrequency.getValue(), dt);
+         for (int i = 0; i < legJoints.length; i++)
+         {
+            double qd = legJoints[i].getQd();
+            if (hasPreviousQd && dt > 0.0)
+            {
+               double raw = (qd - previousQd[i]) / dt;
+               estimatedQdd.set(i, 0, alpha * estimatedQdd.get(i, 0) + (1.0 - alpha) * raw);
+            }
+            previousQd[i] = qd;
+         }
+         hasPreviousQd = true;
+      }
+
+      void resetAccelerationEstimate()
+      {
+         hasPreviousQd = false;
+         estimatedQdd.zero();
+      }
+
       private void updateFootSwitch(WrenchReadOnly wrench)
       {
          footForceMagnitude.set(wrench.getLinearPart().norm());
@@ -481,6 +610,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          // Sometimes the sensor can be mounted such that z is down.
          double forceZUp = wrench.getLinearPartZ();
 
+         forceZ.set(forceZUp);
          double fZPlus = MathTools.clamp(forceZUp, 0.0, Double.POSITIVE_INFINITY);
          footLoadPercentage.update(fZPlus / robotTotalWeight);
 
@@ -522,13 +652,15 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          horizontalVelocity.set(EuclidCoreTools.norm(linearVelocity.getX(), linearVelocity.getY()));
          verticalVelocity.set(linearVelocity.getZ());
 
-         if (jacobianDeterminant.getDoubleValue() > jacobianDeterminantThreshold.getValue())
-         { // The jacobian determinant is above the threshold, so it's not in a singular configuration
+         boolean gate = useVelocityGate.getValue();
+         if (!gate || jacobianDeterminant.getDoubleValue() > jacobianDeterminantThreshold.getValue())
+         { // The jacobian determinant is above the threshold, so it's not in a singular configuration.
+           // Without the gate a singular configuration has no other test left, so the force test decides there too.
             boolean validCoP = isPastCoPThresholdFiltered.getValue();
             boolean hitGroundLow = isPastForceThresholdLowFiltered.getValue() && validCoP;
-            boolean allowableSpeed = horizontalVelocity.getValue() < horizontalVelocityThreshold.getValue()
+            boolean allowableSpeed = !gate || horizontalVelocity.getValue() < horizontalVelocityThreshold.getValue()
                                      && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue();
-            boolean allowableHighSpeed = Math.abs(verticalVelocity.getValue()) < verticalVelocityHighThreshold.getValue();
+            boolean allowableHighSpeed = !gate || Math.abs(verticalVelocity.getValue()) < verticalVelocityHighThreshold.getValue();
 
             hasFootHitGround.set((hitGroundLow && allowableSpeed) || (isPastForceThresholdHigh.getValue() && allowableHighSpeed));
          }
@@ -537,6 +669,23 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
             boolean allowableSpeed = horizontalVelocity.getValue() < horizontalVelocityThreshold.getValue()
                                      && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue();
             hasFootHitGround.set(allowableSpeed);
+         }
+
+         relativeVelocityVeto.set(false);
+         if (useRelativeVelocityCheck.getValue() && other != null)
+         {
+            otherSoleVelocity.setIncludingFrame(other.soleFrame.getTwistOfFrame().getLinearPart());
+            otherSoleVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+            relativeVelocity.sub(linearVelocity, otherSoleVelocity);
+            boolean movingApart = EuclidCoreTools.norm(relativeVelocity.getX(), relativeVelocity.getY()) > relativeHorizontalVelocityThreshold.getValue()
+                                  || Math.abs(relativeVelocity.getZ()) > relativeVerticalVelocityThreshold.getValue();
+            // One of two force-loaded feet moving apart is in swing: keep the one carrying more force.
+            if (hasFootHitGround.getValue() && movingApart && other.isPastForceThresholdLowFiltered.getValue()
+                && forceZ.getValue() < other.forceZ.getValue())
+            {
+               relativeVelocityVeto.set(true);
+               hasFootHitGround.set(false);
+            }
          }
          hasFootHitGroundFiltered.update();
       }

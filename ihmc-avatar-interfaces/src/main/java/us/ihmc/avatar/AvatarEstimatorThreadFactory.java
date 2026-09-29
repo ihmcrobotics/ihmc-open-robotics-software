@@ -605,6 +605,11 @@ public class AvatarEstimatorThreadFactory
     * wraps them as the invariant estimator's {@link FootSwitchContactProbabilityProvider}. The
     * contactable feet are built on the invariant estimator's own reference frames, which it refreshes
     * each tick before polling the provider.
+    * <p>
+    * Joint-torque switches are configured by {@link #configureInvariantFootSwitches}: their velocity gate
+    * would read the root twist this filter writes, so they detect contact from force (inertia-compensated)
+    * and the two feet's relative velocity instead. The gate stays a parameter
+    * ({@code <foot>InvariantEstimatorUseVelocityGate}) and can be switched back on at run time.
     */
    private FootSwitchContactProbabilityProvider createInvariantFootSwitchProvider(InvariantMainStateEstimator mainStateEstimator)
    {
@@ -618,6 +623,7 @@ public class AvatarEstimatorThreadFactory
 
       double totalRobotWeight = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator()) * Math.abs(getGravity());
       SideDependentList<FootSwitchFactory> footSwitchFactories = getStateEstimatorParameters().getFootSwitchFactories();
+      configureInvariantFootSwitches(footSwitchFactories);
       SideDependentList<String> feetForceSensorNames = getSensorInformation().getFeetForceSensorNames();
 
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<>();
@@ -638,8 +644,35 @@ public class AvatarEstimatorThreadFactory
                                                                             getEstimatorRegistry());
          footSwitches.put(robotSide, footSwitch);
       }
+      pairInvariantFootSwitches(footSwitches);
 
       return new FootSwitchContactProbabilityProvider(footSwitches, getStateEstimatorParameters().getEstimatorDT(), getEstimatorRegistry());
+   }
+
+   /**
+    * Invariant-filter contact detection that does not read the filter's own linear velocity (see
+    * {@link us.ihmc.commonWalkingControlModules.sensors.footSwitch.JointTorqueBasedFootSwitch}). Call on the
+    * factories BEFORE building the switches: the parameters take their defaults at construction. Other
+    * factory types are left as they are. Shared with the log replay so both build the same detector.
+    */
+   public static void configureInvariantFootSwitches(SideDependentList<FootSwitchFactory> footSwitchFactories)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (footSwitchFactories.get(robotSide) instanceof us.ihmc.commonWalkingControlModules.sensors.footSwitch.JointTorqueBasedFootSwitchFactory factory)
+            factory.useEstimatorIndependentDetection();
+      }
+   }
+
+   /** Pairs the two joint-torque switches for the relative velocity check, whatever factory instances built them. */
+   public static void pairInvariantFootSwitches(SideDependentList<? extends FootSwitchInterface> footSwitches)
+   {
+      if (footSwitches.get(RobotSide.LEFT) instanceof us.ihmc.commonWalkingControlModules.sensors.footSwitch.JointTorqueBasedFootSwitch left
+          && footSwitches.get(RobotSide.RIGHT) instanceof us.ihmc.commonWalkingControlModules.sensors.footSwitch.JointTorqueBasedFootSwitch right)
+      {
+         left.setOtherFootSwitch(right);
+         right.setOtherFootSwitch(left);
+      }
    }
 
    /**

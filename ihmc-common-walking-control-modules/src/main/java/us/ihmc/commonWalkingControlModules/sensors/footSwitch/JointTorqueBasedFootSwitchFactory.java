@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -26,6 +28,13 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
    private double defaultVerticalVelocityThreshold = 0.125;
    private double defaultVerticalVelocityHighThreshold = 0.3;
    private double defaultJacobianDeterminantSingularityThreshold = 2e-3;
+   // The historical behavior: velocity gate on, no inertial compensation, no relative check.
+   private boolean defaultUseVelocityGate = true;
+   private boolean defaultCompensateInertia = false;
+   private double defaultInertiaAccelerationBreakFrequency = 25.0;
+   private boolean defaultUseRelativeVelocityCheck = false;
+   private double defaultRelativeHorizontalVelocityThreshold = 0.3;
+   private double defaultRelativeVerticalVelocityThreshold = 0.1;
 
    private DoubleProvider contactThresholdTorque;
    private DoubleProvider higherContactThresholdTorque;
@@ -38,6 +47,17 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
    private DoubleProvider verticalVelocityHighThreshold;
    private DoubleProvider jacobianDeterminantSingularityThreshold;
    private BooleanProvider useJacobianTranspose;
+   private BooleanProvider useVelocityGate;
+   private BooleanProvider compensateInertia;
+   private DoubleProvider inertiaAccelerationBreakFrequency;
+   private BooleanProvider useRelativeVelocityCheck;
+   private DoubleProvider relativeHorizontalVelocityThreshold;
+   private DoubleProvider relativeVerticalVelocityThreshold;
+
+   /** Switches built so far, to pair each with the other foot's for the relative velocity check. */
+   private final List<JointTorqueBasedFootSwitch> createdSwitches = new ArrayList<>();
+   private final List<ContactablePlaneBody> createdFeet = new ArrayList<>();
+   private final List<YoRegistry> createdRegistries = new ArrayList<>();
 
    private final String jointDescriptionToCheck;
 
@@ -115,6 +135,49 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
       this.defaultJacobianDeterminantSingularityThreshold = defaultJacobianDeterminantSingularityThreshold;
    }
 
+   /** Whether contact also requires a small sole velocity. That velocity comes from the owning estimator's root twist. */
+   public void setDefaultUseVelocityGate(boolean defaultUseVelocityGate)
+   {
+      this.defaultUseVelocityGate = defaultUseVelocityGate;
+   }
+
+   /** Solve the foot wrench from {@code tau - ID(q, qd, qdd)} of the leg rather than {@code tau - g(q)}. */
+   public void setDefaultCompensateInertia(boolean defaultCompensateInertia)
+   {
+      this.defaultCompensateInertia = defaultCompensateInertia;
+   }
+
+   /** Break frequency of the filter on the finite-difference joint accelerations used by the inertial compensation. */
+   public void setDefaultInertiaAccelerationBreakFrequency(double breakFrequency)
+   {
+      this.defaultInertiaAccelerationBreakFrequency = breakFrequency;
+   }
+
+   /** Reject the less-loaded of two force-loaded feet whose soles move apart. Reads no estimated linear velocity. */
+   public void setDefaultUseRelativeVelocityCheck(boolean defaultUseRelativeVelocityCheck)
+   {
+      this.defaultUseRelativeVelocityCheck = defaultUseRelativeVelocityCheck;
+   }
+
+   public void setDefaultRelativeVelocityThresholds(double horizontal, double vertical)
+   {
+      this.defaultRelativeHorizontalVelocityThreshold = horizontal;
+      this.defaultRelativeVerticalVelocityThreshold = vertical;
+   }
+
+   /**
+    * Contact detection that does not read the owning estimator's linear velocity: velocity gate off,
+    * inertial compensation on, relative velocity check on. For an estimator whose velocity would
+    * otherwise gate its own contacts -- the invariant filter as main estimator. The gate stays a
+    * parameter ({@code <prefix>UseVelocityGate}) and can be switched back on.
+    */
+   public void useEstimatorIndependentDetection()
+   {
+      setDefaultUseVelocityGate(false);
+      setDefaultCompensateInertia(true);
+      setDefaultUseRelativeVelocityCheck(true);
+   }
+
    @Override
    public FootSwitchInterface newFootSwitch(String namePrefix,
                                             ContactablePlaneBody foot,
@@ -139,9 +202,18 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
          horizontalVelocityThreshold = new DoubleParameter(namePrefix + "HorizontalVelocityThreshold", registry, defaultHorizontalVelocityThreshold);
          jacobianDeterminantSingularityThreshold = new DoubleParameter(namePrefix + "JacobianDeterminantSingularityThreshold", registry,
                                                                        defaultJacobianDeterminantSingularityThreshold);
+         useVelocityGate = new BooleanParameter(namePrefix + "UseVelocityGate", registry, defaultUseVelocityGate);
+         compensateInertia = new BooleanParameter(namePrefix + "CompensateInertia", registry, defaultCompensateInertia);
+         inertiaAccelerationBreakFrequency = new DoubleParameter(namePrefix + "InertiaAccelerationBreakFrequency", registry,
+                                                                 defaultInertiaAccelerationBreakFrequency);
+         useRelativeVelocityCheck = new BooleanParameter(namePrefix + "UseRelativeVelocityCheck", registry, defaultUseRelativeVelocityCheck);
+         relativeHorizontalVelocityThreshold = new DoubleParameter(namePrefix + "RelativeHorizontalVelocityThreshold", registry,
+                                                                   defaultRelativeHorizontalVelocityThreshold);
+         relativeVerticalVelocityThreshold = new DoubleParameter(namePrefix + "RelativeVerticalVelocityThreshold", registry,
+                                                                 defaultRelativeVerticalVelocityThreshold);
       }
 
-      return new JointTorqueBasedFootSwitch(namePrefix,
+      JointTorqueBasedFootSwitch footSwitch = new JointTorqueBasedFootSwitch(namePrefix,
                                             jointDescriptionToCheck,
                                             rootBody,
                                             foot,
@@ -158,6 +230,27 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
                                             verticalVelocityHighThreshold,
                                             jacobianDeterminantSingularityThreshold,
                                             useJacobianTranspose,
+                                            useVelocityGate,
+                                            compensateInertia,
+                                            inertiaAccelerationBreakFrequency,
+                                            useRelativeVelocityCheck,
+                                            relativeHorizontalVelocityThreshold,
+                                            relativeVerticalVelocityThreshold,
                                             registry);
+
+      // Pair with an earlier switch of this factory whose foot is one of this foot's other feet, in the
+      // same registry: a biped's two switches of one estimator. Other estimators' feet are other objects.
+      for (int i = 0; i < createdSwitches.size(); i++)
+      {
+         if (createdRegistries.get(i) == registry && otherFeet != null && otherFeet.contains(createdFeet.get(i)))
+         {
+            footSwitch.setOtherFootSwitch(createdSwitches.get(i));
+            createdSwitches.get(i).setOtherFootSwitch(footSwitch);
+         }
+      }
+      createdSwitches.add(footSwitch);
+      createdFeet.add(foot);
+      createdRegistries.add(registry);
+      return footSwitch;
    }
 }
