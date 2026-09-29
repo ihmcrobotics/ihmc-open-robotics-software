@@ -252,6 +252,50 @@ public class InvariantEKF
       return gravityUpdater.isQuasiStatic(specificForceBody, rawAngularVelocity, accelToleranceRatio, gyroThreshold, horizontalAccelThreshold);
    }
 
+   // Kinematic base-velocity update: preallocated, the measurement size is always 3.
+   private DMatrixRMaj velocityJacobian = null;
+   private final DMatrixRMaj velocityResidual = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj velocityNoise = new DMatrixRMaj(3, 3);
+   private final us.ihmc.euclid.matrix.RotationMatrix velocityRotation = new us.ihmc.euclid.matrix.RotationMatrix();
+   private final us.ihmc.euclid.tuple3D.Vector3D velocityEstimate = new us.ihmc.euclid.tuple3D.Vector3D();
+   private final us.ihmc.euclid.tuple3D.Vector3D velocityMeasurementWorld = new us.ihmc.euclid.tuple3D.Vector3D();
+   private final us.ihmc.euclid.matrix.Matrix3D velocityNoiseWorld = new us.ihmc.euclid.matrix.Matrix3D();
+
+   /**
+    * Correction step: a body-frame measurement of the base velocity, {@code y = Rᵀv}. On a stance foot leg
+    * kinematics gives it directly, {@code y = −(ω × r + ṙ)} with r the sole in the body frame -- the measurement
+    * the kinematics-based estimator lives on, which keeps velocity from running away between the position-only
+    * contact corrections.
+    * <p>
+    * Residual {@code R̂·y − v̂}. With {@code X̂ = exp(ξ)·X}, {@code R̂ ≈ (I + ξ_R×)R} and {@code v̂ ≈ (I + ξ_R×)v + ξ_v},
+    * so the residual is {@code −ξ_v} to first order -- the rotation error cancels -- and H is −I on the velocity
+    * block, zero elsewhere. The noise is rotated to world, {@code R̂·N·R̂ᵀ}.
+    *
+    * @param bodyVelocity           y, the base velocity in the body frame. Not modified.
+    * @param bodyVelocityCovariance N, its 3×3 covariance in the body frame. Not modified.
+    */
+   public void updateBodyVelocity(Tuple3DReadOnly bodyVelocity, Matrix3DReadOnly bodyVelocityCovariance)
+   {
+      int m = state.getTangentSize();
+      if (velocityJacobian == null || velocityJacobian.getNumCols() != m)
+      {
+         velocityJacobian = new DMatrixRMaj(3, m);
+         int v = state.baseVelocityTangentIndex();
+         for (int i = 0; i < 3; i++)
+            velocityJacobian.set(i, v + i, -1.0);
+      }
+      state.getRotation(velocityRotation);
+      state.getBaseVelocity(velocityEstimate);
+      velocityRotation.transform(bodyVelocity, velocityMeasurementWorld);
+      velocityResidual.set(0, 0, velocityMeasurementWorld.getX() - velocityEstimate.getX());
+      velocityResidual.set(1, 0, velocityMeasurementWorld.getY() - velocityEstimate.getY());
+      velocityResidual.set(2, 0, velocityMeasurementWorld.getZ() - velocityEstimate.getZ());
+      velocityNoiseWorld.set(bodyVelocityCovariance);
+      velocityRotation.transform(velocityNoiseWorld); // R N Rᵀ
+      velocityNoiseWorld.get(velocityNoise);
+      updater.update(state, velocityJacobian, velocityResidual, velocityNoise);
+   }
+
    /**
     * Advances the quasi-static gate's sensor-only gravity reference. Call once per tick, before
     * {@link #isGravityQuasiStatic}, with RAW sensor values. See {@link GravityLevelingUpdater#updateGravityReference}.

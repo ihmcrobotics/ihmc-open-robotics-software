@@ -252,6 +252,27 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
                                                                                                     new YoDouble("invariantContactInnovationInflationRight", registry));
    private final YoInteger yoContactInnovationInflatedCount = new YoInteger("invariantContactInnovationInflatedCount", registry);
 
+   /**
+    * Kinematic base-velocity measurement (see {@link InvariantEKF#updateBodyVelocity}): each foot in contact
+    * (probability above 0.5) gives the body velocity {@code −(ω × r + ṙ)} from leg kinematics, applied after the
+    * contact updates. It is what keeps the kinematics-based estimator's velocity from running away; the contact
+    * update alone observes velocity only through position, and on the 2026-09-28 Alex RL log a few tens of
+    * milliseconds of wrong contact grew into multi-m/s divergence before position caught it. Live switch and
+    * isotropic body-frame standard deviation.
+    */
+   private final YoBoolean yoKinematicVelocityEnabled = new YoBoolean("invariantKinematicVelocityEnabled", registry);
+   private final YoDouble yoKinematicVelocityStd = new YoDouble("invariantKinematicVelocityStd", registry);
+   private final SideDependentList<YoDouble> yoKinematicVelocityNIS = new SideDependentList<>(new YoDouble("invariantKinematicVelocityNISLeft", registry),
+                                                                                               new YoDouble("invariantKinematicVelocityNISRight", registry));
+   private final SideDependentList<YoBoolean> yoKinematicVelocityApplied = new SideDependentList<>(new YoBoolean("invariantKinematicVelocityAppliedLeft", registry),
+                                                                                                   new YoBoolean("invariantKinematicVelocityAppliedRight", registry));
+   private final us.ihmc.mecano.spatial.Twist soleRelativeTwist = new us.ihmc.mecano.spatial.Twist();
+   private final FrameVector3D soleRelativeVelocity = new FrameVector3D();
+   private final FramePoint3D soleInPelvis = new FramePoint3D();
+   private final us.ihmc.euclid.tuple3D.Vector3D kinematicBodyVelocity = new us.ihmc.euclid.tuple3D.Vector3D();
+   private final us.ihmc.euclid.matrix.Matrix3D kinematicVelocityCovariance = new us.ihmc.euclid.matrix.Matrix3D();
+   public static final double DEFAULT_KINEMATIC_VELOCITY_STD = 0.1; // m/s
+
    // The gyro bias actually subtracted from the raw gyro this tick, AFTER the MAX_GYRO_BIAS clamp, plus a count
    // of ticks the clamp bound. This is the "is the upstream bias sane" diagnostic.
    //
@@ -471,6 +492,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoContactNISLowerBound.set(contactNISDistribution.inverseCumulativeProbability(lowerTail));
       yoContactNISUpperBound.set(contactNISDistribution.inverseCumulativeProbability(1.0 - lowerTail));
       yoContactNISGate.set(Double.NaN); // off; chi2_3(DEFAULT_CONTACT_NIS_GATE_PROBABILITY) = 16.27 when enabled for diagnosis
+      yoKinematicVelocityEnabled.set(false);
+      yoKinematicVelocityStd.set(DEFAULT_KINEMATIC_VELOCITY_STD);
       // Default fallback: forward-kinematics-only contact detection on the estimator's own sole frames
       // (already refreshed each tick in doControl, so no frame-updater hook is needed here).
       contactProbabilityProvider = new KinematicContactDetector(soleFrames, null, dt);
@@ -671,10 +694,46 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          yoContactCorrectionVelNorm.get(side).set(ekf.getLastCorrectionVelocityNorm());
          yoContactCorrectionPosNorm.get(side).set(ekf.getLastCorrectionPositionNorm());
       }
+      updateKinematicVelocity();
       yoInvariantUpdateGateSkipCount.set(ekf.getUpdateGateSkipCount());
       yoContactInnovationInflatedCount.set(ekf.getInnovationInflatedCount());
 
       updateYoVariables();
+   }
+
+   /** One body-velocity update per foot in contact: y = −(ω × r + ṙ), all in the pelvis frame. */
+   private void updateKinematicVelocity()
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         yoKinematicVelocityApplied.get(side).set(false);
+         yoKinematicVelocityNIS.get(side).setToNaN();
+      }
+      if (!yoKinematicVelocityEnabled.getBooleanValue())
+         return;
+      double std = yoKinematicVelocityStd.getDoubleValue();
+      kinematicVelocityCovariance.setIdentity();
+      kinematicVelocityCovariance.scale(std * std);
+      for (RobotSide side : RobotSide.values)
+      {
+         if (yoContactProbability.get(side).getDoubleValue() <= 0.5)
+            continue;
+         MovingReferenceFrame soleFrame = soleFrames.get(side);
+         // ṙ: velocity of the sole origin relative to the pelvis. Expressed in the sole frame, a twist's linear
+         // part is the velocity of that frame's origin; rotate it into the pelvis frame. Independent of the
+         // root twist this filter writes -- joint velocities only.
+         soleFrame.getTwistRelativeToOther(pelvisFrame, soleRelativeTwist);
+         soleRelativeVelocity.setIncludingFrame(soleFrame, soleRelativeTwist.getLinearPart());
+         soleRelativeVelocity.changeFrame(pelvisFrame);
+         soleInPelvis.setToZero(soleFrame);
+         soleInPelvis.changeFrame(pelvisFrame);
+         kinematicBodyVelocity.cross(angularVelocity, soleInPelvis); // ω × r, ω already in the pelvis frame
+         kinematicBodyVelocity.add(soleRelativeVelocity);
+         kinematicBodyVelocity.negate();
+         ekf.updateBodyVelocity(kinematicBodyVelocity, kinematicVelocityCovariance);
+         yoKinematicVelocityNIS.get(side).set(ekf.getLastNormalizedInnovationSquared());
+         yoKinematicVelocityApplied.get(side).set(ekf.wasLastUpdateApplied());
+      }
    }
 
    /** Trace of the 3×3 diagonal block of the EKF covariance starting at {@code tangentIndex}. */
