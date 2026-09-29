@@ -132,4 +132,9 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    {
       set(HeightMapParameters.icpConvergenceYawDegrees, icpConvergenceYawDegrees);
    }
+
+   default void setFillUnseenCells(boolean fillUnseenCells)
+   {
+      set(HeightMapParameters.fillUnseenCells, fillUnseenCells);
+   }
 }

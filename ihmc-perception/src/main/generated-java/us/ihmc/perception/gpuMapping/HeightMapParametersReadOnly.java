@@ -134,4 +134,9 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    {
       return get(icpConvergenceYawDegrees);
    }
+
+   default boolean getFillUnseenCells()
+   {
+      return get(fillUnseenCells);
+   }
 }

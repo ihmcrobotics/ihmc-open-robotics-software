@@ -86,5 +86,6 @@
     "value": 2.0,
     "lowerBound": 0.0,
     "upperBound": 30.0
-  }
+  },
+  "Fill unseen cells": true
 }

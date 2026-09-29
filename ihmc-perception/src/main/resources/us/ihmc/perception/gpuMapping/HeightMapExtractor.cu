@@ -601,6 +601,118 @@ __global__ void heightMapEmptyRegistrationKernel(float *localMap, size_t pitchLo
     *globalHeight = *localHeight;
 }
 
+/**
+ * Nearest-neighbor fill of unseen global cells, using jump flooding: each cell tracks the index of the
+ * nearest cell holding real data (its "seed"), and log2(N) passes propagate seeds with halving step
+ * sizes. Unseen cells then take their seed's height while keeping INVALID_CELL_VARIANCE, so the fill
+ * is only ever output: registration takes the first real measurement outright, and ICP ignores them.
+ *
+ * Seeds are stored as the linear index x * globalCellsPerAxis + y, or -1 for no seed yet.
+ */
+extern "C"
+__global__ void nearestValidCellInitKernel(const float* __restrict__ globalVarianceMap, size_t pitchGlobalVariance,
+                                           int* __restrict__ seedMap, size_t pitchSeed,
+                                           const float* __restrict__ params)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+
+    if (x >= globalCellsPerAxis || y >= globalCellsPerAxis)
+        return;
+
+    const float* varianceRow = (const float*)((const char*)globalVarianceMap + x * pitchGlobalVariance);
+    int* seedRow = (int*)((char*)seedMap + x * pitchSeed);
+    seedRow[y] = varianceRow[y] < 0.0f ? -1 : x * globalCellsPerAxis + y;
+}
+
+/**
+ * One jump flooding pass: each cell adopts the closest seed among its own and those of the 8 cells
+ * {@code step} away. Reads from seedsIn and writes to seedsOut so passes don't race each other.
+ */
+extern "C"
+__global__ void nearestValidCellJumpKernel(const int* __restrict__ seedsIn, size_t pitchSeedsIn,
+                                           int* __restrict__ seedsOut, size_t pitchSeedsOut,
+                                           const int step,
+                                           const float* __restrict__ params)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+
+    if (x >= globalCellsPerAxis || y >= globalCellsPerAxis)
+        return;
+
+    int bestSeed = -1;
+    int bestDistanceSquared = 0;
+
+    for (int dx = -step; dx <= step; dx += step)
+    {
+        for (int dy = -step; dy <= step; dy += step)
+        {
+            int neighborX = x + dx;
+            int neighborY = y + dy;
+            if (neighborX < 0 || neighborX >= globalCellsPerAxis || neighborY < 0 || neighborY >= globalCellsPerAxis)
+                continue;
+
+            const int* neighborRow = (const int*)((const char*)seedsIn + neighborX * pitchSeedsIn);
+            int seed = neighborRow[neighborY];
+            if (seed < 0)
+                continue;
+
+            int seedX = seed / globalCellsPerAxis;
+            int seedY = seed % globalCellsPerAxis;
+            int distanceSquared = (seedX - x) * (seedX - x) + (seedY - y) * (seedY - y);
+
+            // Break ties by seed index so the fill doesn't flicker between equidistant cells
+            if (bestSeed < 0 || distanceSquared < bestDistanceSquared || (distanceSquared == bestDistanceSquared && seed < bestSeed))
+            {
+                bestSeed = seed;
+                bestDistanceSquared = distanceSquared;
+            }
+        }
+    }
+
+    int* outRow = (int*)((char*)seedsOut + x * pitchSeedsOut);
+    outRow[y] = bestSeed;
+}
+
+/**
+ * Gives each unseen cell the height of its nearest cell with real data. Only unseen cells are written
+ * and only cells with real data are read, so there is no race. The variance is left invalid.
+ */
+extern "C"
+__global__ void fillUnseenCellsKernel(float* __restrict__ globalMeanMap, size_t pitchGlobalMean,
+                                      const float* __restrict__ globalVarianceMap, size_t pitchGlobalVariance,
+                                      const int* __restrict__ seedMap, size_t pitchSeed,
+                                      const float* __restrict__ params)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+
+    if (x >= globalCellsPerAxis || y >= globalCellsPerAxis)
+        return;
+
+    const float* varianceRow = (const float*)((const char*)globalVarianceMap + x * pitchGlobalVariance);
+    if (varianceRow[y] >= 0.0f)
+        return;
+
+    const int* seedRow = (const int*)((const char*)seedMap + x * pitchSeed);
+    int seed = seedRow[y];
+    if (seed < 0)
+        return; // Nothing has been seen yet, keep the default height
+
+    int seedX = seed / globalCellsPerAxis;
+    int seedY = seed % globalCellsPerAxis;
+    const float* seedMeanRow = (const float*)((const char*)globalMeanMap + seedX * pitchGlobalMean);
+    float* meanRow = (float*)((char*)globalMeanMap + x * pitchGlobalMean);
+    meanRow[y] = seedMeanRow[seedY];
+}
+
 extern "C"
 /**
     @brief Compute Plan Offset KERNEL: This kernel is not very intuitive. For background we've got a status message
