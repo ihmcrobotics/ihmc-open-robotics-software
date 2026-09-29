@@ -35,6 +35,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
    private boolean defaultUseRelativeVelocityCheck = false;
    private double defaultRelativeHorizontalVelocityThreshold = 0.3;
    private double defaultRelativeVerticalVelocityThreshold = 0.1;
+   private double defaultReleaseLoadFraction = Double.NaN; // off
 
    private DoubleProvider contactThresholdTorque;
    private DoubleProvider higherContactThresholdTorque;
@@ -53,6 +54,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
    private BooleanProvider useRelativeVelocityCheck;
    private DoubleProvider relativeHorizontalVelocityThreshold;
    private DoubleProvider relativeVerticalVelocityThreshold;
+   private DoubleProvider releaseLoadFraction;
 
    /** Switches built so far, to pair each with the other foot's for the relative velocity check. */
    private final List<JointTorqueBasedFootSwitch> createdSwitches = new ArrayList<>();
@@ -159,6 +161,12 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
       this.defaultUseRelativeVelocityCheck = defaultUseRelativeVelocityCheck;
    }
 
+   /** Release contact at once when the foot's vertical force drops below this fraction of body weight; NaN = off. */
+   public void setDefaultReleaseLoadFraction(double fraction)
+   {
+      this.defaultReleaseLoadFraction = fraction;
+   }
+
    public void setDefaultRelativeVelocityThresholds(double horizontal, double vertical)
    {
       this.defaultRelativeHorizontalVelocityThreshold = horizontal;
@@ -215,6 +223,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
                                                                    defaultRelativeHorizontalVelocityThreshold);
          relativeVerticalVelocityThreshold = new DoubleParameter(namePrefix + "RelativeVerticalVelocityThreshold", registry,
                                                                  defaultRelativeVerticalVelocityThreshold);
+         releaseLoadFraction = new DoubleParameter(namePrefix + "ReleaseLoadFraction", registry, defaultReleaseLoadFraction);
       }
 
       JointTorqueBasedFootSwitch footSwitch = new JointTorqueBasedFootSwitch(namePrefix,
@@ -240,6 +249,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
                                             useRelativeVelocityCheck,
                                             relativeHorizontalVelocityThreshold,
                                             relativeVerticalVelocityThreshold,
+                                            releaseLoadFraction,
                                             registry);
 
       // Pair with an earlier switch of this factory whose foot is one of this foot's other feet, in the

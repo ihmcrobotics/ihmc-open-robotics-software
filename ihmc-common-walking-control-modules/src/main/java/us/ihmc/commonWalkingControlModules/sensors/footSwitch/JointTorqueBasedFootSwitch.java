@@ -62,6 +62,12 @@ import java.util.List;
  * velocities contains no root linear velocity -- it cancels -- so this check reads only joint
  * velocities and the angular velocity, never the estimator's linear velocity. The other foot's force is
  * the one from its latest update (one tick old if it updates after this one).</li>
+ * <li><b>Fast release</b> ({@code ReleaseLoadFraction}, off = NaN) -- as soon as the foot's vertical force
+ * falls below this fraction of body weight, contact is released at once, bypassing the glitch window.
+ * Touchdown is unchanged. The window and the 60 N low threshold otherwise hold a lifting foot in contact
+ * for tens of milliseconds after it unloads (measured 23-28 ms median, 43-63 ms p90 on the 2026-09-28
+ * Alex RL log), and an estimator anchoring that moving foot is dragged with it. Unloading precedes the
+ * foot moving, so the load is a leading signal where the velocity gate was a lagging one.</li>
  * </ul>
  */
 public class JointTorqueBasedFootSwitch implements FootSwitchInterface
@@ -105,6 +111,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                      BooleanProvider useRelativeVelocityCheck,
                                      DoubleProvider relativeHorizontalVelocityThreshold,
                                      DoubleProvider relativeVerticalVelocityThreshold,
+                                     DoubleProvider releaseLoadFraction,
                                      YoRegistry parentRegistry)
    {
       this.useJacobianTranspose = useJacobianTranspose;
@@ -172,6 +179,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                                                useRelativeVelocityCheck,
                                                                relativeHorizontalVelocityThreshold,
                                                                relativeVerticalVelocityThreshold,
+                                                               releaseLoadFraction,
                                                                switchDT,
                                                                registry);
 
@@ -393,6 +401,8 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       private final YoDouble forceZ;
       private final FrameVector3D otherSoleVelocity = new FrameVector3D();
       private JacobianBasedBasedTouchdownDetector other;
+      private final DoubleProvider releaseLoadFraction;
+      private final YoBoolean fastRelease;
 
       private final BooleanProvider compensateGravity;
 
@@ -442,9 +452,11 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                                  BooleanProvider useRelativeVelocityCheck,
                                                  DoubleProvider relativeHorizontalVelocityThreshold,
                                                  DoubleProvider relativeVerticalVelocityThreshold,
+                                                 DoubleProvider releaseLoadFraction,
                                                  DoubleProvider switchDT,
                                                  YoRegistry registry)
       {
+         this.releaseLoadFraction = releaseLoadFraction;
          this.useVelocityGate = useVelocityGate;
          this.compensateInertia = compensateInertia;
          this.inertiaAccelerationBreakFrequency = inertiaAccelerationBreakFrequency;
@@ -492,6 +504,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          relativeVelocity = new YoFrameVector3D(namePrefix + "RelativeVelocity", ReferenceFrame.getWorldFrame(), registry);
          relativeVelocityVeto = new YoBoolean(namePrefix + "RelativeVelocityVeto", registry);
          forceZ = new YoDouble(namePrefix + "ForceZ", registry);
+         fastRelease = new YoBoolean(namePrefix + "FastRelease", registry);
 
          wrench = new YoFixedFrameWrench(foot.getBodyFixedFrame(),
                                          new YoFrameVector3D(namePrefix + "EstimatedTorque", soleFrame, registry),
@@ -688,6 +701,16 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
             }
          }
          hasFootHitGroundFiltered.update();
+
+         fastRelease.set(false);
+         double releaseFraction = releaseLoadFraction.getValue();
+         if (releaseFraction > 0.0 && fZPlus < releaseFraction * robotTotalWeight)
+         {
+            if (hasFootHitGroundFiltered.getValue())
+               fastRelease.set(true);
+            hasFootHitGround.set(false);
+            hasFootHitGroundFiltered.set(false); // also restarts the glitch window, so touchdown still needs a full window
+         }
       }
 
       public boolean hasFootHitGroundSensitive()
