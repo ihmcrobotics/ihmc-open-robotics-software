@@ -167,15 +167,19 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
 
    /**
     * Contact detection that does not read the owning estimator's linear velocity: velocity gate off,
-    * inertial compensation on, relative velocity check on. For an estimator whose velocity would
-    * otherwise gate its own contacts -- the invariant filter as main estimator. The gate stays a
-    * parameter ({@code <prefix>UseVelocityGate}) and can be switched back on.
+    * inertial compensation on. For an estimator whose velocity would otherwise gate its own contacts --
+    * the invariant filter as main estimator. The gate and the relative velocity check stay parameters
+    * ({@code <prefix>UseVelocityGate}, {@code <prefix>UseRelativeVelocityCheck}) and can be switched on.
+    * <p>
+    * The relative check is off by default because it measured worse: on the 2026-09-28 Alex RL log
+    * (invariant arm 4, walking time in |v| > 1 m/s episodes) gate on 18.3%, gate off 9.5%, + inertia 5.1%,
+    * + inertia + relative check 16.1%.
     */
    public void useEstimatorIndependentDetection()
    {
       setDefaultUseVelocityGate(false);
       setDefaultCompensateInertia(true);
-      setDefaultUseRelativeVelocityCheck(true);
+      setDefaultUseRelativeVelocityCheck(false);
    }
 
    @Override

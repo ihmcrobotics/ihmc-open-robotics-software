@@ -235,6 +235,23 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final SideDependentList<YoBoolean> yoContactUpdateApplied;
    private final YoInteger yoInvariantUpdateGateSkipCount = new YoInteger("invariantUpdateGateSkipCount", registry);
 
+   /**
+    * Contact innovation gate: a contact update whose NIS exceeds this has its R scaled by NIS / gate, which
+    * bounds its correction (see {@link InvariantUpdater}). Such an update is a foot declared in contact that
+    * is not where a stationary foot would be -- on the 2026-09-28 Alex RL log, swing feet the foot switch
+    * called loaded, at NIS up to 1.8e4, 6.8% of applied updates against 0.1% expected.
+    * <p>
+    * OFF by default (NaN), because it measured much worse there: at the χ²₃ 99.9% point (16.27) the
+    * invariant arm 4's mean walking v_z went from -41 to -1082 mm/s. The high-NIS updates are mostly the
+    * stance feet pulling an already-drifted state back; bounding them lets the drift run. Kept as a live
+    * switch for diagnosis: set a positive threshold to enable.
+    */
+   public static final double DEFAULT_CONTACT_NIS_GATE_PROBABILITY = 0.999;
+   private final YoDouble yoContactNISGate = new YoDouble("invariantContactNISGate", registry);
+   private final SideDependentList<YoDouble> yoContactInnovationInflation = new SideDependentList<>(new YoDouble("invariantContactInnovationInflationLeft", registry),
+                                                                                                    new YoDouble("invariantContactInnovationInflationRight", registry));
+   private final YoInteger yoContactInnovationInflatedCount = new YoInteger("invariantContactInnovationInflatedCount", registry);
+
    // The gyro bias actually subtracted from the raw gyro this tick, AFTER the MAX_GYRO_BIAS clamp, plus a count
    // of ticks the clamp bound. This is the "is the upstream bias sane" diagnostic.
    //
@@ -453,6 +470,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       double lowerTail = 0.5 * (1.0 - CONSISTENCY_CONFIDENCE);
       yoContactNISLowerBound.set(contactNISDistribution.inverseCumulativeProbability(lowerTail));
       yoContactNISUpperBound.set(contactNISDistribution.inverseCumulativeProbability(1.0 - lowerTail));
+      yoContactNISGate.set(Double.NaN); // off; chi2_3(DEFAULT_CONTACT_NIS_GATE_PROBABILITY) = 16.27 when enabled for diagnosis
       // Default fallback: forward-kinematics-only contact detection on the estimator's own sole frames
       // (already refreshed each tick in doControl, so no frame-updater hook is needed here).
       contactProbabilityProvider = new KinematicContactDetector(soleFrames, null, dt);
@@ -617,6 +635,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       // Knob 1 (measurement covariance): inflate a swing foot's contact FK noise so it stops dragging the
       // base velocity, while a stance foot keeps constraining it.
       yoContactPBaseTrace.set(covarianceBlockTrace(ekf.getState().basePositionTangentIndex()));
+      ekf.setContactNISGate(yoContactNISGate.getDoubleValue());
       for (RobotSide side : RobotSide.values)
       {
          double contactProbability = yoContactProbability.get(side).getDoubleValue();
@@ -642,6 +661,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          yoContactPContactTrace.get(side).set(covarianceBlockTrace(ekf.getState().contactTangentIndex(contactIndex(side))));
          ekf.update(contactIndex(side), contactInBody, inflatedContactCovariance);
          yoContactNIS.get(side).set(ekf.getLastNormalizedInnovationSquared());
+         yoContactInnovationInflation.get(side).set(ekf.getLastInnovationInflation());
          yoContactCondSProxyLog10.get(side).set(Math.log10(ekf.getLastConditionProxy()));
          yoContactResidualNorm.get(side).set(ekf.getLastResidualNorm());
          yoContactUpdateApplied.get(side).set(ekf.wasLastUpdateApplied());
@@ -652,6 +672,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          yoContactCorrectionPosNorm.get(side).set(ekf.getLastCorrectionPositionNorm());
       }
       yoInvariantUpdateGateSkipCount.set(ekf.getUpdateGateSkipCount());
+      yoContactInnovationInflatedCount.set(ekf.getInnovationInflatedCount());
 
       updateYoVariables();
    }

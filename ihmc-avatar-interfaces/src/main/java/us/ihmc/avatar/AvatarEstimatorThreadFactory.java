@@ -607,9 +607,9 @@ public class AvatarEstimatorThreadFactory
     * each tick before polling the provider.
     * <p>
     * Joint-torque switches are configured by {@link #configureInvariantFootSwitches}: their velocity gate
-    * would read the root twist this filter writes, so they detect contact from force (inertia-compensated)
-    * and the two feet's relative velocity instead. The gate stays a parameter
-    * ({@code <foot>InvariantEstimatorUseVelocityGate}) and can be switched back on at run time.
+    * would read the root twist this filter writes, so they detect contact from inertia-compensated force
+    * instead. The gate and the feet's relative velocity check stay parameters
+    * ({@code <foot>InvariantEstimatorUseVelocityGate}, {@code ...UseRelativeVelocityCheck}), switchable at run time.
     */
    private FootSwitchContactProbabilityProvider createInvariantFootSwitchProvider(InvariantMainStateEstimator mainStateEstimator)
    {

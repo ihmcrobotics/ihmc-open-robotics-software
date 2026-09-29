@@ -307,4 +307,87 @@ public class InvariantUpdaterTest
          for (int c = r + 1; c < matrix.getNumCols(); c++)
             assertEquals(matrix.get(r, c), matrix.get(c, r), epsilon);
    }
+
+   // ---------------------------------------------------------------------------------------------
+   // Innovation gate (Huber-type R inflation above an NIS threshold)
+   // ---------------------------------------------------------------------------------------------
+
+   /** Estimate, residual and a tight P/R, so the contact innovation is a gross outlier (NIS ~300). */
+   private static InvariantState outlierCase(Random random, DMatrixRMaj residual, Vector3D[] measurementOut)
+   {
+      InvariantState truth = randomState(random);
+      Vector3D measurement = forwardKinematicsFromTruth(truth);
+      InvariantState estimate = perturb(truth, randomError(random, 0.05));
+      CommonOps_DDRM.setIdentity(estimate.getCovariance());
+      CommonOps_DDRM.scale(1.0e-5, estimate.getCovariance());
+      computeResidual(estimate, measurement, residual);
+      measurementOut[0] = measurement;
+      return estimate;
+   }
+
+   /** Off, or above the innovation, the gate changes nothing: bit-identical to the ungated update. */
+   @Test
+   public void testTheGateIsANoOpWhenOffOrNotExceeded()
+   {
+      for (double threshold : new double[] {Double.NaN, 0.0, 1.0e12})
+      {
+         DMatrixRMaj residual = new DMatrixRMaj(3, 1);
+         Vector3D[] measurement = new Vector3D[1];
+         InvariantState gated = outlierCase(new Random(7L), residual, measurement);
+         InvariantState plain = outlierCase(new Random(7L), new DMatrixRMaj(3, 1), new Vector3D[1]);
+         DMatrixRMaj R = scaledIdentity(3, 1.0e-6);
+
+         InvariantUpdater gatedUpdater = new InvariantUpdater(TANGENT_SIZE);
+         gatedUpdater.update(gated, buildContactJacobian(), residual, R, threshold);
+         new InvariantUpdater(TANGENT_SIZE).update(plain, buildContactJacobian(), residual, R);
+
+         assertEquals(1.0, gatedUpdater.getInnovationInflation(), 0.0);
+         assertEquals(0, gatedUpdater.getInnovationInflatedCount());
+         for (int k = 0; k < gated.getCovariance().getNumElements(); k++)
+            assertEquals(plain.getCovariance().get(k), gated.getCovariance().get(k), 0.0, "threshold " + threshold);
+         for (int k = 0; k < gated.getGroupElement().getNumElements(); k++)
+            assertEquals(plain.getGroupElement().get(k), gated.getGroupElement().get(k), 0.0, "threshold " + threshold);
+      }
+   }
+
+   /**
+    * An outlier is bounded, not rejected: R is scaled by NIS / threshold, the correction shrinks but stays
+    * nonzero and in the same direction, NIS is reported raw, and P stays symmetric positive definite.
+    */
+   @Test
+   public void testAnOutlierIsInflatedNotRejected()
+   {
+      double threshold = 16.27; // χ²₃ at 99.9%
+      DMatrixRMaj residual = new DMatrixRMaj(3, 1);
+      Vector3D[] measurement = new Vector3D[1];
+      InvariantState gated = outlierCase(new Random(11L), residual, measurement);
+      InvariantState plain = outlierCase(new Random(11L), new DMatrixRMaj(3, 1), new Vector3D[1]);
+      DMatrixRMaj R = scaledIdentity(3, 1.0e-6);
+
+      InvariantUpdater plainUpdater = new InvariantUpdater(TANGENT_SIZE);
+      plainUpdater.update(plain, buildContactJacobian(), residual, R);
+      InvariantUpdater gatedUpdater = new InvariantUpdater(TANGENT_SIZE);
+      gatedUpdater.update(gated, buildContactJacobian(), residual, R, threshold);
+
+      double nis = plainUpdater.getNormalizedInnovationSquared();
+      assertTrue(nis > 10.0 * threshold, "the case must be a gross outlier, NIS " + nis);
+      assertEquals(nis, gatedUpdater.getNormalizedInnovationSquared(), 1.0e-9 * nis, "NIS is reported raw");
+      assertEquals(nis / threshold, gatedUpdater.getInnovationInflation(), 1.0e-9 * nis);
+      assertEquals(1, gatedUpdater.getInnovationInflatedCount());
+      assertTrue(gatedUpdater.wasLastUpdateApplied(), "inflated, not skipped");
+
+      double plainCorrection = plainUpdater.getLastCorrectionPositionNorm();
+      double gatedCorrection = gatedUpdater.getLastCorrectionPositionNorm();
+      assertTrue(gatedCorrection > 0.0 && gatedCorrection < plainCorrection,
+                 "bounded but nonzero: gated " + gatedCorrection + " vs ungated " + plainCorrection);
+
+      DMatrixRMaj after = new DMatrixRMaj(3, 1);
+      double residualAfter = computeResidual(gated, measurement[0], after);
+      assertTrue(residualAfter < Math.sqrt(CommonOps_DDRM.dot(residual, residual)), "still pulled toward the measurement");
+
+      assertSymmetric(gated.getCovariance(), 1.0e-12);
+      assertTrue(new org.ejml.dense.row.decomposition.chol.CholeskyDecompositionInner_DDRM(true).decompose(gated.getCovariance().copy()),
+                 "P stays positive definite");
+   }
+
 }

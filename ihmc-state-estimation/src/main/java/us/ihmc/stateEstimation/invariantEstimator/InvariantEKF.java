@@ -146,7 +146,15 @@ public class InvariantEKF
     */
    public void update(int contactIndex, Tuple3DReadOnly bodyMeasurement, Matrix3DReadOnly bodyMeasurementCovariance)
    {
-      updater.update(state, contactIndex, bodyMeasurement, bodyMeasurementCovariance, false); // learned module not wired yet
+      updater.update(state, contactIndex, bodyMeasurement, bodyMeasurementCovariance, false, contactNISGate); // learned module not wired yet
+   }
+
+   /** NIS above which a contact update's R is inflated (see {@link InvariantUpdater}); NaN disables. */
+   private double contactNISGate = Double.NaN;
+
+   public void setContactNISGate(double threshold)
+   {
+      contactNISGate = threshold;
    }
 
    private final us.ihmc.euclid.matrix.RotationMatrix reseedRotation = new us.ihmc.euclid.matrix.RotationMatrix();
@@ -279,6 +287,8 @@ public class InvariantEKF
    public double getLastResidualNorm()   { return updater.getResidualNorm(); }
    public boolean wasLastUpdateApplied() { return updater.wasLastUpdateApplied(); }
    public int getUpdateGateSkipCount()   { return updater.getGateSkipCount(); }
+   public double getLastInnovationInflation() { return updater.getInnovationInflation(); }
+   public int getInnovationInflatedCount()    { return updater.getInnovationInflatedCount(); }
    /** trace(H·P·Hᵀ) of the most recent update's S — the state-covariance share. */
    public double getLastHPHtTrace()      { return updater.getLastHPHtTrace(); }
    /** trace(R) of the most recent update's S — the measurement-noise share (post-inflation). */

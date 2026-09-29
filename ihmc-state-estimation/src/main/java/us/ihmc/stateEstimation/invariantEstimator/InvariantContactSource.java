@@ -21,7 +21,7 @@ public enum InvariantContactSource
     * reads the sole velocity built from the root twist the filter writes, and on the 2026-09-28 Alex RL log
     * that loop un-trusted loaded stance feet and diverged the filter. The invariant path therefore builds
     * them through {@code AvatarEstimatorThreadFactory.configureInvariantFootSwitches}: gate off (still a
-    * parameter), inertia-compensated force, and a relative-velocity check between the feet.
+    * parameter) and inertia-compensated force.
     */
    FOOT_SWITCHES,
    /**

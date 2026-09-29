@@ -72,6 +72,15 @@ public class InvariantUpdater
    private double residualNorm = Double.NaN;     // ‖residual‖ of the most recent update (contact or gravity)
    private boolean lastUpdateApplied = false;    // false when the conditioning gate skipped the last update
    private int gateSkipCount = 0;                // running count of gate-skipped updates
+
+   // Innovation gate (Huber-type), used only where the caller asks for it -- the contact update. When the
+   // NIS of an update exceeds the threshold, R is scaled by NIS / threshold and S rebuilt, so the update still
+   // applies but its correction is bounded to what an innovation at the threshold would give. A soft bound,
+   // not a rejection: a filter that has already drifted keeps being pulled back by its stance feet instead of
+   // locking them out. NIS is still reported at its raw, pre-inflation value.
+   private double innovationInflation = 1.0;     // R scale applied by the gate on the most recent update
+   private int innovationInflatedCount = 0;      // running count of updates the gate inflated
+   private final DMatrixRMaj inflatedMeasurementCovariance = new DMatrixRMaj(1, 1);
    private double lastHPHtTrace = Double.NaN;             // trace(H·P·Hᵀ) of the most recent S assembly
    private double lastMeasurementNoiseTrace = Double.NaN; // trace(R) of the most recent S assembly
    private double lastCorrectionRotationNorm = Double.NaN; // |δθ| (rad) of the most recent applied correction
@@ -131,6 +140,21 @@ public class InvariantUpdater
    }
 
    /**
+    * Same as {@link #update(InvariantState, int, Tuple3DReadOnly, Matrix3DReadOnly, boolean)}, with the
+    * innovation gate at {@code nisThreshold} (NaN or non-positive: no gate).
+    */
+   public void update(InvariantState state,
+                      int contactIndex,
+                      Tuple3DReadOnly bodyMeasurement,
+                      Matrix3DReadOnly bodyMeasurementCovariance,
+                      boolean includeLearnedModule,
+                      double nisThreshold)
+   {
+      updateContact(state, contactIndex, bodyMeasurement, bodyMeasurementCovariance, includeLearnedModule);
+      update(state, contactUpdater.getMeasurementJacobian(), contactUpdater.getResidual(), contactUpdater.getMeasurementCovariance(), nisThreshold);
+   }
+
+   /**
     * Applies one right-invariant correction to the state in place.
     *
     * @param state                 the state whose X and P are updated in place. Modified.
@@ -140,6 +164,17 @@ public class InvariantUpdater
     */
    public void update(InvariantState state, DMatrixRMaj H, DMatrixRMaj residual, DMatrixRMaj measurementCovariance)
    {
+      update(state, H, residual, measurementCovariance, Double.NaN);
+   }
+
+   /**
+    * Applies one right-invariant correction to the state in place, with the innovation gate at
+    * {@code nisThreshold}: above it, R is scaled by NIS / threshold before the gain is formed. NaN or
+    * non-positive disables the gate, which is then exactly the ungated update.
+    */
+   public void update(InvariantState state, DMatrixRMaj H, DMatrixRMaj residual, DMatrixRMaj measurementCovariance, double nisThreshold)
+   {
+      innovationInflation = 1.0;
       DMatrixRMaj covariance = state.getCovariance();
       int m = covariance.getNumRows();
       int z  = H.getNumRows();
@@ -198,6 +233,20 @@ public class InvariantUpdater
       innovationCovarianceInverseTimesResidual.reshape(z,1);
       CommonOps_DDRM.mult(innovationCovarianceInverse, residual, innovationCovarianceInverseTimesResidual);
       normalizedInnovationSquared = CommonOps_DDRM.dot(residual, innovationCovarianceInverseTimesResidual);
+
+      if (nisThreshold > 0.0 && normalizedInnovationSquared > nisThreshold)
+      {
+         // S' = HPHᵀ + αR, α = NIS/threshold. The Joseph form below then uses αR too, so P stays consistent
+         // with the gain actually applied.
+         innovationInflation = normalizedInnovationSquared / nisThreshold;
+         innovationInflatedCount++;
+         inflatedMeasurementCovariance.reshape(z, z);
+         CommonOps_DDRM.scale(innovationInflation, measurementCovariance, inflatedMeasurementCovariance);
+         measurementCovariance = inflatedMeasurementCovariance;
+         CommonOps_DDRM.multTransB(hTimesCovariance, H, innovationCovariance);
+         CommonOps_DDRM.addEquals(innovationCovariance, measurementCovariance);
+         CommonOps_DDRM.invert(innovationCovariance, innovationCovarianceInverse);
+      }
 
       gain.reshape(m,z);
       CommonOps_DDRM.mult(covarianceTimesHTranspose,innovationCovarianceInverse,gain);
@@ -260,6 +309,10 @@ public class InvariantUpdater
    public boolean wasLastUpdateApplied()        { return lastUpdateApplied; }
    /** Running count of updates skipped by the conditioning gate. */
    public int getGateSkipCount()                { return gateSkipCount; }
+   /** R scale the innovation gate applied on the most recent update; 1 when it did not act. */
+   public double getInnovationInflation()       { return innovationInflation; }
+   /** Running count of updates the innovation gate inflated. */
+   public int getInnovationInflatedCount()      { return innovationInflatedCount; }
    /** |δθ| (rad) of the most recent applied correction — H4 anchor-transient diagnostic. */
    public double getLastCorrectionRotationNorm() { return lastCorrectionRotationNorm; }
    /** |δv| (m/s) of the most recent applied correction. */
