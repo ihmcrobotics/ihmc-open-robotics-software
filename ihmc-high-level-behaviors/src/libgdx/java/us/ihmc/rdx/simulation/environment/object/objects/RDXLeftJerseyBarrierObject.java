@@ -1,11 +1,9 @@
 package us.ihmc.rdx.simulation.environment.object.objects;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
-import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
@@ -17,8 +15,7 @@ public class RDXLeftJerseyBarrierObject extends RDXEnvironmentObject
    public RDXLeftJerseyBarrierObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = RDXModelLoader.load("environmentObjects/jerseyBarrier/BarrierLeft.g3dj");
-      setRealisticModel(realisticModel);
+      loadRealisticModel("environmentObjects/jerseyBarrier/BarrierLeft.g3dj");
 
       double sizeX = 1.055;
       double sizeY = 0.46;

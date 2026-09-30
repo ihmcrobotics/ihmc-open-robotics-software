@@ -1,13 +1,11 @@
 package us.ihmc.rdx.simulation.environment.object.objects;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.tools.RDXModelLoader;
 
 public class RDXBottleObject extends RDXEnvironmentObject
 {
@@ -17,8 +15,7 @@ public class RDXBottleObject extends RDXEnvironmentObject
    public RDXBottleObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = RDXModelLoader.load("environmentObjects/mustard/mustard.glb");
-      setRealisticModel(realisticModel);
+      loadRealisticModel("environmentObjects/mustard/mustard.glb");
 
       double sizeX = 0.2;
       double sizeY = 0.2;
