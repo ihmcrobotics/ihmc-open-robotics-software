@@ -62,6 +62,8 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
    private final MomentumStateUpdater momentumStateUpdater;
    private final IMUBiasStateEstimator imuBiasStateEstimator;
+   /** False keeps the momentum estimator out of the logged tree (it still runs); see StateEstimatorParameters#logMomentumEstimator. */
+   private final boolean logMomentumEstimator;
    private final IMUYawDriftEstimator imuYawDriftEstimator;
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
@@ -244,8 +246,12 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
             throw new IllegalArgumentException("Unhandled mode: " + stateEstimatorParameters.getMomentumEstimatorMode());
       }
 
-      if (momentumStateUpdater != null)
+      logMomentumEstimator = stateEstimatorParameters.logMomentumEstimator();
+      if (momentumStateUpdater != null && logMomentumEstimator)
          registry.addChild(momentumStateUpdater.getRegistry());
+      else if (momentumStateUpdater != null)
+         // Off the tree, the parameter loader never reaches its parameters (SIMPLE and WRENCH_BASED have some): defaults.
+         new us.ihmc.yoVariables.parameters.DefaultParameterReader().readParametersInRegistry(momentumStateUpdater.getRegistry());
 
       copVisualizer = new CenterOfPressureVisualizer(footSwitches, registry);
 
@@ -451,7 +457,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       group.addChild(forceSensorStateUpdater.getSCS2YoGraphics());
       group.addChild(pelvisLinearStateUpdater.getSCS2YoGraphics());
       group.addChild(pelvisPoseHistoryCorrection.getSCS2YoGraphics());
-      if (momentumStateUpdater != null)
+      if (momentumStateUpdater != null && logMomentumEstimator)
          group.addChild(momentumStateUpdater.getSCS2YoGraphics());
       if (copVisualizer != null)
          group.addChild(copVisualizer.getSCS2YoGraphics());
