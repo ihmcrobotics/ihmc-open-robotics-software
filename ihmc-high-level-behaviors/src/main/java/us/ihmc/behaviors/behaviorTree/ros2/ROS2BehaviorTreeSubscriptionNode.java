@@ -21,6 +21,7 @@ public class ROS2BehaviorTreeSubscriptionNode
    private CheckpointNodeStateMessage checkpointNodeStateMessage;
    private SceneActionStateMessage sceneActionStateMessage;
    private MimicActionStateMessage mimicActionStateMessage;
+   private FollowActionStateMessage followActionStateMessage;
    private AI2RNodeStateMessage ai2rNodeStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
    private BuildingExplorationStateMessage buildingExplorationStateMessage;
@@ -215,6 +216,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setMimicActionStateMessage(MimicActionStateMessage mimicActionStateMessage)
    {
       this.mimicActionStateMessage = mimicActionStateMessage;
+   }
+
+   public FollowActionStateMessage getFollowActionStateMessage()
+   {
+      return followActionStateMessage;
+   }
+
+   public void setFollowActionStateMessage(FollowActionStateMessage followActionStateMessage)
+   {
+      this.followActionStateMessage = followActionStateMessage;
    }
 
    public AI2RNodeStateMessage getAI2RNodeStateMessage()

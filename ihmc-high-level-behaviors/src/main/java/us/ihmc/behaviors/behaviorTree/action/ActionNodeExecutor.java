@@ -1,7 +1,9 @@
 package us.ihmc.behaviors.behaviorTree.action;
 
+import behavior_msgs.BehaviorResultMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.LeafNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 
 /**
  * Base template for a robot action, like a hand pose or a walk goal.
@@ -24,5 +26,20 @@ public abstract class ActionNodeExecutor<S extends ActionNodeState<D>,
       state.setElapsedExecutionTime(0.0);
       state.getCommandedTrajectory().accessValue().clear();
       state.getCommandedJointTrajectories().clear(0);
+   }
+
+   /** A nested mimic or follow leaf reads this phase on the behavior thread. */
+   protected static void finishIfTerminal(LeafNodeState<?> leaf, long requestId, byte phase)
+   {
+      if (requestId == 0 || phase == BehaviorResultMessage.FAILED || phase == BehaviorResultMessage.REJECTED
+          || phase == BehaviorResultMessage.CANCELLED)
+      {
+         leaf.setFailed(true);
+         leaf.setIsExecuting(false);
+      }
+      else if (phase == BehaviorResultMessage.SUCCEEDED)
+      {
+         leaf.setIsExecuting(false);
+      }
    }
 }

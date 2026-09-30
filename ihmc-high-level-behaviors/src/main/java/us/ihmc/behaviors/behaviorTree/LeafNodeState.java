@@ -132,6 +132,19 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       return failed.getValue();
    }
 
+   /**
+    * Writes robot-owned flags on the operator side. {@code setValue} throws there because the robot owns the fields.
+    * {@code fromMessage} is the path that already accepts a robot value.
+    */
+   public void applyMonitorStatus(boolean active, boolean nextForExecution, boolean canExecuteValue, boolean executing, boolean failedValue)
+   {
+      setIsActive(active);
+      isNextForExecution.fromMessage(nextForExecution);
+      canExecute.fromMessage(canExecuteValue);
+      isExecuting.fromMessage(executing);
+      failed.fromMessage(failedValue);
+   }
+
    /** Should return a precalculated value from {@link LeafNodeExecutor#updateCurrentlyExecuting} */
    public boolean getIsExecuting()
    {

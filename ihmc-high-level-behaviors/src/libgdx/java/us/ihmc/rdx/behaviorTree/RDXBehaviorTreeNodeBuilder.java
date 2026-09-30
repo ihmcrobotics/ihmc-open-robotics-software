@@ -37,6 +37,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       REGISTRY.put(CheckpointNodeDefinition.class, RDXCheckpointNode::new);
       REGISTRY.put(SceneActionDefinition.class, RDXSceneAction::new);
       REGISTRY.put(MimicActionDefinition.class, RDXMimicAction::new);
+      REGISTRY.put(FollowActionDefinition.class, RDXFollowAction::new);
       REGISTRY.put(AI2RNodeDefinition.class, RDXAI2RNode::new);
       REGISTRY.put(DoorTraversalDefinition.class, RDXDoorTraversal::new);
       REGISTRY.put(BuildingExplorationDefinition.class, RDXBuildingExploration::new);

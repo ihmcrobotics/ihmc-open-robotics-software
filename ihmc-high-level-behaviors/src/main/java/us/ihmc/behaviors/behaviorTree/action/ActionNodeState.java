@@ -100,6 +100,12 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Le
       return elapsedExecutionTime.getValue();
    }
 
+   /** Operator-side write of the robot's elapsed time. Same ownership rule as {@link LeafNodeState#applyMonitorStatus}. */
+   public void applyMonitorElapsed(double elapsedSeconds)
+   {
+      elapsedExecutionTime.fromMessage(elapsedSeconds);
+   }
+
    public CRDTStatusSE3Trajectory getCommandedTrajectory()
    {
       return commandedTrajectory;

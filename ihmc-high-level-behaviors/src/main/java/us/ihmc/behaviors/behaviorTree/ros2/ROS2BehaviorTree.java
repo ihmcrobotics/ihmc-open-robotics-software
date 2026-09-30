@@ -95,4 +95,10 @@ public class ROS2BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
    {
       return behaviorTreeSubscription;
    }
+
+   /** Editors currently subscribed to this tree's outgoing CRDT. Zero means nobody is editing. */
+   public int getStateSubscriberCount()
+   {
+      return publisher.getPublicationMatchedStatus();
+   }
 }

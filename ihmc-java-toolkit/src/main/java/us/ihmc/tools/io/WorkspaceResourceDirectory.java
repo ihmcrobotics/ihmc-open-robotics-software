@@ -58,6 +58,21 @@ public class WorkspaceResourceDirectory extends WorkspaceDirectory
       initialize();
    }
 
+   /**
+    * {@code filesystemDirectory} is the resource directory itself. The classpath path is not appended to it.
+    * Used when the files live in a different source set than {@code classForLoading}.
+    */
+   public WorkspaceResourceDirectory(Class<?> classForLoading, Path filesystemDirectory, String subsequentOrAbsoluteResourcePackagePath)
+   {
+      this.classForLoading = classForLoading;
+      this.filesystemDirectory = filesystemDirectory == null ? null : filesystemDirectory.toAbsolutePath();
+      pathNecessaryForClasspathLoading = ResourceTools.getResourcesPathForClass(classForLoading)
+                                                      .resolve(subsequentOrAbsoluteResourcePackagePath);
+      pathNecessaryForClasspathLoadingString = ResourceTools.toResourceAccessStringWithCorrectSeparators(pathNecessaryForClasspathLoading);
+      String classpathPathToResourceDirectoryString = pathNecessaryForClasspathLoadingString.substring(1);
+      pathNecessaryForResourceExploring = classpathPathToResourceDirectoryString.replaceAll("/", ".");
+   }
+
    private void initialize()
    {
       pathNecessaryForClasspathLoadingString = ResourceTools.toResourceAccessStringWithCorrectSeparators(pathNecessaryForClasspathLoading);

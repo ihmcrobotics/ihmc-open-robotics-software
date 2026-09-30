@@ -10,8 +10,12 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.function.Consumer;
 
 /**
@@ -98,6 +102,39 @@ public abstract class BehaviorTree<R extends BehaviorTreeRootNode<T>, T extends 
    public void deleteRootNode()
    {
       modifyTreeTopology(BehaviorTreeTopologyOperationQueue::queueDestroyEntireTreeModify);
+   }
+
+   /**
+    * Replace the root with the tree in {@code jsonFileName}. A missing or unreadable file leaves the current root.
+    * Does not arm automatic execution.
+    */
+   @SuppressWarnings("unchecked")
+   public boolean loadBehavior(String jsonFileName)
+   {
+      WorkspaceResourceFile file = new WorkspaceResourceFile(saveFileDirectory, jsonFileName);
+      Path filesystemFile = file.getFilesystemFile();
+      if (!((filesystemFile != null && Files.exists(filesystemFile)) || file.getClasspathResource() != null))
+      {
+         LogTools.error("Cannot load behavior: {}", jsonFileName);
+         return false;
+      }
+
+      boolean[] loaded = {false};
+      modifyTreeTopology(queue ->
+      {
+         R newRoot = (R) nodeBuilder.createRootNode(getAndIncrementNextID());
+         T loadedNode = fileLoader.loadFromFile(newRoot, file, queue);
+         if (loadedNode == null)
+            return;
+
+         if (rootNode != null)
+            queue.queueDestroyEntireTreeModify();
+         newRoot.getDefinition().modify();
+         queue.queueSetRootNodeModify(newRoot);
+         queue.queueAppendChildModify((T) newRoot, loadedNode);
+         loaded[0] = true;
+      });
+      return loaded[0] && rootNode != null;
    }
 
    public void toMessage(BehaviorTreeStateMessage message)

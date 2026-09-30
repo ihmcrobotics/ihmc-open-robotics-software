@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import org.apache.commons.lang3.function.TriFunction;
+import behavior_msgs.BehaviorResultMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
@@ -14,7 +15,6 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.jros2.ROS2Node;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
@@ -22,7 +22,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
-import us.ihmc.tools.io.WorkspaceResourceFile;
 
 public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecutor, BehaviorTreeNodeExecutor<?, ?>>
 {
@@ -39,10 +38,32 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
          IsaacROSFoundationPoseCommunicatorMap foundationPose,
          TerrainMapData terrainMapData)
    {
+      this(syncedRobot,
+           peerClockEstimator,
+           ros2ControllerHelper,
+           kinematicsSimulationBuilder,
+           imageSensor,
+           yolo,
+           foundationPose,
+           terrainMapData,
+           new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees"));
+   }
+
+   public BehaviorTreeExecutor(
+         ROS2SyncedRobotModel syncedRobot,
+         ROS2PeerClockOffsetEstimator peerClockEstimator,
+         ROS2ControllerHelper ros2ControllerHelper,
+         TriFunction<DRCRobotModel, ROS2Node, RigidBodyTransformReadOnly, HumanoidKinematicsSimulation> kinematicsSimulationBuilder,
+         ImageSensor imageSensor,
+         YOLOv8DetectionExecutor yolo,
+         IsaacROSFoundationPoseCommunicatorMap foundationPose,
+         TerrainMapData terrainMapData,
+         WorkspaceResourceDirectory behaviorTreesDirectory)
+   {
       super(syncedRobot,
             ROS2ActorDesignation.ROBOT,
             peerClockEstimator,
-            new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees"),
+            behaviorTreesDirectory,
             new BehaviorTreeExecutorNodeBuilder());
 
       controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2ControllerHelper.getROS2Node(), syncedRobot);
@@ -93,31 +114,26 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
       LLMConditionExecutor.destroy();
    }
 
-   public void loadBehavior(String jsonFileName)
+   /** Default fails the leaf. {@link us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeExecutor} plays the mimic. */
+   public long startNestedMimic(String catalogName)
    {
-      WorkspaceResourceFile file = new WorkspaceResourceFile(getSaveFileDirectory(), jsonFileName);
-      if (file.getClasspathResource() != null)
-      {
-         modifyTreeTopology(topologyOperationQueue ->
-         {
-            if (rootNode == null)
-               topologyOperationQueue.queueDestroyEntireTree();
+      return 0L;
+   }
 
-            BehaviorTreeRootNodeExecutor rootNode = (BehaviorTreeRootNodeExecutor) getNodeBuilder().createRootNode(getAndIncrementNextID());
-            BehaviorTreeNodeExecutor<?, ?> loadedNode = getFileLoader().loadFromFile(rootNode, file, topologyOperationQueue);
+   public byte nestedMimicPhase(long requestId)
+   {
+      return BehaviorResultMessage.REJECTED;
+   }
 
-            if (loadedNode != null)
-            {
-               rootNode.getDefinition().modify();
-               topologyOperationQueue.queueSetRootNodeModify(rootNode);
-               topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
-            }
-         });
-      }
-      else
-      {
-         LogTools.error("Cannot load behavior: {}", jsonFileName);
-      }
+   /** Default fails the leaf. {@link us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeExecutor} runs follow. */
+   public long startNestedFollow(String targetLabel, boolean closestPerson)
+   {
+      return 0L;
+   }
+
+   public byte nestedFollowPhase(long requestId)
+   {
+      return BehaviorResultMessage.REJECTED;
    }
 
 }

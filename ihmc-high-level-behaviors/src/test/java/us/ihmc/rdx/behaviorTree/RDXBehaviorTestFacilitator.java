@@ -246,7 +246,15 @@ public class RDXBehaviorTestFacilitator
          yolo = null;
       }
 
-      behaviorTree = new ROS2BehaviorTreeExecutor(ros2, syncedRobot, kinematicsSimulationBuilder, zedSensor, yolo, foundationPose, null, peerClockEstimator);
+      behaviorTree = new ROS2BehaviorTreeExecutor(ros2,
+                                                   syncedRobot,
+                                                   kinematicsSimulationBuilder,
+                                                   zedSensor,
+                                                   yolo,
+                                                   foundationPose,
+                                                   null,
+                                                   peerClockEstimator,
+                                                   treeFilesDirectory);
 
       ImageMessage relayMessage = new ImageMessage();
       ROS2Publisher<ImageMessage> relayPublisher = relayNode.createPublisher(PerceptionAPI.EXPERIMENTAL_ZED_COLOR.get(RobotSide.LEFT));

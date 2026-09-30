@@ -5,7 +5,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
-import imgui.type.ImInt;
 import imgui.type.ImString;
 import toolbox_msgs.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
@@ -25,22 +24,12 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
-import us.ihmc.tools.IHMCCommonPaths;
-
-import java.io.File;
-import java.util.Arrays;
 
 public class RDXMimicAction extends RDXActionNode<MimicActionState, MimicActionDefinition>
 {
-   private static final String DEFAULT_ROS2_LOG_DIRECTORY = IHMCCommonPaths.LOGS_DIRECTORY.resolve("ros2").toString();
-   private static final String ROS2_LOG_DIRECTORY_MARKER = "/.ihmc/logs/ros2/";
-
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper waitTimeExitPolicyWidget;
-   private final ImInt replayFileIndex = new ImInt();
-   private final ImString logDirectory = new ImString(DEFAULT_ROS2_LOG_DIRECTORY, 512);
-   private final ImString logFileName = new ImString("", 255);
-   private String[] availableLogFiles = new String[0];
+   private final ImString catalogName = new ImString("", 255);
    private final ROS2Input<KinematicsToolboxOutputStatus> status;
    private final FullHumanoidRobotModel ghostFullRobotModel;
    private final OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
@@ -53,8 +42,7 @@ public class RDXMimicAction extends RDXActionNode<MimicActionState, MimicActionD
       waitTimeExitPolicyWidget = new ImDoubleWrapper(definition::getWaitTimeExitPolicy,
                                                      definition::setWaitTimeExitPolicy,
                                                      imDouble -> ImGui.inputDouble(labels.get("Wait Time Exit Policy"), imDouble));
-      logFileName.set(definition.getMimicFileName());
-      refreshAvailableLogFiles();
+      catalogName.set(definition.getMimicFileName());
 
       ghostFullRobotModel = syncedRobot.getRobotModel().createFullRobotModel();
       ghostOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(ghostFullRobotModel);
@@ -84,8 +72,8 @@ public class RDXMimicAction extends RDXActionNode<MimicActionState, MimicActionD
       super.update();
 
       String definitionFileName = definition.getMimicFileName();
-      if (!definitionFileName.equals(logFileName.get()))
-         logFileName.set(definitionFileName);
+      if (!definitionFileName.equals(catalogName.get()))
+         catalogName.set(definitionFileName);
 
       if (status != null && status.getMessageNotification().poll())
       {
@@ -137,36 +125,8 @@ public class RDXMimicAction extends RDXActionNode<MimicActionState, MimicActionD
 
       if (definition.getMimicActionType().getValue() == MimicActionType.EXECUTE_POLICY)
       {
-         if (ImGui.inputText(labels.get("Log Directory"), logDirectory, ImGuiInputTextFlags.EnterReturnsTrue))
-            refreshAvailableLogFiles();
-         if (ImGui.inputText(labels.get("Log File Name"), logFileName, ImGuiInputTextFlags.EnterReturnsTrue))
-            definition.setMimicFileName(toPortableMimicPath(logFileName.get(), logDirectory.get()));
-
-         if (availableLogFiles.length > 0)
-         {
-            replayFileIndex.set(0);
-            for (int i = 0; i < availableLogFiles.length; i++)
-            {
-               if (availableLogFiles[i].equals(logFileName.get()))
-               {
-                  replayFileIndex.set(i);
-                  break;
-               }
-            }
-
-            if (ImGui.combo(labels.get("Replay File"), replayFileIndex, availableLogFiles))
-            {
-               logFileName.set(availableLogFiles[replayFileIndex.get()]);
-               definition.setMimicFileName(toPortableMimicPath(logFileName.get(), logDirectory.get()));
-            }
-         }
-         else
-         {
-            ImGui.textDisabled("No replay files found in logs/ros2 directory.");
-         }
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Refresh Files")))
-            refreshAvailableLogFiles();
+         if (ImGui.inputText(labels.get("Catalog Name"), catalogName, ImGuiInputTextFlags.EnterReturnsTrue))
+            definition.setMimicFileName(catalogName.get().trim());
       }
    }
 
@@ -184,45 +144,5 @@ public class RDXMimicAction extends RDXActionNode<MimicActionState, MimicActionD
    {
       if (getState().getIsExecuting() && hasKinematicsStatus)
          ghostRobotGraphic.getRenderables(renderables, pool, baseUI.getPrimaryScene().getSceneLevelsToRender());
-   }
-
-   private void refreshAvailableLogFiles()
-   {
-      File directory = new File(logDirectory.get());
-      File[] files = directory.listFiles(File::isFile);
-      if (files == null)
-      {
-         availableLogFiles = new String[0];
-         return;
-      }
-
-      Arrays.sort(files, (a, b) -> b.getName().compareTo(a.getName()));
-      availableLogFiles = new String[files.length];
-      for (int i = 0; i < files.length; i++)
-         availableLogFiles[i] = files[i].getName();
-   }
-
-   private static String toPortableMimicPath(String rawPath, String directoryContext)
-   {
-      if (rawPath == null || rawPath.isBlank())
-         return rawPath;
-
-      File file = new File(rawPath);
-      if (!file.isAbsolute())
-         return rawPath;
-
-      String normalized = rawPath.replace('\\', '/');
-      int markerIndex = normalized.indexOf(ROS2_LOG_DIRECTORY_MARKER);
-      if (markerIndex >= 0)
-         return normalized.substring(markerIndex + ROS2_LOG_DIRECTORY_MARKER.length());
-
-      File contextDirectory = new File(directoryContext);
-      String contextAbsolute = contextDirectory.getAbsolutePath().replace('\\', '/');
-      if (!contextAbsolute.endsWith("/"))
-         contextAbsolute += "/";
-      if (normalized.startsWith(contextAbsolute))
-         return normalized.substring(contextAbsolute.length());
-
-      return file.getName();
    }
 }
