@@ -1,101 +1,106 @@
 {
-  "title": "HeightMapParameters",
-  "Drift offset filter": true,
-  "Flying points filter": false,
-  "Log height map": false,
-  "Min Depth To Accept": {
-    "value": 0.88,
-    "lowerBound": 0.0,
-    "upperBound": 2.0
+  "title" : "HeightMapParameters",
+  "Drift offset filter" : true,
+  "Flying points filter" : false,
+  "Log height map" : false,
+  "Min Depth To Accept" : {
+    "value" : 0.4,
+    "lowerBound" : 0.0,
+    "upperBound" : 2.0
   },
-  "Min height registration": {
-    "value": -1.5,
-    "lowerBound": -10.0,
-    "upperBound": 1.0
+  "Min height registration" : {
+    "value" : -1.5,
+    "lowerBound" : -10.0,
+    "upperBound" : 1.0
   },
-  "Max height registration": {
-    "value": 5.0,
-    "lowerBound": -1.0,
-    "upperBound": 10.0
+  "Max height registration" : {
+    "value" : 5.0,
+    "lowerBound" : -1.0,
+    "upperBound" : 10.0
   },
-  "Kalman filter prediction noise": {
-    "value": 0.001,
-    "lowerBound": 0.0,
-    "upperBound": 1.0
+  "Kalman filter prediction noise" : {
+    "value" : 0.001,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
   },
-  "Additional translational variance added": {
-    "value": 0.001,
-    "lowerBound": 0.0,
-    "upperBound": 1.0
+  "Additional translational variance added" : {
+    "value" : 0.001,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
   },
-  "Variance per meter": {
-    "value": 0.1,
-    "lowerBound": 0.0,
-    "upperBound": 1.0
+  "Variance per meter" : {
+    "value" : 0.1,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
   },
-  "Variance per translation speed": {
-    "value": 0.01,
-    "lowerBound": 0.0,
-    "upperBound": 1.0
+  "Variance per translation speed" : {
+    "value" : 0.01,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
   },
-  "Variance per rotation speed": {
-    "value": 0.01,
-    "lowerBound": 0.0,
-    "upperBound": 1.0
+  "Variance per rotation speed" : {
+    "value" : 0.01,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
   },
-  "Min Clamp Height": {
-    "value": -6.5536,
-    "lowerBound": -8.0,
-    "upperBound": 8.0
+  "Min Clamp Height" : {
+    "value" : -6.5536,
+    "lowerBound" : -8.0,
+    "upperBound" : 8.0
   },
-  "Max Clamp Height": {
-    "value": 6.5536,
-    "lowerBound": -8.0,
-    "upperBound": 8.0
+  "Max Clamp Height" : {
+    "value" : 6.5536,
+    "lowerBound" : -8.0,
+    "upperBound" : 8.0
   },
-  "Cell size": {
-    "value": 0.02,
-    "lowerBound": 0.01,
-    "upperBound": 0.06
+  "Cell size" : {
+    "value" : 0.02,
+    "lowerBound" : 0.01,
+    "upperBound" : 0.06
   },
-  "Local width in meters": {
-    "value": 4.0,
-    "lowerBound": 1.0,
-    "upperBound": 4.5
+  "Local width in meters" : {
+    "value" : 4.0,
+    "lowerBound" : 1.0,
+    "upperBound" : 4.5
   },
-  "Global width in meters": {
-    "value": 4.0,
-    "lowerBound": 1.0,
-    "upperBound": 4.5
+  "Global width in meters" : {
+    "value" : 4.0,
+    "lowerBound" : 1.0,
+    "upperBound" : 4.5
   },
-  "ICP filter": true,
-  "ICP rotation enabled": true,
-  "ICP max iterations": 5,
-  "ICP min correspondence count": 50,
-  "ICP max horizontal drift": {
-    "value": 0.05,
-    "lowerBound": 0.0,
-    "upperBound": 0.1
+  "ICP filter" : true,
+  "ICP rotation enabled" : true,
+  "ICP max iterations" : 8,
+  "ICP min correspondence count" : 50,
+  "ICP max horizontal drift" : {
+    "value" : 0.05,
+    "lowerBound" : 0.0,
+    "upperBound" : 0.1
   },
-  "ICP outlier distance threshold": {
-    "value": 0.05,
-    "lowerBound": 0.0,
-    "upperBound": 0.5
+  "ICP outlier distance threshold" : {
+    "value" : 0.05,
+    "lowerBound" : 0.0,
+    "upperBound" : 0.5
   },
-  "ICP variance per meter of correction": {
-    "value": 0.1,
-    "lowerBound": 0.0,
-    "upperBound": 1.0
+  "ICP variance per meter of correction" : {
+    "value" : 0.1,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
   },
-  "ICP convergence Z meters": {
-    "value": 0.002,
-    "lowerBound": 0.0,
-    "upperBound": 0.05
+  "ICP convergence Z meters" : {
+    "value" : 0.002,
+    "lowerBound" : 0.0,
+    "upperBound" : 0.05
   },
-  "ICP convergence yaw degrees": {
-    "value": 2.0,
-    "lowerBound": 0.0,
-    "upperBound": 30.0
+  "ICP convergence yaw degrees" : {
+    "value" : 0.5,
+    "lowerBound" : 0.0,
+    "upperBound" : 30.0
   },
-  "Fill unseen cells": true
+  "Fill unseen cells" : true,
+  "Fill blend start distance" : {
+    "value" : 0.1,
+    "lowerBound" : 0.0,
+    "upperBound" : 2.0
+  }
 }

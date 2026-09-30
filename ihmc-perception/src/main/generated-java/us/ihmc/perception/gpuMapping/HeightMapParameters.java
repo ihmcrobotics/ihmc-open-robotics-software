@@ -44,6 +44,7 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final DoubleStoredPropertyKey icpConvergenceZMeters = keys.addDoubleKey("ICP convergence Z meters");
    public static final DoubleStoredPropertyKey icpConvergenceYawDegrees = keys.addDoubleKey("ICP convergence yaw degrees");
    public static final BooleanStoredPropertyKey fillUnseenCells = keys.addBooleanKey("Fill unseen cells");
+   public static final DoubleStoredPropertyKey fillBlendStartDistance = keys.addDoubleKey("Fill blend start distance");
 
    /**
     * Loads this property set.

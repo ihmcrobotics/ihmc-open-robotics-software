@@ -139,4 +139,9 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    {
       return get(fillUnseenCells);
    }
+
+   default double getFillBlendStartDistance()
+   {
+      return get(fillBlendStartDistance);
+   }
 }

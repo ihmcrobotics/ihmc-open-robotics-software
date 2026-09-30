@@ -137,4 +137,9 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    {
       set(HeightMapParameters.fillUnseenCells, fillUnseenCells);
    }
+
+   default void setFillBlendStartDistance(double fillBlendStartDistance)
+   {
+      set(HeightMapParameters.fillBlendStartDistance, fillBlendStartDistance);
+   }
 }
