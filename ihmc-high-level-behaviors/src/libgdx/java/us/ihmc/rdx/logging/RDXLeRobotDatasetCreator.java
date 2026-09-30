@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
+import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import imgui.type.ImString;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDataset;
@@ -22,9 +23,11 @@ import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.session.log.LogDataReader;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.tools.IHMCCommonPaths;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.awt.*;
-import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -41,15 +44,22 @@ public class RDXLeRobotDatasetCreator
    private final HumanoidJointNameMap jointMap;
    private final HumanoidRobotSensorInformation sensorInformation;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImString datasetsRootDirectory = new ImString(IHMCCommonPaths.LOGS_DIRECTORY.resolve("lerobot-datasets").toString(), 1024);
    private transient final ImString datasetName = new ImString(512);
    private transient final ImInt imTaskID = new ImInt();
    private transient final ImString imTaskName = new ImString(512);
+   private transient final ImString autoScrubVariableName = new ImString("q_right_ability_hand_index_q1", 512);
+   private transient final ImFloat autoScrubThreshold = new ImFloat(0.15f);
+   private transient final ImFloat autoScrubMinEpisodeDuration = new ImFloat(1.0f);
+   private transient String autoScrubVariableSearched;
+   private transient YoVariable autoScrubVariable;
    private transient final ImBoolean removalSelectionMode = new ImBoolean();
    private boolean[] episodesToRemove;
    private List<Path> datasets;
    private LeRobotDataset dataset;
    private BooleanSupplier generating;
    private final ImBoolean keepGenerating = new ImBoolean(false);
+   private volatile String finalizationStatus = "Not finalized";
    private int mouseHoveringEpisode = -1;
 
    public RDXLeRobotDatasetCreator(RDXSCS2LogSession logSession,
@@ -105,13 +115,14 @@ public class RDXLeRobotDatasetCreator
             }
             ImGui.separator();
 
+            ImGui.text("Datasets root:");
+            ImGuiTools.inputText(labels.getHidden("datasetsRoot"), datasetsRootDirectory);
             ImGui.text("Dataset name:");
             ImGuiTools.inputText(labels.getHidden("datasetName"), datasetName);
 
             if (ImGui.menuItem(labels.get("Create Dataset")))
             {
-               File logDirectory = logSession.getSession().getLogDirectory();
-               dataset = new LeRobotDataset(logDirectory.toPath().resolve(datasetName.get().trim()), jointMap, sensorInformation);
+               dataset = new LeRobotDataset(Path.of(datasetsRootDirectory.get()).resolve(datasetName.get().trim()), jointMap, sensorInformation);
                dataset.mkdirs();
                dataset.writeMetaJson();
                datasetName.clear();
@@ -152,20 +163,46 @@ public class RDXLeRobotDatasetCreator
          ImGui.setNextItemWidth(100.0f);
          ImGui.inputInt(labels.get("Auto Scrub Task ID Filter"), imTaskID);
 
+         ImGuiTools.inputText(labels.get("Auto Scrub Variable"), autoScrubVariableName);
+         ImGui.setNextItemWidth(100.0f);
+         ImGui.inputFloat(labels.get("Auto Scrub Threshold"), autoScrubThreshold);
+         ImGui.setNextItemWidth(100.0f);
+         ImGui.inputFloat(labels.get("Min Episode Duration (s)"), autoScrubMinEpisodeDuration);
+
+         String variableName = autoScrubVariableName.get().trim();
+         if (!variableName.equals(autoScrubVariableSearched))
+         {
+            autoScrubVariable = logSession.getSession().getRootRegistry().findVariable(variableName);
+            autoScrubVariableSearched = variableName;
+         }
+         if (autoScrubVariable == null)
+            ImGui.textColored(ImGuiTools.DARK_RED, "Variable not found in log");
+         else
+            ImGui.text("Current value: %.4f (%s threshold)".formatted(autoScrubVariable.getValueAsDouble(),
+                       autoScrubVariable.getValueAsDouble() > autoScrubThreshold.get() ? "above" : "below"));
+
          ImGui.text("Add episode:");
          ImGui.sameLine();
          ImGui.beginDisabled(imTaskName.get().trim().isEmpty() || (generating != null && generating.getAsBoolean()));
          if (ImGui.button(labels.get("From Buffer")))
-         {
-            dataset.addEpisode(imTaskName.get().trim(), logSession.getSession());
-         }
+            generating = dataset.addEpisode(imTaskName.get().trim(), logSession.getSession());
          ImGuiTools.previousWidgetTooltip("Add an episode from the current SCS 2 in/out points.");
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Auto Scrub")))
+         if (ImGui.button(labels.get("Auto Scrub (Task ID)")))
          {
             keepGenerating.set(true);
             generating = dataset.addEpisodesAutomatically(imTaskName.get().trim(), imTaskID.get(), logSession.getSession(), keepGenerating::get);
          }
+         ImGuiTools.previousWidgetTooltip("Scrub using the KST demonstrationTaskID variable.");
+         ImGui.sameLine();
+         ImGui.beginDisabled(autoScrubVariable == null);
+         if (ImGui.button(labels.get("Auto Scrub (Variable)")))
+         {
+            keepGenerating.set(true);
+            generating = dataset.addEpisodesAutomatically(imTaskName.get().trim(), variableName, autoScrubThreshold.get(),
+                                                          autoScrubMinEpisodeDuration.get(), logSession.getSession(), keepGenerating::get);
+         }
+         ImGui.endDisabled();
          ImGui.endDisabled();
          if (keepGenerating.get())
          {
@@ -175,7 +212,7 @@ public class RDXLeRobotDatasetCreator
                keepGenerating.set(false);
             ImGui.popStyleColor();
          }
-         ImGuiTools.previousWidgetTooltip("Scrub the log from the current position, add the next episode using the demonstrationTaskID variable.");
+         ImGuiTools.previousWidgetTooltip("Start an episode while the selected log variable is above its threshold.");
 
          boolean noEpisodes = dataset == null || dataset.getEpisodes().isEmpty();
          if (noEpisodes)
@@ -200,6 +237,29 @@ public class RDXLeRobotDatasetCreator
                episodesToRemove = new boolean[dataset.getEpisodes().size()];
             ImGui.endDisabled();
          }
+
+         boolean notGenerating = generating == null || !generating.getAsBoolean();
+         ImGui.beginDisabled(noEpisodes || !notGenerating);
+         if (ImGui.button(labels.get("Finalize Dataset (LeRobot v3.0)")))
+         {
+            finalizationStatus = "Finalizing...";
+            ThreadTools.startAsDaemon(() ->
+            {
+               try
+               {
+                  dataset.finalizeDataset();
+                  finalizationStatus = "Finalized successfully";
+               }
+               catch (Exception exception)
+               {
+                  finalizationStatus = "Finalization failed: " + exception.getMessage();
+                  DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(exception);
+               }
+            }, "FinalizeLeRobotDataset");
+         }
+         ImGuiTools.previousWidgetTooltip("Write combined parquet, videos, statistics, tasks, and episode metadata after collection is complete.");
+         ImGui.endDisabled();
+         ImGui.text(finalizationStatus);
 
          if (ImGui.collapsingHeader(labels.get("Debug Operations")))
          {
@@ -315,7 +375,8 @@ public class RDXLeRobotDatasetCreator
 
    private void refresh()
    {
-      datasets = LeRobotDatasetTools.findLeRobotDatasetSubdirectories(logSession.getSession().getLogDataReader().getLogDirectory().toPath());
+      Path root = Path.of(datasetsRootDirectory.get());
+      datasets = Files.exists(root) ? LeRobotDatasetTools.findLeRobotDatasetSubdirectories(root) : List.of();
    }
 
    public void destroy()

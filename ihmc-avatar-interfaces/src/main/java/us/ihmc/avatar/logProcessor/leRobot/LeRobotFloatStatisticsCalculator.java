@@ -13,7 +13,7 @@ public class LeRobotFloatStatisticsCalculator
    private float mean = 0.0f;
    private float stddev = 0.0f;
    private float min = Float.MAX_VALUE;
-   private float max = Float.MIN_VALUE;
+   private float max = -Float.MAX_VALUE;
 
    /**
     * Add a value to the statistics calculation
@@ -93,5 +93,14 @@ public class LeRobotFloatStatisticsCalculator
    public float getMax()
    {
       return max;
+   }
+
+   public void mergeFrom(LeRobotFloatStatisticsCalculator other)
+   {
+      count += other.count;
+      sum += other.sum;
+      sumSquares += other.sumSquares;
+      min = Math.min(min, other.min);
+      max = Math.max(max, other.max);
    }
 }
