@@ -291,6 +291,23 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final us.ihmc.euclid.referenceFrame.FramePoint2D rawCoP = new us.ihmc.euclid.referenceFrame.FramePoint2D();
    private final FramePoint3D stationaryPoint = new FramePoint3D();
 
+   /**
+    * Which stance feet feed the kinematic velocity measurement, by load: with this on, a foot is trusted once its
+    * vertical force exceeds {@code invariantKinematicVelocityTrustLoad} of body weight and released below
+    * {@code invariantKinematicVelocityUntrustLoad} -- the kinematics-based estimator's rule (35% / 25% on Alex,
+    * {@code getForceInPercentOfWeightThresholdToTrustFoot}). Contact probability above 0.5 is still required.
+    * Contact detection holds a lifting foot for tens of milliseconds after it unloads, and a rising foot biases
+    * the measured pelvis velocity downward; the load releases it first. Uses the foot switches of
+    * {@link #setCenterOfPressureSources} ({@code getFootLoadPercentage}).
+    */
+   private final YoBoolean yoKinematicVelocityUseLoadGate = new YoBoolean("invariantKinematicVelocityUseLoadGate", registry);
+   private final YoDouble yoKinematicVelocityTrustLoad = new YoDouble("invariantKinematicVelocityTrustLoad", registry);
+   private final YoDouble yoKinematicVelocityUntrustLoad = new YoDouble("invariantKinematicVelocityUntrustLoad", registry);
+   private final SideDependentList<YoBoolean> yoKinematicVelocityLoadTrusted = new SideDependentList<>(new YoBoolean("invariantKinematicVelocityLoadTrustedLeft", registry),
+                                                                                                        new YoBoolean("invariantKinematicVelocityLoadTrustedRight", registry));
+   public static final double DEFAULT_KINEMATIC_VELOCITY_TRUST_LOAD = 0.35;
+   public static final double DEFAULT_KINEMATIC_VELOCITY_UNTRUST_LOAD = 0.25;
+
    // The gyro bias actually subtracted from the raw gyro this tick, AFTER the MAX_GYRO_BIAS clamp, plus a count
    // of ticks the clamp bound. This is the "is the upstream bias sane" diagnostic.
    //
@@ -513,6 +530,9 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoKinematicVelocityEnabled.set(false);
       yoKinematicVelocityStd.set(DEFAULT_KINEMATIC_VELOCITY_STD);
       yoKinematicVelocityUseCoP.set(false);
+      yoKinematicVelocityUseLoadGate.set(false);
+      yoKinematicVelocityTrustLoad.set(DEFAULT_KINEMATIC_VELOCITY_TRUST_LOAD);
+      yoKinematicVelocityUntrustLoad.set(DEFAULT_KINEMATIC_VELOCITY_UNTRUST_LOAD);
       yoCoPFilterBreakFrequency.set(DEFAULT_COP_FILTER_BREAK_FREQUENCY);
       // Default fallback: forward-kinematics-only contact detection on the estimator's own sole frames
       // (already refreshed each tick in doControl, so no frame-updater hook is needed here).
@@ -798,14 +818,26 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       double std = yoKinematicVelocityStd.getDoubleValue();
       kinematicVelocityCovariance.setIdentity();
       kinematicVelocityCovariance.scale(std * std);
+      boolean loadGate = yoKinematicVelocityUseLoadGate.getBooleanValue() && copSources != null;
       for (RobotSide side : RobotSide.values)
       {
+         if (loadGate)
+         {
+            double load = copSources.get(side).getFootLoadPercentage();
+            YoBoolean trusted = yoKinematicVelocityLoadTrusted.get(side);
+            if (!Double.isFinite(load))
+               trusted.set(false);
+            else if (load > yoKinematicVelocityTrustLoad.getDoubleValue())
+               trusted.set(true);
+            else if (load < yoKinematicVelocityUntrustLoad.getDoubleValue())
+               trusted.set(false);
+         }
          if (yoContactProbability.get(side).getDoubleValue() <= 0.5)
             continue;
+         if (loadGate && !yoKinematicVelocityLoadTrusted.get(side).getBooleanValue())
+            continue;
          MovingReferenceFrame soleFrame = soleFrames.get(side);
-         // ṙ: velocity of the sole origin relative to the pelvis. Expressed in the sole frame, a twist's linear
-         // part is the velocity of that frame's origin; rotate it into the pelvis frame. Independent of the
-         // root twist this filter writes -- joint velocities only.
+         // ṙ_c comes from joint velocities only, never the root twist this filter writes.
          // The stationary point c: sole origin or center of pressure, in the sole frame. ṙ_c is the velocity of
          // the foot's material point at c relative to the pelvis, from the relative twist (expressed in the sole
          // frame, so c is expressed there too).
