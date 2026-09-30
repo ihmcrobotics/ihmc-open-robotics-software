@@ -645,6 +645,11 @@ public class AvatarEstimatorThreadFactory
          footSwitches.put(robotSide, footSwitch);
       }
       pairInvariantFootSwitches(footSwitches);
+      // The same switches give the kinematic velocity measurement its center of pressure (when enabled).
+      SideDependentList<java.util.List<? extends us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly>> contactPoints = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+         contactPoints.put(robotSide, bipedFeet.get(robotSide).getContactPoints2D());
+      invariantEstimator.setCenterOfPressureSources(footSwitches, contactPoints);
 
       return new FootSwitchContactProbabilityProvider(footSwitches, getStateEstimatorParameters().getEstimatorDT(), getEstimatorRegistry());
    }

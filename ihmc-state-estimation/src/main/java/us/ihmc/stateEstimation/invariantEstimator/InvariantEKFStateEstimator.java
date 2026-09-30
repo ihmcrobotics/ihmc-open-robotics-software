@@ -273,6 +273,24 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final us.ihmc.euclid.matrix.Matrix3D kinematicVelocityCovariance = new us.ihmc.euclid.matrix.Matrix3D();
    public static final double DEFAULT_KINEMATIC_VELOCITY_STD = 0.1; // m/s
 
+   /**
+    * Which point of a stance foot the kinematic velocity measurement assumes is not moving. The sole origin is
+    * violated by a rolling foot: rolling onto the toe lifts the sole origin, which biases the measured pelvis
+    * velocity downward (-13..-18 mm/s on the 2026-09-28 Alex RL log). With this on, the point is the foot's
+    * center of pressure from its foot switch -- low-pass filtered, projected into the foot polygon when noise
+    * puts it outside, the sole origin when the switch has none (too little force) -- as the kinematics-based
+    * estimator does ({@code trustCoPAsNonSlippingContactPoint}). Needs {@link #setCenterOfPressureSources}.
+    */
+   private final YoBoolean yoKinematicVelocityUseCoP = new YoBoolean("invariantKinematicVelocityUseCoP", registry);
+   private final YoDouble yoCoPFilterBreakFrequency = new YoDouble("invariantKinematicVelocityCoPBreakFrequency", registry);
+   public static final double DEFAULT_COP_FILTER_BREAK_FREQUENCY = 40.0; // Hz, Alex's DRC CoP filter
+   private SideDependentList<? extends us.ihmc.robotics.sensors.FootSwitchInterface> copSources = null;
+   private final SideDependentList<us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D> footPolygons = new SideDependentList<>();
+   private final SideDependentList<us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D> yoFilteredCoP = new SideDependentList<>();
+   private final SideDependentList<boolean[]> copFilterInitialized = new SideDependentList<>(new boolean[1], new boolean[1]);
+   private final us.ihmc.euclid.referenceFrame.FramePoint2D rawCoP = new us.ihmc.euclid.referenceFrame.FramePoint2D();
+   private final FramePoint3D stationaryPoint = new FramePoint3D();
+
    // The gyro bias actually subtracted from the raw gyro this tick, AFTER the MAX_GYRO_BIAS clamp, plus a count
    // of ticks the clamp bound. This is the "is the upstream bias sane" diagnostic.
    //
@@ -494,6 +512,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoContactNISGate.set(Double.NaN); // off; chi2_3(DEFAULT_CONTACT_NIS_GATE_PROBABILITY) = 16.27 when enabled for diagnosis
       yoKinematicVelocityEnabled.set(false);
       yoKinematicVelocityStd.set(DEFAULT_KINEMATIC_VELOCITY_STD);
+      yoKinematicVelocityUseCoP.set(false);
+      yoCoPFilterBreakFrequency.set(DEFAULT_COP_FILTER_BREAK_FREQUENCY);
       // Default fallback: forward-kinematics-only contact detection on the estimator's own sole frames
       // (already refreshed each tick in doControl, so no frame-updater hook is needed here).
       contactProbabilityProvider = new KinematicContactDetector(soleFrames, null, dt);
@@ -701,6 +721,70 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       updateYoVariables();
    }
 
+   /**
+    * Where each foot's center of pressure comes from, for {@code invariantKinematicVelocityUseCoP}: the foot
+    * switches (whose {@code getCenterOfPressure} is in their sole frame, NaN without enough force) and each
+    * foot's contact points in its sole frame (the polygon a noisy CoP is projected into).
+    */
+   public void setCenterOfPressureSources(SideDependentList<? extends us.ihmc.robotics.sensors.FootSwitchInterface> footSwitches,
+                                          SideDependentList<? extends java.util.List<? extends us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly>> footContactPoints)
+   {
+      copSources = footSwitches;
+      for (RobotSide side : RobotSide.values)
+      {
+         MovingReferenceFrame sole = soleFrames.get(side);
+         us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D polygon = new us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D(sole);
+         for (us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly point : footContactPoints.get(side))
+         {
+            us.ihmc.euclid.referenceFrame.FramePoint3D p3 = new us.ihmc.euclid.referenceFrame.FramePoint3D(point.getReferenceFrame(), point.getX(), point.getY(), 0.0);
+            p3.changeFrame(sole);
+            polygon.addVertex(p3.getX(), p3.getY());
+         }
+         polygon.update();
+         footPolygons.put(side, polygon);
+         if (yoFilteredCoP.get(side) == null)
+            yoFilteredCoP.put(side, new us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D("invariantKinematicVelocityCoP" + side.getPascalCaseName(), sole, registry));
+      }
+   }
+
+   /**
+    * The stationary point of a stance foot in its sole frame: the filtered, polygon-projected center of pressure,
+    * or the sole origin when CoP use is off, has no source, or the switch reports none.
+    */
+   private void packStationaryPoint(RobotSide side, MovingReferenceFrame soleFrame)
+   {
+      stationaryPoint.setToZero(soleFrame);
+      if (!yoKinematicVelocityUseCoP.getBooleanValue() || copSources == null)
+         return;
+      us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly cop = copSources.get(side).getCenterOfPressure();
+      if (cop == null || cop.containsNaN())
+      {
+         rawCoP.setToZero(soleFrame);
+      }
+      else
+      {
+         stationaryPoint.setIncludingFrame(cop.getReferenceFrame(), cop.getX(), cop.getY(), 0.0);
+         stationaryPoint.changeFrame(soleFrame);
+         rawCoP.setIncludingFrame(soleFrame, stationaryPoint.getX(), stationaryPoint.getY());
+         us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D polygon = footPolygons.get(side);
+         if (!polygon.isPointInside(rawCoP))
+            polygon.orthogonalProjection(rawCoP);
+      }
+      us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D filtered = yoFilteredCoP.get(side);
+      if (!copFilterInitialized.get(side)[0])
+      {
+         filtered.set(rawCoP);
+         copFilterInitialized.get(side)[0] = true;
+      }
+      else
+      {
+         double alpha = us.ihmc.yoVariables.filters.AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(yoCoPFilterBreakFrequency.getDoubleValue(), dt);
+         filtered.setX(alpha * filtered.getX() + (1.0 - alpha) * rawCoP.getX());
+         filtered.setY(alpha * filtered.getY() + (1.0 - alpha) * rawCoP.getY());
+      }
+      stationaryPoint.setIncludingFrame(soleFrame, filtered.getX(), filtered.getY(), 0.0);
+   }
+
    /** One body-velocity update per foot in contact: y = −(ω × r + ṙ), all in the pelvis frame. */
    private void updateKinematicVelocity()
    {
@@ -722,10 +806,14 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          // ṙ: velocity of the sole origin relative to the pelvis. Expressed in the sole frame, a twist's linear
          // part is the velocity of that frame's origin; rotate it into the pelvis frame. Independent of the
          // root twist this filter writes -- joint velocities only.
+         // The stationary point c: sole origin or center of pressure, in the sole frame. ṙ_c is the velocity of
+         // the foot's material point at c relative to the pelvis, from the relative twist (expressed in the sole
+         // frame, so c is expressed there too).
+         packStationaryPoint(side, soleFrame);
          soleFrame.getTwistRelativeToOther(pelvisFrame, soleRelativeTwist);
-         soleRelativeVelocity.setIncludingFrame(soleFrame, soleRelativeTwist.getLinearPart());
+         soleRelativeTwist.getLinearVelocityAt(stationaryPoint, soleRelativeVelocity);
          soleRelativeVelocity.changeFrame(pelvisFrame);
-         soleInPelvis.setToZero(soleFrame);
+         soleInPelvis.setIncludingFrame(stationaryPoint);
          soleInPelvis.changeFrame(pelvisFrame);
          kinematicBodyVelocity.cross(angularVelocity, soleInPelvis); // ω × r, ω already in the pelvis frame
          kinematicBodyVelocity.add(soleRelativeVelocity);
