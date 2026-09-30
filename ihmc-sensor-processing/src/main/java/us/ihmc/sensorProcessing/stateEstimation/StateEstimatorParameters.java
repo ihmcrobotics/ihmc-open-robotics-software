@@ -265,6 +265,15 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       return false;
    }
 
+   /**
+    * Whether the momentum (center-of-mass) estimator's variables are part of the logged registry tree. The
+    * estimator runs either way; this only decides whether its registry and graphics are published. Default true.
+    */
+   public boolean logMomentumEstimator()
+   {
+      return true;
+   }
+
    public String[] getIMUsToUseInMomentumEstimator()
    {
       return null;
