@@ -257,8 +257,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     * (probability above 0.5) gives the body velocity {@code −(ω × r + ṙ)} from leg kinematics, applied after the
     * contact updates. It is what keeps the kinematics-based estimator's velocity from running away; the contact
     * update alone observes velocity only through position, and on the 2026-09-28 Alex RL log a few tens of
-    * milliseconds of wrong contact grew into multi-m/s divergence before position caught it. Live switch and
-    * isotropic body-frame standard deviation.
+    * milliseconds of wrong contact grew into multi-m/s divergence before position caught it. Live switch (on by
+    * default) and isotropic body-frame standard deviation.
     */
    private final YoBoolean yoKinematicVelocityEnabled = new YoBoolean("invariantKinematicVelocityEnabled", registry);
    private final YoDouble yoKinematicVelocityStd = new YoDouble("invariantKinematicVelocityStd", registry);
@@ -306,6 +306,18 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final SideDependentList<YoBoolean> yoKinematicVelocityLoadTrusted = new SideDependentList<>(new YoBoolean("invariantKinematicVelocityLoadTrustedLeft", registry),
                                                                                                         new YoBoolean("invariantKinematicVelocityLoadTrustedRight", registry));
    public static final double DEFAULT_KINEMATIC_VELOCITY_TRUST_LOAD = 0.35;
+
+   /**
+    * Contact position-update variance (m², isotropic) used while the kinematic velocity measurement is enabled;
+    * non-positive or NaN keeps the configured contact noise. The position anchors sit at the sole origin, which a
+    * rolling foot lifts, and their update then drags velocity down: on the 2026-09-28 Alex RL log, with the
+    * kinematic velocity measurement on, the steady vertical velocity bias fell monotonically from -9 mm/s at the
+    * configured 1 cm to +-1 mm/s at 1 m, and the rest-height drift fell with it. The contact update has no
+    * rotation block, so this costs only global position, which the velocity measurement no longer needs. The
+    * touchdown re-seed keeps the configured covariance.
+    */
+   private final YoDouble yoContactVarianceWithKinematicVelocity = new YoDouble("invariantContactVarianceWithKinematicVelocity", registry);
+   public static final double DEFAULT_CONTACT_VARIANCE_WITH_KINEMATIC_VELOCITY = 1.0; // (1 m)^2
    public static final double DEFAULT_KINEMATIC_VELOCITY_UNTRUST_LOAD = 0.25;
 
    // The gyro bias actually subtracted from the raw gyro this tick, AFTER the MAX_GYRO_BIAS clamp, plus a count
@@ -527,10 +539,13 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoContactNISLowerBound.set(contactNISDistribution.inverseCumulativeProbability(lowerTail));
       yoContactNISUpperBound.set(contactNISDistribution.inverseCumulativeProbability(1.0 - lowerTail));
       yoContactNISGate.set(Double.NaN); // off; chi2_3(DEFAULT_CONTACT_NIS_GATE_PROBABILITY) = 16.27 when enabled for diagnosis
-      yoKinematicVelocityEnabled.set(false);
+      // Defaults measured on the 2026-09-28 Alex RL log (replay, full session): no divergence (time at |v| > 2 m/s
+      // 1.4-3.2% -> 0 on the invariant arms) and a steady vertical velocity bias of +-1 mm/s (DRC: +4).
+      yoKinematicVelocityEnabled.set(true);
       yoKinematicVelocityStd.set(DEFAULT_KINEMATIC_VELOCITY_STD);
-      yoKinematicVelocityUseCoP.set(false);
-      yoKinematicVelocityUseLoadGate.set(false);
+      yoKinematicVelocityUseCoP.set(true);
+      yoKinematicVelocityUseLoadGate.set(true);
+      yoContactVarianceWithKinematicVelocity.set(DEFAULT_CONTACT_VARIANCE_WITH_KINEMATIC_VELOCITY);
       yoKinematicVelocityTrustLoad.set(DEFAULT_KINEMATIC_VELOCITY_TRUST_LOAD);
       yoKinematicVelocityUntrustLoad.set(DEFAULT_KINEMATIC_VELOCITY_UNTRUST_LOAD);
       yoCoPFilterBreakFrequency.set(DEFAULT_COP_FILTER_BREAK_FREQUENCY);
@@ -718,6 +733,12 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
             yoReseedArmed.get(side).set(reseedLatches.get(side).isArmed());
          }
 
+         double weakVariance = yoContactVarianceWithKinematicVelocity.getDoubleValue();
+         if (yoKinematicVelocityEnabled.getBooleanValue() && weakVariance > 0.0)
+         {
+            inflatedContactCovariance.setIdentity();
+            inflatedContactCovariance.scale(weakVariance);
+         }
          double inflation = measurementInflation(contactProbability);
          inflatedContactCovariance.scale(inflation);
          yoContactRInflation.get(side).set(inflation);
