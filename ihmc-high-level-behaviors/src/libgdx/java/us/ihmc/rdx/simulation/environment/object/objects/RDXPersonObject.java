@@ -16,7 +16,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
-import us.ihmc.behaviors.simulation.RigidBodySceneObjectDefinitions;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -99,7 +98,7 @@ public class RDXPersonObject extends RDXEnvironmentObject
    private RDXPersonObject(String name, RDXEnvironmentObjectFactory factory, boolean ignored)
    {
       super(name, factory);
-      String modelPath = RigidBodySceneObjectDefinitions.PERSON_ANIMATED_MODEL_FILE_PATH;
+      String modelPath = "environmentObjects/person/personAnimated.glb";
       LogTools.info("Person '{}' loading poseable model {}", name, modelPath);
       loadRealisticModel(modelPath);
       isolateInstanceMaterials();

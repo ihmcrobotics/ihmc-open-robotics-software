@@ -1,23 +1,14 @@
-package us.ihmc.behaviors.simulation.door;
+package us.ihmc.rdx.simulation.environment.object;
 
 /**
- * The parameters for the real and simulated door.
- * We are trying to keep the simulation door representing the
- * real door pretty much exactly for now.
- *
- * Remeasured by dcalvert on 7/11/23:
- * Push door (real):
- * Thickness - 3.4 cm
- * Lever axis inset - 6.2 cm
- * Lever axis height - 91.5 cm
- * 91.4 cm panel width
- * 203.3 cm panel height
- * 5 cm lever away from panel
- * 9 cm lever length
+ * Dimensions and visual paths for the lab door.
+ * <p>
+ * Remeasured by dcalvert on 7/11/23. Push door (real): thickness 3.4 cm, lever axis inset 6.2 cm,
+ * lever axis height 91.5 cm, panel 91.4 cm by 203.3 cm, lever 5 cm off the panel and 9 cm long.
+ * Panel width, height, and thickness below are the simulation model, measured in Blender.
  */
 public class DoorModelParameters
 {
-   /* These measurements from the simulation door model, measured in Blender. */
    /** The thickness of the door panel. */
    public static final double DOOR_PANEL_THICKNESS = 0.034;
    /** The vertical length of the panel. */
@@ -46,6 +37,8 @@ public class DoorModelParameters
     */
    public static final double DOOR_LEVER_MAX_TORQUE = 1.0;
    public static final double DOOR_BOLT_HEIGHT = 0.015;
-   public static final double DOOR_BOLT_HOLE_HEIGHT = DOOR_BOLT_HEIGHT + 0.01;
-   public static final double DOOR_BOLT_TRAVEL = 0.015;
+
+   public static final String DOOR_PANEL_VISUAL_MODEL_FILE_PATH = "environmentObjects/doorPanel/doorPanel.g3dj";
+   public static final String DOOR_FRAME_VISUAL_MODEL_FILE_PATH = "environmentObjects/door/doorFrame/DoorFrame.g3dj";
+   public static final String DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH = "environmentObjects/door_handle/door_handle.glb";
 }

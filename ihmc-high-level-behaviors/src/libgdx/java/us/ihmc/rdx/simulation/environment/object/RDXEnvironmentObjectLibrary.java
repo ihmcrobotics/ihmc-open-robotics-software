@@ -19,6 +19,7 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXRightJerseyBarrierObject.FACTORY);
       objectFactories.add(RDXLeftJerseyBarrierObject.FACTORY);
       objectFactories.add(RDXStairsObject.FACTORY);
+      objectFactories.add(RDXWallObject.FACTORY);
       objectFactories.add(RDXWorkPlatformObject.FACTORY);
       objectFactories.add(RDXPersonObject.FACTORY);
       objectFactories.add(RDXOrangeShirtPersonObject.FACTORY);

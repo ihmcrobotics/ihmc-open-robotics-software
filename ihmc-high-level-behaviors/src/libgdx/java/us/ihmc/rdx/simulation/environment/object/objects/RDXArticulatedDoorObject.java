@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import org.bytedeco.javacpp.DoublePointer;
-import us.ihmc.behaviors.simulation.door.DoorSceneNodeDefinitions;
+import us.ihmc.rdx.simulation.environment.object.DoorModelParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static us.ihmc.behaviors.simulation.door.DoorModelParameters.*;
+import static us.ihmc.rdx.simulation.environment.object.DoorModelParameters.*;
 
 /**
  * One door: frame, panel, and lever.
@@ -60,9 +60,9 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
    private final RigidBodyTransform leverOffsetFromPanel = new RigidBodyTransform();
    private final RigidBodyTransform panelVisualOffset = new RigidBodyTransform();
    private final RigidBodyTransform leverOtherSideOffset = new RigidBodyTransform();
-   /** Front lever mesh: door_handle.glb yawed onto the arm, rolled 180 about X, one panel thickness out. */
+   /** Front lever mesh: door_handle.glb yawed onto the arm, two panel thicknesses out. */
    private final RigidBodyTransform leverMeshOffset = new RigidBodyTransform();
-   /** Other-side lever mesh. Same orientation, one panel thickness the other way. */
+   /** Other-side lever mesh. Same local +X offset; the 180° pitch sends it the other way through the panel. */
    private final RigidBodyTransform leverOtherSideMeshOffset = new RigidBodyTransform();
 
    private final RigidBodyTransform hingeRotation = new RigidBodyTransform();
@@ -113,11 +113,9 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
       leverOtherSideOffset.appendPitchRotation(Math.PI);
       leverOtherSideOffset.getTranslation().setX(DOOR_PANEL_THICKNESS);
       leverMeshOffset.appendYawRotation(-Math.PI / 2.0);
-      leverMeshOffset.prependRollRotation(Math.PI);
-      leverMeshOffset.getTranslation().setX(DOOR_PANEL_THICKNESS);
+      leverMeshOffset.getTranslation().add(DOOR_PANEL_THICKNESS * 2, 0.0, 0.0);
       leverOtherSideMeshOffset.appendYawRotation(-Math.PI / 2.0);
-      leverOtherSideMeshOffset.prependRollRotation(Math.PI);
-      leverOtherSideMeshOffset.getTranslation().setX(-DOOR_PANEL_THICKNESS);
+      leverOtherSideMeshOffset.getTranslation().add(DOOR_PANEL_THICKNESS * 2, 0.0, 0.0);
 
       panelToFrame.set(panelOffsetFromFrame);
       leverToPanel.set(leverOffsetFromPanel);
@@ -141,10 +139,10 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
                                                                                                   leverOtherSideFrame,
                                                                                                   leverOtherSideMeshOffset);
 
-      setRealisticModel(RDXModelLoader.load(DoorSceneNodeDefinitions.DOOR_FRAME_VISUAL_MODEL_FILE_PATH));
-      panelInstance = new RDXModelInstance(RDXModelLoader.load(DoorSceneNodeDefinitions.DOOR_PANEL_VISUAL_MODEL_FILE_PATH));
-      leverInstance = new RDXModelInstance(RDXModelLoader.load(DoorSceneNodeDefinitions.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH));
-      leverOtherSideInstance = new RDXModelInstance(RDXModelLoader.load(DoorSceneNodeDefinitions.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH));
+      setRealisticModel(RDXModelLoader.load(DoorModelParameters.DOOR_FRAME_VISUAL_MODEL_FILE_PATH));
+      panelInstance = new RDXModelInstance(RDXModelLoader.load(DoorModelParameters.DOOR_PANEL_VISUAL_MODEL_FILE_PATH));
+      leverInstance = new RDXModelInstance(RDXModelLoader.load(DoorModelParameters.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH));
+      leverOtherSideInstance = new RDXModelInstance(RDXModelLoader.load(DoorModelParameters.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH));
 
       // Two jambs beside the panel. Panel and lever keep the meshes extracted from their g3dj.
       RigidBodyTransform hingeJambOffset = new RigidBodyTransform();
@@ -169,8 +167,8 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
       hingeJambInstance.setOpacity(0.4f);
       latchJambInstance.setOpacity(0.4f);
 
-      panelCollisionFile = RDXSimpleObject.findCollisionMeshFile(DoorSceneNodeDefinitions.DOOR_PANEL_VISUAL_MODEL_FILE_PATH);
-      leverCollisionFile = RDXSimpleObject.findCollisionMeshFile(DoorSceneNodeDefinitions.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH);
+      panelCollisionFile = RDXSimpleObject.findCollisionMeshFile(DoorModelParameters.DOOR_PANEL_VISUAL_MODEL_FILE_PATH);
+      leverCollisionFile = RDXSimpleObject.findCollisionMeshFile(DoorModelParameters.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH);
       panelCollisionInstance = collisionInstance(panelCollisionFile, "panel");
       leverCollisionInstance = collisionInstance(leverCollisionFile, "lever");
       leverOtherSideCollisionInstance = collisionInstance(leverCollisionFile, "lever");
@@ -252,14 +250,23 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
       }
       wasOverridingJointPositions = overriding;
 
-      if (!overriding)
+      boolean leverUnlatched = Math.abs(leverSliderValue[0]) >= (float) Dynamics.UNLATCH_LEVER_ANGLE;
+      boolean hingeCaught = hingeSliderValue[0] <= (float) Dynamics.LATCH_CATCH_ANGLE;
+      boolean hingeLocked = !leverUnlatched && hingeCaught;
+      if (!overriding || hingeLocked)
          ImGui.beginDisabled();
       ImGui.sliderFloat("Hinge##articulatedDoorHinge", hingeSliderValue, 0.0f, (float) HINGE_LIMIT, "%.3f rad");
+      if (!overriding || hingeLocked)
+         ImGui.endDisabled();
+      if (!overriding)
+         ImGui.beginDisabled();
       ImGui.sliderFloat("Lever##articulatedDoorLever", leverSliderValue, (float) -DOOR_LEVER_MAX_TURN_ANGLE, (float) DOOR_LEVER_MAX_TURN_ANGLE, "%.3f rad");
       if (!overriding)
          ImGui.endDisabled();
       else
       {
+         if (hingeLocked)
+            hingeSliderValue[0] = 0.0f;
          if (Math.abs(hingeAngle - hingeSliderValue[0]) > 1.0e-5)
             setHingeAngle(hingeSliderValue[0]);
          if (Math.abs(leverAngle - leverSliderValue[0]) > 1.0e-5)
@@ -461,8 +468,8 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
 
    public static final class Dynamics
    {
-      /** Lever angle, either direction, at which the panel is free to swing. */
-      public static final double UNLATCH_LEVER_ANGLE = 0.5 * DOOR_LEVER_MAX_TURN_ANGLE;
+      /** Lever angle, either direction, at which the panel is free to swing. Below this the hinge stays shut. */
+      public static final double UNLATCH_LEVER_ANGLE = 0.5;
       /** How close to closed the panel must be before a released lever catches it. */
       public static final double LATCH_CATCH_ANGLE = 0.05;
 
@@ -642,10 +649,13 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
          }
 
          boolean unlatched = Math.abs(lever) >= UNLATCH_LEVER_ANGLE;
-         boolean caught = Math.abs(hinge) <= LATCH_CATCH_ANGLE;
+         boolean caught = hinge <= LATCH_CATCH_ANGLE;
+         DoublePointer damping = model.dof_damping();
          if (!unlatched && caught)
          {
-            setHingeRange(range, ids.hingeJoint, 0.0, 1.0e-4);
+            // A positive-only sliver still lets one push step run past the catch angle. Pin it shut.
+            setHingeRange(range, ids.hingeJoint, 0.0, 1.0e-8);
+            damping.put(ids.hingeDof, 1.0e6);
             data.qpos().put(ids.hingeQpos, 0.0);
             data.qvel().put(ids.hingeDof, 0.0);
             hinge = 0.0;
@@ -653,6 +663,7 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
          else
          {
             setHingeRange(range, ids.hingeJoint, 0.0, HINGE_LIMIT);
+            damping.put(ids.hingeDof, HINGE_DAMPING);
          }
          return new double[] {hinge, lever};
       }
