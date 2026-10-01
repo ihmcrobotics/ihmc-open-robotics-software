@@ -1,5 +1,6 @@
 package us.ihmc.rdx.simulation.environment.mujoco;
 
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.DoublePointer;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -11,15 +12,21 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
+import us.ihmc.rdx.simulation.environment.object.RDXInteractableObjectLibrary;
 import us.ihmc.rdx.simulation.environment.object.objects.RDXArticulatedDoorObject;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.simulation.mujoco.Mujoco;
 import us.ihmc.scs2.simulation.mujoco.Mujoco.mjData;
 import us.ihmc.scs2.simulation.mujoco.Mujoco.mjModel;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoMultiBodyDynamicsWorld;
+import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoMultiBodyRobot;
+import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoMultiBodyRobotFactory;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoPhysicsEngine;
+import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoRobot;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngine;
 import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimRigidBodyBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.io.File;
@@ -30,6 +37,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -43,10 +51,12 @@ import java.util.regex.Pattern;
  * Copies RDX environment-builder collisions into the running MuJoCo model.
  * <p>
  * When a visual GLB has a precomputed {@code <stem>_convex.stl} beside it, that hull is the
- * collision mesh. Objects without one keep their box or sphere. An articulated door is not a
- * static geom: it is a dynamic mechanism (welded frame, hinged panel, sprung lever). Adding or
- * removing an object rebuilds the world XML and recompiles, keeping the robot state. Dragging a
- * static object only writes that mocap pose. Dragging a door writes the frame body pose.
+ * collision mesh. Objects without one keep their box or sphere. Only classes registered in
+ * {@link RDXInteractableObjectLibrary} are free bodies. Everything else is mocap, so contact
+ * cannot move it and it adds no degrees of freedom. Dragging a free object writes its joint
+ * pose while it is selected. An
+ * articulated door is a separate mechanism (welded frame, hinged panel, sprung lever). Adding or
+ * removing an object rebuilds the world XML and recompiles, keeping the robot state.
  */
 public class RDXMujocoObjectCollisionSync implements Controller
 {
@@ -65,6 +75,8 @@ public class RDXMujocoObjectCollisionSync implements Controller
 
    private final AtomicReference<List<RDXArticulatedDoorObject.Dynamics>> doorCommands = new AtomicReference<>(List.of());
    private final Map<String, double[]> simulatedDoorJoints = new ConcurrentHashMap<>();
+   /** World pose of each dynamic object's collision body, written by physics and applied on the UI thread. */
+   private final Map<String, double[]> simulatedObjectPoses = new ConcurrentHashMap<>();
    private final Map<String, RDXArticulatedDoorObject.JointIds> doorIds = new HashMap<>();
 
    private MujocoPhysicsEngine physicsEngine;
@@ -114,6 +126,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
             doors.add(door.captureDynamics());
             continue;
          }
+         applySimulatedObjectPose(object);
          RDXMujocoCollisionShape shape = toCollisionShape(object);
          if (shape != null)
             shapes.add(shape);
@@ -147,7 +160,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
       else
       {
          writePoses(model, world.getData(), shapes);
-         ignoredJointCollisions.writePoses(robot, model, world.getData());
+         ignoredJointCollisions.writeConfiguration(robot, model, world.getData());
          syncDynamicDoors(model, world.getData(), doors, false);
       }
    }
@@ -179,8 +192,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
             preservedNq = nq;
             preservedNv = nv;
          }
-         double[] qpos = copy(data.qpos(), nq);
-         double[] qvel = copy(data.qvel(), nv);
+         Map<String, JointState> jointStates = snapshotJoints(model, data);
          double time = data.time();
          DoublePointer gravity = model.opt().gravity();
          double gravityX = gravity.get(0);
@@ -193,19 +205,24 @@ public class RDXMujocoObjectCollisionSync implements Controller
 
          mjModel recompiled = world.getModel();
          mjData recompiledData = world.getData();
-         int expectedNq = preservedNq + 2 * doors.size();
-         int expectedNv = preservedNv + 2 * doors.size();
+         int fingerDofs = ignoredJointCollisions.addedDofCount();
+         int dynamicObjects = dynamicObjectCount(shapes);
+         // A free joint is 7 qpos and 6 qvel. Door hinges stay 1 and 1, two of them per door.
+         int expectedNq = preservedNq + fingerDofs + 7 * dynamicObjects + 2 * doors.size();
+         int expectedNv = preservedNv + fingerDofs + 6 * dynamicObjects + 2 * doors.size();
          if (recompiled.nq() != expectedNq || recompiled.nv() != expectedNv)
          {
             physicsSyncBroken = true;
             LogTools.error("MuJoCo recompile nq/nv " + recompiled.nq() + "/" + recompiled.nv()
-                           + " did not match the robot plus " + doors.size() + " door(s) (" + expectedNq + "/" + expectedNv
-                           + "). Robot state was not restored.");
+                           + " did not match the robot plus " + fingerDofs + " finger joint(s), "
+                           + dynamicObjects + " free object(s), and " + doors.size()
+                           + " door(s) (" + expectedNq + "/" + expectedNv + "). Robot state was not restored.");
             return;
          }
 
-         pastePrefix(recompiledData.qpos(), qpos, preservedNq, expectedNq);
-         pastePrefix(recompiledData.qvel(), qvel, preservedNv, expectedNv);
+         // Finger hinges are inserted in the middle of the tree, so qpos is restored by joint name
+         // rather than as a prefix of the old vector.
+         restoreJoints(recompiled, recompiledData, jointStates);
          recompiledData.time(time);
          recompiled.opt().gravity().put(0, gravityX);
          recompiled.opt().gravity().put(1, gravityY);
@@ -217,10 +234,11 @@ public class RDXMujocoObjectCollisionSync implements Controller
          // step rather than leaving them one tick off the visual.
          writePoses(recompiled, recompiledData, shapes);
          syncDynamicDoors(recompiled, recompiledData, doors, true);
+         ignoredJointCollisions.writeConfiguration(robot, recompiled, recompiledData);
+         rebindJointAddresses(recompiled);
          Mujoco.mj_forward(recompiled, recompiledData);
          rebindDiagnostics(world);
          compiledStructureKey = structureKey;
-         ignoredJointCollisions.writePoses(robot, recompiled, recompiledData);
          missingGeomRetries = 0;
          LogTools.info("MuJoCo environment now includes {} RDX object collision(s) and {} dynamic door(s)", shapes.size(), doors.size());
       }
@@ -238,6 +256,21 @@ public class RDXMujocoObjectCollisionSync implements Controller
       {
          int bodyId = Mujoco.mj_name2id(model, Mujoco.mjOBJ_BODY, shape.getBodyName());
          int geomId = Mujoco.mj_name2id(model, Mujoco.mjOBJ_GEOM, shape.getName());
+         if (shape.isDynamic())
+         {
+            int jointId = Mujoco.mj_name2id(model, Mujoco.mjOBJ_JOINT, shape.getJointName());
+            if (bodyId < 0 || geomId < 0 || jointId < 0)
+            {
+               missingGeom = true;
+               continue;
+            }
+            if (shape.isSelected())
+               writeFreeJoint(model, data, jointId, shape);
+            else
+               simulatedObjectPoses.put(shape.getBodyName(), readFreeJoint(model, data, jointId));
+            continue;
+         }
+
          int mocapId = bodyId < 0 ? -1 : model.body_mocapid().get(bodyId);
          if (bodyId < 0 || geomId < 0 || mocapId < 0)
          {
@@ -369,8 +402,8 @@ public class RDXMujocoObjectCollisionSync implements Controller
             door.appendBodies(geoms);
          geoms.append("    <!-- /rdx-articulated-doors -->\n");
       }
-      xml = xml.substring(0, end) + geoms + ignoredJointCollisions.bodyXml(robot.getRobotDefinition()) + xml.substring(end);
-      xml = insertBefore(xml, "</contact>", ignoredJointCollisions.excludeXml());
+      xml = xml.substring(0, end) + geoms + xml.substring(end);
+      xml = ignoredJointCollisions.injectInto(xml, robot.getRobotDefinition());
       if (doors.isEmpty())
          return xml;
 
@@ -383,16 +416,6 @@ public class RDXMujocoObjectCollisionSync implements Controller
       if (mujocoEnd < 0)
          throw new IllegalStateException("MuJoCo world XML has no </mujoco>");
       return xml.substring(0, mujocoEnd) + contact + xml.substring(mujocoEnd);
-   }
-
-   private static String insertBefore(String xml, String marker, String insertion)
-   {
-      if (insertion.isEmpty())
-         return xml;
-      int at = xml.indexOf(marker);
-      if (at < 0)
-         return xml;
-      return xml.substring(0, at) + insertion + xml.substring(at);
    }
 
    private static String injectMeshAssets(String baseXml,
@@ -440,12 +463,86 @@ public class RDXMujocoObjectCollisionSync implements Controller
          geometry = "type=\"box\" size=\"" + fmt(shape.getSizeX() / 2.0) + " "
                     + fmt(shape.getSizeY() / 2.0) + " " + fmt(shape.getSizeZ() / 2.0) + "\"";
 
-      // A child of worldbody with no joint becomes a free joint, which changes nq and lets the
-      // object fall. mocap keeps it fixed for the solver while writePoses can still move it, and
-      // the broadphase box follows that pose. A plain worldbody geom would not.
-      return "    <body name=\"" + shape.getBodyName() + "\" mocap=\"true\" " + pose + ">\n"
-             + "      <geom class=\"terrain\" name=\"" + shape.getName() + "\" " + geometry + "/>\n"
+      // Scenery stays mocap: contact forces cannot move it, and dragging still writes mocap_pos.
+      // A manipulable object is a free body. Its mass is the object's mass, and contype/conaffinity
+      // 3 lets it touch the robot, the ground, the scenery, and other free objects (terrain is 2/1,
+      // so two terrain geoms never contact). A plain worldbody geom would keep a compile-time bounding box.
+      if (!shape.isDynamic())
+      {
+         return "    <body name=\"" + shape.getBodyName() + "\" mocap=\"true\" " + pose + ">\n"
+                + "      <geom class=\"terrain\" name=\"" + shape.getName() + "\" " + geometry + "/>\n"
+                + "    </body>\n";
+      }
+      String mass = shape.getMass() > 0.0 ? " mass=\"" + fmt(shape.getMass()) + "\"" : "";
+      return "    <body name=\"" + shape.getBodyName() + "\" " + pose + ">\n"
+             + "      <freejoint name=\"" + shape.getJointName() + "\"/>\n"
+             + "      <geom class=\"terrain\" contype=\"3\" conaffinity=\"3\" name=\"" + shape.getName() + "\""
+             + mass + " " + geometry + "/>\n"
              + "    </body>\n";
+   }
+
+   private void writeFreeJoint(mjModel model, mjData data, int jointId, RDXMujocoCollisionShape shape)
+   {
+      int qadr = model.jnt_qposadr().get(jointId);
+      int vadr = model.jnt_dofadr().get(jointId);
+      quaternion.set(shape.getPoseInWorld().getOrientation());
+      data.qpos().put(qadr, shape.getPoseInWorld().getPosition().getX());
+      data.qpos().put(qadr + 1, shape.getPoseInWorld().getPosition().getY());
+      data.qpos().put(qadr + 2, shape.getPoseInWorld().getPosition().getZ());
+      data.qpos().put(qadr + 3, quaternion.getS());
+      data.qpos().put(qadr + 4, quaternion.getX());
+      data.qpos().put(qadr + 5, quaternion.getY());
+      data.qpos().put(qadr + 6, quaternion.getZ());
+      for (int i = 0; i < 6; i++)
+         data.qvel().put(vadr + i, 0.0);
+   }
+
+   private static double[] readFreeJoint(mjModel model, mjData data, int jointId)
+   {
+      int qadr = model.jnt_qposadr().get(jointId);
+      double[] pose = new double[7];
+      for (int i = 0; i < 7; i++)
+         pose[i] = data.qpos().get(qadr + i);
+      return pose;
+   }
+
+   /** Copies the simulated collision pose back onto the visual, unless the user is dragging it. */
+   private void applySimulatedObjectPose(RDXEnvironmentObject object)
+   {
+      if (!RDXInteractableObjectLibrary.isInteractable(object) || object.getIsSelected())
+         return;
+      String bodyName = "rdx_" + object.getPascalCasedName() + "_" + object.getObjectIndex() + "_body";
+      double[] pose = simulatedObjectPoses.get(bodyName);
+      if (pose == null)
+         return;
+
+      RigidBodyTransform collision = new RigidBodyTransform();
+      Quaternion rotation = new Quaternion();
+      rotation.set(pose[4], pose[5], pose[6], pose[3]);
+      collision.getTranslation().set(pose[0], pose[1], pose[2]);
+      collision.getRotation().set(rotation);
+
+      RigidBodyTransform offset = new RigidBodyTransform();
+      if (object.getConvexCollisionMeshFile() != null)
+         offset.set(object.getRealisticModelOffset());
+      else
+         offset.set(object.getCollisionShapeOffset());
+      offset.invert();
+      collision.multiply(offset);
+      if (collision.epsilonEquals(object.getObjectTransform(), CHANGE_EPSILON))
+         return;
+      object.setTransformToWorld(collision);
+   }
+
+   private static int dynamicObjectCount(List<RDXMujocoCollisionShape> shapes)
+   {
+      int count = 0;
+      for (RDXMujocoCollisionShape shape : shapes)
+      {
+         if (shape.isDynamic())
+            count++;
+      }
+      return count;
    }
 
    private void applySimulatedDoorJoints(RDXArticulatedDoorObject door)
@@ -492,12 +589,16 @@ public class RDXMujocoObjectCollisionSync implements Controller
          return null;
 
       String name = "rdx_" + object.getPascalCasedName() + "_" + object.getObjectIndex();
+      boolean dynamic = RDXInteractableObjectLibrary.isInteractable(object);
+      double mass = object.getMass();
+      boolean selected = object.getIsSelected();
       File convexMesh = object.getConvexCollisionMeshFile();
       if (convexMesh != null)
       {
          collisionToWorld.set(object.getObjectTransform());
          collisionToWorld.multiply(object.getRealisticModelOffset());
-         return new RDXMujocoCollisionShape(name, convexMesh.getAbsolutePath(), new us.ihmc.euclid.geometry.Pose3D(collisionToWorld));
+         return new RDXMujocoCollisionShape(name, convexMesh.getAbsolutePath(), new us.ihmc.euclid.geometry.Pose3D(collisionToWorld),
+                                            dynamic, mass, selected);
       }
       String convexResourcePath = RDXEnvironmentObject.convexCollisionResourcePath(object.getVisualResourcePath());
       if (convexResourcePath != null && warnedMissingHulls.add(convexResourcePath))
@@ -512,7 +613,8 @@ public class RDXMujocoObjectCollisionSync implements Controller
                                                 box.getSizeX(),
                                                 box.getSizeY(),
                                                 box.getSizeZ(),
-                                                new us.ihmc.euclid.geometry.Pose3D(collisionToWorld));
+                                                new us.ihmc.euclid.geometry.Pose3D(collisionToWorld),
+                                                dynamic, mass, selected);
       }
       if (geometry instanceof Sphere3D sphere)
       {
@@ -521,7 +623,8 @@ public class RDXMujocoObjectCollisionSync implements Controller
                                                 sphere.getRadius(),
                                                 sphere.getRadius(),
                                                 sphere.getRadius(),
-                                                new us.ihmc.euclid.geometry.Pose3D(collisionToWorld));
+                                                new us.ihmc.euclid.geometry.Pose3D(collisionToWorld),
+                                                dynamic, mass, selected);
       }
 
       String typeName = geometry.getClass().getSimpleName();
@@ -575,21 +678,127 @@ public class RDXMujocoObjectCollisionSync implements Controller
       return key.toString();
    }
 
-   private static double[] copy(DoublePointer pointer, int length)
+   /**
+    * Finger hinges land in the middle of the kinematic tree, which shifts the qpos addresses of
+    * every joint after the gripper. Rebuild the address map the torque controller uses, and the
+    * body-id map the contact wrench readout uses, against the recompiled model.
+    */
+   private void rebindJointAddresses(mjModel model)
    {
-      double[] values = new double[length];
-      for (int i = 0; i < length; i++)
-         values[i] = pointer.get(i);
-      return values;
+      try
+      {
+         rebindJointAddressesUnsafe(model);
+      }
+      catch (ReflectiveOperationException exception)
+      {
+         throw new IllegalStateException("MuJoCo joint addresses were not rebound after adding the fingers", exception);
+      }
    }
 
-   private static void pastePrefix(DoublePointer pointer, double[] values, int keep, int total)
+   private void rebindJointAddressesUnsafe(mjModel model) throws ReflectiveOperationException
    {
-      int count = Math.min(keep, values.length);
-      for (int i = 0; i < count; i++)
-         pointer.put(i, values[i]);
-      for (int i = count; i < total; i++)
-         pointer.put(i, 0.0);
+      MujocoMultiBodyRobot fresh = MujocoMultiBodyRobotFactory.registerJoints(robot.getRobotDefinition(), model);
+      String robotName = robot.getRobotDefinition().getName();
+      List<MujocoMultiBodyRobot> worldRobots = physicsEngine.getDynamicsWorld().getRobots();
+      for (int i = 0; i < worldRobots.size(); i++)
+      {
+         if (robotName.equals(worldRobots.get(i).getRobotName()))
+            worldRobots.set(i, fresh);
+      }
+
+      Field robotList = MujocoPhysicsEngine.class.getDeclaredField("robotList");
+      robotList.setAccessible(true);
+      List<?> wrappers = (List<?>) robotList.get(physicsEngine);
+      for (Object wrapper : wrappers)
+      {
+         if (!(wrapper instanceof MujocoRobot mujocoRobot))
+            continue;
+         if (!robotName.equals(mujocoRobot.getRobotDefinition().getName()))
+            continue;
+         Field multiBody = MujocoRobot.class.getDeclaredField("mujocoMultiBodyRobot");
+         multiBody.setAccessible(true);
+         multiBody.set(mujocoRobot, fresh);
+
+         Field mapField = MujocoRobot.class.getDeclaredField("mecanoBodyByMujocoId");
+         mapField.setAccessible(true);
+         @SuppressWarnings("unchecked")
+         Map<Integer, SimRigidBodyBasics> bodyMap = (Map<Integer, SimRigidBodyBasics>) mapField.get(mujocoRobot);
+         bodyMap.clear();
+         for (SimJointBasics joint : robot.getAllJoints())
+         {
+            SimRigidBodyBasics body = joint.getSuccessor();
+            if (body == null)
+               continue;
+            int bodyId = fresh.getBodyId(body.getName());
+            if (bodyId >= 0)
+               bodyMap.put(bodyId, body);
+         }
+      }
+   }
+
+   private static Map<String, JointState> snapshotJoints(mjModel model, mjData data)
+   {
+      Map<String, JointState> states = new LinkedHashMap<>();
+      int count = Math.toIntExact(model.njnt());
+      for (int jointId = 0; jointId < count; jointId++)
+      {
+         String name = jointName(model, jointId);
+         if (name == null)
+            continue;
+         int type = model.jnt_type().get(jointId);
+         int nq = type == Mujoco.mjJNT_FREE ? 7 : type == Mujoco.mjJNT_BALL ? 4 : 1;
+         int nv = type == Mujoco.mjJNT_FREE ? 6 : type == Mujoco.mjJNT_BALL ? 3 : 1;
+         int qadr = model.jnt_qposadr().get(jointId);
+         int vadr = model.jnt_dofadr().get(jointId);
+         double[] qpos = new double[nq];
+         double[] qvel = new double[nv];
+         for (int i = 0; i < nq; i++)
+            qpos[i] = data.qpos().get(qadr + i);
+         for (int i = 0; i < nv; i++)
+            qvel[i] = data.qvel().get(vadr + i);
+         states.put(name, new JointState(qpos, qvel));
+      }
+      return states;
+   }
+
+   private static void restoreJoints(mjModel model, mjData data, Map<String, JointState> states)
+   {
+      int count = Math.toIntExact(model.njnt());
+      for (int jointId = 0; jointId < count; jointId++)
+      {
+         String name = jointName(model, jointId);
+         JointState state = name == null ? null : states.get(name);
+         if (state == null)
+            continue;
+         int qadr = model.jnt_qposadr().get(jointId);
+         int vadr = model.jnt_dofadr().get(jointId);
+         for (int i = 0; i < state.qpos.length; i++)
+            data.qpos().put(qadr + i, state.qpos[i]);
+         for (int i = 0; i < state.qvel.length; i++)
+            data.qvel().put(vadr + i, state.qvel[i]);
+      }
+   }
+
+   private static String jointName(mjModel model, int jointId)
+   {
+      BytePointer pointer = Mujoco.mj_id2name(model, Mujoco.mjOBJ_JOINT, jointId);
+      if (pointer == null || pointer.isNull())
+         return null;
+      String name = pointer.getString();
+      int nul = name.indexOf('\0');
+      return nul < 0 ? name : name.substring(0, nul);
+   }
+
+   private static final class JointState
+   {
+      private final double[] qpos;
+      private final double[] qvel;
+
+      private JointState(double[] qpos, double[] qvel)
+      {
+         this.qpos = qpos;
+         this.qvel = qvel;
+      }
    }
 
    private static String fmt(double value)

@@ -20,7 +20,7 @@ public class RDXBottleObject extends RDXEnvironmentObject
       double sizeX = 0.2;
       double sizeY = 0.2;
       double sizeZ = 0.3;
-      setMass(0.5f);
+      setMass(0.2f);
       getCollisionShapeOffset().getTranslation().add(sizeX / 2.0 - 0.08 , 0, 0.0);
       getBoundingSphere().setRadius(5.0);
       getBoundingSphere().getPosition().add(sizeX / 2.0, sizeY / 2.0, sizeZ / 2.0);

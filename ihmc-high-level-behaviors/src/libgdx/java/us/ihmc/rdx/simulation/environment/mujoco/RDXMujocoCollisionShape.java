@@ -22,15 +22,21 @@ public final class RDXMujocoCollisionShape
    private final double sizeZ;
    private final String meshResourcePath;
    private final Pose3D poseInWorld;
+   /** False for the wall, which stays a mocap body. Everything else is a free body the robot can move. */
+   private final boolean dynamic;
+   private final double mass;
+   private final boolean selected;
 
-   public RDXMujocoCollisionShape(String name, Type type, double sizeX, double sizeY, double sizeZ, Pose3D poseInWorld)
+   public RDXMujocoCollisionShape(String name, Type type, double sizeX, double sizeY, double sizeZ, Pose3D poseInWorld,
+                                  boolean dynamic, double mass, boolean selected)
    {
-      this(name, type, sizeX, sizeY, sizeZ, null, poseInWorld);
+      this(name, type, sizeX, sizeY, sizeZ, null, poseInWorld, dynamic, mass, selected);
    }
 
-   public RDXMujocoCollisionShape(String name, String meshResourcePath, Pose3D poseInWorld)
+   public RDXMujocoCollisionShape(String name, String meshResourcePath, Pose3D poseInWorld,
+                                  boolean dynamic, double mass, boolean selected)
    {
-      this(name, Type.MESH, 0.0, 0.0, 0.0, meshResourcePath, poseInWorld);
+      this(name, Type.MESH, 0.0, 0.0, 0.0, meshResourcePath, poseInWorld, dynamic, mass, selected);
    }
 
    private RDXMujocoCollisionShape(String name,
@@ -39,7 +45,10 @@ public final class RDXMujocoCollisionShape
                                        double sizeY,
                                        double sizeZ,
                                        String meshResourcePath,
-                                       Pose3D poseInWorld)
+                                       Pose3D poseInWorld,
+                                       boolean dynamic,
+                                       double mass,
+                                       boolean selected)
    {
       this.name = name;
       this.type = type;
@@ -48,6 +57,9 @@ public final class RDXMujocoCollisionShape
       this.sizeZ = sizeZ;
       this.meshResourcePath = meshResourcePath;
       this.poseInWorld = new Pose3D(poseInWorld);
+      this.dynamic = dynamic;
+      this.mass = mass;
+      this.selected = selected;
    }
 
    public String getName()
@@ -90,11 +102,33 @@ public final class RDXMujocoCollisionShape
    /**
     * Body that carries this geom. MuJoCo's broadphase uses a compile-time bounding box for geoms
     * written straight into the worldbody, so a geom moved at runtime is never tested for contact.
-    * Each collision therefore gets its own jointless body, whose bounding box follows its pose.
+    * Each collision therefore gets its own body, whose bounding box follows its pose.
     */
    public String getBodyName()
    {
       return name + "_body";
+   }
+
+   /** Free joint of a dynamic object. The wall has none. */
+   public String getJointName()
+   {
+      return name + "_free";
+   }
+
+   public boolean isDynamic()
+   {
+      return dynamic;
+   }
+
+   public double getMass()
+   {
+      return mass;
+   }
+
+   /** True while the user is dragging this object, so physics follows the gizmo instead of integrating. */
+   public boolean isSelected()
+   {
+      return selected;
    }
 
    public Pose3D getPoseInWorld()
@@ -105,14 +139,17 @@ public final class RDXMujocoCollisionShape
    /** Identity of the geom, ignoring the pose, so a drag does not force a MuJoCo recompile. */
    public String structureKey()
    {
+      String motion = (dynamic ? "free" : "mocap") + "|" + mass;
       if (type == Type.MESH)
-         return name + "|" + type + "|" + meshResourcePath;
-      return name + "|" + type + "|" + sizeX + "|" + sizeY + "|" + sizeZ;
+         return name + "|" + type + "|" + meshResourcePath + "|" + motion;
+      return name + "|" + type + "|" + sizeX + "|" + sizeY + "|" + sizeZ + "|" + motion;
    }
 
    public boolean matches(RDXMujocoCollisionShape other, double epsilon)
    {
-      if (other == null || type != other.type || !name.equals(other.name))
+      if (other == null || type != other.type || !name.equals(other.name) || dynamic != other.dynamic || selected != other.selected)
+         return false;
+      if (Math.abs(mass - other.mass) > epsilon)
          return false;
       if (type == Type.MESH)
       {
