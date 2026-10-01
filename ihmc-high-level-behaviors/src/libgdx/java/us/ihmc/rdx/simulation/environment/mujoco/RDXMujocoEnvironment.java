@@ -39,6 +39,12 @@ public class RDXMujocoEnvironment implements CommonAvatarEnvironmentInterface
       return revision.get();
    }
 
+   /** Collision primitives that belong to the flat ground, before any RDX object is added. */
+   public int getGroundCollisionShapeCount()
+   {
+      return ground.getTerrainObject3D().getTerrainCollisionShapes().size();
+   }
+
    @Override
    public TerrainObject3D getTerrainObject3D()
    {

@@ -7,7 +7,6 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
@@ -20,6 +19,7 @@ import us.ihmc.scs2.simulation.mujoco.Mujoco.mjModel;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoMultiBodyDynamicsWorld;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngine;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.io.File;
@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Copies RDX environment-builder collisions into the running MuJoCo model.
@@ -44,27 +46,30 @@ import java.util.concurrent.atomic.AtomicReference;
  * collision mesh. Objects without one keep their box or sphere. An articulated door is not a
  * static geom: it is a dynamic mechanism (welded frame, hinged panel, sprung lever). Adding or
  * removing an object rebuilds the world XML and recompiles, keeping the robot state. Dragging a
- * static object only writes that geom's pose. Dragging a door writes the frame body pose.
+ * static object only writes that mocap pose. Dragging a door writes the frame body pose.
  */
 public class RDXMujocoObjectCollisionSync implements Controller
 {
    private static final double CHANGE_EPSILON = 1.0e-5;
    private static final String WORLD_BODY_END = "</worldbody>";
+   /** Factory geom names are {@code terrain_<terrainIndex>_<shapeIndex>}. */
+   private static final Pattern FACTORY_TERRAIN_GEOM = Pattern.compile("name=\"terrain_(\\d+)_(\\d+)\"");
 
    private final RDXMujocoEnvironment environment;
+   private final int groundCollisionShapeCount;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final Set<String> warnedUnsupportedTypes = new HashSet<>();
    private final Set<String> warnedMissingHulls = new HashSet<>();
    private final RigidBodyTransform collisionToWorld = new RigidBodyTransform();
    private final Quaternion quaternion = new Quaternion();
-   private final Quaternion meshRotation = new Quaternion();
-   private final Vector3D meshOffset = new Vector3D();
 
    private final AtomicReference<List<RDXArticulatedDoorObject.Dynamics>> doorCommands = new AtomicReference<>(List.of());
    private final Map<String, double[]> simulatedDoorJoints = new ConcurrentHashMap<>();
    private final Map<String, RDXArticulatedDoorObject.JointIds> doorIds = new HashMap<>();
 
    private MujocoPhysicsEngine physicsEngine;
+   private Robot robot;
+   private RDXMujocoIgnoredJointCollisions ignoredJointCollisions = RDXMujocoIgnoredJointCollisions.none();
    private String baseWorldXml;
    private File worldXmlFile;
    private String compiledStructureKey = "";
@@ -76,6 +81,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
    public RDXMujocoObjectCollisionSync(RDXMujocoEnvironment environment)
    {
       this.environment = environment;
+      this.groundCollisionShapeCount = environment.getGroundCollisionShapeCount();
    }
 
    public void attach(SCS2AvatarSimulation simulation)
@@ -87,6 +93,8 @@ public class RDXMujocoObjectCollisionSync implements Controller
          return;
       }
       physicsEngine = mujocoPhysicsEngine;
+      robot = simulation.getRobot();
+      ignoredJointCollisions = RDXMujocoIgnoredJointCollisions.fromRobot(robot);
       simulation.getRobot().getControllerManager().addController(this);
    }
 
@@ -127,6 +135,8 @@ public class RDXMujocoObjectCollisionSync implements Controller
       List<RDXMujocoCollisionShape> shapes = environment.getObjectCollisions();
       List<RDXArticulatedDoorObject.Dynamics> doors = doorCommands.get();
       String structureKey = structureKey(shapes, doors);
+      if (!ignoredJointCollisions.isEmpty())
+         structureKey = structureKey + "hands\n";
       MujocoMultiBodyDynamicsWorld world = physicsEngine.getDynamicsWorld();
       mjModel model = world.getModel();
       if (model == null || model.isNull())
@@ -136,7 +146,8 @@ public class RDXMujocoObjectCollisionSync implements Controller
          recompile(world, shapes, doors, structureKey);
       else
       {
-         writePoses(model, shapes);
+         writePoses(model, world.getData(), shapes);
+         ignoredJointCollisions.writePoses(robot, model, world.getData());
          syncDynamicDoors(model, world.getData(), doors, false);
       }
    }
@@ -202,10 +213,14 @@ public class RDXMujocoObjectCollisionSync implements Controller
          world.setTimestep(timestep);
          world.writeOptions(physicsEngine.getOptions());
          doorIds.clear();
+         // The mesh frame is only known after compiling, so place the collisions before the first
+         // step rather than leaving them one tick off the visual.
+         writePoses(recompiled, recompiledData, shapes);
          syncDynamicDoors(recompiled, recompiledData, doors, true);
          Mujoco.mj_forward(recompiled, recompiledData);
          rebindDiagnostics(world);
          compiledStructureKey = structureKey;
+         ignoredJointCollisions.writePoses(robot, recompiled, recompiledData);
          missingGeomRetries = 0;
          LogTools.info("MuJoCo environment now includes {} RDX object collision(s) and {} dynamic door(s)", shapes.size(), doors.size());
       }
@@ -216,13 +231,15 @@ public class RDXMujocoObjectCollisionSync implements Controller
       }
    }
 
-   private void writePoses(mjModel model, List<RDXMujocoCollisionShape> shapes)
+   private void writePoses(mjModel model, mjData data, List<RDXMujocoCollisionShape> shapes)
    {
       boolean missingGeom = false;
       for (RDXMujocoCollisionShape shape : shapes)
       {
+         int bodyId = Mujoco.mj_name2id(model, Mujoco.mjOBJ_BODY, shape.getBodyName());
          int geomId = Mujoco.mj_name2id(model, Mujoco.mjOBJ_GEOM, shape.getName());
-         if (geomId < 0)
+         int mocapId = bodyId < 0 ? -1 : model.body_mocapid().get(bodyId);
+         if (bodyId < 0 || geomId < 0 || mocapId < 0)
          {
             missingGeom = true;
             continue;
@@ -232,36 +249,18 @@ public class RDXMujocoObjectCollisionSync implements Controller
          double x = shape.getPoseInWorld().getPosition().getX();
          double y = shape.getPoseInWorld().getPosition().getY();
          double z = shape.getPoseInWorld().getPosition().getZ();
-         // MuJoCo recenters a mesh into its inertia frame and stores that shift in mesh_pos/mesh_quat.
-         // The geom pose has to include it, or the collision sits away from the visible mesh.
-         if (shape.getType() == RDXMujocoCollisionShape.Type.MESH)
-         {
-            int meshId = model.geom_dataid().get(geomId);
-            if (meshId >= 0)
-            {
-               meshOffset.set(model.mesh_pos().get(meshId * 3L),
-                              model.mesh_pos().get(meshId * 3L + 1),
-                              model.mesh_pos().get(meshId * 3L + 2));
-               quaternion.transform(meshOffset);
-               x += meshOffset.getX();
-               y += meshOffset.getY();
-               z += meshOffset.getZ();
-               meshRotation.set(model.mesh_quat().get(meshId * 4L + 1),
-                                model.mesh_quat().get(meshId * 4L + 2),
-                                model.mesh_quat().get(meshId * 4L + 3),
-                                model.mesh_quat().get(meshId * 4L));
-               quaternion.multiply(meshRotation);
-            }
-         }
-         DoublePointer position = model.geom_pos();
-         position.put(geomId * 3L, x);
-         position.put(geomId * 3L + 1, y);
-         position.put(geomId * 3L + 2, z);
-         DoublePointer quat = model.geom_quat();
-         quat.put(geomId * 4L, quaternion.getS());
-         quat.put(geomId * 4L + 1, quaternion.getX());
-         quat.put(geomId * 4L + 2, quaternion.getY());
-         quat.put(geomId * 4L + 3, quaternion.getZ());
+         // Leave mesh_pos/mesh_quat alone. MuJoCo already applies that inertia-frame shift
+         // when it places the geom, so writing it into the mocap pose rotates the collision
+         // off the visual. The table's shift is a 120 degree axis swap.
+         DoublePointer position = data.mocap_pos();
+         position.put(mocapId * 3L, x);
+         position.put(mocapId * 3L + 1, y);
+         position.put(mocapId * 3L + 2, z);
+         DoublePointer quat = data.mocap_quat();
+         quat.put(mocapId * 4L, quaternion.getS());
+         quat.put(mocapId * 4L + 1, quaternion.getX());
+         quat.put(mocapId * 4L + 2, quaternion.getY());
+         quat.put(mocapId * 4L + 3, quaternion.getZ());
       }
       if (!missingGeom)
       {
@@ -326,11 +325,31 @@ public class RDXMujocoObjectCollisionSync implements Controller
       Files.copy(source.toPath(), new File(workingDirectory, fileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
    }
 
-   private static String injectObjectGeoms(String baseXml,
-                                           List<RDXMujocoCollisionShape> shapes,
-                                           List<RDXArticulatedDoorObject.Dynamics> doors)
+   /**
+    * The first compile names loaded boxes {@code terrain_0_<n>} after the ground geoms. Drop those
+    * before injecting {@code rdx_*} geoms so a later rebuild does not stack a second copy.
+    */
+   private String withoutBakedObjectGeoms(String xml)
    {
-      String xml = injectMeshAssets(baseXml, shapes, doors);
+      String[] lines = xml.split("\\R", -1);
+      StringBuilder out = new StringBuilder();
+      for (int i = 0; i < lines.length; i++)
+      {
+         Matcher matcher = FACTORY_TERRAIN_GEOM.matcher(lines[i]);
+         if (matcher.find() && Integer.parseInt(matcher.group(1)) == 0 && Integer.parseInt(matcher.group(2)) >= groundCollisionShapeCount)
+            continue;
+         if (i > 0)
+            out.append('\n');
+         out.append(lines[i]);
+      }
+      return out.toString();
+   }
+
+   private String injectObjectGeoms(String baseXml,
+                                    List<RDXMujocoCollisionShape> shapes,
+                                    List<RDXArticulatedDoorObject.Dynamics> doors)
+   {
+      String xml = injectMeshAssets(withoutBakedObjectGeoms(baseXml), shapes, doors);
       int end = xml.lastIndexOf(WORLD_BODY_END);
       if (end < 0)
          throw new IllegalStateException("MuJoCo world XML has no </worldbody>");
@@ -340,7 +359,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
       {
          geoms.append("    <!-- rdx-environment-collisions -->\n");
          for (RDXMujocoCollisionShape shape : shapes)
-            geoms.append(toGeomXml(shape));
+            geoms.append(toBodyXml(shape));
          geoms.append("    <!-- /rdx-environment-collisions -->\n");
       }
       if (!doors.isEmpty())
@@ -350,7 +369,8 @@ public class RDXMujocoObjectCollisionSync implements Controller
             door.appendBodies(geoms);
          geoms.append("    <!-- /rdx-articulated-doors -->\n");
       }
-      xml = xml.substring(0, end) + geoms + xml.substring(end);
+      xml = xml.substring(0, end) + geoms + ignoredJointCollisions.bodyXml(robot.getRobotDefinition()) + xml.substring(end);
+      xml = insertBefore(xml, "</contact>", ignoredJointCollisions.excludeXml());
       if (doors.isEmpty())
          return xml;
 
@@ -363,6 +383,16 @@ public class RDXMujocoObjectCollisionSync implements Controller
       if (mujocoEnd < 0)
          throw new IllegalStateException("MuJoCo world XML has no </mujoco>");
       return xml.substring(0, mujocoEnd) + contact + xml.substring(mujocoEnd);
+   }
+
+   private static String insertBefore(String xml, String marker, String insertion)
+   {
+      if (insertion.isEmpty())
+         return xml;
+      int at = xml.indexOf(marker);
+      if (at < 0)
+         return xml;
+      return xml.substring(0, at) + insertion + xml.substring(at);
    }
 
    private static String injectMeshAssets(String baseXml,
@@ -392,7 +422,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
       return baseXml.substring(0, worldBody) + "  <asset>\n" + assets + "  </asset>\n" + baseXml.substring(worldBody);
    }
 
-   private static String toGeomXml(RDXMujocoCollisionShape shape)
+   private static String toBodyXml(RDXMujocoCollisionShape shape)
    {
       Quaternion rotation = new Quaternion();
       rotation.set(shape.getPoseInWorld().getOrientation());
@@ -401,19 +431,21 @@ public class RDXMujocoObjectCollisionSync implements Controller
                     + fmt(shape.getPoseInWorld().getPosition().getZ()) + "\" quat=\""
                     + fmt(rotation.getS()) + " " + fmt(rotation.getX()) + " "
                     + fmt(rotation.getY()) + " " + fmt(rotation.getZ()) + "\"";
+      String geometry;
       if (shape.getType() == RDXMujocoCollisionShape.Type.MESH)
-      {
-         return "    <geom class=\"terrain\" name=\"" + shape.getName() + "\" " + pose
-                + " type=\"mesh\" mesh=\"" + shape.getName() + "_mesh\"/>\n";
-      }
-      if (shape.getType() == RDXMujocoCollisionShape.Type.SPHERE)
-      {
-         return "    <geom class=\"terrain\" name=\"" + shape.getName() + "\" " + pose
-                + " type=\"sphere\" size=\"" + fmt(shape.getSizeX()) + "\"/>\n";
-      }
-      return "    <geom class=\"terrain\" name=\"" + shape.getName() + "\" " + pose
-             + " type=\"box\" size=\"" + fmt(shape.getSizeX() / 2.0) + " "
-             + fmt(shape.getSizeY() / 2.0) + " " + fmt(shape.getSizeZ() / 2.0) + "\"/>\n";
+         geometry = "type=\"mesh\" mesh=\"" + shape.getName() + "_mesh\"";
+      else if (shape.getType() == RDXMujocoCollisionShape.Type.SPHERE)
+         geometry = "type=\"sphere\" size=\"" + fmt(shape.getSizeX()) + "\"";
+      else
+         geometry = "type=\"box\" size=\"" + fmt(shape.getSizeX() / 2.0) + " "
+                    + fmt(shape.getSizeY() / 2.0) + " " + fmt(shape.getSizeZ() / 2.0) + "\"";
+
+      // A child of worldbody with no joint becomes a free joint, which changes nq and lets the
+      // object fall. mocap keeps it fixed for the solver while writePoses can still move it, and
+      // the broadphase box follows that pose. A plain worldbody geom would not.
+      return "    <body name=\"" + shape.getBodyName() + "\" mocap=\"true\" " + pose + ">\n"
+             + "      <geom class=\"terrain\" name=\"" + shape.getName() + "\" " + geometry + "/>\n"
+             + "    </body>\n";
    }
 
    private void applySimulatedDoorJoints(RDXArticulatedDoorObject door)

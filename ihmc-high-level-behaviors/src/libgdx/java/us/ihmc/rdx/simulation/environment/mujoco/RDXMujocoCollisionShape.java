@@ -87,6 +87,16 @@ public final class RDXMujocoCollisionShape
       return name + ".stl";
    }
 
+   /**
+    * Body that carries this geom. MuJoCo's broadphase uses a compile-time bounding box for geoms
+    * written straight into the worldbody, so a geom moved at runtime is never tested for contact.
+    * Each collision therefore gets its own jointless body, whose bounding box follows its pose.
+    */
+   public String getBodyName()
+   {
+      return name + "_body";
+   }
+
    public Pose3D getPoseInWorld()
    {
       return poseInWorld;
