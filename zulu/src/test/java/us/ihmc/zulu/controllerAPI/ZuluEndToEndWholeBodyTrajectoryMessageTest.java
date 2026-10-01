@@ -7,6 +7,7 @@ import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.avatar.controllerAPI.EndToEndWholeBodyTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 
@@ -18,6 +19,20 @@ public class ZuluEndToEndWholeBodyTrajectoryMessageTest extends EndToEndWholeBod
    public DRCRobotModel getRobotModel()
    {
       return robotModel;
+   }
+
+   // TRIAL: forcing the Mujoco physics engine (instead of the default contact-point engine) for
+   // controller-api-2 tests only. See conversation with Nick 2026-08-17.
+   private boolean useMujocoPhysicsEngine = false;
+
+   @Override
+   protected void configureSimulationFactory(SCS2AvatarTestingSimulationFactory testSimulationFactory)
+   {
+      if (useMujocoPhysicsEngine)
+      {
+         testSimulationFactory.setUseMujocoPhysicsEngine(true);
+         testSimulationFactory.setSimulationDT(0.001);
+      }
    }
 
    @Override
@@ -47,6 +62,7 @@ public class ZuluEndToEndWholeBodyTrajectoryMessageTest extends EndToEndWholeBod
    @Test
    public void testSingleWaypoint() throws Exception
    {
+      useMujocoPhysicsEngine = true;
       super.testSingleWaypoint();
    }
 
