@@ -320,6 +320,43 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    public static final double DEFAULT_CONTACT_VARIANCE_WITH_KINEMATIC_VELOCITY = 1.0; // (1 m)^2
    public static final double DEFAULT_KINEMATIC_VELOCITY_UNTRUST_LOAD = 0.25;
 
+   /**
+    * Initial roll/pitch standard deviation (rad, world x/y rotation error) used when the filter is initialized;
+    * non-positive or NaN keeps the isotropic {@code initialCovariance}. With P = 1·I the tilt σ is 1 rad, and the
+    * first velocity residual is explained as tilt through the velocity-rotation coupling the propagation builds
+    * (δθ ≈ Δv / (g t)): in simulation the robot drops ~30 ms before landing, the free-fall integration leaves
+    * 0.3 m/s for the kinematic velocity measurement to remove, and the estimate swung 0.5-0.8 rad in pitch within
+    * 50 ms, tripping the RL base-angle failure detector (45 deg) in 9 of 10 starts. The initial pose comes from a
+    * source that already levels tilt (simulation ground truth, or the gyro/gravity-leveled pose on re-anchor),
+    * so roll/pitch are known to a few degrees; yaw keeps the isotropic value.
+    */
+   private final YoDouble yoInitialTiltStd = new YoDouble("invariantInitialTiltStd", registry);
+   public static final double DEFAULT_INITIAL_TILT_STD = 0.05;
+   /**
+    * If true, re-anchoring after a hold keeps the rotation covariance block the filter carried through the hold
+    * (gravity leveling keeps it informed) instead of resetting it; velocity, position and contacts still reset.
+    */
+   private final YoBoolean yoReAnchorKeepsRotationCovariance = new YoBoolean("invariantReAnchorKeepsRotationCovariance", registry);
+   /**
+    * Start-up settle: after (re)initialization the filter stays on the hold path (gyro + gravity leveling, base
+    * velocity zeroed, no contact or velocity updates) until a foot is in contact and the accelerometer has been
+    * quasi-static for {@link #yoStartupSettleDuration}, or {@link #yoStartupSettleTimeout} has passed. In
+    * simulation the robot starts ~5 mm above the floor: the foot switches already report contact (they read
+    * joint torque, and the controller is pushing), the accelerometer reads free fall for ~30 ms and then a landing
+    * transient of up to 15 m/s², and the filter integrated 0.3 m/s it then had to remove through the
+    * velocity-rotation coupling -- pitch swung 20-45 deg. The timeout keeps a robot that starts moving at once
+    * from being held indefinitely.
+    */
+   private final YoBoolean yoStartupSettleEnabled = new YoBoolean("invariantStartupSettleEnabled", registry);
+   private final YoDouble yoStartupSettleDuration = new YoDouble("invariantStartupSettleDuration", registry);
+   private final YoDouble yoStartupSettleTimeout = new YoDouble("invariantStartupSettleTimeout", registry);
+   private final YoBoolean yoStartupSettled = new YoBoolean("invariantStartupSettled", registry);
+   private final YoDouble yoStartupQuietTime = new YoDouble("invariantStartupQuietTime", registry);
+   private final YoDouble yoStartupElapsed = new YoDouble("invariantStartupElapsed", registry);
+   public static final double DEFAULT_STARTUP_SETTLE_DURATION = 0.1;
+   public static final double DEFAULT_STARTUP_SETTLE_TIMEOUT = 2.0;
+   private final org.ejml.data.DMatrixRMaj startCovariance = new org.ejml.data.DMatrixRMaj(9 + 3 * NUMBER_OF_CONTACTS, 9 + 3 * NUMBER_OF_CONTACTS);
+
    // The gyro bias actually subtracted from the raw gyro this tick, AFTER the MAX_GYRO_BIAS clamp, plus a count
    // of ticks the clamp bound. This is the "is the upstream bias sane" diagnostic.
    //
@@ -546,6 +583,11 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoKinematicVelocityUseCoP.set(true);
       yoKinematicVelocityUseLoadGate.set(true);
       yoContactVarianceWithKinematicVelocity.set(DEFAULT_CONTACT_VARIANCE_WITH_KINEMATIC_VELOCITY);
+      yoInitialTiltStd.set(DEFAULT_INITIAL_TILT_STD);
+      yoReAnchorKeepsRotationCovariance.set(true);
+      yoStartupSettleEnabled.set(true);
+      yoStartupSettleDuration.set(DEFAULT_STARTUP_SETTLE_DURATION);
+      yoStartupSettleTimeout.set(DEFAULT_STARTUP_SETTLE_TIMEOUT);
       yoKinematicVelocityTrustLoad.set(DEFAULT_KINEMATIC_VELOCITY_TRUST_LOAD);
       yoKinematicVelocityUntrustLoad.set(DEFAULT_KINEMATIC_VELOCITY_UNTRUST_LOAD);
       yoCoPFilterBreakFrequency.set(DEFAULT_COP_FILTER_BREAK_FREQUENCY);
@@ -570,13 +612,80 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          contactPositions[contactIndex(side)] = new Point3D(contactInWorld);
       }
 
-      ekf.initialize(tempRotation, new Vector3D(), basePosition, contactPositions, scaledIdentity(initialCovariance));
+      ekf.initialize(tempRotation, new Vector3D(), basePosition, contactPositions, startCovariance(false));
+      resetStartupSettle();
       updateYoVariables();
+   }
+
+   private void resetStartupSettle()
+   {
+      yoStartupSettled.set(false);
+      yoStartupQuietTime.set(0.0);
+      yoStartupElapsed.set(0.0);
+   }
+
+   /** @return true while the start-up settle still holds the filter (see {@link #yoStartupSettleEnabled}). */
+   private boolean updateStartupSettle(boolean noContact)
+   {
+      if (yoStartupSettled.getBooleanValue() || !yoStartupSettleEnabled.getBooleanValue())
+         return false;
+
+      yoStartupElapsed.add(dt);
+      boolean quasiStatic = ekf.isGravityQuasiStatic(linearAcceleration,
+                                                     rawAngularVelocity,
+                                                     QUASI_STATIC_ACCEL_TOLERANCE,
+                                                     QUASI_STATIC_GYRO_THRESHOLD,
+                                                     QUASI_STATIC_HORIZONTAL_ACCEL_THRESHOLD);
+      if (!noContact && quasiStatic)
+         yoStartupQuietTime.add(dt);
+      else
+         yoStartupQuietTime.set(0.0);
+
+      if (yoStartupQuietTime.getDoubleValue() >= yoStartupSettleDuration.getDoubleValue()
+          || yoStartupElapsed.getDoubleValue() >= yoStartupSettleTimeout.getDoubleValue())
+      {
+         yoStartupSettled.set(true);
+         return false;
+      }
+      return true;
+   }
+
+   /**
+    * P = initialCovariance·I with the world roll/pitch block set from {@link #yoInitialTiltStd}, or, when
+    * {@code keepRotation} and enabled, the filter's current rotation block (cross terms dropped).
+    */
+   private org.ejml.data.DMatrixRMaj startCovariance(boolean keepRotation)
+   {
+      int r = ekf.getState().rotationTangentIndex();
+      org.ejml.data.DMatrixRMaj current = ekf.getState().getCovariance();
+      boolean keep = keepRotation && yoReAnchorKeepsRotationCovariance.getBooleanValue();
+
+      startCovariance.zero();
+      for (int i = 0; i < startCovariance.getNumRows(); i++)
+         startCovariance.set(i, i, initialCovariance);
+
+      if (keep)
+      {
+         for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+               startCovariance.set(r + i, r + j, current.get(r + i, r + j));
+      }
+      else
+      {
+         double tiltStd = yoInitialTiltStd.getDoubleValue();
+         if (tiltStd > 0.0)
+         {
+            startCovariance.set(r, r, tiltStd * tiltStd);
+            startCovariance.set(r + 1, r + 1, tiltStd * tiltStd);
+         }
+      }
+      return startCovariance;
    }
 
    /**
     * Re-seed the flter when resuming from a held state: base pose from the current (gyro-tracked) pelvis frame,
-    * contact anchors from current sole FK, zero velocity, covariance reset to P = initialCovariance * I.
+    * contact anchors from current sole FK, zero velocity, covariance reset to P = initialCovariance * I except the
+    * rotation block, which is kept (see {@link #yoReAnchorKeepsRotationCovariance}).
     * Runs only on the hold->active transition, so the allication here is not when the estimator is actively running yet.
     */
    /**
@@ -606,7 +715,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          contactPositions[contactIndex(side)] = new Point3D(contactInWorld);
       }
 
-      ekf.initialize(tempRotation, new Vector3D(), basePosition, contactPositions, scaledIdentity(initialCovariance));
+      ekf.initialize(tempRotation, new Vector3D(), basePosition, contactPositions, startCovariance(true));
       updateYoVariables();
    }
 
@@ -676,7 +785,9 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
 
       boolean noContact = getContactProbability(RobotSide.LEFT) < CONTACT_HOLD_THRESHOLD && getContactProbability(RobotSide.RIGHT) < CONTACT_HOLD_THRESHOLD;
 
-      if (operatingMode == StateEstimatorMode.FROZEN || noContact)
+      boolean startupHold = updateStartupSettle(noContact);
+
+      if (operatingMode == StateEstimatorMode.FROZEN || noContact || startupHold)
       {
          // Base translation is unobservable (frozen/hanging). Integrate
          // gyro as usual, but hold translation: zero the base velocity so the accel/gravity residual can't ramp
@@ -1151,15 +1262,6 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       return value < 0.0 ? 0.0 : (value > 1.0 ? 1.0 : value);
    }
 
-   private static org.ejml.data.DMatrixRMaj scaledIdentity(double scale)
-   {
-      int m = 9 + 3 * NUMBER_OF_CONTACTS;
-      org.ejml.data.DMatrixRMaj matrix = new org.ejml.data.DMatrixRMaj(m, m);
-      for (int i = 0; i < m; i++)
-         matrix.set(i, i, scale);
-      return matrix;
-   }
-
    @Override
    public void requestStateEstimatorMode(StateEstimatorMode operatingMode)
    {
@@ -1170,6 +1272,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    public void initialize()
    {
       referenceFrames.updateFrames();
+      resetStartupSettle();
    }
 
    /** Installs the start-up static accelerometer bias; null restores the provider's bias. */
