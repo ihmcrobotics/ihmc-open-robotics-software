@@ -698,6 +698,10 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       this.contactMeasurementNoiseProvider = Objects.requireNonNull(contactMeasurementNoiseProvider);
    }
 
+   private final Point3D reAnchorBasePosition = new Point3D();
+   private final Vector3D reAnchorVelocity = new Vector3D();
+   private final Point3D[] reAnchorContactPositions = {new Point3D(), new Point3D()};
+
    public void reAnchor()
    {
       referenceFrames.updateFrames();
@@ -705,17 +709,17 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       mainEstimatePelvisPose.setToZero(pelvisFrame);
       mainEstimatePelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
       tempRotation.set(mainEstimatePelvisPose.getOrientation());
-      Point3D basePosition = new Point3D(mainEstimatePelvisPose.getPosition());
+      reAnchorBasePosition.set(mainEstimatePelvisPose.getPosition());
 
-      Tuple3DReadOnly[] contactPositions = new Tuple3DReadOnly[NUMBER_OF_CONTACTS];
+      // Preallocated: this runs whenever both feet come back after a hold, which can happen mid-walk.
       for (RobotSide side: RobotSide.values)
       {
          contactInWorld.setToZero(soleFrames.get(side));
          contactInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-         contactPositions[contactIndex(side)] = new Point3D(contactInWorld);
+         reAnchorContactPositions[contactIndex(side)].set(contactInWorld);
       }
 
-      ekf.initialize(tempRotation, new Vector3D(), basePosition, contactPositions, startCovariance(true));
+      ekf.initialize(tempRotation, reAnchorVelocity, reAnchorBasePosition, reAnchorContactPositions, startCovariance(true));
       updateYoVariables();
    }
 

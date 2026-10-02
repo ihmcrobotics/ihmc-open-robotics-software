@@ -160,6 +160,7 @@ public class InvariantEKF
    private final us.ihmc.euclid.matrix.RotationMatrix reseedRotation = new us.ihmc.euclid.matrix.RotationMatrix();
    private final us.ihmc.euclid.tuple3D.Vector3D reseedPosition = new us.ihmc.euclid.tuple3D.Vector3D();
    private final us.ihmc.euclid.tuple3D.Vector3D reseedContactPosition = new us.ihmc.euclid.tuple3D.Vector3D();
+   private final us.ihmc.euclid.tuple3D.Vector3D reseedRotatedMeasurement = new us.ihmc.euclid.tuple3D.Vector3D();
    private final us.ihmc.euclid.matrix.Matrix3D reseedRotatedCovariance = new us.ihmc.euclid.matrix.Matrix3D();
 
    /**
@@ -182,7 +183,7 @@ public class InvariantEKF
       state.getContactPosition(contactIndex, reseedContactPosition);
 
       // pre-reseed residual r = R*y - (d - p), world frame
-      us.ihmc.euclid.tuple3D.Vector3D rotated = new us.ihmc.euclid.tuple3D.Vector3D();
+      us.ihmc.euclid.tuple3D.Vector3D rotated = reseedRotatedMeasurement; // a field: this runs on every touchdown
       reseedRotation.transform(bodyMeasurement, rotated);
       double rx = rotated.getX() - (reseedContactPosition.getX() - reseedPosition.getX());
       double ry = rotated.getY() - (reseedContactPosition.getY() - reseedPosition.getY());

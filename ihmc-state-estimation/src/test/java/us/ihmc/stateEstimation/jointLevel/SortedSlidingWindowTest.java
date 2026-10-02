@@ -98,7 +98,9 @@ public class SortedSlidingWindowTest
       PairOffAxisNoiseProvider provider = new PairOffAxisNoiseProvider(chains, scale, sigmaZero, 500, 100);
       DMatrixRMaj zg = new DMatrixRMaj(3 * pairs, 1);
 
-      for (int t = 0; t < 2000; t++) // warm-up: JIT, and the per-shape SVD storage
+      // Warm-up: JIT, and the per-shape SVD storage. 2000 ticks was enough alone but not in the full suite, where a
+      // busy compile queue let C2 finish mid-measurement (a one-off ~400 bytes over 20000 ticks, not per tick).
+      for (int t = 0; t < 30000; t++)
          tick(provider, zg, jacobians, random);
 
       com.sun.management.ThreadMXBean threads = (com.sun.management.ThreadMXBean) ManagementFactory.getThreadMXBean();

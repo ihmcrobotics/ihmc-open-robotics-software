@@ -8,7 +8,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -55,7 +54,7 @@ public class FootReferencedYawCorrector
    private final RotationMatrix filterRotation = new RotationMatrix();
    private final RigidBodyTransform soleToPelvis = new RigidBodyTransform();
 
-   // Unit direction vectors for the AngleTools angle differences. Fields rather than locals so the
+   // Unit direction vectors for the angle differences. Fields rather than locals so the
    // correction stays allocation-free in the control loop.
    private final Vector2D currentFootDirection = new Vector2D();
    private final Vector2D anchorFootDirection = new Vector2D();
@@ -181,21 +180,19 @@ public class FootReferencedYawCorrector
     * Signed angle in (-pi, pi] from {@code startDirection} to {@code endDirection}, i.e. the wrapped
     * difference {@code endYaw - startYaw}.
     *
-    * <p>Thin guard over {@link AngleTools#angleMinusPiToPi}, which forms its magnitude as an unclamped
-    * {@code Math.acos(dot / normStart / normEnd)}. For (anti)parallel inputs round-off pushes that cosine
-    * just outside [-1, 1] and {@code acos} returns NaN — measured at 21% of angles for two unit vectors
-    * built from the cosine/sine of the <em>same</em> angle. That is not a corner case here: on the tick a
-    * foot is anchored, {@code anchorRelativeFootYaw} is assigned {@code relativeFootYaw}, so the two
-    * direction vectors are identical by construction and a NaN would propagate through
-    * {@code prependYawRotation} into the filter mean. The limiting value is exact in that case, so
-    * recover it directly: parallel gives 0, antiparallel gives pi.</p>
+    * <p>Computed as {@code atan2(cross, dot)}. This used to go through {@code AngleTools.angleMinusPiToPi},
+    * which has two problems here: its unclamped {@code acos(dot / normStart / normEnd)} returns NaN for
+    * (anti)parallel inputs (21% of angles for two unit vectors built from the same angle, and on the tick a foot
+    * is anchored the two directions are identical by construction), and it allocates three {@code Vector3D}s
+    * per call. Escape analysis usually removes those, but not always: in a 30 s RL walking simulation the
+    * estimator thread allocated 40 bytes on 0.17% of ticks, all from that call. {@code atan2} has neither
+    * problem. Parallel gives 0, antiparallel pi, zero-length input 0.</p>
     */
    static double signedAngleFromTo(Vector2DReadOnly startDirection, Vector2DReadOnly endDirection)
    {
-      double angle = AngleTools.angleMinusPiToPi(startDirection, endDirection);
-      if (Double.isNaN(angle))
-         return startDirection.dot(endDirection) >= 0.0 ? 0.0 : Math.PI;
-      return angle;
+      double cross = startDirection.getX() * endDirection.getY() - startDirection.getY() * endDirection.getX();
+      double angle = Math.atan2(cross, startDirection.dot(endDirection));
+      return angle == -Math.PI ? Math.PI : angle;
    }
 
 }
