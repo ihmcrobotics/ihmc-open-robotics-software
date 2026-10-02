@@ -8,6 +8,7 @@ public class RDXCustomSceneLoader
    public enum RDXDemoScene
    {
       FLAT_GROUND,
+      EMPTY_ROOM,
       ROUGH_TERRAIN,
       EXPLOSIVE_BREACHING,
       DISPOSE_BOTTLE,
@@ -24,6 +25,7 @@ public class RDXCustomSceneLoader
          case DISPOSE_BOTTLE -> "DisposeBottle.json";
          case ROOM_WITH_OBJECTS -> "RoomWithObjects.json";
          case ROUGH_TERRAIN -> "HarderTerrain.json";
+         case EMPTY_ROOM -> "EmptyRoom.json";
          default -> "FlatGround.json";
       };
    }
