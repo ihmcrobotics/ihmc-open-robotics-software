@@ -271,6 +271,36 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final FramePoint3D soleInPelvis = new FramePoint3D();
    private final us.ihmc.euclid.tuple3D.Vector3D kinematicBodyVelocity = new us.ihmc.euclid.tuple3D.Vector3D();
    private final us.ihmc.euclid.matrix.Matrix3D kinematicVelocityCovariance = new us.ihmc.euclid.matrix.Matrix3D();
+
+   /**
+    * Joint-velocity covariance in the kinematic velocity noise: N_v = sigma_v^2 I + s * J_c Sigma_qd J_c^T, with J_c
+    * the Jacobian from the leg's joint rates to the velocity of the stationary point c relative to the pelvis (in
+    * the pelvis frame) and Sigma_qd the joint-level filter's velocity covariance. Why: the measurement is built
+    * from that filter's qd, so its uncertainty is the joint uncertainty pushed through J_c. With the contact anchors
+    * weak (invariantContactVarianceWithKinematicVelocity), this is the only path by which the joint-level
+    * covariance -- and so the IMU-pair noise model -- reaches the base estimate; with a constant N_v only the
+    * joint-level MEAN does. Active only when a source with a covariance is installed
+    * ({@link #setKinematicVelocityJointCovarianceSource}); joints the source does not carry (the ankles) get
+    * {@code invariantKinematicVelocityUnfilteredJointVelocityVariance}.
+    */
+   private final YoBoolean yoKinematicVelocityUseJointCovariance = new YoBoolean("invariantKinematicVelocityUseJointCovariance", registry);
+   private final YoDouble yoKinematicVelocityJointCovarianceScale = new YoDouble("invariantKinematicVelocityJointCovarianceScale", registry);
+   private final YoDouble yoKinematicVelocityUnfilteredJointVelocityVariance = new YoDouble("invariantKinematicVelocityUnfilteredJointVelocityVariance",
+                                                                                            registry);
+   private final SideDependentList<YoDouble> yoKinematicVelocityJointNoiseTrace = new SideDependentList<>(new YoDouble("invariantKinematicVelocityJointNoiseTraceLeft",
+                                                                                                                       registry),
+                                                                                                          new YoDouble("invariantKinematicVelocityJointNoiseTraceRight",
+                                                                                                                       registry));
+   public static final double DEFAULT_UNFILTERED_JOINT_VELOCITY_VARIANCE = 0.1 * 0.1; // JointKFParameters.SIGMA_QD_UNFILTERED^2
+   private us.ihmc.stateEstimation.jointLevel.OneDoFJointStateSource kinematicVelocityJointSource = null;
+   private final SideDependentList<us.ihmc.mecano.algorithms.GeometricJacobianCalculator> legJacobians = new SideDependentList<>();
+   private final SideDependentList<us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics[]> legJoints = new SideDependentList<>();
+   private final SideDependentList<DMatrixRMaj> pointJacobianInPelvis = new SideDependentList<>();
+   private final SideDependentList<DMatrixRMaj> legVelocityCovariance = new SideDependentList<>();
+   private final SideDependentList<DMatrixRMaj> pointJacobianTimesCovariance = new SideDependentList<>();
+   private final DMatrixRMaj jointVelocityNoise = new DMatrixRMaj(3, 3);
+   private final us.ihmc.euclid.matrix.RotationMatrix soleToPelvisRotation = new us.ihmc.euclid.matrix.RotationMatrix();
+   private final us.ihmc.euclid.transform.RigidBodyTransform soleToPelvisTransform = new us.ihmc.euclid.transform.RigidBodyTransform();
    public static final double DEFAULT_KINEMATIC_VELOCITY_STD = 0.1; // m/s
 
    /**
@@ -584,6 +614,9 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoKinematicVelocityUseLoadGate.set(true);
       yoContactVarianceWithKinematicVelocity.set(DEFAULT_CONTACT_VARIANCE_WITH_KINEMATIC_VELOCITY);
       yoInitialTiltStd.set(DEFAULT_INITIAL_TILT_STD);
+      yoKinematicVelocityUseJointCovariance.set(true);
+      yoKinematicVelocityJointCovarianceScale.set(1.0);
+      yoKinematicVelocityUnfilteredJointVelocityVariance.set(DEFAULT_UNFILTERED_JOINT_VELOCITY_VARIANCE);
       yoReAnchorKeepsRotationCovariance.set(true);
       yoStartupSettleEnabled.set(true);
       yoStartupSettleDuration.set(DEFAULT_STARTUP_SETTLE_DURATION);
@@ -942,6 +975,80 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    }
 
    /** One body-velocity update per foot in contact: y = −(ω × r + ṙ), all in the pelvis frame. */
+   /**
+    * Installs the joint-level source whose velocity covariance enters the kinematic velocity noise (see
+    * {@link #yoKinematicVelocityUseJointCovariance}). The leg Jacobians are built from the same one-DoF joint path
+    * the covariance is packed against, so their columns line up by construction.
+    */
+   public void setKinematicVelocityJointCovarianceSource(us.ihmc.stateEstimation.jointLevel.OneDoFJointStateSource source,
+                                                         us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics pelvis,
+                                                         SideDependentList<? extends us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics> feet)
+   {
+      kinematicVelocityJointSource = source;
+      if (source == null)
+         return;
+      for (RobotSide side : RobotSide.values)
+      {
+         us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics[] joints = us.ihmc.mecano.tools.MultiBodySystemTools.createOneDoFJointPath(pelvis,
+                                                                                                                                             feet.get(side));
+         us.ihmc.mecano.algorithms.GeometricJacobianCalculator calculator = new us.ihmc.mecano.algorithms.GeometricJacobianCalculator();
+         calculator.setKinematicChain(joints); // same order as the covariance packed against joints
+         calculator.setJacobianFrame(soleFrames.get(side));
+         legJacobians.put(side, calculator);
+         legJoints.put(side, joints);
+         pointJacobianInPelvis.put(side, new DMatrixRMaj(3, joints.length));
+         legVelocityCovariance.put(side, new DMatrixRMaj(joints.length, joints.length));
+         pointJacobianTimesCovariance.put(side, new DMatrixRMaj(3, joints.length));
+      }
+   }
+
+   /**
+    * Adds s * J_c Sigma_qd J_c^T (pelvis frame) to {@code covariance}; {@link #stationaryPoint} must already hold c
+    * in the sole frame. Returns the trace added, or 0 when no covariance is available.
+    */
+   private double addJointVelocityNoise(RobotSide side, us.ihmc.euclid.matrix.Matrix3D covariance)
+   {
+      if (kinematicVelocityJointSource == null || !yoKinematicVelocityUseJointCovariance.getBooleanValue() || !kinematicVelocityJointSource.hasCovariance())
+         return 0.0;
+      us.ihmc.mecano.algorithms.GeometricJacobianCalculator calculator = legJacobians.get(side);
+      calculator.reset();
+      DMatrixRMaj jacobian = calculator.getJacobianMatrix(); // 6 x n, angular rows first, in the sole frame
+      DMatrixRMaj pointJacobian = pointJacobianInPelvis.get(side);
+      soleFrames.get(side).getTransformToDesiredFrame(soleToPelvisTransform, pelvisFrame); // the one-argument overload allocates
+      soleToPelvisRotation.set(soleToPelvisTransform.getRotation());
+      computePointJacobian(jacobian, stationaryPoint, soleToPelvisRotation, pointJacobian);
+      DMatrixRMaj sigma = legVelocityCovariance.get(side);
+      kinematicVelocityJointSource.packVelocityCovariance(legJoints.get(side), yoKinematicVelocityUnfilteredJointVelocityVariance.getDoubleValue(), sigma);
+      DMatrixRMaj jSigma = pointJacobianTimesCovariance.get(side);
+      org.ejml.dense.row.CommonOps_DDRM.mult(pointJacobian, sigma, jSigma);
+      org.ejml.dense.row.CommonOps_DDRM.multTransB(yoKinematicVelocityJointCovarianceScale.getDoubleValue(), jSigma, pointJacobian, jointVelocityNoise);
+      for (int row = 0; row < 3; row++)
+         for (int column = 0; column < 3; column++)
+            covariance.setElement(row, column, covariance.getElement(row, column) + 0.5 * (jointVelocityNoise.get(row, column) + jointVelocityNoise.get(column, row)));
+      return jointVelocityNoise.get(0, 0) + jointVelocityNoise.get(1, 1) + jointVelocityNoise.get(2, 2);
+   }
+
+   /**
+    * From a 6 x n geometric Jacobian taken in the sole frame (angular rows first), the 3 x n Jacobian of the velocity
+    * of the point {@code c} (sole-frame coordinates), rotated into the pelvis frame:
+    * v_c = v_o + w x c = v_o - (c)x w, so J_c = R (J_lin - (c)x J_ang).
+    */
+   static void computePointJacobian(DMatrixRMaj jacobianInSole, us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly c,
+                                    us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly soleToPelvis, DMatrixRMaj pointJacobianToPack)
+   {
+      double cx = c.getX(), cy = c.getY(), cz = c.getZ();
+      for (int column = 0; column < pointJacobianToPack.getNumCols(); column++)
+      {
+         double wx = jacobianInSole.get(0, column), wy = jacobianInSole.get(1, column), wz = jacobianInSole.get(2, column);
+         double x = jacobianInSole.get(3, column) - (cy * wz - cz * wy);
+         double y = jacobianInSole.get(4, column) - (cz * wx - cx * wz);
+         double z = jacobianInSole.get(5, column) - (cx * wy - cy * wx);
+         pointJacobianToPack.set(0, column, soleToPelvis.getM00() * x + soleToPelvis.getM01() * y + soleToPelvis.getM02() * z);
+         pointJacobianToPack.set(1, column, soleToPelvis.getM10() * x + soleToPelvis.getM11() * y + soleToPelvis.getM12() * z);
+         pointJacobianToPack.set(2, column, soleToPelvis.getM20() * x + soleToPelvis.getM21() * y + soleToPelvis.getM22() * z);
+      }
+   }
+
    private void updateKinematicVelocity()
    {
       for (RobotSide side : RobotSide.values)
@@ -952,8 +1059,6 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       if (!yoKinematicVelocityEnabled.getBooleanValue())
          return;
       double std = yoKinematicVelocityStd.getDoubleValue();
-      kinematicVelocityCovariance.setIdentity();
-      kinematicVelocityCovariance.scale(std * std);
       boolean loadGate = yoKinematicVelocityUseLoadGate.getBooleanValue() && copSources != null;
       for (RobotSide side : RobotSide.values)
       {
@@ -986,6 +1091,9 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          kinematicBodyVelocity.cross(angularVelocity, soleInPelvis); // ω × r, ω already in the pelvis frame
          kinematicBodyVelocity.add(soleRelativeVelocity);
          kinematicBodyVelocity.negate();
+         kinematicVelocityCovariance.setIdentity();
+         kinematicVelocityCovariance.scale(std * std);
+         yoKinematicVelocityJointNoiseTrace.get(side).set(addJointVelocityNoise(side, kinematicVelocityCovariance));
          ekf.updateBodyVelocity(kinematicBodyVelocity, kinematicVelocityCovariance);
          yoKinematicVelocityNIS.get(side).set(ekf.getLastNormalizedInnovationSquared());
          yoKinematicVelocityApplied.get(side).set(ekf.wasLastUpdateApplied());

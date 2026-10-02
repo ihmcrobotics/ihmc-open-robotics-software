@@ -233,6 +233,8 @@ public class InvariantMainStateEstimator implements StateEstimatorController
                                                           initialCovariance,
                                                           gravitationalAcceleration);
       invariantEstimator.setRunningAsMain(true); // disables the invariantMinusMain* self-comparisons
+      if (preFilter != null)
+         invariantEstimator.setKinematicVelocityJointCovarianceSource(preFilter, fullRobotModel.getPelvis(), feet);
       registry.addChild(invariantEstimator.getYoRegistry());
 
       // 2026-07-16 anti-damping fix: notch the CONTROLLER-FACING qd of the pitch-plane leg joints
