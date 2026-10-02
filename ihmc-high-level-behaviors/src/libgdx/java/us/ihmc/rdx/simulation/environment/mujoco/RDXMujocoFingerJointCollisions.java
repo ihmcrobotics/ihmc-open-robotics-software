@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
  * stop when it meets an object. The pad contact itself stays stiff, so the visible finger rests
  * on the surface instead of sinking into it.
  */
-public final class RDXMujocoIgnoredJointCollisions
+public final class RDXMujocoFingerJointCollisions
 {
    /** Slide, torsion, roll. The pads are a gum-like rubber, so tangential and torsional stiction are high. */
    private static final String FINGER_FRICTION = "2.5 1.0 0.05";
@@ -67,19 +67,19 @@ public final class RDXMujocoIgnoredJointCollisions
    private boolean configurationErrorLogged;
    private boolean springsSeeded;
 
-   private RDXMujocoIgnoredJointCollisions(List<Hand> hands, List<DrivenJoint> drivenJoints)
+   private RDXMujocoFingerJointCollisions(List<Hand> hands, List<DrivenJoint> drivenJoints)
    {
       this.hands = hands;
       this.drivenJoints = drivenJoints;
       this.emittedDofs = drivenJoints.size();
    }
 
-   public static RDXMujocoIgnoredJointCollisions none()
+   public static RDXMujocoFingerJointCollisions none()
    {
-      return new RDXMujocoIgnoredJointCollisions(List.of(), List.of());
+      return new RDXMujocoFingerJointCollisions(List.of(), List.of());
    }
 
-   public static RDXMujocoIgnoredJointCollisions fromRobot(Robot robot)
+   public static RDXMujocoFingerJointCollisions fromRobot(Robot robot)
    {
       RobotDefinition robotDefinition = robot.getRobotDefinition();
       Set<String> ignored = new HashSet<>(robotDefinition.getNameOfJointsToIgnore());
@@ -109,7 +109,7 @@ public final class RDXMujocoIgnoredJointCollisions
       }
       if (!hands.isEmpty())
          LogTools.info("MuJoCo will collide {} ignored robot link(s) as regular links, including the fingers", emittedBodies.size());
-      return new RDXMujocoIgnoredJointCollisions(hands, List.copyOf(drivenJoints));
+      return new RDXMujocoFingerJointCollisions(hands, List.copyOf(drivenJoints));
    }
 
    public boolean isEmpty()

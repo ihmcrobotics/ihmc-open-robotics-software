@@ -81,7 +81,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
 
    private MujocoPhysicsEngine physicsEngine;
    private Robot robot;
-   private RDXMujocoIgnoredJointCollisions ignoredJointCollisions = RDXMujocoIgnoredJointCollisions.none();
+   private RDXMujocoFingerJointCollisions fingerJointCollisions = RDXMujocoFingerJointCollisions.none();
    private String baseWorldXml;
    private File worldXmlFile;
    private String compiledStructureKey = "";
@@ -106,7 +106,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
       }
       physicsEngine = mujocoPhysicsEngine;
       robot = simulation.getRobot();
-      ignoredJointCollisions = RDXMujocoIgnoredJointCollisions.fromRobot(robot);
+      fingerJointCollisions = RDXMujocoFingerJointCollisions.fromRobot(robot);
       simulation.getRobot().getControllerManager().addController(this);
    }
 
@@ -148,7 +148,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
       List<RDXMujocoCollisionShape> shapes = environment.getObjectCollisions();
       List<RDXArticulatedDoorObject.Dynamics> doors = doorCommands.get();
       String structureKey = structureKey(shapes, doors);
-      if (!ignoredJointCollisions.isEmpty())
+      if (!fingerJointCollisions.isEmpty())
          structureKey = structureKey + "hands\n";
       MujocoMultiBodyDynamicsWorld world = physicsEngine.getDynamicsWorld();
       mjModel model = world.getModel();
@@ -160,7 +160,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
       else
       {
          writePoses(model, world.getData(), shapes);
-         ignoredJointCollisions.writeConfiguration(robot, model, world.getData());
+         fingerJointCollisions.writeConfiguration(robot, model, world.getData());
          syncDynamicDoors(model, world.getData(), doors, false);
       }
    }
@@ -205,7 +205,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
 
          mjModel recompiled = world.getModel();
          mjData recompiledData = world.getData();
-         int fingerDofs = ignoredJointCollisions.addedDofCount();
+         int fingerDofs = fingerJointCollisions.addedDofCount();
          int dynamicObjects = dynamicObjectCount(shapes);
          // A free joint is 7 qpos and 6 qvel. Door hinges stay 1 and 1, two of them per door.
          int expectedNq = preservedNq + fingerDofs + 7 * dynamicObjects + 2 * doors.size();
@@ -234,7 +234,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
          // step rather than leaving them one tick off the visual.
          writePoses(recompiled, recompiledData, shapes);
          syncDynamicDoors(recompiled, recompiledData, doors, true);
-         ignoredJointCollisions.writeConfiguration(robot, recompiled, recompiledData);
+         fingerJointCollisions.writeConfiguration(robot, recompiled, recompiledData);
          rebindJointAddresses(recompiled);
          Mujoco.mj_forward(recompiled, recompiledData);
          rebindDiagnostics(world);
@@ -403,7 +403,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
          geoms.append("    <!-- /rdx-articulated-doors -->\n");
       }
       xml = xml.substring(0, end) + geoms + xml.substring(end);
-      xml = ignoredJointCollisions.injectInto(xml, robot.getRobotDefinition());
+      xml = fingerJointCollisions.injectInto(xml, robot.getRobotDefinition());
       if (doors.isEmpty())
          return xml;
 
