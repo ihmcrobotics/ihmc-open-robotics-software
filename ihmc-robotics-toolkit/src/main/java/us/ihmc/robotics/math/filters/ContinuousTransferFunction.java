@@ -1,5 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
+import java.util.Arrays;
+
 /**
  * This class holds the representation of a continuous transfer function of the form:
  * <pre>
@@ -8,7 +10,7 @@ package us.ihmc.robotics.math.filters;
  * where numerator[] = [b_0, b_1, ..., b_{m-1}, b_m] and denominator[] = [a_0, a_1, ..., a_{n-1}, a_n]. This class can
  * be passed into the TransferFunctionDiscretizer to create a discrete representation of that transfer function
  * in the YoFilteredDouble class.
- * In addition, two ContinuousTransferFunctions can be cascaded together to produce a new transfer function of the form
+ * In addition, two ContinuousTransferFunctions can be multiplied together to produce a new transfer function of the form
  * <pre>
  *                            N1(s)      N2(s)        N3(s)
  * H3(s) = H1(s)*H2(s) = k1 * ----- k2 * ----- = k3 * -----
@@ -19,7 +21,6 @@ package us.ihmc.robotics.math.filters;
  */
 public class ContinuousTransferFunction
 {
-
    private String name;
    private double k;
    private double[] numerator;
@@ -43,8 +44,8 @@ public class ContinuousTransferFunction
    {
       this.name = name;
       this.k = k;
-      this.numerator = numerator;
-      this.denominator = denominator;
+      this.numerator = Arrays.copyOf(numerator, numerator.length);
+      this.denominator = Arrays.copyOf(denominator, denominator.length);
    }
 
    public ContinuousTransferFunction(ContinuousTransferFunction[] severalContinuousTransferFunctions)
@@ -56,78 +57,117 @@ public class ContinuousTransferFunction
    {
       this.name = name;
 
-      int numOfTransferFunctionsToCascade = severalContinuousTransferFunctions.length;
-      ContinuousTransferFunction tf_total;
+      ContinuousTransferFunction resultingTransferFunction = severalContinuousTransferFunctions[0];
 
-      // Initialize total transfer function with first transfer function.
-      tf_total = severalContinuousTransferFunctions[0];
-
-      for (int i = 1; i < numOfTransferFunctionsToCascade; i++)
+      for (int i = 1; i < severalContinuousTransferFunctions.length; i++)
       {
-         tf_total = CascadeTwoTransferFunctions(tf_total, severalContinuousTransferFunctions[i]);
+         resultingTransferFunction = multiply(resultingTransferFunction, severalContinuousTransferFunctions[i]);
       }
 
-      // Set private variables to total transfer function variables;
-      this.k = tf_total.getGain();
-      this.numerator = tf_total.getNumerator();
-      this.denominator = tf_total.getDenominator();
+      this.k = resultingTransferFunction.getGain();
+      this.numerator = Arrays.copyOf(resultingTransferFunction.getNumeratorUnsafe(), resultingTransferFunction.getNumeratorUnsafe().length);
+      this.denominator = Arrays.copyOf(resultingTransferFunction.getDenominatorUnsafe(), resultingTransferFunction.getDenominatorUnsafe().length);
    }
 
    /**
-    * Method cascades two transfer functions, H1(s) and H2(s) and returns a new transfer function H3(s).
+    * Creates a new transfer function H3(s) = H1(s) * H2(s).
     * <pre>
     *                            N1(s)      N2(s)        N3(s)
     * H3(s) = H1(s)*H2(s) = k1 * ----- k2 * ----- = k3 * -----
     *                            D1(s)      D2(s)        D3(s)
     * </pre>
+    * Allocates a new {@link ContinuousTransferFunction} and new numerator/denominator arrays; not garbage free.
     *
     * @param H1 - Transfer Function 1
     * @param H2 - Transfer Function 2
     * @return H3 - Combined Transfer Function of 1 and 2 (H3(s) = H1(s)*H2(s))
     */
-   private ContinuousTransferFunction CascadeTwoTransferFunctions(ContinuousTransferFunction H1, ContinuousTransferFunction H2)
+   public static ContinuousTransferFunction multiply(ContinuousTransferFunction H1, ContinuousTransferFunction H2)
    {
-      ContinuousTransferFunction H3 = new ContinuousTransferFunction();
-
-      H3.setGain(H1.getGain() * H2.getGain());
-      H3.setNumerator(cascadePolynomials(H1.getNumerator(), H2.getNumerator()));
-      H3.setDenominator(cascadePolynomials(H1.getDenominator(), H2.getDenominator()));
-
-      return H3;
+      ContinuousTransferFunction result = new ContinuousTransferFunction();
+      multiply(result, H1, H2);
+      return result;
    }
 
    /**
-    * Method combines two polynomials, poly1(x) and poly2(x), into poly3(s).
+    * Packs {@code resultToPack} with H1(s) * H2(s). This resizes {@code resultToPack}'s numerator/denominator
+    * arrays to match the product's polynomial order, so it still allocates; it is not garbage free.
+    */
+   public static void multiply(ContinuousTransferFunction resultToPack, ContinuousTransferFunction H1, ContinuousTransferFunction H2)
+   {
+      resultToPack.setGain(H1.getGain() * H2.getGain());
+      resultToPack.setNumerator(multiplyPolynomials(H1.getNumeratorUnsafe(), H2.getNumeratorUnsafe()));
+      resultToPack.setDenominator(multiplyPolynomials(H1.getDenominatorUnsafe(), H2.getDenominatorUnsafe()));
+   }
+
+   /**
+    * Multiplies two polynomials, poly1(x) and poly2(x), into a newly allocated poly3(x). Not garbage free.
     *
     * @param poly1
     * @param poly2
     * @return poly3 = poly1*poly2
     */
-   private static double[] cascadePolynomials(double[] poly1, double[] poly2)
+   private static double[] multiplyPolynomials(double[] poly1, double[] poly2)
    {
-      // Initialize new polynomial to new size.
       double[] poly3 = new double[poly1.length + poly2.length - 1];
+      multiplyPolynomials(poly3, poly1, poly2);
+      return poly3;
+   }
 
-      // Cycle through poly1 and poly2 to polynomials.
+   /**
+    * Packs {@code resultToPack} with the coefficients of poly1(x) * poly2(x). {@code resultToPack} must already be
+    * sized to {@code poly1.length + poly2.length - 1}. Garbage free.
+    */
+   private static void multiplyPolynomials(double[] resultToPack, double[] poly1, double[] poly2)
+   {
+      Arrays.fill(resultToPack, 0.0);
+
       for (int i = 0; i < poly1.length; i++)
       {
          for (int j = 0; j < poly2.length; j++)
          {
-            poly3[i + j] += poly1[i] * poly2[j];
+            resultToPack[i + j] += poly1[i] * poly2[j];
          }
       }
+   }
 
-      return poly3;
+   /**
+    * Creates a first-order low-pass filter transfer function: G(s) = breakFrequency / (s + breakFrequency).
+    */
+   public static ContinuousTransferFunction createLowPassFilterTransferFunction(double breakFrequency)
+   {
+      return new ContinuousTransferFunction("Low-Pass Filter", 1.0, new double[] {breakFrequency}, new double[] {1.0, breakFrequency});
+   }
+
+   /**
+    * Creates a first-order high-pass filter transfer function: G(s) = s / (s + breakFrequency).
+    */
+   public static ContinuousTransferFunction createHighPassFilterTransferFunction(double breakFrequency)
+   {
+      return new ContinuousTransferFunction("High-Pass Filter", 1.0, new double[] {1.0, 0.0}, new double[] {1.0, breakFrequency});
+   }
+
+   /**
+    * Creates a second-order notch filter transfer function:
+    * G(s) = (s^2 + notchFrequency^2) / (s^2 + notchWidth*s + notchFrequency^2).
+    */
+   public static ContinuousTransferFunction createNotchFilterTransferFunction(double notchFrequency, double notchWidth)
+   {
+      double notchFrequencySquared = notchFrequency * notchFrequency;
+      return new ContinuousTransferFunction("Notch Filter",
+                                             1.0,
+                                             new double[] {1.0, 0.0, notchFrequencySquared},
+                                             new double[] {1.0, notchWidth, notchFrequencySquared});
    }
 
    public void setNumerator(double[] numerator)
    {
-      this.numerator = numerator;
+      this.numerator = Arrays.copyOf(numerator, numerator.length);
    }
 
    public void setDenominator(double[] denominator)
    {
-      this.denominator = denominator;
+      this.denominator = Arrays.copyOf(denominator, denominator.length);
    }
 
    public void setGain(double k)
@@ -135,14 +175,38 @@ public class ContinuousTransferFunction
       this.k = k;
    }
 
-   public double[] getNumerator()
+   /**
+    * Returns the backing numerator array directly, without copying. Do not store a reference to it or modify it;
+    * it is the live internal state of this transfer function.
+    */
+   public double[] getNumeratorUnsafe()
    {
       return numerator;
    }
 
-   public double[] getDenominator()
+   /**
+    * Returns the backing denominator array directly, without copying. Do not store a reference to it or modify it;
+    * it is the live internal state of this transfer function.
+    */
+   public double[] getDenominatorUnsafe()
    {
       return denominator;
+   }
+
+   /**
+    * Copies the numerator coefficients into {@code numeratorToPack}, which must already be sized to match. Garbage free.
+    */
+   public void getNumerator(double[] numeratorToPack)
+   {
+      System.arraycopy(numerator, 0, numeratorToPack, 0, numerator.length);
+   }
+
+   /**
+    * Copies the denominator coefficients into {@code denominatorToPack}, which must already be sized to match. Garbage free.
+    */
+   public void getDenominator(double[] denominatorToPack)
+   {
+      System.arraycopy(denominator, 0, denominatorToPack, 0, denominator.length);
    }
 
    public double getGain()
