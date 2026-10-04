@@ -20,7 +20,7 @@ class ContinuousTransferFunctionTest
 
       ContinuousTransferFunction tf = new ContinuousTransferFunction(k, numerator, denominator);
 
-      double[] numAndDenOutput = ArrayUtils.addAll(tf.getNumerator(), tf.getDenominator());
+      double[] numAndDenOutput = ArrayUtils.addAll(tf.getNumeratorUnsafe(), tf.getDenominatorUnsafe());
 
       assertArrayEquals(numAndDen, numAndDenOutput);
    }
@@ -65,7 +65,7 @@ class ContinuousTransferFunctionTest
       ContinuousTransferFunction tf_total = new ContinuousTransferFunction(name4, new ContinuousTransferFunction[] {tf1, tf2, tf3});
 
       // Combine Numerator and Denominator Arrays.
-      double[] numAndDenOutput = ArrayUtils.addAll(tf_total.getNumerator(), tf_total.getDenominator());
+      double[] numAndDenOutput = ArrayUtils.addAll(tf_total.getNumeratorUnsafe(), tf_total.getDenominatorUnsafe());
 
       // Set Matlab's Output
       double delta = 0.00000000001;
@@ -152,7 +152,7 @@ class ContinuousTransferFunctionTest
       ContinuousTransferFunction tf_total = new ContinuousTransferFunction(name_combined, new ContinuousTransferFunction[] {tf_butter, tf_notch});
 
       // Combine Numerator and Denominator Arrays.
-      double[] numAndDenOutput = ArrayUtils.addAll(tf_total.getNumerator(), tf_total.getDenominator());
+      double[] numAndDenOutput = ArrayUtils.addAll(tf_total.getNumeratorUnsafe(), tf_total.getDenominatorUnsafe());
 
       // Set Matlab's Output
       double delta = 0.00001;
@@ -190,8 +190,8 @@ class ContinuousTransferFunctionTest
       ContinuousTransferFunction tf_total2 = new ContinuousTransferFunction(name_combined, new ContinuousTransferFunction[] {tf_notch, tf_butter});
 
       // Combine Numerator and Denominator Arrays.
-      double[] numAndDenOutput1 = ArrayUtils.addAll(tf_total1.getNumerator(), tf_total1.getDenominator());
-      double[] numAndDenOutput2 = ArrayUtils.addAll(tf_total2.getNumerator(), tf_total2.getDenominator());
+      double[] numAndDenOutput1 = ArrayUtils.addAll(tf_total1.getNumeratorUnsafe(), tf_total1.getDenominatorUnsafe());
+      double[] numAndDenOutput2 = ArrayUtils.addAll(tf_total2.getNumeratorUnsafe(), tf_total2.getDenominatorUnsafe());
 
       // Compare Matlab and Method's outputs.
       assertArrayEquals(numAndDenOutput1, numAndDenOutput2);

@@ -17,12 +17,6 @@ import org.ejml.dense.row.CommonOps_DDRM;
  */
 public class TransferFunctionDiscretizer
 {
-
-   // Used for temporary private calculations.
-   private DMatrixRMaj outputVec;
-   private DMatrixRMaj tempVec;
-   private int numCols;
-
    // Desired Transfer function numerator and denominator.
    private DMatrixRMaj numerator;
    private DMatrixRMaj denominator;
@@ -34,7 +28,6 @@ public class TransferFunctionDiscretizer
    private double k;
    private double p;
    private double fs;
-   private double output;
    private int n;
    private int m;
    private String name;
@@ -53,11 +46,10 @@ public class TransferFunctionDiscretizer
     */
    public TransferFunctionDiscretizer(String name, ContinuousTransferFunction tf, double sampleFrequency)
    {
-
       this.name = name;
 
-      m = tf.getNumerator().length;
-      n = tf.getDenominator().length;
+      m = tf.getNumeratorUnsafe().length;
+      n = tf.getDenominatorUnsafe().length;
 
       // Handles multiple cases of m and n for matrix sizes.
       if (m > n)
@@ -67,19 +59,19 @@ public class TransferFunctionDiscretizer
       else if (m < n)
       {
          double[] d = new double[n];
-         System.arraycopy(tf.getNumerator(), 0, d, n - m, m);
+         System.arraycopy(tf.getNumeratorUnsafe(), 0, d, n - m, m);
          this.numerator = new DMatrixRMaj(1, d.length, false, d);
       }
       else
       {
-         this.numerator = new DMatrixRMaj(1, m, false, tf.getNumerator());
+         this.numerator = new DMatrixRMaj(1, m, false, tf.getNumeratorUnsafe());
       }
 
-      this.denominator = new DMatrixRMaj(1, n, false, tf.getDenominator());
+      this.denominator = new DMatrixRMaj(1, n, false, tf.getDenominatorUnsafe());
 
       this.k = tf.getGain();
       this.fs = sampleFrequency;
-      this.p = 1 / (2 * this.fs);
+      this.p = 1.0 / (2.0 * this.fs);
 
       // Apply gain across numerator.
       CommonOps_DDRM.scale(k, this.numerator);
@@ -90,7 +82,6 @@ public class TransferFunctionDiscretizer
 
    private void buildFilter()
    {
-
       numerator = solveFx_to_Fz(numerator);
       denominator = solveFx_to_Fz(denominator);
 
@@ -105,19 +96,16 @@ public class TransferFunctionDiscretizer
       CommonOps_DDRM.scale(-1.0 / denominator.get(0), outputCoefficients);
    }
 
-   private double calc;
-
    private DMatrixRMaj solveFx_to_Fz(DMatrixRMaj Fx)
    {
-      numCols = Fx.numCols;
-      DMatrixRMaj Fz = new DMatrixRMaj(1, numCols);
+      int numCols = Fx.numCols;
 
       /*
        *  1) 	Dividing by s^n. Multiply out the correct number of gains.
        *  	Converting Numerator & Denominator to F(x) form, where they
        *  	are backwards in this form.
        */
-      calc = 1 / p;
+      double calc = 1.0 / p;
       for (int i = 0; i < n; i++)
       {
          calc *= p;
@@ -132,7 +120,7 @@ public class TransferFunctionDiscretizer
       Fx = reverseVector(Fx);
 
       // 4) Convert F(1/x + 1) -> F(2/x + 1).
-      calc = 1.0 / 2.0;
+      calc = 0.5;
       for (int i = 0; i < numCols; i++)
       {
          calc *= 2.0;
@@ -140,9 +128,7 @@ public class TransferFunctionDiscretizer
       }
 
       // 5) Convert F(2/x + 1) -> F(2/(x-1) + 1).
-      Fz = syntheticDivision(Fx, -1.0);
-
-      return Fz;
+      return syntheticDivision(Fx, -1.0);
    }
 
    /**
@@ -151,40 +137,40 @@ public class TransferFunctionDiscretizer
     * 1) F(x) -> F(x+1)
     * 2) F(2/x + 1) -> F(2/(x-1) + 1).
     *
-    * This code
+    * Mutates and returns {@code inputVec} in place; garbage free.
     *
     * @param inputVec
     * @return
     */
    private DMatrixRMaj syntheticDivision(DMatrixRMaj inputVec, double sign)
    {
-      numCols = inputVec.numCols;
-      tempVec = inputVec;
-      outputVec = inputVec;
+      int numCols = inputVec.numCols;
 
-      // Might need to be NumCols - 1
       for (int i = 0; i < numCols; i++)
       {
          for (int j = 0; j < (numCols - 1 - i); j++)
          {
-            tempVec.set(j + 1, tempVec.get(j + 1) + sign * tempVec.get(j));
+            inputVec.set(j + 1, inputVec.get(j + 1) + sign * inputVec.get(j));
          }
-         outputVec.set((numCols - 1 - i), tempVec.get(numCols - 1 - i));
       }
 
-      return outputVec;
+      return inputVec;
    }
 
-   // Reverse input Vector from Left to Right.
+   // Reverse input Vector from Left to Right, in place via a swap; garbage free.
    private DMatrixRMaj reverseVector(DMatrixRMaj inputVec)
    {
-      numCols = inputVec.numCols;
-      outputVec = new DMatrixRMaj(1, numCols);
-      for (int i = 0; i < numCols; i++)
+      double[] data = inputVec.data;
+      int lastIndex = inputVec.numCols - 1;
+
+      for (int i = 0; i < inputVec.numCols / 2; i++)
       {
-         outputVec.set(i, inputVec.get(numCols - 1 - i));
+         double temp = data[lastIndex - i];
+         data[lastIndex - i] = data[i];
+         data[i] = temp;
       }
-      return outputVec;
+
+      return inputVec;
    }
 
    public DMatrixRMaj getInputCoefficients()
@@ -195,6 +181,22 @@ public class TransferFunctionDiscretizer
    public DMatrixRMaj getOutputCoefficients()
    {
       return outputCoefficients.copy();
+   }
+
+   /**
+    * Copies the input coefficients into {@code coefficientsToPack}, which must already be sized to match. Garbage free.
+    */
+   public void getInputCoefficients(DMatrixRMaj coefficientsToPack)
+   {
+      coefficientsToPack.set(inputCoefficients);
+   }
+
+   /**
+    * Copies the output coefficients into {@code coefficientsToPack}, which must already be sized to match. Garbage free.
+    */
+   public void getOutputCoefficients(DMatrixRMaj coefficientsToPack)
+   {
+      coefficientsToPack.set(outputCoefficients);
    }
 
    public String getName()
