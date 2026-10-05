@@ -130,8 +130,12 @@ final class JointKFUpdate
    private final DMatrixRMaj K = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj nu = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj KR = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj IKH = new DMatrixRMaj(0, 0); // I-KH, dim x dim, Joseph form
+   private final DMatrixRMaj IKH = new DMatrixRMaj(0, 0); // I-KH, dim x dim: only the reference Joseph form in tests
    private final DMatrixRMaj Ptmp = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj Sfull = new DMatrixRMaj(0, 0); // S kept intact: setA may factor S in place
+   private final DMatrixRMaj josephG = new DMatrixRMaj(0, 0); // PH^T - K S, dim x k
+   private int[][] rowNonzeros = new int[0][0]; // per measurement row, the columns where H is nonzero
+   private int[] rowNonzeroCount = new int[0];
    /** Reused Cholesky solver for the innovation-covariance inverse. S is symmetric PD by construction, so a
     *  setA failure means non-PD => skip. Its factor L also gives the conditioning gate cheaply: S's pivots are
     *  L_ii^2, so cond(S) ~ (max L_ii / min L_ii)^2 with no eigendecomposition. */
@@ -269,6 +273,10 @@ final class JointKFUpdate
       PHt.reshape(dim, maxMeas);
       K.reshape(dim, maxMeas);
       KR.reshape(dim, maxMeas);
+      josephG.reshape(dim, maxMeas);
+      rowNonzeros = new int[maxMeas][dim];
+      rowNonzeroCount = new int[maxMeas];
+      Sfull.reshape(maxMeas, maxMeas);
       S.reshape(maxMeas, maxMeas);
       Sinv.reshape(maxMeas, maxMeas);
       nu.reshape(maxMeas, 1);
@@ -584,8 +592,11 @@ final class JointKFUpdate
       Sinv.reshape(k, k);
       nu.reshape(k, 1);
 
-      CommonOps_DDRM.multTransB(state.P, Hm, PHt);
-      CommonOps_DDRM.mult(Hm, PHt, S);
+      // H is mostly zeros (an encoder row has one entry; a gyro-pair row a handful), so PH^T and H(PH^T) are
+      // formed over each row's nonzero columns only. Same sums as the dense products, without the zero terms.
+      collectRowNonzeros(Hm);
+      sparseMultTransB(state.P, Hm, rowNonzeros, rowNonzeroCount, PHt);
+      sparseMult(Hm, PHt, rowNonzeros, rowNonzeroCount, S);
       CommonOps_DDRM.addEquals(S, Rm); // S = H P H^T + R; the +R was once missing, which made the gain
                                        // over-confident and could grow the covariance
       // Symmetrize first: Cholesky assumes exact symmetry and S is symmetric only to round-off. The factor
@@ -594,6 +605,8 @@ final class JointKFUpdate
       // were blind to. The floor gate catches the dual pathology: a pivot below half the applicable noise floor
       // is algebraically impossible for a healthy S, so it signals a collapsed (zero-Sigma) row.
       JointLevelKFPreFilter.symmetrize(S);
+      Sfull.reshape(k, k); // within the capacity reserved in allocate()
+      Sfull.set(S);
       // nu = z - H x, computed BEFORE the gates: it depends on neither the factorization nor the gain, and S's
       // diagonal must be read here anyway since setA may decompose in place.
       CommonOps_DDRM.mult(Hm, state.x, nu);
@@ -687,14 +700,7 @@ final class JointKFUpdate
       CommonOps_DDRM.mult(PHt, Sinv, K);
       CommonOps_DDRM.multAdd(K, nu, state.x); // nu = z - H x was computed above, before the gates
 
-      // Full Joseph form update
-      CommonOps_DDRM.setIdentity(IKH);
-      CommonOps_DDRM.multAdd(-1.0, K, Hm, IKH); // I - KH
-      CommonOps_DDRM.mult(IKH, state.P, Ptmp);
-      CommonOps_DDRM.multTransB(Ptmp, IKH, state.P);
-      KR.reshape(dim, k);
-      CommonOps_DDRM.mult(K, Rm, KR);
-      CommonOps_DDRM.multAddTransB(KR, K, state.P); // + K R K^T
+      josephCovarianceUpdate(state.P, PHt, K, Sfull, josephG);
 
       if (JointLevelKFPreFilter.containsNonFinite(state.x) || JointLevelKFPreFilter.containsNonFinite(state.P))
       {
@@ -702,6 +708,101 @@ final class JointKFUpdate
          state.P.set(PBackup);
          if (!state.warnedNonFiniteInput)
             state.warnNonFiniteInputOnce("the " + channel.label + " update produced a non-finite state; rolled back to the prior estimate");
+      }
+   }
+
+   /**
+    * Joseph-form covariance update, P <- (I-KH)P(I-KH)^T + K R K^T, without forming the dim x dim (I-KH).
+    * <p>
+    * With P symmetric, HP = (PH^T)^T and HPH^T = S - R, so expanding the Joseph form gives, for ANY gain K,
+    * <pre>  P+ = P - K (PH^T)^T - (PH^T - K S) K^T  </pre>
+    * an algebraic identity, not the optimal-gain shortcut P - KHP: an error in K still enters only at second order,
+    * which is the property the Joseph form is used for. Cost: three dim x k x dim-type products instead of two
+    * dim^3 ones plus forming I-KH. On Alex (dim 42; k = 27 stacked gyro rows, 9 encoder, 9 velocity) the three
+    * updates drop from ~0.79 M to ~0.35 M multiply-adds, and computing only the upper triangle halves the last step.
+    *
+    * @param P   the covariance, updated in place (dim x dim, symmetric).
+    * @param PHt P H^T (dim x k), computed from the prior P.
+    * @param K   the gain (dim x k).
+    * @param S   H P H^T + R (k x k), intact (not a factored copy).
+    * @param G   scratch, dim x k capacity.
+    */
+   static void josephCovarianceUpdate(DMatrixRMaj P, DMatrixRMaj PHt, DMatrixRMaj K, DMatrixRMaj S, DMatrixRMaj G)
+   {
+      int dim = K.getNumRows(), k = K.getNumCols();
+      G.reshape(dim, k);
+      CommonOps_DDRM.mult(K, S, G);
+      CommonOps_DDRM.changeSign(G);
+      CommonOps_DDRM.addEquals(G, PHt); // G = PH^T - K S
+      // P -= K (PH^T)^T + G K^T. The sum is exactly symmetric, so only the upper triangle is computed and mirrored:
+      // half the work of the two full products, and the result is symmetric by construction.
+      double[] p = P.data, kd = K.data, ph = PHt.data, g = G.data;
+      for (int i = 0; i < dim; i++)
+      {
+         int ri = i * k;
+         for (int j = i; j < dim; j++)
+         {
+            int rj = j * k;
+            double sum = 0.0;
+            for (int l = 0; l < k; l++)
+               sum += kd[ri + l] * ph[rj + l] + g[ri + l] * kd[rj + l];
+            double value = p[i * dim + j] - sum;
+            p[i * dim + j] = value;
+            p[j * dim + i] = value;
+         }
+      }
+   }
+
+   /** Fills {@link #rowNonzeros}/{@link #rowNonzeroCount} with each row's nonzero columns of {@code H}. */
+   private void collectRowNonzeros(DMatrixRMaj H)
+   {
+      int cols = H.getNumCols();
+      for (int r = 0; r < H.getNumRows(); r++)
+      {
+         int count = 0;
+         for (int c = 0; c < cols; c++)
+            if (H.data[r * cols + c] != 0.0)
+               rowNonzeros[r][count++] = c;
+         rowNonzeroCount[r] = count;
+      }
+   }
+
+   /** out = A H^T over H's nonzero columns (A dim x n, H k x n, out dim x k). */
+   static void sparseMultTransB(DMatrixRMaj A, DMatrixRMaj H, int[][] nonzeros, int[] counts, DMatrixRMaj out)
+   {
+      int dim = A.getNumRows(), n = A.getNumCols(), k = H.getNumRows();
+      out.reshape(dim, k);
+      for (int i = 0; i < dim; i++)
+      {
+         int ai = i * n;
+         for (int r = 0; r < k; r++)
+         {
+            int[] nz = nonzeros[r];
+            int hr = r * n;
+            double sum = 0.0;
+            for (int t = 0; t < counts[r]; t++)
+               sum += A.data[ai + nz[t]] * H.data[hr + nz[t]];
+            out.data[i * k + r] = sum;
+         }
+      }
+   }
+
+   /** out = H B over H's nonzero columns (H k x n, B n x m, out k x m). */
+   static void sparseMult(DMatrixRMaj H, DMatrixRMaj B, int[][] nonzeros, int[] counts, DMatrixRMaj out)
+   {
+      int k = H.getNumRows(), n = H.getNumCols(), m = B.getNumCols();
+      out.reshape(k, m);
+      for (int r = 0; r < k; r++)
+      {
+         int[] nz = nonzeros[r];
+         int hr = r * n;
+         for (int c = 0; c < m; c++)
+         {
+            double sum = 0.0;
+            for (int t = 0; t < counts[r]; t++)
+               sum += H.data[hr + nz[t]] * B.data[nz[t] * m + c];
+            out.data[r * m + c] = sum;
+         }
       }
    }
 
