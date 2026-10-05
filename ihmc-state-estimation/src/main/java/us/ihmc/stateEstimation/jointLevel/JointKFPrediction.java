@@ -383,14 +383,42 @@ final class JointKFPrediction
       // Q is state-dependent on the mass-matrix path (Qa = sigma_tau^2 lambda(q)^-2), so refresh it from the
       // model's current configuration before propagating the covariance. No-op on the scalar fallback path.
       updateProcessNoiseFromMassMatrix();
-      CommonOps_DDRM.mult(F, state.x, xtmp);
-      state.x.set(xtmp);
-      CommonOps_DDRM.mult(F, state.P, Ptmp);
-      CommonOps_DDRM.multTransB(Ptmp, F, state.P); // FPF^T term
+      propagate(state.x, state.P, state.numberOfJoints, dt, Ptmp);
       CommonOps_DDRM.addEquals(state.P, Q);
       // FPF^T + Q is symmetric in exact arithmetic; force it so round-off can't drift P before the encoder/pair
       // updates read it this tick (matches the JAX reference's LSigmaL^T discipline).
       JointLevelKFPreFilter.symmetrize(state.P);
+   }
+
+   /**
+    * x <- F x and P <- F P F^T for the constant-velocity transition F = I + dt E, E selecting qd into q
+    * ({@code F(i, n+i) = dt}, see the constructor). With that structure F P F^T = P + dt (E P + P E^T) + dt^2 E P E^T,
+    * which touches only the q rows and columns: O(dim^2) instead of the two dense dim^3 products.
+    *
+    * @param prior scratch, receives a copy of the prior P.
+    */
+   static void propagate(DMatrixRMaj x, DMatrixRMaj P, int n, double dt, DMatrixRMaj prior)
+   {
+      int dim = P.getNumRows();
+      for (int i = 0; i < n; i++)
+         x.data[i] += dt * x.data[n + i];
+      prior.reshape(dim, dim);
+      prior.set(P);
+      double[] p = P.data, q = prior.data;
+      for (int i = 0; i < dim; i++)
+      {
+         for (int j = 0; j < dim; j++)
+         {
+            double value = q[i * dim + j];
+            if (i < n)
+               value += dt * q[(n + i) * dim + j];
+            if (j < n)
+               value += dt * q[i * dim + n + j];
+            if (i < n && j < n)
+               value += dt * dt * q[(n + i) * dim + n + j];
+            p[i * dim + j] = value;
+         }
+      }
    }
 
    /** True when Q's joint blocks come from the Schur-complement Qa (a robot model was provided). */
