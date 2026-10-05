@@ -1,11 +1,9 @@
 package us.ihmc.rdx.simulation.environment.object.objects;
 
-import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
-import us.ihmc.rdx.tools.RDXModelLoader;
 
 public class RDXPalletObject extends RDXEnvironmentObject
 {
@@ -15,8 +13,7 @@ public class RDXPalletObject extends RDXEnvironmentObject
    public RDXPalletObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = RDXModelLoader.load("environmentObjects/pallet/Pallet.g3dj");
-      setRealisticModel(realisticModel);
+      loadRealisticModel("environmentObjects/pallet/Pallet.g3dj");
 
       double sizeX = 1.21;
       double sizeY = 1.013;
