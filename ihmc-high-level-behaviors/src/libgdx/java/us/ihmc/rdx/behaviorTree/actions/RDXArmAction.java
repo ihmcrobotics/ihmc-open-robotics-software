@@ -415,7 +415,7 @@ public class RDXArmAction extends RDXActionNode<ArmActionState, ArmActionDefinit
       else
       {
          boolean gizmoWasSelected = poseGizmo.getSelected().get();
-         if (armIconWidget.render(definition.getSide(), gizmoWasSelected, definition.getDefinedInJointspace()))
+         if (armIconWidget.render(definition.getSide(), gizmoWasSelected, definition.getDefinedInJointspace()) && !rootNode.getTree().isMonitorMode())
             poseGizmo.setSelected(!gizmoWasSelected);
       }
 
