@@ -7,10 +7,10 @@ import toolbox_msgs.ExternalForceEstimationConfigurationMessage;
 import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.jros2.ROS2Message;
-import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
 
 import java.io.File;
@@ -61,28 +61,28 @@ public class ExternalForceEstimationMessageLogger
       this.robotName = robotName;
       ros2Node = new AsyncROS2Node("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ExternalForceEstimationMessageLogger"));
 
-      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
-      ros2Node.createSubscription(controllerOutputTopic.withType(RobotConfigurationData.class), reader ->
+      HumanoidROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class), reader ->
       {
          RobotConfigurationData message = reader.read();
          if (message != null)
             robotConfigurationData.set(message);
       });
-      ros2Node.createSubscription(controllerOutputTopic.withType(RobotDesiredConfigurationData.class), reader ->
+      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotDesiredConfigurationData.class), reader ->
       {
          RobotDesiredConfigurationData message = reader.read();
          if (message != null)
             robotDesiredConfigurationData.set(message);
       });
 
-      ROS2Topic<?> toolboxInputTopic = ExternalForceEstimationToolboxModule.getInputTopic(robotName);
-      ros2Node.createSubscription(toolboxInputTopic.withType(ToolboxStateMessage.class), reader ->
+      HumanoidROS2Topic<?> toolboxInputTopic = ExternalForceEstimationToolboxModule.getInputTopic(robotName);
+      ros2Node.createSubscription(toolboxInputTopic.withTypeName(ToolboxStateMessage.class), reader ->
       {
          ToolboxStateMessage message = reader.read();
          if (message != null)
             processToolboxStateMessage(message);
       });
-      ros2Node.createSubscription(toolboxInputTopic.withType(ExternalForceEstimationConfigurationMessage.class), reader ->
+      ros2Node.createSubscription(toolboxInputTopic.withTypeName(ExternalForceEstimationConfigurationMessage.class), reader ->
       {
          ExternalForceEstimationConfigurationMessage message = reader.read();
          if (message != null)

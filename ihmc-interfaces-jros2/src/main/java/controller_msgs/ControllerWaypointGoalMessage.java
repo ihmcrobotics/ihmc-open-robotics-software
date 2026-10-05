@@ -34,7 +34,11 @@ float64 orientation_proximity 0.1
 
 # Whether the goal yaw matters. If false, the robot will always face toward the goal
 # position rather than blending to match the goal orientation as it approaches.
-bool goal_orientation_matters true}</pre>
+bool goal_orientation_matters true
+
+# When true, keep the current heading all the way to the goal (walk backward or
+# sideways even past distanceToFaceGoal). Default false faces the goal when far.
+bool keep_heading false}</pre>
 */
 public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWaypointGoalMessage>
 {
@@ -68,6 +72,11 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
       position rather than blending to match the goal orientation as it approaches.
    */
    private boolean goal_orientation_matters_;
+   /**
+      When true, keep the current heading all the way to the goal (walk backward or
+      sideways even past distanceToFaceGoal). Default false faces the goal when far.
+   */
+   private boolean keep_heading_;
 
    public ControllerWaypointGoalMessage()
    {
@@ -75,6 +84,7 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
       position_proximity_ = (double) 0.02;
       orientation_proximity_ = (double) 0.1;
       goal_orientation_matters_ = (boolean) true;
+      keep_heading_ = (boolean) false;
 
    }
 
@@ -98,6 +108,7 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // position_proximity_
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // orientation_proximity_
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // goal_orientation_matters_
+      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // keep_heading_
 
       return currentAlignment - initialAlignment;
    }
@@ -114,6 +125,7 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
       buffer.writeDouble(position_proximity_);
       buffer.writeDouble(orientation_proximity_);
       buffer.writeBoolean(goal_orientation_matters_);
+      buffer.writeBoolean(keep_heading_);
 
    }
 
@@ -129,6 +141,7 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
       position_proximity_ = buffer.readDouble();
       orientation_proximity_ = buffer.readDouble();
       goal_orientation_matters_ = buffer.readBoolean();
+      keep_heading_ = buffer.readBoolean();
 
    }
 
@@ -144,6 +157,7 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
       position_proximity_ = from.position_proximity_;
       orientation_proximity_ = from.orientation_proximity_;
       goal_orientation_matters_ = from.goal_orientation_matters_;
+      keep_heading_ = from.keep_heading_;
 
    }
 
@@ -237,6 +251,16 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
       this.goal_orientation_matters_ = goal_orientation_matters_;
    }
 
+   public boolean getKeepHeading()
+   {
+      return keep_heading_;
+   }
+
+   public void setKeepHeading(boolean keep_heading_)
+   {
+      this.keep_heading_ = keep_heading_;
+   }
+
 
    @Override
    public java.lang.String toString()
@@ -261,6 +285,8 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
       builder.append(orientation_proximity_);
       builder.append("goal_orientation_matters_=");
       builder.append(goal_orientation_matters_);
+      builder.append("keep_heading_=");
+      builder.append(keep_heading_);
 
       builder.append("}");
       return builder.toString();
