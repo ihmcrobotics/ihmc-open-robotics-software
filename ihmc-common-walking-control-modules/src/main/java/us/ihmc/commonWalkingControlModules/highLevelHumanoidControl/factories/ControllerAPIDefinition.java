@@ -41,6 +41,14 @@ import java.util.Map;
  */
 public class ControllerAPIDefinition
 {
+   /**
+    * Selects how the RL controller receives {@code HeightMapMessageForController}. When {@code false}, it is registered
+    * here as {@link HeightMapCommand}, so the controller's network subscriber subscribes to it and it reaches the RL
+    * controller through the {@code CommandInputManager}. When {@code true}, it is left out of the supported commands, so
+    * nothing on the command input path subscribes to it, and the RL controller reads it with its own ROS2 subscriber.
+    */
+   public static final boolean RECEIVE_HEIGHT_MAP_OVER_ROS2 = false;
+
    private static final List<Class<? extends Command<?, ?>>> controllerSupportedCommands;
    private static final List<Class<? extends ROS2Message<?>>> controllerSupportedStatusMessages;
 
@@ -100,7 +108,8 @@ public class ControllerAPIDefinition
       commands.add(RLModelSelectionCommand.class);
 
       /** Commands supported by the RL controoler, in this repo*/
-      commands.add(HeightMapCommand.class);
+      if (!RECEIVE_HEIGHT_MAP_OVER_ROS2)
+         commands.add(HeightMapCommand.class);
 
       controllerSupportedCommands = new ArrayList<>(commands);
 
