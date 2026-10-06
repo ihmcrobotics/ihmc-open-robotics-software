@@ -198,6 +198,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
       ImGui.separator();
       ImGui.text("Selected Object: " + (selectedObject == null ? "" : (selectedObject.getTitleCasedName() + " " + selectedObject.getObjectIndex())));
+      if (selectedObject != null)
+         selectedObject.renderImGuiWidgets();
       ImGui.text("Highlighted Object: " + (intersectedObject == null ? "" : (intersectedObject.getTitleCasedName() + " " + intersectedObject.getObjectIndex())));
 
       if (ImGui.button("Delete selected object") && selectedObject != null
@@ -458,6 +460,26 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
          selectedObject = to;
       }
+   }
+
+   /**
+    * When enabled, left-click picks objects in the 3D view and the pose gizmo can move the selection.
+    */
+   public void setInputsEnabled(boolean enabled)
+   {
+      inputsEnabled.set(enabled);
+   }
+
+   public boolean getInputsEnabled()
+   {
+      return inputsEnabled.get();
+   }
+
+   public void selectObject(RDXEnvironmentObject object)
+   {
+      updateObjectSelected(selectedObject, object);
+      if (selectedObject != null)
+         pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
    }
 
    public void addObject(RDXEnvironmentObject environmentObject)

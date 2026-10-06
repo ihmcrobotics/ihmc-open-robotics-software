@@ -13,10 +13,12 @@ public class RDXEnvironmentObjectLibrary
    private static final ArrayList<RDXEnvironmentObjectFactory> objectFactories = new ArrayList<>();
    static
    {
+      objectFactories.add(RDXPointLightObject.FACTORY);
+      objectFactories.add(RDXDirectionalLightObject.FACTORY);
+      objectFactories.add(RDXLabFloorObject.FACTORY);
       objectFactories.add(RDXSmallCinderBlockRoughed.FACTORY);
       objectFactories.add(RDXMediumCinderBlockRoughed.FACTORY);
       objectFactories.add(RDXLargeCinderBlockRoughed.FACTORY);
-      objectFactories.add(RDXLabFloorObject.FACTORY);
       objectFactories.add(RDXPalletObject.FACTORY);
       objectFactories.add(RDXStairsObject.FACTORY);
       objectFactories.add(RDXPyramidStairsObject.FACTORY);
@@ -24,29 +26,31 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXUnevenTilesObject.FACTORY);
       objectFactories.add(RDXProceduralGroundObject.FACTORY);
       objectFactories.add(RDXWorkPlatformObject.FACTORY);
-      objectFactories.add(RDXArUcoBoxObject.FACTORY);
-      objectFactories.add(RDXPointLightObject.FACTORY);
-      objectFactories.add(RDXPersonObject.FACTORY);
-      objectFactories.add(RDXDoorPanelObject.FACTORY);
-      objectFactories.add(RDXDoorLeverObject.FACTORY);
-      objectFactories.add(RDXDirectionalLightObject.FACTORY);
-      objectFactories.add(RDXL515SensorObject.FACTORY);
       objectFactories.add(RDXRightJerseyBarrierObject.FACTORY);
       objectFactories.add(RDXLeftJerseyBarrierObject.FACTORY);
-      objectFactories.add(RDXCenteredJerseyBarrierObject.FACTORY);
-      objectFactories.add(RDXChargeObject.FACTORY);
+      objectFactories.add(RDXWallObject.FACTORY);
+      objectFactories.add(RDXPersonObject.FACTORY);
+      objectFactories.add(RDXOrangeShirtPersonObject.FACTORY);
+      objectFactories.add(RDXGreenShirtPersonObject.FACTORY);
+      objectFactories.add(RDXBlackPantsPersonObject.FACTORY);
+      objectFactories.add(RDXArUcoBoxObject.FACTORY);
+      objectFactories.add(RDXDoorPanelObject.FACTORY);
+      objectFactories.add(RDXDoorLeverObject.FACTORY);
+      objectFactories.add(RDXArticulatedDoorObject.FACTORY);
       objectFactories.add(RDXCouchObject.FACTORY);
       objectFactories.add(RDXTableObject.FACTORY);
       objectFactories.add(RDXTrashCanObject.FACTORY);
       objectFactories.add(RDXDrillObject.FACTORY);
+      objectFactories.add(RDXChargeObject.FACTORY);
       objectFactories.add(RDXShoeObject.FACTORY);
       objectFactories.add(RDXBikeObject.FACTORY);
-      objectFactories.add(RDXBookObject.FACTORY);
       objectFactories.add(RDXMugObject.FACTORY);
       objectFactories.add(RDXCanObject.FACTORY);
       objectFactories.add(RDX2x4Object.FACTORY);
       objectFactories.add(RDXCerealBoxObject.FACTORY);
       objectFactories.add(RDXBottleObject.FACTORY);
+      objectFactories.add(RDXBucketObject.FACTORY);
+      objectFactories.add(RDXTrowelObject.FACTORY);
    }
 
    public static ArrayList<RDXEnvironmentObjectFactory> getObjectFactories()

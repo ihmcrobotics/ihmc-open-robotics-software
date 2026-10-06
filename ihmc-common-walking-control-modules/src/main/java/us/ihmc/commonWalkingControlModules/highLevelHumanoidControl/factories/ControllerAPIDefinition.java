@@ -106,6 +106,7 @@ public class ControllerAPIDefinition
       /** Commands supported by the RL controller, not in this repo*/
       commands.add(Point2DCommand.class);
       commands.add(RLModelSelectionCommand.class);
+      commands.add(MimicManeuverCommand.class);
 
       /** Commands supported by the RL controoler, in this repo*/
       if (!RECEIVE_HEIGHT_MAP_OVER_ROS2)
