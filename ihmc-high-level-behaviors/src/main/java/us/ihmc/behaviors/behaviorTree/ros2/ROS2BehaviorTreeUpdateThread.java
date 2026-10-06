@@ -45,6 +45,11 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
                                               peerClockOffsetEstimator);
    }
 
+   public ROS2BehaviorTreeExecutor getExecutor()
+   {
+      return executor;
+   }
+
    @Override
    protected synchronized void runTask()
    {

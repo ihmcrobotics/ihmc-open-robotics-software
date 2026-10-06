@@ -24,6 +24,9 @@ import us.ihmc.sensors.ImageSensor;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecutor, BehaviorTreeNodeExecutor<?, ?>>
 {
    private final ControllerStatusTracker controllerStatusTracker;
@@ -93,31 +96,46 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
       LLMConditionExecutor.destroy();
    }
 
-   public void loadBehavior(String jsonFileName)
+   public void setTreeDirectory(Path directory)
+   {
+      if (directory != null)
+         getSaveFileDirectory().setFilesystemDirectory(directory);
+   }
+
+   public boolean canLoadBehavior(String jsonFileName)
    {
       WorkspaceResourceFile file = new WorkspaceResourceFile(getSaveFileDirectory(), jsonFileName);
-      if (file.getClasspathResource() != null)
-      {
-         modifyTreeTopology(topologyOperationQueue ->
-         {
-            if (rootNode == null)
-               topologyOperationQueue.queueDestroyEntireTree();
+      return (file.isFileAccessAvailable() && Files.exists(file.getFilesystemFile())) || file.getClasspathResource() != null;
+   }
 
-            BehaviorTreeRootNodeExecutor rootNode = (BehaviorTreeRootNodeExecutor) getNodeBuilder().createRootNode(getAndIncrementNextID());
-            BehaviorTreeNodeExecutor<?, ?> loadedNode = getFileLoader().loadFromFile(rootNode, file, topologyOperationQueue);
-
-            if (loadedNode != null)
-            {
-               rootNode.getDefinition().modify();
-               topologyOperationQueue.queueSetRootNodeModify(rootNode);
-               topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
-            }
-         });
-      }
-      else
+   /** @return false when the file is missing or unreadable. The current tree is left in place. */
+   public boolean loadBehavior(String jsonFileName)
+   {
+      if (!canLoadBehavior(jsonFileName))
       {
          LogTools.error("Cannot load behavior: {}", jsonFileName);
+         return false;
       }
+
+      boolean[] loaded = {false};
+      WorkspaceResourceFile file = new WorkspaceResourceFile(getSaveFileDirectory(), jsonFileName);
+      modifyTreeTopology(topologyOperationQueue ->
+      {
+         if (rootNode != null)
+            topologyOperationQueue.queueDestroyEntireTreeModify();
+
+         BehaviorTreeRootNodeExecutor rootNode = (BehaviorTreeRootNodeExecutor) getNodeBuilder().createRootNode(getAndIncrementNextID());
+         BehaviorTreeNodeExecutor<?, ?> loadedNode = getFileLoader().loadFromFile(rootNode, file, topologyOperationQueue);
+         if (loadedNode != null)
+         {
+            rootNode.getState().setAutomaticExecution(true);
+            rootNode.getDefinition().modify();
+            topologyOperationQueue.queueSetRootNodeModify(rootNode);
+            topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
+            loaded[0] = true;
+         }
+      });
+      return loaded[0];
    }
 
 }
