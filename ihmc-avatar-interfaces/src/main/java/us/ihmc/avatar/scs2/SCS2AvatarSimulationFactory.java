@@ -80,6 +80,7 @@ import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoPhysicsEngine;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParameters;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParametersReadOnly;
@@ -417,6 +418,7 @@ public class SCS2AvatarSimulationFactory
 
       String name = simulationName.hasValue() ? simulationName.get() : Session.retrieveCallerName();
       simulationConstructionSet = new SimulationConstructionSet2(name, physicsEngineFactory);
+      registerMujocoContactYoGraphics();
       simulationConstructionSet.initializeBufferSize(simulationDataBufferSize.get());
       simulationConstructionSet.initializeBufferRecordTickPeriod(simulationDataRecordTickPeriod.get());
       if (terrainObjectDefinitions.isEmpty())
@@ -1241,6 +1243,31 @@ public class SCS2AvatarSimulationFactory
    public void setBulletCollisionMutator(Consumer<RobotDefinition> bulletCollisionMutator)
    {
       this.bulletCollisionMutator.set(bulletCollisionMutator);
+   }
+
+   /**
+    * Shows MuJoCo's live contact set in the 3D view: a sphere per contact point plus an arrow along
+    * the normal whose length is the normal force. This is the graphical form of
+    * {@code MujocoContactPool}, and it is the only direct view of what the engine thinks is touching
+    * at a given instant -- the controller's own crimson contact points are where the ESTIMATOR
+    * believes the feet are, which is a different thing and can differ by tens of millimetres.
+    * <p>
+    * Hardcoded on for every MuJoCo session rather than put behind a flag, because the pool's
+    * variables are recorded regardless and the graphic costs nothing when nothing is touching: a free
+    * slot holds NaN and is not drawn. Contacts beyond the pool's capacity
+    * ({@code MujocoSimulationParameters.perContactDiagnosticsCapacity}, 16 by default) are not drawn,
+    * so consult {@code contactOverflowCount} before reading the view as complete.
+    * <p>
+    * {@code PhysicsEngine} exposes no graphics hook, hence the instanceof rather than a generic call.
+    */
+   private void registerMujocoContactYoGraphics()
+   {
+      if (!(simulationConstructionSet.getPhysicsEngine() instanceof MujocoPhysicsEngine mujocoPhysicsEngine))
+         return;
+
+      YoGraphicDefinition contactYoGraphics = mujocoPhysicsEngine.getContactYoGraphics();
+      if (contactYoGraphics != null)
+         simulationConstructionSet.addYoGraphic(contactYoGraphics);
    }
 
    public void setUseMujocoPhysicsEngine(boolean useMujocoPhysicsEngine)

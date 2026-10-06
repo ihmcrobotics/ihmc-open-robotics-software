@@ -95,3 +95,7 @@
 **/.attach_pid*
 **/*.blend1
 **/*.hdf5
+
+# MuJoCo writes its native warning log to the process working directory, which for a gradle
+# test is the module source tree. Generated, never to be committed.
+MUJOCO_LOG.TXT

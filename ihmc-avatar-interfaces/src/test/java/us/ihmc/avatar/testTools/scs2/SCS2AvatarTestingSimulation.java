@@ -42,6 +42,7 @@ import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.registry.YoNamespace;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
+import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -149,7 +150,23 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    public void start(boolean cameraTracksPelvis)
    {
       getSimulationConstructionSet().addSimulationThrowableListener(lastThrowable::set);
-      enableExceptionControllerFailure();
+
+      // A controller failure normally throws here, which kills the controller thread and destroys
+      // the simulation -- which is exactly when you most want to look at it. Set
+      // SCS2_TEST_IGNORE_CONTROLLER_FAILURE=true (implied by SCS2_TEST_SHOW_GUI) to let the robot
+      // fall over while the simulation keeps running and recording.
+      //
+      // This makes the test result meaningless: simulateNow stops reporting the failure, so a test
+      // that should fail will pass. It is an observation mode, not a test mode.
+      if (Boolean.parseBoolean(System.getenv("SCS2_TEST_SHOW_GUI"))
+          || Boolean.parseBoolean(System.getenv("SCS2_TEST_IGNORE_CONTROLLER_FAILURE")))
+      {
+         LogTools.warn("Controller failures will not abort this simulation, so the test result means nothing.");
+      }
+      else
+      {
+         enableExceptionControllerFailure();
+      }
 
       avatarSimulation.start();
 
