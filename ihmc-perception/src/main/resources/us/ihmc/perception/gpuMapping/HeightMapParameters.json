@@ -1,6 +1,6 @@
 {
   "title" : "HeightMapParameters",
-  "Drift offset filter" : true,
+  "Drift offset filter" : false,
   "Flying points filter" : false,
   "Log height map" : false,
   "Min Depth To Accept" : {
@@ -19,7 +19,7 @@
     "upperBound" : 10.0
   },
   "Kalman filter prediction noise" : {
-    "value" : 0.001,
+    "value" : 0.01,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -78,7 +78,7 @@
     "upperBound" : 0.1
   },
   "ICP outlier distance threshold" : {
-    "value" : 0.05,
+    "value" : 0.03,
     "lowerBound" : 0.0,
     "upperBound" : 0.5
   },
@@ -88,7 +88,7 @@
     "upperBound" : 1.0
   },
   "ICP convergence Z meters" : {
-    "value" : 0.002,
+    "value" : 0.005,
     "lowerBound" : 0.0,
     "upperBound" : 0.05
   },
@@ -97,7 +97,7 @@
     "lowerBound" : 0.0,
     "upperBound" : 30.0
   },
-  "Fill unseen cells" : true,
+  "Fill unseen cells" : false,
   "Fill blend start distance" : {
     "value" : 0.1,
     "lowerBound" : 0.0,
