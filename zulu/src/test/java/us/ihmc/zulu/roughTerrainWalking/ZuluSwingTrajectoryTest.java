@@ -26,6 +26,12 @@ public class ZuluSwingTrajectoryTest extends HumanoidSwingTrajectoryTest
    }
 
    @Override
+   protected double getExtraSwingHeightTestSimulationDuration(double swingHeight)
+   {
+      return swingHeight < 0.0 ? 2.0 : 0.0;
+   }
+
+   @Override
    @Test
    public void testMultipleHeightFootsteps()
    {

@@ -33,6 +33,12 @@ public class ZuluEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldTe
    }
 
    @Override
+   public double getSlantedCinderBlockFieldSwingHeight()
+   {
+      return 0.15;
+   }
+
+   @Override
    public String getSimpleRobotName()
    {
       return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ZULU);
