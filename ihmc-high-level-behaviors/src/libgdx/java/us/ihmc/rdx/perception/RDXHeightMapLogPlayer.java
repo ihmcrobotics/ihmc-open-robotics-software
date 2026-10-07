@@ -36,7 +36,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class RDXHeightMapLogPlayer
 {
 //   private static final String SVO_FILE = "/opt/ihmc/LogData/UserFolders/TomaszFolder/heightmap_test.svo2";
-   private static final String SVO_FILE = "/opt/ihmc/LogData/UserFolders/DexFolder/FrameGrabber9000/01262026/ZED_Recording_58123737_20260126_152719.svo";
+   private static final String SVO_FILE = System.getProperty("svo", "/opt/ihmc/LogData/UserFolders/DexFolder/FrameGrabber9000/01262026/ZED_Recording_58123737_20260126_152719.svo");
 
    private final RDXBaseUI baseUI;
    private final ROS2Node ros2Node;
@@ -59,7 +59,7 @@ public class RDXHeightMapLogPlayer
       ros2Node = new ROS2Node(getClass().getSimpleName());
       baseUI = new RDXBaseUI();
 
-      zedPlaybackSensor = new ROS2ZEDSVOPlaybackSensor(ros2Node, 0, ZEDModelData.ZED_X_MINI, zed.SL_DEPTH_MODE_NEURAL_LIGHT, SVO_FILE);
+      zedPlaybackSensor = new ROS2ZEDSVOPlaybackSensor(ros2Node, 0, ZEDModelData.ZED_X_MINI, zed.SL_DEPTH_MODE_NEURAL, SVO_FILE);
       zedPlaybackSensor.setTrackedPoseOffset(new Pose3D(0.0, 0.0, 1.0, 0.0, 0.0, 0.0));
       zedPlaybackSensor.useTrackedPose(true);
       BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);

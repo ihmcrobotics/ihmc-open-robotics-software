@@ -4,6 +4,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.jros2.ROS2Node;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.imageMessage.PixelFormat;
@@ -64,7 +65,18 @@ public class YOLOv8DetectionThread extends RepeatingTaskThread
 
          colorImage.release();
          depthImage.release();
-      } catch (InterruptedException ignored) {}
+      }
+      catch (InterruptedException ignored)
+      {
+      }
+      catch (RuntimeException e)
+      {
+         if (!isCUDAOutOfMemory(e))
+            throw e;
+         LogTools.error("YOLO ran out of GPU memory and will stop. {}", e.getMessage());
+         yoloExecutor.disableAllModels();
+         interrupt();
+      }
    }
 
    @Override
@@ -78,5 +90,17 @@ public class YOLOv8DetectionThread extends RepeatingTaskThread
    public YOLOv8DetectionExecutor getYoloExecutor()
    {
       return yoloExecutor;
+   }
+
+   private static boolean isCUDAOutOfMemory(Throwable error)
+   {
+      while (error != null)
+      {
+         String message = error.getMessage();
+         if (message != null && (message.contains("out of memory") || message.contains("(-217:Gpu API call)")))
+            return true;
+         error = error.getCause();
+      }
+      return false;
    }
 }
