@@ -72,6 +72,14 @@ final class JointKFParameters
    static final double INIT_BIAS_VAR = 2.5e-3;
    /** Stance FK slip variance Sigma_eps ((rad/s)^2). */
    static final double ANCHOR_VAR = 4.0e-4;
+   /**
+    * Stance-anchor gate (rad/s) on the sensor-only residual |omega_base^meas + J_leg qd^meas|, i.e. the trusted
+    * foot's own angular rate: above it the foot is rolling (heel strike, toe-off) and the anchor is dropped for
+    * the tick. On the 2026-10-06 Alex002 logs the trusted feet turn at ~0.9 rad/s in pitch through the last
+    * tenth of every stance; ungated, the anchor rows average +59 mrad/s of pitch "bias" over walking, gated at
+    * 0.05 they average -0.2 against a true ~1. Walking stance in between has an rms of ~9 mrad/s per axis.
+    */
+   static final double ANCHOR_RESIDUAL_GATE = 0.05;
    /** Encoder velocity STD (rad/s) for unfiltered base-&gt;foot chain joints; CHANGES.md. */
    static final double SIGMA_QD_UNFILTERED = 0.1;
    /** Smoothing corner (Hz) for the measured-q̇ slew driving the direct-velocity lag inflation; CHANGES.md. */
@@ -93,6 +101,7 @@ final class JointKFParameters
    final YoDouble qaMax;
    final YoDouble condSMax;
    final YoDouble anchorVar;
+   final YoDouble anchorResidualGate;
    final YoDouble sigmaGyroFloor;
 
    // ================================ Boot-time ================================
@@ -120,6 +129,9 @@ final class JointKFParameters
       condSMax = create("condSMax", LIVE + "Max cond(S) proxy (max L_ii / min L_ii)^2 before the measurement "
                                     + "block is gated.", COND_S_MAX, registry);
       anchorVar = create("anchorVar", LIVE + "Stance-anchor FK slip variance Sigma_eps ((rad/s)^2).", ANCHOR_VAR, registry);
+      anchorResidualGate = create("anchorResidualGate", LIVE + "Drop a stance anchor whose sensor-only residual "
+                                                        + "|omega_base + J_leg qd| exceeds this (rad/s): the foot is rolling. "
+                                                        + "<= 0 or non-finite disables.", ANCHOR_RESIDUAL_GATE, registry);
       sigmaGyroFloor = create("sigmaGyroFloor", LIVE + "Gyro measurement-noise floor ((rad/s)^2 per axis), and "
                                                 + "the S-pivot floor for every non-encoder block.", SIGMA_GYRO_FLOOR, registry);
 
