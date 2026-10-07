@@ -154,6 +154,13 @@ final class JointKFUpdate
 
    private final YoInteger yoInnovationGateSkipCount;
    private final YoDouble yoCondSProxyLog10;
+   /**
+    * Normalized innovation squared of the stacked gyro update (IMU-pair and stance-anchor rows), nu^T S^-1 nu, and its
+    * dimension: a consistent filter averages NIS/dof = 1. The consistency measure the pair-noise comparison is judged on
+    * (configuration 4 vs 6); NaN on a tick the update was skipped by a gate.
+    */
+   private final YoDouble yoStackedNIS;
+   private final YoDouble yoStackedNISDof;
    private final YoDouble yoMinSDiag;
    private final YoDouble yoMaxSDiag;
    // Per-channel diagnostics, indexed by joint state index. NIS = nu_i^2 / S_ii; E[NIS] = 1 for a consistent
@@ -256,6 +263,8 @@ final class JointKFUpdate
 
       yoInnovationGateSkipCount = new YoInteger("jointKFInnovationGateSkipCount", registry);
       yoCondSProxyLog10 = new YoDouble("jointKFCondSProxyLog10", registry);
+      yoStackedNIS = new YoDouble("jointKFStackedNIS", registry);
+      yoStackedNISDof = new YoDouble("jointKFStackedNISDof", registry);
       yoMinSDiag = new YoDouble("jointKFMinSDiag", registry);
       yoMaxSDiag = new YoDouble("jointKFMaxSDiag", registry);
       createMeasurementYoVariables(registry, useDirectVelocityMeasurement);
@@ -585,6 +594,8 @@ final class JointKFUpdate
     */
    void josephUpdate(DMatrixRMaj Hm, DMatrixRMaj zm, DMatrixRMaj Rm, Channel channel)
    {
+      if (channel == Channel.STACKED_GYRO)
+         yoStackedNIS.set(Double.NaN); // stays NaN if a gate skips this tick's update
       int dim = state.dim;
       int k = Hm.getNumRows();
       PHt.reshape(dim, k);
@@ -690,6 +701,19 @@ final class JointKFUpdate
       {
          warnSingularInnovationOnce(channel, "S^-1 is non-finite (S is near-singular and its inverse overflowed)", Hm, Rm);
          return;
+      }
+      if (channel == Channel.STACKED_GYRO)
+      {
+         double nis = 0.0;
+         for (int i = 0; i < k; i++)
+         {
+            double row = 0.0;
+            for (int j = 0; j < k; j++)
+               row += Sinv.get(i, j) * nu.get(j, 0);
+            nis += nu.get(i, 0) * row;
+         }
+         yoStackedNIS.set(nis);
+         yoStackedNISDof.set(k);
       }
 
       // Snapshot for rollback: everything below writes x then P in place.
