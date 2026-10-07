@@ -210,6 +210,7 @@ public class SCS2AvatarSimulationFactory
    private InvariantContactSource invariantMainEstimatorContactSource = InvariantContactSource.FOOT_SWITCHES;
    private java.util.function.Consumer<us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter> jointLevelKFConfigurator = null;
    private double invariantStaticAccelerometerBiasWindow = Double.NaN;
+   private boolean invariantUseRestGyroBias = false;
    private final OptionalFactoryField<Boolean> createIKStreamingRealTimeController = new OptionalFactoryField<>(
          "createIKStreamingRealTimeController",
          false);
@@ -565,6 +566,7 @@ public class SCS2AvatarSimulationFactory
          avatarEstimatorThreadFactory.setInvariantEstimatorYawSeeding(invariantMainEstimatorYawSeeding);
          avatarEstimatorThreadFactory.setInvariantContactSource(invariantMainEstimatorContactSource);
          avatarEstimatorThreadFactory.setInvariantStaticAccelerometerBiasWindow(invariantStaticAccelerometerBiasWindow);
+         avatarEstimatorThreadFactory.setInvariantUseRestGyroBias(invariantUseRestGyroBias);
          avatarEstimatorThreadFactory.setJointLevelKFConfigurator(jointLevelKFConfigurator);
       }
       estimatorThread = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
@@ -1324,6 +1326,12 @@ public class SCS2AvatarSimulationFactory
    public void setInvariantStaticAccelerometerBiasWindow(double windowSeconds)
    {
       this.invariantStaticAccelerometerBiasWindow = windowSeconds;
+   }
+
+   /** Same as the hardware threading factory's: rest-measured gyro bias for the invariant main estimator. */
+   public void setInvariantUseRestGyroBias(boolean invariantUseRestGyroBias)
+   {
+      this.invariantUseRestGyroBias = invariantUseRestGyroBias;
    }
 
    public void setInvariantMainEstimatorContactSource(InvariantContactSource invariantMainEstimatorContactSource)

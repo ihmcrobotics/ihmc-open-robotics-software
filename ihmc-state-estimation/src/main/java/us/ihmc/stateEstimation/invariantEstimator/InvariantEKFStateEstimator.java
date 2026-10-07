@@ -396,6 +396,15 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    // sitting directly beside pelvis-frame rates -- which is exactly how a pitch bias gets read as a roll bias.
    // The bias is ESTIMATED in the IMU frame (that is where it physically lives), so that stays the primary; the
    // pelvis-frame copy is what you want when correlating against roll/pitch drift.
+   // The gyro bias re-measured at every two-foot standing rest (RestGyroBiasEstimator). It always runs, so every
+   // invariant log carries it beside the applied bias; invariantUseRestGyroBias makes the filter subtract it in
+   // place of the upstream provider's (zero until the first rest completes a window).
+   private final RestGyroBiasEstimator restGyroBias = new RestGyroBiasEstimator(registry);
+   private final YoBoolean yoUseRestGyroBias = new YoBoolean("invariantUseRestGyroBias", registry);
+   private final us.ihmc.euclid.transform.RigidBodyTransform imuToSoleTransform = new us.ihmc.euclid.transform.RigidBodyTransform();
+   private final SideDependentList<us.ihmc.euclid.tuple4D.Quaternion> imuInSole = new SideDependentList<>(new us.ihmc.euclid.tuple4D.Quaternion(),
+                                                                                                         new us.ihmc.euclid.tuple4D.Quaternion());
+   private static final double REST_CONTACT_PROBABILITY = 0.9;
    private final YoDouble yoAppliedGyroBiasImuX = new YoDouble("invariantAppliedGyroBiasInIMUFrameX", registry);
    private final YoDouble yoAppliedGyroBiasImuY = new YoDouble("invariantAppliedGyroBiasInIMUFrameY", registry);
    private final YoDouble yoAppliedGyroBiasImuZ = new YoDouble("invariantAppliedGyroBiasInIMUFrameZ", registry);
@@ -778,7 +787,11 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       // Clamp the upstream gyro bias to a physically plausible range before subtracting: a runaway bias would
       // otherwise be integrated straight into base orientation (the pitch-drift mechanism). Publish the applied
       // (post-clamp) bias for visibility.
-      appliedGyroBias.setIncludingFrame(imuSensor.getMeasurementFrame(), imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuSensor));
+      updateRestGyroBias();
+      if (yoUseRestGyroBias.getValue())
+         appliedGyroBias.setIncludingFrame(imuSensor.getMeasurementFrame(), restGyroBias.getBias());
+      else
+         appliedGyroBias.setIncludingFrame(imuSensor.getMeasurementFrame(), imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuSensor));
       boolean clamped = clampGyroBias(appliedGyroBias);
       if (clamped)
          yoGyroBiasClampCount.set(yoGyroBiasClampCount.getValue() + 1);
@@ -1163,6 +1176,30 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    public void setGatePitchOnDoubleSupport(boolean gatePitchOnDoubleSupport)
    {
       this.gatePitchOnDoubleSupport = gatePitchOnDoubleSupport;
+   }
+
+   private void updateRestGyroBias()
+   {
+      boolean bothFeetLoaded = true;
+      for (RobotSide side : RobotSide.values)
+      {
+         bothFeetLoaded &= yoContactProbability.get(side).getDoubleValue() >= REST_CONTACT_PROBABILITY;
+         // The two-argument overload: the one-argument one allocates.
+         imuSensor.getMeasurementFrame().getTransformToDesiredFrame(imuToSoleTransform, soleFrames.get(side));
+         imuInSole.get(side).set(imuToSoleTransform.getRotation());
+      }
+      restGyroBias.update(imuSensor.getAngularVelocityMeasurement(), bothFeetLoaded, imuInSole.get(RobotSide.LEFT), imuInSole.get(RobotSide.RIGHT), dt);
+   }
+
+   /** Makes the filter subtract the rest-measured gyro bias instead of the upstream provider's; see {@link RestGyroBiasEstimator}. */
+   public void setUseRestGyroBias(boolean useRestGyroBias)
+   {
+      yoUseRestGyroBias.set(useRestGyroBias);
+   }
+
+   public RestGyroBiasEstimator getRestGyroBiasEstimator()
+   {
+      return restGyroBias;
    }
 
    /** Clamps each gyro-bias component to ±{@link #MAX_GYRO_BIAS}; returns true if any axis was clamped. */
