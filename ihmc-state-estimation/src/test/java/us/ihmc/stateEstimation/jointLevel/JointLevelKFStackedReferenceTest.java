@@ -44,6 +44,9 @@ public class JointLevelKFStackedReferenceTest
       for (int trial = 0; trial < 12; trial++)
       {
          JointLevelKFTestFixture f = JointLevelKFTestFixture.twoPairs(90100L + trial, 10, 1, 5, 9);
+         // The raw gyros below are arbitrary, so the trusted foot "turns" at up to ~0.3 rad/s; the anchor residual
+         // gate would drop it. This test is about the algebra of the stacked update, so keep every anchor.
+         ((us.ihmc.yoVariables.variable.YoDouble) f.registry.findVariable("jointKFParam_anchorResidualGate")).set(Double.POSITIVE_INFINITY);
 
          // Arbitrary (not necessarily consistent) raw gyros — the equivalence is algebraic, not motion-specific.
          for (JointLevelKFTestFixture.TestIMU imu : f.imus)

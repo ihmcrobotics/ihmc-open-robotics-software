@@ -105,6 +105,10 @@ final class JointKFBiasUpdate
    // even while the common mode is unfixed) and shows up only in P. Anchor count 0 => gauge unfixed => the bias
    // WILL diverge; an unboundedly growing trace says the same. See FINDINGS.md §F.4.
    private final YoInteger yoActiveAnchorCount;
+   // Anchors dropped by the residual gate (cumulative), and each anchor's sensor-only residual this tick: the
+   // trusted foot's own angular rate, which the anchor row assumes is zero.
+   private final YoInteger yoAnchorGatedCount;
+   private final YoDouble[] yoAnchorRawResidual;
    private final YoDouble yoBiasPTrace;
    // Per-IMU gyro bias (IMU frame), indexed by ordinal. Published because this is the bias EXPORTED to the
    // downstream InEKF, where a runaway integrates straight into base orientation — not an unlogged black box.
@@ -154,6 +158,10 @@ final class JointKFBiasUpdate
 
       yoActiveAnchorCount = new YoInteger("jointKFActiveAnchorCount", registry);
       yoBiasPTrace = new YoDouble("jointKF_biasPTrace", registry);
+      yoAnchorGatedCount = new YoInteger("jointKFAnchorGatedCount", registry);
+      yoAnchorRawResidual = new YoDouble[state.footAnchors.size()];
+      for (int i = 0; i < yoAnchorRawResidual.length; i++)
+         yoAnchorRawResidual[i] = new YoDouble("jointKFAnchorRawResidual_" + state.footAnchors.get(i).foot.getName(), registry);
       yoImuGyroBiasX = new YoDouble[m];
       yoImuGyroBiasY = new YoDouble[m];
       yoImuGyroBiasZ = new YoDouble[m];
@@ -237,12 +245,27 @@ final class JointKFBiasUpdate
 
       // Active = usable AND trusted last tick. activeAnchors == 0 means the bias gauge is unfixed THIS TICK.
       int activeAnchors = 0;
+      double gate = parameters.anchorResidualGate.getValue();
       for (int i = 0; i < state.footAnchors.size(); i++)
       {
          JointKFState.FootAnchor footAnchor = state.footAnchors.get(i);
          footAnchor.active = footAnchor.usable && trustedFeetFromLastTick.contains(footAnchor.foot);
-         if (footAnchor.active)
-            activeAnchors++;
+         if (!footAnchor.active)
+         {
+            yoAnchorRawResidual[i].set(Double.NaN);
+            continue;
+         }
+         footAnchor.jacobian.reset();
+         CommonOps_DDRM.extract(footAnchor.jacobian.getJacobianMatrix(), 0, 3, 0, footAnchor.qdCols.length, footAnchor.Jang, 0, 0);
+         double residual = anchorRawResidualNorm(footAnchor);
+         yoAnchorRawResidual[i].set(residual);
+         if (gate > 0.0 && Double.isFinite(gate) && residual > gate)
+         {
+            footAnchor.active = false;
+            yoAnchorGatedCount.increment();
+            continue;
+         }
+         activeAnchors++;
       }
       yoActiveAnchorCount.set(activeAnchors);
       int rows = 3 * (E + activeAnchors);
@@ -309,8 +332,7 @@ final class JointKFBiasUpdate
          JointKFState.FootAnchor footAnchor = state.footAnchors.get(i);
          if (!footAnchor.active)
             continue;
-         footAnchor.jacobian.reset();
-         CommonOps_DDRM.extract(footAnchor.jacobian.getJacobianMatrix(), 0, 3, 0, footAnchor.qdCols.length, footAnchor.Jang, 0, 0);
+         // Jang was computed by the gate above, this tick.
 
          Vector3DReadOnly baseAngularVelocity = state.baseIMU.getAngularVelocityMeasurement();
          zg.set(anchorRow, 0, baseAngularVelocity.getX());
@@ -412,6 +434,26 @@ final class JointKFBiasUpdate
                   + "Sigma) has regressed. Reported once.");
          }
       }
+   }
+
+   /**
+    * |omega_base^meas + J_leg qd^meas| over the whole chain with MEASURED joint velocities and no bias: the
+    * trusted foot's angular rate from sensors alone. Deliberately not the filter's own q̇ or bias estimate, so
+    * the gate cannot feed back on what it protects. A non-finite input reads as +infinity (gated).
+    */
+   private double anchorRawResidualNorm(JointKFState.FootAnchor footAnchor)
+   {
+      Vector3DReadOnly baseAngularVelocity = state.baseIMU.getAngularVelocityMeasurement();
+      double x = baseAngularVelocity.getX(), y = baseAngularVelocity.getY(), z = baseAngularVelocity.getZ();
+      for (int c = 0; c < footAnchor.qdCols.length; c++)
+      {
+         double qd = state.sensorMap.getOneDoFJointOutput(footAnchor.legJoints[c]).getVelocity();
+         x += footAnchor.Jang.get(0, c) * qd;
+         y += footAnchor.Jang.get(1, c) * qd;
+         z += footAnchor.Jang.get(2, c) * qd;
+      }
+      double norm = Math.sqrt(x * x + y * y + z * z);
+      return Double.isFinite(norm) ? norm : Double.POSITIVE_INFINITY;
    }
 
    /**
