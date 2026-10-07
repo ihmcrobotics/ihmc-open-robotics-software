@@ -154,6 +154,30 @@ public class CUDATools
    }
 
    /**
+    * Allocate page-locked (pinned) host memory for {@code elementCount} elements of the {@code pointer}'s type.
+    * <p>
+    * Pinned memory enables faster asynchronous transfers between host and device. Use {@link #freeHost(Pointer)}
+    * to release it. The size allocated is {@code pointer.sizeof() * elementCount}.
+    *
+    * @param pointer      Host pointer that will reference the allocated pinned memory. THE TYPE MATTERS.
+    * @param elementCount Number of elements to allocate.
+    */
+   public static void mallocHost(Pointer pointer, long elementCount)
+   {
+      checkCUDAError(cudaMallocHost(pointer, pointer.sizeof() * elementCount));
+   }
+
+   /**
+    * Free page-locked (pinned) host memory previously allocated with {@link #mallocHost(Pointer, long)}.
+    *
+    * @param pointer Host pointer to free.
+    */
+   public static void freeHost(Pointer pointer)
+   {
+      checkCUDAError(cudaFreeHost(pointer));
+   }
+
+   /**
     * Performs default memory copy (as in, {@link cudart#cudaMemcpyDefault}) from {@code source} to {@code destination}.
     * <p>
     * THE POINTER TYPE OF {@code source} MATTERS.
