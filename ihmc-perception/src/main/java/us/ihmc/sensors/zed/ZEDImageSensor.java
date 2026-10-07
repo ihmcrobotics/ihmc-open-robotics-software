@@ -86,6 +86,17 @@ public class ZEDImageSensor extends ImageSensor
    private long lastGrabTimestamp;
 
    private boolean positionalTrackingEnabled = false;
+   private final java.util.LinkedHashMap<Long, RigidBodyTransform> trackedPosesBySequence = new java.util.LinkedHashMap<>();
+
+   /** Independent SDK left-camera pose for an exact image grab; null if tracking was not valid. */
+   public RigidBodyTransform getTrackedPoseForSequence(long sequence)
+   {
+      synchronized (trackedPosesBySequence)
+      {
+         RigidBodyTransform pose = trackedPosesBySequence.get(sequence);
+         return pose == null ? null : new RigidBodyTransform(pose);
+      }
+   }
    private final MutableReferenceFrame trackedSensorFrame;
    private final RigidBodyTransform trackedPoseOffset = new RigidBodyTransform();
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
@@ -383,7 +394,7 @@ public class ZEDImageSensor extends ImageSensor
          // Update tracked position if tracking enabled
          if (positionalTrackingEnabled)
          {
-            sl_get_position(cameraID, sensorRotation, sensorTranslation, SL_REFERENCE_FRAME_WORLD);
+            int trackingState = sl_get_position(cameraID, sensorRotation, sensorTranslation, SL_REFERENCE_FRAME_WORLD);
 
             Quaternion euclidRotation = new Quaternion(sensorRotation.x(), sensorRotation.y(), sensorRotation.z(), sensorRotation.w());
             Vector3D euclidTranslation = new Vector3D(sensorTranslation.x(), sensorTranslation.y(), sensorTranslation.z());
@@ -394,6 +405,17 @@ public class ZEDImageSensor extends ImageSensor
                                             transformToWorld.prependOrientation(trackedPoseOffset.getRotation());
                                             transformToWorld.prependTranslation(trackedPoseOffset.getTranslation());
                                          });
+            if (trackingState == SL_POSITIONAL_TRACKING_STATE_OK
+                  && !euclidRotation.containsNaN() && !euclidTranslation.containsNaN())
+            {
+               synchronized (trackedPosesBySequence)
+               {
+                  trackedPosesBySequence.put(grabSequenceNumber,
+                        new RigidBodyTransform(trackedSensorFrame.getReferenceFrame().getTransformToWorldFrame()));
+                  while (trackedPosesBySequence.size() > 120)
+                     trackedPosesBySequence.remove(trackedPosesBySequence.keySet().iterator().next());
+               }
+            }
          }
 
          // Snapshot this grab's pose after updating tracking, before another grab can change it.
