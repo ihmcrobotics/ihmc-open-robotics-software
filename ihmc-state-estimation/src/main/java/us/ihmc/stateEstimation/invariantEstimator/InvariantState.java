@@ -11,7 +11,8 @@ import us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter;
 
 /**
  * State for an SE_k(3) invariant filter: a group element X together with its covariance P.
- * Biases are intentionally excluded — an upstream joint-space EKF is responsible for those.
+ * Optionally carries a body-frame gyro bias b_g as a Euclidean state outside the group (the "imperfect"
+ * invariant EKF of Hartley et al.): its tangent block is appended after the contacts.
  *
  * <p><b>Group element</b> (an n×n {@link DMatrixRMaj}, n = 5 + N for N contacts), with the
  * named "base + contacts" column layout:
@@ -26,7 +27,8 @@ import us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter;
  *
  * <p><b>Covariance</b> P is an m×m {@link DMatrixRMaj} (m = 9 + 3N) in the tangent ordering
  * {@code [δφ; δv; δp; δp_c0; …]}, matching the adjoint dimension. Tangent block offsets are
- * given by the {@code *TangentIndex} accessors.</p>
+ * given by the {@code *TangentIndex} accessors. With the gyro bias, m = 12 + 3N and the last block is
+ * {@code δb_g = b̂_g − b_g}, the estimate minus the truth, matching the group error {@code X̂ = exp(ξ)·X}.</p>
  */
 public class InvariantState
 {
@@ -40,6 +42,10 @@ public class InvariantState
    private final int numberOfContacts;
    private final DMatrixRMaj groupElement;
    private final DMatrixRMaj covariance;
+   private final int groupTangentSize;
+   private final boolean hasGyroBias;
+   /** Body-frame gyro bias estimate b̂_g (rad/s); zero and unused without the bias state. */
+   private final us.ihmc.euclid.tuple3D.Vector3D gyroBias = new us.ihmc.euclid.tuple3D.Vector3D();
 
    /**
     * Creates a state with the given number of contacts, X = identity and P = 0.
@@ -48,6 +54,15 @@ public class InvariantState
     */
    public InvariantState(int numberOfContacts)
    {
+      this(numberOfContacts, false);
+   }
+
+   /**
+    * @param numberOfContacts the number of contact columns N (≥ 0).
+    * @param withGyroBias     appends a 3-dim body-frame gyro bias block to the tangent/covariance.
+    */
+   public InvariantState(int numberOfContacts, boolean withGyroBias)
+   {
       if (numberOfContacts < 0)
          throw new IllegalArgumentException("numberOfContacts must be >= 0, was " + numberOfContacts);
 
@@ -55,7 +70,9 @@ public class InvariantState
 
       int k = 2 + numberOfContacts; // base velocity + base position + contacts
       int n = 3 + k;                // group matrix size
-      int m = 3 + 3 * k;            // tangent / covariance size
+      groupTangentSize = 3 + 3 * k; // tangent size of the group part
+      hasGyroBias = withGyroBias;
+      int m = groupTangentSize + (withGyroBias ? 3 : 0); // tangent / covariance size
 
       groupElement = new DMatrixRMaj(n, n);
       CommonOps_DDRM.setIdentity(groupElement);
@@ -79,6 +96,30 @@ public class InvariantState
    public int getTangentSize()
    {
       return covariance.getNumRows();
+   }
+
+   /** @return the tangent size of the group part alone, 9 + 3N. */
+   public int getGroupTangentSize()
+   {
+      return groupTangentSize;
+   }
+
+   /** @return whether this state carries the gyro bias block. */
+   public boolean hasGyroBias()
+   {
+      return hasGyroBias;
+   }
+
+   /** @return the tangent start index of the gyro bias block (9 + 3N), or -1 without it. */
+   public int gyroBiasTangentIndex()
+   {
+      return hasGyroBias ? groupTangentSize : -1;
+   }
+
+   /** @return the live body-frame gyro bias estimate. Mutating it mutates the state. */
+   public us.ihmc.euclid.tuple3D.Vector3D getGyroBias()
+   {
+      return gyroBias;
    }
 
    /** @return the live group-element matrix X (n×n). Mutating it mutates the state. */

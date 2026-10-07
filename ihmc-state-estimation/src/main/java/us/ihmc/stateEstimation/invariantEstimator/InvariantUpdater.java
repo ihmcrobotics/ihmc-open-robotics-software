@@ -33,6 +33,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 public class InvariantUpdater
 {
    private final double[] correctionArray;
+   /** The group part of the correction, the length SEK3Utils.exp needs; equals correctionArray without a bias block. */
+   private double[] groupCorrectionArray = null;
 
    // Fixed-size (m × m or n × n) work; measurement-sized work is reshaped per call.
    private final DMatrixRMaj innovationCovariance = new DMatrixRMaj(1, 1);    // S   (z×z)
@@ -262,7 +264,19 @@ public class InvariantUpdater
       lastCorrectionVelocityNorm = blockNorm(correctionArray, state.baseVelocityTangentIndex());
       lastCorrectionPositionNorm = blockNorm(correctionArray, state.basePositionTangentIndex());
 
-      SEK3Utils.exp(correctionArray, expDelta, expPhi, expRotation, expJacobian);
+      int groupSize = state.getGroupTangentSize();
+      double[] groupCorrection = correctionArray;
+      if (groupSize != m)
+      {
+         if (groupCorrectionArray == null || groupCorrectionArray.length != groupSize)
+            groupCorrectionArray = new double[groupSize]; // once
+         System.arraycopy(correctionArray, 0, groupCorrectionArray, 0, groupSize);
+         groupCorrection = groupCorrectionArray;
+         // Euclidean bias block: b̂⁺ = b̂ − c_b (correctionArray already holds −c).
+         int b = state.gyroBiasTangentIndex();
+         state.getGyroBias().add(correctionArray[b], correctionArray[b + 1], correctionArray[b + 2]);
+      }
+      SEK3Utils.exp(groupCorrection, expDelta, expPhi, expRotation, expJacobian);
       newGroupElement.reshape(expDelta.getNumRows(), expDelta.getNumCols());
       CommonOps_DDRM.mult(expDelta, state.getGroupElement(), newGroupElement);
       state.getGroupElement().set(newGroupElement);

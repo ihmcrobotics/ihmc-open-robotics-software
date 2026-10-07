@@ -30,10 +30,23 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
  *
  * <p>The covariance is linearized about the prior state, so {@link #predict} propagates P
  * <em>before</em> overwriting X with the mean update.</p>
+ *
+ * <p><b>Gyro bias state</b> (optional, see {@link InvariantState#hasGyroBias}). The caller corrects ω with the
+ * state's own b̂_g. With {@code δb = b̂_g − b_g}, the corrected rate is off by −δb, which enters the group error as
+ * {@code ξ̇ = A_c ξ − Ad_X̂·[δb; 0; …; 0]} (Hartley et al., "imperfect" InEKF). Discretized to first order:
+ * {@code Φ_ξb = −Φ_g·Ad_X̂·E·Δt}, E selecting the rotation columns, and a random walk σ_b² on the bias block.
+ * While the bias is inactive both are zero and the block is decoupled.</p>
  */
 public class InvariantPropagator
 {
    private final int numberOfContacts;
+   private final int groupTangentSize;
+   /** Tangent index of the gyro bias block, or -1 without one. */
+   private final int gyroBiasIndex;
+   private boolean gyroBiasActive = false;
+   private double gyroBiasRandomWalkVariance = 0.0;
+   /** Ad_X̂ of the group part alone ((9+3N)²); embedded in {@link #adjoint} with an identity bias block. */
+   private final DMatrixRMaj groupAdjoint;
    /** World-frame gravity g = (0, 0, -|g|). Set from the robot process's gravity, never hard-coded here. */
    private final Vector3D gravity = new Vector3D();
 
@@ -77,6 +90,17 @@ public class InvariantPropagator
     */
    public InvariantPropagator(int numberOfContacts, double gyroVariance, double accelVariance, double contactVariance, double gravitationalAcceleration)
    {
+      this(numberOfContacts, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration, false);
+   }
+
+   /** @param withGyroBias sizes Φ, Q and P for the gyro bias block of {@link InvariantState#InvariantState(int, boolean)}. */
+   public InvariantPropagator(int numberOfContacts,
+                              double gyroVariance,
+                              double accelVariance,
+                              double contactVariance,
+                              double gravitationalAcceleration,
+                              boolean withGyroBias)
+   {
       if (numberOfContacts < 0)
          throw new IllegalArgumentException("numberOfContacts must be >= 0, was " + numberOfContacts);
       requireNonNegativeFinite("gyroVariance", gyroVariance);
@@ -86,7 +110,10 @@ public class InvariantPropagator
       this.numberOfContacts = numberOfContacts;
       gravity.set(0.0, 0.0, -Math.abs(gravitationalAcceleration));
 
-      int m = 3 + 3 * (2 + numberOfContacts); // tangent size = 9 + 3N
+      groupTangentSize = 3 + 3 * (2 + numberOfContacts); // 9 + 3N
+      gyroBiasIndex = withGyroBias ? groupTangentSize : -1;
+      int m = groupTangentSize + (withGyroBias ? 3 : 0);
+      groupAdjoint = new DMatrixRMaj(groupTangentSize, groupTangentSize);
 
       processNoise = new DMatrixRMaj(m, m);
       Phi = new DMatrixRMaj(m, m);
@@ -115,6 +142,30 @@ public class InvariantPropagator
       int block = FIRST_CONTACT_TANGENT_INDEX + 3 * contactIndex;
       for (int j = 0; j < 3; j++)
          processNoise.set(block + j, block + j, variance);
+   }
+
+   /**
+    * Couples (or decouples) the gyro bias block and sets its continuous random-walk variance σ_b² ((rad/s)²/s).
+    * Inactive: Φ_ξb = 0 and no bias process noise, so b̂_g and its covariance do not move.
+    */
+   public void setGyroBias(boolean active, double randomWalkVariance)
+   {
+      if (gyroBiasIndex < 0)
+      {
+         if (active)
+            throw new IllegalStateException("built without a gyro bias state");
+         return;
+      }
+      requireNonNegativeFinite("randomWalkVariance", randomWalkVariance);
+      gyroBiasActive = active;
+      gyroBiasRandomWalkVariance = randomWalkVariance;
+      for (int j = 0; j < 3; j++)
+         processNoise.set(gyroBiasIndex + j, gyroBiasIndex + j, active ? randomWalkVariance : 0.0);
+   }
+
+   public boolean isGyroBiasActive()
+   {
+      return gyroBiasActive;
    }
 
    /**
@@ -185,7 +236,33 @@ public class InvariantPropagator
    private void predictCovariance(InvariantState state, double dt)
    {
       buildStateTransition(dt);
-      SEK3Utils.adjoint(state.getGroupElement(), adjoint, adjointRotation, adjointColumn, adjointHat);
+      SEK3Utils.adjoint(state.getGroupElement(), groupAdjoint, adjointRotation, adjointColumn, adjointHat);
+      if (gyroBiasIndex < 0)
+      {
+         adjoint.set(groupAdjoint);
+      }
+      else
+      {
+         // Ad on the group block, identity on the bias block (the bias noise is body-frame, not transported).
+         adjoint.zero();
+         CommonOps_DDRM.insert(groupAdjoint, adjoint, 0, 0);
+         for (int j = 0; j < 3; j++)
+            adjoint.set(gyroBiasIndex + j, gyroBiasIndex + j, 1.0);
+         if (gyroBiasActive)
+         {
+            // Φ_ξb = −Φ_g·Ad_X̂·E·Δt: Φ_g times the rotation columns of Ad, into the group rows of the bias columns.
+            for (int r = 0; r < groupTangentSize; r++)
+            {
+               for (int c = 0; c < 3; c++)
+               {
+                  double sum = 0.0;
+                  for (int k = 0; k < groupTangentSize; k++)
+                     sum += Phi.get(r, k) * groupAdjoint.get(k, c);
+                  Phi.set(r, gyroBiasIndex + c, -sum * dt);
+               }
+            }
+         }
+      }
 
       // Q_d = Φ · Ad · Q_c · Adᵀ · Φᵀ · Δt
       CommonOps_DDRM.mult(adjoint, processNoise, tempA);           // Ad·Q_c

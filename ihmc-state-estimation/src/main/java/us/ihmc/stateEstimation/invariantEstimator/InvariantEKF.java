@@ -52,8 +52,22 @@ public class InvariantEKF
     */
    public InvariantEKF(int numberOfContacts, double gyroVariance, double accelVariance, double contactVariance, double gravitationalAcceleration)
    {
-      state = new InvariantState(numberOfContacts);
-      propagator = new InvariantPropagator(numberOfContacts, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration);
+      this(numberOfContacts, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration, false);
+   }
+
+   /**
+    * @param withGyroBias carries a body-frame gyro bias state (see {@link InvariantState}); inactive until
+    *                     {@link #setGyroBiasEstimation} turns it on.
+    */
+   public InvariantEKF(int numberOfContacts,
+                       double gyroVariance,
+                       double accelVariance,
+                       double contactVariance,
+                       double gravitationalAcceleration,
+                       boolean withGyroBias)
+   {
+      state = new InvariantState(numberOfContacts, withGyroBias);
+      propagator = new InvariantPropagator(numberOfContacts, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration, withGyroBias);
       updater = new InvariantUpdater(state.getTangentSize());
       updater.setContactUpdater(new ContactUpdater(numberOfContacts));
       gravityUpdater = new GravityLevelingUpdater(state.getTangentSize(),
@@ -277,6 +291,20 @@ public class InvariantEKF
     */
    public void updateBodyVelocity(Tuple3DReadOnly bodyVelocity, Matrix3DReadOnly bodyVelocityCovariance)
    {
+      updateBodyVelocity(bodyVelocity, bodyVelocityCovariance, null);
+   }
+
+   private final us.ihmc.euclid.matrix.Matrix3D velocityBiasColumns = new us.ihmc.euclid.matrix.Matrix3D();
+
+   /**
+    * As {@link #updateBodyVelocity(Tuple3DReadOnly, Matrix3DReadOnly)} for a measurement built from the bias-corrected
+    * rate, {@code y = −((ω_m − b̂_g) × r + ṙ)}. With {@code δb = b̂_g − b_g} that is {@code y = Rᵀv − [r]ₓ δb}, so
+    * with an active gyro bias state the residual gains {@code −R̂[r]ₓ δb} and H the bias columns {@code −R̂[r]ₓ}.
+    *
+    * @param leverArm r, the stationary point in the body frame; null (or no active bias state) leaves H as before.
+    */
+   public void updateBodyVelocity(Tuple3DReadOnly bodyVelocity, Matrix3DReadOnly bodyVelocityCovariance, Tuple3DReadOnly leverArm)
+   {
       int m = state.getTangentSize();
       if (velocityJacobian == null || velocityJacobian.getNumCols() != m)
       {
@@ -294,7 +322,70 @@ public class InvariantEKF
       velocityNoiseWorld.set(bodyVelocityCovariance);
       velocityRotation.transform(velocityNoiseWorld); // R N Rᵀ
       velocityNoiseWorld.get(velocityNoise);
+      int b = state.gyroBiasTangentIndex();
+      if (b >= 0)
+      {
+         boolean couple = leverArm != null && propagator.isGyroBiasActive();
+         if (couple)
+         {
+            // −R̂·[r]ₓ
+            velocityBiasColumns.setToTildeForm(leverArm);
+            velocityBiasColumns.preMultiply(velocityRotation);
+            velocityBiasColumns.scale(-1.0);
+         }
+         for (int r = 0; r < 3; r++)
+            for (int c = 0; c < 3; c++)
+               velocityJacobian.set(r, b + c, couple ? velocityBiasColumns.getElement(r, c) : 0.0);
+      }
       updater.update(state, velocityJacobian, velocityResidual, velocityNoise);
+   }
+
+   private final DMatrixRMaj biasJacobian = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj biasResidual = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj biasNoise = new DMatrixRMaj(3, 3);
+
+   /**
+    * Direct measurement of the body-frame gyro bias (e.g. the mean raw rate over a standing rest): residual
+    * {@code b̂_g − z ≈ δb}, H = I on the bias block. No-op without an active bias state.
+    *
+    * @param measuredBias z, body frame (rad/s). Not modified.
+    * @param variance     per-axis variance of z ((rad/s)²).
+    */
+   public void updateGyroBias(Tuple3DReadOnly measuredBias, double variance)
+   {
+      int b = state.gyroBiasTangentIndex();
+      if (b < 0 || !propagator.isGyroBiasActive())
+         return;
+      int m = state.getTangentSize();
+      biasJacobian.reshape(3, m);
+      biasJacobian.zero();
+      for (int i = 0; i < 3; i++)
+         biasJacobian.set(i, b + i, 1.0);
+      us.ihmc.euclid.tuple3D.Vector3D estimate = state.getGyroBias();
+      biasResidual.set(0, 0, estimate.getX() - measuredBias.getX());
+      biasResidual.set(1, 0, estimate.getY() - measuredBias.getY());
+      biasResidual.set(2, 0, estimate.getZ() - measuredBias.getZ());
+      biasNoise.zero();
+      for (int i = 0; i < 3; i++)
+         biasNoise.set(i, i, variance);
+      updater.update(state, biasJacobian, biasResidual, biasNoise);
+   }
+
+   /** Turns the gyro bias state on or off and sets its random walk σ_b² ((rad/s)²/s); see {@link InvariantPropagator#setGyroBias}. */
+   public void setGyroBiasEstimation(boolean active, double randomWalkVariance)
+   {
+      propagator.setGyroBias(active, randomWalkVariance);
+   }
+
+   public boolean isGyroBiasEstimationActive()
+   {
+      return propagator.isGyroBiasActive();
+   }
+
+   /** @return the live body-frame gyro bias estimate (zero without the bias state). */
+   public us.ihmc.euclid.tuple3D.Vector3D getGyroBias()
+   {
+      return state.getGyroBias();
    }
 
    /**
