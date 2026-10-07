@@ -46,8 +46,13 @@ public class LeRobotDatasetTools
 
    public static String findRegistry(YoRegistry yoRegistry, String path, String childSearchSuffix)
    {
+      YoRegistry parent = yoRegistry.findRegistry(path);
+      if (parent == null)
+         return null;
       Predicate<YoRegistry> filter = reg -> reg.getName().endsWith(childSearchSuffix);
-      YoRegistry result = yoRegistry.findRegistry(path).getChildren().stream().filter(filter).findFirst().orElse(null);
+      YoRegistry result = parent.getChildren().stream().filter(filter).findFirst().orElse(null);
+      if (result == null)
+         return null;
       return path + "." + result.getName() + ".";
    }
 
