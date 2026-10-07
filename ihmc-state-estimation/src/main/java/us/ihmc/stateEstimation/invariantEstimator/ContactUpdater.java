@@ -76,7 +76,8 @@ public class ContactUpdater
       if (numberOfContacts < 0)
          throw new IllegalArgumentException("numberOfContacts must be >= 0, was " + numberOfContacts);
       int tangentSize = 9 + 3 * numberOfContacts; // m = 9 + 3N
-      measurementJacobian = new DMatrixRMaj(MEASUREMENT_SIZE, tangentSize);
+      measurementJacobian = new DMatrixRMaj(MEASUREMENT_SIZE, tangentSize + 3); // capacity for a gyro bias block
+      measurementJacobian.reshape(MEASUREMENT_SIZE, tangentSize);
    }
 
    /**

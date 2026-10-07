@@ -144,7 +144,7 @@ public class AvatarEstimatorThreadFactory
    private java.util.function.Consumer<us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter> jointLevelKFConfigurator = null;
    /** Seconds of start-up standing over which the invariant filter estimates and then holds its accelerometer bias; NaN or <= 0 disables. */
    private double invariantStaticAccelerometerBiasWindow = Double.NaN;
-   private boolean invariantUseRestGyroBias = false;
+   private us.ihmc.stateEstimation.invariantEstimator.InvariantGyroBiasSource invariantGyroBiasSource = us.ihmc.stateEstimation.invariantEstimator.InvariantGyroBiasSource.PROVIDER;
    /**
     * Source for the invariant main estimator's per-foot contact probability. Default
     * {@link InvariantContactSource#FOOT_SWITCHES}: the robot's production foot switches
@@ -470,13 +470,12 @@ public class AvatarEstimatorThreadFactory
    }
 
    /**
-    * Makes the invariant main estimator subtract the gyro bias it re-measures at every two-foot standing rest
-    * ({@link us.ihmc.stateEstimation.invariantEstimator.RestGyroBiasEstimator}) instead of the joint-level provider's
-    * (default false).
+    * Where the invariant main estimator's gyro bias comes from
+    * ({@link us.ihmc.stateEstimation.invariantEstimator.InvariantGyroBiasSource}); default PROVIDER.
     */
-   public void setInvariantUseRestGyroBias(boolean invariantUseRestGyroBias)
+   public void setInvariantGyroBiasSource(us.ihmc.stateEstimation.invariantEstimator.InvariantGyroBiasSource invariantGyroBiasSource)
    {
-      this.invariantUseRestGyroBias = invariantUseRestGyroBias;
+      this.invariantGyroBiasSource = invariantGyroBiasSource;
    }
 
    /** Enables/disables foot-referenced yaw seeding on the invariant main estimator (default true). */
@@ -587,7 +586,7 @@ public class AvatarEstimatorThreadFactory
                                                                                        preFilter);
       mainStateEstimator.getYoRegistry().addChild(preFilterRegistry);
 
-      mainStateEstimator.getInvariantEKFStateEstimator().setUseRestGyroBias(invariantUseRestGyroBias);
+      mainStateEstimator.getInvariantEKFStateEstimator().setGyroBiasSource(invariantGyroBiasSource);
       if (invariantStaticAccelerometerBiasWindow > 0.0)
       {
          us.ihmc.stateEstimation.invariantEstimator.InvariantEKFStateEstimator invariantEKF = mainStateEstimator.getInvariantEKFStateEstimator();

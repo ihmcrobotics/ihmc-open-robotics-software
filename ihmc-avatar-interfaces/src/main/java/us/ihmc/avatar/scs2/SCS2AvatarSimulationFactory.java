@@ -210,7 +210,7 @@ public class SCS2AvatarSimulationFactory
    private InvariantContactSource invariantMainEstimatorContactSource = InvariantContactSource.FOOT_SWITCHES;
    private java.util.function.Consumer<us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter> jointLevelKFConfigurator = null;
    private double invariantStaticAccelerometerBiasWindow = Double.NaN;
-   private boolean invariantUseRestGyroBias = false;
+   private us.ihmc.stateEstimation.invariantEstimator.InvariantGyroBiasSource invariantGyroBiasSource = us.ihmc.stateEstimation.invariantEstimator.InvariantGyroBiasSource.PROVIDER;
    private final OptionalFactoryField<Boolean> createIKStreamingRealTimeController = new OptionalFactoryField<>(
          "createIKStreamingRealTimeController",
          false);
@@ -566,7 +566,7 @@ public class SCS2AvatarSimulationFactory
          avatarEstimatorThreadFactory.setInvariantEstimatorYawSeeding(invariantMainEstimatorYawSeeding);
          avatarEstimatorThreadFactory.setInvariantContactSource(invariantMainEstimatorContactSource);
          avatarEstimatorThreadFactory.setInvariantStaticAccelerometerBiasWindow(invariantStaticAccelerometerBiasWindow);
-         avatarEstimatorThreadFactory.setInvariantUseRestGyroBias(invariantUseRestGyroBias);
+         avatarEstimatorThreadFactory.setInvariantGyroBiasSource(invariantGyroBiasSource);
          avatarEstimatorThreadFactory.setJointLevelKFConfigurator(jointLevelKFConfigurator);
       }
       estimatorThread = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
@@ -1328,10 +1328,10 @@ public class SCS2AvatarSimulationFactory
       this.invariantStaticAccelerometerBiasWindow = windowSeconds;
    }
 
-   /** Same as the hardware threading factory's: rest-measured gyro bias for the invariant main estimator. */
-   public void setInvariantUseRestGyroBias(boolean invariantUseRestGyroBias)
+   /** Same as the hardware threading factory's: where the invariant main estimator's gyro bias comes from. */
+   public void setInvariantGyroBiasSource(us.ihmc.stateEstimation.invariantEstimator.InvariantGyroBiasSource invariantGyroBiasSource)
    {
-      this.invariantUseRestGyroBias = invariantUseRestGyroBias;
+      this.invariantGyroBiasSource = invariantGyroBiasSource;
    }
 
    public void setInvariantMainEstimatorContactSource(InvariantContactSource invariantMainEstimatorContactSource)

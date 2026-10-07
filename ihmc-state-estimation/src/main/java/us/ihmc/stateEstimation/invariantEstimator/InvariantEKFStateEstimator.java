@@ -385,7 +385,33 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final YoDouble yoStartupElapsed = new YoDouble("invariantStartupElapsed", registry);
    public static final double DEFAULT_STARTUP_SETTLE_DURATION = 0.1;
    public static final double DEFAULT_STARTUP_SETTLE_TIMEOUT = 2.0;
-   private final org.ejml.data.DMatrixRMaj startCovariance = new org.ejml.data.DMatrixRMaj(9 + 3 * NUMBER_OF_CONTACTS, 9 + 3 * NUMBER_OF_CONTACTS);
+   private final org.ejml.data.DMatrixRMaj startCovariance = new org.ejml.data.DMatrixRMaj(12 + 3 * NUMBER_OF_CONTACTS, 12 + 3 * NUMBER_OF_CONTACTS);
+
+   // Gyro bias as a filter state (the "imperfect" InEKF): pitch/roll bias become observable while walking through
+   // gravity and the kinematic velocity/contact updates, which the joint-level KF cannot provide (its stance
+   // anchors are invalid on rolling feet, see JointKFParameters.ANCHOR_RESIDUAL_GATE). Rest estimates from
+   // RestGyroBiasEstimator enter as direct bias measurements, which also pin yaw. Off by default; when on, the
+   // filter's own b̂ replaces both the upstream provider's bias and invariantUseRestGyroBias.
+   private final YoBoolean yoEstimateGyroBias = new YoBoolean("invariantEstimateGyroBias", registry);
+   private final YoDouble yoGyroBiasRandomWalkStd = new YoDouble("invariantGyroBiasRandomWalkStd", registry);
+   private final YoDouble yoGyroBiasInitialStd = new YoDouble("invariantGyroBiasInitialStd", registry);
+   private final YoDouble yoRestGyroBiasMeasurementStd = new YoDouble("invariantRestGyroBiasMeasurementStd", registry);
+   private final YoDouble yoGyroBiasStateX = new YoDouble("invariantGyroBiasStateInPelvisFrameX", registry);
+   private final YoDouble yoGyroBiasStateY = new YoDouble("invariantGyroBiasStateInPelvisFrameY", registry);
+   private final YoDouble yoGyroBiasStateZ = new YoDouble("invariantGyroBiasStateInPelvisFrameZ", registry);
+   private final YoDouble yoGyroBiasStateStdX = new YoDouble("invariantGyroBiasStateStdX", registry);
+   private final YoDouble yoGyroBiasStateStdY = new YoDouble("invariantGyroBiasStateStdY", registry);
+   private final YoDouble yoGyroBiasStateStdZ = new YoDouble("invariantGyroBiasStateStdZ", registry);
+   /**
+    * (rad/s)/sqrt(s). Replay of the 2026-10-06 Alex002 logs: 1e-5 gives the smallest bias error at rest entry
+    * (0.6/1.2/0.4 mrad/s roll/pitch/yaw); 1e-4 and 1e-3 let walking drag the bias (up to 4 mrad/s yaw, 1.6 deg/min).
+    */
+   public static final double DEFAULT_GYRO_BIAS_RANDOM_WALK_STD = 1.0e-5;
+   public static final double DEFAULT_GYRO_BIAS_INITIAL_STD = 0.01;
+   public static final double DEFAULT_REST_GYRO_BIAS_MEASUREMENT_STD = 1.0e-3;
+   private boolean gyroBiasEstimationWasActive = false;
+   private int lastRestGyroBiasUpdates = 0;
+   private final FrameVector3D restBiasInPelvis = new FrameVector3D();
 
    // The gyro bias actually subtracted from the raw gyro this tick, AFTER the MAX_GYRO_BIAS clamp, plus a count
    // of ticks the clamp bound. This is the "is the upstream bias sane" diagnostic.
@@ -550,7 +576,10 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       this.sensorOutputMap = sensorOutputMap;
       this.imuBiasProvider = Objects.requireNonNull(imuBiasProvider, "imuBiasProvider must not be null (use ZeroIMUBiasProvider)");
 
-      ekf = new InvariantEKF(NUMBER_OF_CONTACTS, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration);
+      ekf = new InvariantEKF(NUMBER_OF_CONTACTS, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration, true);
+      yoGyroBiasRandomWalkStd.set(DEFAULT_GYRO_BIAS_RANDOM_WALK_STD);
+      yoGyroBiasInitialStd.set(DEFAULT_GYRO_BIAS_INITIAL_STD);
+      yoRestGyroBiasMeasurementStd.set(DEFAULT_REST_GYRO_BIAS_MEASUREMENT_STD);
 
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       pelvisFrame = referenceFrames.getPelvisFrame();
@@ -706,6 +735,18 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       for (int i = 0; i < startCovariance.getNumRows(); i++)
          startCovariance.set(i, i, initialCovariance);
 
+      int b = ekf.getState().gyroBiasTangentIndex();
+      if (b >= 0)
+      {
+         // The bias block: kept across a re-anchor (the bias did not change because the feet moved), the initial
+         // variance otherwise, and zero while bias estimation is off so the block stays decoupled.
+         boolean active = ekf.isGyroBiasEstimationActive();
+         double initialVariance = us.ihmc.euclid.tools.EuclidCoreTools.square(yoGyroBiasInitialStd.getDoubleValue());
+         for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+               startCovariance.set(b + i, b + j, !active ? 0.0 : keepRotation ? current.get(b + i, b + j) : (i == j ? initialVariance : 0.0));
+      }
+
       if (keep)
       {
          for (int i = 0; i < 3; i++)
@@ -788,11 +829,23 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       // otherwise be integrated straight into base orientation (the pitch-drift mechanism). Publish the applied
       // (post-clamp) bias for visibility.
       updateRestGyroBias();
-      if (yoUseRestGyroBias.getValue())
-         appliedGyroBias.setIncludingFrame(imuSensor.getMeasurementFrame(), restGyroBias.getBias());
+      syncGyroBiasEstimation();
+      boolean clamped = false;
+      if (ekf.isGyroBiasEstimationActive())
+      {
+         // The filter's own b̂ (pelvis frame), expressed in the IMU frame for the frame-checked sub() below. Not
+         // clamped: the filter's model must see exactly the bias it subtracts.
+         appliedGyroBias.setIncludingFrame(pelvisFrame, ekf.getGyroBias());
+         appliedGyroBias.changeFrame(imuSensor.getMeasurementFrame());
+      }
       else
-         appliedGyroBias.setIncludingFrame(imuSensor.getMeasurementFrame(), imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuSensor));
-      boolean clamped = clampGyroBias(appliedGyroBias);
+      {
+         if (yoUseRestGyroBias.getValue())
+            appliedGyroBias.setIncludingFrame(imuSensor.getMeasurementFrame(), restGyroBias.getBias());
+         else
+            appliedGyroBias.setIncludingFrame(imuSensor.getMeasurementFrame(), imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuSensor));
+         clamped = clampGyroBias(appliedGyroBias);
+      }
       if (clamped)
          yoGyroBiasClampCount.set(yoGyroBiasClampCount.getValue() + 1);
       yoAppliedGyroBiasImuX.set(appliedGyroBias.getX());
@@ -1107,7 +1160,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          kinematicVelocityCovariance.setIdentity();
          kinematicVelocityCovariance.scale(std * std);
          yoKinematicVelocityJointNoiseTrace.get(side).set(addJointVelocityNoise(side, kinematicVelocityCovariance));
-         ekf.updateBodyVelocity(kinematicBodyVelocity, kinematicVelocityCovariance);
+         ekf.updateBodyVelocity(kinematicBodyVelocity, kinematicVelocityCovariance, soleInPelvis); // r for the bias columns
          yoKinematicVelocityNIS.get(side).set(ekf.getLastNormalizedInnovationSquared());
          yoKinematicVelocityApplied.get(side).set(ekf.wasLastUpdateApplied());
       }
@@ -1176,6 +1229,79 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    public void setGatePitchOnDoubleSupport(boolean gatePitchOnDoubleSupport)
    {
       this.gatePitchOnDoubleSupport = gatePitchOnDoubleSupport;
+   }
+
+   /**
+    * Applies invariantEstimateGyroBias. On turning on, b̂ starts from the bias in use until now (rest-measured or the
+    * provider's, clamped), with the initial variance and no cross-covariance. While on, a new rest estimate enters
+    * as a direct bias measurement.
+    */
+   private void syncGyroBiasEstimation()
+   {
+      boolean active = yoEstimateGyroBias.getValue();
+      double randomWalkStd = yoGyroBiasRandomWalkStd.getDoubleValue();
+      ekf.setGyroBiasEstimation(active, randomWalkStd * randomWalkStd);
+      org.ejml.data.DMatrixRMaj covariance = ekf.getState().getCovariance();
+      int b = ekf.getState().gyroBiasTangentIndex();
+      if (active != gyroBiasEstimationWasActive)
+      {
+         int m = covariance.getNumRows();
+         for (int i = 0; i < 3; i++)
+         {
+            for (int k = 0; k < m; k++)
+            {
+               covariance.set(b + i, k, 0.0);
+               covariance.set(k, b + i, 0.0);
+            }
+         }
+         if (active)
+         {
+            if (yoUseRestGyroBias.getValue() && restGyroBias.getNumberOfUpdates() > 0)
+               appliedGyroBias.setIncludingFrame(imuSensor.getMeasurementFrame(), restGyroBias.getBias());
+            else
+               appliedGyroBias.setIncludingFrame(imuSensor.getMeasurementFrame(), imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuSensor));
+            clampGyroBias(appliedGyroBias);
+            appliedGyroBias.changeFrame(pelvisFrame);
+            ekf.getGyroBias().set(appliedGyroBias);
+            double initialVariance = us.ihmc.euclid.tools.EuclidCoreTools.square(yoGyroBiasInitialStd.getDoubleValue());
+            for (int i = 0; i < 3; i++)
+               covariance.set(b + i, b + i, initialVariance);
+         }
+         else
+         {
+            ekf.getGyroBias().setToZero();
+         }
+         gyroBiasEstimationWasActive = active;
+      }
+
+      int restUpdates = restGyroBias.getNumberOfUpdates();
+      if (active && restUpdates != lastRestGyroBiasUpdates)
+      {
+         restBiasInPelvis.setIncludingFrame(imuSensor.getMeasurementFrame(), restGyroBias.getBias());
+         restBiasInPelvis.changeFrame(pelvisFrame);
+         ekf.updateGyroBias(restBiasInPelvis, us.ihmc.euclid.tools.EuclidCoreTools.square(yoRestGyroBiasMeasurementStd.getDoubleValue()));
+      }
+      lastRestGyroBiasUpdates = restUpdates;
+
+      yoGyroBiasStateX.set(ekf.getGyroBias().getX());
+      yoGyroBiasStateY.set(ekf.getGyroBias().getY());
+      yoGyroBiasStateZ.set(ekf.getGyroBias().getZ());
+      yoGyroBiasStateStdX.set(Math.sqrt(Math.max(0.0, covariance.get(b, b))));
+      yoGyroBiasStateStdY.set(Math.sqrt(Math.max(0.0, covariance.get(b + 1, b + 1))));
+      yoGyroBiasStateStdZ.set(Math.sqrt(Math.max(0.0, covariance.get(b + 2, b + 2))));
+   }
+
+   /** Selects the gyro bias the filter subtracts; see {@link InvariantGyroBiasSource}. */
+   public void setGyroBiasSource(InvariantGyroBiasSource source)
+   {
+      setUseRestGyroBias(source == InvariantGyroBiasSource.REST);
+      setEstimateGyroBias(source == InvariantGyroBiasSource.STATE);
+   }
+
+   /** Turns the filter's own gyro bias state on or off (invariantEstimateGyroBias). */
+   public void setEstimateGyroBias(boolean estimateGyroBias)
+   {
+      yoEstimateGyroBias.set(estimateGyroBias);
    }
 
    private void updateRestGyroBias()

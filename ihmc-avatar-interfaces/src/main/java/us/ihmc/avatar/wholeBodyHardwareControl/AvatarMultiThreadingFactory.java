@@ -118,7 +118,7 @@ public class AvatarMultiThreadingFactory
    private final java.util.function.Consumer<us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter> jointLevelKFConfigurator;
    /** Seconds of start-up standing for the invariant filter's held accelerometer bias; NaN or <= 0 disables. */
    private final double invariantStaticAccelerometerBiasWindow;
-   private final boolean invariantUseRestGyroBias;
+   private final us.ihmc.stateEstimation.invariantEstimator.InvariantGyroBiasSource invariantGyroBiasSource;
 
    // Controller
    private final HighLevelHumanoidControllerFactory avatarControllerFactory;
@@ -174,7 +174,7 @@ public class AvatarMultiThreadingFactory
    {
       this(robotModel, fullRobotModel, hardwareCommunicationInterface, lowLevelOutputProcessor, sensorReaderFactory, standPrepStateFactory,
            freezeStateFactory, affinity, useRealtimeThreads, useMultiThreading, period, masterThreadDt, monotonicTimeProvider, registry,
-           yoVariableServer, useInvariantMainEstimator, invariantContactSource, null, Double.NaN, false);
+           yoVariableServer, useInvariantMainEstimator, invariantContactSource, null, Double.NaN, us.ihmc.stateEstimation.invariantEstimator.InvariantGyroBiasSource.PROVIDER);
    }
 
    /**
@@ -184,8 +184,8 @@ public class AvatarMultiThreadingFactory
     * @param invariantStaticAccelerometerBiasWindow seconds of start-up standing over which the invariant main
     *                                               estimator estimates, then holds, its accelerometer bias; NaN or <= 0
     *                                               disables (the joint-level KF itself publishes a zero accelerometer bias).
-    * @param invariantUseRestGyroBias               the invariant main estimator subtracts the gyro bias it re-measures at
-    *                                               every two-foot standing rest instead of the joint-level provider's.
+    * @param invariantGyroBiasSource                where the invariant main estimator's gyro bias comes from (the
+    *                                               joint-level provider's, rest-measured, or its own filter state).
     */
    public AvatarMultiThreadingFactory(DRCRobotModel robotModel,
                                       FullHumanoidRobotModel fullRobotModel,
@@ -206,9 +206,9 @@ public class AvatarMultiThreadingFactory
                                       InvariantContactSource invariantContactSource,
                                       java.util.function.Consumer<us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter> jointLevelKFConfigurator,
                                       double invariantStaticAccelerometerBiasWindow,
-                                      boolean invariantUseRestGyroBias)
+                                      us.ihmc.stateEstimation.invariantEstimator.InvariantGyroBiasSource invariantGyroBiasSource)
    {
-      this.invariantUseRestGyroBias = invariantUseRestGyroBias;
+      this.invariantGyroBiasSource = invariantGyroBiasSource;
       this.jointLevelKFConfigurator = jointLevelKFConfigurator;
       this.invariantStaticAccelerometerBiasWindow = invariantStaticAccelerometerBiasWindow;
       this.masterRobotModel = robotModel;
@@ -315,7 +315,7 @@ public class AvatarMultiThreadingFactory
       avatarEstimatorThreadFactory.setInvariantContactSource(invariantContactSource);
       avatarEstimatorThreadFactory.setJointLevelKFConfigurator(jointLevelKFConfigurator);
       avatarEstimatorThreadFactory.setInvariantStaticAccelerometerBiasWindow(invariantStaticAccelerometerBiasWindow);
-      avatarEstimatorThreadFactory.setInvariantUseRestGyroBias(invariantUseRestGyroBias);
+      avatarEstimatorThreadFactory.setInvariantGyroBiasSource(invariantGyroBiasSource);
       //      if (secondaryEstimatorFactory != null)
       //         avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryEstimatorFactory);
       StateEstimatorController stateEstimator = avatarEstimatorThreadFactory.getMainStateEstimator();
