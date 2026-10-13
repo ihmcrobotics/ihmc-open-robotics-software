@@ -544,9 +544,11 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " cannot go to load bearing.");
          return;
       }
-      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
-      {
-         //         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " is already load bearing. Changing contact point must be done first be exiting state.");
+
+      boolean isLoaded = stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING;
+      if (isLoaded)
+      { // Only update contact normal
+         loadBearingControlState.updateContactNormal(contactNormalInWorldFrame);
          return;
       }
 
