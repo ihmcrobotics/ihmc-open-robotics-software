@@ -47,7 +47,7 @@ public class DynamicStateInspectorParameters
       minDistanceAlongErrorFromOutsideEdge = new DoubleParameter("minDistAlongErrorFromOutEdge" + suffix, registry, -0.025);
       minOrthogonalDistanceFromOutsideEdge = new DoubleParameter("minOrthoDistFromOutEdge" + suffix, registry, -0.035);
       minDistanceAlongErrorFromInsideEdge = new DoubleParameter("minDistAlongErrorFromInEdge" + suffix, registry, -0.01);
-      minOrthogonalDistanceFromInsideEdge = new DoubleParameter("minOrthoDistFromInEdge" + suffix, registry, -0.025);
+      minOrthogonalDistanceFromInsideEdge = new DoubleParameter("minOrthoDistFromInEdge" + suffix, registry, -0.01);
 
       minNormalizedDistanceFromOutsideEdge = new DoubleParameter("minNormDistFromOutEdge" + suffix, registry, 0.35);
       minNormalizedDistanceFromInsideEdge = new DoubleParameter("minNormDistFromInEdge" + suffix, registry, 0.3);
