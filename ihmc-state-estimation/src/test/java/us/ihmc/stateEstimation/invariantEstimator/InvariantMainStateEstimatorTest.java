@@ -206,6 +206,55 @@ public class InvariantMainStateEstimatorTest
       assertPipelineFinite(rig, "hanging under gravity");
    }
 
+   /**
+    * Initialized level while actually hanging pitched 11 deg (Alex on the hoist, 2026-10-13): with the gyro bias as a
+    * state, the start-up tilt alignment must put the 11 deg into the attitude, not into the bias. Without it the
+    * leveling correction leaks into the bias.
+    */
+   @Test
+   public void testPitchedHangStartAlignsTiltNotGyroBias()
+   {
+      double[] withAlignment = runPitchedHangStart(true);
+      assertEquals(Math.toRadians(11.0), withAlignment[0], Math.toRadians(0.2), "pitch aligned to the accelerometer");
+      assertTrue(withAlignment[1] < 2.0e-3, "max gyro bias norm while hanging: " + withAlignment[1]);
+
+      double[] withoutAlignment = runPitchedHangStart(false);
+      assertTrue(withoutAlignment[1] > 3.0e-3 && withAlignment[1] < 0.2 * withoutAlignment[1],
+                 "control: without the alignment the bias absorbs the tilt (" + withoutAlignment[1] + " vs " + withAlignment[1] + ")");
+   }
+
+   /** @return {final pitch, max gyro bias norm over 5 s} of a level-initialized filter hanging at 11 deg pitch. */
+   private static double[] runPitchedHangStart(boolean alignment)
+   {
+      Rig rig = buildRig(4006L, new RotationMatrix(), 0.0, false); // initialized level, no contact
+      InvariantEKFStateEstimator estimator = rig.main.getInvariantEKFStateEstimator();
+      estimator.setEstimateGyroBias(true);
+      estimator.setStartupTiltAlignment(alignment);
+      RotationMatrix truePose = new RotationMatrix();
+      truePose.setToPitchOrientation(Math.toRadians(11.0));
+      Vector3D specificForceInPelvis = new Vector3D(0.0, 0.0, 9.81);
+      truePose.inverseTransform(specificForceInPelvis);
+      for (SettableTestIMU imu : rig.imus)
+      {
+         // The model still sits at the level initial pose here, so pelvis-to-IMU is the mounting alone.
+         FrameVector3D specificForce = new FrameVector3D(rig.model.getRootJoint().getFrameAfterJoint(), specificForceInPelvis);
+         specificForce.changeFrame(imu.getMeasurementFrame());
+         imu.setLinearAcceleration(specificForce);
+         imu.setAngularVelocity(0.0, 0.0, 0.0);
+      }
+
+      double maxBias = 0.0;
+      for (int k = 0; k < 5000; k++)
+      {
+         rig.doControl();
+         maxBias = Math.max(maxBias, rig.ekf.getGyroBias().norm());
+      }
+      RotationMatrix rotation = new RotationMatrix();
+      rig.ekf.getRotation(rotation);
+      assertPipelineFinite(rig, "pitched hang start");
+      return new double[] {rotation.getPitch(), maxBias};
+   }
+
    @Test
    public void testFreeFallDoesNotRunAwayOrFail()
    {

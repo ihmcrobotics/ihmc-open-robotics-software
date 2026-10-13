@@ -386,6 +386,22 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    public static final double DEFAULT_STARTUP_SETTLE_DURATION = 0.1;
    public static final double DEFAULT_STARTUP_SETTLE_TIMEOUT = 2.0;
    private final org.ejml.data.DMatrixRMaj startCovariance = new org.ejml.data.DMatrixRMaj(12 + 3 * NUMBER_OF_CONTACTS, 12 + 3 * NUMBER_OF_CONTACTS);
+   /**
+    * Start-up tilt alignment: before the start-up settle ends, the first {@link #STARTUP_TILT_ALIGNMENT_WINDOW} of
+    * quasi-static accelerometer readings sets roll/pitch directly (yaw kept from the initial pose), and the filter
+    * restarts from the aligned pose with the start covariance. Until then gravity leveling is not applied. The
+    * initial pose is level, but Alex hangs from the hoist with the pelvis pitched ~11 deg (2026-10-13 logs): leveling
+    * then corrected 11 deg over ~3 s, and with the gyro bias as a state the bias took part of it, -45 mrad/s in pitch
+    * at t = 2 s and +6 mrad/s in yaw that stayed until the first rest.
+    */
+   private final YoBoolean yoStartupTiltAlignmentEnabled = new YoBoolean("invariantStartupTiltAlignment", registry);
+   private final YoBoolean yoStartupTiltAligned = new YoBoolean("invariantStartupTiltAligned", registry);
+   private final YoDouble yoStartupTiltAlignmentAngle = new YoDouble("invariantStartupTiltAlignmentAngle", registry);
+   private static final double STARTUP_TILT_ALIGNMENT_WINDOW = 0.05; // s of quasi-static samples averaged
+   private final Vector3D startupSpecificForceSum = new Vector3D();
+   private double startupSpecificForceTime = 0.0;
+   private final Vector3D alignedUp = new Vector3D();
+   private final Vector3D alignedBasePosition = new Vector3D();
 
    // Gyro bias as a filter state (the "imperfect" InEKF): pitch/roll bias become observable while walking through
    // gravity and the kinematic velocity/contact updates, which the joint-level KF cannot provide (its stance
@@ -659,6 +675,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoStartupSettleEnabled.set(true);
       yoStartupSettleDuration.set(DEFAULT_STARTUP_SETTLE_DURATION);
       yoStartupSettleTimeout.set(DEFAULT_STARTUP_SETTLE_TIMEOUT);
+      yoStartupTiltAlignmentEnabled.set(true);
       yoKinematicVelocityTrustLoad.set(DEFAULT_KINEMATIC_VELOCITY_TRUST_LOAD);
       yoKinematicVelocityUntrustLoad.set(DEFAULT_KINEMATIC_VELOCITY_UNTRUST_LOAD);
       yoCoPFilterBreakFrequency.set(DEFAULT_COP_FILTER_BREAK_FREQUENCY);
@@ -693,6 +710,63 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoStartupSettled.set(false);
       yoStartupQuietTime.set(0.0);
       yoStartupElapsed.set(0.0);
+      yoStartupTiltAligned.set(false);
+      startupSpecificForceSum.setToZero();
+      startupSpecificForceTime = 0.0;
+   }
+
+   /** @return true while the start-up tilt alignment is still to come (gravity leveling waits for it). */
+   private boolean isStartupTiltAlignmentPending()
+   {
+      return yoStartupTiltAlignmentEnabled.getBooleanValue() && yoStartupSettleEnabled.getBooleanValue() && !yoStartupTiltAligned.getBooleanValue()
+             && !yoStartupSettled.getBooleanValue();
+   }
+
+   /**
+    * Averages quasi-static specific force (pelvis frame, bias-corrected) over {@link #STARTUP_TILT_ALIGNMENT_WINDOW},
+    * then restarts the filter with roll/pitch from it and yaw, base position and velocity from the current
+    * estimate; contacts are re-placed by FK about the new pose.
+    */
+   private void updateStartupTiltAlignment()
+   {
+      if (!isStartupTiltAlignmentPending())
+         return;
+      if (!ekf.isGravityQuasiStatic(linearAcceleration,
+                                    rawAngularVelocity,
+                                    QUASI_STATIC_ACCEL_TOLERANCE,
+                                    QUASI_STATIC_GYRO_THRESHOLD,
+                                    QUASI_STATIC_HORIZONTAL_ACCEL_THRESHOLD))
+      {
+         startupSpecificForceSum.setToZero();
+         startupSpecificForceTime = 0.0;
+         return;
+      }
+      startupSpecificForceSum.add(linearAcceleration);
+      startupSpecificForceTime += dt;
+      if (startupSpecificForceTime < STARTUP_TILT_ALIGNMENT_WINDOW)
+         return;
+
+      // f = Rᵀ·e_z·|g| at rest; with R = Rz(yaw)·Ry(pitch)·Rx(roll): f ∝ (−sin p, sin r cos p, cos r cos p).
+      alignedUp.setAndNormalize(startupSpecificForceSum);
+      ekf.getRotation(tempRotation);
+      double yaw = tempRotation.getYaw();
+      double pitch = Math.atan2(-alignedUp.getX(), Math.sqrt(alignedUp.getY() * alignedUp.getY() + alignedUp.getZ() * alignedUp.getZ()));
+      double roll = Math.atan2(alignedUp.getY(), alignedUp.getZ());
+      tempRotation.transform(alignedUp); // the measured up in world with the old pose: its angle to e_z is the correction
+      yoStartupTiltAlignmentAngle.set(Math.acos(Math.max(-1.0, Math.min(1.0, alignedUp.getZ()))));
+      tempRotation.setYawPitchRoll(yaw, pitch, roll);
+
+      ekf.getBasePosition(alignedBasePosition);
+      for (RobotSide side : RobotSide.values)
+      {
+         contactInBody.setToZero(soleFrames.get(side));
+         contactInBody.changeFrame(pelvisFrame);
+         Point3D contact = reAnchorContactPositions[contactIndex(side)];
+         tempRotation.transform(contactInBody, contact);
+         contact.add(alignedBasePosition);
+      }
+      ekf.initialize(tempRotation, zeroVelocity, alignedBasePosition, reAnchorContactPositions, startCovariance(false));
+      yoStartupTiltAligned.set(true);
    }
 
    /** @return true while the start-up settle still holds the filter (see {@link #yoStartupSettleEnabled}). */
@@ -888,6 +962,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
 
       boolean noContact = getContactProbability(RobotSide.LEFT) < CONTACT_HOLD_THRESHOLD && getContactProbability(RobotSide.RIGHT) < CONTACT_HOLD_THRESHOLD;
 
+      updateStartupTiltAlignment();
       boolean startupHold = updateStartupSettle(noContact);
 
       if (operatingMode == StateEstimatorMode.FROZEN || noContact || startupHold)
@@ -1198,6 +1273,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoGravityTiltErrorRoll.set(ekf.getGravityTiltErrorRoll());
 
       boolean apply = gravityLevelingEnabled
+            && !isStartupTiltAlignmentPending()
             && ekf.isGravityQuasiStatic(linearAcceleration,
                                         rawAngularVelocity,
                                         QUASI_STATIC_ACCEL_TOLERANCE,
@@ -1302,6 +1378,12 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    public void setEstimateGyroBias(boolean estimateGyroBias)
    {
       yoEstimateGyroBias.set(estimateGyroBias);
+   }
+
+   /** Turns the start-up roll/pitch alignment to the accelerometer on or off (invariantStartupTiltAlignment). */
+   public void setStartupTiltAlignment(boolean startupTiltAlignment)
+   {
+      yoStartupTiltAlignmentEnabled.set(startupTiltAlignment);
    }
 
    private void updateRestGyroBias()
