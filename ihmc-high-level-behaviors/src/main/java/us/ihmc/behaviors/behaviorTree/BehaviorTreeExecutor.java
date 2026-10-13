@@ -24,6 +24,9 @@ import us.ihmc.sensors.ImageSensor;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
+import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecutor, BehaviorTreeNodeExecutor<?, ?>>
 {
    private final ControllerStatusTracker controllerStatusTracker;
@@ -87,14 +90,21 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
       }
    }
 
+   public void setTreeDirectory(Path directory){
+      if(directory != null){
+         getSaveFileDirectory().setFilesystemDirectory(directory);
+      }
+   }
+
    public void destroy()
    {
       modifyTreeTopology(BehaviorTreeTopologyOperationQueue::queueDestroyEntireTree);
       LLMConditionExecutor.destroy();
    }
 
-   public void loadBehavior(String jsonFileName)
+   public boolean loadBehavior(String jsonFileName)
    {
+      AtomicBoolean success = new AtomicBoolean(false);
       WorkspaceResourceFile file = new WorkspaceResourceFile(getSaveFileDirectory(), jsonFileName);
       if (file.getClasspathResource() != null)
       {
@@ -108,9 +118,11 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
 
             if (loadedNode != null)
             {
+               rootNode.getState().setAutomaticExecution(true);
                rootNode.getDefinition().modify();
                topologyOperationQueue.queueSetRootNodeModify(rootNode);
                topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
+               success.set(true);
             }
          });
       }
@@ -118,6 +130,7 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
       {
          LogTools.error("Cannot load behavior: {}", jsonFileName);
       }
+      return success.get();
    }
 
 }
