@@ -8,6 +8,7 @@ import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.avatar.controllerAPI.EndToEndPelvisTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 
@@ -26,6 +27,20 @@ public class ZuluEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraje
    public String getSimpleRobotName()
    {
       return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ZULU);
+   }
+
+   // TRIAL: forcing the Mujoco physics engine (instead of the default contact-point engine) for
+   // controller-api-2 tests only. See conversation with Nick 2026-08-17.
+   private boolean useMujocoPhysicsEngine = false;
+
+   @Override
+   protected void configureSimulationFactory(SCS2AvatarTestingSimulationFactory testSimulationFactory)
+   {
+      if (useMujocoPhysicsEngine)
+      {
+         testSimulationFactory.setUseMujocoPhysicsEngine(true);
+         testSimulationFactory.setSimulationDT(0.001);
+      }
    }
 
    @Tag("controller-api-slow-2")
@@ -62,6 +77,7 @@ public class ZuluEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraje
    @Override
    public void testMultipleWaypoints() throws Exception
    {
+      useMujocoPhysicsEngine = true;
       super.testMultipleWaypoints();
    }
 
@@ -70,6 +86,7 @@ public class ZuluEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraje
    @Override
    public void testSingleWaypoint() throws Exception
    {
+      useMujocoPhysicsEngine = true;
       super.testSingleWaypoint();
    }
 
@@ -118,6 +135,7 @@ public class ZuluEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraje
    @Override
    public void testStreaming() throws Exception
    {
+      useMujocoPhysicsEngine = true;
       super.testStreaming();
    }
 }

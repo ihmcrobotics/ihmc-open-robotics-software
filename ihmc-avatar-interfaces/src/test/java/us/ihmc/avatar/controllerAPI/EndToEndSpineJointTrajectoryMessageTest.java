@@ -65,6 +65,19 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    private final Random random = new Random(1991L);
    private SCS2AvatarTestingSimulation simulationTestHelper;
 
+   protected SCS2AvatarTestingSimulation createSimulationTestHelper()
+   {
+      SCS2AvatarTestingSimulationFactory testSimulationFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                        simulationTestingParameters);
+      configureSimulationFactory(testSimulationFactory);
+      return testSimulationFactory.createAvatarTestingSimulation();
+   }
+
+   /** Extension point for subclasses to tweak the simulation factory (e.g. swap physics engine) before the simulation is built. No-op by default. */
+   protected void configureSimulationFactory(SCS2AvatarTestingSimulationFactory testSimulationFactory)
+   {
+   }
+
    private RigidBodyBasics pelvis;
    private RigidBodyBasics chest;
    private OneDoFJointBasics[] spineJoints;
@@ -387,7 +400,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
       YoRegistry testRegistry = new YoRegistry("testStreaming");
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
       simulationTestHelper.getRootRegistry().addChild(testRegistry);
 
@@ -670,7 +683,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    private void setupTest()
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
       ThreadTools.sleep(1000);
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();

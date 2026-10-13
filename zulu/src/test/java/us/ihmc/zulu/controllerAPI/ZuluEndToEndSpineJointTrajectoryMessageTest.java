@@ -7,6 +7,7 @@ import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.avatar.controllerAPI.EndToEndSpineJointTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 
@@ -19,6 +20,7 @@ public class ZuluEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJo
    @Test
    public void testSingleWaypoint()
    {
+      useMujocoPhysicsEngine = true;
       super.testSingleWaypoint();
    }
 
@@ -43,6 +45,7 @@ public class ZuluEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJo
    @Test
    public void testMultipleWaypoints()
    {
+      useMujocoPhysicsEngine = true;
       super.testMultipleWaypoints();
    }
 
@@ -59,6 +62,7 @@ public class ZuluEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJo
    @Test
    public void testMessageQueuing()
    {
+      useMujocoPhysicsEngine = true;
       super.testMessageQueuing();
    }
 
@@ -75,6 +79,7 @@ public class ZuluEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJo
    @Test
    public void testStreaming() throws Exception
    {
+      useMujocoPhysicsEngine = true;
       super.testStreaming();
    }
 
@@ -88,6 +93,20 @@ public class ZuluEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJo
    public String getSimpleRobotName()
    {
       return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ZULU);
+   }
+
+   // TRIAL: forcing the Mujoco physics engine (instead of the default contact-point engine) for
+   // controller-api-2 tests only. See conversation with Nick 2026-08-17.
+   private boolean useMujocoPhysicsEngine = false;
+
+   @Override
+   protected void configureSimulationFactory(SCS2AvatarTestingSimulationFactory testSimulationFactory)
+   {
+      if (useMujocoPhysicsEngine)
+      {
+         testSimulationFactory.setUseMujocoPhysicsEngine(true);
+         testSimulationFactory.setSimulationDT(0.001);
+      }
    }
 
 }
