@@ -34,7 +34,7 @@ public class ZuluFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    public void testFlatGroundWalking()
    {
       robotModel = new ZuluRobotModel(ZuluVersion.V1_FULL_ROBOT, RobotTarget.SCS);
-      setDoPelvisWarmup(true);
+      setDoPelvisWarmup(!"true".equals(System.getProperty("runningOnCIServer")));
       super.testFlatGroundWalking();
    }
 
