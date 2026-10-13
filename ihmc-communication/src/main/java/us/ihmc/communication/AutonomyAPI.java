@@ -28,7 +28,7 @@ public final class AutonomyAPI
    /** rt/ihmc/behavior_tree/ai2r_command */
    public static final ROS2Topic<AI2RCommandMessage> AI2R_COMMAND = BEHAVIOR_TREE_MODULE.withType(AI2RCommandMessage.class).withSuffix("ai2r_command");
    /** rt/ihmc/behavior_tree/behavior_command */
-   public static final ROS2Topic<BehaviorResultMessage> BEHAVIOR_COMMAND = BEHAVIOR_TREE_MODULE.withType(BehaviorCommandMessage.class).withSuffix("behavior_command").withQoS(ROS2QoSProfile.RELIABLE);
+   public static final ROS2Topic<BehaviorCommandMessage> BEHAVIOR_COMMAND = BEHAVIOR_TREE_MODULE.withType(BehaviorCommandMessage.class).withSuffix("behavior_command").withQoS(ROS2QoSProfile.RELIABLE);
    /** rt/ihmc/behavior_tree/behavior_result */
    public static final ROS2Topic<BehaviorResultMessage> BEHAVIOR_RESULT = BEHAVIOR_TREE_MODULE.withType(BehaviorResultMessage.class).withSuffix("behavior_result").withQoS(ROS2QoSProfile.RELIABLE);
 }
