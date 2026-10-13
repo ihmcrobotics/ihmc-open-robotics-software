@@ -74,7 +74,7 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
     */
    public double getIMUYawDriftEstimatorDelayBeforeTrustingFoot()
    {
-      return 0.5;
+      return 0.02;
    }
 
    /**

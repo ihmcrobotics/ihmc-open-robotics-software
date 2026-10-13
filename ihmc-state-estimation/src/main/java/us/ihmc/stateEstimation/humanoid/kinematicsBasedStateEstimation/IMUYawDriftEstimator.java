@@ -14,7 +14,6 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -201,39 +200,44 @@ public class IMUYawDriftEstimator implements YawDriftProvider
    {
       trustedFeet.clear();
 
-      int newNumberOfFeetTrusted = 0;
+      int candidateFeetTrusted = 0;
 
       int windowSize = (int) (delayBeforeTrustingFoot.getValue() / estimatorDT);
       for (int i = 0; i < allFeet.size(); i++)
          areFeetTrusted.get(allFeet.get(i)).setWindowSize(windowSize);
-
-      boolean isStanding = robotMotionStatusFromController.getCurrentRobotMotionStatus() == RobotMotionStatus.STANDING;
 
       for (int i = 0; i < numberOfFeet; i++)
       {
          RigidBodyBasics foot = allFeet.get(i);
          GlitchFilteredYoBoolean isFootTrusted = areFeetTrusted.get(foot);
 
-         boolean hasFootHitGround;
-
-         if (estimateWhenControllerIsStanding.getValue())
-            hasFootHitGround = isStanding;
-         else
-            hasFootHitGround = isStanding && footSwitches.get(foot).hasFootHitGroundFiltered();
-
+         boolean hasFootHitGround = footSwitches.get(foot).hasFootHitGroundFiltered();
          boolean isFootStatic = currentFootLinearVelocities.get(foot).getDoubleValue() < footLinearVelocityThreshold.getValue();
 
          if (enableCompensation.getValue() && hasFootHitGround && isFootStatic)
-            isFootTrusted.update(true);
-         else
-            isFootTrusted.set(false);
+            candidateFeetTrusted++;
+      }
 
-         if (isFootTrusted.getBooleanValue())
+      boolean trustAllFeetThisTick = candidateFeetTrusted == numberOfFeet;
+
+      for (int i = 0; i < numberOfFeet; i++)
+      {
+         RigidBodyBasics foot = allFeet.get(i);
+         GlitchFilteredYoBoolean isFootTrusted = areFeetTrusted.get(foot);
+
+         if (trustAllFeetThisTick)
          {
-            newNumberOfFeetTrusted++;
-            trustedFeet.add(foot);
+            isFootTrusted.update(true);
+            if (isFootTrusted.getBooleanValue())
+               trustedFeet.add(foot);
+         }
+         else
+         {
+            isFootTrusted.set(false);
          }
       }
+
+      int newNumberOfFeetTrusted = trustedFeet.size();
 
       // Just started trusting all the feet.
       // Initialize the reference points.
@@ -252,7 +256,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
             RigidBodyBasics foot = trustedFeet.get(i);
             referenceAverageFootPosition.add(referenceFootPositions.get(foot));
          }
-         referenceAverageFootPosition.scale(1.0 / trustedFeet.size());
+         referenceAverageFootPosition.scale(1.0 / newNumberOfFeetTrusted);
       }
       // Not trusting all the feet.
       // Reseting all the reference points.
