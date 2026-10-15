@@ -1,8 +1,5 @@
 package us.ihmc.avatar.testTools.scs2;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-import static us.ihmc.robotics.Assert.fail;
-
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -15,15 +12,13 @@ import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
@@ -58,6 +53,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
+
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 public class SCS2AvatarTestingSimulation implements YoVariableHolder
 {
@@ -576,7 +574,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    @SuppressWarnings({"unchecked", "rawtypes"})
    public <T extends ROS2Message<T>> ROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic<?> generator)
    {
-      return ros2Node.createPublisher(generator.withType((Class) messageType));
+      return ros2Node.createPublisher(((HumanoidROS2Topic) generator).withTypeName((Class) messageType));
    }
 
    @SuppressWarnings({"unchecked", "rawtypes"})
@@ -638,7 +636,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    @SuppressWarnings({"unchecked", "rawtypes"})
    public <T extends ROS2Message<T>> void createSubscriber(Class<T> messageType, ROS2Topic<?> generator, ObjectConsumer<T> consumer)
    {
-      ros2Node.createSubscription(generator.withType((Class) messageType), s -> consumer.consumeObject(messageType.cast(s.read())));
+      ros2Node.createSubscription(((HumanoidROS2Topic) generator).withTypeName((Class) messageType), s -> consumer.consumeObject(messageType.cast(s.read())));
    }
 
    @SuppressWarnings({"unchecked", "rawtypes"})

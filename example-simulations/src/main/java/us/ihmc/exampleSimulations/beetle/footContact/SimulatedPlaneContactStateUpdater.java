@@ -10,8 +10,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.scs2.simulation.robot.trackers.GroundContactPoint;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 
 public class SimulatedPlaneContactStateUpdater implements PlaneContactState
@@ -23,7 +24,6 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    private FrameVector3D contactNormal = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
    private final double coefficientOfFriction = 0.8;
    private boolean hasContactStateChanged = false;
-   private final double contactForceThreshold = 0.3;
    private final FramePoint3D touchdownPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final ReferenceFrame soleFrame;
 
@@ -46,8 +46,14 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
 
       if (isFootInContact())
       {
-         YoFramePoint3D yoPosition = contactPoint.getYoPosition();
-         touchdownPoint.setIncludingFrame(yoPosition);
+         // Use the GCP's live position, not getTouchdownPose(): that pose is only written by the physics
+         // engine the instant it independently detects real geometric contact, and stays frozen at the
+         // world origin until then. HexapodStepController calls this based on its own gait schedule, which
+         // can mark a leg as "in stance" before the foot has actually touched down (e.g. while the robot is
+         // still settling from its initial drop height) - feeding the origin in as the contact point sends
+         // the whole-body controller a bogus support location and produces runaway joint torques.
+         YoFramePoint3D yoPosition = contactPoint.getPose().getPosition();
+         touchdownPoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), yoPosition.getX(), yoPosition.getY(), yoPosition.getZ());
          touchdownPoint.changeFrame(soleFrame);
          planeContactStateCommand.addPointInContact(touchdownPoint);
       }
@@ -63,8 +69,11 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       planeContactStateCommand.setContactNormal(contactNormal);
       planeContactStateCommand.setHasContactStateChanged(hasContactStateChanged);
 
-      YoFramePoint3D yoPosition = contactPoint.getYoPosition();
-      touchdownPoint.setIncludingFrame(yoPosition);
+      // See the comment in getContactStateBasedOnContactForceThreshold() above: use the live GCP position,
+      // not the touchdown-only snapshot, since this is called unconditionally whenever the gait schedule
+      // considers the leg to be in stance, regardless of whether the foot has actually touched down yet.
+      YoFramePoint3D yoPosition = contactPoint.getPose().getPosition();
+      touchdownPoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), yoPosition.getX(), yoPosition.getY(), yoPosition.getZ());
       touchdownPoint.changeFrame(soleFrame);
       planeContactStateCommand.addPointInContact(touchdownPoint);
 
@@ -85,7 +94,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
 
    public boolean isFootInContact()
    {
-      return contactPoint.getYoForce().length() >= contactForceThreshold;
+      return contactPoint.getInContact().getValue();
    }
 
    @Override
@@ -121,7 +130,8 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    @Override
    public void getContactNormalFrameVector(FrameVector3D frameVectorToPack)
    {
-      frameVectorToPack.set(contactPoint.getYoSurfaceNormal());
+      FrameVector3DReadOnly simContactNormal = contactPoint.getContactNormal();
+      frameVectorToPack.set(simContactNormal.getX(), simContactNormal.getY(), simContactNormal.getZ());
    }
 
    @Override
@@ -243,19 +253,19 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       @Override
       public double getX()
       {
-         return groundContactPoint.getX();
+         return groundContactPoint.getPose().getPosition().getX();
       }
 
       @Override
       public double getY()
       {
-         return groundContactPoint.getY();
+         return groundContactPoint.getPose().getPosition().getY();
       }
 
       @Override
       public double getZ()
       {
-         return groundContactPoint.getZ();
+         return groundContactPoint.getPose().getPosition().getZ();
       }
 
       @Override

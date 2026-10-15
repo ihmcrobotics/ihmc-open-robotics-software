@@ -33,7 +33,7 @@ float64 cell_size_in_meters
 int32 cells_per_axis
 
 # List of heights, which correspond to the list of keys
-byte[<=255000] heights
+byte[] heights
 }</pre>
 */
 public class HeightMapMessage implements ROS2Message<HeightMapMessage>
@@ -73,7 +73,7 @@ public class HeightMapMessage implements ROS2Message<HeightMapMessage>
    {
       grid_center_x_ = (double) 0.0;
       grid_center_y_ = (double) 0.0;
-      heights_ = new IDLByteSequence(0, 255000);
+      heights_ = new IDLByteSequence();
 
    }
 

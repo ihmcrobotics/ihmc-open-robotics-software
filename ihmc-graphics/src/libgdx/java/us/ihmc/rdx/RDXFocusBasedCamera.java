@@ -231,14 +231,16 @@ public class RDXFocusBasedCamera extends Camera
 
    public void processImGuiInput(ImGui3DViewInput input)
    {
-      isWPressed = input.isWindowHovered() && ImGui.isKeyDown('W');
-      isSPressed = input.isWindowHovered() && ImGui.isKeyDown('S');
-      isAPressed = input.isWindowHovered() && ImGui.isKeyDown('A');
-      isDPressed = input.isWindowHovered() && ImGui.isKeyDown('D');
-      isQPressed = input.isWindowHovered() && ImGui.isKeyDown('Q');
-      isZPressed = input.isWindowHovered() && ImGui.isKeyDown('Z');
-      isCPressed = input.isWindowHovered() && ImGui.isKeyDown('C');
-      isEPressed = input.isWindowHovered() && ImGui.isKeyDown('E');
+      // Do not fly the camera with WASD/etc while ImGui is capturing the keyboard (e.g. typing in a chat box).
+      boolean cameraKeysAllowed = input.isWindowHovered() && !ImGui.getIO().getWantCaptureKeyboard();
+      isWPressed = cameraKeysAllowed && ImGui.isKeyDown('W');
+      isSPressed = cameraKeysAllowed && ImGui.isKeyDown('S');
+      isAPressed = cameraKeysAllowed && ImGui.isKeyDown('A');
+      isDPressed = cameraKeysAllowed && ImGui.isKeyDown('D');
+      isQPressed = cameraKeysAllowed && ImGui.isKeyDown('Q');
+      isZPressed = cameraKeysAllowed && ImGui.isKeyDown('Z');
+      isCPressed = cameraKeysAllowed && ImGui.isKeyDown('C');
+      isEPressed = cameraKeysAllowed && ImGui.isKeyDown('E');
 
       int orbitMouseButton = useMiddleClickViewOrbit ? ImGuiMouseButton.Middle : ImGuiMouseButton.Left;
       ImGuiMouseDragData orbitDragData = input.getMouseDragData(orbitMouseButton);
@@ -306,14 +308,15 @@ public class RDXFocusBasedCamera extends Camera
 
          if (libGDXInputMode)
          {
-            isWPressed = Gdx.input.isKeyPressed(Input.Keys.W);
-            isSPressed = Gdx.input.isKeyPressed(Input.Keys.S);
-            isAPressed = Gdx.input.isKeyPressed(Input.Keys.A);
-            isDPressed = Gdx.input.isKeyPressed(Input.Keys.D);
-            isQPressed = Gdx.input.isKeyPressed(Input.Keys.Q);
-            isZPressed = Gdx.input.isKeyPressed(Input.Keys.Z);
-            isCPressed = Gdx.input.isKeyPressed(Input.Keys.C);
-            isEPressed = Gdx.input.isKeyPressed(Input.Keys.E);
+            boolean cameraKeysAllowed = !ImGui.getIO().getWantCaptureKeyboard();
+            isWPressed = cameraKeysAllowed && Gdx.input.isKeyPressed(Input.Keys.W);
+            isSPressed = cameraKeysAllowed && Gdx.input.isKeyPressed(Input.Keys.S);
+            isAPressed = cameraKeysAllowed && Gdx.input.isKeyPressed(Input.Keys.A);
+            isDPressed = cameraKeysAllowed && Gdx.input.isKeyPressed(Input.Keys.D);
+            isQPressed = cameraKeysAllowed && Gdx.input.isKeyPressed(Input.Keys.Q);
+            isZPressed = cameraKeysAllowed && Gdx.input.isKeyPressed(Input.Keys.Z);
+            isCPressed = cameraKeysAllowed && Gdx.input.isKeyPressed(Input.Keys.C);
+            isEPressed = cameraKeysAllowed && Gdx.input.isKeyPressed(Input.Keys.E);
          }
 
          boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
