@@ -47,7 +47,7 @@ public class ControllerAPIDefinition
     * controller through the {@code CommandInputManager}. When {@code true}, it is left out of the supported commands, so
     * nothing on the command input path subscribes to it, and the RL controller reads it with its own ROS2 subscriber.
     */
-   public static final boolean RECEIVE_HEIGHT_MAP_OVER_ROS2 = false;
+   public static final boolean RECEIVE_HEIGHT_MAP_OVER_ROS2 = true;
 
    private static final List<Class<? extends Command<?, ?>>> controllerSupportedCommands;
    private static final List<Class<? extends ROS2Message<?>>> controllerSupportedStatusMessages;
