@@ -34,12 +34,17 @@ public class ROS2BehaviorCommandExecutor{
     private final ROS2Publisher<BehaviorResultMessage> resultPublisher;
     private final ROS2Subscription<BehaviorCommandMessage> commandSubscription;
     private final Queue<BehaviorCommandMessage> commands = new ConcurrentLinkedQueue<>();
+    private final Queue<BehaviorCommandMessage> pending = new ConcurrentLinkedQueue<>();
+    private final Queue<Byte> deferredStops = new ConcurrentLinkedQueue<>();
+    private final Queue<Byte> deferredTreeCancels = new ConcurrentLinkedQueue<>();
+    private final Object scheduleLock = new Object();
     private volatile Starter mimicStarter;
     private volatile Starter followStarter;
     private volatile Consumer<Byte> stopKind;
+    private Consumer<BehaviorResultMessage> resultSink;
     private byte activeKind;
     private boolean hasActive;
-    private boolean running;
+    private boolean draining;
 
     public ROS2BehaviorCommandExecutor(
             ROS2ControllerHelper helper,
@@ -49,6 +54,21 @@ public class ROS2BehaviorCommandExecutor{
         ros2BehaviorTreeExecutor = treeExecutor;
         resultPublisher = ros2ControllerHelper.getROS2Node().createPublisher(AutonomyAPI.BEHAVIOR_RESULT);
         commandSubscription = ros2ControllerHelper.getROS2Node().createSubscription(AutonomyAPI.BEHAVIOR_COMMAND, reader -> commands.add(new BehaviorCommandMessage(reader.read())));
+    }
+
+    /** No ROS node. Tests enqueue commands and read results through {@code resultSink}. */
+    ROS2BehaviorCommandExecutor(Consumer<BehaviorResultMessage> resultSink)
+    {
+        ros2ControllerHelper = null;
+        ros2BehaviorTreeExecutor = null;
+        resultPublisher = null;
+        commandSubscription = null;
+        this.resultSink = resultSink;
+    }
+
+    void enqueue(BehaviorCommandMessage command)
+    {
+        commands.add(new BehaviorCommandMessage(command));
     }
 
     public void setMimicStarter(Starter starter){
@@ -64,25 +84,58 @@ public class ROS2BehaviorCommandExecutor{
     }
 
     public void update(){
-        if(!running){
-            running = true;
+        synchronized(scheduleLock){
+            Byte treeCancel;
+            while((treeCancel = deferredTreeCancels.poll()) != null){
+                if(ros2BehaviorTreeExecutor != null)
+                    ros2BehaviorTreeExecutor.cancelActive(treeCancel);
+            }
+            stageIncoming();
+            while(!pending.isEmpty() && pending.peek().getKind() == BehaviorCommandMessage.TREE)
+                apply(pending.poll());
+        }
+    }
+
+    /**
+     * Starts queued mimic and follow commands. Called from the command tick, not from {@link #update()}.
+     */
+    public void drain(){
+        synchronized(scheduleLock){
+            if(draining)
+                return;
+            draining = true;
             try{
-                BehaviorCommandMessage command;
-                while((command = commands.poll()) != null){
-                    apply(command);
-                }
+                stageIncoming();
+                flushDeferredStops();
+                while(!pending.isEmpty() && pending.peek().getKind() != BehaviorCommandMessage.TREE)
+                    apply(pending.poll());
             }
             finally{
-                running = false;
+                draining = false;
             }
         }
     }
 
+    private void stageIncoming(){
+        BehaviorCommandMessage command;
+        while((command = commands.poll()) != null)
+            pending.add(command);
+    }
+
+    private void flushDeferredStops(){
+        Byte kind;
+        while((kind = deferredStops.poll()) != null){
+            if(stopKind != null)
+                stopKind.accept(kind);
+        }
+    }
+
     public void destroy(){
-        if(commandSubscription != null){
+        if(commandSubscription != null && ros2ControllerHelper != null){
             ros2ControllerHelper.getROS2Node().destroySubscription(commandSubscription);
         }
-        ros2BehaviorTreeExecutor.destroy();
+        if(ros2BehaviorTreeExecutor != null)
+            ros2BehaviorTreeExecutor.destroy();
     }
 
     private void apply(BehaviorCommandMessage command){
@@ -138,13 +191,21 @@ public class ROS2BehaviorCommandExecutor{
         if(!hasActive){
             return;
         }
-        if(activeKind == BehaviorCommandMessage.TREE){
-            ros2BehaviorTreeExecutor.cancelActive(newKind);
-        }
-        else if (stopKind != null){
-            stopKind.accept(activeKind);
-        }
+        byte previous = activeKind;
         hasActive = false;
+        if(previous == BehaviorCommandMessage.TREE){
+            if(draining)
+                deferredTreeCancels.add(newKind);
+            else if(ros2BehaviorTreeExecutor != null)
+                ros2BehaviorTreeExecutor.cancelActive(newKind);
+            return;
+        }
+        if(stopKind == null)
+            return;
+        if(draining)
+            stopKind.accept(previous);
+        else
+            deferredStops.add(previous);
     }
 
     private void remember(BehaviorCommandMessage command){
@@ -158,7 +219,10 @@ public class ROS2BehaviorCommandExecutor{
         message.setPhase(phase);
         message.setSummary(summary);
         message.setRejected(rejected);
-        resultPublisher.publish(message);
+        if(resultSink != null)
+            resultSink.accept(message);
+        else if(resultPublisher != null)
+            resultPublisher.publish(message);
     }
 
     @FunctionalInterface
