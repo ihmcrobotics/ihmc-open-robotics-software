@@ -6,11 +6,9 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.HeightMapMessage;
-import perception_msgs.HeightMapMessageForController;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.fastddsjava.cdr.idl.IDLByteSequence;
-import us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence;
 
 public class HeightMapMessageTools
 {
@@ -90,28 +88,6 @@ public class HeightMapMessageTools
       compressedData.close();
    }
 
-   /**
-    * There is no safety for this method, in the sense that we've got an array of floats, and we've got a message to pack with the data.
-    * Its expected that the data matches the size requirements of the message.
-    * By not having a safety check (i < size()) we can drastically speed up the computational time of this method.
-    *
-    * @param heightMapData is the data that contains the heights to be put into the message
-    * @param messageToPack is the message that we want to fill up with our data to publish over the network.
-    */
-   public static void toMessageForController(HeightMapData heightMapData, HeightMapMessageForController messageToPack)
-   {
-      messageToPack.setGridCenterX(heightMapData.getGridCenter().getX());
-      messageToPack.setGridCenterY(heightMapData.getGridCenter().getY());
-      messageToPack.setWidthInMeters(heightMapData.getMapSize());
-      messageToPack.setCellSizeInMeters(heightMapData.getCellSize());
-      messageToPack.setCellsPerAxis(heightMapData.getCellsPerAxis());
-
-      float[] heightsFromData = heightMapData.getHeights();
-
-      messageToPack.getHeights().clear();
-      IDLFloatSequence heights = messageToPack.getHeights();
-      heights.addAll(heightsFromData);
-   }
    /**
     * We don't want to do this unless we have too, it's too slow
     */
