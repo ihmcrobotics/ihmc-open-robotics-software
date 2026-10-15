@@ -17,7 +17,9 @@ import us.ihmc.sensors.ImageSensor;
 public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
 {
    private final ROS2SyncedRobotModel syncedRobot;
-   private final ROS2BehaviorTreeExecutor executor;
+   private final ROS2BehaviorTreeExecutor tree;
+   private final ROS2BehaviorCommandExecutor executor;
+
 
    public ROS2BehaviorTreeUpdateThread(
          ROS2Node ros2Node,
@@ -35,7 +37,7 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
       ROS2ControllerHelper ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2Node());
 
-      executor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,
+      tree = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,
                                               syncedRobot,
                                               kinematicsSimulationBuilder,
                                               imageSensor,
@@ -43,9 +45,16 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
                                               foundationPose,
                                               terrainMapData,
                                               peerClockOffsetEstimator);
+
+      executor = new ROS2BehaviorCommandExecutor(ros2ControllerHelper, tree);
    }
 
-   public ROS2BehaviorTreeExecutor getExecutor()
+   public ROS2BehaviorTreeExecutor getTreeExecutor()
+   {
+      return tree;
+   }
+
+   public ROS2BehaviorCommandExecutor getExecutor()
    {
       return executor;
    }
@@ -55,6 +64,7 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
    {
       syncedRobot.update();
       executor.update();
+      tree.update();
    }
 
    @Override

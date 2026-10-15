@@ -36,7 +36,6 @@ public class ROS2BehaviorCommandExecutor{
     private final Queue<BehaviorCommandMessage> commands = new ConcurrentLinkedQueue<>();
     private volatile Starter mimicStarter;
     private volatile Starter followStarter;
-    private volatile Starter treeStarter;
     private volatile Consumer<Byte> stopKind;
     private byte activeKind;
     private boolean hasActive;
@@ -60,10 +59,6 @@ public class ROS2BehaviorCommandExecutor{
         followStarter = starter;
     }
 
-    public void setTreeStarter(Starter starter){
-        treeStarter = starter;
-    }
-
     public void setStopKind(Consumer<Byte> stopKind){
         this.stopKind = stopKind;
     }
@@ -72,10 +67,9 @@ public class ROS2BehaviorCommandExecutor{
         if(!running){
             running = true;
             try{
-                for(BehaviorCommandMessage command : commands){
-                    if(command != null) {
-                        apply(command);
-                    }
+                BehaviorCommandMessage command;
+                while((command = commands.poll()) != null){
+                    apply(command);
                 }
             }
             finally{
@@ -98,7 +92,16 @@ public class ROS2BehaviorCommandExecutor{
         }
 
         if(command.getKind() == BehaviorCommandMessage.TREE){
-            ros2BehaviorTreeExecutor.startTree(command);
+            if(!(hasActive && activeKind == BehaviorCommandMessage.TREE))
+                cancelActive(command.getKind());
+            int phase = ros2BehaviorTreeExecutor.startTree(command);
+            String treeName = command.getNameAsString();
+            if(phase != BehaviorResultMessage.ACCEPTED){
+                publish(command.getRequestId(), (byte) phase, treeName, true);
+                return;
+            }
+            remember(command);
+            publish(command.getRequestId(), BehaviorResultMessage.ACCEPTED, treeName, false);
             return;
         }
 
@@ -111,12 +114,13 @@ public class ROS2BehaviorCommandExecutor{
             return;
         }
 
+        cancelActive(command.getKind());
         StartResult result = start(starter, command);
         if(result.rejected()){
             publish(command.getRequestId(), result.phase(), result.summary(), true);
             return;
         }
-        cancelActive(command.getKind());
+
         if(result.phase() != BehaviorResultMessage.SUCCEEDED){
             remember(command);
         }
@@ -137,7 +141,7 @@ public class ROS2BehaviorCommandExecutor{
         if(activeKind == BehaviorCommandMessage.TREE){
             ros2BehaviorTreeExecutor.cancelActive(newKind);
         }
-        else if (activeKind != newKind && stopKind != null){
+        else if (stopKind != null){
             stopKind.accept(activeKind);
         }
         hasActive = false;

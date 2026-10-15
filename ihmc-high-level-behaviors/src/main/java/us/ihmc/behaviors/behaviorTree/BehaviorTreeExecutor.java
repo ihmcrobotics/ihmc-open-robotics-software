@@ -24,6 +24,7 @@ import us.ihmc.sensors.ImageSensor;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -106,22 +107,25 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
    {
       AtomicBoolean success = new AtomicBoolean(false);
       WorkspaceResourceFile file = new WorkspaceResourceFile(getSaveFileDirectory(), jsonFileName);
-      if (file.getClasspathResource() != null)
+      Path filesystemFile = file.getFilesystemFile();
+      boolean fileOnDisk = filesystemFile != null && Files.exists(filesystemFile);
+      if (file.getClasspathResource() != null || fileOnDisk)
       {
          modifyTreeTopology(topologyOperationQueue ->
          {
-            if (rootNode == null)
-               topologyOperationQueue.queueDestroyEntireTree();
-
-            BehaviorTreeRootNodeExecutor rootNode = (BehaviorTreeRootNodeExecutor) getNodeBuilder().createRootNode(getAndIncrementNextID());
-            BehaviorTreeNodeExecutor<?, ?> loadedNode = getFileLoader().loadFromFile(rootNode, file, topologyOperationQueue);
+            boolean replaceRoot = rootNode != null;
+            BehaviorTreeRootNodeExecutor loadedRoot = (BehaviorTreeRootNodeExecutor) getNodeBuilder().createRootNode(getAndIncrementNextID());
+            BehaviorTreeNodeExecutor<?, ?> loadedNode = getFileLoader().loadFromFile(loadedRoot, file, topologyOperationQueue);
 
             if (loadedNode != null)
             {
-               rootNode.getState().setAutomaticExecution(true);
-               rootNode.getDefinition().modify();
-               topologyOperationQueue.queueSetRootNodeModify(rootNode);
-               topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
+               if (replaceRoot)
+                  topologyOperationQueue.queueDestroyEntireTree();
+
+               loadedRoot.getState().setAutomaticExecution(true);
+               loadedRoot.getDefinition().modify();
+               topologyOperationQueue.queueSetRootNodeModify(loadedRoot);
+               topologyOperationQueue.queueAppendChildModify(loadedRoot, loadedNode);
                success.set(true);
             }
          });

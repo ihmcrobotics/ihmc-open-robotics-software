@@ -70,7 +70,6 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
    }
 
    public int startTree(BehaviorCommandMessage command){
-      cancelActive(BehaviorCommandMessage.TREE);
       if(loadBehavior(command.getNameAsString())){
          return BehaviorResultMessage.ACCEPTED;
       }
