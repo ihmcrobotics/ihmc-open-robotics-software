@@ -29,7 +29,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    private final List<? extends IMUSensorReadOnly> imuSensorData;
    private final List<? extends ForceSensorDataReadOnly> forceSensorData;
 
-   private List<RobotFrameDataPublisher> robotFrameDataPublishers = new ArrayList<>();
+   private final List<RobotFrameDataPublisher> robotFrameDataPublishers = new ArrayList<>();
    private final SensorTimestampHolder timestampHolder;
    private final RobotMotionStatusHolder robotMotionStatusHolder;
 
@@ -169,9 +169,9 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       robotConfigurationDataPublisher.publish(robotConfigurationData);
 
       // publish robot frame data
-      for (RobotFrameDataPublisher robotFrameDataPublisher : robotFrameDataPublishers)
+      for (int i = 0; i < robotFrameDataPublishers.size(); i++)
       {
-         robotFrameDataPublisher.publish();
+         robotFrameDataPublishers.get(i).publish();
       }
    }
 

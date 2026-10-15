@@ -24,6 +24,8 @@ public class ROS2LogReplay
    private final Map<String, ReplayTopicManager<?>> topicManagersMap = new HashMap<>();
    private final LongSupplier timestampSupplier;
    private final List<ROS2Topic<?>> loggedTopics;
+   @SuppressWarnings("rawtypes")
+   private final Function<ROS2Topic, Consumer> messageConsumerGenerator;
    private boolean paused = false;
 
    private boolean firstUpdate = true;
@@ -38,15 +40,30 @@ public class ROS2LogReplay
    {
       this.timeSource = timeSource;
       this.loggedTopics = loggedTopics;
+      this.messageConsumerGenerator = null;
 
       ros2Node = new ROS2Node("ihmc_ros2_log_replay");
       timestampSupplier = timeSource.createTimestampProvider(robotName, ros2Node);
+   }
+
+   /**
+    * Simulation replay that uses an in-process clock (e.g. SCS2 yoTime in milliseconds) instead of
+    * waiting for {@code RobotConfigurationData} on a separate ROS 2 node.
+    */
+   public ROS2LogReplay(String robotName, List<ROS2Topic<?>> loggedTopics, LongSupplier timestampSupplier)
+   {
+      this.timeSource = ROS2LogTimeSource.SIMULATION;
+      this.loggedTopics = loggedTopics;
+      this.timestampSupplier = timestampSupplier;
+      this.messageConsumerGenerator = null;
+      ros2Node = new ROS2Node("ihmc_ros2_log_replay");
    }
 
    public ROS2LogReplay(String robotName, List<ROS2Topic<?>> loggedTopics, File logFile, ROS2LogTimeSource timeSource)
    {
       this.timeSource = timeSource;
       this.loggedTopics = loggedTopics;
+      this.messageConsumerGenerator = null;
 
       ros2Node = new ROS2Node("ihmc_ros2_log_replay");
       topicManagers = ROS2LogIOTools.loadLogFile(ros2Node, loggedTopics, logFile);
@@ -61,10 +78,24 @@ public class ROS2LogReplay
       this.timeSource = ROS2LogTimeSource.SIMULATION;
       this.timestampSupplier = timestampSupplier;
       this.loggedTopics = loggedTopics;
+      this.messageConsumerGenerator = messageConsumerGenerator;
 
       topicManagers = ROS2LogIOTools.loadLogFile(logFile, loggedTopics, messageConsumerGenerator);
 
       populateTopicManagers();
+   }
+
+   /**
+    * Local replay that delivers messages to {@code messageConsumerGenerator} instead of publishing
+    * over ROS 2. Call {@link #load(File)} to choose a recording.
+    */
+   public ROS2LogReplay(List<ROS2Topic<?>> loggedTopics, Function<ROS2Topic, Consumer> messageConsumerGenerator, LongSupplier timestampSupplier)
+   {
+      this.ros2Node = null;
+      this.timeSource = ROS2LogTimeSource.SIMULATION;
+      this.timestampSupplier = timestampSupplier;
+      this.loggedTopics = loggedTopics;
+      this.messageConsumerGenerator = messageConsumerGenerator;
    }
 
    public void load(File logFile)
@@ -75,7 +106,10 @@ public class ROS2LogReplay
          return;
       }
       LogTools.info("Loading file {}", logFile.getName());
-      topicManagers = ROS2LogIOTools.loadLogFile(ros2Node, loggedTopics, logFile);
+      if (messageConsumerGenerator != null)
+         topicManagers = ROS2LogIOTools.loadLogFile(logFile, loggedTopics, messageConsumerGenerator);
+      else
+         topicManagers = ROS2LogIOTools.loadLogFile(ros2Node, loggedTopics, logFile);
       populateTopicManagers();
    }
 
@@ -251,6 +285,56 @@ public class ROS2LogReplay
    public double getReplaySpeed()
    {
       return replaySpeed;
+   }
+
+   /**
+    * 0-based index of the latest message sent on any loaded topic, or {@code -1} if none yet.
+    */
+   public int getCurrentStepIndex()
+   {
+      if (!isReady())
+         return -1;
+
+      int index = -1;
+      for (ReplayTopicManager<?> topicManager : topicManagers)
+         index = Math.max(index, topicManager.getLastSentIndex());
+      return index;
+   }
+
+   /**
+    * Number of logged messages on the densest topic (typical UI "total steps").
+    */
+   public int getNumberOfSteps()
+   {
+      if (!isReady())
+         return 0;
+
+      int count = 0;
+      for (ReplayTopicManager<?> topicManager : topicManagers)
+         count = Math.max(count, topicManager.getMessageCount());
+      return count;
+   }
+
+   /**
+    * Current replay clock in nanoseconds (paused time excluded, speed applied), or {@code 0} before start.
+    */
+   public long getCurrentReplayTimeNanos()
+   {
+      return lastReplayTime;
+   }
+
+   /**
+    * Duration of the loaded log in nanoseconds (max end timestamp across topics).
+    */
+   public long getTotalDurationNanos()
+   {
+      if (!isReady())
+         return 0L;
+
+      long duration = 0L;
+      for (ReplayTopicManager<?> topicManager : topicManagers)
+         duration = Math.max(duration, topicManager.getEndTimestamp());
+      return duration;
    }
 
    public <T extends ROS2Message<T>> void addReplayMutator(ROS2Topic<T> topic, ObjLongConsumer<T> mutator)

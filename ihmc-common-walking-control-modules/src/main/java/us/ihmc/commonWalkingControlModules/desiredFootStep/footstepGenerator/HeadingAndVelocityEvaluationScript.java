@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorInputCommand;
@@ -136,10 +137,28 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
    }
 
    private final ContinuousStepGeneratorInputCommand commandInput = new ContinuousStepGeneratorInputCommand();
+   private final AtomicBoolean resetRequested = new AtomicBoolean(false);
+
+   /**
+    * Requests this script to restart its event sequence from the beginning, e.g. after the simulation
+    * has been reset to its initial state. Safe to call from any thread; the restart is performed at
+    * the beginning of the next {@link #update(double)}.
+    */
+   public void reset()
+   {
+      resetRequested.set(true);
+   }
 
    @Override
    public void update(double time)
    {
+      if (resetRequested.getAndSet(false))
+      {
+         taskExecutor.clear();
+         desiredVelocity.setToZero();
+         desiredTurningVelocity.set(0.0);
+      }
+
       if (taskExecutor.isDone())
       {
          eventList.forEach(taskExecutor::submit);

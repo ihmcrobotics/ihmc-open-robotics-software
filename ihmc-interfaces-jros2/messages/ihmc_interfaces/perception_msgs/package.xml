@@ -14,10 +14,12 @@
   <build_depend>controller_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
+  <build_depend>vision_msgs</build_depend>
 
   <exec_depend>controller_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>vision_msgs</exec_depend>
 
   <member_of_group>rosidl_interface_packages</member_of_group>
 

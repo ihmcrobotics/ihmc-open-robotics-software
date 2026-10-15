@@ -17,6 +17,7 @@ public class ControllerWaypointGoalCommand implements Command<ControllerWaypoint
    private double positionProximity = 0.02;
    private double orientationProximity = 0.1;
    private boolean goalOrientationMatters = true;
+   private boolean keepHeading = false;
 
    public ControllerWaypointGoalCommand()
    {
@@ -32,6 +33,7 @@ public class ControllerWaypointGoalCommand implements Command<ControllerWaypoint
       positionProximity = 0.02;
       orientationProximity = 0.1;
       goalOrientationMatters = true;
+      keepHeading = false;
    }
 
    @Override
@@ -46,6 +48,7 @@ public class ControllerWaypointGoalCommand implements Command<ControllerWaypoint
       positionProximity = message.getPositionProximity();
       orientationProximity = message.getOrientationProximity();
       goalOrientationMatters = message.getGoalOrientationMatters();
+      keepHeading = message.getKeepHeading();
    }
 
    @Override
@@ -76,6 +79,7 @@ public class ControllerWaypointGoalCommand implements Command<ControllerWaypoint
       positionProximity = other.positionProximity;
       orientationProximity = other.orientationProximity;
       goalOrientationMatters = other.goalOrientationMatters;
+      keepHeading = other.keepHeading;
    }
 
    public void setSequenceId(long sequenceId)
@@ -141,5 +145,15 @@ public class ControllerWaypointGoalCommand implements Command<ControllerWaypoint
    public void setGoalOrientationMatters(boolean goalOrientationMatters)
    {
       this.goalOrientationMatters = goalOrientationMatters;
+   }
+
+   public boolean getKeepHeading()
+   {
+      return keepHeading;
+   }
+
+   public void setKeepHeading(boolean keepHeading)
+   {
+      this.keepHeading = keepHeading;
    }
 }

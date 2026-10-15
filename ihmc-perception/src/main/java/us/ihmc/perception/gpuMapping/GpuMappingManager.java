@@ -26,6 +26,12 @@ import java.util.List;
  */
 public class GpuMappingManager
 {
+   /**
+    * Width in meters of the crop around the feet sent to the controller. The RL height scan reaches about 1.1 m from the
+    * pelvis, and footsteps snapped by the step generator outside the crop get no height.
+    */
+   public static final double CONTROLLER_HEIGHT_MAP_WIDTH = 2.4;
+
    private final ROS2Node ros2Node;
    private final ReferenceFrame heightMapCenter;
    private final HeightMapParameters heightMapParameters;
@@ -48,6 +54,7 @@ public class GpuMappingManager
    // These fields are created globally cause it takes compute time to create it in the update loop
    private final HeightMapMessage heightMapMessage;
    private final HeightMapMessageForController heightMapMessageForController;
+   private final HeightMapForControllerEncoder heightMapForControllerEncoder = new HeightMapForControllerEncoder(CONTROLLER_HEIGHT_MAP_WIDTH);
    private long heightMapSequenceId = 0;
    private long heightMapForControllerSequenceId = 0;
    private final TerrainMapMessage terrainMapMessage;
@@ -88,6 +95,7 @@ public class GpuMappingManager
       controllerHeightMapMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(HeightMapMessageForController.class, robotName));
    }
 
+   boolean firstTick = true;
    /**
     * Update the Height Map with the latest depth image from the sensor
     */
@@ -121,6 +129,17 @@ public class GpuMappingManager
       RigidBodyTransform heightMapFrameToWorldFrame = new RigidBodyTransform(heightMapCenter.getTransformToWorldFrame());
       Point3D heightMapCenterOrigin = new Point3D(heightMapFrameToWorldFrame.getTranslation());
 
+      // Keep the seed height for newly-exposed map cells tracking the robot's current elevation
+      double footHeight = computeFootHeight();
+      heightMapExtractor.updateResetOffset(footHeight);
+
+      if (firstTick)
+      {
+         // On the first tick of the update loop, call this reset, otherwise everything is initialized with value to 0 height, and things don't happen properly.
+         heightMapExtractor.reset(footHeight);
+         firstTick = false;
+      }
+
       // -------- Update the Height Map with the latest depth image from the sensor --------------
       // We expect to have knowledge of where the camera is in relation to the world so we can accurately display the height map
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
@@ -146,7 +165,7 @@ public class GpuMappingManager
                                 groundToWorld,
                                 driftOffsetInZ,
                                 heightMapCenterOrigin,
-                                computeFootHeight());
+                                footHeight);
 
       terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenterPoint);
 
@@ -169,10 +188,17 @@ public class GpuMappingManager
 
    public void publishHeightMapForController()
    {
-      HeightMapMessageTools.toMessageForController(heightMapExtractor.getHeightMapData(), heightMapMessageForController);
+      double midFeetX = 0.0;
+      double midFeetY = 0.0;
+      for (ReferenceFrame footSoleFrame : footSoleFrames)
+      {
+         RigidBodyTransform soleToWorld = footSoleFrame.getTransformToWorldFrame();
+         midFeetX += soleToWorld.getTranslationX() / footSoleFrames.size();
+         midFeetY += soleToWorld.getTranslationY() / footSoleFrames.size();
+      }
+      heightMapForControllerEncoder.encode(heightMapExtractor.getHeightMapData(), midFeetX, midFeetY, computeFootHeight(), heightMapMessageForController);
       heightMapMessageForController.setSequenceId(heightMapForControllerSequenceId++);
       controllerHeightMapMessagePublisher.publish(heightMapMessageForController);
-
    }
 
     public void publishTerrainMap()

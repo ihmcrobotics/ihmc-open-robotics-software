@@ -364,6 +364,29 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          stateTransitionFactories.add(new ControllerFailedTransitionFactory(currentControlStateEnum, HighLevelControllerName.FALLING_STATE));
    }
 
+   public List<ControllerStateTransitionFactory<HighLevelControllerName>> getStateTransitionFactories()
+   {
+      return stateTransitionFactories;
+   }
+
+   public void removeFailureTransitionFactories(HighLevelControllerName controllerToRemove)
+   {
+      int i = 0;
+      while (i < stateTransitionFactories.size())
+      {
+         if (stateTransitionFactories.get(i) instanceof ControllerFailedTransitionFactory failedFactory)
+         {
+            if (failedFactory.getStateToAttachEnum() == controllerToRemove)
+            {
+               stateTransitionFactories.remove(i);
+               continue;
+            }
+         }
+         i++;
+      }
+   }
+
+
    public void addCustomStateTransition(ControllerStateTransitionFactory<HighLevelControllerName> stateTransitionFactory)
    {
       stateTransitionFactories.add(stateTransitionFactory);

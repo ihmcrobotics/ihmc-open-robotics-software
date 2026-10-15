@@ -11,13 +11,13 @@ public final class FootstepPlannerAPI
    public static final HumanoidROS2Topic<?> FOOTSTEP_PLANNER = HumanoidROS2Topic.IHMC_ROOT.withModule(FOOTSTEP_PLANNER_MODULE_NAME);
 
    /** By default, topics are made using "typed topic names" from this base topic */
-   public static ROS2Topic<?> outputTopic(String robotName)
+   public static HumanoidROS2Topic<?> outputTopic(String robotName)
    {
       return FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
    }
 
    /** By default, topics are made using "typed topic names" from this base topic */
-   public static ROS2Topic<?> inputTopic(String robotName)
+   public static HumanoidROS2Topic<?> inputTopic(String robotName)
    {
       return FOOTSTEP_PLANNER.withRobot(robotName).withInput();
    }

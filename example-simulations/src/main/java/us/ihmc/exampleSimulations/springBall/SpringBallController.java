@@ -1,18 +1,19 @@
 package us.ihmc.exampleSimulations.springBall;
 
-import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.scs2.definition.controller.ControllerInput;
+import us.ihmc.scs2.definition.controller.ControllerOutput;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.definition.state.interfaces.OneDoFJointStateBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class SpringBallController implements RobotController
+public class SpringBallController implements Controller
 {
-   private SpringBallRobot rob;
+   private final ControllerInput controllerInput;
 
-   private YoDouble t, q_x, q_y, q_z;
-   private YoDouble qd_wx, qd_wy, qd_wz;
-
-   private YoDouble[]
-      pos = new YoDouble[SpringBallRobot.NUM_SPIKES], vel = new YoDouble[SpringBallRobot.NUM_SPIKES], tau = new YoDouble[SpringBallRobot.NUM_SPIKES];
+   private final OneDoFJointReadOnly[] slider = new OneDoFJointReadOnly[SpringBallRobotDefinition.NUM_SPIKES];
+   private final OneDoFJointStateBasics[] tau = new OneDoFJointStateBasics[SpringBallRobotDefinition.NUM_SPIKES];
 
    private YoRegistry registry = new YoRegistry("SpringBallController");
 
@@ -29,32 +30,19 @@ public class SpringBallController implements RobotController
 
    private String name;
 
-   public SpringBallController(SpringBallRobot rob, String name)
+   public SpringBallController(ControllerInput controllerInput, ControllerOutput controllerOutput, String name)
    {
+      this.controllerInput = controllerInput;
       this.name = name;
-      this.rob = rob;
-      initControl();
+      initControl(controllerInput, controllerOutput);
    }
 
-   private void initControl()
+   private void initControl(ControllerInput controllerInput, ControllerOutput controllerOutput)
    {
-      t = (YoDouble)rob.findVariable("t");
-
-      q_x = (YoDouble)rob.findVariable("q_x");
-      q_y = (YoDouble)rob.findVariable("q_y");
-      q_z = (YoDouble)rob.findVariable("q_z");
-
-      qd_wx = (YoDouble)rob.findVariable("qd_wx");
-      qd_wy = (YoDouble)rob.findVariable("qd_wy");
-      qd_wz = (YoDouble)rob.findVariable("qd_wz");
-
-      q_z.set(1.0);
-
-      for (int i = 0; i < SpringBallRobot.NUM_SPIKES; i++)
+      for (int i = 0; i < SpringBallRobotDefinition.NUM_SPIKES; i++)
       {
-         pos[i] = (YoDouble)rob.findVariable("q_slider" + i);
-         vel[i] = (YoDouble)rob.findVariable("qd_slider" + i);
-         tau[i] = (YoDouble)rob.findVariable("tau_slider" + i);
+         slider[i] = (OneDoFJointReadOnly) controllerInput.getInput().findJoint("slider" + i);
+         tau[i] = controllerOutput.getOneDoFJointOutput("slider" + i);
       }
 
       q_d_spike.set(0.0);
@@ -64,10 +52,6 @@ public class SpringBallController implements RobotController
       offset_spike.set(-0.1);
       amp_spike.set(0.1);
       freq_spike.set(1.0);
-
-      qd_wz.set(2.0);
-      qd_wy.set(1.0);
-      qd_wx.set(-1.5);
    }
 
 
@@ -78,11 +62,12 @@ public class SpringBallController implements RobotController
 
    public void doControl()
    {
-      q_d_spike.set(offset_spike.getDoubleValue() + amp_spike.getDoubleValue() * Math.cos(2.0 * Math.PI * freq_spike.getDoubleValue() * t.getDoubleValue()));
+      q_d_spike.set(offset_spike.getDoubleValue()
+                     + amp_spike.getDoubleValue() * Math.cos(2.0 * Math.PI * freq_spike.getDoubleValue() * controllerInput.getTime()));
 
-      for (int i = 0; i < SpringBallRobot.NUM_SPIKES; i++)
+      for (int i = 0; i < SpringBallRobotDefinition.NUM_SPIKES; i++)
       {
-         tau[i].set(k_spike.getDoubleValue() * (q_d_spike.getDoubleValue() - pos[i].getDoubleValue()) - b_spike.getDoubleValue() * vel[i].getDoubleValue());
+         tau[i].setEffort(k_spike.getDoubleValue() * (q_d_spike.getDoubleValue() - slider[i].getQ()) - b_spike.getDoubleValue() * slider[i].getQd());
       }
 
    }
@@ -91,18 +76,13 @@ public class SpringBallController implements RobotController
    {
       return registry;
    }
-   
+
    public String getName()
    {
       return name;
    }
-   
-   public void initialize()
-   {      
-   }
 
-   public String getDescription()
+   public void initialize()
    {
-      return getName();
    }
 }
