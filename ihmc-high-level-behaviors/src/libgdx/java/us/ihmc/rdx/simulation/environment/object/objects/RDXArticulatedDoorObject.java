@@ -491,11 +491,19 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
       public static final double UNLATCH_LEVER_ANGLE = 0.5;
       /** How close to closed the panel must be before a released lever catches it. */
       public static final double LATCH_CATCH_ANGLE = 0.05;
+      /**
+       * Lever angle, either direction, below which a released lever lets the bolt catch again. Lower than
+       * {@link #UNLATCH_LEVER_ANGLE}, so a hand holding the lever near that threshold does not latch and
+       * unlatch the door every tick while pulling it.
+       */
+      public static final double RELATCH_LEVER_ANGLE = 0.3;
 
       private static final double PANEL_DENSITY = 400.0;
       private static final double LEVER_DENSITY = 800.0;
       private static final double HINGE_DAMPING = 2.0;
       private static final double LEVER_DAMPING = 0.1;
+      /** Kg m^2. The lever pieces weigh a few grams, and with less inertia a gripping hand made the lever snap and chatter. */
+      private static final double LEVER_ARMATURE = 0.01;
       private static final double LEVER_STIFFNESS = DOOR_LEVER_MAX_TORQUE / DOOR_LEVER_MAX_TURN_ANGLE;
 
       private final String baseName;
@@ -626,7 +634,7 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
                .append(fmt(-DOOR_LEVER_MAX_TURN_ANGLE)).append(' ').append(fmt(DOOR_LEVER_MAX_TURN_ANGLE))
                .append("\" damping=\"").append(fmt(LEVER_DAMPING))
                .append("\" stiffness=\"").append(fmt(LEVER_STIFFNESS))
-               .append("\" armature=\"0.001\"/>\n");
+               .append("\" armature=\"").append(fmt(LEVER_ARMATURE)).append("\"/>\n");
          for (int piece = 0; piece < leverMeshPaths.size(); piece++)
             appendGeom(bodies, leverMeshName(piece), leverMeshName(piece) + "_mesh", leverMeshOffset, leverMeshPaths.get(piece), LEVER_DENSITY);
          bodies.append("          <body name=\"").append(baseName).append("_leverOtherside\" ")
@@ -681,17 +689,14 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
             return new double[] {hingeAngle, leverAngle};
          }
 
-         boolean unlatched = Math.abs(lever) >= UNLATCH_LEVER_ANGLE;
-         boolean caught = hinge <= LATCH_CATCH_ANGLE;
          DoublePointer damping = model.dof_damping();
-         if (!unlatched && caught)
+         if (ids.updateLatch(Math.abs(lever), hinge))
          {
-            // A positive-only sliver still lets one push step run past the catch angle. Pin it shut.
+            // A positive-only sliver still lets one push step run past the catch angle. The joint limit
+            // and damping hold it shut. Writing qpos here moved the panel under a gripping hand every
+            // tick, and the lever between them chattered.
             setHingeRange(range, ids.hingeJoint, 0.0, 1.0e-8);
             damping.put(ids.hingeDof, 1.0e6);
-            data.qpos().put(ids.hingeQpos, 0.0);
-            data.qvel().put(ids.hingeDof, 0.0);
-            hinge = 0.0;
          }
          else
          {
@@ -782,6 +787,11 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
       private final int leverQpos;
       private final int hingeDof;
       private final int leverDof;
+      /**
+       * Null until the first update. Kept here because these ids last as long as the compiled model,
+       * while {@link Dynamics} is a fresh snapshot every frame.
+       */
+      private Boolean latched;
 
       private JointIds(int frameBody, int hingeJoint, int leverJoint, int hingeQpos, int leverQpos, int hingeDof, int leverDof)
       {
@@ -792,6 +802,19 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
          this.leverQpos = leverQpos;
          this.hingeDof = hingeDof;
          this.leverDof = leverDof;
+      }
+
+      /** Unlatches past {@link Dynamics#UNLATCH_LEVER_ANGLE}, and latches again only once the lever is released and the panel is shut. */
+      private boolean updateLatch(double leverAngleMagnitude, double hingeAngle)
+      {
+         boolean caught = hingeAngle <= Dynamics.LATCH_CATCH_ANGLE;
+         if (latched == null)
+            latched = caught && leverAngleMagnitude < Dynamics.UNLATCH_LEVER_ANGLE;
+         else if (latched && leverAngleMagnitude >= Dynamics.UNLATCH_LEVER_ANGLE)
+            latched = false;
+         else if (!latched && caught && leverAngleMagnitude < Dynamics.RELATCH_LEVER_ANGLE)
+            latched = true;
+         return latched;
       }
 
       public static JointIds resolve(mjModel model, String baseName)
