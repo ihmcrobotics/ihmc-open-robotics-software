@@ -5,7 +5,6 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.model.Animation;
 import com.badlogic.gdx.graphics.g3d.model.Node;
@@ -17,7 +16,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
-import us.ihmc.behaviors.simulation.RigidBodySceneObjectDefinitions;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -29,7 +27,6 @@ import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.tools.RDXModelLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,10 +98,9 @@ public class RDXPersonObject extends RDXEnvironmentObject
    private RDXPersonObject(String name, RDXEnvironmentObjectFactory factory, boolean ignored)
    {
       super(name, factory);
-      String modelPath = RigidBodySceneObjectDefinitions.PERSON_ANIMATED_MODEL_FILE_PATH;
+      String modelPath = "environmentObjects/person/personAnimated.glb";
       LogTools.info("Person '{}' loading poseable model {}", name, modelPath);
-      Model realisticModel = RDXModelLoader.load(modelPath);
-      setRealisticModel(realisticModel);
+      loadRealisticModel(modelPath);
       isolateInstanceMaterials();
       applyShirtTexture(shirtTextureForName(name));
       // Mixamo glTF is Y-up / +Z-forward. Roll so they stand on Z, then yaw so yaw=0 faces +X.

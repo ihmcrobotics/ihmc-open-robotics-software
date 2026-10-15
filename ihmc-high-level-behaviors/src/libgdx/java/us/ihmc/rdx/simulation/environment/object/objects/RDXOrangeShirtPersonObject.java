@@ -1,6 +1,5 @@
 package us.ihmc.rdx.simulation.environment.object.objects;
 
-import us.ihmc.behaviors.simulation.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
 
 /**
@@ -9,7 +8,7 @@ import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
  */
 public class RDXOrangeShirtPersonObject extends RDXPersonObject
 {
-   public static final String NAME = RigidBodySceneObjectDefinitions.PERSON_ORANGE_SHIRT_NAME;
+   public static final String NAME = "Person (orange shirt)";
    public static final RDXEnvironmentObjectFactory FACTORY = new RDXEnvironmentObjectFactory(NAME, RDXOrangeShirtPersonObject.class);
 
    public RDXOrangeShirtPersonObject()
