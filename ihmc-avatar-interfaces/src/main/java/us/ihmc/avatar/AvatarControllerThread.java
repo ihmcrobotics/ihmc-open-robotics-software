@@ -174,6 +174,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       }
 
       ParameterLoaderHelper.loadParameters(this, robotModel, registry);
+      controllerManager.detachUnpublishedStateRegistries();
    }
 
    @Override

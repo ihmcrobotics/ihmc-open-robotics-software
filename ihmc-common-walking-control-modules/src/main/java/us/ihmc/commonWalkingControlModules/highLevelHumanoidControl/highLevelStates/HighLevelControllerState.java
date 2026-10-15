@@ -51,6 +51,15 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
       return registry;
    }
 
+   /**
+    * Whether this state's registry and YoGraphics should be exposed by the high-level controller manager.
+    * The state continues to execute normally when this returns false; only its telemetry is hidden.
+    */
+   public boolean isYoVariableRegistryToBePublished()
+   {
+      return true;
+   }
+
    protected JointDesiredOutputList getStateSpecificJointSettings()
    {
       jointSettingsHelper.update();

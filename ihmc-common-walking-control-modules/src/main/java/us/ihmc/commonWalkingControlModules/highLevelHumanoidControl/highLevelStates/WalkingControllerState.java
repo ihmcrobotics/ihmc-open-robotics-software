@@ -199,6 +199,12 @@ public class WalkingControllerState extends HighLevelControllerState
    }
 
    @Override
+   public boolean isYoVariableRegistryToBePublished()
+   {
+      return false;
+   }
+
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

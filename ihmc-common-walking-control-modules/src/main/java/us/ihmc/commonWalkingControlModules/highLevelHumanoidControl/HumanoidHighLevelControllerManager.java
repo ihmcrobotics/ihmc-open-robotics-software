@@ -185,6 +185,19 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       this.registry.addChild(registryToAdd);
    }
 
+   /**
+    * Detaches state registries excluded from telemetry after controller parameters have been loaded.
+    * Their states continue to execute with their YoVariables intact.
+    */
+   public void detachUnpublishedStateRegistries()
+   {
+      for (HighLevelControllerState controllerState : highLevelControllerStates.values())
+      {
+         if (!controllerState.isYoVariableRegistryToBePublished())
+            controllerState.getYoRegistry().detachFromParent();
+      }
+   }
+
    public void requestHighLevelControllerState(HighLevelControllerName requestedHighLevelControllerName)
    {
       this.requestedHighLevelControllerState.set(requestedHighLevelControllerName);
@@ -438,7 +451,8 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       group.addChild(controllerFactoryHelper.getManagerFactory().getSCS2YoGraphics());
       for (HighLevelControllerState controllerState : highLevelControllerStates.values())
       {
-         group.addChild(controllerState.getSCS2YoGraphics());
+         if (controllerState.isYoVariableRegistryToBePublished())
+            group.addChild(controllerState.getSCS2YoGraphics());
       }
       for (HighLevelHumanoidControllerPlugin controllerPlugin : controllerPlugins)
       {
