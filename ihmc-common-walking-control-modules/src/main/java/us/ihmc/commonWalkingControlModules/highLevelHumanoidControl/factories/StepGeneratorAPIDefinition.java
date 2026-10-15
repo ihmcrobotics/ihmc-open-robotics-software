@@ -11,7 +11,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.Contr
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeightMapCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Topic;
@@ -40,6 +42,8 @@ public class StepGeneratorAPIDefinition
       commands.add(ControllerReleaseGoalCommand.class);
       commands.add(PlanarRegionsListCommand.class);
       commands.add(HeightMapCommand.class);
+      commands.add(AbortWalkingCommand.class);
+      commands.add(PauseWalkingCommand.class);
 
       stepGeneratorSupportedCommands = Collections.unmodifiableList(commands);
       for (Class<? extends Command<?, ?>> commandClass : stepGeneratorSupportedCommands)

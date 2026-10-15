@@ -26,6 +26,7 @@ public class ZuluRDXBehaviorTestFacilitator
                parameters.setROS2Node(ros2Node);
                return HumanoidKinematicsSimulation.create(robotModel, parameters);
             },
+            null,
             () -> new RDXBaseUI(ZuluRDXBehaviorTestFacilitator.class),
             new WorkspaceResourceDirectory(ZuluRDXBehaviorTestFacilitator.class, "/behaviorTrees"),
             robotModel -> new ZuluSimulationCollisionModel(robotModel.getJointMap()));

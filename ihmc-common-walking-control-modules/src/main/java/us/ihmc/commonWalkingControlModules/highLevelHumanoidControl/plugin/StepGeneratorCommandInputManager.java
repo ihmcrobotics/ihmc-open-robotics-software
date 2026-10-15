@@ -12,6 +12,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.ros2.ROS2HeartbeatMonitor;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeightMapCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -50,6 +51,7 @@ public class StepGeneratorCommandInputManager implements Updatable
    private final List<Consumer<ControllerWaypointGoalListCommand>> controllerWaypointGoalListCommandConsumer = new ArrayList<>();
    private final List<Consumer<ControllerWaypointGoalCommand>> controllerWaypointGoalCommandConsumer = new ArrayList<>();
    private final List<Consumer<ControllerReleaseGoalCommand>> controllerReleaseGoalCommandConsumers = new ArrayList<>();
+   private final List<Consumer<AbortWalkingCommand>> abortWalkingConsumers = new ArrayList<>();
 
    private final AtomicReference<FootstepStatus> latestFootstepStatusReceived = new AtomicReference<>(null);
    private final AtomicReference<FootstepStatus> previousFootstepStatusReceived = new AtomicReference<>(null);
@@ -100,6 +102,11 @@ public class StepGeneratorCommandInputManager implements Updatable
    public void addControllerWaypointGoalCommandConsumer(Consumer<ControllerWaypointGoalCommand> controllerWaypointGoalCommandConsumer)
    {
       this.controllerWaypointGoalCommandConsumer.add(controllerWaypointGoalCommandConsumer);
+   }
+
+   public void addAbortWalkingConsumer(Consumer<AbortWalkingCommand> abortWalkingConsumer)
+   {
+      this.abortWalkingConsumers.add(abortWalkingConsumer);
    }
 
    public void addControllerReleaseGoalCommand(Consumer<ControllerReleaseGoalCommand> controllerReleaseGoalCommandConsumer)
@@ -208,6 +215,21 @@ public class StepGeneratorCommandInputManager implements Updatable
             controllerReleaseGoalCommandConsumers.get(i).accept(command);
          }
       }
+
+      if (commandInputManager.isNewCommandAvailable(AbortWalkingCommand.class))
+      {
+         AbortWalkingCommand command = commandInputManager.pollNewestCommand(AbortWalkingCommand.class);
+
+         walk.set(false);
+         desiredVelocity.setX(0.0);
+         desiredVelocity.setY(0.0);
+         turningVelocity.set(0.0);
+         areVelocitiesNormalized.set(true);
+
+         for (int i = 0; i < abortWalkingConsumers.size(); i++)
+            abortWalkingConsumers.get(i).accept(command);
+      }
+
       commandInputManager.clearCommands(ContinuousStepGeneratorInputCommand.class);
       commandInputManager.clearCommands(ControllerWaypointGoalCommand.class);
       commandInputManager.clearCommands(ControllerWaypointGoalListCommand.class);

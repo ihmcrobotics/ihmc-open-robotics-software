@@ -81,6 +81,24 @@ class ReplayTopicManager<T extends ROS2Message<T>>
       return topicName;
    }
 
+   int getLastSentIndex()
+   {
+      return lastSentIndex;
+   }
+
+   int getMessageCount()
+   {
+      return messages.size();
+   }
+
+   /**
+    * Timestamp of the last logged message, or {@code 0} if the topic has no messages.
+    */
+   long getEndTimestamp()
+   {
+      return timestamps.isEmpty() ? 0L : timestamps.get(timestamps.size() - 1);
+   }
+
    @SuppressWarnings("unchecked")
    public <S extends ROS2Message<S>> void setMutator(ObjLongConsumer<S> mutator)
    {

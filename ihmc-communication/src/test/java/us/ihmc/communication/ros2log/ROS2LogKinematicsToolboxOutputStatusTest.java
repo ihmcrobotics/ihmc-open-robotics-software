@@ -59,6 +59,8 @@ public class ROS2LogKinematicsToolboxOutputStatusTest
       Assertions.assertEquals(1, replayManagers.size());
 
       KinematicsToolboxOutputStatus imported = (KinematicsToolboxOutputStatus) replayManagers.get(0).getMessages().get(0);
+      // writeLogFile marks the final kinematics status so replay can detect the end of the log.
+      exported.setEndReplay(true);
       assertKinematicsToolboxOutputStatusEqual(exported, imported);
 
       ros2Node.close();
@@ -96,6 +98,7 @@ public class ROS2LogKinematicsToolboxOutputStatusTest
       Assertions.assertEquals(-1087810655, imported.getJointNameHash());
       Assertions.assertFalse(imported.getDesiredJointAngles().isEmpty());
       Assertions.assertEquals(0.018464804f, imported.getDesiredJointAngles().get(0), 1.0e-6f);
+      Assertions.assertFalse(imported.getEndReplay());
 
       ros2Node.close();
    }
@@ -128,5 +131,6 @@ public class ROS2LogKinematicsToolboxOutputStatusTest
       Assertions.assertEquals(expected.getSolutionQuality(), actual.getSolutionQuality(), 1.0e-9);
       Assertions.assertEquals(expected.getLeftFootInContact(), actual.getLeftFootInContact());
       Assertions.assertEquals(expected.getRightFootInContact(), actual.getRightFootInContact());
+      Assertions.assertEquals(expected.getEndReplay(), actual.getEndReplay());
    }
 }

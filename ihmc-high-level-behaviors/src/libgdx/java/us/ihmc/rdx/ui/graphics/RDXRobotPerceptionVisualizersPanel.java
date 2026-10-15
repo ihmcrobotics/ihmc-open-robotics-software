@@ -46,7 +46,7 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
       this.ros2Node = ros2Node;
 
       // Common robot visualizer
-      robotVisualizer = new RDXROS2RobotVisualizer(ros2Node, syncedRobot);
+      robotVisualizer = createRobotVisualizer(ros2Node, syncedRobot);
       robotVisualizer.setPinned(true);
       robotVisualizer.setActive(true);
       addVisualizer(robotVisualizer);
@@ -56,6 +56,14 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
       addVisualizer(kinematicsStreamingSolutionVisualizer);
 
       // Additional visualizers instantiated in robot specific class
+   }
+
+   /**
+    * Hook for robot-specific visualizers (e.g. collision mesh overlays).
+    */
+   protected RDXROS2RobotVisualizer createRobotVisualizer(ROS2Node ros2Node, ROS2SyncedRobotModel syncedRobot)
+   {
+      return new RDXROS2RobotVisualizer(ros2Node, syncedRobot);
    }
 
    @Override

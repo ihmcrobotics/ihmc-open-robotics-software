@@ -1,13 +1,14 @@
 package us.ihmc.exampleSimulations.simplePendulum;
 
-import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.scs2.definition.controller.ControllerInput;
+import us.ihmc.scs2.definition.controller.ControllerOutput;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.definition.state.interfaces.OneDoFJointStateBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-/**
- * Created by amoucheboeuf on 2/11/16.
- */
-public class SimplePendulumController implements RobotController
+public class SimplePendulumController implements Controller
 {
    // A name for this controller
    private final String name = "pendulumController";
@@ -15,8 +16,9 @@ public class SimplePendulumController implements RobotController
    // This line instantiates a registry that will contain relevant controller variables that will be accessible from the simulation panel.
    private final YoRegistry registry = new YoRegistry("PendulumController");
 
-   // This is a reference to the SimplePendulumRobot that enables the controller to access this robot's variables.
-   private SimplePendulumRobot robot;
+   // These give the controller read/write access to the fulcrum joint's state, resolved once up front.
+   private final OneDoFJointReadOnly fulcrumJoint;
+   private final OneDoFJointStateBasics fulcrumOutput;
 
    /* Control variables: */
 
@@ -26,15 +28,17 @@ public class SimplePendulumController implements RobotController
    // Controller parameter variables
    private YoDouble p_gain, d_gain, i_gain;
 
-   // This is the desired torque that we will apply to the fulcrum joint (PinJoint)
+   // This is the desired torque that we will apply to the fulcrum joint (RevoluteJoint)
    private double torque;
 
    /* Constructor:
       Where we instantiate and initialize control variables
    */
-   public SimplePendulumController(SimplePendulumRobot robot)
+   public SimplePendulumController(ControllerInput controllerInput, ControllerOutput controllerOutput)
    {
-      this.robot = robot;
+      fulcrumJoint = (OneDoFJointReadOnly) controllerInput.getInput().findJoint("FulcrumPin");
+      fulcrumOutput = controllerOutput.getOneDoFJointOutput("FulcrumPin");
+
       desiredPositionRadians = new YoDouble("DesiredPosRad", registry);
       desiredPositionRadians.set(-1.5);
 
@@ -46,7 +50,8 @@ public class SimplePendulumController implements RobotController
       i_gain.set(10.0);
    }
 
-   @Override public void initialize()
+   @Override
+   public void initialize()
    {
 
    }
@@ -54,39 +59,31 @@ public class SimplePendulumController implements RobotController
    private double positionError = 0;
    private double integralError = 0;
 
-   @Override public void doControl()
+   @Override
+   public void doControl()
    {
 
       // ERROR term: Compute the difference between the desired position the pendulum and its current position
-      positionError = desiredPositionRadians.getDoubleValue() - robot.getFulcrumAngularPosition();
+      positionError = desiredPositionRadians.getDoubleValue() - fulcrumJoint.getQ();
 
       // INTEGRAL term: Compute a simple numerical integration of the position error
       integralError += positionError * SimplePendulumSimulation.DT;   //
 
       // P.I.D
-      torque = p_gain.getDoubleValue() * positionError + i_gain.getDoubleValue() * integralError + d_gain.getDoubleValue() * (0 - robot
-            .getFulcrumAngularVelocity());
+      torque = p_gain.getDoubleValue() * positionError + i_gain.getDoubleValue() * integralError + d_gain.getDoubleValue() * (0 - fulcrumJoint.getQd());
 
-      robot.setFulcrumTorque(torque);
-
+      fulcrumOutput.setEffort(torque);
    }
 
-   @Override public YoRegistry getYoRegistry()
+   @Override
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }
 
-   @Override public String getName()
-   {
-      return name;
-   }
-
-   @Override public String getDescription()
+   @Override
+   public String getName()
    {
       return name;
    }
 }
-
-//lastPositionError = positionError;
-//   private double lastPositionError = 0;
-//      integralError += (positionError + lastPositionError)/2.0 * SimplePendulumSimulation.DT;   // INTEGRAL
