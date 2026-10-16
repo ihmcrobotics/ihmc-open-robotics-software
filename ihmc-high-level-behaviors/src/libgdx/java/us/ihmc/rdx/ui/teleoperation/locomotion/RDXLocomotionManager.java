@@ -52,6 +52,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This class provides easy access to everything that involves mobility for the robot's legs.
@@ -120,7 +121,8 @@ public class RDXLocomotionManager
    private final ROS2Publisher<ControllerWaypointGoalListMessage> goalListMessagePublisher;
    /** StepGeneratorCommandInputManager discards waypoint goals unless this heartbeat is alive. */
    private final ROS2Heartbeat stepGeneratorHeartbeat;
-   private final ControllerWaypointStatusMessage waypointStatusMessage = new ControllerWaypointStatusMessage();
+   private final AtomicReference<ControllerWaypointStatusMessage> receivedWaypointStatus = new AtomicReference<>();
+   private static final double WAYPOINT_MATCH_EPSILON = 1.0e-3;
    private final Pose3D goalPose = new Pose3D();
    private final ControllerWaypointGoalMessage goalMessage = new ControllerWaypointGoalMessage();
    private final ControllerWaypointGoalListMessage goalListMessage = new ControllerWaypointGoalListMessage();
@@ -131,9 +133,8 @@ public class RDXLocomotionManager
    private RDXSplineGraphic trajectoryGraphic;
    private int numWaypoints = 0;
    private boolean waypointsSent = false;
-   private boolean waypointsReceived = false;
-   private int waypointsCompleted = 0;
-   private int lastWaypointsRemaining = 0;
+   /** Waypoint the robot is walking to, drawn red. -1 before the waypoints are sent. */
+   private int activeWaypointIndex = -1;
 
    // Used for UI logic
    private boolean wasPlanning = false;
@@ -176,7 +177,7 @@ public class RDXLocomotionManager
                                                                                                  robotModel.getSimpleRobotName()));
       controllerHelper.getROS2Node()
                       .createSubscriptionSampler(HumanoidControllerAPI.getTopic(ControllerWaypointStatusMessage.class, robotModel.getSimpleRobotName()),
-                                                 waypointStatusMessage::set);
+                                                 status -> receivedWaypointStatus.set(new ControllerWaypointStatusMessage(status)));
       stepGeneratorHeartbeat = new ROS2Heartbeat(controllerHelper.getROS2Node(), CSGROS2CommunicationHelper.CSG_HEARTBEAT_TOPIC);
       stepGeneratorHeartbeat.setAlive(true);
    }
@@ -477,32 +478,7 @@ public class RDXLocomotionManager
          walkPathControlRing.renderImGuiWidgets(widgetStartX);
       }
 
-      int currentWaypointsRemaining = waypointStatusMessage.getWaypointsRemaining();
-      boolean waypointsStarted = waypointStatusMessage.getIsStarted();
-
-      if (currentWaypointsRemaining == 0 && !waypointsStarted && waypointsSent && waypointsReceived)
-      {
-         System.out.println("RL walking complete");
-         clearWaypoints();
-      }
-      else if ((waypointsStarted || currentWaypointsRemaining > 0) && waypointsSent)
-      {
-         waypointsReceived = true;
-      }
-      //      System.out.println(waypointsStarted + " " + currentWaypointsRemaining);
-      if (currentWaypointsRemaining != lastWaypointsRemaining)
-      {
-         System.out.println("Waypoint completed");
-         waypoints.get(waypointsCompleted).create(0.05, 0.2, Color.GREEN);
-         waypoints.get(waypointsCompleted).setToPose(goalPoseArrayList.get(waypointsCompleted));
-         waypointsCompleted++;
-         if (waypointsCompleted < numWaypoints)
-         {
-            waypoints.get(waypointsCompleted).create(0.05, 0.2, Color.RED);
-            waypoints.get(waypointsCompleted).setToPose(goalPoseArrayList.get(waypointsCompleted));
-         }
-      }
-      lastWaypointsRemaining = currentWaypointsRemaining;
+      updateWaypointProgress();
 
       if (posePlacement.getPlacedNotification().poll() && posePlacement.isPlaced())
       {
@@ -553,20 +529,67 @@ public class RDXLocomotionManager
       waypoints.clear();
 
       numWaypoints = 0;
-      waypointsCompleted = 0;
+      activeWaypointIndex = -1;
       waypointsSent = false;
    }
 
    private void sendWaypoints()
    {
-      waypoints.get(0).create(0.05, 0.2, Color.RED);
-      waypoints.get(0).setToPose(goalPoseArrayList.get(0));
+      if (activeWaypointIndex > 0)
+         setWaypointColor(activeWaypointIndex, Color.BLUE);
+      activeWaypointIndex = 0;
+      setWaypointColor(0, Color.RED);
 
       goalListMessage.getWaypoints().addAll(goalMessageArrayList);
       goalListMessagePublisher.publish(goalListMessage);
       goalListMessage.getWaypoints().clear();
       waypointsSent = true;
-      waypointsReceived = false;
+   }
+
+   /**
+    * The goal reacher publishes "reached" and "started next" in the same tick and the sampler keeps only the newest, so
+    * progress can't be tracked by counting messages. Each status names its waypoint by goal position, so match on that.
+    */
+   private void updateWaypointProgress()
+   {
+      ControllerWaypointStatusMessage status = receivedWaypointStatus.getAndSet(null);
+      if (status == null || !waypointsSent)
+         return;
+
+      int statusWaypointIndex = findWaypointIndex(status.getGoalXPosition(), status.getGoalYPosition());
+      if (statusWaypointIndex < 0)
+         return; // About a goal from an earlier send
+
+      int nextActiveWaypointIndex = status.getIsStarted() ? statusWaypointIndex : statusWaypointIndex + 1;
+      if (nextActiveWaypointIndex >= numWaypoints)
+      {
+         LogTools.info("Reached the last waypoint");
+         clearWaypoints();
+         return;
+      }
+
+      for (int i = activeWaypointIndex; i < nextActiveWaypointIndex; i++)
+         setWaypointColor(i, Color.BLUE);
+      setWaypointColor(nextActiveWaypointIndex, Color.RED);
+      activeWaypointIndex = nextActiveWaypointIndex;
+   }
+
+   /** Searches from the active waypoint on, so progress only moves forward. */
+   private int findWaypointIndex(double x, double y)
+   {
+      for (int i = Math.max(activeWaypointIndex, 0); i < numWaypoints; i++)
+      {
+         Pose3D waypointPose = goalPoseArrayList.get(i);
+         if (Math.abs(waypointPose.getX() - x) < WAYPOINT_MATCH_EPSILON && Math.abs(waypointPose.getY() - y) < WAYPOINT_MATCH_EPSILON)
+            return i;
+      }
+      return -1;
+   }
+
+   private void setWaypointColor(int index, Color color)
+   {
+      waypoints.get(index).create(0.05, 0.2, color);
+      waypoints.get(index).setToPose(goalPoseArrayList.get(index));
    }
 
    public void updateWalkPathControlRing()
