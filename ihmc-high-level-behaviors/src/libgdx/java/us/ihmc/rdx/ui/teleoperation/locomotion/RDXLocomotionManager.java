@@ -7,13 +7,16 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.*;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.subscribers.FilteredNotification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -116,6 +119,8 @@ public class RDXLocomotionManager
    //   private final RDXWaypointPlacement waypointPlacement;
 
    private final ROS2Publisher<ControllerWaypointGoalListMessage> goalListMessagePublisher;
+   /** StepGeneratorCommandInputManager discards waypoint goals unless this heartbeat is alive. */
+   private final ROS2Heartbeat stepGeneratorHeartbeat;
    private final ControllerWaypointStatusMessage waypointStatusMessage = new ControllerWaypointStatusMessage();
    private final Pose3D goalPose = new Pose3D();
    private final ControllerWaypointGoalMessage goalMessage = new ControllerWaypointGoalMessage();
@@ -130,6 +135,10 @@ public class RDXLocomotionManager
    private boolean waypointsReceived = false;
    private int waypointsCompleted = 0;
    private int lastWaypointsRemaining = 0;
+   private static final int FACE_GOAL = 0;
+   private static final int KEEP_HEADING = 1;
+   private static final int TURN_WALK_TURN = 2;
+   private final ImInt waypointHeadingMode = new ImInt(FACE_GOAL);
 
    // Used for UI logic
    private boolean wasPlanning = false;
@@ -173,6 +182,8 @@ public class RDXLocomotionManager
       controllerHelper.getROS2Node()
                       .createSubscriptionSampler(HumanoidControllerAPI.getTopic(ControllerWaypointStatusMessage.class, robotModel.getSimpleRobotName()),
                                                  waypointStatusMessage::set);
+      stepGeneratorHeartbeat = new ROS2Heartbeat(controllerHelper.getROS2Node(), CSGROS2CommunicationHelper.CSG_HEARTBEAT_TOPIC);
+      stepGeneratorHeartbeat.setAlive(true);
    }
 
    public void create(RDXBaseUI baseUI)
@@ -399,6 +410,16 @@ public class RDXLocomotionManager
             sendWaypoints();
          ImGui.endDisabled();
          ImGui.text("Waypoints: " + numWaypoints);
+         ImGui.text("Heading:");
+         ImGui.sameLine();
+         ImGui.radioButton(labels.get("Face goal"), waypointHeadingMode, FACE_GOAL);
+         ImGuiTools.previousWidgetTooltip("Face the waypoint while walking, then turn to its arrow");
+         ImGui.sameLine();
+         ImGui.radioButton(labels.get("Keep heading"), waypointHeadingMode, KEEP_HEADING);
+         ImGuiTools.previousWidgetTooltip("Keep the current facing, walking sideways or backward, then turn to the arrow at the end");
+         ImGui.sameLine();
+         ImGui.radioButton(labels.get("Turn-walk-turn"), waypointHeadingMode, TURN_WALK_TURN);
+         ImGuiTools.previousWidgetTooltip("Turn to face along the line to the waypoint, walk the line, then turn to the arrow");
          ImGui.separator();
 
          ImGui.text("Footstep Placement:");
@@ -556,6 +577,11 @@ public class RDXLocomotionManager
       waypoints.get(0).create(0.05, 0.2, Color.RED);
       waypoints.get(0).setToPose(goalPoseArrayList.get(0));
 
+      for (int i = 0; i < goalMessageArrayList.size(); i++)
+      {
+         goalMessageArrayList.get(i).setKeepHeading(waypointHeadingMode.get() == KEEP_HEADING);
+         goalMessageArrayList.get(i).setTurnWalkTurn(waypointHeadingMode.get() == TURN_WALK_TURN);
+      }
       goalListMessage.getWaypoints().addAll(goalMessageArrayList);
       goalListMessagePublisher.publish(goalListMessage);
       goalListMessage.getWaypoints().clear();
@@ -619,6 +645,7 @@ public class RDXLocomotionManager
       controllerFootstepQueueGraphic.destroy();
       bodyPathPlanGraphic.destroy();
       interactableFootstepPlan.destroy();
+      stepGeneratorHeartbeat.destroy();
    }
 
    public void deleteAll()

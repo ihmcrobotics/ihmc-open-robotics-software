@@ -25,3 +25,7 @@ bool goal_orientation_matters true
 # When true, keep the current heading all the way to the goal (walk backward or
 # sideways even past distanceToFaceGoal). Default false faces the goal when far.
 bool keep_heading false
+
+# When true, turn in place to face the goal, walk straight to it, then turn in place to the goal
+# yaw. Takes precedence over keep_heading.
+bool turn_walk_turn false
