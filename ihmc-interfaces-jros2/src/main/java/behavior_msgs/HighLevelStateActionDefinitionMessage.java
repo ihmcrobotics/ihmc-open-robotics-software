@@ -19,6 +19,9 @@ byte high_level_controller_name
 
 # Seconds to wait for the controller to report the requested state before the action fails
 float64 timeout
+
+# With RL_CONTROL, the RL model to run, by its name in controller_msgs/RLPolicyState available_models. Empty keeps the current model.
+string rl_model_name
 }</pre>
 */
 public class HighLevelStateActionDefinitionMessage implements ROS2Message<HighLevelStateActionDefinitionMessage>
@@ -37,10 +40,15 @@ public class HighLevelStateActionDefinitionMessage implements ROS2Message<HighLe
       Seconds to wait for the controller to report the requested state before the action fails
    */
    private double timeout_;
+   /**
+      With RL_CONTROL, the RL model to run, by its name in controller_msgs/RLPolicyState available_models. Empty keeps the current model.
+   */
+   private final StringBuilder rl_model_name_;
 
    public HighLevelStateActionDefinitionMessage()
    {
       definition_ = new behavior_msgs.ActionNodeDefinitionMessage();
+      rl_model_name_ = new StringBuilder();
 
    }
 
@@ -58,6 +66,7 @@ public class HighLevelStateActionDefinitionMessage implements ROS2Message<HighLe
       currentAlignment += definition_.calculateSizeBytes(currentAlignment);
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // high_level_controller_name_
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // timeout_
+      currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4) + (1 * rl_model_name_.length()) + 1; // rl_model_name_
 
       return currentAlignment - initialAlignment;
    }
@@ -68,6 +77,7 @@ public class HighLevelStateActionDefinitionMessage implements ROS2Message<HighLe
       definition_.serialize(buffer);
       buffer.writeByte(high_level_controller_name_);
       buffer.writeDouble(timeout_);
+      buffer.writeString(rl_model_name_);
 
    }
 
@@ -77,6 +87,7 @@ public class HighLevelStateActionDefinitionMessage implements ROS2Message<HighLe
       definition_.deserialize(buffer);
       high_level_controller_name_ = buffer.readByte();
       timeout_ = buffer.readDouble();
+      buffer.readString(rl_model_name_);
 
    }
 
@@ -86,6 +97,8 @@ public class HighLevelStateActionDefinitionMessage implements ROS2Message<HighLe
       definition_.set(from.definition_);
       high_level_controller_name_ = from.high_level_controller_name_;
       timeout_ = from.timeout_;
+      rl_model_name_.delete(0, rl_model_name_.length());
+      rl_model_name_.insert(0, from.rl_model_name_);
 
    }
 
@@ -114,6 +127,21 @@ public class HighLevelStateActionDefinitionMessage implements ROS2Message<HighLe
       this.timeout_ = timeout_;
    }
 
+   public StringBuilder getRlModelName()
+   {
+      return rl_model_name_;
+   }
+
+   public java.lang.String getRlModelNameAsString()
+   {
+      return rl_model_name_.toString();
+   }
+
+   public void setRlModelName(java.lang.String s)
+   {
+      this.rl_model_name_.delete(0, this.rl_model_name_.length());
+      this.rl_model_name_.insert(0, s);
+   }
 
    @Override
    public java.lang.String toString()
@@ -126,6 +154,8 @@ public class HighLevelStateActionDefinitionMessage implements ROS2Message<HighLe
       builder.append(high_level_controller_name_);
       builder.append("timeout_=");
       builder.append(timeout_);
+      builder.append("rl_model_name_=");
+      builder.append(rl_model_name_.toString());
 
       builder.append("}");
       return builder.toString();

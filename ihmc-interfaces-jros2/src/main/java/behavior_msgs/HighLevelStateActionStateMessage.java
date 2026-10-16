@@ -16,6 +16,9 @@ behavior_msgs/ActionNodeStateMessage state
 
 # Definition
 behavior_msgs/HighLevelStateActionDefinitionMessage definition
+
+# The RL models the controller offers, from controller_msgs/RLPolicyState, one name per line
+string available_rl_models
 }</pre>
 */
 public class HighLevelStateActionStateMessage implements ROS2Message<HighLevelStateActionStateMessage>
@@ -30,11 +33,16 @@ public class HighLevelStateActionStateMessage implements ROS2Message<HighLevelSt
       Definition
    */
    private final behavior_msgs.HighLevelStateActionDefinitionMessage definition_;
+   /**
+      The RL models the controller offers, from controller_msgs/RLPolicyState, one name per line
+   */
+   private final StringBuilder available_rl_models_;
 
    public HighLevelStateActionStateMessage()
    {
       state_ = new behavior_msgs.ActionNodeStateMessage();
       definition_ = new behavior_msgs.HighLevelStateActionDefinitionMessage();
+      available_rl_models_ = new StringBuilder();
 
    }
 
@@ -51,6 +59,7 @@ public class HighLevelStateActionStateMessage implements ROS2Message<HighLevelSt
 
       currentAlignment += state_.calculateSizeBytes(currentAlignment);
       currentAlignment += definition_.calculateSizeBytes(currentAlignment);
+      currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4) + (1 * available_rl_models_.length()) + 1; // available_rl_models_
 
       return currentAlignment - initialAlignment;
    }
@@ -60,6 +69,7 @@ public class HighLevelStateActionStateMessage implements ROS2Message<HighLevelSt
    {
       state_.serialize(buffer);
       definition_.serialize(buffer);
+      buffer.writeString(available_rl_models_);
 
    }
 
@@ -68,6 +78,7 @@ public class HighLevelStateActionStateMessage implements ROS2Message<HighLevelSt
    {
       state_.deserialize(buffer);
       definition_.deserialize(buffer);
+      buffer.readString(available_rl_models_);
 
    }
 
@@ -76,6 +87,8 @@ public class HighLevelStateActionStateMessage implements ROS2Message<HighLevelSt
    {
       state_.set(from.state_);
       definition_.set(from.definition_);
+      available_rl_models_.delete(0, available_rl_models_.length());
+      available_rl_models_.insert(0, from.available_rl_models_);
 
    }
 
@@ -89,6 +102,21 @@ public class HighLevelStateActionStateMessage implements ROS2Message<HighLevelSt
       return definition_;
    }
 
+   public StringBuilder getAvailableRlModels()
+   {
+      return available_rl_models_;
+   }
+
+   public java.lang.String getAvailableRlModelsAsString()
+   {
+      return available_rl_models_.toString();
+   }
+
+   public void setAvailableRlModels(java.lang.String s)
+   {
+      this.available_rl_models_.delete(0, this.available_rl_models_.length());
+      this.available_rl_models_.insert(0, s);
+   }
 
    @Override
    public java.lang.String toString()
@@ -99,6 +127,8 @@ public class HighLevelStateActionStateMessage implements ROS2Message<HighLevelSt
       builder.append(state_);
       builder.append("definition_=");
       builder.append(definition_);
+      builder.append("available_rl_models_=");
+      builder.append(available_rl_models_.toString());
 
       builder.append("}");
       return builder.toString();

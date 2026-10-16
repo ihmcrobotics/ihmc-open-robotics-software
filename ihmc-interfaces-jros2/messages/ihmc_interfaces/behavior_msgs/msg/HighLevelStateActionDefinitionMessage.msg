@@ -6,3 +6,6 @@ byte high_level_controller_name
 
 # Seconds to wait for the controller to report the requested state before the action fails
 float64 timeout
+
+# With RL_CONTROL, the RL model to run, by its name in controller_msgs/RLPolicyState available_models. Empty keeps the current model.
+string rl_model_name
