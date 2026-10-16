@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ROS2BehaviorCommandExecutorTest
 {
    @Test
-   public void testMimicStartsOnDrainNotOnBehaviorUpdate()
+   public void testMimicStartsOnCommandDrain()
    {
       List<BehaviorResultMessage> results = new ArrayList<>();
       ROS2BehaviorCommandExecutor executor = new ROS2BehaviorCommandExecutor(results::add);
