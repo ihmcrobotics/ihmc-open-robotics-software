@@ -13,7 +13,9 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.subscribers.FilteredNotification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -116,6 +118,8 @@ public class RDXLocomotionManager
    //   private final RDXWaypointPlacement waypointPlacement;
 
    private final ROS2Publisher<ControllerWaypointGoalListMessage> goalListMessagePublisher;
+   /** StepGeneratorCommandInputManager discards waypoint goals unless this heartbeat is alive. */
+   private final ROS2Heartbeat stepGeneratorHeartbeat;
    private final ControllerWaypointStatusMessage waypointStatusMessage = new ControllerWaypointStatusMessage();
    private final Pose3D goalPose = new Pose3D();
    private final ControllerWaypointGoalMessage goalMessage = new ControllerWaypointGoalMessage();
@@ -173,6 +177,8 @@ public class RDXLocomotionManager
       controllerHelper.getROS2Node()
                       .createSubscriptionSampler(HumanoidControllerAPI.getTopic(ControllerWaypointStatusMessage.class, robotModel.getSimpleRobotName()),
                                                  waypointStatusMessage::set);
+      stepGeneratorHeartbeat = new ROS2Heartbeat(controllerHelper.getROS2Node(), CSGROS2CommunicationHelper.CSG_HEARTBEAT_TOPIC);
+      stepGeneratorHeartbeat.setAlive(true);
    }
 
    public void create(RDXBaseUI baseUI)
@@ -619,6 +625,7 @@ public class RDXLocomotionManager
       controllerFootstepQueueGraphic.destroy();
       bodyPathPlanGraphic.destroy();
       interactableFootstepPlan.destroy();
+      stepGeneratorHeartbeat.destroy();
    }
 
    public void deleteAll()
