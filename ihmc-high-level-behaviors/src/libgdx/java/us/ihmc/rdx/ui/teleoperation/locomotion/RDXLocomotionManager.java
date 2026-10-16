@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.*;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -133,6 +134,10 @@ public class RDXLocomotionManager
    private RDXSplineGraphic trajectoryGraphic;
    private int numWaypoints = 0;
    private boolean waypointsSent = false;
+   private static final int FACE_GOAL = 0;
+   private static final int KEEP_HEADING = 1;
+   private static final int TURN_WALK_TURN = 2;
+   private final ImInt waypointHeadingMode = new ImInt(FACE_GOAL);
    /** Waypoint the robot is walking to, drawn red. -1 before the waypoints are sent. */
    private int activeWaypointIndex = -1;
 
@@ -406,6 +411,16 @@ public class RDXLocomotionManager
             sendWaypoints();
          ImGui.endDisabled();
          ImGui.text("Waypoints: " + numWaypoints);
+         ImGui.text("Heading:");
+         ImGui.sameLine();
+         ImGui.radioButton(labels.get("Face goal"), waypointHeadingMode, FACE_GOAL);
+         ImGuiTools.previousWidgetTooltip("Face the waypoint while walking, then turn to its arrow");
+         ImGui.sameLine();
+         ImGui.radioButton(labels.get("Keep heading"), waypointHeadingMode, KEEP_HEADING);
+         ImGuiTools.previousWidgetTooltip("Keep the current facing, walking sideways or backward, then turn to the arrow at the end");
+         ImGui.sameLine();
+         ImGui.radioButton(labels.get("Turn-walk-turn"), waypointHeadingMode, TURN_WALK_TURN);
+         ImGuiTools.previousWidgetTooltip("Turn to face along the line to the waypoint, walk the line, then turn to the arrow");
          ImGui.separator();
 
          ImGui.text("Footstep Placement:");
@@ -540,6 +555,11 @@ public class RDXLocomotionManager
       activeWaypointIndex = 0;
       setWaypointColor(0, Color.RED);
 
+      for (int i = 0; i < goalMessageArrayList.size(); i++)
+      {
+         goalMessageArrayList.get(i).setKeepHeading(waypointHeadingMode.get() == KEEP_HEADING);
+         goalMessageArrayList.get(i).setTurnWalkTurn(waypointHeadingMode.get() == TURN_WALK_TURN);
+      }
       goalListMessage.getWaypoints().addAll(goalMessageArrayList);
       goalListMessagePublisher.publish(goalListMessage);
       goalListMessage.getWaypoints().clear();
