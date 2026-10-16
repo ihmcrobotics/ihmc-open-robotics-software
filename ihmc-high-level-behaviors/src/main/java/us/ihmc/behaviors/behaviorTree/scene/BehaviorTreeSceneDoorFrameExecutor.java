@@ -167,4 +167,15 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
    {
       return doorOpenAngle;
    }
+
+   /** Depth points in front of the hinge. More than {@link #getMinRecessPoints()} means a push door. */
+   public long getHingeRecessPoints()
+   {
+      return hingeRecessPoints;
+   }
+
+   public long getLatchPostPoints()
+   {
+      return latchPostPoints;
+   }
 }

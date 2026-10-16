@@ -8,6 +8,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionTaskspaceTrajectoryMode;
 import us.ihmc.behaviors.behaviorTree.action.actions.EZGripperActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.HighLevelStateActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.SpineActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionDefinition;
@@ -203,6 +204,8 @@ public class RDXBehaviorTreeSVGNode
          return "Action Sequence";
       if (node instanceof WaitActionDefinition)
          return "Wait Action";
+      if (node instanceof HighLevelStateActionDefinition)
+         return "Controller State Action";
       if (node instanceof ArmActionDefinition armActionDefinition)
          return armActionDefinition.getTaskspaceTrajectoryMode() == ArmActionTaskspaceTrajectoryMode.SCREW_PRIMITIVE
                 ? "Screw Trajectory Action" : "Arm Action";
