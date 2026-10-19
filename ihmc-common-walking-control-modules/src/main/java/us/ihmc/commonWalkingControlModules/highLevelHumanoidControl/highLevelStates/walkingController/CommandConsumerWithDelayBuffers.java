@@ -167,14 +167,6 @@ public class CommandConsumerWithDelayBuffers
       {
          LogTools.error("Skipping %s because priority queue is full. %d/%d".formatted(command.getClass().getSimpleName(), priorityQueue.size(), NUMBER_OF_COMMANDS_TO_QUEUE));
          return;
-
-//         if(command.isDelayedExecutionSupported())
-//         {
-//            LogTools.error("Skipping %s because priority queue is full. %d/%d".formatted(command.getClass().getSimpleName(), priorityQueue.size(), NUMBER_OF_COMMANDS_TO_QUEUE));
-//            return;
-//         }
-//         // Streaming samples such as velocity: the command that just arrived is the one to run.
-//         clearDelayQueue((Class<? extends Command<?, ?>>) command.getClass());
       }
       RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(command.getClass());
       C commandCopy = (C) recyclingArrayList.add();
