@@ -8,7 +8,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.zulu.ZuluVersion;
-import us.ihmc.zulu.parameters.model.ZuluSimulationCollisionModel;
+import us.ihmc.zulu.parameters.model.ZuluSelectionCollisionModel;
 
 public class ZuluRDXBehaviorTestFacilitator
       extends RDXBehaviorTestFacilitator
@@ -29,7 +29,7 @@ public class ZuluRDXBehaviorTestFacilitator
             null,
             () -> new RDXBaseUI(ZuluRDXBehaviorTestFacilitator.class),
             new WorkspaceResourceDirectory(ZuluRDXBehaviorTestFacilitator.class, "/behaviorTrees"),
-            robotModel -> new ZuluSimulationCollisionModel(robotModel.getJointMap()));
+            robotModel -> new ZuluSelectionCollisionModel(robotModel.getJointMap()));
    }
 
    public static void main(String[] args)

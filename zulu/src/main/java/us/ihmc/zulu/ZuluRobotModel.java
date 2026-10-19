@@ -35,7 +35,6 @@ import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
-import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
@@ -50,7 +49,6 @@ import us.ihmc.zulu.parameters.diagnostic.ZuluDiagnosticParameters;
 import us.ihmc.zulu.parameters.model.ZULUURDFParameters;
 import us.ihmc.zulu.parameters.model.ZuluKSTKinematicsCollisionModel;
 import us.ihmc.zulu.parameters.model.ZuluPhysicalProperties;
-import us.ihmc.zulu.parameters.model.ZuluSimulationCollisionModel;
 import us.ihmc.zulu.parameters.planning.ZuluFootstepPlannerParameters;
 import us.ihmc.zulu.parameters.planning.ZuluLocomotionParameters;
 import us.ihmc.zulu.parameters.planning.ZuluSwingPlannerParameters;
@@ -345,14 +343,6 @@ public class ZuluRobotModel implements DRCRobotModel
    public CoPTrajectoryParameters getCoPTrajectoryParameters()
    {
       return copTrajectoryParameters;
-   }
-
-   @Override
-   public RobotCollisionModel getSimulationRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks)
-   {
-      ZuluSimulationCollisionModel collisionModel = new ZuluSimulationCollisionModel(jointMap);
-      collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
-      return collisionModel;
    }
 
    @Override

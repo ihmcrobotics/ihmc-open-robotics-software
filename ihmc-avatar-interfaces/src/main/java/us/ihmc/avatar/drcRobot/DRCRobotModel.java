@@ -23,8 +23,6 @@ import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.scs2.simulation.collision.Collidable;
-import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -189,23 +187,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    public HighLevelControllerParameters getHighLevelControllerParameters();
 
    default RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
-   {
-      return null;
-   }
-
-   /**
-    * Gets the collision model for this robot to use with {@link us.ihmc.scs2.simulation.physicsEngine.impulseBased.ImpulseBasedPhysicsEngine}.
-
-    * @param helper                    the helper to use when creating the {@link Collidable}s for
-    *                                  generating the collidable masks and groups.
-    * @param robotCollisionMask        the mask for the robot collidables that are supposed to interact
-    *                                  with the environment.
-    * @param environmentCollisionMasks the masks used for the environment collidables needed to create
-    *                                  the collision group for the robot collidables that are to
-    *                                  interact with the environment.
-    * @return the robot collision model used to create the robot's {@link Collidable}s.
-    */
-   default RobotCollisionModel getSimulationRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks)
    {
       return null;
    }
