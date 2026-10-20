@@ -88,6 +88,12 @@ public class ZEDImageSensor extends ImageSensor
    private boolean positionalTrackingEnabled = false;
    private final java.util.LinkedHashMap<Long, RigidBodyTransform> trackedPosesBySequence = new java.util.LinkedHashMap<>();
 
+   /** Valid tracked left-camera pose for the current grab, or null on tracking loss. */
+   protected RigidBodyTransform getTrackedPoseForCurrentGrab()
+   {
+      return getTrackedPoseForSequence(grabSequenceNumber);
+   }
+
    /** Independent SDK left-camera pose for an exact image grab; null if tracking was not valid. */
    public RigidBodyTransform getTrackedPoseForSequence(long sequence)
    {
