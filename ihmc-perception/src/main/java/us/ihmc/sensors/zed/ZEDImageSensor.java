@@ -418,6 +418,7 @@ public class ZEDImageSensor extends ImageSensor
             }
          }
 
+         lastGrabTime = getImageAcquisitionTime(sl_get_image_timestamp(cameraID), lastGrabTime);
          if (!updateSensorFrameForGrab(sl_get_image_timestamp(cameraID)))
             return false;
 
@@ -467,6 +468,12 @@ public class ZEDImageSensor extends ImageSensor
 
       lastGrabFailed = false;
       return true;
+   }
+
+   /** Override for replay streams sharing one sensor-time mapping with auxiliary measurements. */
+   protected Instant getImageAcquisitionTime(long imageTimestamp, Instant wallTime)
+   {
+      return wallTime;
    }
 
    /** Called after acquisition and before immutable image poses are captured. False drops this grab. */
