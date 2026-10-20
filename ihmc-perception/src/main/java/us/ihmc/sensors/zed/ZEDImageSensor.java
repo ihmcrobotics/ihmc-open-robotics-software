@@ -418,6 +418,9 @@ public class ZEDImageSensor extends ImageSensor
             }
          }
 
+         if (!updateSensorFrameForGrab(sl_get_image_timestamp(cameraID)))
+            return false;
+
          // Snapshot this grab's pose after updating tracking, before another grab can change it.
          RigidBodyTransform leftSensorTransformAtGrab = new RigidBodyTransform(leftSensorFrame.getTransformToWorldFrame());
          RigidBodyTransform rightSensorTransformAtGrab = new RigidBodyTransform(rightSensorFrame.getTransformToWorldFrame());
@@ -463,6 +466,12 @@ public class ZEDImageSensor extends ImageSensor
       }
 
       lastGrabFailed = false;
+      return true;
+   }
+
+   /** Called after acquisition and before immutable image poses are captured. False drops this grab. */
+   protected boolean updateSensorFrameForGrab(long imageTimestamp)
+   {
       return true;
    }
 
