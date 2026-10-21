@@ -34,6 +34,42 @@ public class RawImagePublisher implements AutoCloseable
 
    private double publishScale = 1.0;
    private boolean destroyed = false;
+   private boolean imageTimingEnabled = false;
+   private final java.util.Map<String, ImageTiming> imageTimings = new java.util.HashMap<>();
+
+   /** Log per-topic timing summaries every five seconds for standard ROS images only. */
+   public synchronized void setImageTimingEnabled(boolean enabled)
+   {
+      imageTimingEnabled = enabled;
+      imageTimings.clear();
+   }
+
+   private static class ImageTiming
+   {
+      private long windowStart = System.nanoTime();
+      private long count;
+      private double ageSum, downloadSum, packingSum, publishingSum, publishingMax;
+
+      private void record(String topic, long bytes, double age, long download, long packing, long publishing)
+      {
+         count++;
+         ageSum += age;
+         downloadSum += download / 1.0e6;
+         packingSum += packing / 1.0e6;
+         publishingSum += publishing / 1.0e6;
+         publishingMax = Math.max(publishingMax, publishing / 1.0e6);
+         long now = System.nanoTime();
+         if (now - windowStart < 5_000_000_000L)
+            return;
+         LogTools.info(String.format(java.util.Locale.ROOT,
+                                     "Hydra image timing %s: n=%d rate=%.2f Hz bytes=%d entryAgeAvg=%.1f ms CPUAccessAvg=%.1f ms packAvg=%.1f ms publishAvg=%.1f ms publishMax=%.1f ms",
+                                     topic, count, count * 1.0e9 / (now - windowStart), bytes, ageSum / count,
+                                     downloadSum / count, packingSum / count, publishingSum / count, publishingMax));
+         count = 0;
+         ageSum = downloadSum = packingSum = publishingSum = publishingMax = 0.0;
+         windowStart = now;
+      }
+   }
 
    public RawImagePublisher(ROS2Node ros2Node)
    {
@@ -187,11 +223,31 @@ public class RawImagePublisher implements AutoCloseable
          imageToPublish = scaledImage;
       }
 
+      long downloadStart = 0;
+      long packingStart = 0;
+      double entryAgeMilliseconds = 0.0;
+      if (imageTimingEnabled)
+      {
+         entryAgeMilliseconds = java.time.Duration.between(imageToPublish.getAcquisitionTime(), java.time.Instant.now()).toNanos() / 1.0e6;
+         downloadStart = System.nanoTime();
+         // Includes any CPU-image lock wait and lazy GPU download. Packing then reuses this image.
+         imageToPublish.getCpuImageMat();
+         packingStart = System.nanoTime();
+      }
+
       // Pack the Image message
       PerceptionMessageTools.packImageMessage(imageToPublish, sensorFrame.getName(), ros2Image);
 
-      // Publish the image
+      // Publish includes Java serialization and the DDS write call, not receiver delivery.
+      long publishingStart = imageTimingEnabled ? System.nanoTime() : 0;
       publisherMap.publish(imageTopic, ros2Image);
+      if (imageTimingEnabled)
+      {
+         long publishingEnd = System.nanoTime();
+         imageTimings.computeIfAbsent(imageTopic.getName(), key -> new ImageTiming())
+                     .record(imageTopic.getName(), ros2Image.getData().size(), entryAgeMilliseconds,
+                             packingStart - downloadStart, publishingStart - packingStart, publishingEnd - publishingStart);
+      }
 
       // Close stuff
       if (scaledImage != null)
