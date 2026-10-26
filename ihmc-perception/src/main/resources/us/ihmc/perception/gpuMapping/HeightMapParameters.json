@@ -1,10 +1,10 @@
 {
   "title" : "HeightMapParameters",
-  "Drift offset filter" : true,
+  "Drift offset filter" : false,
   "Flying points filter" : false,
   "Log height map" : false,
   "Min Depth To Accept" : {
-    "value" : 0.4,
+    "value" : 0.2,
     "lowerBound" : 0.0,
     "upperBound" : 2.0
   },
