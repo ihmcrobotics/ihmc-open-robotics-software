@@ -1,12 +1,10 @@
 package us.ihmc.rdx.simulation.environment.object.objects;
 
-import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
-import us.ihmc.rdx.tools.RDXModelLoader;
 
 public class RDXLabFloorObject extends RDXEnvironmentObject
 {
@@ -19,8 +17,7 @@ public class RDXLabFloorObject extends RDXEnvironmentObject
    public RDXLabFloorObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = RDXModelLoader.load("environmentObjects/labFloor/LabFloor.g3dj");
-      setRealisticModel(realisticModel);
+      loadRealisticModel("environmentObjects/labFloor/LabFloor.g3dj");
 
       // LabFloor.g3dj is a unit plane scaled to 20 x 20 m
       double sizeX = 20.0;

@@ -59,7 +59,8 @@ public class RDX3DScene
       this.sceneLevelsToRender = new TreeSet<>();
       Collections.addAll(this.sceneLevelsToRender, sceneLevelsToRender);
 
-      int maxBones = 0; // We aren't using bones
+      // Mixamo personAnimated.glb has 67 joints; 0 made the PBR shader reject the skin.
+      int maxBones = 80;
       PBRShaderConfig pbrColorShaderConfig = new PBRShaderConfig();
       pbrColorShaderConfig.numBones = maxBones;
       pbrColorShaderConfig.numPointLights = 10; // Increase max

@@ -124,6 +124,8 @@ public class RDXTeleoperationManager extends RDXPanel
    private final RDXWholeBodyIKManager wholeBodyIKManager;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
    private RDXHumanoidDemoPoses demoPoses;
+   /** When set, a Reset Sim button is shown under Trajectory time. Left unset for the real robot. */
+   private Runnable resetSimulationCallback;
 
    /** This tracker should be shared with the sub-managers to keep the state consistent. */
    private final ControllerStatusTracker controllerStatusTracker;
@@ -713,6 +715,16 @@ public class RDXTeleoperationManager extends RDXPanel
                                                      armManager,
                                                      teleoperationParameters.getPelvisMaximumHeight());
       trajectoryTimeSlider.renderImGuiWidget();
+      if (resetSimulationCallback != null)
+      {
+         ImGui.text("Simulation:");
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Reset Sim")))
+         {
+            RDXBaseUI.pushNotification("Resetting RL simulation...");
+            resetSimulationCallback.run();
+         }
+      }
       renderWholeBodyWidgets();
       locomotionManager.renderImGuiWidgets();
       armManager.renderImGuiWidgets();
@@ -961,5 +973,14 @@ public class RDXTeleoperationManager extends RDXPanel
    public RDXArmManager getArmManager()
    {
       return armManager;
+   }
+
+   /**
+    * Shows a "Simulation: [Reset Sim]" row under Trajectory time. The callback reinitializes the
+    * RL simulation. Leave this unset for the real robot so the control stays hidden.
+    */
+   public void setResetSimulationCallback(Runnable resetSimulationCallback)
+   {
+      this.resetSimulationCallback = resetSimulationCallback;
    }
 }
