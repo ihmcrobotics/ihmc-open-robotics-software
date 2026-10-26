@@ -13,9 +13,11 @@ import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.perception.filters.DepthImageBodyCollisionFilter;
 import us.ihmc.perception.filters.DepthImageFlyingPointsFilter;
 import us.ihmc.perception.gpuMapping.GpuMappingManager;
@@ -56,6 +58,30 @@ public class GpuMappingThread extends RepeatingTaskThread
                            ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                            ActiveMappingParameterToolBox activeMappingParameterToolBox)
    {
+      this(ros2Node,
+           syncedRobotModel.getRobotModel().getSimpleRobotName(),
+           syncedRobotModel.getFullRobotModel().getRootBody(),
+           syncedRobotModel.getReferenceFrames(),
+           robotCollisionModel,
+           rawImageCollection,
+           controllerFootstepQueueMonitor,
+           activeMappingParameterToolBox);
+   }
+
+   /**
+    * For callers that pose the robot themselves, such as a log player, rather than from a {@link ROS2SyncedRobotModel}.
+    * The robot must be posed before each call to {@link #processDepthImage(RawImage)}, since the body collision filter
+    * reads the current state of {@code rootBody}'s subtree.
+    */
+   public GpuMappingThread(ROS2Node ros2Node,
+                           String simpleRobotName,
+                           RigidBodyBasics rootBody,
+                           HumanoidReferenceFrames referenceFrames,
+                           RobotCollisionModel robotCollisionModel,
+                           BlockingQueue<RawImage> rawImageCollection,
+                           ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
+                           ActiveMappingParameterToolBox activeMappingParameterToolBox)
+   {
       super(GpuMappingThread.class.getSimpleName());
       this.rawImageCollection = rawImageCollection;
       this.heightMapParameters = activeMappingParameterToolBox.getHeightMapParameters();
@@ -66,17 +92,17 @@ public class GpuMappingThread extends RepeatingTaskThread
       publishTerrainMap = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_TERRAIN_MAP);
 
       // At the highest level pass in the reference frames for the specific robot
-      ReferenceFrame leftFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
-      ReferenceFrame rightFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.RIGHT);
+      ReferenceFrame leftFootFrame = referenceFrames.getSoleFrame(RobotSide.LEFT);
+      ReferenceFrame rightFootFrame = referenceFrames.getSoleFrame(RobotSide.RIGHT);
       // TODO we don't have a great way to setup the height map if we are using more then one sensor
       // This will make the height map not appear correct cause the center is wrong
-      ReferenceFrame heightMapCenterFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
+      ReferenceFrame heightMapCenterFrame = referenceFrames.getSteppingCameraFrame();
 
       filteredDepthPublisher = ros2Node.createPublisher(PerceptionAPI.STEPPING_REALSENSE_DEPTH_FILTERED);
 
-      bodyCollisionFilter = new DepthImageBodyCollisionFilter(robotCollisionModel, syncedRobotModel.getFullRobotModel().getRootBody());
+      bodyCollisionFilter = new DepthImageBodyCollisionFilter(robotCollisionModel, rootBody);
       flyingPointsFilter = new DepthImageFlyingPointsFilter(activeMappingParameterToolBox.getDepthImageFilteringParameters());
-      gpuMappingManager = new GpuMappingManager(syncedRobotModel.getRobotModel().getSimpleRobotName(),
+      gpuMappingManager = new GpuMappingManager(simpleRobotName,
                                                 ros2Node,
                                                 leftFootFrame,
                                                 rightFootFrame,
@@ -92,70 +118,7 @@ public class GpuMappingThread extends RepeatingTaskThread
       try
       {
          RawImage depthImage = rawImageCollection.take();
-
-         // We can get the transform to world from the image and use that to get the desired camera frames
-         RigidBodyTransformReadOnly transformToWorld = depthImage.getTransformToWorld();
-         ReferenceFrame cameraFrameInWorld = new FixedReferenceFrame("FrameInWorld", ReferenceFrame.getWorldFrame(), transformToWorld);
-         ZUpFrame cameraZUpFrameInWorld = new ZUpFrame(cameraFrameInWorld, "ZUpFrameInWorld");
-         // Need to update this due to how its implemented, other the transform to world will be all zeros
-         cameraZUpFrameInWorld.update();
-
-         // Get everything we need from the image
-         GpuMat latestDepthImage = depthImage.getGpuImageMat();
-         CameraIntrinsics depthIntrinsicsCopy = depthImage.getIntrinsicsCopy();
-         GpuMat filteredDepthImage = new GpuMat(latestDepthImage.size(), latestDepthImage.type());
-
-         // Process body collisions
-         bodyCollisionFilter.process(latestDepthImage, filteredDepthImage, depthIntrinsicsCopy, cameraFrameInWorld);
-
-         if (heightMapParameters.getFlyingPointsFilter())
-         {
-            GpuMat depthImageNoFlyingPoints = new GpuMat(filteredDepthImage.size(), filteredDepthImage.type());
-            flyingPointsFilter.applyFilter(filteredDepthImage, depthImageNoFlyingPoints, depthIntrinsicsCopy);
-            depthImageNoFlyingPoints.copyTo(filteredDepthImage);
-
-            CompressionType compressionType;
-            BytePointer bytePointer;
-
-            compressionType = CompressionType.PNG;
-            Mat cpuDepthImage = new Mat();
-            bytePointer = new BytePointer();
-            depthImageNoFlyingPoints.download(cpuDepthImage);
-            OpenCVTools.compressImagePNG(cpuDepthImage, bytePointer);
-            cpuDepthImage.close();
-
-            ImageMessage imageMessage = filteredDepthImageMessage;
-            imageMessage.getData().clear();
-            PerceptionMessageTools.packImageMessage(depthImage, bytePointer, compressionType, imageMessage);
-            filteredDepthPublisher.publish(imageMessage);
-
-            bytePointer.close();
-
-            depthImageNoFlyingPoints.close();
-         }
-
-         // Update height map
-         synchronized (terrainMapLock)
-         {
-            gpuMappingManager.update(filteredDepthImage, depthIntrinsicsCopy, cameraFrameInWorld, cameraZUpFrameInWorld);
-         }
-
-         // Publish the updated maps if demanded
-         if (publishHeightMap.isDemanded())
-            gpuMappingManager.publishHeightMap();
-         if (publishHeightMapToController.isDemanded())
-            gpuMappingManager.publishHeightMapForController();
-         if (publishTerrainMap.isDemanded())
-            gpuMappingManager.publishTerrainMap();
-
-         // Chunked map is only published if it's enabled by the height map parameters
-         if (publishChunkMap.isDemanded())
-         {
-            gpuMappingManager.updateChunkedMap();
-            gpuMappingManager.publishChunkedMap();
-         }
-
-         filteredDepthImage.close();
+         processDepthImage(depthImage);
          depthImage.release();
       }
       catch (InterruptedException ignored)
@@ -165,6 +128,76 @@ public class GpuMappingThread extends RepeatingTaskThread
       {
          LogTools.error(e);
       }
+   }
+
+   /**
+    * Filters the depth image and updates and publishes the maps. Does not release {@code depthImage}.
+    */
+   public void processDepthImage(RawImage depthImage)
+   {
+      // We can get the transform to world from the image and use that to get the desired camera frames
+      RigidBodyTransformReadOnly transformToWorld = depthImage.getTransformToWorld();
+      ReferenceFrame cameraFrameInWorld = new FixedReferenceFrame("FrameInWorld", ReferenceFrame.getWorldFrame(), transformToWorld);
+      ZUpFrame cameraZUpFrameInWorld = new ZUpFrame(cameraFrameInWorld, "ZUpFrameInWorld");
+      // Need to update this due to how its implemented, other the transform to world will be all zeros
+      cameraZUpFrameInWorld.update();
+
+      // Get everything we need from the image
+      GpuMat latestDepthImage = depthImage.getGpuImageMat();
+      CameraIntrinsics depthIntrinsicsCopy = depthImage.getIntrinsicsCopy();
+      GpuMat filteredDepthImage = new GpuMat(latestDepthImage.size(), latestDepthImage.type());
+
+      // Process body collisions
+      bodyCollisionFilter.process(latestDepthImage, filteredDepthImage, depthIntrinsicsCopy, cameraFrameInWorld);
+
+      if (heightMapParameters.getFlyingPointsFilter())
+      {
+         GpuMat depthImageNoFlyingPoints = new GpuMat(filteredDepthImage.size(), filteredDepthImage.type());
+         flyingPointsFilter.applyFilter(filteredDepthImage, depthImageNoFlyingPoints, depthIntrinsicsCopy);
+         depthImageNoFlyingPoints.copyTo(filteredDepthImage);
+
+         CompressionType compressionType;
+         BytePointer bytePointer;
+
+         compressionType = CompressionType.PNG;
+         Mat cpuDepthImage = new Mat();
+         bytePointer = new BytePointer();
+         depthImageNoFlyingPoints.download(cpuDepthImage);
+         OpenCVTools.compressImagePNG(cpuDepthImage, bytePointer);
+         cpuDepthImage.close();
+
+         ImageMessage imageMessage = filteredDepthImageMessage;
+         imageMessage.getData().clear();
+         PerceptionMessageTools.packImageMessage(depthImage, bytePointer, compressionType, imageMessage);
+         filteredDepthPublisher.publish(imageMessage);
+
+         bytePointer.close();
+
+         depthImageNoFlyingPoints.close();
+      }
+
+      // Update height map
+      synchronized (terrainMapLock)
+      {
+         gpuMappingManager.update(filteredDepthImage, depthIntrinsicsCopy, cameraFrameInWorld, cameraZUpFrameInWorld);
+      }
+
+      // Publish the updated maps if demanded
+      if (publishHeightMap.isDemanded())
+         gpuMappingManager.publishHeightMap();
+      if (publishHeightMapToController.isDemanded())
+         gpuMappingManager.publishHeightMapForController();
+      if (publishTerrainMap.isDemanded())
+         gpuMappingManager.publishTerrainMap();
+
+      // Chunked map is only published if it's enabled by the height map parameters
+      if (publishChunkMap.isDemanded())
+      {
+         gpuMappingManager.updateChunkedMap();
+         gpuMappingManager.publishChunkedMap();
+      }
+
+      filteredDepthImage.close();
    }
 
    public HeightMapData getLatestHeightMapData()
