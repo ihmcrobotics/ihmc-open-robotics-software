@@ -31,6 +31,8 @@ import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.function.Consumer;
+import java.util.function.DoubleBinaryOperator;
+import java.util.function.DoubleSupplier;
 
 public class RDXBallAndArrowPosePlacement implements RenderableProvider
 {
@@ -52,6 +54,13 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    private final Notification placedNotification = new Notification();
    private Runnable onStartPositionPlacement;
    private Runnable onEndPositionPlacement;
+   /**
+    * Optional height of a horizontal plane to pick on instead of the rendered scene.
+    * Keeps X and Y steady when the height provider moves the sphere.
+    */
+   private DoubleSupplier pickPlaneHeightSupplier;
+   /** Optional height for the placed position from its X and Y. NaN keeps the picked height */
+   private DoubleBinaryOperator positionHeightProvider;
 
    public void create(Color color)
    {
@@ -118,11 +127,22 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    {
       if (placingGoal && input.isWindowHovered())
       {
-         Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
+         Point3DReadOnly pickPointInWorld;
+         if (pickPlaneHeightSupplier == null)
+            pickPointInWorld = input.getPickPointInWorld();
+         else
+            pickPointInWorld = input.getGroundPickPointInWorld(pickPlaneHeightSupplier.getAsDouble());
 
          if (placingPosition)
          {
-            sphere.transform.setTranslation(pickPointInWorld.getX32(), pickPointInWorld.getY32(), pickPointInWorld.getZ32());
+            float z = pickPointInWorld.getZ32();
+            if (positionHeightProvider != null)
+            {
+               double providedHeight = positionHeightProvider.applyAsDouble(pickPointInWorld.getX(), pickPointInWorld.getY());
+               if (!Double.isNaN(providedHeight))
+                  z = (float) providedHeight;
+            }
+            sphere.transform.setTranslation(pickPointInWorld.getX32(), pickPointInWorld.getY32(), z);
             LibGDXTools.toEuclid(sphere.transform, tempSpherePosition);
 
             goalPoseForReading.setToZero();
@@ -300,6 +320,16 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    public void setOnEndPositionPlacement(Runnable onEndPositionPlacement)
    {
       this.onEndPositionPlacement = onEndPositionPlacement;
+   }
+
+   public void setPickPlaneHeightSupplier(DoubleSupplier pickPlaneHeightSupplier)
+   {
+      this.pickPlaneHeightSupplier = pickPlaneHeightSupplier;
+   }
+
+   public void setPositionHeightProvider(DoubleBinaryOperator positionHeightProvider)
+   {
+      this.positionHeightProvider = positionHeightProvider;
    }
 
    public Notification getPlacedNotification()
