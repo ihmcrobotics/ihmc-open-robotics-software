@@ -8,7 +8,10 @@ import imgui.flag.ImGuiCol;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.RawImage;
 import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
@@ -17,6 +20,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.robotics.time.TimeTools;
 
+import java.nio.ShortBuffer;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Deque;
@@ -70,6 +74,17 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
 
    private final boolean enableColorImageRendering;
    private boolean switchBackToColor = false;
+
+   // CPU copy of the rendered depth image, used to look up point cloud heights
+   private static final int MAX_HEIGHT_QUERY_PIXELS = 250000;
+   private short[] latestDepthData = new short[0];
+   private int latestDepthWidth = 0;
+   private int latestDepthHeight = 0;
+   private float latestDepthDiscretization;
+   private double latestDepthFx, latestDepthFy, latestDepthCx, latestDepthCy;
+   private final RigidBodyTransform latestDepthTransform = new RigidBodyTransform();
+   private final Point3D heightQueryPoint = new Point3D();
+   private double[] heightQueryResults = new double[64];
 
    public RDXRawImagePointCloudVisualizer(String title)
    {
@@ -192,6 +207,9 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
       pointCloudRenderer.setDefaultPointColor(defaultColor[0], defaultColor[1], defaultColor[2], 1.0f);
       pointCloudRenderer.setColoringMethod(ColoringMethod.values()[coloringMethod.get()]);
 
+      if (depthImage.getOpenCVType() == opencv_core.CV_16UC1)
+         copyDepthImageForHeightQueries(depthImage);
+
       // Update the mesh
       if (colorImage == null)
          pointCloudRenderer.updateMesh(depthImage);
@@ -207,6 +225,75 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
       {
          clearExpiredHistory(colorImageHistory, historyLength.get());
       }
+   }
+
+   private void copyDepthImageForHeightQueries(RawImage depthImage)
+   {
+      Mat depthMat = depthImage.getCpuImageMat();
+      if (depthMat == null || !depthMat.isContinuous())
+         return;
+
+      int size = depthImage.getWidth() * depthImage.getHeight();
+      if (latestDepthData.length < size)
+         latestDepthData = new short[size];
+      ShortBuffer depthBuffer = depthMat.createBuffer();
+      depthBuffer.get(latestDepthData, 0, size);
+
+      latestDepthWidth = depthImage.getWidth();
+      latestDepthHeight = depthImage.getHeight();
+      latestDepthDiscretization = depthImage.getDepthDiscretization();
+      latestDepthFx = depthImage.getFocalLengthX();
+      latestDepthFy = depthImage.getFocalLengthY();
+      latestDepthCx = depthImage.getPrincipalPointX();
+      latestDepthCy = depthImage.getPrincipalPointY();
+      latestDepthTransform.set(depthImage.getTransformToWorld());
+   }
+
+   /**
+    * Median world Z of the latest point cloud points within the radius of the given world XY.
+    * Returns NaN when there is no point cloud there.
+    */
+   public double getPointCloudHeight(double x, double y, double radius)
+   {
+      if (latestDepthWidth == 0)
+         return Double.NaN;
+
+      // Skip pixels on big images to keep this cheap enough to call every frame
+      int stride = (int) Math.ceil(Math.sqrt((double) (latestDepthWidth * latestDepthHeight) / MAX_HEIGHT_QUERY_PIXELS));
+      double radiusSquared = radius * radius;
+      int numberOfResults = 0;
+
+      // Same deprojection as the point cloud shader
+      for (int row = 0; row < latestDepthHeight; row += stride)
+      {
+         for (int column = 0; column < latestDepthWidth; column += stride)
+         {
+            int depthValue = latestDepthData[row * latestDepthWidth + column] & 0xFFFF;
+            if (depthValue == 0)
+               continue;
+
+            double depthInMeters = depthValue * latestDepthDiscretization;
+            heightQueryPoint.set(depthInMeters,
+                                 -(column - latestDepthCx) / latestDepthFx * depthInMeters,
+                                 -(row - latestDepthCy) / latestDepthFy * depthInMeters);
+            latestDepthTransform.transform(heightQueryPoint);
+
+            double dx = heightQueryPoint.getX() - x;
+            double dy = heightQueryPoint.getY() - y;
+            if (dx * dx + dy * dy > radiusSquared)
+               continue;
+
+            if (numberOfResults == heightQueryResults.length)
+               heightQueryResults = Arrays.copyOf(heightQueryResults, 2 * numberOfResults);
+            heightQueryResults[numberOfResults++] = heightQueryPoint.getZ();
+         }
+      }
+
+      if (numberOfResults == 0)
+         return Double.NaN;
+
+      Arrays.sort(heightQueryResults, 0, numberOfResults);
+      return heightQueryResults[numberOfResults / 2];
    }
 
    private RawImage findClosest(RawImage targetImage, List<RawImage> imageHistory)
