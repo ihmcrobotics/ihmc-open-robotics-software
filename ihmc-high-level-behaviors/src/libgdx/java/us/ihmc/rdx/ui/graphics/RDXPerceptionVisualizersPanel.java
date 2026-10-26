@@ -45,7 +45,9 @@ public class RDXPerceptionVisualizersPanel extends RDXPanel implements RDXRender
    public void removeVisualizer(RDXVisualizer visualizer)
    {
       visualizers.remove(visualizer);
-      queueRemoveChild(visualizer.getPanel());
+      RDXPanel panel = visualizer.getPanel();
+      if (panel != null)
+         queueRemoveChild(panel);
    }
 
    public void create(RDXBaseUI baseUI)

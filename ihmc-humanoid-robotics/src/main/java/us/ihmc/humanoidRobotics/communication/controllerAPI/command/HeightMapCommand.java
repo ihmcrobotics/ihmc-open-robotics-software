@@ -5,16 +5,17 @@ import perception_msgs.HeightMapMessageForController;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.log.LogTools;
+
+import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
 
 public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMessageForController>
 {
-   /* By default, use the capacity defined in HeightMapMessage.msg */
-   private static final int DEFAULT_CAPACITY = new HeightMapMessageForController().getHeights().capacity();
-
    private long sequenceId;
 
    /* List of heights indexed by key. See HeightMapTools for definition of key */
-   private final TFloatArrayList heights = new TFloatArrayList(DEFAULT_CAPACITY);
+   private final TFloatArrayList heights = new TFloatArrayList();
    /* Zero-indexed key corresponding to the center of the height map */
    private int centerIndex;
    /* Number of cells along each axis of the height map */
@@ -28,13 +29,9 @@ public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMess
    /* Convenience fields for the height map dimensions */
    private double minX, maxX, minY, maxY;
 
-   public HeightMapCommand()
-   {
-      for (int i = 0; i < DEFAULT_CAPACITY; i++)
-      {
-         heights.add(0.0f);
-      }
-   }
+   private final Inflater inflater = new Inflater();
+   private byte[] compressedCells = new byte[0];
+   private byte[] cells = new byte[0];
 
    @Override
    public void clear()
@@ -51,14 +48,56 @@ public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMess
       this.mapSize = message.getWidthInMeters();
       this.gridCenter.set(message.getGridCenterX(), message.getGridCenterY());
 
-      for (int i = 0; i < message.getHeights().size(); i++)
-      {
-         // Calculate cell height
-         float cellHeight = message.getHeights().get(i);
-         heights.set(i, cellHeight);
-      }
+      heights.resetQuick();
+      decompressHeights(message);
 
       updateGridDimensions();
+   }
+
+   private void decompressHeights(HeightMapMessageForController message)
+   {
+      int cellCount = cellsPerAxis * cellsPerAxis;
+      int compressedSize = message.getCompressedHeights().size();
+      if (compressedCells.length < compressedSize)
+         compressedCells = new byte[compressedSize];
+      if (cells.length < 2 * cellCount)
+         cells = new byte[2 * cellCount];
+      for (int i = 0; i < compressedSize; i++)
+         compressedCells[i] = message.getCompressedHeights().get(i);
+
+      int size = 0;
+      inflater.reset();
+      inflater.setInput(compressedCells, 0, compressedSize);
+      try
+      {
+         while (size < 2 * cellCount && !inflater.finished())
+         {
+            int inflated = inflater.inflate(cells, size, 2 * cellCount - size);
+            if (inflated == 0 && inflater.needsInput())
+               break;
+            size += inflated;
+         }
+      }
+      catch (DataFormatException e)
+      {
+         LogTools.error("Corrupted height map {}: {}", message.getSequenceId(), e.getMessage());
+      }
+
+      if (size != 2 * cellCount)
+      {
+         LogTools.error("Height map {} has {} bytes of cells, expected {}", message.getSequenceId(), size, 2 * cellCount);
+         for (int i = 0; i < cellCount; i++)
+            heights.add(Float.NaN);
+         return;
+      }
+
+      float offset = message.getHeightOffset();
+      float resolution = message.getHeightResolution();
+      for (int i = 0; i < cellCount; i++)
+      {
+         short value = (short) ((cells[2 * i] & 0xFF) | (cells[2 * i + 1] << 8));
+         heights.add(value == HeightMapMessageForController.NO_DATA_VALUE ? Float.NaN : offset + resolution * value);
+      }
    }
 
    @Override
@@ -82,6 +121,7 @@ public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMess
    @Override
    public void set(HeightMapCommand other)
    {
+      this.sequenceId = other.sequenceId;
       this.centerIndex = other.centerIndex;
       this.cellsPerAxis = other.cellsPerAxis;
       this.cellSize = other.cellSize;

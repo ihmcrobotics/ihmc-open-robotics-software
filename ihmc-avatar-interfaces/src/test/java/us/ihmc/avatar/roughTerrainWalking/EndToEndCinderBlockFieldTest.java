@@ -264,7 +264,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       setupSimulation(cinderBlockFieldEnvironment);
       ImpulseBasedPhysicsEngine physicsEngine = (ImpulseBasedPhysicsEngine) simulationTestHelper.getSimulationConstructionSet().getPhysicsEngine();
       ContactParameters contactParameters = ContactParameters.defaultIneslasticContactParameters(true);
-      contactParameters.setCoefficientOfFriction(0.80);
+      contactParameters.setCoefficientOfFriction(1.2);
       contactParameters.setCoulombMomentFrictionRatio(0.6);
       physicsEngine.setGlobalContactParameters(contactParameters);
       simulationTestHelper.start();

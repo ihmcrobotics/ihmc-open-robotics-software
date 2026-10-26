@@ -8,7 +8,7 @@
           "markerSize": 0.2032,
           "translationMarkerToMainBody": [0.03, 0.09, -0.105],
           "yawPitchRollMarkerToMainBody": [3.1415, 0.0, 3.1415],
-          "modelFileName": "environmentObjects/door/doorLeverHandle/DoorLeverHandle.g3dj"
+          "modelFileName": "environmentObjects/door_handle/door_handle.glb"
         }
       ]
     }

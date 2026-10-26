@@ -29,7 +29,7 @@ import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static us.ihmc.zed.ZEDTools.throwOnError;
 import static us.ihmc.zed.global.zed.*;
@@ -41,7 +41,8 @@ public class ZEDImageSensor extends ImageSensor
       ZEDJavaAPINativeLibrary.load();
    }
 
-   private static final AtomicInteger nextStreamingPort = new AtomicInteger(30000);
+   /** Argus cannot open two GMSL cameras at once; a concurrent sl_open_camera times out in libnvargus_socketclient. */
+   private static final Object START_LOCK = new Object();
 
    public static final int LEFT_COLOR_IMAGE_KEY = 0;
    public static final int RIGHT_COLOR_IMAGE_KEY = 1;
@@ -62,7 +63,8 @@ public class ZEDImageSensor extends ImageSensor
 
    // sl_enable_streaming related
    private int bitrate;
-   private final int localStreamingPort = nextStreamingPort.getAndAdd(2);
+   // Even port so the ZED SDK can use port+1; random to avoid clashes with the logger / other cameras
+   private final int localStreamingPort = ThreadLocalRandom.current().nextInt(15000, 30000) * 2;
    private int fps;
 
    private final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
@@ -250,6 +252,14 @@ public class ZEDImageSensor extends ImageSensor
 
    @Override
    protected boolean startSensor()
+   {
+      synchronized (START_LOCK)
+      {
+         return startSensorLocked();
+      }
+   }
+
+   private boolean startSensorLocked()
    {
       try
       {

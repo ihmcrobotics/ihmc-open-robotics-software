@@ -10,7 +10,7 @@ git clone --recurse-submodules https://github.com/carnegierobotics/multisense_ro
 
 Then, run the `startMultisense.sh` script.
 
-The container and build will be resused. To reset the container, run `# docker rm mapsense` and run the script again.
+The container and build will be reused. To reset the container, run `# docker rm multisense` and run the script again.
 
 Reference the Confluence page for more:
 https://confluence.ihmc.us/display/PER/MultiSense+SL

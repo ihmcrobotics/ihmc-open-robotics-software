@@ -14,6 +14,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -103,10 +104,15 @@ public class HexapodHighLevelControlManager
    {
       controllerCoreCommandList.clear();
       FeedbackControlCommandList ret = new FeedbackControlCommandList();
-      
+
       ret.addCommand(bodySpatialManager.getSpatialFeedbackControlCommand());
       ret.addCommand(stepController.getFeedbackControlTemplate());
 
       return ret;
+   }
+
+   public YoGraphicGroupDefinition getSCS2YoGraphics()
+   {
+      return stepController.getSCS2YoGraphics();
    }
 }

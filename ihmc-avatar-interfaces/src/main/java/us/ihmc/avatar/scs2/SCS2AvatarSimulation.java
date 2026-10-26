@@ -109,6 +109,34 @@ public class SCS2AvatarSimulation
          simulationConstructionSet.waitUntilVisualizerFullyUp();
    }
 
+   /**
+    * Reinitializes the state estimator with legacy behavior (restore last stored / provided root pose).
+    */
+   public void reinitializeStateEstimatorFromRobot()
+   {
+      if (estimatorThread == null)
+      {
+         LogTools.warn("Cannot reinitialize state estimator: estimator thread is not available.");
+         return;
+      }
+
+      estimatorThread.requestReinitializeEstimator();
+   }
+
+   /**
+    * Reinitializes the state estimator so mid-feet is at the world origin (translation only).
+    */
+   public void reinitializeStateEstimatorToWorldOrigin()
+   {
+      if (estimatorThread == null)
+      {
+         LogTools.warn("Cannot reinitialize state estimator to world origin: estimator thread is not available.");
+         return;
+      }
+
+      estimatorThread.requestReinitializeEstimatorToWorldOrigin();
+   }
+
    public void destroy()
    {
       if (hasBeenDestroyed)

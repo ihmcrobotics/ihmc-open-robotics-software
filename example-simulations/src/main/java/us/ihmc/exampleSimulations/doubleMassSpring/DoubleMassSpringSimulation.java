@@ -1,20 +1,24 @@
 package us.ihmc.exampleSimulations.doubleMassSpring;
 
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
+import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.SimulationSessionControls;
 
 public class DoubleMassSpringSimulation
 {
 
    public DoubleMassSpringSimulation()
    {
-      DoubleMassSpringRobot robot = new DoubleMassSpringRobot();
-      DoubleMassSpringController controller = new DoubleMassSpringController(robot);
+      DoubleMassSpringRobotDefinition robotDefinition = new DoubleMassSpringRobotDefinition();
 
-      robot.setController(controller);
+      SimulationSession simulationSession = new SimulationSession();
+      simulationSession.addRobot(robotDefinition);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-      scs.setDT(0.0001, 100);
-      scs.startOnAThread();
+      SimulationSessionControls simulationSessionControls = simulationSession.getSimulationSessionControls();
+      simulationSessionControls.setDT(0.0001);
+      simulationSessionControls.setBufferRecordTickPeriod(100);
+
+      SessionVisualizer.startSessionVisualizer(simulationSession);
    }
 
    public static void main(String[] args)

@@ -11,6 +11,7 @@ import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLoggerOld;
+import us.ihmc.avatar.logging.SCS2YoGraphicLogTools;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -350,7 +351,9 @@ public class HumanoidKinematicsSimulation
       if (kinematicsSimulationParameters.getLogToFile())
       {
          YoGraphicGroupDefinition definitions = new YoGraphicGroupDefinition("SCS1Graphics", YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
-         intraprocessYoVariableLogger = new IntraprocessYoVariableLoggerOld(List.of(new RegistrySendBufferBuilder(registry, fullRobotModel.getElevator(), definitions)),
+         intraprocessYoVariableLogger = new IntraprocessYoVariableLoggerOld(List.of(new RegistrySendBufferBuilder(registry,
+                                                                                                                    fullRobotModel.getElevator(),
+                                                                                                                    SCS2YoGraphicLogTools.toYoGraphicsData(definitions))),
                                                                             0.01,
                                                                             getClass().getSimpleName());
          if (intraprocessYoVariableLogger.create())
@@ -366,7 +369,7 @@ public class HumanoidKinematicsSimulation
          // Some robots have four bar linkages and need the `getSubtreeJointsIncludingFourBars` call
          yoVariableServer.setMainRegistry(registry,
                                           MultiBodySystemMissingTools.getSubtreeJointsIncludingFourBars(fullRobotModel.getElevator()),
-                                          definitions);
+                                          SCS2YoGraphicLogTools.toYoGraphicsData(definitions));
          yoVariableServer.start();
          LogTools.info("YoVariable server started.");
       }

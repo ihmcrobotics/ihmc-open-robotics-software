@@ -50,7 +50,7 @@ public class RDXEnvironmentBuilder extends RDXPanel
    private final RDX3DPanel panel3D;
    private final RDXPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
 
-   private final TreeSet<String> environmentFileNames = new TreeSet<>();
+   private final TreeSet<String> environmentFileNames = new TreeSet<>(RDXEnvironmentBuilder::compareFileNames);
    private final Point3D tempIntersection = new Point3D();
    private final Point3D tempTranslation = new Point3D();
    private final Quaternion tempOrientation = new Quaternion();
@@ -192,6 +192,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
       ImGui.separator();
       ImGui.text("Selected Object: " + (selectedObject == null ? "" : (selectedObject.getTitleCasedName() + " " + selectedObject.getObjectIndex())));
+      if (selectedObject != null)
+         selectedObject.renderImGuiWidgets();
       ImGui.text("Highlighted Object: " + (intersectedObject == null ? "" : (intersectedObject.getTitleCasedName() + " " + intersectedObject.getObjectIndex())));
 
       if (ImGui.button("Delete selected object") && selectedObject != null || ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
@@ -365,6 +367,26 @@ public class RDXEnvironmentBuilder extends RDXPanel
       }
    }
 
+   /**
+    * When enabled, left-click picks objects in the 3D view and the pose gizmo can move the selection.
+    */
+   public void setInputsEnabled(boolean enabled)
+   {
+      inputsEnabled.set(enabled);
+   }
+
+   public boolean getInputsEnabled()
+   {
+      return inputsEnabled.get();
+   }
+
+   public void selectObject(RDXEnvironmentObject object)
+   {
+      updateObjectSelected(selectedObject, object);
+      if (selectedObject != null)
+         pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
+   }
+
    public void addObject(RDXEnvironmentObject environmentObject)
    {
       allObjects.add(environmentObject);
@@ -445,5 +467,52 @@ public class RDXEnvironmentBuilder extends RDXPanel
    public ArrayList<RDXEnvironmentObject> getAllObjects()
    {
       return allObjects;
+   }
+
+   /** Alphabetical order, with digit runs compared as numbers so 2 comes before 10. */
+   private static int compareFileNames(String left, String right)
+   {
+      int i = 0;
+      int j = 0;
+      while (i < left.length() && j < right.length())
+      {
+         if (Character.isDigit(left.charAt(i)) && Character.isDigit(right.charAt(j)))
+         {
+            int leftStart = i;
+            int rightStart = j;
+            while (i < left.length() && Character.isDigit(left.charAt(i)))
+               i++;
+            while (j < right.length() && Character.isDigit(right.charAt(j)))
+               j++;
+            int numberComparison = compareNumericText(left.substring(leftStart, i), right.substring(rightStart, j));
+            if (numberComparison != 0)
+               return numberComparison;
+         }
+         else
+         {
+            int characterComparison = Character.compare(Character.toLowerCase(left.charAt(i)), Character.toLowerCase(right.charAt(j)));
+            if (characterComparison != 0)
+               return characterComparison;
+            i++;
+            j++;
+         }
+      }
+      int lengthComparison = Integer.compare(left.length() - i, right.length() - j);
+      return lengthComparison != 0 ? lengthComparison : left.compareTo(right);
+   }
+
+   private static int compareNumericText(String left, String right)
+   {
+      int leftIndex = 0;
+      int rightIndex = 0;
+      while (leftIndex < left.length() - 1 && left.charAt(leftIndex) == '0')
+         leftIndex++;
+      while (rightIndex < right.length() - 1 && right.charAt(rightIndex) == '0')
+         rightIndex++;
+      int lengthComparison = Integer.compare(left.length() - leftIndex, right.length() - rightIndex);
+      if (lengthComparison != 0)
+         return lengthComparison;
+      int digitComparison = left.substring(leftIndex).compareTo(right.substring(rightIndex));
+      return digitComparison != 0 ? digitComparison : Integer.compare(left.length(), right.length());
    }
 }

@@ -1,11 +1,15 @@
 package us.ihmc.exampleSimulations.doubleMassSpring;
 
-import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.scs2.definition.controller.ControllerInput;
+import us.ihmc.scs2.definition.controller.ControllerOutput;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.definition.state.interfaces.OneDoFJointStateBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class DoubleMassSpringController implements RobotController
+public class DoubleMassSpringController implements Controller
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -20,11 +24,15 @@ public class DoubleMassSpringController implements RobotController
    private final YoDouble b1 = new YoDouble("b1", registry);
    private final YoDouble b2 = new YoDouble("b2", registry);
 
-   private final DoubleMassSpringRobot robot;
+   private final OneDoFJointReadOnly x1Joint, x2Joint;
+   private final OneDoFJointStateBasics x1Output, x2Output;
 
-   public DoubleMassSpringController(DoubleMassSpringRobot robot)
+   public DoubleMassSpringController(ControllerInput controllerInput, ControllerOutput controllerOutput)
    {
-      this.robot = robot;
+      x1Joint = (OneDoFJointReadOnly) controllerInput.getInput().findJoint("x1");
+      x2Joint = (OneDoFJointReadOnly) controllerInput.getInput().findJoint("x2");
+      x1Output = controllerOutput.getOneDoFJointOutput("x1");
+      x2Output = controllerOutput.getOneDoFJointOutput("x2");
 
       this.kSpring.set(1.0);
 
@@ -50,12 +58,6 @@ public class DoubleMassSpringController implements RobotController
    public String getName()
    {
       return registry.getName();
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return getName();
    }
 
    @Override
@@ -87,7 +89,7 @@ public class DoubleMassSpringController implements RobotController
       // This controller achieves control of the x2 mass through control of x1 mass.
       // Very similar to a series elastic actuator.
       // In order for this to work, k1 and b1 must be much larger than k2 and b2.
-      x1Des.set(k2.getDoubleValue() * (x2Des.getDoubleValue() - robot.getX2()) - b2.getDoubleValue() * robot.getX2Dot());
+      x1Des.set(k2.getDoubleValue() * (x2Des.getDoubleValue() - x2Joint.getQ()) - b2.getDoubleValue() * x2Joint.getQd());
 
       controlMassOnePosition();
    }
@@ -95,18 +97,18 @@ public class DoubleMassSpringController implements RobotController
    private void controlMassOnePosition()
    {
       // Standard PD controller on mass one.
-      double x1FeedbackForce = k1.getDoubleValue() * (x1Des.getDoubleValue() - robot.getX1()) - b1.getDoubleValue() * robot.getX1Dot();
-      robot.addX1Force(x1FeedbackForce);
+      double x1FeedbackForce = k1.getDoubleValue() * (x1Des.getDoubleValue() - x1Joint.getQ()) - b1.getDoubleValue() * x1Joint.getQd();
+      x1Output.addEffort(x1FeedbackForce);
    }
 
    private void doPassiveSpringsControl()
    {
       // These are the forces from the passive springs. One connected from x1 to ground, one from x1 to x2, and one from x2 to ground.
-      double x1PassiveForce = -2.0 * kSpring.getDoubleValue() * robot.getX1() + kSpring.getDoubleValue() * robot.getX2();
-      double x2PassiveForce = -2.0 * kSpring.getDoubleValue() * robot.getX2() + kSpring.getDoubleValue() * robot.getX1();
+      double x1PassiveForce = -2.0 * kSpring.getDoubleValue() * x1Joint.getQ() + kSpring.getDoubleValue() * x2Joint.getQ();
+      double x2PassiveForce = -2.0 * kSpring.getDoubleValue() * x2Joint.getQ() + kSpring.getDoubleValue() * x1Joint.getQ();
 
-      robot.setX1Force(x1PassiveForce);
-      robot.setX2Force(x2PassiveForce);
+      x1Output.setEffort(x1PassiveForce);
+      x2Output.setEffort(x2PassiveForce);
    }
 
    private enum ControlMode

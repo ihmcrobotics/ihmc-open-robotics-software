@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui.interactable;
 import com.badlogic.gdx.graphics.Color;
 import controller_msgs.*;
 import ihmc_common_msgs.QueueableMessage;
-import ihmc_common_msgs.SO3TrajectoryMessage;
 import ihmc_common_msgs.TrajectoryPoint1DMessage;
 import imgui.ImGui;
 import imgui.type.ImInt;
@@ -13,7 +12,6 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
@@ -27,7 +25,6 @@ import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -377,15 +374,16 @@ public class RDXHumanoidDoFsWidgets
          neckJointAngleWidgets[i].renderImGuiWidget();
       }
       ImGui.popItemWidth();
+      receiveRobotConfigurationData();
+      updateDesiredRobotNeck();
       if (ImGui.button(labels.get("Send to Robot")))
       {
-         receiveRobotConfigurationData();
-         ros2ControllerHelper.publishToController(HumanoidMessageTools.createHeadJointspaceTaskspaceTrajectoryMessage(syncedRobot.getReferenceFrames(),
-                                                                                                                      neckJointNamesArray,
-                                                                                                                      neckJointWidgetValues,
-                                                                                                                      teleoperationParameters.getTrajectoryTime()));
+
+         ros2ControllerHelper.publishToController(HumanoidMessageTools.createHeadHybridTrajectoryMessage(desiredRobot.getDesiredFullRobotModel().getHead().getBodyFixedFrame(),
+                                                                                                         desiredRobot.getDesiredFullRobotModel().getChest().getBodyFixedFrame(),
+                                                                                                         neckJointWidgetValues,
+                                                                                                         teleoperationParameters.getTrajectoryTime()));
       }
-      updateDesiredRobotNeck();
    }
 
    private void renderChestWidgets()

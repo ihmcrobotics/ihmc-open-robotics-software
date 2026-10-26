@@ -172,6 +172,14 @@ public class SCS2StateEstimatorDebugVariables implements Controller
    }
 
    @Override
+   public boolean isResetSupported()
+   {
+      // All internal state is either a YoVariable (restored automatically on session reset) or a
+      // calculator that is fully recomputed every doControl() tick; nothing here goes stale.
+      return true;
+   }
+
+   @Override
    public YoRegistry getYoRegistry()
    {
       return registry;

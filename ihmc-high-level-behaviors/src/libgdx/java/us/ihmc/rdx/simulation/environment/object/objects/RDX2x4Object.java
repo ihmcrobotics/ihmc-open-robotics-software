@@ -1,13 +1,11 @@
 package us.ihmc.rdx.simulation.environment.object.objects;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.tools.RDXModelLoader;
 
 public class RDX2x4Object extends RDXEnvironmentObject
 {
@@ -17,8 +15,7 @@ public class RDX2x4Object extends RDXEnvironmentObject
    public RDX2x4Object()
    {
       super(NAME, FACTORY);
-      Model realisticModel = RDXModelLoader.load("environmentObjects/debris/2x4.g3dj");
-      setRealisticModel(realisticModel);
+      loadRealisticModel("environmentObjects/debris/2x4.g3dj");
 
       double sizeX = 0.2;
       double sizeY = 0.2;

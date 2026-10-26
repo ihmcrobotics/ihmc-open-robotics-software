@@ -27,7 +27,6 @@ import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.sensors.CameraIntrinsics;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -36,7 +35,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
@@ -92,9 +90,7 @@ public class YOLOv8Model
 
    public YOLOv8Model(URL modelBaseDirectory)
    {
-      // Get name & onnx file path
-      String[] path = modelBaseDirectory.getPath().split(Pattern.quote(File.separator));
-      modelName = path[path.length - 1];
+      modelName = YOLOv8Tools.modelNameFromDirectory(modelBaseDirectory);
 
       URL classNamesFileURL = YOLOv8Tools.getClassNamesFile(modelBaseDirectory);
       URL onnxFileURL = YOLOv8Tools.getONNXFile(modelBaseDirectory);

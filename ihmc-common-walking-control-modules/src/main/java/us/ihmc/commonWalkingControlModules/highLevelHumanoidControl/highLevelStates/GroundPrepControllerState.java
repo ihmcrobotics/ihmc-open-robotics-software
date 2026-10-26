@@ -9,8 +9,6 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.commons.lists.PairList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -30,22 +28,19 @@ public class GroundPrepControllerState extends HighLevelControllerState
    private final YoBoolean reinitialize = new YoBoolean("groundPrepReinitialize", registry);
    private final YoBoolean continuousUpdate = new YoBoolean("groundPrepContinuousUpdate", registry);
    private final YoDouble splineStartTime = new YoDouble("groundPrepSplineStartTime", registry);
-   private final YoDouble timeToPrepareForGround = new YoDouble("timeToPrepareForGround", registry);
+   private final YoDouble timeToMoveInGroundPrep = new YoDouble("timeToMoveInGroundPrep", registry);
    private final YoDouble minimumTimeDoneWithGroundPrep = new YoDouble("minimumTimeDoneWithGroundPrep", registry);
-   private final JointDesiredOutputListReadOnly highLevelControlOutput;
 
    private final DoubleProvider timeProvider;
 
    public GroundPrepControllerState(OneDoFJointBasics[] controlledJoints,
                                     HighLevelControllerParameters highLevelControllerParameters,
-                                    JointDesiredOutputListReadOnly highLevelControlOutput,
                                     DoubleProvider timeProvider)
    {
       super(controllerState, highLevelControllerParameters, controlledJoints);
-      this.highLevelControlOutput = highLevelControlOutput;
       this.timeProvider = timeProvider;
 
-      this.timeToPrepareForGround.set(highLevelControllerParameters.getTimeToMoveInStandPrep());
+      this.timeToMoveInGroundPrep.set(highLevelControllerParameters.getTimeToMoveInGroundPrep());
 
       WholeBodySetpointParameters groundPrepParameters = highLevelControllerParameters.getGroundPrepParameters();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
@@ -77,6 +72,19 @@ public class GroundPrepControllerState extends HighLevelControllerState
       this.minimumTimeDoneWithGroundPrep.set(minimumTimeDoneWithGroundPrep);
    }
 
+   /**
+    * Sets the ground-prep spline duration used on the next initialize / reinitialize.
+    */
+   public void setTimeToMoveInGroundPrep(double timeToMoveInGroundPrep)
+   {
+      this.timeToMoveInGroundPrep.set(timeToMoveInGroundPrep);
+   }
+
+   public void requestReinitialize()
+   {
+      reinitialize.set(true);
+   }
+
    @Override
    public void onEntry()
    {
@@ -97,17 +105,12 @@ public class GroundPrepControllerState extends HighLevelControllerState
          OneDoFJointBasics joint = jointsData.get(jointIndex).getLeft();
          TrajectoryData trajectoryData = jointsData.get(jointIndex).getRight();
 
-         JointDesiredOutputReadOnly jointDesiredOutput = highLevelControlOutput.getJointDesiredOutput(joint);
-         double startAngle;
-         if (jointDesiredOutput != null && jointDesiredOutput.hasDesiredPosition())
-            startAngle = jointDesiredOutput.getDesiredPosition();
-         else
-            startAngle = joint.getQ();
-
-         trajectoryData.getInitialJointConfiguration().set(startAngle);
+         // Start from the measured pose. Previous desireds (e.g. AvatarMimic) can sit far from
+         // actual under different gains; commanding those desireds with ground-prep gains jerks.
+         trajectoryData.getInitialJointConfiguration().set(joint.getQ());
       }
 
-      trajectory.setCubic(0.0, timeToPrepareForGround.getDoubleValue(), 0, 0, 1, 0);
+      trajectory.setCubic(0.0, timeToMoveInGroundPrep.getDoubleValue(), 0, 0, 1, 0);
    }
 
    @Override
@@ -130,7 +133,7 @@ public class GroundPrepControllerState extends HighLevelControllerState
          initializeSplines(time);
       }
 
-      double timeInTrajectory = MathTools.clamp(time - splineStartTime.getValue(), 0.0, timeToPrepareForGround.getDoubleValue());
+      double timeInTrajectory = MathTools.clamp(time - splineStartTime.getValue(), 0.0, timeToMoveInGroundPrep.getDoubleValue());
 
       trajectory.compute(timeInTrajectory);
       double alphaPosition = trajectory.getValue();
@@ -147,7 +150,7 @@ public class GroundPrepControllerState extends HighLevelControllerState
          JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
          lowLevelJointData.clear();
 
-         if (timeInTrajectory < timeToPrepareForGround.getDoubleValue())
+         if (timeInTrajectory < timeToMoveInGroundPrep.getDoubleValue())
          {
             double jointPosition = ((1 - alphaPosition) * q_initial) + (alphaPosition * q_final);
             double jointVelocity = alphaVelocity * (q_final - q_initial);
@@ -172,7 +175,7 @@ public class GroundPrepControllerState extends HighLevelControllerState
    @Override
    public boolean isDone(double timeInState)
    {
-      return timeInState > (timeToPrepareForGround.getDoubleValue() + minimumTimeDoneWithGroundPrep.getDoubleValue());
+      return timeInState > (timeToMoveInGroundPrep.getDoubleValue() + minimumTimeDoneWithGroundPrep.getDoubleValue());
    }
 
    @Override

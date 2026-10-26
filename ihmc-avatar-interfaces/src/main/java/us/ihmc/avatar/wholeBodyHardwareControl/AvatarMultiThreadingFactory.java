@@ -8,7 +8,7 @@ import us.ihmc.affinity.Processor;
 import us.ihmc.avatar.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
-import us.ihmc.avatar.logging.IntraprocessYoVariableLoggerOld;
+import us.ihmc.avatar.logging.SCS2YoGraphicLogTools;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -40,12 +39,10 @@ import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.time.ThreadTimer;
@@ -64,6 +61,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,7 +69,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 /**
  * This class is responsible for creating the estimator, controller, and optionally step generator and IK streaming modules.
@@ -147,7 +144,6 @@ public class AvatarMultiThreadingFactory
    private final AvatarAffinityInterface affinity;
    private final boolean useRealtimeThreads;
    private final boolean useMultiThreading;
-   private final boolean useLocalLogging;
    private final YoVariableServer yoVariableServer;
 
    public AvatarMultiThreadingFactory(DRCRobotModel robotModel,
@@ -160,7 +156,6 @@ public class AvatarMultiThreadingFactory
                                       AvatarAffinityInterface affinity,
                                       boolean useRealtimeThreads,
                                       boolean useMultiThreading,
-                                      boolean useLocalLogging,
                                       MonotonicTime period,
                                       double masterThreadDt,
                                       TimestampProvider monotonicTimeProvider,
@@ -177,7 +172,6 @@ public class AvatarMultiThreadingFactory
       this.affinity = affinity;
       this.useRealtimeThreads = useRealtimeThreads;
       this.useMultiThreading = useMultiThreading;
-      this.useLocalLogging = useLocalLogging;
       this.rootRegistry = registry;
       this.yoVariableServer = yoVariableServer;
 
@@ -210,10 +204,10 @@ public class AvatarMultiThreadingFactory
       // Set the root registry as the YoVariableServer's main registry
       yoVariableServer.setMainRegistry(rootRegistry,
                                        masterFullRobotModel.getRootJoint().subtreeList(),
-                                       new YoGraphicGroupDefinition(rootRegistry.getName()));
+                                       SCS2YoGraphicLogTools.toYoGraphicsData(new YoGraphicGroupDefinition(rootRegistry.getName())));
 
       // Add estimator thread registry directly to the YoVariableServer (since it is in a separate thread)
-      yoVariableServer.addRegistry(avatarEstimator.getYoRegistry(), avatarEstimator.getSCS2YoGraphics());
+      yoVariableServer.addRegistry(avatarEstimator.getYoRegistry(), SCS2YoGraphicLogTools.toYoGraphicsData(avatarEstimator.getSCS2YoGraphics()));
    }
 
    public AvatarMultiThreadingManager buildThreadsAndThreadingManager()
@@ -245,7 +239,7 @@ public class AvatarMultiThreadingFactory
       threadingManager.get().addPostMasterThreadRunnable(()->HumanoidRobotContextTools.updateRobot(masterFullRobotModel, masterContext.getProcessedJointData()));
 
       // Set up local logging
-      configureLoggingSettings();
+      LogTools.info("[Logging] Logging remote to logger server");
 
       return threadingManager.get();
    }
@@ -312,7 +306,7 @@ public class AvatarMultiThreadingFactory
                                                                                  false);
 
       // Add controller registry directly to the YoVariableServer (since it is in a separate thread)
-      yoVariableServer.addRegistry(avatarController.getYoVariableRegistry(), avatarController.getSCS2YoGraphics());
+      yoVariableServer.addRegistry(avatarController.getYoVariableRegistry(), SCS2YoGraphicLogTools.toYoGraphicsData(avatarController.getSCS2YoGraphics()));
 
       // Set up the task and thread for the controller
       setupControllerTaskAndThread(avatarController, masterFullRobotModel, yoVariableServer);
@@ -334,7 +328,8 @@ public class AvatarMultiThreadingFactory
 
       avatarStepGenerator.set(stepGenerator);
 
-      yoVariableServer.addRegistry(avatarStepGenerator.get().getYoVariableRegistry(), avatarStepGenerator.get().getSCS2YoGraphics());
+      yoVariableServer.addRegistry(avatarStepGenerator.get().getYoVariableRegistry(),
+                                   SCS2YoGraphicLogTools.toYoGraphicsData(avatarStepGenerator.get().getSCS2YoGraphics()));
 
       setupStepGeneratorTaskAndThread(masterRobotModel,
                                       stepGenerator,
@@ -357,7 +352,8 @@ public class AvatarMultiThreadingFactory
                                                                             ikStreamingParameters));
 
       if (yoVariableServer != null && avatarIKStreaming.get().isYoVariableServerEnabled())
-         yoVariableServer.addRegistry(avatarIKStreaming.get().getYoVariableRegistry(), avatarIKStreaming.get().getSCS2YoGraphics());
+         yoVariableServer.addRegistry(avatarIKStreaming.get().getYoVariableRegistry(),
+                                      SCS2YoGraphicLogTools.toYoGraphicsData(avatarIKStreaming.get().getSCS2YoGraphics()));
 
       setupIKStreamingTaskAndThread(avatarIKStreaming.get(), yoVariableServer);
 
@@ -729,69 +725,6 @@ public class AvatarMultiThreadingFactory
    }
 
    /**
-    * Configures everything needed for a local (on-robot) logging setup, and it will notify the operator
-    * of which logging setup (local or remote) they are currently using
-    */
-   private void configureLoggingSettings()
-   {
-      if (useLocalLogging)
-      {
-         // Setup logger
-         ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
-
-         builders.add(new RegistrySendBufferBuilder(rootRegistry,
-                                                    (YoGraphicGroupDefinition) null));
-
-         builders.add(new RegistrySendBufferBuilder(avatarEstimator.getYoRegistry(),
-                                                    avatarEstimator.getFullRobotModel().getRootJoint().subtreeList(),
-                                                    avatarEstimator.getSCS2YoGraphics()));
-
-         if (avatarController != null)
-         {
-            builders.add(new RegistrySendBufferBuilder(avatarController.getYoVariableRegistry(),
-                                                       avatarController.getSCS2YoGraphics()));
-         }
-
-         if (avatarStepGenerator.hasValue())
-         {
-            builders.add(new RegistrySendBufferBuilder(avatarStepGenerator.get().getYoVariableRegistry(),
-                                                       avatarStepGenerator.get().getSCS2YoGraphics()));
-         }
-         if (avatarIKStreaming.hasValue())
-         {
-            builders.add(new RegistrySendBufferBuilder(avatarIKStreaming.get().getYoVariableRegistry(),
-                                                       avatarIKStreaming.get().getSCS2YoGraphics()));
-         }
-
-         // FIXME add this back when a release of the logger is done.
-         //         builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
-
-         // Logging locally on the robot
-         IntraprocessYoVariableLoggerOld intraprocessYoVariableLogger = new IntraprocessYoVariableLoggerOld(builders,
-                                                                                                            masterRobotModel.getEstimatorDT(),
-                                                                                                      masterRobotModel.getSimpleRobotName().toLowerCase() + getClass().getSimpleName(), masterRobotModel.getLogModelProvider());
-
-         if (intraprocessYoVariableLogger.create())
-         {
-            LogTools.info("[Logging] Logging locally to disk");
-
-            threadingManager.get()
-                            .addPostMasterThreadRunnable(() -> intraprocessYoVariableLogger.update(avatarEstimator.getHumanoidRobotContextData()
-                                                                                                                  .getTimestamp()));
-         }
-         else
-         {
-            LogTools.error("[Logging] Unable to log locally to disk");
-         }
-
-      }
-      else
-      {
-         LogTools.info("[Logging] Logging remote to logger server");
-      }
-   }
-
-   /**
     * External API for adding a custom controller state to the high-level controller
     */
    public void addCustomControlState(HighLevelControllerStateFactory customControllerStateFactory)
@@ -824,12 +757,23 @@ public class AvatarMultiThreadingFactory
    }
 
    /**
-    * External API for adding a high-level controller state that is automatically transitioned into from a previous state (in this case the STAND_PREP
-    * state), given logic that determines the trigger of that transition (in this case STAND_PREP is done, and feet are loaded)
+    * External API for adding a high-level controller state that is transitioned into from STAND_PREP. Automatic transition will be disabled at start up
+    * by default
+    * @param nextControlStateEnum Enum for the high-level controller to transition to
     */
    public void addStandPrepStateTransition(HighLevelControllerName nextControlStateEnum)
    {
-      avatarControllerFactory.addCustomStateTransition(createStandTransitionState(nextControlStateEnum, avatarControllerFactory, true));
+      addStandPrepStateTransition(nextControlStateEnum, false);
+   }
+
+   /**
+    * External API for adding a high-level controller state that is transitioned into from STAND_PREP.
+    * @param nextControlStateEnum Enum for the high-level controller to transition to
+    * @param transitionAutomatically If true, automatic transition is enabled. Else, automatic transition is disabled
+    */
+   public void addStandPrepStateTransition(HighLevelControllerName nextControlStateEnum, boolean transitionAutomatically)
+   {
+      avatarControllerFactory.addCustomStateTransition(createStandTransitionState(nextControlStateEnum, avatarControllerFactory, !transitionAutomatically));
    }
 
    /**

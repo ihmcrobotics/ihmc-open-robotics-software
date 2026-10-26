@@ -7,9 +7,9 @@ import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.footstepStreamingToolboxAPI.FootstepStreamingToolboxInputCommand;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
@@ -106,40 +106,39 @@ public class FootstepStreamingToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2Topic<?> getOutputTopic()
+   public HumanoidROS2Topic<?> getOutputTopic()
    {
       return getOutputTopic(robotName);
    }
 
-   public static ROS2Topic<?> getOutputTopic(String robotName)
+   public static HumanoidROS2Topic<?> getOutputTopic(String robotName)
    {
       return ToolboxAPIs.FOOTSTEP_STREAMING_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2Topic<?> getInputTopic()
+   public HumanoidROS2Topic<?> getInputTopic()
    {
       return getInputTopic(robotName);
    }
 
-   public static ROS2Topic<?> getInputTopic(String robotName)
+   public static HumanoidROS2Topic<?> getInputTopic(String robotName)
    {
       return ToolboxAPIs.FOOTSTEP_STREAMING_TOOLBOX.withRobot(robotName).withInput();
    }
 
    public static ROS2Topic<ToolboxStateMessage> getInputStateTopic(String robotName)
    {
-      return getInputTopic(robotName).withType(ToolboxStateMessage.class);
+      return getInputTopic(robotName).withTypeName(ToolboxStateMessage.class);
    }
 
    public static ROS2Topic<FootstepStreamingToolboxInputMessage> getInputCommandTopic(String robotName)
    {
-      return getInputTopic(robotName).withType(FootstepStreamingToolboxInputMessage.class);
+      return getInputTopic(robotName).withTypeName(FootstepStreamingToolboxInputMessage.class);
    }
 
    public static ROS2Topic<FootstepStreamingToolboxOutputStatus> getOutputStatusTopic(String robotName)
    {
-      // HumanoidROS2Topic.withType() suffixes the topic with the message type name (legacy withTypeName behavior).
-      return getOutputTopic(robotName).withType(FootstepStreamingToolboxOutputStatus.class);
+      return getOutputTopic(robotName).withTypeName(FootstepStreamingToolboxOutputStatus.class);
    }
 }

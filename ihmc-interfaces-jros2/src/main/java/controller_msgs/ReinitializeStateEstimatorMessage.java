@@ -16,17 +16,22 @@ This message is used to request an initialization fo the state estimator.
 # This message is part of the IHMC whole-body controller API.
 # This message is used to request an initialization fo the state estimator.
 
-bool request_reinitialize}</pre>
+bool request_reinitialize
+# When true (with request_reinitialize), reinitialize so mid-feet is at world origin.
+# Corresponds to the reinitializeStateEstimatorToWorldOrigin YoVariable.
+bool reinitialize_to_world_origin}</pre>
 */
 public class ReinitializeStateEstimatorMessage implements ROS2Message<ReinitializeStateEstimatorMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ReinitializeStateEstimatorMessage_";
 
    private boolean request_reinitialize_;
+   private boolean reinitialize_to_world_origin_;
 
    public ReinitializeStateEstimatorMessage()
    {
       request_reinitialize_ = (boolean) false;
+      reinitialize_to_world_origin_ = (boolean) false;
 
    }
 
@@ -42,6 +47,7 @@ public class ReinitializeStateEstimatorMessage implements ROS2Message<Reinitiali
       int initialAlignment = currentAlignment;
 
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // request_reinitialize_
+      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // reinitialize_to_world_origin_
 
       return currentAlignment - initialAlignment;
    }
@@ -50,6 +56,7 @@ public class ReinitializeStateEstimatorMessage implements ROS2Message<Reinitiali
    public void serialize(CDRBuffer buffer)
    {
       buffer.writeBoolean(request_reinitialize_);
+      buffer.writeBoolean(reinitialize_to_world_origin_);
 
    }
 
@@ -57,6 +64,7 @@ public class ReinitializeStateEstimatorMessage implements ROS2Message<Reinitiali
    public void deserialize(CDRBuffer buffer)
    {
       request_reinitialize_ = buffer.readBoolean();
+      reinitialize_to_world_origin_ = buffer.readBoolean();
 
    }
 
@@ -64,6 +72,7 @@ public class ReinitializeStateEstimatorMessage implements ROS2Message<Reinitiali
    public void set(ReinitializeStateEstimatorMessage from)
    {
       request_reinitialize_ = from.request_reinitialize_;
+      reinitialize_to_world_origin_ = from.reinitialize_to_world_origin_;
 
    }
 
@@ -77,6 +86,16 @@ public class ReinitializeStateEstimatorMessage implements ROS2Message<Reinitiali
       this.request_reinitialize_ = request_reinitialize_;
    }
 
+   public boolean getReinitializeToWorldOrigin()
+   {
+      return reinitialize_to_world_origin_;
+   }
+
+   public void setReinitializeToWorldOrigin(boolean reinitialize_to_world_origin_)
+   {
+      this.reinitialize_to_world_origin_ = reinitialize_to_world_origin_;
+   }
+
 
    @Override
    public java.lang.String toString()
@@ -85,6 +104,9 @@ public class ReinitializeStateEstimatorMessage implements ROS2Message<Reinitiali
       builder.append("ReinitializeStateEstimatorMessage {");
       builder.append("request_reinitialize_=");
       builder.append(request_reinitialize_);
+      builder.append(", ");
+      builder.append("reinitialize_to_world_origin_=");
+      builder.append(reinitialize_to_world_origin_);
 
       builder.append("}");
       return builder.toString();

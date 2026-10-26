@@ -64,6 +64,7 @@ public class RDXSCS2Session
    private final RDXRenderableAdapter renderables = new RDXRenderableAdapter(this::getRenderables);
    private final ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
    private final ArrayList<Runnable> additionalImGuiWidgets = new ArrayList<>();
+   private final ArrayList<String> robotsToHide = new ArrayList<>();
    private boolean stoppingSession = false;
    private final StatelessNotification sessionStoppedNotification = new StatelessNotification();
 
@@ -85,7 +86,7 @@ public class RDXSCS2Session
          stopSession();
          waitForSessionToBeStopped();
       }
-      
+
       sessionStartedHandled = false;
 
       this.session = session;
@@ -144,6 +145,9 @@ public class RDXSCS2Session
       robots.clear();
       for (RobotDefinition robotDefinition : session.getRobotDefinitions())
       {
+         if (robotsToHide.contains(robotDefinition.getName()))
+            continue;
+
          RDXSCS2Robot robot = new RDXSCS2Robot(robotDefinition);
          robots.add(robot);
          robot.create(yoManager);
@@ -174,7 +178,7 @@ public class RDXSCS2Session
       showRobotMap.clear();
       for (RobotDefinition robotDefinition : session.getRobotDefinitions())
       {
-         ImBoolean imBoolean = new ImBoolean(true);
+         ImBoolean imBoolean = new ImBoolean(!robotsToHide.contains(robotDefinition.getName()));
          showRobotPairs.add(ImmutablePair.of(imBoolean, robotDefinition.getName()));
          showRobotMap.put(robotDefinition.getName(), imBoolean);
       }
@@ -368,7 +372,7 @@ public class RDXSCS2Session
       }
       ImGui.popItemWidth();
       ImGui.text("In: %d  Out: %d".formatted(yoManager.getInPoint(), yoManager.getOutPoint()));
-      ImGui.checkbox(labels.get("Pause and end of buffer"), pauseAtEndOfBuffer);
+      ImGui.checkbox(labels.get("Pause at end of buffer"), pauseAtEndOfBuffer);
       if (ImGui.checkbox("Run at real-time rate", runAtRealtimeRate))
       {
          session.submitRunAtRealTimeRate(runAtRealtimeRate.get());
@@ -522,6 +526,11 @@ public class RDXSCS2Session
    public ArrayList<Runnable> getAdditionalImGuiWidgets()
    {
       return additionalImGuiWidgets;
+   }
+
+   public ArrayList<String> getRobotsToHide()
+   {
+      return robotsToHide;
    }
 
    public boolean isSessionThreadRunning()

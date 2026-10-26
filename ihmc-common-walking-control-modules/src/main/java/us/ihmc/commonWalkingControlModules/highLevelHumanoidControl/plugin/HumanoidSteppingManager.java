@@ -21,6 +21,7 @@ import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.jros2.AsyncROS2Node;
@@ -38,13 +39,20 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   /**
+    * Null until the first {@link HighLevelStateChangeStatusMessage} is observed. Starting the
+    * controller already in {@code RL_CONTROL} does not emit a transition, so a non-null default
+    * (ordinal 0 / DO_NOTHING) would incorrectly clear walk-to-goal commands every tick.
+    */
    private final YoEnum<HighLevelControllerName> latestHighLevelControllerStatus = new YoEnum<>("LatestHighLevelControllerState",
                                                                                                 registry,
-                                                                                                HighLevelControllerName.class);
+                                                                                                HighLevelControllerName.class,
+                                                                                                true);
 
    private final ContinuousStepGenerator stepGenerator;
    private final PDVelocityBasedGoalReacher goalReacher;
@@ -117,6 +125,7 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
 
       goalReacher = new PDVelocityBasedGoalReacher(referenceFrames.getPelvisZUpFrame(), statusMessageOutputManager, registry);
       commandInputManager.addControllerWaypointGoalCommandConsumer(goalReacher::consumeNewWaypoint);
+      commandInputManager.addAbortWalkingConsumer(abortWalkingCommand -> goalReacher.clear());
       commandInputManager.addControllerWaypointGoalListCommandConsumer(goalReacher::consumeNewWaypointList);
       commandInputManager.addControllerReleaseGoalCommand(goalReacher::consumeReleaseGoalCommand);
    }
@@ -180,15 +189,19 @@ public class HumanoidSteppingManager implements Updatable, SCS2YoGraphicHolder
       for (int i = 0; i < updatables.size(); i++)
          updatables.get(i).update(time);
 
-      if (latestHighLevelControllerStatus.getValue() == HighLevelControllerName.WALKING)
+      HighLevelControllerName highLevelState = latestHighLevelControllerStatus.getValue();
+
+      if (highLevelState == HighLevelControllerName.WALKING)
          stepGenerator.update(time);
 
-      if (latestHighLevelControllerStatus.getValue() == HighLevelControllerName.RL_CONTROL)
+      // Null means we have not observed a transition yet (common when booting directly into RL_CONTROL).
+      // Keep serving walk-to-goal until we know we are in a non-RL state.
+      if (highLevelState == null || highLevelState == HighLevelControllerName.RL_CONTROL)
       {
          goalReacher.update(time);
          VelocityBasedWalkingInputMessage message = goalReacher.getOutputMessage();
          if (message != null)
-            controllerCommandInputManager.submitMessage(goalReacher.getOutputMessage());
+            controllerCommandInputManager.submitMessage(message);
       }
       else
       {

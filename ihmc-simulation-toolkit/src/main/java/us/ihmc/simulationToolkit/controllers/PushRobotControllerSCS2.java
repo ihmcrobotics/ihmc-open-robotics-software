@@ -254,6 +254,22 @@ public class PushRobotControllerSCS2 implements Controller
    }
 
    @Override
+   public void reset()
+   {
+      // pushCondition and delayedPushs live outside YoVariables and would otherwise resume a stale
+      // pending push after the simulation is reset to its initial state.
+      scheduledPushAction.set(null);
+      pushCondition = null;
+      delayedPushs.clear();
+   }
+
+   @Override
+   public boolean isResetSupported()
+   {
+      return true;
+   }
+
+   @Override
    public YoRegistry getYoRegistry()
    {
       return registry;

@@ -69,7 +69,14 @@ float32 com_offset
 bool left_foot_in_contact
 bool right_foot_in_contact
 
-float64 solution_quality -1}</pre>
+float64 solution_quality -1
+
+# True on the last logged frame of a kinematics streaming replay. Missing in old JSON logs means false.
+bool end_replay false
+
+# 0 means no command. Other values select a hand configuration. Missing in old JSON logs means 0.
+int32 left_hand_configuration_command 0
+int32 right_hand_configuration_command 0}</pre>
 */
 public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsToolboxOutputStatus>
 {
@@ -150,6 +157,18 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
    private boolean left_foot_in_contact_;
    private boolean right_foot_in_contact_;
    private double solution_quality_;
+   /**
+      True on the last logged frame of a kinematics streaming replay. Missing in old JSON logs means false.
+   */
+   private boolean end_replay_;
+   /**
+      0 means no command. Other values select a hand configuration. Missing in old JSON logs means 0.
+   */
+   private int left_hand_configuration_command_;
+   /**
+      0 means no command. Other values select a hand configuration. Missing in old JSON logs means 0.
+   */
+   private int right_hand_configuration_command_;
 
    public KinematicsToolboxOutputStatus()
    {
@@ -169,6 +188,9 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
       left_foot_in_contact_ = (boolean) false;
       right_foot_in_contact_ = (boolean) false;
       solution_quality_ = (double) -1;
+      end_replay_ = (boolean) false;
+      left_hand_configuration_command_ = (int) 0;
+      right_hand_configuration_command_ = (int) 0;
 
    }
 
@@ -202,6 +224,9 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // left_foot_in_contact_
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // right_foot_in_contact_
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // solution_quality_
+      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // end_replay_
+      currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // left_hand_configuration_command_
+      currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // right_hand_configuration_command_
 
       return currentAlignment - initialAlignment;
    }
@@ -228,6 +253,9 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
       buffer.writeBoolean(left_foot_in_contact_);
       buffer.writeBoolean(right_foot_in_contact_);
       buffer.writeDouble(solution_quality_);
+      buffer.writeBoolean(end_replay_);
+      buffer.writeInt(left_hand_configuration_command_);
+      buffer.writeInt(right_hand_configuration_command_);
 
    }
 
@@ -253,6 +281,9 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
       left_foot_in_contact_ = buffer.readBoolean();
       right_foot_in_contact_ = buffer.readBoolean();
       solution_quality_ = buffer.readDouble();
+      end_replay_ = buffer.readBoolean();
+      left_hand_configuration_command_ = buffer.readInt();
+      right_hand_configuration_command_ = buffer.readInt();
 
    }
 
@@ -278,6 +309,9 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
       left_foot_in_contact_ = from.left_foot_in_contact_;
       right_foot_in_contact_ = from.right_foot_in_contact_;
       solution_quality_ = from.solution_quality_;
+      end_replay_ = from.end_replay_;
+      left_hand_configuration_command_ = from.left_hand_configuration_command_;
+      right_hand_configuration_command_ = from.right_hand_configuration_command_;
 
    }
 
@@ -411,6 +445,36 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
       this.solution_quality_ = solution_quality_;
    }
 
+   public boolean getEndReplay()
+   {
+      return end_replay_;
+   }
+
+   public void setEndReplay(boolean end_replay_)
+   {
+      this.end_replay_ = end_replay_;
+   }
+
+   public int getLeftHandConfigurationCommand()
+   {
+      return left_hand_configuration_command_;
+   }
+
+   public void setLeftHandConfigurationCommand(int left_hand_configuration_command_)
+   {
+      this.left_hand_configuration_command_ = left_hand_configuration_command_;
+   }
+
+   public int getRightHandConfigurationCommand()
+   {
+      return right_hand_configuration_command_;
+   }
+
+   public void setRightHandConfigurationCommand(int right_hand_configuration_command_)
+   {
+      this.right_hand_configuration_command_ = right_hand_configuration_command_;
+   }
+
 
    @Override
    public java.lang.String toString()
@@ -463,6 +527,12 @@ public class KinematicsToolboxOutputStatus implements ROS2Message<KinematicsTool
       builder.append(right_foot_in_contact_);
       builder.append("solution_quality_=");
       builder.append(solution_quality_);
+      builder.append("end_replay_=");
+      builder.append(end_replay_);
+      builder.append("left_hand_configuration_command_=");
+      builder.append(left_hand_configuration_command_);
+      builder.append("right_hand_configuration_command_=");
+      builder.append(right_hand_configuration_command_);
 
       builder.append("}");
       return builder.toString();

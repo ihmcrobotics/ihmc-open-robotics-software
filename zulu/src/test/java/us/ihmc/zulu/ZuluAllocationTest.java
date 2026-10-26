@@ -24,10 +24,15 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.allocations.AllocationProfiler;
 import us.ihmc.commons.allocations.AllocationRecord;
+import us.ihmc.commonWalkingControlModules.heightPlanning.SplinedHeightTrajectory;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.robotics.geometry.ConvexPolygonConstructorFromInteriorOfRays;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
+import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -90,6 +95,20 @@ public class ZuluAllocationTest
       allocationProfiler.excludeAllocationsInsideMethod(LUDecompositionBase_DDRM.class.getName() + ".decomposeCommonInit");
       allocationProfiler.excludeAllocationsInsideMethod(CholeskyDecompositionCommon_DDRM.class.getName() + ".decompose");
       allocationProfiler.excludeAllocationsInsideMethod(BidiagonalDecompositionRow_DDRM.class.getName() + ".init");
+      allocationProfiler.excludeAllocationsInsideMethod("org.ejml.sparse.csc.decomposition.lu.LuUpLooking_DSCC.initialize");
+      // AsyncROS2Publisher queue slots grow IDL sequences once on first use of each slot.
+      allocationProfiler.excludeAllocationsInsideMethod("us.ihmc.fastddsjava.cdr.idl.IDLObjectSequence.ensureMinCapacity");
+      allocationProfiler.excludeAllocationsInsideMethod("us.ihmc.fastddsjava.cdr.idl.IDLFloatSequence.ensureMinCapacity");
+      allocationProfiler.excludeAllocationsInsideMethod("us.ihmc.fastddsjava.cdr.idl.IDLDoubleSequence.ensureMinCapacity");
+      allocationProfiler.excludeAllocationsInsideMethod("us.ihmc.fastddsjava.cdr.idl.IDLLongSequence.ensureMinCapacity");
+      allocationProfiler.excludeAllocationsInsideMethod("us.ihmc.fastddsjava.cdr.idl.IDLShortSequence.ensureMinCapacity");
+      allocationProfiler.excludeAllocationsInsideMethod("us.ihmc.fastddsjava.cdr.idl.IDLStringSequence.ensureMinCapacity");
+      // Omit objects in expanding recycling array lists
+      allocationProfiler.excludeAllocationsInsideClass(StringStretcher2d.class.getName());
+      allocationProfiler.excludeAllocationsInsideClass(ConvexPolygonScaler.class.getName());
+      allocationProfiler.excludeAllocationsInsideClass(ConvexPolygonConstructorFromInteriorOfRays.class.getName());
+      allocationProfiler.excludeAllocationsInsideClass(WalkingMessageHandler.class.getName());
+      allocationProfiler.excludeAllocationsInsideClass(SplinedHeightTrajectory.class.getName());
 
       // Ignore the following methods as they are related to printouts.
       allocationProfiler.excludeAllocationsInsideMethod(Throwable.class.getName() + ".printStackTrace");
