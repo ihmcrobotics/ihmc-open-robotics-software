@@ -50,8 +50,8 @@ import java.util.regex.Pattern;
 /**
  * Copies RDX environment-builder collisions into the running MuJoCo model.
  * <p>
- * When a visual GLB has a precomputed {@code <stem>_convex.stl} beside it, that hull is the
- * collision mesh. Objects without one keep their box or sphere. Only classes registered in
+ * When a visual GLB has {@code <stem>_collision.stl} beside it, that file is the collision mesh.
+ * Objects without one keep their box or sphere. Only classes registered in
  * {@link RDXInteractableObjectLibrary} are free bodies. Everything else is mocap, so contact
  * cannot move it and it adds no degrees of freedom. Dragging a free object writes its joint
  * pose while it is selected. An
@@ -600,9 +600,9 @@ public class RDXMujocoObjectCollisionSync implements Controller
          return new RDXMujocoCollisionShape(name, convexMesh.getAbsolutePath(), new us.ihmc.euclid.geometry.Pose3D(collisionToWorld),
                                             dynamic, mass, selected);
       }
-      String convexResourcePath = RDXEnvironmentObject.convexCollisionResourcePath(object.getVisualResourcePath());
+      String convexResourcePath = RDXEnvironmentObject.collisionMeshResourcePath(object.getVisualResourcePath());
       if (convexResourcePath != null && warnedMissingHulls.add(convexResourcePath))
-         LogTools.info("No convex hull for {}. Using the primitive collision.", object.getVisualResourcePath());
+         LogTools.info("No collision mesh for {}. Using the primitive collision.", object.getVisualResourcePath());
 
       collisionToWorld.set(object.getObjectTransform());
       collisionToWorld.multiply(object.getCollisionShapeOffset());
