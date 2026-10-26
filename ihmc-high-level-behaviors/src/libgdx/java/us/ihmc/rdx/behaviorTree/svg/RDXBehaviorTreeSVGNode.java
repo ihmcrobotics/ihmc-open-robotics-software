@@ -9,6 +9,7 @@ import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.ArmActionTaskspaceTrajectoryMode;
 import us.ihmc.behaviors.behaviorTree.action.actions.EZGripperActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.HighLevelStateActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.RLWalkActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.SpineActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.WalkActionDefinition;
@@ -211,6 +212,8 @@ public class RDXBehaviorTreeSVGNode
                 ? "Screw Trajectory Action" : "Arm Action";
       if (node instanceof WalkActionDefinition)
          return "Walk Action";
+      if (node instanceof RLWalkActionDefinition)
+         return "RL Walk Action";
       if (node instanceof SpineActionDefinition)
          return "Spine Action";
       if (node instanceof EZGripperActionDefinition)
