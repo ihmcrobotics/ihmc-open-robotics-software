@@ -81,7 +81,6 @@ import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoPhysicsEngine;
-import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParameters;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
@@ -380,16 +379,9 @@ public class SCS2AvatarSimulationFactory
       }
       else if (useMujocoPhysicsEngine.hasValue() && useMujocoPhysicsEngine.get())
       {
-         // MuJoCo requires its internal timestep to match the SCS2 session DT, otherwise sim time
-         // diverges from wall time. Start from caller-supplied parameters if present, then
-         // override timestep so ordering of setSimulationDT vs setMujocoSimulationParameters
-         // doesn't matter.
-         // Copy into a mutable instance so we can override the timestep without mutating the
-         // caller-supplied (read-only) parameters.
-         MujocoSimulationParameters mujocoParameters = new MujocoSimulationParameters();
-         if (mujocoSimulationParameters.hasValue())
-            mujocoParameters.set(mujocoSimulationParameters.get());
-         mujocoParameters.setTimestep(simulationDT.get());
+         if (!mujocoSimulationParameters.hasValue())
+            throw new RuntimeException("The MuJoCo physics engine needs simulation parameters; call setMujocoSimulationParameters.");
+         MujocoSimulationParametersReadOnly mujocoParameters = mujocoSimulationParameters.get();
          physicsEngineFactory = (inertialFrame, rootRegistry) -> new MujocoPhysicsEngine(inertialFrame, rootRegistry, mujocoParameters);
       }
       else
