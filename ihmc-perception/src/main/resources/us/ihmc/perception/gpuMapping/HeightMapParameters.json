@@ -4,7 +4,7 @@
   "Flying points filter" : false,
   "Log height map" : false,
   "Min Depth To Accept" : {
-    "value" : 0.2,
+    "value" : 0.4,
     "lowerBound" : 0.0,
     "upperBound" : 2.0
   },
@@ -69,7 +69,7 @@
     "upperBound" : 4.5
   },
   "ICP filter" : true,
-  "ICP rotation enabled" : true,
+  "ICP rotation enabled" : false,
   "ICP max iterations" : 8,
   "ICP min correspondence count" : 50,
   "ICP max horizontal drift" : {
@@ -81,6 +81,11 @@
     "value" : 0.03,
     "lowerBound" : 0.0,
     "upperBound" : 0.5
+  },
+  "ICP max distance" : {
+    "value" : 1.0,
+    "lowerBound" : 0.0,
+    "upperBound" : 5.0
   },
   "ICP variance per meter of correction" : {
     "value" : 0.1,

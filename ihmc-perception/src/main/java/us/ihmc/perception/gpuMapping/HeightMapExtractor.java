@@ -731,7 +731,8 @@ public class HeightMapExtractor
                           (float) groundHeightGuess,
                           (float) parameters.getMinDepthToAccept(),
                           (float) parameters.getICPOutlierDistanceThreshold(),
-                          (float) parameters.getICPVariancePerMeterOfCorrection()};
+                          (float) parameters.getICPVariancePerMeterOfCorrection(),
+                          (float) parameters.getICPMaxDistance()};
    }
 
    public HeightMapData getHeightMapData()

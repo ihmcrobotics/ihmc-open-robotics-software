@@ -200,6 +200,15 @@ public class GpuMappingThread extends RepeatingTaskThread
       filteredDepthImage.close();
    }
 
+   /**
+    * Resets the height map to the feet before the next depth image is processed.
+    * Callers processing images themselves use this rather than {@link PerceptionAPI#RESET_HEIGHT_MAP}, which may arrive late.
+    */
+   public void requestReset()
+   {
+      gpuMappingManager.requestReset();
+   }
+
    public HeightMapData getLatestHeightMapData()
    {
       synchronized (terrainMapLock)

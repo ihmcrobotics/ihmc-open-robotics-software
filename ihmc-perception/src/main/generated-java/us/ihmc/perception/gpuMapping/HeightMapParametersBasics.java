@@ -118,6 +118,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.icpOutlierDistanceThreshold, icpOutlierDistanceThreshold);
    }
 
+   default void setICPMaxDistance(double icpMaxDistance)
+   {
+      set(HeightMapParameters.icpMaxDistance, icpMaxDistance);
+   }
+
    default void setICPVariancePerMeterOfCorrection(double icpVariancePerMeterOfCorrection)
    {
       set(HeightMapParameters.icpVariancePerMeterOfCorrection, icpVariancePerMeterOfCorrection);

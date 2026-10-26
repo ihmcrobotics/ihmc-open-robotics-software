@@ -120,6 +120,11 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(icpOutlierDistanceThreshold);
    }
 
+   default double getICPMaxDistance()
+   {
+      return get(icpMaxDistance);
+   }
+
    default double getICPVariancePerMeterOfCorrection()
    {
       return get(icpVariancePerMeterOfCorrection);

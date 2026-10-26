@@ -26,6 +26,7 @@ extern "C"
 #define MIN_DEPTH_TO_ACCEPT 21
 #define ICP_OUTLIER_DISTANCE_THRESHOLD 22
 #define ICP_VARIANCE_PER_METER_OF_CORRECTION 23
+#define ICP_MAX_DISTANCE 24
 
 // Sentinel written to a global-map variance cell to mark it as holding no real data.
 // Real variances are always non-negative, so this is unambiguous everywhere it's checked.
@@ -290,6 +291,7 @@ __global__ void icpCorrespondenceKernel(const float* __restrict__ localMeanMap, 
     const int localCenterIndex = static_cast<int>(params[LOCAL_CENTER_INDEX]);
     const int globalCenterIndex = static_cast<int>(params[GLOBAL_CENTER_INDEX]);
     const float outlierDistanceThreshold = params[ICP_OUTLIER_DISTANCE_THRESHOLD];
+    const float maxDistance = params[ICP_MAX_DISTANCE];
 
     if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
         return;
@@ -300,6 +302,15 @@ __global__ void icpCorrespondenceKernel(const float* __restrict__ localMeanMap, 
 
     // No point landed in this local cell, nothing to correspond
     if (localMeanF == 0.0f)
+        return;
+
+    // Stereo depth gets less accurate with distance from the sensor, and far cells would pull the correction toward their
+    // error, so leave them out. The local map is centered on the sensor in XY, and its heights are in the world frame, the
+    // same as the sensor's height in the ground to world translation.
+    float2 localCoordinate = indices_to_coordinate(localCell, make_float2(0.0f, 0.0f), cellSize, localCenterIndex);
+    float heightBelowSensor = groundToWorldTranslation[11] - localMeanF;
+    float distanceSquared = localCoordinate.x * localCoordinate.x + localCoordinate.y * localCoordinate.y + heightBelowSensor * heightBelowSensor;
+    if (distanceSquared > maxDistance * maxDistance)
         return;
 
     // The newest sensor data is treated as the fixed reference this frame; x, y come from the cell's
