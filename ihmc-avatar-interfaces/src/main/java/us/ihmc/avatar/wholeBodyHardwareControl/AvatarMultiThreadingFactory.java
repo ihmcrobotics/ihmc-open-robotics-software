@@ -262,7 +262,10 @@ public class AvatarMultiThreadingFactory
       avatarEstimatorThreadFactory.setGravity(GRAVITY);
       //      if (secondaryEstimatorFactory != null)
       //         avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryEstimatorFactory);
-      if (Boolean.getBoolean("ihmc.estimator.externalPose.enabled"))
+      boolean alexExternalPoseDefault = "alex".equalsIgnoreCase(robotModel.getSimpleRobotName());
+      boolean externalPoseEnabled = Boolean.parseBoolean(System.getProperty("ihmc.estimator.externalPose.enabled",
+                                                                            Boolean.toString(alexExternalPoseDefault)));
+      if (externalPoseEnabled)
       {
          var communicator = new us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator(
                estimatorAsyncROS2Node, robotModel.getSimpleRobotName());
