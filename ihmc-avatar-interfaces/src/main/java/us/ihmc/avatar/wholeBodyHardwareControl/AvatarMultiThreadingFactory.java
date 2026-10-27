@@ -262,6 +262,16 @@ public class AvatarMultiThreadingFactory
       avatarEstimatorThreadFactory.setGravity(GRAVITY);
       //      if (secondaryEstimatorFactory != null)
       //         avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryEstimatorFactory);
+      if (Boolean.getBoolean("ihmc.estimator.externalPose.enabled"))
+      {
+         var communicator = new us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator(
+               estimatorAsyncROS2Node, robotModel.getSimpleRobotName());
+         estimatorAsyncROS2Node.createSubscriptionSampler(
+               us.ihmc.communication.StateEstimatorAPI.getTopic(ihmc_common_msgs.StampedPosePacket.class, robotModel.getSimpleRobotName()),
+               communicator::receivedPacket);
+         avatarEstimatorThreadFactory.setExternalPelvisCorrectorSubscriber(communicator);
+         LogTools.warn("External pelvis pose corrections enabled for the hardware estimator");
+      }
       StateEstimatorController stateEstimator = avatarEstimatorThreadFactory.getMainStateEstimator();
 
       // Create state estimator from its factory
