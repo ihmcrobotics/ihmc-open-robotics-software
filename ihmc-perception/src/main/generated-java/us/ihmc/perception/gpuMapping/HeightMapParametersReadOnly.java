@@ -120,9 +120,49 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(icpOutlierDistanceThreshold);
    }
 
+   default double getICPMinDistance()
+   {
+      return get(icpMinDistance);
+   }
+
    default double getICPMaxDistance()
    {
       return get(icpMaxDistance);
+   }
+
+   default double getICPNeighborHeightThreshold()
+   {
+      return get(icpNeighborHeightThreshold);
+   }
+
+   default int getICPMinConsistentNeighbors()
+   {
+      return get(icpMinConsistentNeighbors);
+   }
+
+   default int getICPMinPointsPerCell()
+   {
+      return get(icpMinPointsPerCell);
+   }
+
+   default double getICPRobustKernelWidth()
+   {
+      return get(icpRobustKernelWidth);
+   }
+
+   default double getICPMinZCorrection()
+   {
+      return get(icpMinZCorrection);
+   }
+
+   default double getICPMinXYCorrection()
+   {
+      return get(icpMinXYCorrection);
+   }
+
+   default double getICPMinYawCorrectionDegrees()
+   {
+      return get(icpMinYawCorrectionDegrees);
    }
 
    default double getICPVariancePerMeterOfCorrection()

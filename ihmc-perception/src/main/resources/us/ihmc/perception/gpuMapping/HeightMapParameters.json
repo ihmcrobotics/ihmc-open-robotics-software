@@ -19,7 +19,7 @@
     "upperBound" : 10.0
   },
   "Kalman filter prediction noise" : {
-    "value" : 0.01,
+    "value" : 0.005,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -78,17 +78,49 @@
     "upperBound" : 0.1
   },
   "ICP outlier distance threshold" : {
-    "value" : 0.03,
+    "value" : 0.02,
     "lowerBound" : 0.0,
     "upperBound" : 0.5
+  },
+  "ICP min distance" : {
+    "value" : 0.5,
+    "lowerBound" : 0.0,
+    "upperBound" : 5.0
   },
   "ICP max distance" : {
     "value" : 1.0,
     "lowerBound" : 0.0,
     "upperBound" : 5.0
   },
+  "ICP neighbor height threshold" : {
+    "value" : 0.015,
+    "lowerBound" : 0.0,
+    "upperBound" : 0.2
+  },
+  "ICP min consistent neighbors" : 3,
+  "ICP min points per cell" : 10,
+  "ICP robust kernel width" : {
+    "value" : 0.01,
+    "lowerBound" : 0.0,
+    "upperBound" : 0.1
+  },
+  "ICP min Z correction" : {
+    "value" : 0.005,
+    "lowerBound" : 0.0,
+    "upperBound" : 0.05
+  },
+  "ICP min XY correction" : {
+    "value" : 0.01,
+    "lowerBound" : 0.0,
+    "upperBound" : 0.1
+  },
+  "ICP min yaw correction degrees" : {
+    "value" : 0.5,
+    "lowerBound" : 0.0,
+    "upperBound" : 10.0
+  },
   "ICP variance per meter of correction" : {
-    "value" : 0.1,
+    "value" : 0.15,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
