@@ -48,9 +48,9 @@ public class HeightMapExtractor
    private static final float INVALID_CELL_VARIANCE = -1.0f;
    /**
     * [N, sum_xTranslationFromYaw, sum_yTranslationFromYaw, sum_translationFromYawSq, sum_residualX, sum_residualY,
-    * sum_residualZ, sum_yawRhs], see icpCorrespondenceKernel.
+    * sum_residualZ, sum_yawRhs, sum_weight], see icpCorrespondenceKernel.
     */
-   private static final int ICP_ACCUMULATOR_SIZE = 8;
+   private static final int ICP_ACCUMULATOR_SIZE = 9;
 
    private final HeightMapParameters heightMapParameters;
    private final CUstream_st stream;
@@ -221,7 +221,8 @@ public class HeightMapExtractor
          groundToWorldTranslationHostPointer = new FloatPointer(16);
          groundToWorldTranslationDevicePointer = new FloatPointer();
 
-         parametersHostPointer = new FloatPointer(24);
+         // Sized from the parameter array itself, since put() copies the whole array without checking it fits
+         parametersHostPointer = new FloatPointer(populateParameterArray(heightMapParameters, new CameraIntrinsics(), 0.0).length);
          parametersDevicePointer = new FloatPointer();
 
          icpAccumulatorHostPointer = new FloatPointer(ICP_ACCUMULATOR_SIZE);
@@ -440,10 +441,12 @@ public class HeightMapExtractor
             double convergenceZMeters = heightMapParameters.getICPConvergenceZMeters();
             double convergenceYawRadians = Math.toRadians(heightMapParameters.getICPConvergenceYawDegrees());
             double convergenceXYMeters = heightMapParameters.getCellSize();
+            double minZCorrection = heightMapParameters.getICPMinZCorrection();
+            double minXYCorrection = heightMapParameters.getICPMinXYCorrection();
+            double minYawCorrection = Math.toRadians(heightMapParameters.getICPMinYawCorrectionDegrees());
 
             Vector3D totalTranslation = new Vector3D();
             float totalYaw = 0.0f;
-            boolean appliedAnyCorrection = false;
 
             int icpCorrespondenceGridSizeXY = (localCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
             dim3 icpCorrespondenceGridDim = new dim3(icpCorrespondenceGridSizeXY, icpCorrespondenceGridSizeXY, 1);
@@ -453,6 +456,7 @@ public class HeightMapExtractor
                cudaMemsetAsync(icpAccumulatorDevicePointer, 0, (long) ICP_ACCUMULATOR_SIZE * Float.BYTES, stream);
 
                icpCorrespondenceKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
+               icpCorrespondenceKernel.withPointer(tempCountMap.data()).withLong(tempCountMap.step());
                icpCorrespondenceKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
                icpCorrespondenceKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
                icpCorrespondenceKernel.withFloat(heightMapCenter.getX32());
@@ -481,7 +485,6 @@ public class HeightMapExtractor
 
                totalTranslation.add(translation);
                totalYaw += (float) yaw;
-               appliedAnyCorrection = true;
 
                boolean zConverged = Math.abs(translation.getZ()) < convergenceZMeters;
                boolean xyConverged = EuclidCoreTools.norm(translation.getX(), translation.getY()) < convergenceXYMeters;
@@ -493,7 +496,20 @@ public class HeightMapExtractor
 
             icpCorrespondenceGridDim.close();
 
-            if (appliedAnyCorrection)
+            // Sensor noise alone leaves every frame's correction a little off zero, and applying those every frame adds them up into
+            // a drift of their own, so each part of the correction is only applied once it's big enough to be real drift. Drift
+            // smaller than that stays in the map until it grows past it.
+            if (Math.abs(totalTranslation.getZ()) < minZCorrection)
+               totalTranslation.setZ(0.0);
+            if (EuclidCoreTools.norm(totalTranslation.getX(), totalTranslation.getY()) < minXYCorrection)
+            {
+               totalTranslation.setX(0.0);
+               totalTranslation.setY(0.0);
+            }
+            if (Math.abs(totalYaw) < minYawCorrection)
+               totalYaw = 0.0f;
+
+            if (totalTranslation.normSquared() > 0.0 || totalYaw != 0.0f)
             {
                globalMeanMap.copyTo(previousGlobalMeanMap);
                globalVarianceMap.copyTo(previousGlobalVarianceMap);
@@ -732,7 +748,12 @@ public class HeightMapExtractor
                           (float) parameters.getMinDepthToAccept(),
                           (float) parameters.getICPOutlierDistanceThreshold(),
                           (float) parameters.getICPVariancePerMeterOfCorrection(),
-                          (float) parameters.getICPMaxDistance()};
+                          (float) parameters.getICPMaxDistance(),
+                          (float) parameters.getICPMinDistance(),
+                          (float) parameters.getICPNeighborHeightThreshold(),
+                          (float) parameters.getICPMinConsistentNeighbors(),
+                          (float) parameters.getICPMinPointsPerCell(),
+                          (float) parameters.getICPRobustKernelWidth()};
    }
 
    public HeightMapData getHeightMapData()
@@ -822,7 +843,8 @@ public class HeightMapExtractor
 
    private double solvePose2DTransform(FloatPointer icpAccumulatorHostPointer, Vector3DBasics translationToPack, boolean rotationEnabled)
    {
-      float correspondenceCount = icpAccumulatorHostPointer.get(0);
+      // Every sum is weighted (see icpCorrespondenceKernel), so the sum of the weights stands in for the correspondence count
+      float sumWeight = icpAccumulatorHostPointer.get(8);
       float sumXTranslationFromYaw = icpAccumulatorHostPointer.get(1);
       float sumYTranslationFromYaw = icpAccumulatorHostPointer.get(2);
       float sumTranslationFromYawSq = icpAccumulatorHostPointer.get(3);
@@ -831,13 +853,13 @@ public class HeightMapExtractor
       float sumResidualZ = icpAccumulatorHostPointer.get(6);
       float sumYawRhs = icpAccumulatorHostPointer.get(7);
 
-      translationToPack.setZ(-sumResidualZ / correspondenceCount);
+      translationToPack.setZ(-sumResidualZ / sumWeight);
 
       if (rotationEnabled)
       {
-         normalMatrix.set(0, 0, correspondenceCount);
+         normalMatrix.set(0, 0, sumWeight);
          normalMatrix.set(0, 2, -sumYTranslationFromYaw);
-         normalMatrix.set(1, 1, correspondenceCount);
+         normalMatrix.set(1, 1, sumWeight);
          normalMatrix.set(1, 2, sumXTranslationFromYaw);
          normalMatrix.set(2, 0, -sumYTranslationFromYaw);
          normalMatrix.set(2, 1, sumXTranslationFromYaw);
@@ -856,15 +878,15 @@ public class HeightMapExtractor
          }
          else
          {
-            translationToPack.setX(-sumResidualX / correspondenceCount);
-            translationToPack.setY(-sumResidualY / correspondenceCount);
+            translationToPack.setX(-sumResidualX / sumWeight);
+            translationToPack.setY(-sumResidualY / sumWeight);
             return 0.0;
          }
       }
       else
       {
-         translationToPack.setX(-sumResidualX / correspondenceCount);
-         translationToPack.setY(-sumResidualY / correspondenceCount);
+         translationToPack.setX(-sumResidualX / sumWeight);
+         translationToPack.setY(-sumResidualY / sumWeight);
          return 0.0;
       }
    }

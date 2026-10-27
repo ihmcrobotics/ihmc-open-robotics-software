@@ -27,6 +27,11 @@ extern "C"
 #define ICP_OUTLIER_DISTANCE_THRESHOLD 22
 #define ICP_VARIANCE_PER_METER_OF_CORRECTION 23
 #define ICP_MAX_DISTANCE 24
+#define ICP_MIN_DISTANCE 25
+#define ICP_NEIGHBOR_HEIGHT_THRESHOLD 26
+#define ICP_MIN_CONSISTENT_NEIGHBORS 27
+#define ICP_MIN_POINTS_PER_CELL 28
+#define ICP_ROBUST_KERNEL_WIDTH 29
 
 // Sentinel written to a global-map variance cell to mark it as holding no real data.
 // Real variances are always non-negative, so this is unambiguous everywhere it's checked.
@@ -46,6 +51,39 @@ __device__ float3 localCellToWorldPoint(int2 localCell, float cellSize, int loca
     float2 localCoordinate = indices_to_coordinate(localCell, make_float2(0.0f, 0.0f), cellSize, localCenterIndex);
     float3 pointInLocalFrame = make_float3(localCoordinate.x, localCoordinate.y, 0.0f);
     return transformPoint3D(pointInLocalFrame, groundToWorldTransform);
+}
+
+// Counts the 8 neighbors of a cell that hold data and whose height is within heightThreshold of the cell's own. A random
+// outlier (a flying pixel, a reflection, a bad stereo match) stands alone, so it has few or none, while a real surface,
+// even at a step edge, keeps the neighbors on its own side. A neighbor holds data if its variance is positive (see the
+// global map check in icpCorrespondenceKernel), or, with no variance map (the local map), if its mean isn't 0.
+__device__ int countConsistentNeighbors(const float* meanMap, size_t pitchMean,
+                                        const float* varianceMap, size_t pitchVariance,
+                                        int2 cell, int cellsPerAxis, float height, float heightThreshold)
+{
+    int consistentNeighbors = 0;
+    for (int dx = -1; dx <= 1; ++dx)
+    {
+        int neighborX = cell.x + dx;
+        if (neighborX < 0 || neighborX >= cellsPerAxis)
+            continue;
+
+        const float* meanRow = (const float*)((const char*)meanMap + neighborX * pitchMean);
+        const float* varianceRow = varianceMap ? (const float*)((const char*)varianceMap + neighborX * pitchVariance) : nullptr;
+
+        for (int dy = -1; dy <= 1; ++dy)
+        {
+            int neighborY = cell.y + dy;
+            if ((dx == 0 && dy == 0) || neighborY < 0 || neighborY >= cellsPerAxis)
+                continue;
+
+            float neighborHeight = meanRow[neighborY];
+            bool hasData = varianceRow ? varianceRow[neighborY] > 0.0f : neighborHeight != 0.0f;
+            if (hasData && fabsf(neighborHeight - height) <= heightThreshold)
+                consistentNeighbors++;
+        }
+    }
+    return consistentNeighbors;
 }
 
 /**
@@ -257,8 +295,12 @@ __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOl
  * iteratively: each call takes the current best estimate of that transform (totalTx/Ty/Tz/Yaw) and
  * produces the sums for the next incremental refinement, without modifying the global map itself.
  *
- * Accumulator layout (8 floats, atomically added into by every surviving correspondence):
- *   [0] N                        : number of surviving correspondences
+ * Each surviving correspondence is weighted by a Huber weight on its residual distance: 1 up to the robust kernel width, and
+ * width / distance beyond it, so the farther a match is from agreeing, the less it pulls on the correction. The residuals
+ * are recomputed every iteration, so the weights are too (iteratively reweighted least squares).
+ *
+ * Accumulator layout (9 floats, atomically added into by every surviving correspondence; [1] to [7] are weighted, as is [8]):
+ *   [0] N                        : number of surviving correspondences, unweighted
  *   [1] sum_xTranslationFromYaw  : sum of the old point's X relative to the global map center, rotated by the current yaw estimate
  *   [2] sum_yTranslationFromYaw  : sum of the old point's Y relative to the global map center, rotated by the current yaw estimate
  *   [3] sum_translationFromYawSq : sum of (xTranslationFromYaw^2 + yTranslationFromYaw^2)
@@ -266,9 +308,11 @@ __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOl
  *   [5] sum_residualY            : sum of the Y residual
  *   [6] sum_residualZ            : sum of the Z residual
  *   [7] sum_yawRhs               : sum of (yTranslationFromYaw * residualX - xTranslationFromYaw * residualY), the yaw right-hand-side term
+ *   [8] sum_weight               : sum of the weights, which takes N's place in the solve
  */
 extern "C"
 __global__ void icpCorrespondenceKernel(const float* __restrict__ localMeanMap, size_t pitchLocalMean,
+                                        const int* __restrict__ localCountMap, size_t pitchLocalCount,
                                         const float* __restrict__ globalMeanMap, size_t pitchGlobalMean,
                                         const float* __restrict__ globalVarianceMap, size_t pitchGlobalVariance,
                                         const float globalMapCenterX,
@@ -292,6 +336,11 @@ __global__ void icpCorrespondenceKernel(const float* __restrict__ localMeanMap, 
     const int globalCenterIndex = static_cast<int>(params[GLOBAL_CENTER_INDEX]);
     const float outlierDistanceThreshold = params[ICP_OUTLIER_DISTANCE_THRESHOLD];
     const float maxDistance = params[ICP_MAX_DISTANCE];
+    const float minDistance = params[ICP_MIN_DISTANCE];
+    const float neighborHeightThreshold = params[ICP_NEIGHBOR_HEIGHT_THRESHOLD];
+    const int minConsistentNeighbors = static_cast<int>(params[ICP_MIN_CONSISTENT_NEIGHBORS]);
+    const int minPointsPerCell = static_cast<int>(params[ICP_MIN_POINTS_PER_CELL]);
+    const float robustKernelWidth = params[ICP_ROBUST_KERNEL_WIDTH];
 
     if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
         return;
@@ -304,13 +353,26 @@ __global__ void icpCorrespondenceKernel(const float* __restrict__ localMeanMap, 
     if (localMeanF == 0.0f)
         return;
 
+    // A cell with only one or two points has a height that's no better than a single noisy depth pixel. The count map is
+    // stored transposed relative to the mean map (see computeLocalMap), so its row is the mean map's column.
+    const int* localCountRow = (const int*)((const char*)localCountMap + localCell.y * pitchLocalCount);
+    if (localCountRow[localCell.x] < minPointsPerCell)
+        return;
+
     // Stereo depth gets less accurate with distance from the sensor, and far cells would pull the correction toward their
-    // error, so leave them out. The local map is centered on the sensor in XY, and its heights are in the world frame, the
-    // same as the sensor's height in the ground to world translation.
+    // error, so leave them out. Very near cells are left out too, since they're mostly the robot's own body, which moves with
+    // the robot rather than the world, and depth noise right at the sensor's minimum range. The local map is centered on the
+    // sensor in XY, and its heights are in the world frame, the same as the sensor's height in the ground to world translation.
     float2 localCoordinate = indices_to_coordinate(localCell, make_float2(0.0f, 0.0f), cellSize, localCenterIndex);
     float heightBelowSensor = groundToWorldTranslation[11] - localMeanF;
     float distanceSquared = localCoordinate.x * localCoordinate.x + localCoordinate.y * localCoordinate.y + heightBelowSensor * heightBelowSensor;
-    if (distanceSquared > maxDistance * maxDistance)
+    if (distanceSquared > maxDistance * maxDistance || distanceSquared < minDistance * minDistance)
+        return;
+
+    // A local cell that disagrees with its own neighbors is likely an outlier, and matching it would pull the whole map
+    // toward it. This doesn't change between iterations, but it's cheap next to the correspondence search.
+    if (countConsistentNeighbors(localMeanMap, pitchLocalMean, nullptr, 0, localCell, localCellsPerAxis, localMeanF, neighborHeightThreshold)
+        < minConsistentNeighbors)
         return;
 
     // The newest sensor data is treated as the fixed reference this frame; x, y come from the cell's
@@ -339,6 +401,9 @@ __global__ void icpCorrespondenceKernel(const float* __restrict__ localMeanMap, 
     float bestCandidateYTranslationFromYaw = 0.0f;
     // Vector from localPointInWorldFrame to the correspondence's predicted position
     float3 bestCandidateResidual = make_float3(0.0f, 0.0f, 0.0f);
+    // The best-matching candidate's cell and its height in the (uncorrected) global map
+    int2 bestCandidateCell = make_int2(0, 0);
+    float bestCandidateHeight = 0.0f;
 
     for (int dcx = -searchRadiusCells; dcx <= searchRadiusCells; ++dcx)
     {
@@ -350,8 +415,10 @@ __global__ void icpCorrespondenceKernel(const float* __restrict__ localMeanMap, 
             if (candidateX < 0 || candidateX >= globalCellsPerAxis || candidateY < 0 || candidateY >= globalCellsPerAxis)
                 continue;
 
+            // Registration treats a variance of 0 as no data too: it's a cell seeded from a single local cell's first
+            // measurement, which the next measurement replaces outright, so it isn't trustworthy enough to align to
             const float* varianceRow = (const float*)((const char*)globalVarianceMap + candidateX * pitchGlobalVariance);
-            if (varianceRow[candidateY] < 0.0f)
+            if (varianceRow[candidateY] <= 0.0f)
                 continue; // no real data at this candidate
 
             const float* meanRow = (const float*)((const char*)globalMeanMap + candidateX * pitchGlobalMean);
@@ -390,27 +457,43 @@ __global__ void icpCorrespondenceKernel(const float* __restrict__ localMeanMap, 
                 bestCandidateXTranslationFromYaw = xTranslationFromYaw;
                 bestCandidateYTranslationFromYaw = yTranslationFromYaw;
                 bestCandidateResidual = residual;
+                bestCandidateCell = make_int2(candidateX, candidateY);
+                bestCandidateHeight = qz;
             }
         }
     }
 
-    if (!foundMatch || sqrtf(bestDistanceSquared) > outlierDistanceThreshold)
+    float bestDistance = sqrtf(bestDistanceSquared);
+    if (!foundMatch || bestDistance > outlierDistanceThreshold)
+        return;
+
+    // The same check on the global map side: an outlier that made it into the map is a bad thing to align to. Only the best
+    // match is checked, and the correspondence is dropped rather than falling back to the next best, since an outlier being
+    // the closest candidate means the map around here isn't trustworthy anyway. Neighbor heights are compared in the map as
+    // it is, so the candidate's height without the current Z correction.
+    if (countConsistentNeighbors(globalMeanMap, pitchGlobalMean, globalVarianceMap, pitchGlobalVariance,
+                                 bestCandidateCell, globalCellsPerAxis, bestCandidateHeight, neighborHeightThreshold)
+        < minConsistentNeighbors)
         return;
 
     // Jacobian's yaw row dotted with the residual; the RHS of the normal equations is -J^T*residual
     // (see sum_yawRhs above and the CPU-side solve)
     float yawRhsTerm = bestCandidateYTranslationFromYaw * bestCandidateResidual.x - bestCandidateXTranslationFromYaw * bestCandidateResidual.y;
 
-    atomicAdd(&accumulator[0], 1.0f);                                 // N
-    atomicAdd(&accumulator[1], bestCandidateXTranslationFromYaw);      // sum_xTranslationFromYaw
-    atomicAdd(&accumulator[2], bestCandidateYTranslationFromYaw);      // sum_yTranslationFromYaw
+    // Huber weight, see above. A width of 0 turns the weighting off.
+    float weight = (robustKernelWidth > 0.0f && bestDistance > robustKernelWidth) ? robustKernelWidth / bestDistance : 1.0f;
+
+    atomicAdd(&accumulator[0], 1.0f);                                          // N
+    atomicAdd(&accumulator[1], weight * bestCandidateXTranslationFromYaw);      // sum_xTranslationFromYaw
+    atomicAdd(&accumulator[2], weight * bestCandidateYTranslationFromYaw);      // sum_yTranslationFromYaw
     atomicAdd(&accumulator[3],
-             bestCandidateXTranslationFromYaw * bestCandidateXTranslationFromYaw
-             + bestCandidateYTranslationFromYaw * bestCandidateYTranslationFromYaw); // sum_translationFromYawSq
-    atomicAdd(&accumulator[4], bestCandidateResidual.x); // sum_residualX
-    atomicAdd(&accumulator[5], bestCandidateResidual.y); // sum_residualY
-    atomicAdd(&accumulator[6], bestCandidateResidual.z); // sum_residualZ
-    atomicAdd(&accumulator[7], yawRhsTerm);              // sum_yawRhs
+             weight * (bestCandidateXTranslationFromYaw * bestCandidateXTranslationFromYaw
+                       + bestCandidateYTranslationFromYaw * bestCandidateYTranslationFromYaw)); // sum_translationFromYawSq
+    atomicAdd(&accumulator[4], weight * bestCandidateResidual.x); // sum_residualX
+    atomicAdd(&accumulator[5], weight * bestCandidateResidual.y); // sum_residualY
+    atomicAdd(&accumulator[6], weight * bestCandidateResidual.z); // sum_residualZ
+    atomicAdd(&accumulator[7], weight * yawRhsTerm);              // sum_yawRhs
+    atomicAdd(&accumulator[8], weight);                           // sum_weight
 }
 
 /**
