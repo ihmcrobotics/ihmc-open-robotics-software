@@ -13,7 +13,6 @@ import us.ihmc.rdx.tools.BoxesDemoModel;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.tools.ImGuiScrollableLogArea;
 import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
@@ -28,9 +27,7 @@ public class RDXUIDemo
    private final ImGuiScrollableLogArea logArea = new ImGuiScrollableLogArea();
    private long renderCount = 0;
    private final ImBoolean option = new ImBoolean();
-   private int pressCount = 0;
    private final ImString textForArea = new ImString();
-   private RDX3DPanelToolbarButton flyingCarButton;
    private final ImGuiHandWidget handWidget = new ImGuiHandWidget();
 
    public RDXUIDemo()
@@ -67,14 +64,6 @@ public class RDXUIDemo
                }
             });
 
-            flyingCarButton = baseUI.getPrimary3DPanel().addToolbarButton();
-            flyingCarButton.loadAndSetIcon("icons/flyingCar.png");
-            flyingCarButton.setOnPressed(() -> pressCount++);
-            flyingCarButton.setTooltipText("Tooltip text");
-
-            RDX3DPanelToolbarButton hoverboardButton = baseUI.getPrimary3DPanel().addToolbarButton();
-            hoverboardButton.loadAndSetIcon("icons/hoverboard.png");
-
             RDX3DPanel second3DPanel = new RDX3DPanel("Second 3D View", true);
             baseUI.add3DPanel(second3DPanel);
 
@@ -91,12 +80,6 @@ public class RDXUIDemo
          @Override
          public void render()
          {
-            // call update() methods here
-            if (flyingCarButton.getDown())
-               flyingCarButton.setTooltipText("Mouse down.");
-            else if (flyingCarButton.getHovered())
-               flyingCarButton.setTooltipText("Mouse hovered.");
-
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
@@ -134,7 +117,6 @@ public class RDXUIDemo
 
       logArea.renderImGuiWidgets();
 
-      ImGui.text("Toolbar button press count: " + pressCount);
       ImGuiTools.inputText("Text area", textForArea);
 
       handWidget.render(RobotSide.LEFT, ImGui.getFontSize(), false);
