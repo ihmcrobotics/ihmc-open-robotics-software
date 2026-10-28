@@ -65,6 +65,7 @@ public class HighLevelStateActionExecutor extends ActionNodeExecutor<HighLevelSt
 
       HighLevelStateMessage message = new HighLevelStateMessage();
       message.setHighLevelControllerName(requested.toByte());
+      message.setKeepUpperBodyPose(definition.getKeepUpperBodyPose());
       ros2ControllerHelper.publishToController(message);
 
       rlModelRequestSent = false;
