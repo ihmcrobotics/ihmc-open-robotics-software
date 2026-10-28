@@ -142,6 +142,8 @@ public class RDXBehaviorTreeNodeCreationMenu
          ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "Mimic", MimicActionDefinition.class, null);
          ImGui.setCursorPosX(align);
+         renderNodeCreationClickable(relativeNode, insertionType, "Controller State", HighLevelStateActionDefinition.class, null);
+         ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "Neck", NeckActionDefinition.class, null);
          ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
          armIcon.render(RobotSide.LEFT, false, false);
