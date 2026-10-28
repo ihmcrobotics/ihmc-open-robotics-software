@@ -21,7 +21,7 @@ import us.ihmc.sensors.zed.ZEDImageSensor;
 public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectExecutor
 {
    /** How far toward the robot the hinge recess capsule is from the hinge, in meters */
-   public static final double HINGE_RECESS_DISTANCE_TOWARD_ROBOT = 0.15;
+   public static final double HINGE_RECESS_DISTANCE_TOWARD_ROBOT = 0.1;
 
    private final BehaviorTreeSceneExecutor scene;
    private volatile CUDAShapePointCounter pointCounter = null;

@@ -158,7 +158,7 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
          case DOOR_FRAME ->
          {
             minPostPoints.setValue(jsonNode.has("minPostPoints") ? jsonNode.get("minPostPoints").asInt() : 400);
-            minRecessPoints.setValue(jsonNode.has("minRecessPoints") ? jsonNode.get("minRecessPoints").asInt() : 3000);
+            minRecessPoints.setValue(jsonNode.has("minRecessPoints") ? jsonNode.get("minRecessPoints").asInt() : 5000);
          }
          case APPROACH_TABLE ->
          {
