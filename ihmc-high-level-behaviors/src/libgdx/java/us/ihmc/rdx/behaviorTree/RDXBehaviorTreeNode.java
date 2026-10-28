@@ -19,6 +19,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.tools.ImGuiScrollableLogArea;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -134,7 +135,9 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       {
          LogMessage message = state.getLogger().getRecentMessages().poll();
          logArea.submitEntry(message.instant(), message.level(), message.message());
-         RDXBaseUI.pushNotification(message.message(), logNotifications);
+         // Console only, not the 3D panel notification overlay
+         if (logNotifications)
+            LogTools.info(message.message());
       }
    }
 
