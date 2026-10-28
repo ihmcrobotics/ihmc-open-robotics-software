@@ -427,6 +427,12 @@ public class SCS2AvatarSimulationFactory
       }
       robot = simulationConstructionSet.addRobot(robotDefinition);
 
+      if (simulationConstructionSet.getPhysicsEngine() instanceof MujocoPhysicsEngine mujocoPhysicsEngine && !robotModel.getJointArmatures().isEmpty())
+      {
+         robot.getControllerManager()
+              .addController(new SCS2MujocoJointArmatureSetter(mujocoPhysicsEngine, robot.getName(), robotModel.getJointArmatures()));
+      }
+
       if (asyncROS2Node.hasBeenSet())
          AbilityHandSimulationController.attachIfNeeded(robot, asyncROS2Node.get(), robotModel);
 

@@ -30,6 +30,8 @@ import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.Map;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
@@ -184,6 +186,15 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    default SwingPlannerParametersBasics getSwingPlannerParameters()
    {
       return null;
+   }
+
+   /**
+    * Armature, the reflected rotor inertia, of each actuated joint by joint name, in kg m^2. Simulations that model it, like
+    * MuJoCo, add it to the joint inertia. Joints that are left out have none.
+    */
+   default Map<String, Double> getJointArmatures()
+   {
+      return Collections.emptyMap();
    }
 
    public HighLevelControllerParameters getHighLevelControllerParameters();
