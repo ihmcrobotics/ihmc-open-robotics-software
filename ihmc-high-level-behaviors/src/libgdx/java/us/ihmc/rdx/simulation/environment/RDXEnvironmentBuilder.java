@@ -72,6 +72,7 @@ public class RDXEnvironmentBuilder extends RDXPanel
       setRenderMethod(this::renderImGuiWidgets);
       addChild(poseGizmoTunerPanel);
       RDXBaseUI.getInstance().getKeyBindings().register("Delete selected object", "Delete");
+      RDXBaseUI.getInstance().getKeyBindings().register("Deselect object", "Escape");
    }
 
    public void create()
@@ -95,6 +96,9 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    public void process3DViewInput(ImGui3DViewInput viewInput)
    {
+      if (selectedObject != null && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
+         resetSelection();
+
       if (inputsEnabled.get())
       {
          if (selectedObject != null)

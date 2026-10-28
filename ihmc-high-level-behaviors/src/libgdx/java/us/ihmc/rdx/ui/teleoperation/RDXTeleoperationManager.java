@@ -29,7 +29,6 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
-import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.RDXArmManager;
@@ -217,7 +216,7 @@ public class RDXTeleoperationManager extends RDXPanel
       pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, ros2Helper, teleoperationParameters);
       dofsWidgets = new RDXHumanoidDoFsWidgets(syncedRobot, ros2Helper, teleoperationParameters);
 
-      RDXBaseUI.getInstance().getKeyBindings().register("Delete all Interactables", "Shift + Escape");
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete all Interactables", "Escape");
    }
 
    public void create(RDXBaseUI baseUI)
@@ -225,12 +224,6 @@ public class RDXTeleoperationManager extends RDXPanel
       this.baseUI = baseUI;
       desiredRobot.create();
       dofsWidgets.getDesiredRobot().create();
-
-      // This button is created before locomotion manager to make the toolbar button ordering correct
-      RDX3DPanelToolbarButton deleteAllInteractablesButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      deleteAllInteractablesButton.loadAndSetIcon("icons/deleteAll.png");
-      deleteAllInteractablesButton.setOnPressed(this::clearInteractablesAndLocomotionGraphics);
-      deleteAllInteractablesButton.setTooltipText("Delete All Interactables (Shift + Escape)");
 
       locomotionManager.create(baseUI);
 
@@ -404,21 +397,6 @@ public class RDXTeleoperationManager extends RDXPanel
          demoPoses = new RDXHumanoidDemoPoses(robotModel, syncedRobot, ros2Helper, teleoperationParameters);
          addChild(demoPoses);
       }
-
-      RDX3DPanelToolbarButton standPrepButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      standPrepButton.loadAndSetIcon("icons/standPrep.png");
-      standPrepButton.setOnPressed(hardwareControlStateManager::sendStandPrepRequest);
-      standPrepButton.setTooltipText("Stand prep");
-
-      RDX3DPanelToolbarButton freezeButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      freezeButton.loadAndSetIcon("icons/freeze.png");
-      freezeButton.setTooltipText("Freeze");
-      freezeButton.setOnPressed(hardwareControlStateManager::sendFreezeRequest);
-
-      RDX3DPanelToolbarButton abortToolbarButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      abortToolbarButton.loadAndSetIcon("icons/abort.png");
-      abortToolbarButton.setTooltipText("Abort");
-      abortToolbarButton.setOnPressed(locomotionManager::sendAbortWalkingMessage);
 
       clearInteractablesAndLocomotionGraphics();
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
@@ -678,6 +656,9 @@ public class RDXTeleoperationManager extends RDXPanel
    // This happens after update.
    private void process3DViewInput(ImGui3DViewInput input)
    {
+      if (ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
+         clearInteractablesAndLocomotionGraphics();
+
       if (interactablesEnabled.get())
       {
          locomotionManager.processWalkPathControlRing3dViewInput(input);
@@ -768,11 +749,11 @@ public class RDXTeleoperationManager extends RDXPanel
             ImGui.checkbox("Enable", interactablesEnabled);
          }
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Delete all")) || ImGui.getIO().getKeyShift() && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
+         if (ImGui.button(labels.get("Delete all")))
          {
             clearInteractablesAndLocomotionGraphics();
          }
-         ImGuiTools.previousWidgetTooltip("Shift + Escape");
+         ImGuiTools.previousWidgetTooltip("Escape");
          ImGui.setCursorPosX(widgetStartX);
          wholeBodyIKManager.renderImGuiWidgets();
 
