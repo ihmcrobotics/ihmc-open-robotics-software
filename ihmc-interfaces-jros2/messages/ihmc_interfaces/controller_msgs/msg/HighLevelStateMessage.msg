@@ -24,3 +24,6 @@ byte high_level_controller_name 255
 # Optional trajectory duration for transitions into joint setpoint states (for example, stand prep or ground prep).
 # Values less than or equal to 0 use the controller’s default duration.
 float64 trajectory_time 0.0
+
+# When true, the arms, spine and neck hold their current pose in the new state instead of moving to its home pose.
+bool keep_upper_body_pose false
