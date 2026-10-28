@@ -29,3 +29,10 @@ bool keep_heading false
 # When true, turn in place to face the goal, walk straight to it, then turn in place to the goal
 # yaw. Takes precedence over keep_heading.
 bool turn_walk_turn false
+
+# Walking speed limit in meters per second for this goal. The backward and lateral limits scale with it.
+# 0 or less uses the controller limit.
+float64 max_forward_speed 0.0
+
+# Turning speed limit in radians per second for this goal. 0 or less uses the controller limit.
+float64 max_turning_speed 0.0

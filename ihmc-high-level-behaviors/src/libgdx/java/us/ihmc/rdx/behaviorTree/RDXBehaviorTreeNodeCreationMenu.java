@@ -175,6 +175,8 @@ public class RDXBehaviorTreeNodeCreationMenu
          ImGui.sameLine();
          ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "Walk", WalkActionDefinition.class, null);
+         ImGui.sameLine();
+         renderNodeCreationClickable(relativeNode, insertionType, "RL Walk", RLWalkActionDefinition.class, null);
          ImGui.setCursorPosX(align);
          for (RobotSide side : RobotSide.values)
             renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), LegActionDefinition.class, side);

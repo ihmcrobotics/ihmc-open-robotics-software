@@ -147,6 +147,9 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private final YoDouble maxLateralSpeed = new YoDouble("maxLateralSpeed", registry);
    private final YoDouble maxBackwardSpeed = new YoDouble("maxBackwardSpeed", registry);
    private final YoDouble maxTurningSpeed = new YoDouble("maxTurningSpeed", registry);
+   /** Speed limits for the current goal. The goal can set them, otherwise they are the max speeds above */
+   private final YoDouble goalMaxForwardSpeed = new YoDouble("goalMaxForwardSpeed", registry);
+   private final YoDouble goalMaxTurningSpeed = new YoDouble("goalMaxTurningSpeed", registry);
    private final YoDouble minSpeed = new YoDouble("minSpeed", registry);
    private final YoDouble minTurningSpeed = new YoDouble("minTurningSpeed", registry);
    private final YoDouble minTranslationScaleWhileTurning = new YoDouble("minTranslationScaleWhileTurning", registry);
@@ -234,6 +237,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       maxBackwardSpeed.set(DEFAULT_MAX_BACKWARD_SPEED);
       maxLateralSpeed.set(DEFAULT_MAX_LATERAL_SPEED);
       maxTurningSpeed.set(DEFAULT_MAX_TURNING_SPEED);
+      goalMaxForwardSpeed.set(DEFAULT_MAX_FORWARD_SPEED);
+      goalMaxTurningSpeed.set(DEFAULT_MAX_TURNING_SPEED);
       minSpeed.set(DEFAULT_MIN_SPEED);
       minTurningSpeed.set(DEFAULT_MIN_TURNING_SPEED);
       minTranslationScaleWhileTurning.set(DEFAULT_MIN_TRANSLATION_SCALE_WHILE_TURNING);
@@ -530,6 +535,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          goalOrientationMatters.set(waypoint.getGoalOrientationMatters());
          keepHeading.set(waypoint.getKeepHeading());
          turnWalkTurn.set(waypoint.getTurnWalkTurn());
+         goalMaxForwardSpeed.set(waypoint.getMaxForwardSpeed() > 0.0 ? waypoint.getMaxForwardSpeed() : maxForwardSpeed.getValue());
+         goalMaxTurningSpeed.set(waypoint.getMaxTurningSpeed() > 0.0 ? waypoint.getMaxTurningSpeed() : maxTurningSpeed.getValue());
 
          // Compute how fast the robot may pass through this waypoint without stopping.
          // Dot product of the incoming leg direction with the outgoing leg direction gives
@@ -562,6 +569,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          currentGoalPose.setToNaN();
          keepHeading.set(false);
          turnWalkTurn.set(false);
+         goalMaxForwardSpeed.set(maxForwardSpeed.getValue());
+         goalMaxTurningSpeed.set(maxTurningSpeed.getValue());
       }
    }
 
@@ -711,7 +720,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    private double clampTurningVelocity(double turningVelocity)
    {
-      turningVelocity = MathTools.clamp(turningVelocity, maxTurningSpeed.getDoubleValue());
+      turningVelocity = MathTools.clamp(turningVelocity, goalMaxTurningSpeed.getDoubleValue());
       if (Math.abs(turningVelocity) > 0.0 && Math.abs(turningVelocity) < minTurningSpeed.getValue())
          turningVelocity = Math.signum(turningVelocity) * minTurningSpeed.getValue();
       return turningVelocity;
@@ -728,7 +737,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       angleChangeFromPrevious = MathTools.clamp(angleChangeFromPrevious, maxHeadingRate.getValue() * computedDt);
       rateLimitedAngleToHeading.set(AngleTools.trimAngleMinusPiToPi(rateLimitedAngleToHeading.getDoubleValue() + angleChangeFromPrevious));
 
-      double distanceForMaxSpeed = 0.5 * MathTools.square(maxForwardSpeed.getDoubleValue()) / maxRadialAcceleration.getDoubleValue();
+      double distanceForMaxSpeed = 0.5 * MathTools.square(goalMaxForwardSpeed.getDoubleValue()) / maxRadialAcceleration.getDoubleValue();
       // Acceleration limited controller on distance.
       if (distanceToGoal >= distanceForMaxSpeed)
       {
@@ -737,7 +746,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       else
       {
          double speedForDeccel = Math.sqrt(2.0 * maxRadialAcceleration.getDoubleValue() * distanceToGoal);
-         normalizedRadialSpeed.set(Math.max(speedForDeccel / maxForwardSpeed.getDoubleValue(), waypointThroughputSpeedScalar.getDoubleValue()));
+         normalizedRadialSpeed.set(Math.max(speedForDeccel / goalMaxForwardSpeed.getDoubleValue(), waypointThroughputSpeedScalar.getDoubleValue()));
       }
       // Acceleration-limit the ramp-up so speed increases gradually
       double maxAllowedSpeed = rateLimitedNormalizedRadialSpeed.getDoubleValue() + computedDt * maxRadialAcceleration.getValue();
@@ -747,12 +756,14 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       computeWalkingTarget(goalPose);
       double angleToTarget = Math.atan2(walkingTargetInBodyFrame.getY(), walkingTargetInBodyFrame.getX());
       double speed = rateLimitedNormalizedRadialSpeed.getDoubleValue() * desiredCruisingSpeedScalar.getValue();
-      double xSpeedLimit = walkingTargetInBodyFrame.getX() > 0.0 ? maxForwardSpeed.getDoubleValue() : maxBackwardSpeed.getDoubleValue();
+      // A goal speed limit scales the backward and lateral limits along with the forward one
+      double goalSpeedScale = goalMaxForwardSpeed.getDoubleValue() / maxForwardSpeed.getDoubleValue();
+      double xSpeedLimit = walkingTargetInBodyFrame.getX() > 0.0 ? goalMaxForwardSpeed.getDoubleValue() : goalSpeedScale * maxBackwardSpeed.getDoubleValue();
       // Fastest speed in this direction within the elliptical forward/lateral limits. Scaling each axis by its own
       // limit instead would bend the walking direction off the target.
       double cosine = Math.cos(angleToTarget);
       double sine = Math.sin(angleToTarget);
-      double speedLimit = 1.0 / Math.sqrt(MathTools.square(cosine / xSpeedLimit) + MathTools.square(sine / maxLateralSpeed.getValue()));
+      double speedLimit = 1.0 / Math.sqrt(MathTools.square(cosine / xSpeedLimit) + MathTools.square(sine / (goalSpeedScale * maxLateralSpeed.getValue())));
       desiredVelocity.set(speed * speedLimit * cosine, speed * speedLimit * sine);
 
       // P-controller on heading. The walking policy tracks a gentle walking arc but locks the knees on a hard yaw with
@@ -817,6 +828,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       private boolean goalOrientationMatters;
       private boolean keepHeading;
       private boolean turnWalkTurn;
+      private double maxForwardSpeed;
+      private double maxTurningSpeed;
       /** Unit vector of the leg that arrives at this waypoint (from previousPose to goalPose). */
       private final Vector2D incomingDirection = new Vector2D();
 
@@ -828,6 +841,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          goalOrientationMatters = command.getGoalOrientationMatters();
          keepHeading = command.getKeepHeading();
          turnWalkTurn = command.getTurnWalkTurn();
+         maxForwardSpeed = command.getMaxForwardSpeed();
+         maxTurningSpeed = command.getMaxTurningSpeed();
 
          double dx = goalPose.getX() - previousPose.getX();
          double dy = goalPose.getY() - previousPose.getY();
@@ -845,6 +860,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          if (command.getTimeToReachGoal() > 0.0)
          {
             double speed = distance / command.getTimeToReachGoal();
+            if (maxForwardSpeed > 0.0)
+               maxSpeed = maxForwardSpeed;
             cruisingSpeedScaler = Math.min(1.0, speed / maxSpeed);
          }
          else
@@ -886,6 +903,16 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       public boolean getTurnWalkTurn()
       {
          return turnWalkTurn;
+      }
+
+      public double getMaxForwardSpeed()
+      {
+         return maxForwardSpeed;
+      }
+
+      public double getMaxTurningSpeed()
+      {
+         return maxTurningSpeed;
       }
 
       public Vector2DReadOnly getIncomingDirection()
