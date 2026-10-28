@@ -62,7 +62,7 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
    private final RigidBodyTransform leverOtherSideOffset = new RigidBodyTransform();
    /** Front lever mesh: door_handle.glb yawed onto the arm, two panel thicknesses out. */
    private final RigidBodyTransform leverMeshOffset = new RigidBodyTransform();
-   /** Other-side lever mesh. Same local +X offset; the 180° pitch sends it the other way through the panel. */
+   /** Other-side lever mesh. Same local +X offset; the 180 degree pitch sends it the other way through the panel. */
    private final RigidBodyTransform leverOtherSideMeshOffset = new RigidBodyTransform();
 
    private final RigidBodyTransform hingeRotation = new RigidBodyTransform();
