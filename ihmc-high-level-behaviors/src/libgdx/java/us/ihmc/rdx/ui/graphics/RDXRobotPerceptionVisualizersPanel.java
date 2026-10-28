@@ -20,11 +20,11 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    protected final ROS2Node ros2Node;
    protected final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator;
 
-   // Common — always present
+   // Common - always present
    protected final RDXROS2RobotVisualizer robotVisualizer;
    protected final RDXROS2KSTRobotVisualizer kinematicsStreamingSolutionVisualizer;
 
-   // Optional — may be null in some robots
+   // Optional - may be null in some robots
    protected RDXROS2ColoredPointCloudVisualizer experimentalCameraColoredPointCloudVisualizer;
    protected RDXROS2ImageMessageVisualizer experimentalCameraLeftColorImageVisualizer;
    protected RDXROS2ImageMessageVisualizer experimentalCameraRightColorImageVisualizer;
