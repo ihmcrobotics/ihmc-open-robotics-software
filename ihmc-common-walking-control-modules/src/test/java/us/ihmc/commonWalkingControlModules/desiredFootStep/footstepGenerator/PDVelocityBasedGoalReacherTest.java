@@ -76,6 +76,25 @@ public class PDVelocityBasedGoalReacherTest
       }
    }
 
+   @Test
+   public void goalSpeedLimitsCapTheCommandedVelocities()
+   {
+      double[][] goal = {{3.0, 0.0, 180.0}};
+      for (HeadingMode mode : HeadingMode.values())
+      {
+         SimulatedWalk slowWalk = simulateWalk(mode, goal, 0.2, 0.25);
+         assertTrue(slowWalk.reached, mode + " did not reach the goal with slow limits");
+         assertTrue(slowWalk.maxLinearSpeed < 0.2 + 1.0e-6, mode + " walked " + slowWalk.maxLinearSpeed + " m/s with a 0.2 m/s limit");
+         assertTrue(slowWalk.maxTurningSpeed < 0.25 + 1.0e-6, mode + " turned " + slowWalk.maxTurningSpeed + " rad/s with a 0.25 rad/s limit");
+      }
+
+      SimulatedWalk defaultWalk = simulateWalk(HeadingMode.FACE_GOAL, goal);
+      SimulatedWalk fastWalk = simulateWalk(HeadingMode.FACE_GOAL, goal, 0.8, 0.8);
+      assertTrue(fastWalk.reached, "Did not reach the goal with fast limits");
+      assertTrue(fastWalk.maxLinearSpeed > defaultWalk.maxLinearSpeed + 0.1,
+                 "A 0.8 m/s limit walked " + fastWalk.maxLinearSpeed + " m/s, the default walked " + defaultWalk.maxLinearSpeed + " m/s");
+   }
+
    private enum HeadingMode
    {
       FACE_GOAL, KEEP_HEADING, TURN_WALK_TURN
@@ -88,6 +107,8 @@ public class PDVelocityBasedGoalReacherTest
       double pathLength;
       double maxYawDeviationFromStart;
       double maxDistanceFromLine;
+      double maxLinearSpeed;
+      double maxTurningSpeed;
    }
 
    /**
@@ -95,6 +116,12 @@ public class PDVelocityBasedGoalReacherTest
     * (x, y, yaw in degrees) with the RDX waypoint settings.
     */
    private static SimulatedWalk simulateWalk(HeadingMode mode, double[][] waypoints)
+   {
+      return simulateWalk(mode, waypoints, 0.0, 0.0);
+   }
+
+   /** Same as above, with goal speed limits. 0 uses the controller limits. */
+   private static SimulatedWalk simulateWalk(HeadingMode mode, double[][] waypoints, double maxForwardSpeed, double maxTurningSpeed)
    {
       PoseReferenceFrame base = new PoseReferenceFrame("base", ReferenceFrame.getWorldFrame());
       StatusMessageOutputManager status = new StatusMessageOutputManager(List.of(ControllerWalkToGoalStatusMessage.class, ControllerWaypointStatusMessage.class));
@@ -118,6 +145,8 @@ public class PDVelocityBasedGoalReacherTest
          command.setGoalOrientationMatters(true);
          command.setKeepHeading(mode == HeadingMode.KEEP_HEADING);
          command.setTurnWalkTurn(mode == HeadingMode.TURN_WALK_TURN);
+         command.setMaxForwardSpeed(maxForwardSpeed);
+         command.setMaxTurningSpeed(maxTurningSpeed);
          list.addWaypoint(command);
       }
       reacher.consumeNewWaypointList(list);
@@ -139,6 +168,8 @@ public class PDVelocityBasedGoalReacherTest
          y += dy;
          yaw += output.getTurnVelocity() * dt;
          walk.pathLength += Math.hypot(dx, dy);
+         walk.maxLinearSpeed = Math.max(walk.maxLinearSpeed, Math.hypot(output.getForwardVelocity(), output.getLateralVelocity()));
+         walk.maxTurningSpeed = Math.max(walk.maxTurningSpeed, Math.abs(output.getTurnVelocity()));
          if (Math.hypot(goal[0] - x, goal[1] - y) > 0.2)
             walk.maxYawDeviationFromStart = Math.max(walk.maxYawDeviationFromStart, Math.abs(AngleTools.trimAngleMinusPiToPi(yaw)));
          walk.maxDistanceFromLine = Math.max(walk.maxDistanceFromLine, Math.abs(x * goal[1] - y * goal[0]) / lineLength);
