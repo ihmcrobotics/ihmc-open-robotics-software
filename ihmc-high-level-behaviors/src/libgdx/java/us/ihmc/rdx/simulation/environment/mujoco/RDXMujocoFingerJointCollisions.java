@@ -46,14 +46,27 @@ public final class RDXMujocoFingerJointCollisions
 {
    /** Slide, torsion, roll. The pads are a gum-like rubber, so tangential and torsional stiction are high. */
    private static final String FINGER_FRICTION = "2.5 1.0 0.05";
-   /** Same contact time constant as the rest of the robot, so the pad does not sink in. */
-   private static final String FINGER_SOLREF = "0.005 1.0";
+   /**
+    * Harder than the 0.005 s the rest of the robot uses. MuJoCo scales contact stiffness with the mass in
+    * contact, and a finger link weighs a few grams, so a longer time constant makes the pad soft. It
+    * stays above twice the simulation step, which MuJoCo needs for a stable contact.
+    */
+   private static final String FINGER_SOLREF = "0.002 1.0";
    /** Sub-millimeter constraint width. A wide ramp is what let the mesh sit inside the object. */
-   private static final String FINGER_SOLIMP = "0.9 0.99 0.0007 0.5 2.0";
-   /** Nm/rad. A blocked finger yields around the object instead of holding the commanded angle. */
-   private static final double FINGER_STIFFNESS = 0.25;
-   /** Nm/(rad/s). The URDF damping is nearly zero, which rings once the hinge is no longer locked. */
-   private static final double FINGER_DAMPING = 0.04;
+   private static final String FINGER_SOLIMP = "0.95 0.99 0.0007 0.5 2.0";
+   /**
+    * Above the default 0, so a finger contact uses the finger's solref and solimp instead of averaging
+    * them with the softer object it touches.
+    */
+   private static final int FINGER_CONTACT_PRIORITY = 1;
+   /**
+    * Nm/rad. A blocked finger still yields around the object instead of holding the commanded angle,
+    * but 3 N at the fingertip now folds it 3 degrees. At 0.25 it folded 27 degrees, so a hooked finger
+    * opened and slid off a door lever.
+    */
+   private static final double FINGER_STIFFNESS = 2.0;
+   /** Nm/(rad/s). Damps the stiffer spring without overshoot. The URDF damping is nearly zero and rings. */
+   private static final double FINGER_DAMPING = 0.06;
    /** Extra joint inertia so a near-massless link does not explode under the spring. */
    private static final double FINGER_ARMATURE = 5.0e-4;
 
@@ -425,7 +438,7 @@ public final class RDXMujocoFingerJointCollisions
       }
       return "          <geom class=\"robot\" name=\"" + geomName + "\"" + pose
              + " friction=\"" + FINGER_FRICTION + "\" condim=\"6\" solref=\"" + FINGER_SOLREF
-             + "\" solimp=\"" + FINGER_SOLIMP + "\" " + size + "/>\n";
+             + "\" solimp=\"" + FINGER_SOLIMP + "\" priority=\"" + FINGER_CONTACT_PRIORITY + "\" " + size + "/>\n";
    }
 
    private static String fmt(double value)
