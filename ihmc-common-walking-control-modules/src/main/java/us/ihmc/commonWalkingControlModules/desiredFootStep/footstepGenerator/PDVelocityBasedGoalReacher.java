@@ -540,8 +540,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
          // Compute how fast the robot may pass through this waypoint without stopping.
          // Dot product of the incoming leg direction with the outgoing leg direction gives
-         // cos(turn angle): 1 = straight, 0 = 90 degree turn, −1 = U-turn.
-         // Clamp to [0, 1]: turns >= 90° require a full stop; smaller turns allow proportionally
+         // cos(turn angle): 1 = straight, 0 = 90 degree turn, -1 = U-turn.
+         // Clamp to [0, 1]: turns >= 90 degrees require a full stop; smaller turns allow proportionally
          // higher throughput speed. Terminal waypoints always use 0 (robot must stop).
          if (goalPoses.size() >= 2)
          {
