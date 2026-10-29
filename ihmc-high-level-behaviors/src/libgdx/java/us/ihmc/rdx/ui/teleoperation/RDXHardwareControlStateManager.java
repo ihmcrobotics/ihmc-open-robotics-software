@@ -78,7 +78,7 @@ public class RDXHardwareControlStateManager
       rlModelNames = modelNames;
 
       // Always mirror the controller's active model so UI stays correct after controller-side switches
-      // (e.g. standup → walking handoff), not only on first receive / catalog changes.
+      // (e.g. standup -> walking handoff), not only on first receive / catalog changes.
       int currentModel = Byte.toUnsignedInt(rlPolicyState.getCurrentModel());
       if (currentModel >= 0 && currentModel < rlModelNames.length)
       {
