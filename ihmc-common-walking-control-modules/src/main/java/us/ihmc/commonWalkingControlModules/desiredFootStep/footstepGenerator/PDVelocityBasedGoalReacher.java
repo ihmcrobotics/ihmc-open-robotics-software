@@ -33,14 +33,13 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
  * Class uses a clamped PD controller that aligns headings to reach a goal.
  */
 public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolder
 {
-   private static final Vector2DReadOnly forwardVector = new Vector2D(1.0, 0.0);
-
    private static final double BASE_POSITION_Z_OFFSET_FOR_VISUALIZATION = 0.75;
    private static final double GOAL_POSITION_Z_OFFSET_FOR_VISUALIZATION = 0.1;
 
@@ -78,6 +77,38 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
 
    private static final double DEFAULT_DISTANCE_TO_MATCH_GOAL_ANGLE = 0.75;
    private static final double DEFAULT_DISTANCE_TO_FACE_GOAL = 1.5;
+
+   /** A waypoint whose walking heading is further off than this starts with a turn in place. */
+   private static final double DEFAULT_HEADING_ERROR_TO_START_TURN_IN_PLACE = Math.toRadians(60.0);
+   /** A turn in place to the walking heading ends inside this error. */
+   private static final double DEFAULT_HEADING_ERROR_TO_END_TURN_IN_PLACE = Math.toRadians(5.0);
+   /** Yaw allowed while walking with too little forward speed for a walking arc, e.g. sideways or backward. */
+   private static final double DEFAULT_MAX_TURNING_SPEED_WHILE_WALKING_SLOWLY = 0.15;
+   /** Turn-walk-turn steers to a point this far ahead along the start-to-goal line. */
+   private static final double DEFAULT_PATH_LOOKAHEAD_DISTANCE = 0.5;
+   /**
+    * While turning to the goal yaw, the robot walks back to the goal only past this many times the distance-to-goal threshold.
+    * The walking policy carries on 0.2 to 0.3 m when the walk stops and the turn starts; the position hold brings it back.
+    */
+   private static final double DEFAULT_DISTANCE_TO_GOAL_THRESHOLD_SCALE_WHILE_TURNING_TO_GOAL_YAW = 3.5;
+   /** Gain (1/s) and speed cap (m/s) for stepping back to the goal while turning to the goal yaw. */
+   private static final double DEFAULT_POSITION_HOLD_GAIN = 1.0;
+   private static final double DEFAULT_MAX_POSITION_HOLD_SPEED = 0.1;
+
+   /**
+    * Each waypoint is reached in up to three phases. Large heading changes turn in place, at no more than
+    * {@code maxTurningSpeed}, instead of walking an arc: an arc that has to turn the robot around walks it in loops,
+    * and at the goal there is no forward speed left to turn with.
+    */
+   private enum Phase
+   {
+      /** Turning in place to the heading the robot will walk with. */
+      TURN_TO_PATH,
+      /** Walking to the goal position. */
+      WALK,
+      /** At the goal position, turning in place to the goal yaw. */
+      TURN_TO_GOAL_YAW
+   }
 
    private final RecyclingArrayList<GoalWaypoint> goalPoses = new RecyclingArrayList<>(GoalWaypoint::new);
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -149,6 +180,19 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
     * use this so a 2 m backward walk stays a reverse instead of a U-turn.
     */
    private final YoBoolean keepHeading = new YoBoolean("keepHeading", registry);
+   /** When true, turn in place to face along the start-to-goal line, walk it, then turn in place to the goal yaw. */
+   private final YoBoolean turnWalkTurn = new YoBoolean("turnWalkTurn", registry);
+   private final YoEnum<Phase> phase = new YoEnum<>("goalReacherPhase", registry, Phase.class);
+   /** Set once a turn in place to the walking heading has started, so it runs to the smaller end threshold. */
+   private final YoBoolean isTurningToPath = new YoBoolean("isTurningToPath", registry);
+   private final YoDouble walkingHeadingYaw = new YoDouble("walkingHeadingYaw", registry);
+   private final YoDouble headingErrorToStartTurnInPlace = new YoDouble("headingErrorToStartTurnInPlace", registry);
+   private final YoDouble headingErrorToEndTurnInPlace = new YoDouble("headingErrorToEndTurnInPlace", registry);
+   private final YoDouble maxTurningSpeedWhileWalkingSlowly = new YoDouble("maxTurningSpeedWhileWalkingSlowly", registry);
+   private final YoDouble pathLookaheadDistance = new YoDouble("pathLookaheadDistance", registry);
+   private final YoDouble distanceToGoalThresholdScaleWhileTurningToGoalYaw = new YoDouble("distanceToGoalThresholdScaleWhileTurningToGoalYaw", registry);
+   private final YoDouble positionHoldGain = new YoDouble("positionHoldGain", registry);
+   private final YoDouble maxPositionHoldSpeed = new YoDouble("maxPositionHoldSpeed", registry);
    private final YoBoolean isRampingDownAfterGoal = new YoBoolean("isRampingDownAfterGoal", registry);
    private final YoDouble rampDownDecayRate = new YoDouble("rampDownDecayRate", registry);
    private final YoDouble rampDownDecay = new YoDouble("rampDownDecay", registry);
@@ -165,12 +209,10 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private final YoDouble desiredSpeed = new YoDouble("desiredSpeed", registry);
    private final YoFrameVector3D desiredLinearVelocity = new YoFrameVector3D("desiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D desiredAngularVelocity = new YoFrameVector3D("desiredAngularVelocity", ReferenceFrame.getWorldFrame(), registry);
-   private final YoVector2D desiredHeadingInBodyFrame = new YoVector2D("desiredHeadingInBodyFrame", registry);
 
    private final VelocityBasedWalkingInputMessage outputMessage = new VelocityBasedWalkingInputMessage();
 
    // Temp Variables
-   private final Vector2D finalHeadingInBodyFrame = new Vector2D();     // goal's final heading direction, in robot body frame
    private final Vector2D vectorToGoal = new Vector2D();
 
    private final StatusMessageOutputManager statusMessageOutputManager;
@@ -209,6 +251,14 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       rampDownSpeedThreshold.set(DEFAULT_RAMP_DOWN_SPEED_THRESHOLD);
 
       rampDownDecayRate.set(DEFAULT_RAMP_DOWN_DECAY_RATE);
+
+      headingErrorToStartTurnInPlace.set(DEFAULT_HEADING_ERROR_TO_START_TURN_IN_PLACE);
+      headingErrorToEndTurnInPlace.set(DEFAULT_HEADING_ERROR_TO_END_TURN_IN_PLACE);
+      maxTurningSpeedWhileWalkingSlowly.set(DEFAULT_MAX_TURNING_SPEED_WHILE_WALKING_SLOWLY);
+      pathLookaheadDistance.set(DEFAULT_PATH_LOOKAHEAD_DISTANCE);
+      distanceToGoalThresholdScaleWhileTurningToGoalYaw.set(DEFAULT_DISTANCE_TO_GOAL_THRESHOLD_SCALE_WHILE_TURNING_TO_GOAL_YAW);
+      positionHoldGain.set(DEFAULT_POSITION_HOLD_GAIN);
+      maxPositionHoldSpeed.set(DEFAULT_MAX_POSITION_HOLD_SPEED);
 
       parentRegistry.addChild(registry);
       waypointVisualizer = new GoalReacherWaypointVisualizer(registry);
@@ -275,6 +325,9 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       hasReachedGoal.set(true);
       hasGoal.set(false);
       keepHeading.set(false);
+      turnWalkTurn.set(false);
+      phase.set(Phase.TURN_TO_PATH);
+      isTurningToPath.set(false);
       goalPoses.clear();
       isRampingDownAfterGoal.set(false);
       pendingWaypointReachedPublication.set(false);
@@ -322,8 +375,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
                                currentGoalPose.getY() - startPose.getY(),
                                currentGoalPose.getZ() - startPose.getZ());
 
-         updateHeadingControl(currentGoalPose);
-         computePDNormalizedFeedbackVelocities(distanceToGoal.getValue(), rateLimitedAngleToHeading.getDoubleValue());
+         computeVelocities(currentGoalPose);
          updateOutputMessage();
       }
 
@@ -477,11 +529,12 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          desiredCruisingSpeedScalar.set(waypoint.getCruisingSpeedScaler());
          goalOrientationMatters.set(waypoint.getGoalOrientationMatters());
          keepHeading.set(waypoint.getKeepHeading());
+         turnWalkTurn.set(waypoint.getTurnWalkTurn());
 
          // Compute how fast the robot may pass through this waypoint without stopping.
          // Dot product of the incoming leg direction with the outgoing leg direction gives
-         // cos(turn angle): 1 = straight, 0 = 90 degree turn, −1 = U-turn.
-         // Clamp to [0, 1]: turns >= 90° require a full stop; smaller turns allow proportionally
+         // cos(turn angle): 1 = straight, 0 = 90 degree turn, -1 = U-turn.
+         // Clamp to [0, 1]: turns >= 90 degrees require a full stop; smaller turns allow proportionally
          // higher throughput speed. Terminal waypoints always use 0 (robot must stop).
          if (goalPoses.size() >= 2)
          {
@@ -508,6 +561,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       {
          currentGoalPose.setToNaN();
          keepHeading.set(false);
+         turnWalkTurn.set(false);
       }
    }
 
@@ -515,6 +569,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    {
       startPose.setFromReferenceFrame(frameOfTheBase);
       startPose.getPosition().setZ(GOAL_POSITION_Z_OFFSET_FOR_VISUALIZATION);
+      phase.set(Phase.TURN_TO_PATH);
+      isTurningToPath.set(false);
    }
 
    private void publishWaypointStatus(FramePose2DReadOnly pose, int waypointsRemaining, boolean isStarted)
@@ -538,61 +594,140 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    }
 
    /**
-    * Computes the heading error and rate-limits the heading target used by the PD feedback.
-    * <p>
-    * Far from a goal that is in front, the robot faces toward the goal position; close to the goal it
-    * transitions to matching the goal's final orientation. The blend is governed by
-    * {@code distanceToFaceGoal} (start facing goal) and {@code distanceToMatchGoalAngle} (fully
-    * aligned with final heading).
-    * </p>
-    * <p>
-    * Spoken reverse and sidestep set {@code keepHeading} so this blend stays at matching the current
-    * heading even past {@code distanceToFaceGoal}. Without that flag a 2 m reverse is faced, which
-    * becomes a U-turn then a forward walk.
-    * </p>
+    * Computes the walking command for the current phase. A waypoint starts in {@link Phase#TURN_TO_PATH}, which turns
+    * in place only when the walking heading is far off (always, for turn-walk-turn), then walks, then turns in place to
+    * the goal yaw once at the goal position if the goal yaw matters.
     */
-   private void updateHeadingControl(FramePose3DReadOnly goalPose)
+   private void computeVelocities(FramePose3DReadOnly goalPose)
    {
-      // Vector from the robot to the goal, expressed in the robot's body frame
-      vectorToGoal.set(goalPose.getPosition());
-      vectorToGoal.sub(currentPose.getX(), currentPose.getY());
+      vectorToGoal.set(goalPose.getX() - currentPose.getX(), goalPose.getY() - currentPose.getY());
       currentPose.getOrientation().inverseTransform(vectorToGoal, vectorToGoalInPelvisFrame);
+      double distance = vectorToGoal.norm();
+      double distanceToGoalThreshold = distanceToGoalThresholdToStop.getValue();
 
-      double distanceToGoal = vectorToGoal.norm() ;
-      // 1 = far from goal - face the goal position; 0 = near goal → match the goal's final heading
-      double faceGoalBlendFraction = MathTools.clamp(
-            (distanceToGoal - distanceToMatchGoalAngle.getValue()) / (distanceToFaceGoal.getDoubleValue() - distanceToMatchGoalAngle.getDoubleValue()),
-            0.0, 1.0);
+      if (phase.getValue() == Phase.TURN_TO_GOAL_YAW && distance > distanceToGoalThresholdScaleWhileTurningToGoalYaw.getValue() * distanceToGoalThreshold)
+         phase.set(Phase.WALK); // Pushed off the goal while turning
+      if (phase.getValue() == Phase.WALK && goalOrientationMatters.getValue() && distance < distanceToGoalThreshold)
+         phase.set(Phase.TURN_TO_GOAL_YAW);
+
+      if (phase.getValue() == Phase.TURN_TO_PATH)
+      {
+         walkingHeadingYaw.set(computeWalkingHeadingYaw(goalPose, distance));
+         double headingError = AngleTools.computeAngleDifferenceMinusPiToPi(walkingHeadingYaw.getValue(), currentPose.getYaw());
+         double errorToTurn;
+         if (isTurningToPath.getValue() || turnWalkTurn.getValue())
+            errorToTurn = headingErrorToEndTurnInPlace.getValue();
+         else
+            errorToTurn = headingErrorToStartTurnInPlace.getValue();
+
+         if (distance >= distanceToGoalThreshold && Math.abs(headingError) > errorToTurn)
+         {
+            isTurningToPath.set(true);
+            turnInPlace(headingError);
+            return;
+         }
+         isTurningToPath.set(false);
+         phase.set(Phase.WALK);
+         rateLimitedAngleToHeading.set(headingError);
+      }
+
+      if (phase.getValue() == Phase.TURN_TO_GOAL_YAW)
+      {
+         turnInPlace(AngleTools.computeAngleDifferenceMinusPiToPi(goalPose.getYaw(), currentPose.getYaw()));
+         holdPositionWhileTurning();
+         return;
+      }
+
+      walk(goalPose, distance);
+   }
+
+   /**
+    * Heading to hold while walking. Turn-walk-turn faces along the start-to-goal line and keep-heading holds the heading
+    * the waypoint started with. Otherwise the robot faces the goal position when far, and blends to the final heading
+    * between {@code distanceToFaceGoal} and {@code distanceToMatchGoalAngle}.
+    */
+   private double computeWalkingHeadingYaw(FramePose3DReadOnly goalPose, double distance)
+   {
+      if (turnWalkTurn.getValue())
+      {
+         double lineX = goalPose.getX() - startPose.getX();
+         double lineY = goalPose.getY() - startPose.getY();
+         if (EuclidCoreTools.norm(lineX, lineY) > distanceToGoalThresholdOrSmall())
+            return Math.atan2(lineY, lineX);
+         return currentPose.getYaw();
+      }
+
       if (keepHeading.getValue())
-         faceGoalBlendFraction = 0.0;
+         return startPose.getYaw();
 
-      if (goalOrientationMatters.getValue())
-      {
-         // Goal's final heading direction rotated into the robot's body frame
-         finalHeadingInBodyFrame.set(currentGoalDirection);
-         currentPose.getOrientation().inverseTransform(finalHeadingInBodyFrame);
-      }
-      else
-      {
-         // Final heading is just facing forward.
-         finalHeadingInBodyFrame.set(1.0, 0.0);
-      }
+      double finalYaw = goalOrientationMatters.getValue() ? goalPose.getYaw() : currentPose.getYaw();
+      // 1 = far from goal, face the goal position; 0 = near goal, match the final heading
+      double faceGoalBlendFraction = MathTools.clamp((distance - distanceToMatchGoalAngle.getValue())
+                                                     / (distanceToFaceGoal.getValue() - distanceToMatchGoalAngle.getValue()), 0.0, 1.0);
+      if (faceGoalBlendFraction == 0.0)
+         return finalYaw;
+      double bearingToGoal = Math.atan2(vectorToGoal.getY(), vectorToGoal.getX());
+      // Interpolate the angle, not the vectors: the vector to the goal is metres long and would dominate the blend.
+      return AngleTools.trimAngleMinusPiToPi(finalYaw + faceGoalBlendFraction * AngleTools.computeAngleDifferenceMinusPiToPi(bearingToGoal, finalYaw));
+   }
 
-      // Blend between facing forward (alpha=0) and the direction toward the goal (alpha=1)
-      desiredHeadingInBodyFrame.interpolate(finalHeadingInBodyFrame, vectorToGoalInPelvisFrame, faceGoalBlendFraction);
+   private double distanceToGoalThresholdOrSmall()
+   {
+      return Math.max(distanceToGoalThresholdToStop.getValue(), 1.0e-3);
+   }
 
-      // Signed angle error: how far the robot must rotate to face the desired heading (forward = [1, 0])
-      angleToHeading.set(AngleTools.angleMinusPiToPi(desiredHeadingInBodyFrame, forwardVector));
+   /** Turns toward {@code headingError} (positive is counter-clockwise) without translating. */
+   private void turnInPlace(double headingError)
+   {
+      angleToHeading.set(headingError);
+      rateLimitedAngleToHeading.set(headingError);
+      // Keep turning until inside the orientation proximity, even when that is tighter than the deadband.
+      double deadband = Math.min(angleDeadband.getValue(), 0.5 * angleToGoalThresholdToStop.getValue());
+      double turningVelocity = clampTurningVelocity(kAngle.getValue() * DeadbandTools.applyDeadband(deadband, headingError));
 
+      normalizedRadialSpeed.set(0.0);
+      rateLimitedNormalizedRadialSpeed.set(0.0);
+      desiredVelocity.setToZero();
+      desiredSpeed.set(0.0);
+      desiredLinearVelocity.setToZero();
+      desiredAngularVelocity.set(0.0, 0.0, turningVelocity);
+   }
+
+   /**
+    * The walking policy slides 0.2 to 0.3 m while turning in place, so step back toward the goal at a slow speed rather
+    * than leaving the goal and walking back to it.
+    */
+   private void holdPositionWhileTurning()
+   {
+      desiredVelocity.set(vectorToGoalInPelvisFrame);
+      desiredVelocity.scale(positionHoldGain.getValue());
+      double speed = desiredVelocity.norm();
+      if (speed > maxPositionHoldSpeed.getValue())
+         desiredVelocity.scale(maxPositionHoldSpeed.getValue() / speed);
+      desiredSpeed.set(desiredVelocity.norm());
+      desiredLinearVelocity.set(desiredVelocity);
+      currentPose.getOrientation().transform(desiredLinearVelocity);
+   }
+
+   private double clampTurningVelocity(double turningVelocity)
+   {
+      turningVelocity = MathTools.clamp(turningVelocity, maxTurningSpeed.getDoubleValue());
+      if (Math.abs(turningVelocity) > 0.0 && Math.abs(turningVelocity) < minTurningSpeed.getValue())
+         turningVelocity = Math.signum(turningVelocity) * minTurningSpeed.getValue();
+      return turningVelocity;
+   }
+
+   private final Vector2D walkingTargetInBodyFrame = new Vector2D();
+
+   private void walk(FramePose3DReadOnly goalPose, double distanceToGoal)
+   {
+      walkingHeadingYaw.set(computeWalkingHeadingYaw(goalPose, distanceToGoal));
+      angleToHeading.set(AngleTools.computeAngleDifferenceMinusPiToPi(walkingHeadingYaw.getValue(), currentPose.getYaw()));
       // Rate-limit how quickly the heading target can change each tick
       double angleChangeFromPrevious = AngleTools.computeAngleDifferenceMinusPiToPi(angleToHeading.getDoubleValue(), rateLimitedAngleToHeading.getDoubleValue());
       angleChangeFromPrevious = MathTools.clamp(angleChangeFromPrevious, maxHeadingRate.getValue() * computedDt);
-      rateLimitedAngleToHeading.set(AngleTools.trimAngleMinusPiToPi(angleToHeading.getDoubleValue() + angleChangeFromPrevious));
-   }
+      rateLimitedAngleToHeading.set(AngleTools.trimAngleMinusPiToPi(rateLimitedAngleToHeading.getDoubleValue() + angleChangeFromPrevious));
 
-
-   private void computePDNormalizedFeedbackVelocities(double distanceToGoal, double angleToGoalHeading)
-   {
       double distanceForMaxSpeed = 0.5 * MathTools.square(maxForwardSpeed.getDoubleValue()) / maxRadialAcceleration.getDoubleValue();
       // Acceleration limited controller on distance.
       if (distanceToGoal >= distanceForMaxSpeed)
@@ -608,31 +743,26 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       double maxAllowedSpeed = rateLimitedNormalizedRadialSpeed.getDoubleValue() + computedDt * maxRadialAcceleration.getValue();
       rateLimitedNormalizedRadialSpeed.set(MathTools.clamp(normalizedRadialSpeed.getValue(), 0.0, maxAllowedSpeed));
 
-      // P-controller on heading: angular velocity proportional to heading error
-      double turningVelocity = -kAngle.getValue() * DeadbandTools.applyDeadband(angleDeadband.getDoubleValue(), angleToGoalHeading);
-      turningVelocity = MathTools.clamp(turningVelocity, maxTurningSpeed.getDoubleValue());
-      if (Math.abs(turningVelocity) > 0.0 && Math.abs(turningVelocity) < minTurningSpeed.getValue())
-         turningVelocity = Math.signum(turningVelocity) * minTurningSpeed.getValue();
-
-      // Angle from the robot's forward axis to the goal direction, measured in the robot's body frame
-      double angleToGoalInBodyFrame = AngleTools.angleMinusPiToPi(vectorToGoalInPelvisFrame, forwardVector);
-
-      // Unit components of the velocity direction toward the goal, scaled by normalized speed
+      // Walk toward the goal, or for turn-walk-turn toward a point ahead on the start-to-goal line.
+      computeWalkingTarget(goalPose);
+      double angleToTarget = Math.atan2(walkingTargetInBodyFrame.getY(), walkingTargetInBodyFrame.getX());
       double speed = rateLimitedNormalizedRadialSpeed.getDoubleValue() * desiredCruisingSpeedScalar.getValue();
-      double goalDirectionX = speed * Math.cos(-angleToGoalInBodyFrame);
-      double goalDirectionY = speed * Math.sin(-angleToGoalInBodyFrame);
+      double xSpeedLimit = walkingTargetInBodyFrame.getX() > 0.0 ? maxForwardSpeed.getDoubleValue() : maxBackwardSpeed.getDoubleValue();
+      // Fastest speed in this direction within the elliptical forward/lateral limits. Scaling each axis by its own
+      // limit instead would bend the walking direction off the target.
+      double cosine = Math.cos(angleToTarget);
+      double sine = Math.sin(angleToTarget);
+      double speedLimit = 1.0 / Math.sqrt(MathTools.square(cosine / xSpeedLimit) + MathTools.square(sine / maxLateralSpeed.getValue()));
+      desiredVelocity.set(speed * speedLimit * cosine, speed * speedLimit * sine);
 
-      // Scale by per-axis speed limits; forward and backward limits are asymmetric
-      double xSpeedLimit = vectorToGoalInPelvisFrame.getX() > 0 ? maxForwardSpeed.getDoubleValue() : maxBackwardSpeed.getDoubleValue();
-      double alpha = Math.max(0.1, Math.abs(turningVelocity) / maxTurningSpeed.getDoubleValue());
-      double turningScalar = 1.0 - MathTools.square(alpha);
-      double vx = goalDirectionX * xSpeedLimit * turningScalar;
-      double vy = goalDirectionY * maxLateralSpeed.getValue() * turningScalar;
-
-
-      desiredVelocity.set(vx, vy);
-      turningVelocity = applyWalkingTurnSafety(turningVelocity, turningScalar);
-      desiredAngularVelocity.set(0.0, 0.0, turningVelocity);
+      // P-controller on heading. The walking policy tracks a gentle walking arc but locks the knees on a hard yaw with
+      // little forward speed, so cap yaw to v / radius, or to a slow turn when not walking forward. Large heading
+      // changes are made by the turn in place phases instead.
+      double turningVelocity = clampTurningVelocity(kAngle.getValue() * DeadbandTools.applyDeadband(angleDeadband.getDoubleValue(),
+                                                                                                      rateLimitedAngleToHeading.getDoubleValue()));
+      double radius = Math.max(minTurnRadiusWhileWalking.getValue(), 1.0e-3);
+      double maxTurn = Math.max(Math.max(0.0, desiredVelocity.getX()) / radius, maxTurningSpeedWhileWalkingSlowly.getValue());
+      desiredAngularVelocity.set(0.0, 0.0, MathTools.clamp(turningVelocity, maxTurn));
 
       double desiredSpeed = desiredVelocity.norm();
       if (desiredSpeed < minSpeed.getValue() && desiredSpeed > 1e-3)
@@ -646,35 +776,28 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       currentPose.getOrientation().transform(desiredLinearVelocity);
    }
 
-   /**
-    * The walking policy tracks a gentle walking arc. A hard yaw with little forward speed locks the
-    * knees. Keep enough forward speed, drop the sidestep, and cap yaw to {@code v / radius}.
-    * <p>
-    * Never rewrite a reverse into a forward arc, and when {@code keepHeading} is set leave a sidestep
-    * as a sidestep. Forcing forward is how a 2 m backward spoken step started walking the other way.
-    */
-   private double applyWalkingTurnSafety(double turningVelocity, double turningScalar)
+   private final Vector2D walkingTarget = new Vector2D();
+
+   private void computeWalkingTarget(FramePose3DReadOnly goalPose)
    {
-      if (Math.abs(turningVelocity) < 1.0e-6)
-         return 0.0;
-
-      boolean reversing = desiredVelocity.getX() < 0.0;
-      boolean wouldPivot = turningScalar < minTranslationScaleWhileTurning.getValue()
-                           || (!reversing && desiredVelocity.getX() < minForwardSpeedWhileTurning.getValue());
-      if (wouldPivot)
+      walkingTarget.set(goalPose.getX(), goalPose.getY());
+      if (turnWalkTurn.getValue())
       {
-         if (keepHeading.getBooleanValue() || reversing)
+         double lineX = goalPose.getX() - startPose.getX();
+         double lineY = goalPose.getY() - startPose.getY();
+         double lineLength = EuclidCoreTools.norm(lineX, lineY);
+         if (lineLength > distanceToGoalThresholdOrSmall())
          {
-            if (reversing)
-               desiredVelocity.setY(0.0);
+            lineX /= lineLength;
+            lineY /= lineLength;
+            double distanceAlongLine = (currentPose.getX() - startPose.getX()) * lineX + (currentPose.getY() - startPose.getY()) * lineY;
+            double lookaheadAlongLine = Math.max(distanceAlongLine, 0.0) + pathLookaheadDistance.getValue();
+            if (lookaheadAlongLine < lineLength)
+               walkingTarget.set(startPose.getX() + lookaheadAlongLine * lineX, startPose.getY() + lookaheadAlongLine * lineY);
          }
-         else
-            desiredVelocity.set(minForwardSpeedWhileTurning.getValue(), 0.0);
       }
-
-      double radius = Math.max(minTurnRadiusWhileWalking.getValue(), 1.0e-3);
-      double maxTurn = Math.max(0.0, desiredVelocity.getX()) / radius;
-      return MathTools.clamp(turningVelocity, maxTurn);
+      walkingTarget.sub(currentPose.getX(), currentPose.getY());
+      currentPose.getOrientation().inverseTransform(walkingTarget, walkingTargetInBodyFrame);
    }
 
    private void updateOutputMessage()
@@ -693,6 +816,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       private double cruisingSpeedScaler;
       private boolean goalOrientationMatters;
       private boolean keepHeading;
+      private boolean turnWalkTurn;
       /** Unit vector of the leg that arrives at this waypoint (from previousPose to goalPose). */
       private final Vector2D incomingDirection = new Vector2D();
 
@@ -703,6 +827,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          proximityToReachGoal = command.getPositionProximity();
          goalOrientationMatters = command.getGoalOrientationMatters();
          keepHeading = command.getKeepHeading();
+         turnWalkTurn = command.getTurnWalkTurn();
 
          double dx = goalPose.getX() - previousPose.getX();
          double dy = goalPose.getY() - previousPose.getY();
@@ -756,6 +881,11 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       public boolean getKeepHeading()
       {
          return keepHeading;
+      }
+
+      public boolean getTurnWalkTurn()
+      {
+         return turnWalkTurn;
       }
 
       public Vector2DReadOnly getIncomingDirection()

@@ -7,13 +7,16 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.*;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.subscribers.FilteredNotification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -25,6 +28,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
@@ -50,6 +54,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.DoubleBinaryOperator;
 
 /**
  * This class provides easy access to everything that involves mobility for the robot's legs.
@@ -116,7 +122,10 @@ public class RDXLocomotionManager
    //   private final RDXWaypointPlacement waypointPlacement;
 
    private final ROS2Publisher<ControllerWaypointGoalListMessage> goalListMessagePublisher;
-   private final ControllerWaypointStatusMessage waypointStatusMessage = new ControllerWaypointStatusMessage();
+   /** StepGeneratorCommandInputManager discards waypoint goals unless this heartbeat is alive. */
+   private final ROS2Heartbeat stepGeneratorHeartbeat;
+   /** Every status is queued, since the goal reacher publishes reached and started next in the same tick */
+   private final ConcurrentLinkedQueue<ControllerWaypointStatusMessage> receivedWaypointStatuses = new ConcurrentLinkedQueue<>();
    private final Pose3D goalPose = new Pose3D();
    private final ControllerWaypointGoalMessage goalMessage = new ControllerWaypointGoalMessage();
    private final ControllerWaypointGoalListMessage goalListMessage = new ControllerWaypointGoalListMessage();
@@ -127,9 +136,14 @@ public class RDXLocomotionManager
    private RDXSplineGraphic trajectoryGraphic;
    private int numWaypoints = 0;
    private boolean waypointsSent = false;
-   private boolean waypointsReceived = false;
    private int waypointsCompleted = 0;
-   private int lastWaypointsRemaining = 0;
+   private static final double SHOW_REACHED_WAYPOINTS_DURATION = 2.0;
+   private final Timer allWaypointsReachedTimer = new Timer();
+   private static final int FACE_GOAL = 0;
+   private static final int KEEP_HEADING = 1;
+   private static final int TURN_WALK_TURN = 2;
+   private final ImInt waypointHeadingMode = new ImInt(FACE_GOAL);
+   private DoubleBinaryOperator pointCloudHeightProvider;
 
    // Used for UI logic
    private boolean wasPlanning = false;
@@ -172,7 +186,9 @@ public class RDXLocomotionManager
                                                                                                  robotModel.getSimpleRobotName()));
       controllerHelper.getROS2Node()
                       .createSubscriptionSampler(HumanoidControllerAPI.getTopic(ControllerWaypointStatusMessage.class, robotModel.getSimpleRobotName()),
-                                                 waypointStatusMessage::set);
+                                                 status -> receivedWaypointStatuses.add(new ControllerWaypointStatusMessage(status)));
+      stepGeneratorHeartbeat = new ROS2Heartbeat(controllerHelper.getROS2Node(), CSGROS2CommunicationHelper.CSG_HEARTBEAT_TOPIC);
+      stepGeneratorHeartbeat.setAlive(true);
    }
 
    public void create(RDXBaseUI baseUI)
@@ -208,6 +224,9 @@ public class RDXLocomotionManager
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW, syncedRobot);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
       posePlacement.create(Color.BLUE, "Place Waypoint", "Placing", "Clear Waypoint");
+      // Pick X and Y on the mid feet plane, then snap Z to the point cloud there if there is one
+      posePlacement.setPickPlaneHeightSupplier(this::getMidFeetHeight);
+      posePlacement.setPositionHeightProvider(this::getWaypointHeight);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(posePlacement::processImGui3DViewInput);
 
       interactableFootstepPlan.create(baseUI, controllerHelper, syncedRobot, locomotionParameters, footstepPlannerParametersToUse, swingFootPlannerParameters);
@@ -399,6 +418,16 @@ public class RDXLocomotionManager
             sendWaypoints();
          ImGui.endDisabled();
          ImGui.text("Waypoints: " + numWaypoints);
+         ImGui.text("Heading:");
+         ImGui.sameLine();
+         ImGui.radioButton(labels.get("Face goal"), waypointHeadingMode, FACE_GOAL);
+         ImGuiTools.previousWidgetTooltip("Face the waypoint while walking, then turn to its arrow");
+         ImGui.sameLine();
+         ImGui.radioButton(labels.get("Keep heading"), waypointHeadingMode, KEEP_HEADING);
+         ImGuiTools.previousWidgetTooltip("Keep the current facing, walking sideways or backward, then turn to the arrow at the end");
+         ImGui.sameLine();
+         ImGui.radioButton(labels.get("Turn-walk-turn"), waypointHeadingMode, TURN_WALK_TURN);
+         ImGuiTools.previousWidgetTooltip("Turn to face along the line to the waypoint, walk the line, then turn to the arrow");
          ImGui.separator();
 
          ImGui.text("Footstep Placement:");
@@ -471,32 +500,7 @@ public class RDXLocomotionManager
          walkPathControlRing.renderImGuiWidgets(widgetStartX);
       }
 
-      int currentWaypointsRemaining = waypointStatusMessage.getWaypointsRemaining();
-      boolean waypointsStarted = waypointStatusMessage.getIsStarted();
-
-      if (currentWaypointsRemaining == 0 && !waypointsStarted && waypointsSent && waypointsReceived)
-      {
-         System.out.println("RL walking complete");
-         clearWaypoints();
-      }
-      else if ((waypointsStarted || currentWaypointsRemaining > 0) && waypointsSent)
-      {
-         waypointsReceived = true;
-      }
-      //      System.out.println(waypointsStarted + " " + currentWaypointsRemaining);
-      if (currentWaypointsRemaining != lastWaypointsRemaining)
-      {
-         System.out.println("Waypoint completed");
-         waypoints.get(waypointsCompleted).create(0.05, 0.2, Color.GREEN);
-         waypoints.get(waypointsCompleted).setToPose(goalPoseArrayList.get(waypointsCompleted));
-         waypointsCompleted++;
-         if (waypointsCompleted < numWaypoints)
-         {
-            waypoints.get(waypointsCompleted).create(0.05, 0.2, Color.RED);
-            waypoints.get(waypointsCompleted).setToPose(goalPoseArrayList.get(waypointsCompleted));
-         }
-      }
-      lastWaypointsRemaining = currentWaypointsRemaining;
+      updateWaypointProgress();
 
       if (posePlacement.getPlacedNotification().poll() && posePlacement.isPlaced())
       {
@@ -538,6 +542,39 @@ public class RDXLocomotionManager
       }
    }
 
+   private void updateWaypointProgress()
+   {
+      ControllerWaypointStatusMessage status;
+      while ((status = receivedWaypointStatuses.poll()) != null)
+      {
+         // A status that is not started means the active waypoint was reached
+         if (status.getIsStarted() || !waypointsSent || waypointsCompleted >= numWaypoints)
+            continue;
+
+         setWaypointColor(waypointsCompleted, Color.GREEN);
+         waypointsCompleted++;
+         if (waypointsCompleted < numWaypoints)
+         {
+            setWaypointColor(waypointsCompleted, Color.RED);
+         }
+         else
+         {
+            LogTools.info("Reached the last waypoint");
+            allWaypointsReachedTimer.reset();
+         }
+      }
+
+      // Show the reached waypoints for a moment before clearing them
+      if (waypointsSent && numWaypoints > 0 && waypointsCompleted >= numWaypoints && !allWaypointsReachedTimer.isRunning(SHOW_REACHED_WAYPOINTS_DURATION))
+         clearWaypoints();
+   }
+
+   private void setWaypointColor(int index, Color color)
+   {
+      waypoints.get(index).create(0.05, 0.2, color);
+      waypoints.get(index).setToPose(goalPoseArrayList.get(index));
+   }
+
    private void clearWaypoints()
    {
       trajectoryGraphic.clear();
@@ -551,16 +588,43 @@ public class RDXLocomotionManager
       waypointsSent = false;
    }
 
+   private double getMidFeetHeight()
+   {
+      return syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
+   }
+
+   private double getWaypointHeight(double x, double y)
+   {
+      if (pointCloudHeightProvider != null)
+      {
+         double height = pointCloudHeightProvider.applyAsDouble(x, y);
+         if (!Double.isNaN(height))
+            return height;
+      }
+      return getMidFeetHeight();
+   }
+
+   /** Gives the point cloud height at a world X and Y, NaN when there is none, so waypoints snap onto it */
+   public void setPointCloudHeightProvider(DoubleBinaryOperator pointCloudHeightProvider)
+   {
+      this.pointCloudHeightProvider = pointCloudHeightProvider;
+   }
+
    private void sendWaypoints()
    {
-      waypoints.get(0).create(0.05, 0.2, Color.RED);
-      waypoints.get(0).setToPose(goalPoseArrayList.get(0));
+      setWaypointColor(0, Color.RED);
 
+      for (int i = 0; i < goalMessageArrayList.size(); i++)
+      {
+         goalMessageArrayList.get(i).setKeepHeading(waypointHeadingMode.get() == KEEP_HEADING);
+         goalMessageArrayList.get(i).setTurnWalkTurn(waypointHeadingMode.get() == TURN_WALK_TURN);
+      }
       goalListMessage.getWaypoints().addAll(goalMessageArrayList);
       goalListMessagePublisher.publish(goalListMessage);
       goalListMessage.getWaypoints().clear();
       waypointsSent = true;
-      waypointsReceived = false;
+      waypointsCompleted = 0;
+      receivedWaypointStatuses.clear();
    }
 
    public void updateWalkPathControlRing()
@@ -619,6 +683,7 @@ public class RDXLocomotionManager
       controllerFootstepQueueGraphic.destroy();
       bodyPathPlanGraphic.destroy();
       interactableFootstepPlan.destroy();
+      stepGeneratorHeartbeat.destroy();
    }
 
    public void deleteAll()
