@@ -91,13 +91,13 @@ public class ROS2BehaviorCommandExecutor{
                     ros2BehaviorTreeExecutor.cancelActive(treeCancel);
             }
             stageIncoming();
-            while(!pending.isEmpty() && pending.peek().getKind() == BehaviorCommandMessage.TREE)
-                apply(pending.poll());
+            applyMatching(true);
         }
     }
 
     /**
      * Starts queued mimic and follow commands. Called from the command tick, not from {@link #update()}.
+     * A tree waiting at the head of the queue does not block them, and a mimic or follow does not block a tree.
      */
     public void drain(){
         synchronized(scheduleLock){
@@ -107,12 +107,28 @@ public class ROS2BehaviorCommandExecutor{
             try{
                 stageIncoming();
                 flushDeferredStops();
-                while(!pending.isEmpty() && pending.peek().getKind() != BehaviorCommandMessage.TREE)
-                    apply(pending.poll());
+                applyMatching(false);
             }
             finally{
                 draining = false;
             }
+        }
+    }
+
+    /**
+     * {@code trees} applies {@link BehaviorCommandMessage#TREE} and leaves every other kind queued, in order.
+     * Otherwise applies every other kind and leaves trees queued.
+     */
+    private void applyMatching(boolean trees){
+        int queued = pending.size();
+        for(int i = 0; i < queued; i++){
+            BehaviorCommandMessage command = pending.poll();
+            if(command == null)
+                return;
+            if((command.getKind() == BehaviorCommandMessage.TREE) == trees)
+                apply(command);
+            else
+                pending.add(command);
         }
     }
 

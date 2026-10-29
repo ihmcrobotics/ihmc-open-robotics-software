@@ -43,4 +43,34 @@ public class ROS2BehaviorCommandExecutorTest
       assertEquals(BehaviorResultMessage.ACCEPTED, results.get(0).getPhase());
       assertEquals("wave", results.get(0).getSummaryAsString());
    }
+
+   @Test
+   public void testMimicBehindATreeStillDrains()
+   {
+      List<BehaviorResultMessage> results = new ArrayList<>();
+      ROS2BehaviorCommandExecutor executor = new ROS2BehaviorCommandExecutor(results::add);
+      AtomicInteger starts = new AtomicInteger();
+      executor.setMimicStarter((requestId, name, closestPerson) ->
+      {
+         starts.incrementAndGet();
+         return new StartResult(BehaviorResultMessage.ACCEPTED, name, false);
+      });
+
+      BehaviorCommandMessage tree = new BehaviorCommandMessage();
+      tree.setRequestId(1);
+      tree.setKind(BehaviorCommandMessage.TREE);
+      tree.setName("skill/GoHome.json");
+      executor.enqueue(tree);
+
+      BehaviorCommandMessage mimic = new BehaviorCommandMessage();
+      mimic.setRequestId(2);
+      mimic.setKind(BehaviorCommandMessage.MIMIC);
+      mimic.setName("wave");
+      executor.enqueue(mimic);
+
+      executor.drain();
+      assertEquals(1, starts.get());
+      assertEquals(BehaviorResultMessage.ACCEPTED, results.get(0).getPhase());
+      assertEquals("wave", results.get(0).getSummaryAsString());
+   }
 }
