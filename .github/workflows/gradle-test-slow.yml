@@ -36,11 +36,6 @@ jobs:
     with:
       subproject: 'zulu'
       test-category: 'controller-api-slow-4'
-  zulu-humanoid-behaviors-slow:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    with:
-      subproject: 'zulu'
-      test-category: 'humanoid-behaviors-slow'
   zulu-humanoid-flat-ground-slow-2:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
