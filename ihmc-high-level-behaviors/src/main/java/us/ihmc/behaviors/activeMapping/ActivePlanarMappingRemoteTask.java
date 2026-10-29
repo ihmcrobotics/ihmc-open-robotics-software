@@ -28,14 +28,11 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
    private final ROS2Topic controllerFootstepDataTopic;
 
    private ContinuousPlannerForPlanarRegions continuousPlanner;
-   private final ContinuousHikingParameters continuousPlanningParameters;
    private final SwingPlannerParametersBasics swingFootPlannerParameters;
-   private TerrainPlanningDebugger terrainPlanningDebugger;
 
 
    public ActivePlanarMappingRemoteTask(String simpleRobotName,
                                         DRCRobotModel robotModel,
-                                        ContinuousHikingParameters continuousPlanningParameters,
                                         ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic,
                                         ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic,
                                         ROS2Node ros2Node,
@@ -46,8 +43,6 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
       super(simpleRobotName, terrainRegionsTopic, structuralRegionsTopic, ros2Node, referenceFrames, referenceFramesUpdater, smoothing);
 
       this.walkingStatusMessage.get().setWalkingStatus(WalkingStatus.COMPLETED.toByte());
-      this.terrainPlanningDebugger = new TerrainPlanningDebugger(ros2Node, null);
-      this.continuousPlanningParameters = continuousPlanningParameters;
       this.swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
       this.controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
 
