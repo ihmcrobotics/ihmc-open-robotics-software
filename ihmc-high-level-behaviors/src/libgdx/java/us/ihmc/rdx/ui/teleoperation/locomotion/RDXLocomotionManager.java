@@ -55,6 +55,7 @@ import us.ihmc.tools.Timer;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Consumer;
 import java.util.function.DoubleBinaryOperator;
 
 /**
@@ -144,6 +145,8 @@ public class RDXLocomotionManager
    private static final int TURN_WALK_TURN = 2;
    private final ImInt waypointHeadingMode = new ImInt(FACE_GOAL);
    private DoubleBinaryOperator pointCloudHeightProvider;
+   /** Renders the RL walking rows at the top of the Locomotion header, given the X its widgets start at. Optional. */
+   private Consumer<Float> rlWalkingWidgetsRenderer;
 
    // Used for UI logic
    private boolean wasPlanning = false;
@@ -367,41 +370,11 @@ public class RDXLocomotionManager
          // "Waypoint Placement:" is the widest label up here, so the widgets start just past it
          float widgetStartX = ImGui.getCursorPosX() + ImGuiTools.calcTextSizeX("Waypoint Placement:") + ImGui.getStyle().getItemSpacingX();
 
-         ImGui.text("Walking Command:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         if (ImGui.button(labels.get("Abort")))
+         if (rlWalkingWidgetsRenderer != null)
          {
-            sendAbortWalkingMessage();
+            rlWalkingWidgetsRenderer.accept(widgetStartX);
+            ImGui.separator();
          }
-         ImGui.sameLine();
-
-         ImGui.beginDisabled(!walkAvailable);
-         if (ImGui.button(labels.get("Walk")))
-         { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
-            interactableFootstepPlan.walkFromSteps();
-         }
-         ImGuiTools.previousWidgetTooltip("Space");
-         ImGui.sameLine();
-         ImGui.endDisabled();
-
-         ImGui.beginDisabled(!pauseAvailable);
-         if (ImGui.button(labels.get("Pause")))
-         {
-            setPauseWalkingAndPublish(true);
-         }
-         ImGuiTools.previousWidgetTooltip("Space");
-         ImGui.sameLine();
-         ImGui.endDisabled();
-
-         ImGui.beginDisabled(!continueAvailable);
-         if (ImGui.button(labels.get("Continue")))
-         {
-            setPauseWalkingAndPublish(false);
-         }
-         ImGuiTools.previousWidgetTooltip("Space");
-         ImGui.endDisabled();
-         ImGui.separator();
 
          ImGui.text("Waypoint Placement:");
          ImGui.sameLine();
@@ -442,6 +415,42 @@ public class RDXLocomotionManager
             ImGui.indent();
             // The labels here are indented, so line the widgets up past the widest one instead of at widgetStartX
             float modelBasedWidgetStartX = ImGui.getCursorPosX() + ImGuiTools.calcTextSizeX("Turn Aggressiveness:") + 2.0f * ImGui.getStyle().getItemSpacingX();
+            ImGui.text("Walking Command:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            if (ImGui.button(labels.get("Abort")))
+            {
+               sendAbortWalkingMessage();
+            }
+            ImGui.sameLine();
+
+            ImGui.beginDisabled(!walkAvailable);
+            if (ImGui.button(labels.get("Walk")))
+            { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
+               interactableFootstepPlan.walkFromSteps();
+            }
+            ImGuiTools.previousWidgetTooltip("Space");
+            ImGui.sameLine();
+            ImGui.endDisabled();
+
+            ImGui.beginDisabled(!pauseAvailable);
+            if (ImGui.button(labels.get("Pause")))
+            {
+               setPauseWalkingAndPublish(true);
+            }
+            ImGuiTools.previousWidgetTooltip("Space");
+            ImGui.sameLine();
+            ImGui.endDisabled();
+
+            ImGui.beginDisabled(!continueAvailable);
+            if (ImGui.button(labels.get("Continue")))
+            {
+               setPauseWalkingAndPublish(false);
+            }
+            ImGuiTools.previousWidgetTooltip("Space");
+            ImGui.endDisabled();
+            ImGui.separator();
+
             ImGui.text("Footstep Placement:");
             ImGui.sameLine();
             ImGui.setCursorPosX(modelBasedWidgetStartX);
@@ -623,6 +632,15 @@ public class RDXLocomotionManager
    public void setPointCloudHeightProvider(DoubleBinaryOperator pointCloudHeightProvider)
    {
       this.pointCloudHeightProvider = pointCloudHeightProvider;
+   }
+
+   /**
+    * Puts the robot's RL walking commands at the top of the Locomotion header, above the waypoints. The renderer is
+    * passed the X its widgets should start at, to line up with the rest of the header.
+    */
+   public void setRLWalkingWidgetsRenderer(Consumer<Float> rlWalkingWidgetsRenderer)
+   {
+      this.rlWalkingWidgetsRenderer = rlWalkingWidgetsRenderer;
    }
 
    private void sendWaypoints()
