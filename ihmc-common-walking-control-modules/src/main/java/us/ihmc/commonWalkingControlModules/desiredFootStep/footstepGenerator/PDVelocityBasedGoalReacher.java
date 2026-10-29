@@ -87,10 +87,10 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    /** Turn-walk-turn steers to a point this far ahead along the start-to-goal line. */
    private static final double DEFAULT_PATH_LOOKAHEAD_DISTANCE = 0.5;
    /**
-    * While turning to the goal yaw, the robot walks back to the goal only past this many times the position proximity.
+    * While turning to the goal yaw, the robot walks back to the goal only past this many times the distance-to-goal threshold.
     * The walking policy carries on 0.2 to 0.3 m when the walk stops and the turn starts; the position hold brings it back.
     */
-   private static final double DEFAULT_POSITION_PROXIMITY_SCALE_WHILE_TURNING_TO_GOAL_YAW = 3.5;
+   private static final double DEFAULT_DISTANCE_TO_GOAL_THRESHOLD_SCALE_WHILE_TURNING_TO_GOAL_YAW = 3.5;
    /** Gain (1/s) and speed cap (m/s) for stepping back to the goal while turning to the goal yaw. */
    private static final double DEFAULT_POSITION_HOLD_GAIN = 1.0;
    private static final double DEFAULT_MAX_POSITION_HOLD_SPEED = 0.1;
@@ -190,7 +190,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
    private final YoDouble headingErrorToEndTurnInPlace = new YoDouble("headingErrorToEndTurnInPlace", registry);
    private final YoDouble maxTurningSpeedWhileWalkingSlowly = new YoDouble("maxTurningSpeedWhileWalkingSlowly", registry);
    private final YoDouble pathLookaheadDistance = new YoDouble("pathLookaheadDistance", registry);
-   private final YoDouble positionProximityScaleWhileTurningToGoalYaw = new YoDouble("positionProximityScaleWhileTurningToGoalYaw", registry);
+   private final YoDouble distanceToGoalThresholdScaleWhileTurningToGoalYaw = new YoDouble("distanceToGoalThresholdScaleWhileTurningToGoalYaw", registry);
    private final YoDouble positionHoldGain = new YoDouble("positionHoldGain", registry);
    private final YoDouble maxPositionHoldSpeed = new YoDouble("maxPositionHoldSpeed", registry);
    private final YoBoolean isRampingDownAfterGoal = new YoBoolean("isRampingDownAfterGoal", registry);
@@ -256,7 +256,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       headingErrorToEndTurnInPlace.set(DEFAULT_HEADING_ERROR_TO_END_TURN_IN_PLACE);
       maxTurningSpeedWhileWalkingSlowly.set(DEFAULT_MAX_TURNING_SPEED_WHILE_WALKING_SLOWLY);
       pathLookaheadDistance.set(DEFAULT_PATH_LOOKAHEAD_DISTANCE);
-      positionProximityScaleWhileTurningToGoalYaw.set(DEFAULT_POSITION_PROXIMITY_SCALE_WHILE_TURNING_TO_GOAL_YAW);
+      distanceToGoalThresholdScaleWhileTurningToGoalYaw.set(DEFAULT_DISTANCE_TO_GOAL_THRESHOLD_SCALE_WHILE_TURNING_TO_GOAL_YAW);
       positionHoldGain.set(DEFAULT_POSITION_HOLD_GAIN);
       maxPositionHoldSpeed.set(DEFAULT_MAX_POSITION_HOLD_SPEED);
 
@@ -603,11 +603,11 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       vectorToGoal.set(goalPose.getX() - currentPose.getX(), goalPose.getY() - currentPose.getY());
       currentPose.getOrientation().inverseTransform(vectorToGoal, vectorToGoalInPelvisFrame);
       double distance = vectorToGoal.norm();
-      double positionProximity = distanceToGoalThresholdToStop.getValue();
+      double distanceToGoalThreshold = distanceToGoalThresholdToStop.getValue();
 
-      if (phase.getValue() == Phase.TURN_TO_GOAL_YAW && distance > positionProximityScaleWhileTurningToGoalYaw.getValue() * positionProximity)
+      if (phase.getValue() == Phase.TURN_TO_GOAL_YAW && distance > distanceToGoalThresholdScaleWhileTurningToGoalYaw.getValue() * distanceToGoalThreshold)
          phase.set(Phase.WALK); // Pushed off the goal while turning
-      if (phase.getValue() == Phase.WALK && goalOrientationMatters.getValue() && distance < positionProximity)
+      if (phase.getValue() == Phase.WALK && goalOrientationMatters.getValue() && distance < distanceToGoalThreshold)
          phase.set(Phase.TURN_TO_GOAL_YAW);
 
       if (phase.getValue() == Phase.TURN_TO_PATH)
@@ -620,7 +620,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          else
             errorToTurn = headingErrorToStartTurnInPlace.getValue();
 
-         if (distance >= positionProximity && Math.abs(headingError) > errorToTurn)
+         if (distance >= distanceToGoalThreshold && Math.abs(headingError) > errorToTurn)
          {
             isTurningToPath.set(true);
             turnInPlace(headingError);
@@ -652,7 +652,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       {
          double lineX = goalPose.getX() - startPose.getX();
          double lineY = goalPose.getY() - startPose.getY();
-         if (EuclidCoreTools.norm(lineX, lineY) > positionProximityOrSmall())
+         if (EuclidCoreTools.norm(lineX, lineY) > distanceToGoalThresholdOrSmall())
             return Math.atan2(lineY, lineX);
          return currentPose.getYaw();
       }
@@ -671,7 +671,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       return AngleTools.trimAngleMinusPiToPi(finalYaw + faceGoalBlendFraction * AngleTools.computeAngleDifferenceMinusPiToPi(bearingToGoal, finalYaw));
    }
 
-   private double positionProximityOrSmall()
+   private double distanceToGoalThresholdOrSmall()
    {
       return Math.max(distanceToGoalThresholdToStop.getValue(), 1.0e-3);
    }
@@ -786,7 +786,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
          double lineX = goalPose.getX() - startPose.getX();
          double lineY = goalPose.getY() - startPose.getY();
          double lineLength = EuclidCoreTools.norm(lineX, lineY);
-         if (lineLength > positionProximityOrSmall())
+         if (lineLength > distanceToGoalThresholdOrSmall())
          {
             lineX /= lineLength;
             lineY /= lineLength;
