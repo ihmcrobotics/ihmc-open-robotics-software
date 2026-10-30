@@ -230,11 +230,10 @@ testDependencies {
 
 ## Maintainers
 
-* Sylvain Bertrand (sbertrand@ihmc.org)
-* Duncan Calvert (dcalvert@ihmc.org)
-* Stephen McCrory (smcrory@ihmc.org)
 * Robert Griffin (rgriffin@ihmc.org)
-* James Foster (jfoster@ihmc.org)
 * Dexton Anderson (danderson@ihmc.org)
 * Luigi Penco (lpenco@ihmc.org)
-* Nick Kitchel (nkitchel@ihmc.org)
+* Beomyeong Park (bpark@ihmc.org)
+* Stefan Fasano (sfasano@ihmc.org)
+* Reese Peterson (rpeterson@ihmc.org)
+* James Foster (jfoster@ihmc.org)
