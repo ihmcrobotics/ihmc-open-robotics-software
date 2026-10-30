@@ -350,6 +350,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       // Snapshot state before updateGoalPose() so we can detect transitions for status messages.
       boolean hasGoal = this.hasGoal.getBooleanValue();
       boolean hasReachedGoal = this.hasReachedGoal.getBooleanValue();
+      // The ramp-down ends one tick after hasReachedGoal is set, and only that tick reports the goal as reached.
+      boolean wasRampingDownAfterGoal = isRampingDownAfterGoal.getBooleanValue();
       if (Double.isNaN(lastTickTime))
          computedDt = 0.0;
       else
@@ -416,7 +418,7 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       if (!isRampingDownAfterGoal.getBooleanValue())
          rampDownDecay.set(1.0);
 
-      if (hasGoal || this.hasGoal.getBooleanValue() || (hasReachedGoal != this.hasReachedGoal.getValue()))
+      if (hasGoal || this.hasGoal.getBooleanValue() || (hasReachedGoal != this.hasReachedGoal.getValue()) || wasRampingDownAfterGoal)
       {
          // Send status.
          statusMessage.getCurrentPosition().set(currentPose.getPosition());
