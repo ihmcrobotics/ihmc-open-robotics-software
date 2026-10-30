@@ -30,7 +30,6 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.RDXArmManager;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFoot;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHand;
@@ -97,7 +96,6 @@ public class RDXTeleoperationManager extends RDXPanel
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final RDXTeleoperationParameters teleoperationParameters;
-   private final RDXStoredPropertySetTuner teleoperationParametersTuner = new RDXStoredPropertySetTuner("Teleoperation Parameters");
    private final RDXHardwareControlStateManager hardwareControlStateManager;
 
    private final RDXPelvisHeightSlider pelvisHeightSlider;
@@ -119,7 +117,6 @@ public class RDXTeleoperationManager extends RDXPanel
    private final RDXWholeBodyIKManager wholeBodyIKManager;
    /** Edits the stored "Trajectory time" value under a clearer name. The stored key keeps its name so saved files still load. */
    private final ImDouble trajectoryDuration = new ImDouble();
-   private RDXHumanoidDemoPoses demoPoses;
    /** When set, a Reset Sim button is shown at the top of the 3D view. Left unset for the real robot. */
    private Runnable resetSimulationCallback;
 
@@ -164,7 +161,6 @@ public class RDXTeleoperationManager extends RDXPanel
 
       this.syncedRobot = syncedRobot;
 
-      addChild(teleoperationParametersTuner);
       robotModel = controllerHelper.getRobotModel();
       hasHead = robotModel.getRobotVersion().hasHead();
       for (RobotSide side : RobotSide.values)
@@ -184,7 +180,7 @@ public class RDXTeleoperationManager extends RDXPanel
 
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2Node(), syncedRobot);
 
-      locomotionManager = new RDXLocomotionManager(robotModel, controllerHelper, syncedRobot, controllerStatusTracker, this);
+      locomotionManager = new RDXLocomotionManager(robotModel, controllerHelper, syncedRobot, controllerStatusTracker);
 
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)
@@ -219,7 +215,6 @@ public class RDXTeleoperationManager extends RDXPanel
 
       locomotionManager.create(baseUI);
 
-      teleoperationParametersTuner.create(teleoperationParameters);
 
 
       if (interactablesAvailable)
@@ -382,8 +377,6 @@ public class RDXTeleoperationManager extends RDXPanel
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
          baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
          interactablesEnabled.set(true);
-         demoPoses = new RDXHumanoidDemoPoses(robotModel, syncedRobot, ros2Helper, teleoperationParameters);
-         addChild(demoPoses);
       }
 
       clearInteractablesAndLocomotionGraphics();

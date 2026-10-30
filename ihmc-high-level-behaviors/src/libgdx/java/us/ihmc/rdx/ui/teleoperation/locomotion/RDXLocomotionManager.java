@@ -35,7 +35,6 @@ import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.mesh.RDXMutableMultiLineModel;
 import us.ihmc.rdx.ui.*;
@@ -55,7 +54,6 @@ import us.ihmc.tools.Timer;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Consumer;
 import java.util.function.DoubleBinaryOperator;
 
 /**
@@ -81,8 +79,6 @@ public class RDXLocomotionManager
    private final RDXStoredPropertySetTuner locomotionParametersTuner = new RDXStoredPropertySetTuner("Locomotion Parameters");
    private final RDXStoredPropertySetTuner aStartFootstepPlanningParametersTuner = new RDXStoredPropertySetTuner(
          "Footstep Planner Parameters (Teleoperation A*)");
-   private final RDXStoredPropertySetTuner turnWalkTurnFootstepPlanningParametersTuner = new RDXStoredPropertySetTuner(
-         "Footstep Planner Parameters (Teleoperation Turn Walk Turn)");
    private final RDXStoredPropertySetTuner bodyPathPlanningParametersTuner = new RDXStoredPropertySetTuner("Body Path Planner Parameters (Teleoperation)");
    private final RDXStoredPropertySetTuner swingFootPlanningParametersTuner = new RDXStoredPropertySetTuner("Swing Foot Planning Parameters (Teleoperation)");
    private ImGuiStoredPropertySetBooleanWidget areFootstepsAdjustableCheckbox;
@@ -145,8 +141,7 @@ public class RDXLocomotionManager
    private static final int TURN_WALK_TURN = 2;
    private final ImInt waypointHeadingMode = new ImInt(FACE_GOAL);
    private DoubleBinaryOperator pointCloudHeightProvider;
-   /** Renders the RL walking rows at the top of the Locomotion header, given the X its widgets start at. Optional. */
-   private Consumer<Float> rlWalkingWidgetsRenderer;
+   private final RDXRLWalkingCommandWidgets rlWalkingCommandWidgets;
 
    // Used for UI logic
    private boolean wasPlanning = false;
@@ -154,8 +149,7 @@ public class RDXLocomotionManager
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                ROS2ControllerHelper controllerHelper,
                                ROS2SyncedRobotModel syncedRobot,
-                               ControllerStatusTracker controllerStatusTracker,
-                               RDXPanel teleoperationPanel)
+                               ControllerStatusTracker controllerStatusTracker)
    {
       this.robotModel = robotModel;
       this.controllerHelper = controllerHelper;
@@ -166,12 +160,6 @@ public class RDXLocomotionManager
       aStarFootstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
-
-      teleoperationPanel.addChild(locomotionParametersTuner);
-      teleoperationPanel.addChild(aStartFootstepPlanningParametersTuner);
-      teleoperationPanel.addChild(turnWalkTurnFootstepPlanningParametersTuner);
-      teleoperationPanel.addChild(bodyPathPlanningParametersTuner);
-      teleoperationPanel.addChild(swingFootPlanningParametersTuner);
 
       footstepPlanning = new RDXFootstepPlanning(robotModel,
                                                  syncedRobot,
@@ -192,6 +180,8 @@ public class RDXLocomotionManager
                                                  status -> receivedWaypointStatuses.add(new ControllerWaypointStatusMessage(status)));
       stepGeneratorHeartbeat = new ROS2Heartbeat(controllerHelper.getROS2Node(), CSGROS2CommunicationHelper.CSG_HEARTBEAT_TOPIC);
       stepGeneratorHeartbeat.setAlive(true);
+
+      rlWalkingCommandWidgets = new RDXRLWalkingCommandWidgets(controllerHelper);
    }
 
    public void create(RDXBaseUI baseUI)
@@ -253,6 +243,7 @@ public class RDXLocomotionManager
    public void update()
    {
       controllerStatusTracker.checkControllerIsRunning();
+      rlWalkingCommandWidgets.update();
 
       if (abortedNotification.poll())
       {
@@ -370,11 +361,8 @@ public class RDXLocomotionManager
          // "Waypoint Placement:" is the widest label up here, so the widgets start just past it
          float widgetStartX = ImGui.getCursorPosX() + ImGuiTools.calcTextSizeX("Waypoint Placement:") + ImGui.getStyle().getItemSpacingX();
 
-         if (rlWalkingWidgetsRenderer != null)
-         {
-            rlWalkingWidgetsRenderer.accept(widgetStartX);
-            ImGui.separator();
-         }
+         rlWalkingCommandWidgets.renderImGuiWidgets(widgetStartX);
+         ImGui.separator();
 
          ImGui.text("Waypoint Placement:");
          ImGui.sameLine();
@@ -632,15 +620,6 @@ public class RDXLocomotionManager
    public void setPointCloudHeightProvider(DoubleBinaryOperator pointCloudHeightProvider)
    {
       this.pointCloudHeightProvider = pointCloudHeightProvider;
-   }
-
-   /**
-    * Puts the robot's RL walking commands at the top of the Locomotion header, above the waypoints. The renderer is
-    * passed the X its widgets should start at, to line up with the rest of the header.
-    */
-   public void setRLWalkingWidgetsRenderer(Consumer<Float> rlWalkingWidgetsRenderer)
-   {
-      this.rlWalkingWidgetsRenderer = rlWalkingWidgetsRenderer;
    }
 
    private void sendWaypoints()
