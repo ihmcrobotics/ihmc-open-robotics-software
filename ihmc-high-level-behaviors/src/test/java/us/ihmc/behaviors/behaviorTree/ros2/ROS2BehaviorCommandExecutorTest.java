@@ -15,12 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ROS2BehaviorCommandExecutorTest
 {
    @Test
-   public void testMimicStartsOnCommandDrain()
+   public void testMimicStartsOnMimicUpdate()
    {
       List<BehaviorResultMessage> results = new ArrayList<>();
       ROS2BehaviorCommandExecutor executor = new ROS2BehaviorCommandExecutor(results::add);
       AtomicInteger starts = new AtomicInteger();
-      executor.setMimicStarter((requestId, name, closestPerson) ->
+      executor.setStarter(BehaviorCommandMessage.MIMIC, (requestId, name, closestPerson) ->
       {
          starts.incrementAndGet();
          return new StartResult(BehaviorResultMessage.ACCEPTED, name, false);
@@ -32,11 +32,15 @@ public class ROS2BehaviorCommandExecutorTest
       command.setName("wave");
       executor.enqueue(command);
 
-      executor.update();
+      executor.update(BehaviorCommandMessage.TREE);
       assertEquals(0, starts.get());
       assertTrue(results.isEmpty());
 
-      executor.drain();
+      executor.update(BehaviorCommandMessage.FOLLOW);
+      assertEquals(0, starts.get());
+      assertTrue(results.isEmpty());
+
+      executor.update(BehaviorCommandMessage.MIMIC);
       assertEquals(1, starts.get());
       assertEquals(1, results.size());
       assertEquals(7, results.get(0).getRequestId());
@@ -45,12 +49,12 @@ public class ROS2BehaviorCommandExecutorTest
    }
 
    @Test
-   public void testMimicBehindATreeStillDrains()
+   public void testMimicBehindATreeStillStarts()
    {
       List<BehaviorResultMessage> results = new ArrayList<>();
       ROS2BehaviorCommandExecutor executor = new ROS2BehaviorCommandExecutor(results::add);
       AtomicInteger starts = new AtomicInteger();
-      executor.setMimicStarter((requestId, name, closestPerson) ->
+      executor.setStarter(BehaviorCommandMessage.MIMIC, (requestId, name, closestPerson) ->
       {
          starts.incrementAndGet();
          return new StartResult(BehaviorResultMessage.ACCEPTED, name, false);
@@ -68,9 +72,58 @@ public class ROS2BehaviorCommandExecutorTest
       mimic.setName("wave");
       executor.enqueue(mimic);
 
-      executor.drain();
+      executor.update(BehaviorCommandMessage.MIMIC);
       assertEquals(1, starts.get());
+      assertEquals(1, results.size());
       assertEquals(BehaviorResultMessage.ACCEPTED, results.get(0).getPhase());
       assertEquals("wave", results.get(0).getSummaryAsString());
+   }
+
+   @Test
+   public void testFollowStartsOnFollowUpdate()
+   {
+      List<BehaviorResultMessage> results = new ArrayList<>();
+      ROS2BehaviorCommandExecutor executor = new ROS2BehaviorCommandExecutor(results::add);
+      AtomicInteger starts = new AtomicInteger();
+      executor.setStarter(BehaviorCommandMessage.FOLLOW, (requestId, name, closestPerson) ->
+      {
+         starts.incrementAndGet();
+         return new StartResult(BehaviorResultMessage.ACCEPTED, name, false);
+      });
+
+      BehaviorCommandMessage command = new BehaviorCommandMessage();
+      command.setRequestId(3);
+      command.setKind(BehaviorCommandMessage.FOLLOW);
+      command.setName("person");
+      executor.enqueue(command);
+
+      executor.update(BehaviorCommandMessage.MIMIC);
+      assertEquals(0, starts.get());
+      assertTrue(results.isEmpty());
+
+      executor.update(BehaviorCommandMessage.FOLLOW);
+      assertEquals(1, starts.get());
+      assertEquals(BehaviorResultMessage.ACCEPTED, results.get(0).getPhase());
+      assertEquals("person", results.get(0).getSummaryAsString());
+   }
+
+   @Test
+   public void testFollowWithoutStarterIsRejectedOnTreeUpdate()
+   {
+      List<BehaviorResultMessage> results = new ArrayList<>();
+      ROS2BehaviorCommandExecutor executor = new ROS2BehaviorCommandExecutor(results::add);
+
+      BehaviorCommandMessage command = new BehaviorCommandMessage();
+      command.setRequestId(4);
+      command.setKind(BehaviorCommandMessage.FOLLOW);
+      command.setName("person");
+      executor.enqueue(command);
+
+      executor.update(BehaviorCommandMessage.TREE);
+      assertEquals(1, results.size());
+      assertEquals(4, results.get(0).getRequestId());
+      assertEquals(BehaviorResultMessage.REJECTED, results.get(0).getPhase());
+      assertTrue(results.get(0).getRejected());
+      assertEquals("Follow is not running", results.get(0).getSummaryAsString());
    }
 }

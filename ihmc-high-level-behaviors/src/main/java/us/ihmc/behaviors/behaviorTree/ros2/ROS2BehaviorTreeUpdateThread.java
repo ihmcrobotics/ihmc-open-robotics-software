@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
+import behavior_msgs.BehaviorCommandMessage;
 import org.apache.commons.lang3.function.TriFunction;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -63,7 +64,7 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
    protected synchronized void runTask()
    {
       syncedRobot.update();
-      executor.update();
+      executor.update(BehaviorCommandMessage.TREE);
       tree.update();
    }
 

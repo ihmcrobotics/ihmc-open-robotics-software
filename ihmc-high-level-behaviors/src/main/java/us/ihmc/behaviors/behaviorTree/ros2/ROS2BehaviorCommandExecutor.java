@@ -23,6 +23,7 @@ import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeExecutor;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
@@ -38,9 +39,8 @@ public class ROS2BehaviorCommandExecutor{
     private final Queue<Byte> deferredStops = new ConcurrentLinkedQueue<>();
     private final Queue<Byte> deferredTreeCancels = new ConcurrentLinkedQueue<>();
     private final Object scheduleLock = new Object();
-    private volatile Starter mimicStarter;
-    private volatile Starter followStarter;
-    private volatile Consumer<Byte> stopKind;
+    private final ConcurrentHashMap<Byte, Starter> starters = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Byte, Consumer<Byte>> stops = new ConcurrentHashMap<>();
     private Consumer<BehaviorResultMessage> resultSink;
     private byte activeKind;
     private boolean hasActive;
@@ -71,43 +71,50 @@ public class ROS2BehaviorCommandExecutor{
         commands.add(new BehaviorCommandMessage(command));
     }
 
-    public void setMimicStarter(Starter starter){
-        mimicStarter = starter;
+    public void setStarter(byte kind, Starter starter){
+        if(starter == null)
+            starters.remove(kind);
+        else
+            starters.put(kind, starter);
     }
 
-    public void setFollowStarter(Starter starter){
-        followStarter = starter;
-    }
-
-    public void setStopKind(Consumer<Byte> stopKind){
-        this.stopKind = stopKind;
-    }
-
-    public void update(){
-        synchronized(scheduleLock){
-            Byte treeCancel;
-            while((treeCancel = deferredTreeCancels.poll()) != null){
-                if(ros2BehaviorTreeExecutor != null)
-                    ros2BehaviorTreeExecutor.cancelActive(treeCancel);
-            }
-            stageIncoming();
-            applyMatching(true);
-        }
+    public void setStop(byte kind, Consumer<Byte> stop){
+        if(stop == null)
+            stops.remove(kind);
+        else
+            stops.put(kind, stop);
     }
 
     /**
-     * Starts queued mimic and follow commands. Called from the command tick, not from {@link #update()}.
-     * A tree waiting at the head of the queue does not block them, and a mimic or follow does not block a tree.
+     * Starts queued commands of {@code kind}. A command of another kind stays queued, in order, so a tree
+     * at the head does not block a mimic or a follow, and neither blocks a tree.
+     * <p>
+     * {@link BehaviorCommandMessage#TREE} runs on the behavior-tree thread and flushes deferred tree
+     * cancels. Any other kind sets {@link #draining} so a tree cancel waits for the next tree tick.
+     * When no follow starter is registered, a tree tick also rejects queued follows.
      */
-    public void drain(){
+    public void update(byte kind){
         synchronized(scheduleLock){
+            if(kind == BehaviorCommandMessage.TREE){
+                Byte treeCancel;
+                while((treeCancel = deferredTreeCancels.poll()) != null){
+                    if(ros2BehaviorTreeExecutor != null)
+                        ros2BehaviorTreeExecutor.cancelActive(treeCancel);
+                }
+                stageIncoming();
+                applyKind(BehaviorCommandMessage.TREE);
+                if(!starters.containsKey(BehaviorCommandMessage.FOLLOW))
+                    applyKind(BehaviorCommandMessage.FOLLOW);
+                return;
+            }
+
             if(draining)
                 return;
             draining = true;
             try{
                 stageIncoming();
                 flushDeferredStops();
-                applyMatching(false);
+                applyKind(kind);
             }
             finally{
                 draining = false;
@@ -115,17 +122,14 @@ public class ROS2BehaviorCommandExecutor{
         }
     }
 
-    /**
-     * {@code trees} applies {@link BehaviorCommandMessage#TREE} and leaves every other kind queued, in order.
-     * Otherwise applies every other kind and leaves trees queued.
-     */
-    private void applyMatching(boolean trees){
+    /** Applies queued commands of {@code kind} and leaves every other kind queued, in order. */
+    private void applyKind(byte kind){
         int queued = pending.size();
         for(int i = 0; i < queued; i++){
             BehaviorCommandMessage command = pending.poll();
             if(command == null)
                 return;
-            if((command.getKind() == BehaviorCommandMessage.TREE) == trees)
+            if(command.getKind() == kind)
                 apply(command);
             else
                 pending.add(command);
@@ -141,8 +145,9 @@ public class ROS2BehaviorCommandExecutor{
     private void flushDeferredStops(){
         Byte kind;
         while((kind = deferredStops.poll()) != null){
-            if(stopKind != null)
-                stopKind.accept(kind);
+            Consumer<Byte> stop = stops.get(kind);
+            if(stop != null)
+                stop.accept(kind);
         }
     }
 
@@ -174,12 +179,11 @@ public class ROS2BehaviorCommandExecutor{
             return;
         }
 
-        Starter starter = command.getKind() == BehaviorCommandMessage.FOLLOW ? followStarter
-                : command.getKind() == BehaviorCommandMessage.MIMIC ? mimicStarter
-                : null;
+        Starter starter = starters.get(command.getKind());
 
         if(starter == null){
-            publish(command.getRequestId(), BehaviorResultMessage.REJECTED, "Unknown Command", true);
+            String summary = command.getKind() == BehaviorCommandMessage.FOLLOW ? "Follow is not running" : "Unknown Command";
+            publish(command.getRequestId(), BehaviorResultMessage.REJECTED, summary, true);
             return;
         }
 
@@ -216,10 +220,11 @@ public class ROS2BehaviorCommandExecutor{
                 ros2BehaviorTreeExecutor.cancelActive(newKind);
             return;
         }
-        if(stopKind == null)
+        Consumer<Byte> stop = stops.get(previous);
+        if(stop == null)
             return;
         if(draining)
-            stopKind.accept(previous);
+            stop.accept(previous);
         else
             deferredStops.add(previous);
     }
