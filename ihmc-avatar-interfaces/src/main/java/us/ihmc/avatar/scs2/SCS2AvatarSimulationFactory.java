@@ -427,10 +427,10 @@ public class SCS2AvatarSimulationFactory
       }
       robot = simulationConstructionSet.addRobot(robotDefinition);
 
-      if (simulationConstructionSet.getPhysicsEngine() instanceof MujocoPhysicsEngine mujocoPhysicsEngine && !robotModel.getJointArmatures().isEmpty())
+      TObjectDoubleMap<String> jointArmatures = robotModel.getJointArmatures();
+      if (simulationConstructionSet.getPhysicsEngine() instanceof MujocoPhysicsEngine mujocoPhysicsEngine && !jointArmatures.isEmpty())
       {
-         robot.getControllerManager()
-              .addController(new SCS2MujocoJointArmatureSetter(mujocoPhysicsEngine, robot.getName(), robotModel.getJointArmatures()));
+         robot.getControllerManager().addController(new SCS2MujocoJointArmatureSetter(mujocoPhysicsEngine, robot.getName(), jointArmatures));
       }
 
       if (asyncROS2Node.hasBeenSet())

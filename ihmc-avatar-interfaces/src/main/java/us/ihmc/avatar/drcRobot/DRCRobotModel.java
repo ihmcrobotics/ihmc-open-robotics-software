@@ -1,5 +1,7 @@
 package us.ihmc.avatar.drcRobot;
 
+import gnu.trove.map.TObjectDoubleMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
@@ -30,8 +32,6 @@ import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.Map;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
@@ -192,9 +192,9 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
     * Armature, the reflected rotor inertia, of each actuated joint by joint name, in kg m^2. Simulations that model it, like
     * MuJoCo, add it to the joint inertia. Joints that are left out have none.
     */
-   default Map<String, Double> getJointArmatures()
+   default TObjectDoubleMap<String> getJointArmatures()
    {
-      return Collections.emptyMap();
+      return new TObjectDoubleHashMap<>();
    }
 
    public HighLevelControllerParameters getHighLevelControllerParameters();
