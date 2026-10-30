@@ -8,29 +8,19 @@ import controller_msgs.HighLevelStateMessage;
 import controller_msgs.RLModelSelectionMessage;
 import controller_msgs.RLPolicyState;
 import controller_msgs.ReinitializeStateEstimatorMessage;
-import controller_msgs.StopAllTrajectoryMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
-import us.ihmc.avatar.arm.PresetArmConfiguration;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.affordances.RDXArmManager;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.Timer;
 
 public class RDXHardwareControlStateManager
@@ -88,7 +78,7 @@ public class RDXHardwareControlStateManager
       rlModelNames = modelNames;
 
       // Always mirror the controller's active model so UI stays correct after controller-side switches
-      // (e.g. standup → walking handoff), not only on first receive / catalog changes.
+      // (e.g. standup -> walking handoff), not only on first receive / catalog changes.
       int currentModel = Byte.toUnsignedInt(rlPolicyState.getCurrentModel());
       if (currentModel >= 0 && currentModel < rlModelNames.length)
       {
@@ -105,7 +95,7 @@ public class RDXHardwareControlStateManager
       desiredMasterGain.set(hardwareStatusMessage.getCurrentMasterGain());
    }
 
-   public void renderImGuiWidgets(DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, RDXArmManager armManager, double maxPelvisHeight)
+   public void renderImGuiWidgets()
    {
       if (estopMasterGainStatusTimer.isRunning(1.0))
       {
@@ -201,87 +191,53 @@ public class RDXHardwareControlStateManager
       {
          ImGui.textDisabled("Waiting for RL models...");
       }
+   }
 
-      ImGui.separator();
+   /**
+    * Commands shown in the teleoperation Whole-Body header, lined up at {@code widgetStartX}.
+    * Subclasses add robot specific commands after these.
+    */
+   public void renderWholeBodyCommandWidgets(float widgetStartX)
+   {
       ImGui.text("Command:");
       ImGui.sameLine();
       ImGui.setCursorPosX(widgetStartX);
-      if (ImGui.button(labels.get("Home Pose")))
-      {
-         double trajectoryTime = 3.0;
-
-         GoHomeMessage homeLeftArm = new GoHomeMessage();
-         homeLeftArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
-         homeLeftArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
-         homeLeftArm.setTrajectoryTime(trajectoryTime);
-         controllerHelper.publishToController(homeLeftArm);
-
-         GoHomeMessage homeRightArm = new GoHomeMessage();
-         homeRightArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
-         homeRightArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
-         homeRightArm.setTrajectoryTime(trajectoryTime);
-         controllerHelper.publishToController(homeRightArm);
-
-         GoHomeMessage homePelvis = new GoHomeMessage();
-         homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
-         homePelvis.setTrajectoryTime(trajectoryTime);
-         controllerHelper.publishToController(homePelvis);
-
-         GoHomeMessage homeChest = new GoHomeMessage();
-         homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
-         homeChest.setTrajectoryTime(trajectoryTime);
-         controllerHelper.publishToController(homeChest);
-
-         GoHomeMessage homeHead = new GoHomeMessage();
-         homeHead.setHumanoidBodyPart(HumanoidBodyPart.HEAD.toByte());
-         homeHead.setTrajectoryTime(trajectoryTime);
-         controllerHelper.publishToController(homeHead);
-
-         RDXBaseUI.pushNotification("Commanding home pose...");
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("N-Pose")))
-      {
-         goNPose(robotModel, referenceFrames, armManager, maxPelvisHeight);
-      }
-
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Stop All Trajectories")))
-      {
-         RDXBaseUI.pushNotification("Commanding stop all trajectories...");
-         StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
-         controllerHelper.publishToController(stopAllTrajectoryMessage);
-      }
+      if (ImGui.button(labels.get("Home")))
+         sendHomePose();
    }
 
-   protected void goNPose(DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, RDXArmManager armManager, double maxPelvisHeight)
+   public void sendHomePose()
    {
       double trajectoryTime = 3.0;
 
-      for (RobotSide side : RobotSide.values)
-         armManager.executeArmAngles(side, PresetArmConfiguration.N_POSE, trajectoryTime);
+      GoHomeMessage homeLeftArm = new GoHomeMessage();
+      homeLeftArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
+      homeLeftArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
+      homeLeftArm.setTrajectoryTime(trajectoryTime);
+      controllerHelper.publishToController(homeLeftArm);
 
-      if (robotModel.getRobotVersion().hasHead())
-      {
-         NeckJointName[] neckJointNamesArray = robotModel.getJointMap().getNeckJointNames();
-         double[] desiredNeckJointValues = new double[neckJointNamesArray.length];
-         for (int i = 0; i < neckJointNamesArray.length; i++)
-         {
-            desiredNeckJointValues[i] = 0.0; // TODO make 0 robot agnostic
-         }
-         controllerHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(trajectoryTime, desiredNeckJointValues));
-      }
+      GoHomeMessage homeRightArm = new GoHomeMessage();
+      homeRightArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
+      homeRightArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
+      homeRightArm.setTrajectoryTime(trajectoryTime);
+      controllerHelper.publishToController(homeRightArm);
 
-      FramePose3D pelvisPose = new FramePose3D(referenceFrames.getMidFeetZUpFrame());
-      pelvisPose.getTranslation().addZ(maxPelvisHeight - 0.02);
-      pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
-      controllerHelper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, pelvisPose));
+      GoHomeMessage homePelvis = new GoHomeMessage();
+      homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
+      homePelvis.setTrajectoryTime(trajectoryTime);
+      controllerHelper.publishToController(homePelvis);
 
       GoHomeMessage homeChest = new GoHomeMessage();
       homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
       homeChest.setTrajectoryTime(trajectoryTime);
       controllerHelper.publishToController(homeChest);
-      RDXBaseUI.pushNotification("Commanding N-pose...");
+
+      GoHomeMessage homeHead = new GoHomeMessage();
+      homeHead.setHumanoidBodyPart(HumanoidBodyPart.HEAD.toByte());
+      homeHead.setTrajectoryTime(trajectoryTime);
+      controllerHelper.publishToController(homeHead);
+
+      RDXBaseUI.pushNotification("Commanding home pose...");
    }
 
    public void sendRLModelSelectionRequest()
