@@ -25,7 +25,6 @@ import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -73,16 +72,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       tooltip = new RDX3DPanelTooltip(baseUI.getPrimary3DPanel());
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltips);
       stepChecker = footstepPlan.getStepChecker();
-
-      RDX3DPanelToolbarButton leftFootButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      leftFootButton.loadAndSetIcon("icons/leftFoot.png");
-      leftFootButton.setTooltipText("Place left footstep (R)");
-      leftFootButton.setOnPressed(() -> createNewFootstep(RobotSide.LEFT));
-
-      RDX3DPanelToolbarButton rightFootButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      rightFootButton.loadAndSetIcon("icons/rightFoot.png");
-      rightFootButton.setTooltipText("Place right footstep (T)");
-      rightFootButton.setOnPressed(() -> createNewFootstep(RobotSide.RIGHT));
 
       RDXBaseUI.getInstance().getKeyBindings().register("Place left footstep", "R");
       RDXBaseUI.getInstance().getKeyBindings().register("Place right footstep", "T");

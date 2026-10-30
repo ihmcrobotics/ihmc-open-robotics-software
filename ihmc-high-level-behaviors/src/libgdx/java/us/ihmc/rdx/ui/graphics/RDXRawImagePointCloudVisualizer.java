@@ -10,7 +10,6 @@ import imgui.type.ImInt;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.RawImage;
 import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
@@ -75,14 +74,9 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
    private final boolean enableColorImageRendering;
    private boolean switchBackToColor = false;
 
-   // CPU copy of the rendered depth image, used to look up point cloud heights
+   // Latest rendered 16-bit depth image, kept so point cloud height queries can read it without copying
    private static final int MAX_HEIGHT_QUERY_PIXELS = 250000;
-   private short[] latestDepthData = new short[0];
-   private int latestDepthWidth = 0;
-   private int latestDepthHeight = 0;
-   private float latestDepthDiscretization;
-   private double latestDepthFx, latestDepthFy, latestDepthCx, latestDepthCy;
-   private final RigidBodyTransform latestDepthTransform = new RigidBodyTransform();
+   private RawImage latestDepthImage = null;
    private final Point3D heightQueryPoint = new Point3D();
    private double[] heightQueryResults = new double[64];
 
@@ -208,7 +202,7 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
       pointCloudRenderer.setColoringMethod(ColoringMethod.values()[coloringMethod.get()]);
 
       if (depthImage.getOpenCVType() == opencv_core.CV_16UC1)
-         copyDepthImageForHeightQueries(depthImage);
+         setLatestDepthImage(depthImage);
 
       // Update the mesh
       if (colorImage == null)
@@ -227,26 +221,18 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
       }
    }
 
-   private void copyDepthImageForHeightQueries(RawImage depthImage)
+   private void setLatestDepthImage(RawImage depthImage)
    {
-      Mat depthMat = depthImage.getCpuImageMat();
-      if (depthMat == null || !depthMat.isContinuous())
+      if (depthImage == latestDepthImage)
          return;
 
-      int size = depthImage.getWidth() * depthImage.getHeight();
-      if (latestDepthData.length < size)
-         latestDepthData = new short[size];
-      ShortBuffer depthBuffer = depthMat.createBuffer();
-      depthBuffer.get(latestDepthData, 0, size);
+      RawImage retainedImage = depthImage.get();
+      if (retainedImage == null)
+         return;
 
-      latestDepthWidth = depthImage.getWidth();
-      latestDepthHeight = depthImage.getHeight();
-      latestDepthDiscretization = depthImage.getDepthDiscretization();
-      latestDepthFx = depthImage.getFocalLengthX();
-      latestDepthFy = depthImage.getFocalLengthY();
-      latestDepthCx = depthImage.getPrincipalPointX();
-      latestDepthCy = depthImage.getPrincipalPointY();
-      latestDepthTransform.set(depthImage.getTransformToWorld());
+      if (latestDepthImage != null)
+         latestDepthImage.release();
+      latestDepthImage = retainedImage;
    }
 
    /**
@@ -255,28 +241,41 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
     */
    public double getPointCloudHeight(double x, double y, double radius)
    {
-      if (latestDepthWidth == 0)
+      if (latestDepthImage == null)
          return Double.NaN;
 
+      Mat depthMat = latestDepthImage.getCpuImageMat();
+      if (depthMat == null || !depthMat.isContinuous())
+         return Double.NaN;
+
+      ShortBuffer depthBuffer = depthMat.createBuffer();
+      int width = latestDepthImage.getWidth();
+      int height = latestDepthImage.getHeight();
+      float discretization = latestDepthImage.getDepthDiscretization();
+      double fx = latestDepthImage.getFocalLengthX();
+      double fy = latestDepthImage.getFocalLengthY();
+      double cx = latestDepthImage.getPrincipalPointX();
+      double cy = latestDepthImage.getPrincipalPointY();
+
       // Skip pixels on big images to keep this cheap enough to call every frame
-      int stride = (int) Math.ceil(Math.sqrt((double) (latestDepthWidth * latestDepthHeight) / MAX_HEIGHT_QUERY_PIXELS));
+      int stride = (int) Math.ceil(Math.sqrt((double) (width * height) / MAX_HEIGHT_QUERY_PIXELS));
       double radiusSquared = radius * radius;
       int numberOfResults = 0;
 
       // Same deprojection as the point cloud shader
-      for (int row = 0; row < latestDepthHeight; row += stride)
+      for (int row = 0; row < height; row += stride)
       {
-         for (int column = 0; column < latestDepthWidth; column += stride)
+         for (int column = 0; column < width; column += stride)
          {
-            int depthValue = latestDepthData[row * latestDepthWidth + column] & 0xFFFF;
+            int depthValue = depthBuffer.get(row * width + column) & 0xFFFF;
             if (depthValue == 0)
                continue;
 
-            double depthInMeters = depthValue * latestDepthDiscretization;
+            double depthInMeters = depthValue * discretization;
             heightQueryPoint.set(depthInMeters,
-                                 -(column - latestDepthCx) / latestDepthFx * depthInMeters,
-                                 -(row - latestDepthCy) / latestDepthFy * depthInMeters);
-            latestDepthTransform.transform(heightQueryPoint);
+                                 -(column - cx) / fx * depthInMeters,
+                                 -(row - cy) / fy * depthInMeters);
+            latestDepthImage.getTransformToWorld().transform(heightQueryPoint);
 
             double dx = heightQueryPoint.getX() - x;
             double dy = heightQueryPoint.getY() - y;
@@ -370,6 +369,8 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
       {
          colorImageHistory.forEach(RawImage::release);
       }
+      if (latestDepthImage != null)
+         latestDepthImage.release();
 
       if (pointCloudRenderer != null)
          pointCloudRenderer.dispose();
