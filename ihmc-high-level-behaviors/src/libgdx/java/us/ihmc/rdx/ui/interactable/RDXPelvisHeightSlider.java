@@ -204,7 +204,9 @@ public class RDXPelvisHeightSlider
       ImGui.setCursorPosX(startX);
       ImGui.checkbox(labels.get("Show actual"), showActual);
       ImGui.sameLine();
-      ImGui.checkbox(labels.get("Preview"), preview);
+      // Unchecking drops the unsent previewed height, putting the slider back at the robot's height
+      if (ImGui.checkbox(labels.get("Preview"), preview) && !preview.get())
+         sliderValue[0] = (float) valueFromRobot;
       if (preview.get())
       {
          ImGui.sameLine();
