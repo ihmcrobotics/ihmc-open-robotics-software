@@ -65,10 +65,6 @@ public class SCS2MujocoJointArmatureSetter implements Controller
          dofArmature.put(jointDofAddresses.get(jointId), iterator.value());
          jointsSet++;
       }
-
-      // Only the first model is reported, the model is compiled again every time the world changes.
-      if (modelAddressWithArmature == 0)
-         LogTools.info("Set the MuJoCo armature of {} {} joints", jointsSet, robotName);
       modelAddressWithArmature = model.address();
    }
 }
