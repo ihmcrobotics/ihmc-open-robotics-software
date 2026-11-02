@@ -20,7 +20,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class RDXHandManager
 {
    private final SideDependentList<RDXHandInterface> rdxHands = new SideDependentList<>();
-   private final SideDependentList<RDXHandQuickAccessButtons> quickAccessButtons = new SideDependentList<>();
 
    private EZGripperROS2HardwareCommunication ezGripperCommunication = null;
 
@@ -58,19 +57,13 @@ public class RDXHandManager
    {
       if (ezGripperCommunication != null)
          ezGripperCommunication.start();
-
-      for (RobotSide side : rdxHands.sides())
-         quickAccessButtons.put(side, new RDXHandQuickAccessButtons(baseUI, rdxHands.get(side)));
    }
 
    public void update()
    {
       // Update the hands
       for (RobotSide side : rdxHands.sides())
-      {
          rdxHands.get(side).update();
-         quickAccessButtons.get(side).update();
-      }
    }
 
    public void renderImGuiWidgets()

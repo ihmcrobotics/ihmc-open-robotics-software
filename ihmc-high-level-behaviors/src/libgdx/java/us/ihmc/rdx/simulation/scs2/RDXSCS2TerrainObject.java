@@ -7,7 +7,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXVisualModelInstance;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
-import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletTerrainObject;
 
 public class RDXSCS2TerrainObject
 {
@@ -15,7 +14,6 @@ public class RDXSCS2TerrainObject
    private RDXFrameGraphicsNode visualFrameGraphicsNode;
    private RDXFrameGraphicsNode collisionFrameGraphicsNode;
    private final MutableReferenceFrame centerOfMassFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
-   private BulletTerrainObject bulletTerrainObject;
 
    public RDXSCS2TerrainObject(TerrainObjectDefinition terrainObjectDefinition)
    {
@@ -39,14 +37,6 @@ public class RDXSCS2TerrainObject
 
    public void update()
    {
-      if (bulletTerrainObject != null)
-      {
-         centerOfMassFrame.update(transformToParent ->
-         {
-            transformToParent.set(bulletTerrainObject.getTransformToWorld());
-         });
-      }
-
       visualFrameGraphicsNode.update();
       collisionFrameGraphicsNode.update();
    }
@@ -59,13 +49,5 @@ public class RDXSCS2TerrainObject
    public void getCollisionRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       collisionFrameGraphicsNode.getRenderables(renderables, pool);
-   }
-
-   /**
-    * Support moving terrain objects when using Bullet physics
-    */
-   public void setBulletTerrainObject(BulletTerrainObject bulletTerrainObject)
-   {
-      this.bulletTerrainObject = bulletTerrainObject;
    }
 }
