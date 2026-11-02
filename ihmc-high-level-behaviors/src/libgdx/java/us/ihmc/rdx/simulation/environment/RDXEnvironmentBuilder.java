@@ -48,7 +48,6 @@ public class RDXEnvironmentBuilder extends RDXPanel
    private final ArrayList<RDXEnvironmentObject> lightObjects = new ArrayList<>();
    private final RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo();
    private final RDX3DPanel panel3D;
-   private final RDXPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
 
    private final TreeSet<String> environmentFileNames = new TreeSet<>(RDXEnvironmentBuilder::compareFileNames);
    private final Point3D tempIntersection = new Point3D();
@@ -70,7 +69,6 @@ public class RDXEnvironmentBuilder extends RDXPanel
       super("Environment");
       this.panel3D = panel3D;
       setRenderMethod(this::renderImGuiWidgets);
-      addChild(poseGizmoTunerPanel);
       RDXBaseUI.getInstance().getKeyBindings().register("Delete selected object", "Delete");
       RDXBaseUI.getInstance().getKeyBindings().register("Deselect object", "Escape");
    }
@@ -291,8 +289,6 @@ public class RDXEnvironmentBuilder extends RDXPanel
          });
          reindexScripts();
       }
-
-      ImGui.checkbox("Show 3D Widget Tuner", poseGizmoTunerPanel.getIsShowing());
    }
 
    private void loadEnvironmentInternal(String environmentFileName)
