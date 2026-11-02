@@ -76,6 +76,41 @@ public class PDVelocityBasedGoalReacherTest
       }
    }
 
+   @Test
+   public void walkToGoalStatusReportsASingleGoalAsReached()
+   {
+      PoseReferenceFrame base = new PoseReferenceFrame("base", ReferenceFrame.getWorldFrame());
+      StatusMessageOutputManager status = new StatusMessageOutputManager(List.of(ControllerWalkToGoalStatusMessage.class, ControllerWaypointStatusMessage.class));
+      boolean[] reached = {false};
+      status.attachStatusMessageListener(ControllerWalkToGoalStatusMessage.class, message -> reached[0] |= message.getIsReached());
+      PDVelocityBasedGoalReacher reacher = new PDVelocityBasedGoalReacher(base, status, new YoRegistry("test"));
+
+      FramePose2D goal = new FramePose2D(ReferenceFrame.getWorldFrame());
+      goal.set(2.0, 1.0, 0.0);
+      ControllerWaypointGoalCommand command = new ControllerWaypointGoalCommand();
+      command.setGoalPose(goal);
+      command.setPositionProximity(0.1);
+      command.setOrientationProximity(0.1);
+      command.setGoalOrientationMatters(false);
+      reacher.consumeNewWaypoint(command);
+
+      double dt = 0.02;
+      double x = 0.0, y = 0.0, yaw = 0.0;
+      for (double time = 0.0; time < 60.0 && !reached[0]; time += dt)
+      {
+         base.setPoseAndUpdate(new Pose3D(x, y, 0.0, yaw, 0.0, 0.0));
+         reacher.update(time);
+         VelocityBasedWalkingInputMessage output = reacher.getOutputMessage();
+         if (output == null || !output.getWalk())
+            continue;
+         x += (output.getForwardVelocity() * Math.cos(yaw) - output.getLateralVelocity() * Math.sin(yaw)) * dt;
+         y += (output.getForwardVelocity() * Math.sin(yaw) + output.getLateralVelocity() * Math.cos(yaw)) * dt;
+         yaw += output.getTurnVelocity() * dt;
+      }
+      assertTrue(reached[0], "The walk-to-goal status never reported the goal as reached, robot ended at (" + x + ", " + y + ")");
+      assertTrue(Math.hypot(2.0 - x, 1.0 - y) < 0.1 + 1.0e-3, "Reported reached at (" + x + ", " + y + ")");
+   }
+
    private enum HeadingMode
    {
       FACE_GOAL, KEEP_HEADING, TURN_WALK_TURN
