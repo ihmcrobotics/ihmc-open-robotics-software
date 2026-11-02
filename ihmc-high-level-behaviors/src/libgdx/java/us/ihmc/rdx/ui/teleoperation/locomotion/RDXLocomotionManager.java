@@ -35,7 +35,6 @@ import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.mesh.RDXMutableMultiLineModel;
 import us.ihmc.rdx.ui.*;
@@ -80,8 +79,6 @@ public class RDXLocomotionManager
    private final RDXStoredPropertySetTuner locomotionParametersTuner = new RDXStoredPropertySetTuner("Locomotion Parameters");
    private final RDXStoredPropertySetTuner aStartFootstepPlanningParametersTuner = new RDXStoredPropertySetTuner(
          "Footstep Planner Parameters (Teleoperation A*)");
-   private final RDXStoredPropertySetTuner turnWalkTurnFootstepPlanningParametersTuner = new RDXStoredPropertySetTuner(
-         "Footstep Planner Parameters (Teleoperation Turn Walk Turn)");
    private final RDXStoredPropertySetTuner bodyPathPlanningParametersTuner = new RDXStoredPropertySetTuner("Body Path Planner Parameters (Teleoperation)");
    private final RDXStoredPropertySetTuner swingFootPlanningParametersTuner = new RDXStoredPropertySetTuner("Swing Foot Planning Parameters (Teleoperation)");
    private ImGuiStoredPropertySetBooleanWidget areFootstepsAdjustableCheckbox;
@@ -144,6 +141,7 @@ public class RDXLocomotionManager
    private static final int TURN_WALK_TURN = 2;
    private final ImInt waypointHeadingMode = new ImInt(FACE_GOAL);
    private DoubleBinaryOperator pointCloudHeightProvider;
+   private final RDXRLWalkingCommandWidgets rlWalkingCommandWidgets;
 
    // Used for UI logic
    private boolean wasPlanning = false;
@@ -151,8 +149,7 @@ public class RDXLocomotionManager
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                ROS2ControllerHelper controllerHelper,
                                ROS2SyncedRobotModel syncedRobot,
-                               ControllerStatusTracker controllerStatusTracker,
-                               RDXPanel teleoperationPanel)
+                               ControllerStatusTracker controllerStatusTracker)
    {
       this.robotModel = robotModel;
       this.controllerHelper = controllerHelper;
@@ -163,12 +160,6 @@ public class RDXLocomotionManager
       aStarFootstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
-
-      teleoperationPanel.addChild(locomotionParametersTuner);
-      teleoperationPanel.addChild(aStartFootstepPlanningParametersTuner);
-      teleoperationPanel.addChild(turnWalkTurnFootstepPlanningParametersTuner);
-      teleoperationPanel.addChild(bodyPathPlanningParametersTuner);
-      teleoperationPanel.addChild(swingFootPlanningParametersTuner);
 
       footstepPlanning = new RDXFootstepPlanning(robotModel,
                                                  syncedRobot,
@@ -189,6 +180,8 @@ public class RDXLocomotionManager
                                                  status -> receivedWaypointStatuses.add(new ControllerWaypointStatusMessage(status)));
       stepGeneratorHeartbeat = new ROS2Heartbeat(controllerHelper.getROS2Node(), CSGROS2CommunicationHelper.CSG_HEARTBEAT_TOPIC);
       stepGeneratorHeartbeat.setAlive(true);
+
+      rlWalkingCommandWidgets = new RDXRLWalkingCommandWidgets(controllerHelper);
    }
 
    public void create(RDXBaseUI baseUI)
@@ -250,6 +243,7 @@ public class RDXLocomotionManager
    public void update()
    {
       controllerStatusTracker.checkControllerIsRunning();
+      rlWalkingCommandWidgets.update();
 
       if (abortedNotification.poll())
       {
@@ -364,42 +358,10 @@ public class RDXLocomotionManager
 
       if (ImGui.collapsingHeader(labels.get("Locomotion")))
       {
-         float widgetStartX = 125.0f;
+         // "Waypoint Placement:" is the widest label up here, so the widgets start just past it
+         float widgetStartX = ImGui.getCursorPosX() + ImGuiTools.calcTextSizeX("Waypoint Placement:") + ImGui.getStyle().getItemSpacingX();
 
-         ImGui.text("Walking Command:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         if (ImGui.button(labels.get("Abort")))
-         {
-            sendAbortWalkingMessage();
-         }
-         ImGui.sameLine();
-
-         ImGui.beginDisabled(!walkAvailable);
-         if (ImGui.button(labels.get("Walk")))
-         { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
-            interactableFootstepPlan.walkFromSteps();
-         }
-         ImGuiTools.previousWidgetTooltip("Space");
-         ImGui.sameLine();
-         ImGui.endDisabled();
-
-         ImGui.beginDisabled(!pauseAvailable);
-         if (ImGui.button(labels.get("Pause")))
-         {
-            setPauseWalkingAndPublish(true);
-         }
-         ImGuiTools.previousWidgetTooltip("Space");
-         ImGui.sameLine();
-         ImGui.endDisabled();
-
-         ImGui.beginDisabled(!continueAvailable);
-         if (ImGui.button(labels.get("Continue")))
-         {
-            setPauseWalkingAndPublish(false);
-         }
-         ImGuiTools.previousWidgetTooltip("Space");
-         ImGui.endDisabled();
+         rlWalkingCommandWidgets.renderImGuiWidgets(widgetStartX);
          ImGui.separator();
 
          ImGui.text("Waypoint Placement:");
@@ -410,6 +372,7 @@ public class RDXLocomotionManager
             legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
          ImGui.endDisabled();
 
+         ImGui.setCursorPosX(widgetStartX);
          ImGui.beginDisabled(!waypointsAvailable);
          if (ImGui.button(labels.get("Clear all waypoints")))
             clearWaypoints();
@@ -417,9 +380,13 @@ public class RDXLocomotionManager
          if (ImGui.button(labels.get("Send Waypoints")))
             sendWaypoints();
          ImGui.endDisabled();
-         ImGui.text("Waypoints: " + numWaypoints);
+         ImGui.text("Waypoints:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         ImGui.text(String.valueOf(numWaypoints));
          ImGui.text("Heading:");
          ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
          ImGui.radioButton(labels.get("Face goal"), waypointHeadingMode, FACE_GOAL);
          ImGuiTools.previousWidgetTooltip("Face the waypoint while walking, then turn to its arrow");
          ImGui.sameLine();
@@ -430,74 +397,119 @@ public class RDXLocomotionManager
          ImGuiTools.previousWidgetTooltip("Turn to face along the line to the waypoint, walk the line, then turn to the arrow");
          ImGui.separator();
 
-         ImGui.text("Footstep Placement:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         manualFootstepPlacement.renderImGuiWidgets();
-         ImGui.separator();
-
-         ImGui.text("Footstep Planning:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
-            legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
-
-         ImGui.setCursorPosX(widgetStartX);
-         if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader))
+         ImGui.indent();
+         if (ImGui.collapsingHeader(labels.get("Model-based Walking")))
          {
             ImGui.indent();
-            assumeFlatGroundCheckbox.renderImGuiWidget();
-            performAStarSearchCheckbox.renderImGuiWidget();
-            areFootstepsAdjustableCheckbox.renderImGuiWidget();
-            planSwingTrajectoriesCheckbox.renderImGuiWidget();
-            replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
-            planBodyPathCheckbox.renderImGuiWidget();
+            // The labels here are indented, so line the widgets up past the widest one instead of at widgetStartX
+            float modelBasedWidgetStartX = ImGui.getCursorPosX() + ImGuiTools.calcTextSizeX("Turn Aggressiveness:") + 2.0f * ImGui.getStyle().getItemSpacingX();
+            ImGui.text("Walking Command:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            if (ImGui.button(labels.get("Abort")))
+            {
+               sendAbortWalkingMessage();
+            }
+            ImGui.sameLine();
+
+            ImGui.beginDisabled(!walkAvailable);
+            if (ImGui.button(labels.get("Walk")))
+            { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
+               interactableFootstepPlan.walkFromSteps();
+            }
+            ImGuiTools.previousWidgetTooltip("Space");
+            ImGui.sameLine();
+            ImGui.endDisabled();
+
+            ImGui.beginDisabled(!pauseAvailable);
+            if (ImGui.button(labels.get("Pause")))
+            {
+               setPauseWalkingAndPublish(true);
+            }
+            ImGuiTools.previousWidgetTooltip("Space");
+            ImGui.sameLine();
+            ImGui.endDisabled();
+
+            ImGui.beginDisabled(!continueAvailable);
+            if (ImGui.button(labels.get("Continue")))
+            {
+               setPauseWalkingAndPublish(false);
+            }
+            ImGuiTools.previousWidgetTooltip("Space");
+            ImGui.endDisabled();
+            ImGui.separator();
+
+            ImGui.text("Footstep Placement:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            manualFootstepPlacement.renderImGuiWidgets();
+            ImGui.separator();
+
+            ImGui.text("Footstep Planning:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
+               legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
+
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader))
+            {
+               ImGui.indent();
+               assumeFlatGroundCheckbox.renderImGuiWidget();
+               performAStarSearchCheckbox.renderImGuiWidget();
+               areFootstepsAdjustableCheckbox.renderImGuiWidget();
+               planSwingTrajectoriesCheckbox.renderImGuiWidget();
+               replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
+               planBodyPathCheckbox.renderImGuiWidget();
+               ImGui.unindent();
+            }
+
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            initialStanceSideRadioButtons.renderImGuiWidget();
+            ImGui.separator();
+
+            ImGui.text("Swing Time:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            ImGui.setNextItemWidth(-1);
+            swingTimeSlider.renderImGuiWidget();
+            ImGui.text("Transfer Time:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            ImGui.setNextItemWidth(-1);
+            transferTimeSlider.renderImGuiWidget();
+            ImGui.text("Swing Height:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            ImGui.setNextItemWidth(-1);
+            swingHeightSlider.renderImGuiWidget();
+            ImGui.text("Step Aggressiveness:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            ImGui.setNextItemWidth(-1);
+            if (stepAggressivenessSlider.render(0.0, 1.5, true))
+               stepAggressivenessChanged.set();
+            ImGui.text("Turn Aggressiveness:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            ImGui.setNextItemWidth(-1);
+            if (turnAggressivenessSlider.render(0.0, 2.0, true))
+               turnAggressivenessChanged.set();
+            ImGui.separator();
+
+            ImGui.text("Leg Control Mode:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            ImGui.text(legControlMode.name());
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("Disable")))
+            {
+               legControlMode = RDXLegControlMode.DISABLED;
+            }
+            walkPathControlRing.renderImGuiWidgets(modelBasedWidgetStartX);
             ImGui.unindent();
          }
-
-         ImGui.setCursorPosX(widgetStartX);
-         initialStanceSideRadioButtons.renderImGuiWidget();
-         ImGui.separator();
-
-         ImGui.text("Swing Time:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         ImGui.setNextItemWidth(-1);
-         swingTimeSlider.renderImGuiWidget();
-         ImGui.text("Transfer Time:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         ImGui.setNextItemWidth(-1);
-         transferTimeSlider.renderImGuiWidget();
-         ImGui.text("Swing Height:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         ImGui.setNextItemWidth(-1);
-         swingHeightSlider.renderImGuiWidget();
-         ImGui.text("Step Aggressiveness:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         ImGui.setNextItemWidth(-1);
-         if (stepAggressivenessSlider.render(0.0, 1.5, true))
-            stepAggressivenessChanged.set();
-         ImGui.text("Turn Aggressiveness:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         ImGui.setNextItemWidth(-1);
-         if (turnAggressivenessSlider.render(0.0, 2.0, true))
-            turnAggressivenessChanged.set();
-         ImGui.separator();
-
-         ImGui.text("Leg Control Mode:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         ImGui.text(legControlMode.name());
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Disable")))
-         {
-            legControlMode = RDXLegControlMode.DISABLED;
-         }
-         walkPathControlRing.renderImGuiWidgets(widgetStartX);
+         ImGui.unindent();
       }
 
       updateWaypointProgress();
