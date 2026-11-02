@@ -42,7 +42,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    private static final double standingTimeDuration = RigidBodyControlManager.INITIAL_GO_HOME_TIME;
    private static final double defaultWalkingTimeDuration = CITools.isEveryCommitBuild() ? 45.0 : 90.0;
    private static final boolean useVelocityAndHeadingScript = true;
-   private static String physicsEngineName;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -78,24 +77,17 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    @Test
    public void testFlatGroundWalking()
    {
-      runFlatGroundWalking(false);
+      runFlatGroundWalking();
    }
 
    @Disabled
    @Test
    public void testMeshTerrainWalking()
    {
-      runMeshTerrainWalking(false);
+      runMeshTerrainWalking();
    }
 
-   @Tag("humanoid-flat-ground-bullet")
-   @Test
-   public void testFlatGroundWalkingBullet()
-   {
-      runFlatGroundWalking(true);
-   }
-
-   public void runMeshTerrainWalking(boolean useBulletPhysicsEngine)
+   public void runMeshTerrainWalking()
    {
       boolean doPelvisWarmup = doPelvisWarmup();
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -107,12 +99,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
                                                                                                                                              meshTerrainEnvironment,
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, getWalkingScriptParameters());
-      if (useBulletPhysicsEngine)
-      {
-         robotModel.getHumanoidRobotKinematicsCollisionModel();
-         simulationTestHelperFactory.setUseBulletPhysicsEngine(useBulletPhysicsEngine);
-      }
-      physicsEngineName = useBulletPhysicsEngine ? "Bullet Physics Engine: " : "SCS2 Physics Engine: ";
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
 
@@ -126,7 +112,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 
    }
-   public void runFlatGroundWalking(boolean useBulletPhysicsEngine)
+   public void runFlatGroundWalking()
    {
       boolean doPelvisWarmup = doPelvisWarmup();
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -138,12 +124,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
                                                                                                                                              flatGround,
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, getWalkingScriptParameters());
-      if (useBulletPhysicsEngine)
-      {
-         robotModel.getHumanoidRobotKinematicsCollisionModel();
-         simulationTestHelperFactory.setUseBulletPhysicsEngine(useBulletPhysicsEngine);
-      }
-      physicsEngineName = useBulletPhysicsEngine ? "Bullet Physics Engine: " : "SCS2 Physics Engine: ";
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.setKeepSCSUp(false);
 
@@ -223,7 +203,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
          else
             icpError = Math.sqrt(controllerICPErrorX.getDoubleValue() * controllerICPErrorX.getDoubleValue()
                                  + controllerICPErrorY.getDoubleValue() * controllerICPErrorY.getDoubleValue());
-         assertTrue(icpError < 0.005, physicsEngineName + "icsError < 0.005 for startingYaw + pi/4.0 test");
+         assertTrue(icpError < 0.005, "icsError < 0.005 for startingYaw + pi/4.0 test");
 
          pelvisMessage = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(0.0, new Quaternion(startingYaw, 0.0, 0.0));
          simulationTestHelper.publishToController(pelvisMessage);
@@ -234,7 +214,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
          else
             icpError = Math.sqrt(controllerICPErrorX.getDoubleValue() * controllerICPErrorX.getDoubleValue()
                                  + controllerICPErrorY.getDoubleValue() * controllerICPErrorY.getDoubleValue());
-         assertTrue(icpError < 0.005, physicsEngineName + "icsError < 0.005 for startingYaw test");
+         assertTrue(icpError < 0.005, "icsError < 0.005 for startingYaw test");
       }
 
       walk.set(true);
@@ -246,7 +226,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       {
          assertTrue(simulationTestHelper.simulateNow(timeIncrement), "Simulation has failed");
          if (Math.abs(comError.getDoubleValue()) > 0.06)
-            fail(physicsEngineName + "Math.abs(comError.getDoubleValue()) > 0.06: " + comError.getDoubleValue() + " at t = "
+            fail("Math.abs(comError.getDoubleValue()) > 0.06: " + comError.getDoubleValue() + " at t = "
                  + simulationTestHelper.getSimulationTime());
       }
    }
