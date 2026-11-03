@@ -1,11 +1,8 @@
 package us.ihmc.rdx.simulation.environment.object.objects;
 
-import com.badlogic.gdx.graphics.Color;
 import us.ihmc.euclid.shape.primitives.Box3D;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
-import us.ihmc.rdx.tools.LibGDXTools;
 
 public class RDXBucketObject extends RDXEnvironmentObject
 {
@@ -17,20 +14,11 @@ public class RDXBucketObject extends RDXEnvironmentObject
       super(NAME, FACTORY);
       loadRealisticModel("environmentObjects/bucket/bucket.glb");
 
-      double sizeX = 0.2;
-      double sizeY = 0.2;
-      double sizeZ = 0.3;
-      setMass(2.0f);
-      getCollisionShapeOffset().getTranslation().add(sizeX / 2.0 - 0.08 , 0, sizeZ / 2.0);
-      getBoundingSphere().setRadius(5.0);
-      getBoundingSphere().getPosition().add(sizeX / 2.0, sizeY / 2.0, sizeZ / 2.0);
-      Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
-      setCollisionModel(meshBuilder ->
-                        {
-                           Color color = LibGDXTools.toLibGDX(YoAppearance.LightSkyBlue());
-                           meshBuilder.addBox((float) sizeX, (float) sizeY, (float) sizeZ, color);
-                           meshBuilder.addMultiLineBox(collisionBox.getVertices(), 0.01, color); // some can see it better
-                        });
+      setMass(0.5f);
+      Box3D collisionBox = new Box3D(0.307895, 0.300675, 0.384);
+      collisionBox.getPosition().set(0.003548, -0.000499, 0.192235);
+      getBoundingSphere().setRadius(0.288384);
+      getBoundingSphere().getPosition().set(0.003548, -0.000499, 0.192235);
       setCollisionGeometryObject(collisionBox);
    }
 }

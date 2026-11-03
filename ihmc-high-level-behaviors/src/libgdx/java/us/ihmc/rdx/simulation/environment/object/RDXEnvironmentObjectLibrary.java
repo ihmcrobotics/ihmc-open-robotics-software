@@ -3,6 +3,7 @@ package us.ihmc.rdx.simulation.environment.object;
 import us.ihmc.rdx.simulation.environment.object.objects.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class RDXEnvironmentObjectLibrary
 {
@@ -41,8 +42,9 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDX2x4Object.FACTORY);
       objectFactories.add(RDXCerealBoxObject.FACTORY);
       objectFactories.add(RDXBottleObject.FACTORY);
-      objectFactories.add(RDXBucketObject.FACTORY);
       objectFactories.add(RDXTrowelObject.FACTORY);
+      objectFactories.add(RDXBucketObject.FACTORY);
+      objectFactories.sort(Comparator.comparing(RDXEnvironmentObjectFactory::getName, String.CASE_INSENSITIVE_ORDER));
    }
 
    public static ArrayList<RDXEnvironmentObjectFactory> getObjectFactories()

@@ -40,4 +40,7 @@ public class PerceptionComms
 
    public static final StoredPropertySetROS2TopicPair TERRAIN_MAP_PARAMETERS
          = new StoredPropertySetROS2TopicPair(MODULE_NAME,"terrain_map_parameters");
+
+   public static final StoredPropertySetROS2TopicPair DEPTH_IMAGE_FILTERING_PARAMETERS
+         = new StoredPropertySetROS2TopicPair(ACTIVE_MODULE_NAME,"depth_image_filtering_parameters");
 }

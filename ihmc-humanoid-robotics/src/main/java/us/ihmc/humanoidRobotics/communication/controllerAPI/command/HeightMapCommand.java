@@ -5,6 +5,10 @@ import perception_msgs.HeightMapMessageForController;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.log.LogTools;
+
+import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
 
 public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMessageForController>
 {
@@ -25,6 +29,10 @@ public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMess
    /* Convenience fields for the height map dimensions */
    private double minX, maxX, minY, maxY;
 
+   private final Inflater inflater = new Inflater();
+   private byte[] compressedCells = new byte[0];
+   private byte[] cells = new byte[0];
+
    @Override
    public void clear()
    {
@@ -41,12 +49,55 @@ public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMess
       this.gridCenter.set(message.getGridCenterX(), message.getGridCenterY());
 
       heights.resetQuick();
-      for (int i = 0; i < message.getHeights().size(); i++)
-      {
-         heights.add(message.getHeights().get(i));
-      }
+      decompressHeights(message);
 
       updateGridDimensions();
+   }
+
+   private void decompressHeights(HeightMapMessageForController message)
+   {
+      int cellCount = cellsPerAxis * cellsPerAxis;
+      int compressedSize = message.getCompressedHeights().size();
+      if (compressedCells.length < compressedSize)
+         compressedCells = new byte[compressedSize];
+      if (cells.length < 2 * cellCount)
+         cells = new byte[2 * cellCount];
+      for (int i = 0; i < compressedSize; i++)
+         compressedCells[i] = message.getCompressedHeights().get(i);
+
+      int size = 0;
+      inflater.reset();
+      inflater.setInput(compressedCells, 0, compressedSize);
+      try
+      {
+         while (size < 2 * cellCount && !inflater.finished())
+         {
+            int inflated = inflater.inflate(cells, size, 2 * cellCount - size);
+            if (inflated == 0 && inflater.needsInput())
+               break;
+            size += inflated;
+         }
+      }
+      catch (DataFormatException e)
+      {
+         LogTools.error("Corrupted height map {}: {}", message.getSequenceId(), e.getMessage());
+      }
+
+      if (size != 2 * cellCount)
+      {
+         LogTools.error("Height map {} has {} bytes of cells, expected {}", message.getSequenceId(), size, 2 * cellCount);
+         for (int i = 0; i < cellCount; i++)
+            heights.add(Float.NaN);
+         return;
+      }
+
+      float offset = message.getHeightOffset();
+      float resolution = message.getHeightResolution();
+      for (int i = 0; i < cellCount; i++)
+      {
+         short value = (short) ((cells[2 * i] & 0xFF) | (cells[2 * i + 1] << 8));
+         heights.add(value == HeightMapMessageForController.NO_DATA_VALUE ? Float.NaN : offset + resolution * value);
+      }
    }
 
    @Override
@@ -70,6 +121,7 @@ public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMess
    @Override
    public void set(HeightMapCommand other)
    {
+      this.sequenceId = other.sequenceId;
       this.centerIndex = other.centerIndex;
       this.cellsPerAxis = other.cellsPerAxis;
       this.cellSize = other.cellSize;

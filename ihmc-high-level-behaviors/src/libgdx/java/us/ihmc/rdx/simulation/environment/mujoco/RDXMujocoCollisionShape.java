@@ -87,7 +87,7 @@ public final class RDXMujocoCollisionShape
       return sizeZ;
    }
 
-   /** Classpath path of the convex STL, or null for a primitive. */
+   /** Path of the collision STL, or null for a primitive. */
    public String getMeshResourcePath()
    {
       return meshResourcePath;
