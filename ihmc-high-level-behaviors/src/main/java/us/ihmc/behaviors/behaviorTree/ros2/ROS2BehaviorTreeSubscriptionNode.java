@@ -22,6 +22,7 @@ public class ROS2BehaviorTreeSubscriptionNode
    private SceneActionStateMessage sceneActionStateMessage;
    private MimicActionStateMessage mimicActionStateMessage;
    private HighLevelStateActionStateMessage highLevelStateActionStateMessage;
+   private RLWalkActionStateMessage rlWalkActionStateMessage;
    private AI2RNodeStateMessage ai2rNodeStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
    private BuildingExplorationStateMessage buildingExplorationStateMessage;
@@ -226,6 +227,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setHighLevelStateActionStateMessage(HighLevelStateActionStateMessage highLevelStateActionStateMessage)
    {
       this.highLevelStateActionStateMessage = highLevelStateActionStateMessage;
+   }
+
+   public RLWalkActionStateMessage getRLWalkActionStateMessage()
+   {
+      return rlWalkActionStateMessage;
+   }
+
+   public void setRLWalkActionStateMessage(RLWalkActionStateMessage rlWalkActionStateMessage)
+   {
+      this.rlWalkActionStateMessage = rlWalkActionStateMessage;
    }
 
    public AI2RNodeStateMessage getAI2RNodeStateMessage()
