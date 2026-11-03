@@ -357,7 +357,8 @@ public class PDVelocityBasedGoalReacher implements Updatable, SCS2YoGraphicHolde
       boolean hasReachedGoal = this.hasReachedGoal.getBooleanValue();
       // The ramp-down ends one tick after hasReachedGoal is set, and only that tick reports the goal as reached.
       boolean wasRampingDownAfterGoal = isRampingDownAfterGoal.getBooleanValue();
-      if (Double.isNaN(lastTickTime))
+      // Time goes backwards when the simulation is reset; treat that tick like the first one.
+      if (Double.isNaN(lastTickTime) || time < lastTickTime)
          computedDt = 0.0;
       else
          computedDt = time - lastTickTime;

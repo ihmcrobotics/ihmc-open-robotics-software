@@ -44,8 +44,13 @@ import java.util.regex.Pattern;
  */
 public final class RDXMujocoFingerJointCollisions
 {
-   /** Slide, torsion, roll. The pads are a gum-like rubber, so tangential and torsional stiction are high. */
-   private static final String FINGER_FRICTION = "2.5 1.0 0.05";
+   /**
+    * Slide, torsion, roll. The pads are a gum-like rubber, so sliding friction is high; at 1.5 the fingers slipped off
+    * the door lever. Torsion and roll are lengths, about the contact patch size, and with the finger's contact priority
+    * they apply to every finger contact. At 1.0 and 0.05 m a pad pressed on a surface could neither twist nor roll off
+    * it, so a finger stayed stuck to the door panel and bent instead of releasing.
+    */
+   private static final String FINGER_FRICTION = "2.5 0.02 0.0001";
    /**
     * Harder than the 0.005 s the rest of the robot uses. MuJoCo scales contact stiffness with the mass in
     * contact, and a finger link weighs a few grams, so a longer time constant makes the pad soft. It
