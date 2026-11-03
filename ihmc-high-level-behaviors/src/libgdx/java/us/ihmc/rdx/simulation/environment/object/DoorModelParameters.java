@@ -35,7 +35,7 @@ public class DoorModelParameters
     * The torque required to turn the lever to the max angle.
     * 4 Nm seems to be typical door handle torque, but we're making it easy.
     */
-   public static final double DOOR_LEVER_MAX_TORQUE = 1.0;
+   public static final double DOOR_LEVER_MAX_TORQUE = 0.1;
    public static final double DOOR_BOLT_HEIGHT = 0.015;
 
    public static final String DOOR_PANEL_VISUAL_MODEL_FILE_PATH = "environmentObjects/doorPanel/doorPanel.g3dj";
