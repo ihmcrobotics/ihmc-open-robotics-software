@@ -6,6 +6,7 @@ import us.ihmc.behaviors.behaviorTree.action.actions.HighLevelStateActionState;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
 import java.util.Arrays;
@@ -60,6 +61,10 @@ public class RDXHighLevelStateAction extends RDXActionNode<HighLevelStateActionS
       ImGui.pushItemWidth(80.0f);
       timeoutWidget.renderImGuiWidget();
       ImGui.popItemWidth();
+
+      if (ImGui.checkbox(labels.get("Keep arms, spine and neck pose"), definition.getKeepUpperBodyPose()))
+         definition.setKeepUpperBodyPose(!definition.getKeepUpperBodyPose());
+      ImGuiTools.previousWidgetTooltip("Hold the arms, spine and neck where they are in the new state instead of moving them to its home pose");
    }
 
    /** The models come from the behavior executor through this action's state, once it has the controller's RL policy state. */

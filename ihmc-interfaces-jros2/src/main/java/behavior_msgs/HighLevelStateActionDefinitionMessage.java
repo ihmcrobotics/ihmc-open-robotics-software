@@ -22,6 +22,9 @@ float64 timeout
 
 # With RL_CONTROL, the RL model to run, by its name in controller_msgs/RLPolicyState available_models. Empty keeps the current model.
 string rl_model_name
+
+# When true, the arms, spine and neck hold their current pose in the new state instead of moving to its home pose
+bool keep_upper_body_pose
 }</pre>
 */
 public class HighLevelStateActionDefinitionMessage implements ROS2Message<HighLevelStateActionDefinitionMessage>
@@ -44,11 +47,16 @@ public class HighLevelStateActionDefinitionMessage implements ROS2Message<HighLe
       With RL_CONTROL, the RL model to run, by its name in controller_msgs/RLPolicyState available_models. Empty keeps the current model.
    */
    private final StringBuilder rl_model_name_;
+   /**
+      When true, the arms, spine and neck hold their current pose in the new state instead of moving to its home pose
+   */
+   private boolean keep_upper_body_pose_;
 
    public HighLevelStateActionDefinitionMessage()
    {
       definition_ = new behavior_msgs.ActionNodeDefinitionMessage();
       rl_model_name_ = new StringBuilder();
+      keep_upper_body_pose_ = (boolean) false;
 
    }
 
@@ -67,6 +75,7 @@ public class HighLevelStateActionDefinitionMessage implements ROS2Message<HighLe
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // high_level_controller_name_
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // timeout_
       currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4) + (1 * rl_model_name_.length()) + 1; // rl_model_name_
+      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // keep_upper_body_pose_
 
       return currentAlignment - initialAlignment;
    }
@@ -78,6 +87,7 @@ public class HighLevelStateActionDefinitionMessage implements ROS2Message<HighLe
       buffer.writeByte(high_level_controller_name_);
       buffer.writeDouble(timeout_);
       buffer.writeString(rl_model_name_);
+      buffer.writeBoolean(keep_upper_body_pose_);
 
    }
 
@@ -88,6 +98,7 @@ public class HighLevelStateActionDefinitionMessage implements ROS2Message<HighLe
       high_level_controller_name_ = buffer.readByte();
       timeout_ = buffer.readDouble();
       buffer.readString(rl_model_name_);
+      keep_upper_body_pose_ = buffer.readBoolean();
 
    }
 
@@ -99,6 +110,7 @@ public class HighLevelStateActionDefinitionMessage implements ROS2Message<HighLe
       timeout_ = from.timeout_;
       rl_model_name_.delete(0, rl_model_name_.length());
       rl_model_name_.insert(0, from.rl_model_name_);
+      keep_upper_body_pose_ = from.keep_upper_body_pose_;
 
    }
 
@@ -142,6 +154,16 @@ public class HighLevelStateActionDefinitionMessage implements ROS2Message<HighLe
       this.rl_model_name_.delete(0, this.rl_model_name_.length());
       this.rl_model_name_.insert(0, s);
    }
+   public boolean getKeepUpperBodyPose()
+   {
+      return keep_upper_body_pose_;
+   }
+
+   public void setKeepUpperBodyPose(boolean keep_upper_body_pose_)
+   {
+      this.keep_upper_body_pose_ = keep_upper_body_pose_;
+   }
+
 
    @Override
    public java.lang.String toString()
@@ -156,6 +178,8 @@ public class HighLevelStateActionDefinitionMessage implements ROS2Message<HighLe
       builder.append(timeout_);
       builder.append("rl_model_name_=");
       builder.append(rl_model_name_.toString());
+      builder.append("keep_upper_body_pose_=");
+      builder.append(keep_upper_body_pose_);
 
       builder.append("}");
       return builder.toString();
