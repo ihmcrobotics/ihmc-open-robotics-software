@@ -47,6 +47,7 @@ byte PELVIS_ACTION = 20
 byte WAIT_ACTION = 21
 byte LEG_ACTION = 22
 byte MIMIC_ACTION = 23
+byte HIGH_LEVEL_STATE_ACTION = 24
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint64 sequence_id
@@ -113,6 +114,8 @@ behavior_msgs/WaitActionStateMessage[<=120] wait_actions
 behavior_msgs/LegActionStateMessage[<=120] leg_actions
 
 behavior_msgs/MimicActionStateMessage[<=120] mimic_actions
+
+behavior_msgs/HighLevelStateActionStateMessage[<=120] high_level_state_actions
 }</pre>
 */
 public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMessage>
@@ -146,6 +149,7 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
    public static final byte WAIT_ACTION = 21;
    public static final byte LEG_ACTION = 22;
    public static final byte MIMIC_ACTION = 23;
+   public static final byte HIGH_LEVEL_STATE_ACTION = 24;
    /**
       Monotonically increasing message ID that matches the CRDTInfo update number
    */
@@ -195,6 +199,7 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
    private final IDLObjectSequence<behavior_msgs.WaitActionStateMessage> wait_actions_;
    private final IDLObjectSequence<behavior_msgs.LegActionStateMessage> leg_actions_;
    private final IDLObjectSequence<behavior_msgs.MimicActionStateMessage> mimic_actions_;
+   private final IDLObjectSequence<behavior_msgs.HighLevelStateActionStateMessage> high_level_state_actions_;
 
    public BehaviorTreeStateMessage()
    {
@@ -225,6 +230,7 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
       wait_actions_ = new IDLObjectSequence<behavior_msgs.WaitActionStateMessage>(0, 120, behavior_msgs.WaitActionStateMessage.class);
       leg_actions_ = new IDLObjectSequence<behavior_msgs.LegActionStateMessage>(0, 120, behavior_msgs.LegActionStateMessage.class);
       mimic_actions_ = new IDLObjectSequence<behavior_msgs.MimicActionStateMessage>(0, 120, behavior_msgs.MimicActionStateMessage.class);
+      high_level_state_actions_ = new IDLObjectSequence<behavior_msgs.HighLevelStateActionStateMessage>(0, 120, behavior_msgs.HighLevelStateActionStateMessage.class);
 
    }
 
@@ -268,6 +274,7 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
       currentAlignment += wait_actions_.calculateSizeBytes(currentAlignment);
       currentAlignment += leg_actions_.calculateSizeBytes(currentAlignment);
       currentAlignment += mimic_actions_.calculateSizeBytes(currentAlignment);
+      currentAlignment += high_level_state_actions_.calculateSizeBytes(currentAlignment);
 
       return currentAlignment - initialAlignment;
    }
@@ -304,6 +311,7 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
       wait_actions_.serialize(buffer);
       leg_actions_.serialize(buffer);
       mimic_actions_.serialize(buffer);
+      high_level_state_actions_.serialize(buffer);
 
    }
 
@@ -339,6 +347,7 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
       wait_actions_.deserialize(buffer);
       leg_actions_.deserialize(buffer);
       mimic_actions_.deserialize(buffer);
+      high_level_state_actions_.deserialize(buffer);
 
    }
 
@@ -374,6 +383,7 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
       wait_actions_.set(from.wait_actions_);
       leg_actions_.set(from.leg_actions_);
       mimic_actions_.set(from.mimic_actions_);
+      high_level_state_actions_.set(from.high_level_state_actions_);
 
    }
 
@@ -532,6 +542,11 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
       return mimic_actions_;
    }
 
+   public IDLObjectSequence<behavior_msgs.HighLevelStateActionStateMessage> getHighLevelStateActions()
+   {
+      return high_level_state_actions_;
+   }
+
 
    @Override
    public java.lang.String toString()
@@ -584,6 +599,8 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
       builder.append(LEG_ACTION);
       builder.append("MIMIC_ACTION=");
       builder.append(MIMIC_ACTION);
+      builder.append("HIGH_LEVEL_STATE_ACTION=");
+      builder.append(HIGH_LEVEL_STATE_ACTION);
       builder.append("sequence_id_=");
       builder.append(sequence_id_);
       builder.append("next_id_=");
@@ -642,6 +659,8 @@ public class BehaviorTreeStateMessage implements ROS2Message<BehaviorTreeStateMe
       builder.append(leg_actions_);
       builder.append("mimic_actions_=");
       builder.append(mimic_actions_);
+      builder.append("high_level_state_actions_=");
+      builder.append(high_level_state_actions_);
 
       builder.append("}");
       return builder.toString();

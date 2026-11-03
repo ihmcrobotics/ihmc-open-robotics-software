@@ -78,7 +78,6 @@ import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
-import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoPhysicsEngine;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParameters;
@@ -115,7 +114,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class SCS2AvatarSimulationFactory
@@ -171,11 +169,6 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> useImpulseBasedPhysicsEngine = new OptionalFactoryField<>(
          "useImpulseBasePhysicsEngine",
          false);
-   protected final OptionalFactoryField<Boolean> useBulletPhysicsEngine = new OptionalFactoryField<>(
-         "useBulletPhysicsEngine",
-         false);
-   protected final OptionalFactoryField<Consumer<RobotDefinition>> bulletCollisionMutator = new OptionalFactoryField<>(
-         "bulletCollisionMutator");
    protected final OptionalFactoryField<Boolean> useMujocoPhysicsEngine = new OptionalFactoryField<>(
          "useMujocoPhysicsEngine",
          false);
@@ -358,11 +351,6 @@ public class SCS2AvatarSimulationFactory
          }
       }
 
-      if (useBulletPhysicsEngine.get() && bulletCollisionMutator.hasValue())
-      {
-         bulletCollisionMutator.get().accept(robotDefinition);
-      }
-
       robotInitialSetup.get().initializeRobotDefinition(robotDefinition);
       Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
       lastSimulatedJoints.forEach(lastSimulatedJoint -> robotDefinition.addSubtreeJointsToIgnore(lastSimulatedJoint));
@@ -382,10 +370,6 @@ public class SCS2AvatarSimulationFactory
                physicsEngine.setGlobalContactParameters(impulseBasedPhysicsEngineContactParameters.get());
             return physicsEngine;
          };
-      }
-      else if (useBulletPhysicsEngine.hasValue() && useBulletPhysicsEngine.get())
-      {
-         physicsEngineFactory = (inertialFrame, rootRegistry) -> new BulletPhysicsEngine(inertialFrame, rootRegistry);
       }
       else if (useMujocoPhysicsEngine.hasValue() && useMujocoPhysicsEngine.get())
       {
@@ -435,6 +419,12 @@ public class SCS2AvatarSimulationFactory
          simulationConstructionSet.addTerrainObject(terrainObjectDefinition);
       }
       robot = simulationConstructionSet.addRobot(robotDefinition);
+
+      TObjectDoubleMap<String> jointArmatures = robotModel.getJointArmatures();
+      if (simulationConstructionSet.getPhysicsEngine() instanceof MujocoPhysicsEngine mujocoPhysicsEngine && !jointArmatures.isEmpty())
+      {
+         robot.getControllerManager().addController(new SCS2MujocoJointArmatureSetter(mujocoPhysicsEngine, robot.getName(), jointArmatures));
+      }
 
       if (asyncROS2Node.hasBeenSet())
          AbilityHandSimulationController.attachIfNeeded(robot, asyncROS2Node.get(), robotModel);
@@ -1252,16 +1242,6 @@ public class SCS2AvatarSimulationFactory
    public void setGroundContactModelParameters(GroundContactModelParameters groundContactModelParameters)
    {
       this.groundContactModelParameters.set(groundContactModelParameters);
-   }
-
-   public void setUseBulletPhysicsEngine(boolean useBulletPhysicsEngine)
-   {
-      this.useBulletPhysicsEngine.set(useBulletPhysicsEngine);
-   }
-
-   public void setBulletCollisionMutator(Consumer<RobotDefinition> bulletCollisionMutator)
-   {
-      this.bulletCollisionMutator.set(bulletCollisionMutator);
    }
 
    public void setUseMujocoPhysicsEngine(boolean useMujocoPhysicsEngine)

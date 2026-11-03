@@ -26,6 +26,12 @@ import java.util.List;
  */
 public class GpuMappingManager
 {
+   /**
+    * Width in meters of the crop around the feet sent to the controller. The RL height scan reaches about 1.1 m from the
+    * pelvis, and footsteps snapped by the step generator outside the crop get no height.
+    */
+   public static final double CONTROLLER_HEIGHT_MAP_WIDTH = 2.4;
+
    private final ROS2Node ros2Node;
    private final ReferenceFrame heightMapCenter;
    private final HeightMapParameters heightMapParameters;
@@ -48,6 +54,7 @@ public class GpuMappingManager
    // These fields are created globally cause it takes compute time to create it in the update loop
    private final HeightMapMessage heightMapMessage;
    private final HeightMapMessageForController heightMapMessageForController;
+   private final HeightMapForControllerEncoder heightMapForControllerEncoder = new HeightMapForControllerEncoder(CONTROLLER_HEIGHT_MAP_WIDTH);
    private long heightMapSequenceId = 0;
    private long heightMapForControllerSequenceId = 0;
    private final TerrainMapMessage terrainMapMessage;
@@ -181,10 +188,17 @@ public class GpuMappingManager
 
    public void publishHeightMapForController()
    {
-      HeightMapMessageTools.toMessageForController(heightMapExtractor.getHeightMapData(), heightMapMessageForController);
+      double midFeetX = 0.0;
+      double midFeetY = 0.0;
+      for (ReferenceFrame footSoleFrame : footSoleFrames)
+      {
+         RigidBodyTransform soleToWorld = footSoleFrame.getTransformToWorldFrame();
+         midFeetX += soleToWorld.getTranslationX() / footSoleFrames.size();
+         midFeetY += soleToWorld.getTranslationY() / footSoleFrames.size();
+      }
+      heightMapForControllerEncoder.encode(heightMapExtractor.getHeightMapData(), midFeetX, midFeetY, computeFootHeight(), heightMapMessageForController);
       heightMapMessageForController.setSequenceId(heightMapForControllerSequenceId++);
       controllerHeightMapMessagePublisher.publish(heightMapMessageForController);
-
    }
 
     public void publishTerrainMap()

@@ -48,9 +48,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
    private final ArrayList<RDXEnvironmentObject> lightObjects = new ArrayList<>();
    private final RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo();
    private final RDX3DPanel panel3D;
-   private final RDXPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
 
-   private final TreeSet<String> environmentFileNames = new TreeSet<>();
+   private final TreeSet<String> environmentFileNames = new TreeSet<>(RDXEnvironmentBuilder::compareFileNames);
    private final Point3D tempIntersection = new Point3D();
    private final Point3D tempTranslation = new Point3D();
    private final Quaternion tempOrientation = new Quaternion();
@@ -70,8 +69,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
       super("Environment");
       this.panel3D = panel3D;
       setRenderMethod(this::renderImGuiWidgets);
-      addChild(poseGizmoTunerPanel);
       RDXBaseUI.getInstance().getKeyBindings().register("Delete selected object", "Delete");
+      RDXBaseUI.getInstance().getKeyBindings().register("Deselect object", "Escape");
    }
 
    public void create()
@@ -95,6 +94,9 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    public void process3DViewInput(ImGui3DViewInput viewInput)
    {
+      if (selectedObject != null && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
+         resetSelection();
+
       if (inputsEnabled.get())
       {
          if (selectedObject != null)
@@ -287,8 +289,6 @@ public class RDXEnvironmentBuilder extends RDXPanel
          });
          reindexScripts();
       }
-
-      ImGui.checkbox("Show 3D Widget Tuner", poseGizmoTunerPanel.getIsShowing());
    }
 
    private void loadEnvironmentInternal(String environmentFileName)
@@ -467,5 +467,52 @@ public class RDXEnvironmentBuilder extends RDXPanel
    public ArrayList<RDXEnvironmentObject> getAllObjects()
    {
       return allObjects;
+   }
+
+   /** Alphabetical order, with digit runs compared as numbers so 2 comes before 10. */
+   private static int compareFileNames(String left, String right)
+   {
+      int i = 0;
+      int j = 0;
+      while (i < left.length() && j < right.length())
+      {
+         if (Character.isDigit(left.charAt(i)) && Character.isDigit(right.charAt(j)))
+         {
+            int leftStart = i;
+            int rightStart = j;
+            while (i < left.length() && Character.isDigit(left.charAt(i)))
+               i++;
+            while (j < right.length() && Character.isDigit(right.charAt(j)))
+               j++;
+            int numberComparison = compareNumericText(left.substring(leftStart, i), right.substring(rightStart, j));
+            if (numberComparison != 0)
+               return numberComparison;
+         }
+         else
+         {
+            int characterComparison = Character.compare(Character.toLowerCase(left.charAt(i)), Character.toLowerCase(right.charAt(j)));
+            if (characterComparison != 0)
+               return characterComparison;
+            i++;
+            j++;
+         }
+      }
+      int lengthComparison = Integer.compare(left.length() - i, right.length() - j);
+      return lengthComparison != 0 ? lengthComparison : left.compareTo(right);
+   }
+
+   private static int compareNumericText(String left, String right)
+   {
+      int leftIndex = 0;
+      int rightIndex = 0;
+      while (leftIndex < left.length() - 1 && left.charAt(leftIndex) == '0')
+         leftIndex++;
+      while (rightIndex < right.length() - 1 && right.charAt(rightIndex) == '0')
+         rightIndex++;
+      int lengthComparison = Integer.compare(left.length() - leftIndex, right.length() - rightIndex);
+      if (lengthComparison != 0)
+         return lengthComparison;
+      int digitComparison = left.substring(leftIndex).compareTo(right.substring(rightIndex));
+      return digitComparison != 0 ? digitComparison : Integer.compare(left.length(), right.length());
    }
 }
