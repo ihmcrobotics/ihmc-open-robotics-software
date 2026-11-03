@@ -47,6 +47,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
    private RDXBehaviorTreeNode<?, ?> selectedNode;
    private boolean draggingDivider;
    private boolean shouldSave = false;
+   private boolean monitorMode = false;
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                           ROS2SyncedRobotModel syncedRobot,
@@ -115,7 +116,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
 
    private void calculateVRPick(RDXVRContext vrContext)
    {
-      if (rootNode != null)
+      if (rootNode != null && !monitorMode)
          calculateVRPick(vrContext, rootNode);
    }
 
@@ -131,7 +132,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
 
    private void processVRInput(RDXVRContext vrContext)
    {
-      if (rootNode != null)
+      if (rootNode != null && !monitorMode)
          processVRInput(vrContext, rootNode);
    }
 
@@ -156,7 +157,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
    {
       shouldSave = false;
       ImGui.beginMenuBar();
-      if (ImGui.beginMenu(labels.get("File")))
+      if (!monitorMode && ImGui.beginMenu(labels.get("File")))
       {
          if (rootNode == null)
          {
@@ -201,6 +202,16 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
 
    protected void renderImGuiWidgetsPost()
    {
+      if (ImGui.radioButton(labels.get("Monitor"), monitorMode))
+      {
+         if (!monitorMode && rootNode != null)
+            RDXBehaviorTreeTools.runForEntireTree(rootNode, RDXBehaviorTreeNode::clearSelections);
+         monitorMode = true;
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Editor"), !monitorMode))
+         monitorMode = false;
+
       if (rootNode != null)
       {
          rootNode.renderExecutionControlAndProgressWidgets();
@@ -224,7 +235,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
          shouldSave |= ImGui.isWindowHovered() && ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('S');
          ImGui.endChild();
 
-         if (rootNode != null && anyNodeSelected) // It can become null above
+         if (!monitorMode && rootNode != null && anyNodeSelected) // It can become null above
          {
             float dividerHeight = ImGui.getFrameHeight();
             float closeOffsetY = ImGui.getCursorScreenPosY();
@@ -311,15 +322,15 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
             ImGui.endChild();
          }
       }
-      else
-      {
+      else if (!monitorMode)
          nodeCreationMenu.renderImGuiWidgets(null, BehaviorTreeNodeInsertionType.INSERT_ROOT);
-      }
+      else
+         ImGui.text("No behavior tree loaded.");
 
       // Perform any modifications that were made via user interaction.
       modifyTreeTopology();
 
-      if (shouldSave)
+      if (shouldSave && !monitorMode)
       {
          RDXBaseUI.pushNotification("Saving %s".formatted(rootNode.getDefinition().getName()));
          rootNode.getDefinition().saveToFile();
@@ -350,7 +361,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
 
    private void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (rootNode != null)
+      if (rootNode != null && !monitorMode)
          calculate3DViewPick(input, rootNode);
    }
 
@@ -366,7 +377,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
 
    private void process3DViewInput(ImGui3DViewInput input)
    {
-      if (rootNode != null)
+      if (rootNode != null && !monitorMode)
          process3DViewInput(input, rootNode);
    }
 
@@ -410,5 +421,10 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
    public RDXBehaviorTreeNodeCreationMenu getNodeCreationMenu()
    {
       return nodeCreationMenu;
+   }
+
+   public boolean isMonitorMode()
+   {
+      return monitorMode;
    }
 }

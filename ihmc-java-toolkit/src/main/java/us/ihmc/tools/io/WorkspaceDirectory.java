@@ -128,6 +128,11 @@ public class WorkspaceDirectory
       return filesystemDirectory != null;
    }
 
+   public void setFilesystemDirectory(Path directory)
+   {
+      filesystemDirectory = directory == null ? null : directory.toAbsolutePath();
+   }
+
    /**
     * The directory path on the filesystem, if file access is available.
     *

@@ -192,7 +192,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       {
          ImGui.getWindowDrawList().addRectFilled(lineMin.x, lineMin.y, lineMax.x, lineMax.y, ImGui.getColorU32(ImGuiCol.MenuBarBg));
 
-         if (!isRootNode())
+         if (!isRootNode() && !rootNode.getTree().isMonitorMode())
          {
             if (ImGui.isMouseDragging(ImGuiMouseButton.Left))
             {
@@ -264,7 +264,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       if (selected.get())
          ImGui.getWindowDrawList().addRectFilled(lineMin.x, lineMin.y, lineMax.x, lineMax.y, ImGui.getColorU32(ImGuiCol.Header));
 
-      if (!isRootNode() && textHovered && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
+      if (!rootNode.getTree().isMonitorMode() && !isRootNode() && textHovered && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
       {
          anySpecificWidgetOnLineClicked = true;
          setSelected();
@@ -285,7 +285,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
          ImGui.textColored(getNameColor(), nameText);
       }
 
-      if (mouseHoveringNodeLine && !isNameBeingEdited && ImGui.isMouseClicked(ImGuiMouseButton.Right))
+      if (!rootNode.getTree().isMonitorMode() && mouseHoveringNodeLine && !isNameBeingEdited && ImGui.isMouseClicked(ImGuiMouseButton.Right))
       {
          ImGui.openPopup(nodePopupID);
       }
@@ -293,7 +293,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       // We try to make anywhere on the row clickable to select the node,
       // execpt for specific interactions. We use release without drag to prevent interference
       // with the drag and drop functionality
-      if (!anySpecificWidgetOnLineClicked && mouseHoveringNodeLine
+      if (!rootNode.getTree().isMonitorMode() && !anySpecificWidgetOnLineClicked && mouseHoveringNodeLine
           && ImGuiTools.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && !isNameBeingEdited && !selected.get())
          setSelected();
    }

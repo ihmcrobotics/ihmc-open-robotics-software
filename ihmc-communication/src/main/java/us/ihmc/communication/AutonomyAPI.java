@@ -4,6 +4,8 @@ import behavior_msgs.AI2RCommandMessage;
 import behavior_msgs.AI2RStatusMessage;
 import behavior_msgs.BehaviorTreeStateMessage;
 import behavior_msgs.BehaviorTreeYoDataMessage;
+import behavior_msgs.BehaviorCommandMessage;
+import behavior_msgs.BehaviorResultMessage;
 import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.jros2.ROS2QoSProfile;
@@ -25,4 +27,8 @@ public final class AutonomyAPI
    public static final ROS2Topic<AI2RStatusMessage> AI2R_STATUS = BEHAVIOR_TREE_MODULE.withType(AI2RStatusMessage.class).withSuffix("ai2r_status");
    /** rt/ihmc/behavior_tree/ai2r_command */
    public static final ROS2Topic<AI2RCommandMessage> AI2R_COMMAND = BEHAVIOR_TREE_MODULE.withType(AI2RCommandMessage.class).withSuffix("ai2r_command");
+   /** rt/ihmc/behavior_tree/behavior_command */
+   public static final ROS2Topic<BehaviorCommandMessage> BEHAVIOR_COMMAND = BEHAVIOR_TREE_MODULE.withType(BehaviorCommandMessage.class).withSuffix("behavior_command").withQoS(ROS2QoSProfile.RELIABLE);
+   /** rt/ihmc/behavior_tree/behavior_result */
+   public static final ROS2Topic<BehaviorResultMessage> BEHAVIOR_RESULT = BEHAVIOR_TREE_MODULE.withType(BehaviorResultMessage.class).withSuffix("behavior_result").withQoS(ROS2QoSProfile.RELIABLE);
 }

@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import static us.ihmc.robotics.Assert.*;
 
+import controller_msgs.AbortWalkingMessage;
 import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
@@ -476,6 +477,30 @@ public class CommandConsumerWithDelayBuffersTest
       
       
    }
+
+   @Test
+   public void testFullQueueKeepsNewestNonDelayedCommand()
+   {
+      List<Class<? extends Command<?, ?>>> controllerSupportedCommands = new ArrayList<>();
+      controllerSupportedCommands.add(ImmediateCommand.class);
+      CommandInputManager commandInputManager = new CommandInputManager(controllerSupportedCommands);
+      YoDouble yoTime = new YoDouble("yoTime", null);
+      CommandConsumerWithDelayBuffers commandConsumer = new CommandConsumerWithDelayBuffers(commandInputManager, controllerSupportedCommands, yoTime);
+
+      int submitted = CommandConsumerWithDelayBuffers.NUMBER_OF_COMMANDS_TO_QUEUE + 1;
+      for (int i = 0; i < submitted; i++)
+      {
+         ImmediateCommand command = new ImmediateCommand();
+         command.setData(i);
+         commandInputManager.submitCommand(command);
+         commandConsumer.update();
+      }
+
+      ImmediateCommand newest = commandConsumer.pollNewestCommand(ImmediateCommand.class);
+      assertNotNull(newest);
+      assertEquals(submitted - 1, newest.getData());
+      assertNull(commandConsumer.pollNewestCommand(ImmediateCommand.class));
+   }
    
    private <M extends ROS2Message<M>> Command<?, M> getCommand(Random random, Class clazz)
          throws InstantiationException, IllegalAccessException, InvocationTargetException
@@ -520,5 +545,59 @@ public class CommandConsumerWithDelayBuffersTest
          
       }
       return null;
+   }
+
+   public static class ImmediateCommand implements Command<ImmediateCommand, AbortWalkingMessage>
+   {
+      private long data;
+
+      public ImmediateCommand()
+      {
+      }
+
+      @Override
+      public void set(ImmediateCommand other)
+      {
+         data = other.data;
+      }
+
+      @Override
+      public void clear()
+      {
+         data = 0;
+      }
+
+      @Override
+      public void setFromMessage(AbortWalkingMessage message)
+      {
+      }
+
+      @Override
+      public Class<AbortWalkingMessage> getMessageClass()
+      {
+         return AbortWalkingMessage.class;
+      }
+
+      @Override
+      public boolean isCommandValid()
+      {
+         return true;
+      }
+
+      @Override
+      public long getSequenceId()
+      {
+         return data;
+      }
+
+      public long getData()
+      {
+         return data;
+      }
+
+      public void setData(long data)
+      {
+         this.data = data;
+      }
    }
 }
