@@ -628,6 +628,19 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    }
 
    /**
+    * Holds the chest, head and hands where they are, replacing the go home motion started by {@link #initialize()}.
+    */
+   public void holdUpperBodyPose()
+   {
+      for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
+      {
+         RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
+         if (bodyManager != null)
+            bodyManager.hold();
+      }
+   }
+
+   /**
     * Request the controller to set all its desireds to match the current configuration of the robot.
     * <p>
     * Calling that method right after {@link #initialize()} will cause the controller to maintain the
