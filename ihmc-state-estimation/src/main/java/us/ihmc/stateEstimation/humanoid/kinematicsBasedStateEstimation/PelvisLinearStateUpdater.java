@@ -819,6 +819,11 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       return listOfTrustedFeet;
    }
 
+   public int getNumberOfTrustedFeet()
+   {
+      return numberOfEndEffectorsTrusted.getIntegerValue();
+   }
+
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {

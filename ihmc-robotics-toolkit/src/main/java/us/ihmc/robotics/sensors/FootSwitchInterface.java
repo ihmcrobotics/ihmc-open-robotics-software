@@ -54,6 +54,12 @@ public interface FootSwitchInterface extends SCS2YoGraphicHolder
     */
    double getFootLoadPercentage();
 
+   /** Whether the load estimate is usable independently of any contact-detection fallback. Unknown defaults to false. */
+   default boolean isFootLoadPercentageReliable()
+   {
+      return false;
+   }
+
    /**
     * @return the distance of the center of pressure to the foot polygon. Negative if inside.
     */
