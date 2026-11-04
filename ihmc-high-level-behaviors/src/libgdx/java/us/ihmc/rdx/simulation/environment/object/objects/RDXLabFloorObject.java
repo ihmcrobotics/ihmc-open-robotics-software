@@ -21,7 +21,6 @@ public class RDXLabFloorObject extends RDXEnvironmentObject
       getBoundingSphere().setRadius(0.7);
       Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
       setCollisionGeometryObject(collisionBox);
-//      getBulletCollisionOffset().getTranslation().addZ(-1.0);
    }
 
    @Override

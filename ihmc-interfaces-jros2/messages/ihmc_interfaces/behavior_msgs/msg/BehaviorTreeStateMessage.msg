@@ -30,6 +30,8 @@ byte PELVIS_ACTION = 20
 byte WAIT_ACTION = 21
 byte LEG_ACTION = 22
 byte MIMIC_ACTION = 23
+byte HIGH_LEVEL_STATE_ACTION = 24
+byte RL_WALK_ACTION = 25
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint64 sequence_id
@@ -96,3 +98,7 @@ behavior_msgs/WaitActionStateMessage[<=120] wait_actions
 behavior_msgs/LegActionStateMessage[<=120] leg_actions
 
 behavior_msgs/MimicActionStateMessage[<=120] mimic_actions
+
+behavior_msgs/HighLevelStateActionStateMessage[<=120] high_level_state_actions
+
+behavior_msgs/RLWalkActionStateMessage[<=120] rl_walk_actions

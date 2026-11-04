@@ -20,6 +20,9 @@ import us.ihmc.sensors.zed.ZEDImageSensor;
 
 public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectExecutor
 {
+   /** How far toward the robot the hinge recess capsule is from the hinge, in meters */
+   public static final double HINGE_RECESS_DISTANCE_TOWARD_ROBOT = 0.1;
+
    private final BehaviorTreeSceneExecutor scene;
    private volatile CUDAShapePointCounter pointCounter = null;
 
@@ -108,7 +111,7 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
          }
 
          hingeRecessPoints = 0;
-         Point3D hingeRecessPoint = new Point3D(-0.1, hingeSide.negateIfLeftSide(0.1), 0.0);
+         Point3D hingeRecessPoint = new Point3D(-0.1, hingeSide.negateIfLeftSide(HINGE_RECESS_DISTANCE_TOWARD_ROBOT), 0.0);
          transform.getValueReadOnly().transform(hingeRecessPoint);
          capsuleBottom.set(hingeRecessPoint);
          capsuleBottom.addZ(-0.3);
@@ -166,5 +169,16 @@ public class BehaviorTreeSceneDoorFrameExecutor extends BehaviorTreeSceneObjectE
    public float getDoorOpenAngle()
    {
       return doorOpenAngle;
+   }
+
+   /** Depth points in front of the hinge. More than {@link #getMinRecessPoints()} means a push door. */
+   public long getHingeRecessPoints()
+   {
+      return hingeRecessPoints;
+   }
+
+   public long getLatchPostPoints()
+   {
+      return latchPostPoints;
    }
 }

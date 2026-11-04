@@ -128,6 +128,22 @@ public class ActionNodeInitialization
          }
          walkAction.update();
       }
+      else if (newAction instanceof RLWalkActionState rlWalkAction)
+      {
+         RLWalkActionState nextPreviousRLWalkAction = findNextPreviousAction(actionSequence, RLWalkActionState.class, indexOfInsertion, null);
+         if (nextPreviousRLWalkAction != null)
+         {
+            rlWalkAction.getDefinition().setParentFrameName(nextPreviousRLWalkAction.getDefinition().getParentFrameName());
+            rlWalkAction.getDefinition().getGoalToParentTransform().getValueAndModify()
+                        .set(nextPreviousRLWalkAction.getDefinition().getGoalToParentTransform().getValueReadOnly());
+         }
+         else // one meter in front of the robot
+         {
+            rlWalkAction.getDefinition().setParentFrameName("Walking");
+            rlWalkAction.getDefinition().setGoalX(1.0);
+         }
+         rlWalkAction.update();
+      }
       else if (newAction instanceof AbilityHandActionState abilityHandActionState)
       {
          abilityHandActionState.getDefinition().setSide(sideOfNewAction);

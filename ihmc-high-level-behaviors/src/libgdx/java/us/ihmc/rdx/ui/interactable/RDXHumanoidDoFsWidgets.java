@@ -5,6 +5,9 @@ import controller_msgs.*;
 import ihmc_common_msgs.QueueableMessage;
 import ihmc_common_msgs.TrajectoryPoint1DMessage;
 import imgui.ImGui;
+import imgui.ImVec4;
+import imgui.flag.ImGuiCol;
+import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -19,6 +22,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiInputDouble;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
@@ -35,8 +39,20 @@ public class RDXHumanoidDoFsWidgets
 {
    private enum InteractableDoFs
    {
-      NONE, NECK, CHEST, LEFT_ARM, RIGHT_ARM, LEFT_LEG, RIGHT_LEG;
+      NONE("None"), NECK("Neck"), CHEST("Chest"), LEFT_ARM("Left Arm"), RIGHT_ARM("Right Arm"), LEFT_LEG("Left Leg"), RIGHT_LEG("Right Leg");
+
+      private final String displayName;
+
+      InteractableDoFs(String displayName)
+      {
+         this.displayName = displayName;
+      }
    }
+   /** Radio button grid for picking the body part, so it is one click instead of opening a combo. */
+   private static final InteractableDoFs[][] BODY_PART_ROWS = {{InteractableDoFs.NONE},
+                                                              {InteractableDoFs.NECK, InteractableDoFs.CHEST},
+                                                              {InteractableDoFs.LEFT_ARM, InteractableDoFs.RIGHT_ARM},
+                                                              {InteractableDoFs.LEFT_LEG, InteractableDoFs.RIGHT_LEG}};
    private final int NUMBER_OF_DOFS_SPHERICAL_JOINT = 3;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ROS2SyncedRobotModel syncedRobot;
@@ -44,9 +60,12 @@ public class RDXHumanoidDoFsWidgets
    private final RDXTeleoperationParameters teleoperationParameters;
    private final RDXDesiredRobot desiredRobot;
 
-   private final String[] interactableParts = new String[InteractableDoFs.values().length];
    private final ImInt currentInteractablePart = new ImInt(InteractableDoFs.NONE.ordinal());
    private final ImInt previousInteractablePart = new ImInt(InteractableDoFs.NONE.ordinal());
+   /** Draws each joint's actual angle as a notch on its slider, like the pelvis height slider. */
+   private final ImBoolean showActual = new ImBoolean(false);
+   /** Screen X where the joint slider bars start, recorded while rendering them, so Show actual can line up with them. */
+   private float sliderStartScreenX = Float.NaN;
 
    private final SideDependentList<ImDoubleWrapper[]> armJointAngleWidgets = new SideDependentList<>();
    private final SideDependentList<double[]> armJointWidgetValues = new SideDependentList<>();
@@ -78,13 +97,6 @@ public class RDXHumanoidDoFsWidgets
 
       desiredRobot = new RDXDesiredRobot(syncedRobot.getRobotModel());
       desiredRobot.setSceneLevels(RDXSceneLevel.VIRTUAL);
-
-      int interactableIndex = 0;
-      for (InteractableDoFs preset : InteractableDoFs.values())
-      {
-         interactableParts[interactableIndex++] = preset.name();
-      }
-      interactableParts[0] = "Select Body Part";
 
       SideDependentList<String[]> armJointNames = new SideDependentList<>();
       SideDependentList<double[]> armJointLowerLimits = new SideDependentList<>();
@@ -124,7 +136,7 @@ public class RDXHumanoidDoFsWidgets
 
             for (int i = 0; i < armJointAngleWidgets.get(side).length; i++)
             {
-               armJointAngleWidgets.get(side)[i] = createImDoubleWrapper(i, armJointWidgetValues.get(side), armJointLowerLimits.get(side), armJointUpperLimits.get(side), armJointNames.get(side));
+               armJointAngleWidgets.get(side)[i] = createImDoubleWrapper(i, armJointWidgetValues.get(side), armValuesFromRobot.get(side), armJointLowerLimits.get(side), armJointUpperLimits.get(side), armJointNames.get(side));
             }
          }
 
@@ -152,7 +164,7 @@ public class RDXHumanoidDoFsWidgets
 
          for (int i = 0; i < legJointAngleWidgets.get(side).length; i++)
          {
-            legJointAngleWidgets.get(side)[i] = createImDoubleWrapper(i, legJointWidgetValues.get(side), legJointLowerLimits.get(side), legJointUpperLimits.get(side), legJointNames.get(side));
+            legJointAngleWidgets.get(side)[i] = createImDoubleWrapper(i, legJointWidgetValues.get(side), legValuesFromRobot.get(side), legJointLowerLimits.get(side), legJointUpperLimits.get(side), legJointNames.get(side));
          }
       }
 
@@ -170,7 +182,7 @@ public class RDXHumanoidDoFsWidgets
       }
       for (int i = 0; i < spineJointAngleWidgets.length; i++)
       {
-         spineJointAngleWidgets[i] = createImDoubleWrapper(i, spineJointWidgetValues, spineLowerLimits, spineUpperLimits, spineJointNames);
+         spineJointAngleWidgets[i] = createImDoubleWrapper(i, spineJointWidgetValues, spineValuesFromRobot, spineLowerLimits, spineUpperLimits, spineJointNames);
       }
 
       if (syncedRobot.getRobotModel().getRobotVersion().hasHead())
@@ -192,12 +204,17 @@ public class RDXHumanoidDoFsWidgets
          neckValuesFromRobot = new double[neckJointNamesArray.length];
          for (int i = 0; i < neckJointAngleWidgets.length; i++)
          {
-            neckJointAngleWidgets[i] = createImDoubleWrapper(i, neckJointWidgetValues, neckLowerLimits, neckUpperLimits, neckJointNames);
+            neckJointAngleWidgets[i] = createImDoubleWrapper(i, neckJointWidgetValues, neckValuesFromRobot, neckLowerLimits, neckUpperLimits, neckJointNames);
          }
       }
    }
 
-   private ImDoubleWrapper createImDoubleWrapper(int jointIndex, double[] jointWidgetValues, double[] lowerLimits, double[] upperLimits, String[] jointNames)
+   private ImDoubleWrapper createImDoubleWrapper(int jointIndex,
+                                                 double[] jointWidgetValues,
+                                                 double[] valuesFromRobot,
+                                                 double[] lowerLimits,
+                                                 double[] upperLimits,
+                                                 String[] jointNames)
    {
       final MutableObject<ImGuiInputDouble> fancyInput = new MutableObject<>();
       final MutableObject<ImGuiSliderDouble> fancySlider = new MutableObject<>();
@@ -216,11 +233,34 @@ public class RDXHumanoidDoFsWidgets
                                     fancyInput.getValue().render(0.01, 0.1);
 
                                     ImGui.sameLine();
-                                    fancySlider.getValue().setWidgetText("%s %.1f%s".formatted(jointNames[jointIndex],
-                                                                                               Math.toDegrees(imDouble.get()),
-                                                                                               EuclidCoreMissingTools.DEGREE_SYMBOL));
+                                    String sliderText = "%s %.1f%s".formatted(jointNames[jointIndex],
+                                                                              Math.toDegrees(imDouble.get()),
+                                                                              EuclidCoreMissingTools.DEGREE_SYMBOL);
+                                    if (showActual.get())
+                                       sliderText += " (%.1f%s)".formatted(Math.toDegrees(valuesFromRobot[jointIndex]), EuclidCoreMissingTools.DEGREE_SYMBOL);
+                                    fancySlider.getValue().setWidgetText(sliderText);
                                     fancySlider.getValue().render(lowerLimits[jointIndex], upperLimits[jointIndex]);
+                                    sliderStartScreenX = ImGui.getItemRectMinX();
+
+                                    if (showActual.get())
+                                       renderActualNotch(valuesFromRobot[jointIndex], lowerLimits[jointIndex], upperLimits[jointIndex]);
                                  });
+   }
+
+   /** Draws a notch over the slider that was just rendered, at the joint's actual angle. */
+   private void renderActualNotch(double actualValue, double lowerLimit, double upperLimit)
+   {
+      float sliderMinX = ImGui.getItemRectMinX();
+      float sliderMaxX = ImGui.getItemRectMaxX();
+      float fraction = (float) MathTools.clamp((actualValue - lowerLimit) / (upperLimit - lowerLimit), 0.0, 1.0);
+      float notchX = sliderMinX + fraction * (sliderMaxX - sliderMinX);
+      float verticalExtents = 3.0f;
+      float notchWidth = 2.0f;
+      ImGui.getWindowDrawList().addRectFilled(notchX - notchWidth / 2.0f,
+                                              ImGui.getItemRectMinY() - verticalExtents,
+                                              notchX + notchWidth / 2.0f,
+                                              ImGui.getItemRectMaxY() + verticalExtents,
+                                              ImGui.getColorU32(ImGuiCol.Text));
    }
 
    private void receiveRobotConfigurationData()
@@ -294,32 +334,34 @@ public class RDXHumanoidDoFsWidgets
 
    public void renderImGuiWidgets()
    {
-      ImGui.pushItemWidth(-1);
-      if (ImGui.beginCombo(labels.get("##comboBoxInteractableParts"), interactableParts[currentInteractablePart.get()]))
+      // The second column starts past the widest first column radio button so the columns line up
+      float rowStartX = ImGui.getCursorPosX();
+      float widestFirstColumnText = 0.0f;
+      for (InteractableDoFs[] row : BODY_PART_ROWS)
+         widestFirstColumnText = Math.max(widestFirstColumnText, ImGuiTools.calcTextSizeX(row[0].displayName));
+      float secondColumnX = rowStartX + ImGui.getFrameHeight() + ImGui.getStyle().getItemInnerSpacingX() + widestFirstColumnText
+                            + 2.0f * ImGui.getStyle().getItemSpacingX();
+      for (int row = 0; row < BODY_PART_ROWS.length; row++)
       {
-         for (InteractableDoFs part : InteractableDoFs.values())
+         if (row > 0)
+            ImGui.setCursorPosX(rowStartX);
+         for (int column = 0; column < BODY_PART_ROWS[row].length; column++)
          {
-            boolean isDisabled = shouldDisableOption(part.ordinal()); // Determine if the option should be disabled
-
-            if (isDisabled)
-               ImGui.beginDisabled(); // Grays out the item
-
-            boolean isSelected = (currentInteractablePart.get() == part.ordinal());
-            if (ImGui.selectable(interactableParts[part.ordinal()], isSelected))
+            InteractableDoFs part = BODY_PART_ROWS[row][column];
+            if (column > 0)
             {
-               currentInteractablePart.set(part.ordinal());
+               ImGui.sameLine();
+               ImGui.setCursorPosX(secondColumnX);
             }
 
+            boolean isDisabled = shouldDisableOption(part.ordinal());
             if (isDisabled)
-               ImGui.endDisabled(); // Re-enable options for the next iteration
-
-            if (isSelected)
-               ImGui.setItemDefaultFocus();
+               ImGui.beginDisabled();
+            ImGui.radioButton(labels.get(part.displayName), currentInteractablePart, part.ordinal());
+            if (isDisabled)
+               ImGui.endDisabled();
          }
-
-         ImGui.endCombo();
       }
-      ImGui.popItemWidth();
 
       if (currentInteractablePart.get() != previousInteractablePart.get())
       {
@@ -328,7 +370,34 @@ public class RDXHumanoidDoFsWidgets
          desiredRobot.setActive(false);
       }
 
-      switch (InteractableDoFs.values()[currentInteractablePart.get()])
+      InteractableDoFs selectedPart = InteractableDoFs.values()[currentInteractablePart.get()];
+      if (selectedPart != InteractableDoFs.NONE)
+      {
+         // Slightly lighter than the regular buttons so the send action stands out from the sliders below
+         pushLightenedStyleColor(ImGuiCol.Button);
+         pushLightenedStyleColor(ImGuiCol.ButtonHovered);
+         pushLightenedStyleColor(ImGuiCol.ButtonActive);
+         if (ImGui.button(labels.get("Send to Robot")))
+         {
+            switch (selectedPart)
+            {
+               case NECK -> sendNeck();
+               case CHEST -> sendChest();
+               case LEFT_ARM -> sendArm(RobotSide.LEFT);
+               case RIGHT_ARM -> sendArm(RobotSide.RIGHT);
+               case LEFT_LEG -> sendLeg(RobotSide.LEFT);
+               case RIGHT_LEG -> sendLeg(RobotSide.RIGHT);
+               default -> throw new IllegalStateException("Unexpected value: " + selectedPart);
+            }
+         }
+         ImGui.popStyleColor(3);
+
+         // The actual angles are otherwise only refreshed on send and reset
+         if (showActual.get())
+            receiveRobotConfigurationData();
+      }
+
+      switch (selectedPart)
       {
          case NONE ->
          {
@@ -339,20 +408,80 @@ public class RDXHumanoidDoFsWidgets
          case RIGHT_ARM -> renderArmWidgets(RobotSide.RIGHT);
          case LEFT_LEG -> renderLegWidgets(RobotSide.LEFT);
          case RIGHT_LEG -> renderLegWidgets(RobotSide.RIGHT);
-         default -> throw new IllegalStateException("Unexpected value: " + InteractableDoFs.values()[currentInteractablePart.get()]);
+         default -> throw new IllegalStateException("Unexpected value: " + selectedPart);
       }
 
-      if (currentInteractablePart.get() != 0)
+      if (selectedPart != InteractableDoFs.NONE)
       {
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Reset to Robot Values")))
-         {
-            receiveRobotConfigurationData();
-            resetToRobotValues();
-         }
+         if (!Float.isNaN(sliderStartScreenX))
+            ImGui.setCursorScreenPos(sliderStartScreenX, ImGui.getCursorScreenPosY());
+         ImGui.checkbox(labels.get("Show actual"), showActual);
       }
 
       previousInteractablePart.set(currentInteractablePart);
+   }
+
+   private void pushLightenedStyleColor(int imGuiCol)
+   {
+      ImVec4 color = ImGui.getStyle().getColor(imGuiCol);
+      float lighten = 0.25f; // Fraction of the way toward white
+      ImGui.pushStyleColor(imGuiCol,
+                           color.x + (1.0f - color.x) * lighten,
+                           color.y + (1.0f - color.y) * lighten,
+                           color.z + (1.0f - color.z) * lighten,
+                           color.w);
+   }
+
+   private void sendNeck()
+   {
+      ros2ControllerHelper.publishToController(HumanoidMessageTools.createHeadHybridTrajectoryMessage(desiredRobot.getDesiredFullRobotModel().getHead().getBodyFixedFrame(),
+                                                                                                      desiredRobot.getDesiredFullRobotModel().getChest().getBodyFixedFrame(),
+                                                                                                      neckJointWidgetValues,
+                                                                                                      teleoperationParameters.getTrajectoryTime()));
+   }
+
+   private void sendChest()
+   {
+      receiveRobotConfigurationData();
+      buildAndPublishChestTrajectoryMessage();
+   }
+
+   private void sendArm(RobotSide side)
+   {
+      receiveRobotConfigurationData();
+      double[] desiredValues = new double[armJointNamesArray.get(side).length];
+      double maxChange = 0;
+      for (int i =0; i < desiredValues.length; i++)
+      {
+         desiredValues[i] = armJointWidgetValues.get(side)[i];
+         double change = Math.abs(desiredValues[i] - armValuesFromRobot.get(side)[i]);
+         if (change > maxChange)
+            maxChange = change;
+      }
+      double trajectoryTime = maxChange/2 * teleoperationParameters.getTrajectoryTime();
+      trajectoryTime = MathTools.clamp(trajectoryTime, 0.5, 20.0); // Safety
+
+      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildArmJointspaceTrajectoryMessage(trajectoryTime, side);
+      publishArmJointspaceCommand(jointspaceTrajectoryMessage, side);
+   }
+
+   private void sendLeg(RobotSide side)
+   {
+      receiveRobotConfigurationData();
+      double[] desiredValues = new double[legJointNamesArray.get(side).length];
+      double maxChange = 0;
+      for (int i =0; i < desiredValues.length; i++)
+      {
+         desiredValues[i] = legJointWidgetValues.get(side)[i];
+         double change = Math.abs(desiredValues[i] - legValuesFromRobot.get(side)[i]);
+         if (change > maxChange)
+            maxChange = change;
+      }
+      double trajectoryTime = maxChange * teleoperationParameters.getTrajectoryTime();
+      trajectoryTime = MathTools.clamp(trajectoryTime, 0.5, 20.0); // Safety
+
+      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildLegJointspaceTrajectoryMessage(trajectoryTime, side);
+      publishLegJointspaceCommand(jointspaceTrajectoryMessage, side);
    }
 
    private boolean shouldDisableOption(int partId)
@@ -376,14 +505,6 @@ public class RDXHumanoidDoFsWidgets
       ImGui.popItemWidth();
       receiveRobotConfigurationData();
       updateDesiredRobotNeck();
-      if (ImGui.button(labels.get("Send to Robot")))
-      {
-
-         ros2ControllerHelper.publishToController(HumanoidMessageTools.createHeadHybridTrajectoryMessage(desiredRobot.getDesiredFullRobotModel().getHead().getBodyFixedFrame(),
-                                                                                                         desiredRobot.getDesiredFullRobotModel().getChest().getBodyFixedFrame(),
-                                                                                                         neckJointWidgetValues,
-                                                                                                         teleoperationParameters.getTrajectoryTime()));
-      }
    }
 
    private void renderChestWidgets()
@@ -394,11 +515,6 @@ public class RDXHumanoidDoFsWidgets
          spineJointAngleWidgets[i].renderImGuiWidget();
       }
       ImGui.popItemWidth();
-      if (ImGui.button(labels.get("Send to Robot")))
-      {
-         receiveRobotConfigurationData();
-         buildAndPublishChestTrajectoryMessage();
-      }
       updateDesiredRobotChest();
    }
 
@@ -410,24 +526,6 @@ public class RDXHumanoidDoFsWidgets
          armJointAngleWidgets.get(side)[i].renderImGuiWidget();
       }
       ImGui.popItemWidth();
-      if (ImGui.button(labels.get("Send to Robot")))
-      {
-         receiveRobotConfigurationData();
-         double[] desiredValues = new double[armJointNamesArray.get(side).length];
-         double maxChange = 0;
-         for (int i =0; i < desiredValues.length; i++)
-         {
-            desiredValues[i] = armJointWidgetValues.get(side)[i];
-            double change = Math.abs(desiredValues[i] - armValuesFromRobot.get(side)[i]);
-            if (change > maxChange)
-               maxChange = change;
-         }
-         double trajectoryTime = maxChange/2 * teleoperationParameters.getTrajectoryTime();
-         trajectoryTime = MathTools.clamp(trajectoryTime, 0.5, 20.0); // Safety
-
-         JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildArmJointspaceTrajectoryMessage(trajectoryTime, side);
-         publishArmJointspaceCommand(jointspaceTrajectoryMessage, side);
-      }
       updateDesiredRobotArm(side);
    }
 
@@ -451,24 +549,6 @@ public class RDXHumanoidDoFsWidgets
          legJointAngleWidgets.get(side)[i].renderImGuiWidget();
       }
       ImGui.popItemWidth();
-      if (ImGui.button(labels.get("Send to Robot")))
-      {
-         receiveRobotConfigurationData();
-         double[] desiredValues = new double[legJointNamesArray.get(side).length];
-         double maxChange = 0;
-         for (int i =0; i < desiredValues.length; i++)
-         {
-            desiredValues[i] = legJointWidgetValues.get(side)[i];
-            double change = Math.abs(desiredValues[i] - legValuesFromRobot.get(side)[i]);
-            if (change > maxChange)
-               maxChange = change;
-         }
-         double trajectoryTime = maxChange * teleoperationParameters.getTrajectoryTime();
-         trajectoryTime = MathTools.clamp(trajectoryTime, 0.5, 20.0); // Safety
-
-         JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildLegJointspaceTrajectoryMessage(trajectoryTime, side);
-         publishLegJointspaceCommand(jointspaceTrajectoryMessage, side);
-      }
       updateDesiredRobotLeg(side);
    }
 

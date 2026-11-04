@@ -5,6 +5,7 @@ import static behavior_msgs.BehaviorTreeSceneObjectStateMessage.*;
 import behavior_msgs.BehaviorTreeSceneObjectDefinitionMessage;
 import behavior_msgs.BehaviorTreeSceneObjectStateMessage;
 import imgui.ImGui;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneDoorFrameExecutor;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -45,8 +46,9 @@ public class RDXBehaviorTreeSceneDoorFrame extends RDXBehaviorTreeSceneObject
          model = RDXModelBuilder.buildModel(modelBuilder ->
          {
             modelBuilder.addCapsule(0.6, 0.05, new Vector3D(0.8 + 0.16, 0.0, 0.0), LibGDXTools.toLibGDX(ColorDefinitions.GreenYellow()));
-            modelBuilder.addCapsule(0.6, 0.05, new Vector3D(-0.1, 0.1, 0.0), LibGDXTools.toLibGDX(ColorDefinitions.GreenYellow()));
-            modelBuilder.addCapsule(0.6, 0.05, new Vector3D(-0.1, -0.1, 0.0), LibGDXTools.toLibGDX(ColorDefinitions.GreenYellow()));
+            double recessY = BehaviorTreeSceneDoorFrameExecutor.HINGE_RECESS_DISTANCE_TOWARD_ROBOT;
+            modelBuilder.addCapsule(0.6, 0.05, new Vector3D(-0.1, recessY, 0.0), LibGDXTools.toLibGDX(ColorDefinitions.GreenYellow()));
+            modelBuilder.addCapsule(0.6, 0.05, new Vector3D(-0.1, -recessY, 0.0), LibGDXTools.toLibGDX(ColorDefinitions.GreenYellow()));
          });
          modelInstance = new RDXModelInstance(model);
          modelInstance.setOpacity(0.3f);

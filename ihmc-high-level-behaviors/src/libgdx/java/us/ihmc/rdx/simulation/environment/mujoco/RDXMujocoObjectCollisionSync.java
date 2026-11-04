@@ -344,7 +344,8 @@ public class RDXMujocoObjectCollisionSync implements Controller
       for (RDXArticulatedDoorObject.Dynamics door : doors)
       {
          copyMesh(workingDirectory, door.getPanelMeshPath(), door.panelMeshFileName());
-         copyMesh(workingDirectory, door.getLeverMeshPath(), door.leverMeshFileName());
+         for (int piece = 0; piece < door.getLeverMeshPaths().size(); piece++)
+            copyMesh(workingDirectory, door.getLeverMeshPaths().get(piece), door.leverMeshFileName(piece));
       }
    }
 

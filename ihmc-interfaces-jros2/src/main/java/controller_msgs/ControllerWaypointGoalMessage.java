@@ -38,7 +38,19 @@ bool goal_orientation_matters true
 
 # When true, keep the current heading all the way to the goal (walk backward or
 # sideways even past distanceToFaceGoal). Default false faces the goal when far.
-bool keep_heading false}</pre>
+bool keep_heading false
+
+# When true, turn in place to face the goal, walk straight to it, then turn in place to the goal
+# yaw. Takes precedence over keep_heading.
+bool turn_walk_turn false
+
+# Walking speed limit in meters per second for this goal. The backward and lateral limits scale with it.
+# 0 or less uses the controller limit.
+float64 max_forward_speed 0.0
+
+# Turning speed limit in radians per second for this goal. 0 or less uses the controller limit.
+float64 max_turning_speed 0.0
+}</pre>
 */
 public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWaypointGoalMessage>
 {
@@ -77,6 +89,20 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
       sideways even past distanceToFaceGoal). Default false faces the goal when far.
    */
    private boolean keep_heading_;
+   /**
+      When true, turn in place to face the goal, walk straight to it, then turn in place to the goal
+      yaw. Takes precedence over keep_heading.
+   */
+   private boolean turn_walk_turn_;
+   /**
+      Walking speed limit in meters per second for this goal. The backward and lateral limits scale with it.
+      0 or less uses the controller limit.
+   */
+   private double max_forward_speed_;
+   /**
+      Turning speed limit in radians per second for this goal. 0 or less uses the controller limit.
+   */
+   private double max_turning_speed_;
 
    public ControllerWaypointGoalMessage()
    {
@@ -85,6 +111,9 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
       orientation_proximity_ = (double) 0.1;
       goal_orientation_matters_ = (boolean) true;
       keep_heading_ = (boolean) false;
+      turn_walk_turn_ = (boolean) false;
+      max_forward_speed_ = (double) 0.0;
+      max_turning_speed_ = (double) 0.0;
 
    }
 
@@ -109,6 +138,9 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // orientation_proximity_
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // goal_orientation_matters_
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // keep_heading_
+      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // turn_walk_turn_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // max_forward_speed_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // max_turning_speed_
 
       return currentAlignment - initialAlignment;
    }
@@ -126,6 +158,9 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
       buffer.writeDouble(orientation_proximity_);
       buffer.writeBoolean(goal_orientation_matters_);
       buffer.writeBoolean(keep_heading_);
+      buffer.writeBoolean(turn_walk_turn_);
+      buffer.writeDouble(max_forward_speed_);
+      buffer.writeDouble(max_turning_speed_);
 
    }
 
@@ -142,6 +177,9 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
       orientation_proximity_ = buffer.readDouble();
       goal_orientation_matters_ = buffer.readBoolean();
       keep_heading_ = buffer.readBoolean();
+      turn_walk_turn_ = buffer.readBoolean();
+      max_forward_speed_ = buffer.readDouble();
+      max_turning_speed_ = buffer.readDouble();
 
    }
 
@@ -158,6 +196,9 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
       orientation_proximity_ = from.orientation_proximity_;
       goal_orientation_matters_ = from.goal_orientation_matters_;
       keep_heading_ = from.keep_heading_;
+      turn_walk_turn_ = from.turn_walk_turn_;
+      max_forward_speed_ = from.max_forward_speed_;
+      max_turning_speed_ = from.max_turning_speed_;
 
    }
 
@@ -261,6 +302,36 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
       this.keep_heading_ = keep_heading_;
    }
 
+   public boolean getTurnWalkTurn()
+   {
+      return turn_walk_turn_;
+   }
+
+   public void setTurnWalkTurn(boolean turn_walk_turn_)
+   {
+      this.turn_walk_turn_ = turn_walk_turn_;
+   }
+
+   public double getMaxForwardSpeed()
+   {
+      return max_forward_speed_;
+   }
+
+   public void setMaxForwardSpeed(double max_forward_speed_)
+   {
+      this.max_forward_speed_ = max_forward_speed_;
+   }
+
+   public double getMaxTurningSpeed()
+   {
+      return max_turning_speed_;
+   }
+
+   public void setMaxTurningSpeed(double max_turning_speed_)
+   {
+      this.max_turning_speed_ = max_turning_speed_;
+   }
+
 
    @Override
    public java.lang.String toString()
@@ -287,6 +358,12 @@ public class ControllerWaypointGoalMessage implements ROS2Message<ControllerWayp
       builder.append(goal_orientation_matters_);
       builder.append("keep_heading_=");
       builder.append(keep_heading_);
+      builder.append("turn_walk_turn_=");
+      builder.append(turn_walk_turn_);
+      builder.append("max_forward_speed_=");
+      builder.append(max_forward_speed_);
+      builder.append("max_turning_speed_=");
+      builder.append(max_turning_speed_);
 
       builder.append("}");
       return builder.toString();

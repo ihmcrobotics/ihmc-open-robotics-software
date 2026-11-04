@@ -205,6 +205,15 @@ public class ControllerStatusTracker
       return latestKnownState;
    }
 
+   /**
+    * Sets the known controller state until the controller reports a state change, e.g. when the
+    * controller started before this tracker subscribed.
+    */
+   public void setLatestKnownState(HighLevelControllerName latestKnownState)
+   {
+      this.latestKnownState = latestKnownState;
+   }
+
    private void triggerNotWalkingStateAnymoreCallbacks()
    {
       if (notWalkingStateAnymoreCallbackThrottler.run(2.0)) // don't call them more than once every few seconds

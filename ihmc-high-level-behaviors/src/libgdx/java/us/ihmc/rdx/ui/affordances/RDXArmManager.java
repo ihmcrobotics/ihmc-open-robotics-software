@@ -10,10 +10,7 @@ import ihmc_common_msgs.QueueableMessage;
 import ihmc_common_msgs.SE3TrajectoryMessage;
 import ihmc_common_msgs.SE3TrajectoryPointMessage;
 import ihmc_common_msgs.TrajectoryPoint1DMessage;
-import imgui.ImGui;
-import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImBoolean;
-import imgui.type.ImInt;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -27,7 +24,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.hands.RDXHandManager;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
@@ -60,7 +56,6 @@ public class RDXArmManager
     */
    private final static double SAKE_HAND_SAFEE_FINGER_ANGLE = 15.0;
 
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ROS2ControllerHelper controllerHelper;
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -83,9 +78,6 @@ public class RDXArmManager
 
    private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
-
-   private final ImInt selectedArmConfiguration = new ImInt(PresetArmConfiguration.HOME.ordinal());
-   private final String[] armConfigurationNames = new String[PresetArmConfiguration.values.length];
 
    private final TypedNotification<RobotSide> showWarningNotification = new TypedNotification<>();
 
@@ -114,11 +106,6 @@ public class RDXArmManager
             desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, armJointNames));
             this.armJointNames.put(side, armJointNames);
          }
-      }
-
-      for (int i = 0; i < PresetArmConfiguration.values.length; i++)
-      {
-         armConfigurationNames[i] = PresetArmConfiguration.values[i].name();
       }
 
       handManager = new RDXHandManager(robotModel, controllerHelper.getROS2Node());
@@ -217,67 +204,6 @@ public class RDXArmManager
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.collapsingHeader(labels.get("Arms")))
-      {
-         float widgetStartX = 112.0f;
-
-         ImGui.text("Arm Presets:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         ImGui.pushItemWidth(140.0f);
-         ImGui.combo(labels.getHidden("Arm Configuration Combo"), selectedArmConfiguration, armConfigurationNames);
-         ImGui.popItemWidth();
-         ImGui.sameLine();
-         ImGui.text("Command");
-         for (RobotSide side : RobotSide.values)
-         {
-            ImGui.sameLine();
-            if (ImGui.button(labels.get(side.getPascalCaseName())))
-            {
-               executeArmAngles(side, PresetArmConfiguration.values[selectedArmConfiguration.get()], teleoperationParameters.getTrajectoryTime());
-            }
-         }
-
-         ImGui.text("Arm Control Mode:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         if (ImGui.radioButton(labels.get("Jointspace"), armControlMode == RDXArmControlMode.JOINTSPACE))
-         {
-            armControlMode = RDXArmControlMode.JOINTSPACE;
-         }
-         ImGui.sameLine();
-         if (ImGui.radioButton(labels.get("Taskspace"), armControlMode == RDXArmControlMode.TASKSPACE))
-         {
-            armControlMode = RDXArmControlMode.TASKSPACE;
-         }
-
-         ImGui.text("Reference Frame:");
-         ImGui.sameLine();
-         if (armControlMode == RDXArmControlMode.JOINTSPACE)
-            ImGui.beginDisabled();
-         ImGui.setCursorPosX(widgetStartX);
-         if (ImGui.radioButton(labels.get("World"), taskspaceTrajectoryFrame == ReferenceFrame.getWorldFrame()))
-         {
-            taskspaceTrajectoryFrame = ReferenceFrame.getWorldFrame();
-         }
-         ImGui.sameLine();
-         if (ImGui.radioButton(labels.get("Chest"), taskspaceTrajectoryFrame == syncedRobot.getReferenceFrames().getChestFrame()))
-         {
-            taskspaceTrajectoryFrame = syncedRobot.getReferenceFrames().getChestFrame();
-         }
-         if (armControlMode == RDXArmControlMode.JOINTSPACE)
-            ImGui.endDisabled();
-
-         ImGui.separator();
-         if (ImGui.checkbox(labels.get("Display EE Wrenches"), indicateWrenchOnScreen))
-         {
-            if (indicateWrenchOnScreen.get())
-               RDXBaseUI.getInstance().getPrimary3DPanel().addOverlayPanel("Hand wrenches", () -> panelHandWrenchIndicator.renderImGuiOverlay());
-            else
-               RDXBaseUI.getInstance().getPrimary3DPanel().removeOverlayPanel("Hand wrenches");
-         }
-      }
-
       boolean hasHand = false;
       for (RobotSide side : RobotSide.values)
       {

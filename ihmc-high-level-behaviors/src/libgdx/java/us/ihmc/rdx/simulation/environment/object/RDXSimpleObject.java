@@ -34,7 +34,9 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -212,6 +214,22 @@ public class RDXSimpleObject
    public static File findCollisionMeshFile(String visualResourcePath)
    {
       return resolveResourceFile(collisionMeshResourcePath(visualResourcePath));
+   }
+
+   /**
+    * {@code <stem>_collision_convex_<i>.stl} beside a visual resource, from index 0 up to the first
+    * missing one. MuJoCo collides a mesh geom as its convex hull, so a concave part needs these
+    * convex pieces to collide where its surface is. Empty when there are none.
+    */
+   public static List<File> findConvexCollisionPartFiles(String visualResourcePath)
+   {
+      List<File> parts = new ArrayList<>();
+      String prefix = meshBesideVisual(visualResourcePath, "_collision_convex_");
+      if (prefix == null)
+         return parts;
+      for (File part = resolveResourceFile(prefix + 0 + ".stl"); part != null; part = resolveResourceFile(prefix + parts.size() + ".stl"))
+         parts.add(part);
+      return parts;
    }
 
    private static File resolveResourceFile(String relativePath)

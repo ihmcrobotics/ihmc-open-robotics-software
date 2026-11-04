@@ -142,6 +142,8 @@ public class RDXBehaviorTreeNodeCreationMenu
          ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "Mimic", MimicActionDefinition.class, null);
          ImGui.setCursorPosX(align);
+         renderNodeCreationClickable(relativeNode, insertionType, "Controller State", HighLevelStateActionDefinition.class, null);
+         ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "Neck", NeckActionDefinition.class, null);
          ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getFontSize() * 0.3f);
          armIcon.render(RobotSide.LEFT, false, false);
@@ -173,6 +175,8 @@ public class RDXBehaviorTreeNodeCreationMenu
          ImGui.sameLine();
          ImGui.setCursorPosX(align);
          renderNodeCreationClickable(relativeNode, insertionType, "Walk", WalkActionDefinition.class, null);
+         ImGui.sameLine();
+         renderNodeCreationClickable(relativeNode, insertionType, "RL Walk", RLWalkActionDefinition.class, null);
          ImGui.setCursorPosX(align);
          for (RobotSide side : RobotSide.values)
             renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), LegActionDefinition.class, side);

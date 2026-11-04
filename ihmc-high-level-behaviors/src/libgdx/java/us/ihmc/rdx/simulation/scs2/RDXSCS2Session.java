@@ -27,7 +27,6 @@ import us.ihmc.scs2.session.remote.RemoteSession;
 import us.ihmc.scs2.sharedMemory.CropBufferRequest;
 import us.ihmc.scs2.simulation.SimulationDataSession;
 import us.ihmc.scs2.simulation.SimulationSession;
-import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.DoNothingPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.contactPointBased.ContactPointBasedPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.impulseBased.ImpulseBasedPhysicsEngine;
@@ -116,11 +115,7 @@ public class RDXSCS2Session
       if (session instanceof SimulationSession simulationSession)
       {
          sessionInfo += "\nPhysics engine: ";
-         if (simulationSession.getPhysicsEngine() instanceof BulletPhysicsEngine)
-         {
-            sessionInfo += "Bullet";
-         }
-         else if (simulationSession.getPhysicsEngine() instanceof ContactPointBasedPhysicsEngine)
+         if (simulationSession.getPhysicsEngine() instanceof ContactPointBasedPhysicsEngine)
          {
             sessionInfo += "Contact point";
          }
@@ -154,18 +149,11 @@ public class RDXSCS2Session
       }
 
       terrainObjects.clear();
-      int terrainObjectIndex = 0;
       for (TerrainObjectDefinition terrainObjectDefinition : session.getTerrainObjectDefinitions())
       {
          RDXSCS2TerrainObject simulatedTerrainObject = new RDXSCS2TerrainObject(terrainObjectDefinition);
-         if (session instanceof SimulationSession simulationSession
-          && simulationSession.getPhysicsEngine() instanceof BulletPhysicsEngine bulletPhysicsEngine)
-         { // Support moving terrain objects when using Bullet physics
-            simulatedTerrainObject.setBulletTerrainObject(bulletPhysicsEngine.getTerrainObjects().get(terrainObjectIndex));
-         }
          terrainObjects.add(simulatedTerrainObject);
          simulatedTerrainObject.create();
-         ++terrainObjectIndex;
       }
 
       bufferRecordTickPeriod.set(session.getBufferRecordTickPeriod());

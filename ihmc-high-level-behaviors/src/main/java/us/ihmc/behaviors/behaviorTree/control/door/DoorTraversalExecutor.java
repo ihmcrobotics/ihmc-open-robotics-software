@@ -122,6 +122,12 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
                gotoNodeName = "Approach %s %s %s Door".formatted(doorOpenAngle > 5.0 ? doorOpenAngle > 50.0 ? "Open" : "Ajar" : "Closed",
                                                                  doorFrameExecutor.getHingeSide().getOppositeSide().getPascalCaseName(),
                                                                  doorFrameExecutor.getDoorType() == DOOR_TYPE_PUSH ? "Push" : "Pull");
+               state.getLogger().info("Door type from: hinge %s, open angle %.1f deg (type from angle above 7), hinge recess points %d (push above %d), latch post points %d"
+                                            .formatted(doorFrameExecutor.getHingeSide(),
+                                                       doorOpenAngle,
+                                                       doorFrameExecutor.getHingeRecessPoints(),
+                                                       doorFrameExecutor.getMinRecessPoints(),
+                                                       doorFrameExecutor.getLatchPostPoints()));
             }
 
             BehaviorTreeNodeExecutor<?, ?> gotoNode = searchDFSFirstMatch(this, gotoNodeName);

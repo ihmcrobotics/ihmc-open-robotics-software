@@ -16,7 +16,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 
 public class SpineActionExecutor extends ActionNodeExecutor<SpineActionState, SpineActionDefinition>
 {
-   public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
+   public static final double ORIENTATION_TOLERANCE = Math.toRadians(50.0);
 
    private final FramePose3D desiredChestPose = new FramePose3D();
    private final FramePose3D syncedChestPose = new FramePose3D();

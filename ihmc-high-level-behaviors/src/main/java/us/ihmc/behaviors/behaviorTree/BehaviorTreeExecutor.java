@@ -93,6 +93,11 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
       LLMConditionExecutor.destroy();
    }
 
+   public ControllerStatusTracker getControllerStatusTracker()
+   {
+      return controllerStatusTracker;
+   }
+
    public void loadBehavior(String jsonFileName)
    {
       WorkspaceResourceFile file = new WorkspaceResourceFile(getSaveFileDirectory(), jsonFileName);
