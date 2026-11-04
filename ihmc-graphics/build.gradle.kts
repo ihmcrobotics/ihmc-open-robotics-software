@@ -29,6 +29,12 @@ libgdxDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 
+   val javacppVersion = "1.5.11"
+   api("org.bytedeco:javacpp:$javacppVersion")
+   api("org.bytedeco:javacpp:$javacppVersion:linux-arm64")
+   api("org.bytedeco:javacpp:$javacppVersion:linux-x86_64")
+   api("org.bytedeco:javacpp:$javacppVersion:windows-x86_64")
+
    val openblasVersion = "0.3.28-1.5.11"
    api("org.bytedeco:openblas:$openblasVersion")
    api("org.bytedeco:openblas:$openblasVersion:linux-x86_64")

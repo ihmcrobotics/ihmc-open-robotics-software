@@ -11,12 +11,13 @@ allprojects {
 
       if (project.hasProperty("runMainOutDir") && project.plugins.hasPlugin("java"))
       {
+         val main = project.extensions.getByType(SourceSetContainer::class.java).getByName("main")
          tasks.register("writeRunMainClasspath") {
-            dependsOn("classes")
+            // Resolve the full runtime classpath so dependency processResources tasks run
+            dependsOn(main.runtimeClasspath)
             doLast {
                val outDir = File(project.property("runMainOutDir") as String)
                outDir.mkdirs()
-               val main = project.extensions.getByType(SourceSetContainer::class.java).getByName("main")
                // Prefer build/classes (+ resources) over stale build/libs jars, like IntelliJ
                val entries = ArrayList<File>()
                val seen = HashSet<String>()
@@ -25,18 +26,26 @@ allprojects {
                   if (file.exists() && seen.add(file.absolutePath))
                      entries.add(file)
                }
+               fun addClassesAndResources(classesDir: File)
+               {
+                  add(classesDir)
+                  add(File(classesDir.parentFile.parentFile.parentFile, "resources/main"))
+               }
                for (file in main.runtimeClasspath.files)
                {
                   if (file.extension == "jar" && file.parentFile?.name == "libs")
                   {
-                     val buildDir = file.parentFile.parentFile
-                     val classesDir = File(buildDir, "classes/java/main")
+                     val classesDir = File(file.parentFile.parentFile, "classes/java/main")
                      if (classesDir.isDirectory)
                      {
-                        add(classesDir)
-                        add(File(buildDir, "resources/main"))
+                        addClassesAndResources(classesDir)
                         continue
                      }
+                  }
+                  if (file.name == "main" && file.parentFile?.name == "java" && file.parentFile?.parentFile?.name == "classes")
+                  {
+                     addClassesAndResources(file)
+                     continue
                   }
                   add(file)
                }
