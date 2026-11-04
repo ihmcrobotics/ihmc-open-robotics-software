@@ -337,6 +337,22 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       terrainMapRequestHeartbeat.setAlive(requestTerrainMap.get());
    }
 
+   /** Same as checking "Request Height Map". Takes effect immediately if the heartbeat is already set up. */
+   public void setRequestHeightMap(boolean request)
+   {
+      requestHeightMap.set(request);
+      if (heightMapRequestHeartbeat != null)
+         heightMapRequestHeartbeat.setAlive(request);
+   }
+
+   /** Same as checking "Request Terrain Map". Takes effect immediately if the heartbeat is already set up. */
+   public void setRequestTerrainMap(boolean request)
+   {
+      requestTerrainMap.set(request);
+      if (terrainMapRequestHeartbeat != null)
+         terrainMapRequestHeartbeat.setAlive(request);
+   }
+
    public void setupHeightMapControllerRequestHeartbeat(ROS2Node ros2Node)
    {
       heightMapControllerRequestHeartbeat = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_HEIGHT_MAP_FOR_CONTROLLER);
