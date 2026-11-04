@@ -66,6 +66,8 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
 
    private final YoBoolean isListeningToHighLevelStateMessage = new YoBoolean("isListeningToHighLevelStateMessage", registry);
    private final YoEnum<HighLevelControllerName> requestedHighLevelControllerState;
+   /** Set by a state request so the next state holds the arms, spine and neck where they are, cleared after the next state change */
+   private final YoBoolean keepUpperBodyPose = new YoBoolean("keepUpperBodyPoseOnStateChange", registry);
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
@@ -123,6 +125,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       controllerFactoryHelper.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       controllerFactoryHelper.setLowLevelControllerOutput(lowLevelControllerOutput);
       controllerFactoryHelper.setRequestedHighLevelControllerState(requestedHighLevelControllerState);
+      controllerFactoryHelper.setKeepUpperBodyPose(keepUpperBodyPose);
       controllerFactoryHelper.setForceSensorDataHolder(forceSensorDataHolder);
 
       stateMachine = setUpStateMachine(initialControllerState,
@@ -217,7 +220,10 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
             HighLevelControllerStateCommand command = commandInputManager.pollNewestCommand(HighLevelControllerStateCommand.class);
             applyGroundPrepTrajectoryTime(command);
             if (command.getHighLevelControllerName() != null)
+            {
                requestedHighLevelControllerState.set(command.getHighLevelControllerName());
+               keepUpperBodyPose.set(command.getKeepUpperBodyPose());
+            }
          }
       }
       if (getCurrentHighLevelControlState() == HighLevelControllerName.RL_CONTROL)
@@ -241,7 +247,11 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
             controllerPlugins.get(i).update(time);
          }
 
+         HighLevelControllerName stateBeforeTransition = getCurrentHighLevelControlState();
          stateMachine.doActionAndTransition();
+         // The new state reads the flag when it starts, so it only applies to the state change it was requested with
+         if (getCurrentHighLevelControlState() != stateBeforeTransition)
+            keepUpperBodyPose.set(false);
       }
       catch (Exception e)
       {

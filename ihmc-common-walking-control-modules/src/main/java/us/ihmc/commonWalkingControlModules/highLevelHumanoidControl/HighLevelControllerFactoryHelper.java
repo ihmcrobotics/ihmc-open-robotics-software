@@ -14,6 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class HighLevelControllerFactoryHelper
@@ -28,6 +29,7 @@ public class HighLevelControllerFactoryHelper
    private StatusMessageOutputManager statusMessageOutputManager;
    private JointDesiredOutputListBasics lowLevelControllerOutput;
    private YoEnum<HighLevelControllerName> requestedHighLevelControllerState;
+   private BooleanProvider keepUpperBodyPose = () -> false;
    private ForceSensorDataHolderReadOnly forceSensorDataHolder;
 
    public void setLowLevelControllerOutput(JointDesiredOutputListBasics lowLevelControllerOutput)
@@ -74,6 +76,11 @@ public class HighLevelControllerFactoryHelper
    public void setRequestedHighLevelControllerState(YoEnum<HighLevelControllerName> requestedHighLevelControllerState)
    {
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
+   }
+
+   public void setKeepUpperBodyPose(BooleanProvider keepUpperBodyPose)
+   {
+      this.keepUpperBodyPose = keepUpperBodyPose;
    }
 
    public void setForceSensorDataHolder(ForceSensorDataHolderReadOnly forceSensorDataHolder)
@@ -129,6 +136,15 @@ public class HighLevelControllerFactoryHelper
    public YoEnum<HighLevelControllerName> getRequestedHighLevelControllerState()
    {
       return requestedHighLevelControllerState;
+   }
+
+   /**
+    * True while a state request asked for the arms, spine and neck to hold their current pose in the requested state
+    * instead of going to its home pose. It is cleared after the next state change.
+    */
+   public BooleanProvider getKeepUpperBodyPose()
+   {
+      return keepUpperBodyPose;
    }
 
    public ForceSensorDataHolderReadOnly getForceSensorDataHolder()

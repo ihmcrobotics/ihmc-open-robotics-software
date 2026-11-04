@@ -52,6 +52,11 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
       executor.update();
    }
 
+   public ROS2BehaviorTreeExecutor getExecutor()
+   {
+      return executor;
+   }
+
    @Override
    public synchronized void kill()
    {

@@ -3,9 +3,11 @@ package us.ihmc.rdx.ui.teleoperation;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.StopAllTrajectoryMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
+import imgui.type.ImDouble;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -14,12 +16,10 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -28,16 +28,13 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
-import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
+import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.RDXArmManager;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFoot;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHand;
 import us.ihmc.rdx.ui.affordances.RDXInteractableRobotLink;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
-import us.ihmc.rdx.ui.affordances.RDXPelvisControlMode;
 import us.ihmc.rdx.ui.affordances.RDXRobotCollidable;
 import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
 import us.ihmc.rdx.ui.hands.RDXHandInterface.HandAction;
@@ -99,7 +96,6 @@ public class RDXTeleoperationManager extends RDXPanel
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final RDXTeleoperationParameters teleoperationParameters;
-   private final RDXStoredPropertySetTuner teleoperationParametersTuner = new RDXStoredPropertySetTuner("Teleoperation Parameters");
    private final RDXHardwareControlStateManager hardwareControlStateManager;
 
    private final RDXPelvisHeightSlider pelvisHeightSlider;
@@ -107,8 +103,6 @@ public class RDXTeleoperationManager extends RDXPanel
    private final RDXDesiredRobot desiredRobot;
    private RDXRobotCollisionModel avoidanceCollisionModel;
    private RDXRobotCollisionModel contactCollisionModel;
-   private final ImBoolean showAvoidanceCollisionMeshes = new ImBoolean();
-   private final ImBoolean showContactCollisionMeshes = new ImBoolean();
    private RDXArmManager armManager;
    private final RDXLocomotionManager locomotionManager;
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
@@ -119,24 +113,17 @@ public class RDXTeleoperationManager extends RDXPanel
    private RDXInteractableRobotLink interactableHead;
    private final ArrayList<RDXInteractableRobotLink> allInteractableRobotLinks = new ArrayList<>();
    private final ImString tempImGuiText = new ImString(1000);
-   private final ImBoolean interactableSelections = new ImBoolean(true);
    private final boolean interactablesAvailable;
    private final RDXWholeBodyIKManager wholeBodyIKManager;
-   private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
-   private RDXHumanoidDemoPoses demoPoses;
-   /** When set, a Reset Sim button is shown under Trajectory time. Left unset for the real robot. */
+   /** Edits the stored "Trajectory time" value under a clearer name. The stored key keeps its name so saved files still load. */
+   private final ImDouble trajectoryDuration = new ImDouble();
+   /** When set, a Reset Sim button is shown at the top of the 3D view. Left unset for the real robot. */
    private Runnable resetSimulationCallback;
 
    /** This tracker should be shared with the sub-managers to keep the state consistent. */
    private final ControllerStatusTracker controllerStatusTracker;
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
 
-   /** For post-processing WBMPC commands */
-   private RDXPelvisControlMode pelvisControlMode = RDXPelvisControlMode.PELVIS;
-   private final FramePoint3D tempCurrentCoMPosition = new FramePoint3D();
-   private final FramePoint3D tempDesiredPelvisPosition = new FramePoint3D();
-   private final FramePoint3D tempCurrentPelvisPosition = new FramePoint3D();
-   private static final double HEIGHT_TOLERANCE = 0.01;
 
    /**
     * For use without interactables available. May crash if a YoVariableClient is needed.
@@ -174,7 +161,6 @@ public class RDXTeleoperationManager extends RDXPanel
 
       this.syncedRobot = syncedRobot;
 
-      addChild(teleoperationParametersTuner);
       robotModel = controllerHelper.getRobotModel();
       hasHead = robotModel.getRobotVersion().hasHead();
       for (RobotSide side : RobotSide.values)
@@ -194,7 +180,7 @@ public class RDXTeleoperationManager extends RDXPanel
 
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2Node(), syncedRobot);
 
-      locomotionManager = new RDXLocomotionManager(robotModel, controllerHelper, syncedRobot, controllerStatusTracker, this);
+      locomotionManager = new RDXLocomotionManager(robotModel, controllerHelper, syncedRobot, controllerStatusTracker);
 
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)
@@ -217,7 +203,7 @@ public class RDXTeleoperationManager extends RDXPanel
       pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, ros2Helper, teleoperationParameters);
       dofsWidgets = new RDXHumanoidDoFsWidgets(syncedRobot, ros2Helper, teleoperationParameters);
 
-      RDXBaseUI.getInstance().getKeyBindings().register("Delete all Interactables", "Shift + Escape");
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete all Interactables", "Escape");
    }
 
    public void create(RDXBaseUI baseUI)
@@ -225,18 +211,11 @@ public class RDXTeleoperationManager extends RDXPanel
       this.baseUI = baseUI;
       desiredRobot.create();
       dofsWidgets.getDesiredRobot().create();
-
-      // This button is created before locomotion manager to make the toolbar button ordering correct
-      RDX3DPanelToolbarButton deleteAllInteractablesButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      deleteAllInteractablesButton.loadAndSetIcon("icons/deleteAll.png");
-      deleteAllInteractablesButton.setOnPressed(this::clearInteractablesAndLocomotionGraphics);
-      deleteAllInteractablesButton.setTooltipText("Delete All Interactables (Shift + Escape)");
+      pelvisHeightSlider.create();
 
       locomotionManager.create(baseUI);
 
-      teleoperationParametersTuner.create(teleoperationParameters);
 
-      trajectoryTimeSlider = teleoperationParametersTuner.createDoubleInput(RDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, "s", "%.2f");
 
       if (interactablesAvailable)
       {
@@ -285,10 +264,7 @@ public class RDXTeleoperationManager extends RDXPanel
                                                        {
                                                           if (!wholeBodyIKManager.getEnabled())
                                                           {
-                                                             if (pelvisControlMode == RDXPelvisControlMode.COM)
-                                                                processCoMDirectCommand();
-                                                             else
-                                                                processPelvis6DCommand();
+                                                             processPelvis6DCommand();
                                                           }
                                                        });
                   allInteractableRobotLinks.add(interactablePelvis);
@@ -401,27 +377,11 @@ public class RDXTeleoperationManager extends RDXPanel
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
          baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
          interactablesEnabled.set(true);
-         demoPoses = new RDXHumanoidDemoPoses(robotModel, syncedRobot, ros2Helper, teleoperationParameters);
-         addChild(demoPoses);
       }
-
-      RDX3DPanelToolbarButton standPrepButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      standPrepButton.loadAndSetIcon("icons/standPrep.png");
-      standPrepButton.setOnPressed(hardwareControlStateManager::sendStandPrepRequest);
-      standPrepButton.setTooltipText("Stand prep");
-
-      RDX3DPanelToolbarButton freezeButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      freezeButton.loadAndSetIcon("icons/freeze.png");
-      freezeButton.setTooltipText("Freeze");
-      freezeButton.setOnPressed(hardwareControlStateManager::sendFreezeRequest);
-
-      RDX3DPanelToolbarButton abortToolbarButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      abortToolbarButton.loadAndSetIcon("icons/abort.png");
-      abortToolbarButton.setTooltipText("Abort");
-      abortToolbarButton.setOnPressed(locomotionManager::sendAbortWalkingMessage);
 
       clearInteractablesAndLocomotionGraphics();
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
+      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderResetSimulationOverlay);
    }
 
    public void update()
@@ -429,6 +389,7 @@ public class RDXTeleoperationManager extends RDXPanel
       hardwareControlStateManager.update();
       desiredRobot.update();
       dofsWidgets.getDesiredRobot().update();
+      pelvisHeightSlider.update();
 
       locomotionManager.update();
       armManager.update(interactablesEnabled.get());
@@ -512,9 +473,6 @@ public class RDXTeleoperationManager extends RDXPanel
       {
          locomotionManager.calculateWalkPathControlRingVRPick(vrContext);
 
-         if (interactablesAvailable && showContactCollisionMeshes.get())
-            contactCollisionModel.calculateVRPick(vrContext);
-
          for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
             robotPartInteractable.calculateVRPick(vrContext);
       }
@@ -526,55 +484,8 @@ public class RDXTeleoperationManager extends RDXPanel
       {
          locomotionManager.processWalkPathControlRingVRInput(vrContext);
 
-         if (interactablesEnabled.get() && showContactCollisionMeshes.get())
-            contactCollisionModel.processVRInput(vrContext);
-
          for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
             robotPartInteractable.processVRInput(vrContext);
-      }
-   }
-
-   /**
-    * Function that routes the corresponding height displacement as CoM Trajectory Command, and the orientation
-    * as a Pelvis Trajectory Command
-    *
-    * @comment: For now, it can only process z displacements, it will be easy to extend it's funcionality for
-    *       displacements in the other directions
-    * @comment: Investigate which cases causes it to freak out
-    */
-   private void processCoMDirectCommand()
-   {
-      FramePose3DReadOnly desiredOrientation = interactablePelvis.getPose();
-
-      // Get all positions in world frame
-      tempCurrentCoMPosition.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
-      tempCurrentCoMPosition.changeFrame(syncedRobot.getReferenceFrames().getWorldFrame());
-
-      tempDesiredPelvisPosition.setIncludingFrame(desiredOrientation.getPosition());
-      tempDesiredPelvisPosition.changeFrame(syncedRobot.getReferenceFrames().getWorldFrame());
-
-      tempCurrentPelvisPosition.setToZero(syncedRobot.getReferenceFrames().getPelvisFrame());
-      tempCurrentPelvisPosition.changeFrame(syncedRobot.getReferenceFrames().getWorldFrame());
-
-      // Calculate desired CoM height maintaining current offset
-      double currentComToPelvisOffset = tempCurrentCoMPosition.getZ() - tempCurrentPelvisPosition.getZ();
-      double desiredCoMHeight = tempDesiredPelvisPosition.getZ() + currentComToPelvisOffset;
-      double deltaZ = Math.abs(desiredCoMHeight - tempCurrentCoMPosition.getZ());
-
-      if (deltaZ > HEIGHT_TOLERANCE)
-      {
-         // Send center of mass height trajectory
-         RDXBaseUI.pushNotification("Commanding CoM height trajectory...");
-         ros2Helper.publishToController(HumanoidMessageTools.createCenterOfMassTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
-                                                                                                 new Point3D(tempCurrentCoMPosition.getX(),
-                                                                                                             tempCurrentCoMPosition.getY(),
-                                                                                                             desiredCoMHeight)));
-      }
-      else
-      {
-         // Send orientation-only trajectory for other movements
-         RDXBaseUI.pushNotification("Commanding pelvis trajectory...");
-         ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(), desiredOrientation));
       }
    }
 
@@ -666,9 +577,6 @@ public class RDXTeleoperationManager extends RDXPanel
 
          if (interactablesAvailable)
          {
-            if (input.isWindowHovered() && showContactCollisionMeshes.get())
-               contactCollisionModel.calculate3DViewPick(input);
-
             for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
                robotPartInteractable.calculate3DViewPick(input);
          }
@@ -678,15 +586,15 @@ public class RDXTeleoperationManager extends RDXPanel
    // This happens after update.
    private void process3DViewInput(ImGui3DViewInput input)
    {
+      if (ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
+         clearInteractablesAndLocomotionGraphics();
+
       if (interactablesEnabled.get())
       {
          locomotionManager.processWalkPathControlRing3dViewInput(input);
 
          if (interactablesAvailable)
          {
-            if (showContactCollisionMeshes.get())
-               contactCollisionModel.process3DViewInput(input);
-
             interactableChest.process3DViewInput(input);
             interactablePelvis.process3DViewInput(input);
             if (hasHead)
@@ -710,24 +618,28 @@ public class RDXTeleoperationManager extends RDXPanel
 
    public void renderImGuiWidgets()
    {
-      hardwareControlStateManager.renderImGuiWidgets(syncedRobot.getRobotModel(),
-                                                     syncedRobot.getReferenceFrames(),
-                                                     armManager,
-                                                     teleoperationParameters.getPelvisMaximumHeight());
-      trajectoryTimeSlider.renderImGuiWidget();
-      if (resetSimulationCallback != null)
-      {
-         ImGui.text("Simulation:");
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Reset Sim")))
-         {
-            RDXBaseUI.pushNotification("Resetting RL simulation...");
-            resetSimulationCallback.run();
-         }
-      }
+      hardwareControlStateManager.renderImGuiWidgets();
       renderWholeBodyWidgets();
       locomotionManager.renderImGuiWidgets();
       armManager.renderImGuiWidgets();
+   }
+
+   private void renderResetSimulationOverlay()
+   {
+      if (resetSimulationCallback == null)
+         return;
+
+      RDX3DPanel primary3DPanel = baseUI.getPrimary3DPanel();
+      String buttonLabel = labels.get("Reset Sim");
+      float buttonWidth = ImGuiTools.calcTextSizeX("Reset Sim") + 2.0f * ImGui.getStyle().getFramePaddingX();
+      float screenX = (primary3DPanel.getWindowDrawMinX() + primary3DPanel.getWindowDrawMaxX() - buttonWidth) / 2.0f;
+      float screenY = primary3DPanel.getWindowDrawMinY() + ImGui.getStyle().getItemSpacingY();
+      ImGui.setCursorScreenPos(screenX, screenY);
+      if (ImGui.button(buttonLabel))
+      {
+         RDXBaseUI.pushNotification("Resetting RL simulation...");
+         resetSimulationCallback.run();
+      }
    }
 
    private void renderWholeBodyWidgets()
@@ -735,100 +647,50 @@ public class RDXTeleoperationManager extends RDXPanel
       if (ImGui.collapsingHeader(labels.get("Whole-Body")))
       {
          float widgetStartX = 168.0f;
+         ImGui.text("Trajectory Duration:");
+         ImGuiTools.previousWidgetTooltip("""
+                                          Duration in seconds of the trajectories sent from this panel.
+                                          Arm and leg joint position control instead uses it per radian of the largest joint change
+                                          (half of it for the arms), clamped to 0.5 to 20 seconds.""");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         trajectoryDuration.set(teleoperationParameters.getTrajectoryTime());
+         ImGui.setNextItemWidth(-1);
+         if (ImGuiTools.volatileInputDouble(labels.getHidden("Trajectory Duration"), trajectoryDuration, 0.1, 0.5, "%.2f s"))
+         {
+            double lowerBound = RDXTeleoperationParameters.trajectoryTime.hasLowerBound() ? RDXTeleoperationParameters.trajectoryTime.getLowerBound() : 0.0;
+            double upperBound = RDXTeleoperationParameters.trajectoryTime.hasUpperBound() ? RDXTeleoperationParameters.trajectoryTime.getUpperBound() : Double.POSITIVE_INFINITY;
+            teleoperationParameters.set(RDXTeleoperationParameters.trajectoryTime, MathTools.clamp(trajectoryDuration.get(), lowerBound, upperBound));
+         }
+
+         ImGui.setCursorPosX(widgetStartX);
+         if (ImGui.button(labels.get("Stop All Trajectories")))
+         {
+            RDXBaseUI.pushNotification("Commanding stop all trajectories...");
+            ros2Helper.publishToController(new StopAllTrajectoryMessage());
+         }
+
+         ImGui.spacing();
+         ImGui.separator();
+         ImGui.spacing();
+         hardwareControlStateManager.renderWholeBodyCommandWidgets(widgetStartX);
+
+         ImGui.spacing();
+         ImGui.separator();
+         ImGui.spacing();
          ImGui.text("Joint Position Control:");
          ImGui.sameLine();
          ImGui.setCursorPosX(widgetStartX);
          dofsWidgets.renderImGuiWidgets();
 
+         ImGui.spacing();
          ImGui.separator();
+         ImGui.spacing();
          ImGui.text("Pelvis Height:");
          ImGui.sameLine();
          ImGui.setCursorPosX(widgetStartX);
          ImGui.setNextItemWidth(-1);
          pelvisHeightSlider.renderImGuiWidgets();
-
-         ImGui.text("Pelvis Height Control Mode:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         if (ImGui.radioButton(labels.get("Pelvis"), pelvisControlMode == RDXPelvisControlMode.PELVIS))
-         {
-            pelvisControlMode = RDXPelvisControlMode.PELVIS;
-         }
-         ImGui.sameLine();
-         if (ImGui.radioButton(labels.get("CoM"), pelvisControlMode == RDXPelvisControlMode.COM))
-         {
-            pelvisControlMode = RDXPelvisControlMode.COM;
-         }
-         ImGui.separator();
-         ImGui.text("3D Interactables: ");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         if (interactablesAvailable)
-         {
-            ImGui.checkbox("Enable", interactablesEnabled);
-         }
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Delete all")) || ImGui.getIO().getKeyShift() && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
-         {
-            clearInteractablesAndLocomotionGraphics();
-         }
-         ImGuiTools.previousWidgetTooltip("Shift + Escape");
-         ImGui.setCursorPosX(widgetStartX);
-         wholeBodyIKManager.renderImGuiWidgets();
-
-         ImGui.setCursorPosX(widgetStartX);
-         if (ImGui.collapsingHeader(labels.get("Interactable Selections"), interactableSelections))
-         {
-            ImGui.indent();
-            if (interactablesAvailable)
-            {
-               float radioStartX = 100.0f;
-               if (hasHead)
-               {
-                  ImGui.text("Head:");
-                  ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
-                  ImGui.sameLine();
-                  ImGui.setCursorPosX(radioStartX);
-                  interactableHead.renderImGuiWidgets();
-               }
-
-               ImGui.text("Chest:");
-               ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
-               ImGui.sameLine();
-               ImGui.setCursorPosX(radioStartX);
-               interactableChest.renderImGuiWidgets();
-
-               ImGui.text("Pelvis:");
-               ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
-               ImGui.sameLine();
-               ImGui.setCursorPosX(radioStartX);
-               interactablePelvis.renderImGuiWidgets();
-
-               for (RobotSide side : interactableHands.sides())
-               {
-                  ImGui.text(side.getPascalCaseName() + " Hand:");
-                  ImGui.sameLine();
-                  ImGui.setCursorPosX(radioStartX);
-                  interactableHands.get(side).renderImGuiWidgets();
-               }
-
-               for (RobotSide side : interactableFeet.sides())
-               {
-                  ImGui.text(side.getPascalCaseName() + " Foot:");
-                  ImGui.sameLine();
-                  ImGui.setCursorPosX(radioStartX);
-                  interactableFeet.get(side).renderImGuiWidgets();
-               }
-            }
-            ImGui.unindent();
-         }
-         ImGui.separator();
-         ImGui.text("Collisions: ");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         ImGui.checkbox("Show contact", showContactCollisionMeshes);
-         ImGui.sameLine();
-         ImGui.checkbox("Show avoidance", showAvoidanceCollisionMeshes);
       }
    }
 
@@ -908,6 +770,7 @@ public class RDXTeleoperationManager extends RDXPanel
       {
          desiredRobot.getRenderables(renderables, pool, sceneLevels);
          dofsWidgets.getDesiredRobot().getRenderables(renderables, pool, sceneLevels);
+         pelvisHeightSlider.getRenderables(renderables, pool, sceneLevels);
 
          if (showGraphics.get())
          {
@@ -918,11 +781,6 @@ public class RDXTeleoperationManager extends RDXPanel
          {
             if (interactablesAvailable)
             {
-               if (showAvoidanceCollisionMeshes.get())
-                  avoidanceCollisionModel.getRenderables(renderables, pool);
-               if (showContactCollisionMeshes.get())
-                  contactCollisionModel.getRenderables(renderables, pool);
-
                for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
                   robotPartInteractable.getVirtualRenderables(renderables, pool);
             }
@@ -936,6 +794,7 @@ public class RDXTeleoperationManager extends RDXPanel
    {
       locomotionManager.deleteAll();
       dofsWidgets.reset();
+      pelvisHeightSlider.disablePreview();
 
       for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
          robotPartInteractable.delete();
@@ -948,6 +807,7 @@ public class RDXTeleoperationManager extends RDXPanel
       locomotionManager.destroy();
       armManager.destroy();
       dofsWidgets.destroy();
+      pelvisHeightSlider.destroy();
    }
 
    public ImBoolean getInteractablesEnabled()
@@ -976,7 +836,7 @@ public class RDXTeleoperationManager extends RDXPanel
    }
 
    /**
-    * Shows a "Simulation: [Reset Sim]" row under Trajectory time. The callback reinitializes the
+    * Shows a Reset Sim button at the top of the 3D view. The callback reinitializes the
     * RL simulation. Leave this unset for the real robot so the control stays hidden.
     */
    public void setResetSimulationCallback(Runnable resetSimulationCallback)
