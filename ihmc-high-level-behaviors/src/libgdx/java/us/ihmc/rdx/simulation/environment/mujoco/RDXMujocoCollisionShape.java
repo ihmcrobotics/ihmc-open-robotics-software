@@ -1,6 +1,10 @@
 package us.ihmc.rdx.simulation.environment.mujoco;
 
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.simulationConstructionSetTools.util.environments.procedural.ProceduralTerrainGeometry.TerrainBox;
+import us.ihmc.simulationConstructionSetTools.util.environments.procedural.ProceduralTerrainGeometry.TerrainSurface;
+
+import java.util.List;
 
 /**
  * One RDX environment-object collision, expressed in the world frame, ready to drop into the
@@ -12,7 +16,9 @@ public final class RDXMujocoCollisionShape
    {
       BOX,
       SPHERE,
-      MESH
+      MESH,
+      /** Procedural terrain: a box geom per {@link TerrainBox} and a convex geom per {@link TerrainSurface}, on one body. */
+      TERRAIN
    }
 
    private final String name;
@@ -21,6 +27,10 @@ public final class RDXMujocoCollisionShape
    private final double sizeY;
    private final double sizeZ;
    private final String meshResourcePath;
+   private final List<TerrainBox> terrainBoxes;
+   private final List<TerrainSurface> terrainSurfaces;
+   /** Cached so comparing two terrains does not walk thousands of pieces. */
+   private final int terrainHash;
    private final Pose3D poseInWorld;
    /** False for the wall, which stays a mocap body. Everything else is a free body the robot can move. */
    private final boolean dynamic;
@@ -30,13 +40,19 @@ public final class RDXMujocoCollisionShape
    public RDXMujocoCollisionShape(String name, Type type, double sizeX, double sizeY, double sizeZ, Pose3D poseInWorld,
                                   boolean dynamic, double mass, boolean selected)
    {
-      this(name, type, sizeX, sizeY, sizeZ, null, poseInWorld, dynamic, mass, selected);
+      this(name, type, sizeX, sizeY, sizeZ, null, List.of(), List.of(), poseInWorld, dynamic, mass, selected);
    }
 
    public RDXMujocoCollisionShape(String name, String meshResourcePath, Pose3D poseInWorld,
                                   boolean dynamic, double mass, boolean selected)
    {
-      this(name, Type.MESH, 0.0, 0.0, 0.0, meshResourcePath, poseInWorld, dynamic, mass, selected);
+      this(name, Type.MESH, 0.0, 0.0, 0.0, meshResourcePath, List.of(), List.of(), poseInWorld, dynamic, mass, selected);
+   }
+
+   /** Static procedural terrain, with the pieces in the body frame. */
+   public RDXMujocoCollisionShape(String name, List<TerrainBox> boxes, List<TerrainSurface> surfaces, Pose3D poseInWorld, boolean selected)
+   {
+      this(name, Type.TERRAIN, 0.0, 0.0, 0.0, null, List.copyOf(boxes), List.copyOf(surfaces), poseInWorld, false, 0.0, selected);
    }
 
    private RDXMujocoCollisionShape(String name,
@@ -45,6 +61,8 @@ public final class RDXMujocoCollisionShape
                                        double sizeY,
                                        double sizeZ,
                                        String meshResourcePath,
+                                       List<TerrainBox> terrainBoxes,
+                                       List<TerrainSurface> terrainSurfaces,
                                        Pose3D poseInWorld,
                                        boolean dynamic,
                                        double mass,
@@ -56,6 +74,9 @@ public final class RDXMujocoCollisionShape
       this.sizeY = sizeY;
       this.sizeZ = sizeZ;
       this.meshResourcePath = meshResourcePath;
+      this.terrainBoxes = terrainBoxes;
+      this.terrainSurfaces = terrainSurfaces;
+      this.terrainHash = 31 * terrainBoxes.hashCode() + terrainSurfaces.hashCode();
       this.poseInWorld = new Pose3D(poseInWorld);
       this.dynamic = dynamic;
       this.mass = mass;
@@ -131,6 +152,16 @@ public final class RDXMujocoCollisionShape
       return selected;
    }
 
+   public List<TerrainBox> getTerrainBoxes()
+   {
+      return terrainBoxes;
+   }
+
+   public List<TerrainSurface> getTerrainSurfaces()
+   {
+      return terrainSurfaces;
+   }
+
    public Pose3D getPoseInWorld()
    {
       return poseInWorld;
@@ -142,6 +173,8 @@ public final class RDXMujocoCollisionShape
       String motion = (dynamic ? "free" : "mocap") + "|" + mass;
       if (type == Type.MESH)
          return name + "|" + type + "|" + meshResourcePath + "|" + motion;
+      if (type == Type.TERRAIN)
+         return name + "|" + type + "|" + terrainBoxes.size() + "|" + terrainSurfaces.size() + "|" + terrainHash + "|" + motion;
       return name + "|" + type + "|" + sizeX + "|" + sizeY + "|" + sizeZ + "|" + motion;
    }
 
@@ -154,6 +187,11 @@ public final class RDXMujocoCollisionShape
       if (type == Type.MESH)
       {
          if (meshResourcePath == null ? other.meshResourcePath != null : !meshResourcePath.equals(other.meshResourcePath))
+            return false;
+      }
+      else if (type == Type.TERRAIN)
+      {
+         if (terrainHash != other.terrainHash || terrainBoxes.size() != other.terrainBoxes.size() || terrainSurfaces.size() != other.terrainSurfaces.size())
             return false;
       }
       else if (Math.abs(sizeX - other.sizeX) > epsilon || Math.abs(sizeY - other.sizeY) > epsilon || Math.abs(sizeZ - other.sizeZ) > epsilon)
