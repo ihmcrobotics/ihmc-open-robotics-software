@@ -80,7 +80,7 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
       yoloClassName = new CRDTBidirectionalString(latestTimestampModifiable, "door_lever");
       foundationPoseObjectType = new CRDTBidirectionalEnumField<>(latestTimestampModifiable, IsaacROSFoundationPoseObject.MUSTARD);
       minPostPoints = new CRDTBidirectionalInteger(latestTimestampModifiable, 1000);
-      minRecessPoints = new CRDTBidirectionalInteger(latestTimestampModifiable, 3000);
+      minRecessPoints = new CRDTBidirectionalInteger(latestTimestampModifiable, 2000);
       minCapsulePoints = new CRDTBidirectionalInteger(latestTimestampModifiable, 300);
       searchStartX = new CRDTBidirectionalFloat(latestTimestampModifiable, 0.05f);
       compositeFrameName = new CRDTBidirectionalString(latestTimestampModifiable, "");
@@ -158,7 +158,7 @@ public class BehaviorTreeSceneObjectDefinition extends LatestTimestampModifiable
          case DOOR_FRAME ->
          {
             minPostPoints.setValue(jsonNode.has("minPostPoints") ? jsonNode.get("minPostPoints").asInt() : 400);
-            minRecessPoints.setValue(jsonNode.has("minRecessPoints") ? jsonNode.get("minRecessPoints").asInt() : 3000);
+            minRecessPoints.setValue(jsonNode.has("minRecessPoints") ? jsonNode.get("minRecessPoints").asInt() : 2000);
          }
          case APPROACH_TABLE ->
          {
