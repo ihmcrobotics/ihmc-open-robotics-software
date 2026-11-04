@@ -67,6 +67,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
 
    private final double estimatorDT;
+   private final double gravityMagnitude;
 
    private boolean visualizeMeasurementFrames = false;
    private final List<IMUSensorReadOnly> imusToVisualize;
@@ -100,6 +101,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                            ForceSensorDataHolder forceSensorDataHolderToUpdate)
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
+      gravityMagnitude = Math.abs(gravitationalAcceleration);
       this.sensorOutput = sensorOutputMap;
       this.footSwitchList = new ArrayList<>(footSwitches.values());
 
@@ -407,6 +409,34 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+   }
+
+   /** Read on the estimator thread after its update. No estimator state is changed by this snapshot. */
+   public record GroundSupportSnapshot(long wallTime, long monotonicTime, boolean normal, int feet,
+                                       int contactingFeet, int reliableLoadFeet, int trustedFeet,
+                                       double minimumFootLoad, double totalFootLoad,
+                                       double linearSpeed, double angularSpeed, double accelerationDeviation) { }
+
+   public GroundSupportSnapshot getGroundSupportSnapshot()
+   {
+      int contacting = 0, reliable = 0;
+      double minimumLoad = Double.POSITIVE_INFINITY, totalLoad = 0;
+      for (FootSwitchInterface foot : footSwitchList)
+      {
+         if (foot.hasFootHitGroundFiltered()) contacting++;
+         if (foot.isFootLoadPercentageReliable()) reliable++;
+         double load = foot.getFootLoadPercentage();
+         minimumLoad = Math.min(minimumLoad, load);
+         totalLoad += load;
+      }
+      double accelerationDeviation = imusToVisualize.isEmpty() ? Double.NaN : 0.0;
+      for (IMUSensorReadOnly imu : imusToVisualize)
+         accelerationDeviation = Math.max(accelerationDeviation,
+               Math.abs(imu.getLinearAccelerationMeasurement().norm() - gravityMagnitude));
+      boolean normal = operatingMode.getEnumValue() == StateEstimatorMode.NORMAL;
+      return new GroundSupportSnapshot(sensorOutput.getWallTime(), sensorOutput.getMonotonicTime(), normal, footSwitchList.size(),
+            contacting, reliable, normal ? pelvisLinearStateUpdater.getNumberOfTrustedFeet() : 0, minimumLoad, totalLoad,
+            rootJoint.getJointTwist().getLinearPart().norm(), rootJoint.getJointTwist().getAngularPart().norm(), accelerationDeviation);
    }
 
    @Override

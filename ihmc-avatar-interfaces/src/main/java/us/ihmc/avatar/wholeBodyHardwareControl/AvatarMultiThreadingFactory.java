@@ -108,6 +108,7 @@ public class AvatarMultiThreadingFactory
 
    // Estimator
    private final AvatarEstimatorThread avatarEstimator;
+   private StateEstimatorController mainStateEstimator;
    private final OptionalFactoryField<Map<HighLevelControllerName, StateEstimatorMode>> estimatorModeMapReference = new OptionalFactoryField<>("estimatorModeMapReference");
    private final List<Runnable> preEstimatorRunnables = new ArrayList<>();
    private final List<Runnable> postEstimatorRunnables = new ArrayList<>();
@@ -276,6 +277,7 @@ public class AvatarMultiThreadingFactory
          LogTools.warn("External pelvis pose corrections enabled for the hardware estimator");
       }
       StateEstimatorController stateEstimator = avatarEstimatorThreadFactory.getMainStateEstimator();
+      mainStateEstimator = stateEstimator;
 
       // Create state estimator from its factory
       AvatarEstimatorThread avatarEstimator = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
@@ -1056,6 +1058,11 @@ public class AvatarMultiThreadingFactory
    public FullHumanoidRobotModel getEstimatorFullRobotModel()
    {
       return avatarEstimator.getFullRobotModel();
+   }
+
+   public StateEstimatorController getMainStateEstimator()
+   {
+      return mainStateEstimator;
    }
 
    public void addPreEstimatorThreadRunnable(Runnable runnable)

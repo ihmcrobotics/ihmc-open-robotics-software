@@ -564,6 +564,50 @@ public class ZEDImageSensor extends ImageSensor
       positionalTrackingEnabled = enable;
    }
 
+   /**
+    * Fresh positional-tracking session without closing the RGB-D camera or its streaming connection.
+    * Call only from the sensor's grab thread, before {@link #grab()}, never from a UI or ROS callback.
+    */
+   protected boolean restartPositionalTracking()
+   {
+      synchronized (trackedPosesBySequence)
+      {
+         trackedPosesBySequence.clear();
+      }
+      try (SL_PositionalTrackingParameters parameters = new SL_PositionalTrackingParameters())
+      {
+         SL_PositionalTrackingParameters current = sl_get_positional_tracking_parameters(cameraID);
+         if (current == null || current.isNull())
+            throw new IllegalStateException("ZED tracking parameters unavailable");
+         // Copy before disabling: the SDK owns the pointer returned by its parameter getter.
+         parameters.enable_area_memory(current.enable_area_memory());
+         parameters.enable_pose_smoothing(current.enable_pose_smoothing());
+         parameters.set_floor_as_origin(current.set_floor_as_origin());
+         parameters.set_as_static(current.set_as_static());
+         parameters.enable_imu_fusion(current.enable_imu_fusion());
+         parameters.depth_min_range(current.depth_min_range());
+         parameters.set_gravity_as_origin(current.set_gravity_as_origin());
+         parameters.mode(current.mode());
+         parameters.enable_localization_only(current.enable_localization_only());
+         parameters.enable_2d_ground_mode(current.enable_2d_ground_mode());
+         parameters.initial_world_rotation().x(0).y(0).z(0).w(1);
+         parameters.initial_world_position().x(0).y(0).z(0);
+         if (positionalTrackingEnabled)
+            sl_disable_positional_tracking(cameraID, "");
+         positionalTrackingEnabled = false;
+         throwOnError(sl_enable_positional_tracking(cameraID, parameters, ""));
+         positionalTrackingEnabled = true;
+         trackedSensorFrame.update(transform -> transform.set(trackedPoseOffset));
+         return true;
+      }
+      catch (ZEDException | RuntimeException exception)
+      {
+         positionalTrackingEnabled = false;
+         LogTools.error("Could not restart ZED positional tracking: {}", exception.getMessage());
+         return false;
+      }
+   }
+
    @Override
    public void close()
    {
