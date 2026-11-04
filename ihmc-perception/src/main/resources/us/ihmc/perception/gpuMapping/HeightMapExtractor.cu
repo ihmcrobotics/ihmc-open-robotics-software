@@ -26,6 +26,7 @@ extern "C"
 #define MIN_DEPTH_TO_ACCEPT 21
 #define ICP_OUTLIER_DISTANCE_THRESHOLD 22
 #define ICP_VARIANCE_PER_METER_OF_CORRECTION 23
+#define ICP_MAX_DISTANCE 24
 
 // Sentinel written to a global-map variance cell to mark it as holding no real data.
 // Real variances are always non-negative, so this is unambiguous everywhere it's checked.
@@ -290,6 +291,7 @@ __global__ void icpCorrespondenceKernel(const float* __restrict__ localMeanMap, 
     const int localCenterIndex = static_cast<int>(params[LOCAL_CENTER_INDEX]);
     const int globalCenterIndex = static_cast<int>(params[GLOBAL_CENTER_INDEX]);
     const float outlierDistanceThreshold = params[ICP_OUTLIER_DISTANCE_THRESHOLD];
+    const float maxDistance = params[ICP_MAX_DISTANCE];
 
     if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
         return;
@@ -300,6 +302,15 @@ __global__ void icpCorrespondenceKernel(const float* __restrict__ localMeanMap, 
 
     // No point landed in this local cell, nothing to correspond
     if (localMeanF == 0.0f)
+        return;
+
+    // Stereo depth gets less accurate with distance from the sensor, and far cells would pull the correction toward their
+    // error, so leave them out. The local map is centered on the sensor in XY, and its heights are in the world frame, the
+    // same as the sensor's height in the ground to world translation.
+    float2 localCoordinate = indices_to_coordinate(localCell, make_float2(0.0f, 0.0f), cellSize, localCenterIndex);
+    float heightBelowSensor = groundToWorldTranslation[11] - localMeanF;
+    float distanceSquared = localCoordinate.x * localCoordinate.x + localCoordinate.y * localCoordinate.y + heightBelowSensor * heightBelowSensor;
+    if (distanceSquared > maxDistance * maxDistance)
         return;
 
     // The newest sensor data is treated as the fixed reference this frame; x, y come from the cell's
@@ -599,6 +610,259 @@ __global__ void heightMapEmptyRegistrationKernel(float *localMap, size_t pitchLo
 
     float *globalHeight = (float *)((char *)globalMap + globalIndex.x * pitchGlobal) + globalIndex.y;
     *globalHeight = *localHeight;
+}
+
+/**
+ * Filling unseen global cells. Unseen cells keep INVALID_CELL_VARIANCE, so the fill is only ever output:
+ * registration takes the first real measurement outright, and ICP ignores them. The fill has two parts:
+ *
+ * - Near real data (within the blend start distance), the lowest real height within that distance.
+ *   Hidden cells are always below the line of sight, so the lower neighbor is the safer guess, e.g. for
+ *   the hidden back of a tread seen from above. The distance should be at most the shallowest expected
+ *   tread, so the window reaches a tread's own visible front but not the one below it.
+ * - Farther out, a push-pull fill: a pyramid of block averages of the real data, where unseen cells take
+ *   the (bilinearly interpolated) average of the smallest surrounding block that holds real data. The
+ *   farther a cell is from real data, the larger that block, so the more of its neighbors it blends,
+ *   settling on the average of everything seen. This avoids extending every edge cell outward as a strip.
+ *
+ * Between one and two blend start distances the two are blended. The distance to the nearest real cell
+ * comes from jump flooding: each cell tracks the index of the nearest cell holding real data (its
+ * "seed"), and log2(N) passes propagate seeds with halving step sizes. Seeds are stored as the linear
+ * index x * globalCellsPerAxis + y, or -1 for no seed yet.
+ */
+extern "C"
+__global__ void nearestValidCellInitKernel(const float* __restrict__ globalVarianceMap, size_t pitchGlobalVariance,
+                                           int* __restrict__ seedMap, size_t pitchSeed,
+                                           const float* __restrict__ params)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+
+    if (x >= globalCellsPerAxis || y >= globalCellsPerAxis)
+        return;
+
+    const float* varianceRow = (const float*)((const char*)globalVarianceMap + x * pitchGlobalVariance);
+    int* seedRow = (int*)((char*)seedMap + x * pitchSeed);
+    seedRow[y] = varianceRow[y] < 0.0f ? -1 : x * globalCellsPerAxis + y;
+}
+
+/**
+ * One jump flooding pass: each cell adopts the closest seed among its own and those of the 8 cells
+ * {@code step} away. Reads from seedsIn and writes to seedsOut so passes don't race each other.
+ */
+extern "C"
+__global__ void nearestValidCellJumpKernel(const int* __restrict__ seedsIn, size_t pitchSeedsIn,
+                                           int* __restrict__ seedsOut, size_t pitchSeedsOut,
+                                           const int step,
+                                           const float* __restrict__ params)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+
+    if (x >= globalCellsPerAxis || y >= globalCellsPerAxis)
+        return;
+
+    int bestSeed = -1;
+    int bestDistanceSquared = 0;
+
+    for (int dx = -step; dx <= step; dx += step)
+    {
+        for (int dy = -step; dy <= step; dy += step)
+        {
+            int neighborX = x + dx;
+            int neighborY = y + dy;
+            if (neighborX < 0 || neighborX >= globalCellsPerAxis || neighborY < 0 || neighborY >= globalCellsPerAxis)
+                continue;
+
+            const int* neighborRow = (const int*)((const char*)seedsIn + neighborX * pitchSeedsIn);
+            int seed = neighborRow[neighborY];
+            if (seed < 0)
+                continue;
+
+            int seedX = seed / globalCellsPerAxis;
+            int seedY = seed % globalCellsPerAxis;
+            int distanceSquared = (seedX - x) * (seedX - x) + (seedY - y) * (seedY - y);
+
+            // Break ties by seed index so the fill doesn't flicker between equidistant cells
+            if (bestSeed < 0 || distanceSquared < bestDistanceSquared || (distanceSquared == bestDistanceSquared && seed < bestSeed))
+            {
+                bestSeed = seed;
+                bestDistanceSquared = distanceSquared;
+            }
+        }
+    }
+
+    int* outRow = (int*)((char*)seedsOut + x * pitchSeedsOut);
+    outRow[y] = bestSeed;
+}
+
+/**
+ * Push-pull level 0: real cells carry their height with a count of 1, unseen cells a count of 0.
+ */
+extern "C"
+__global__ void pushPullInitKernel(const float* __restrict__ globalMeanMap, size_t pitchGlobalMean,
+                                   const float* __restrict__ globalVarianceMap, size_t pitchGlobalVariance,
+                                   float* __restrict__ valueMap, size_t pitchValue,
+                                   float* __restrict__ countMap, size_t pitchCount,
+                                   const float* __restrict__ params)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+
+    if (x >= globalCellsPerAxis || y >= globalCellsPerAxis)
+        return;
+
+    bool seen = ((const float*)((const char*)globalVarianceMap + x * pitchGlobalVariance))[y] >= 0.0f;
+    float* valueRow = (float*)((char*)valueMap + x * pitchValue);
+    float* countRow = (float*)((char*)countMap + x * pitchCount);
+    valueRow[y] = seen ? ((const float*)((const char*)globalMeanMap + x * pitchGlobalMean))[y] : 0.0f;
+    countRow[y] = seen ? 1.0f : 0.0f;
+}
+
+/**
+ * Pull: each coarse cell is the mean of the real data under its 2 x 2 fine children, weighted by count,
+ * so every level holds the exact mean of the real cells in its blocks.
+ */
+extern "C"
+__global__ void pushPullDownsampleKernel(const float* __restrict__ fineValueMap, size_t pitchFineValue,
+                                         const float* __restrict__ fineCountMap, size_t pitchFineCount,
+                                         const int fineSize,
+                                         float* __restrict__ coarseValueMap, size_t pitchCoarseValue,
+                                         float* __restrict__ coarseCountMap, size_t pitchCoarseCount,
+                                         const int coarseSize)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (x >= coarseSize || y >= coarseSize)
+        return;
+
+    float weightedSum = 0.0f;
+    float count = 0.0f;
+    for (int fineX = 2 * x; fineX <= 2 * x + 1 && fineX < fineSize; fineX++)
+    {
+        const float* fineValueRow = (const float*)((const char*)fineValueMap + fineX * pitchFineValue);
+        const float* fineCountRow = (const float*)((const char*)fineCountMap + fineX * pitchFineCount);
+        for (int fineY = 2 * y; fineY <= 2 * y + 1 && fineY < fineSize; fineY++)
+        {
+            weightedSum += fineCountRow[fineY] * fineValueRow[fineY];
+            count += fineCountRow[fineY];
+        }
+    }
+
+    ((float*)((char*)coarseValueMap + x * pitchCoarseValue))[y] = count > 0.0f ? weightedSum / count : 0.0f;
+    ((float*)((char*)coarseCountMap + x * pitchCoarseCount))[y] = count;
+}
+
+/**
+ * Push: fine cells without real data under them take the bilinearly interpolated coarse value. Run from
+ * the coarsest level down, so every coarse value is already filled when its children read it.
+ */
+extern "C"
+__global__ void pushPullUpsampleKernel(const float* __restrict__ coarseValueMap, size_t pitchCoarseValue,
+                                       const int coarseSize,
+                                       float* __restrict__ fineValueMap, size_t pitchFineValue,
+                                       const float* __restrict__ fineCountMap, size_t pitchFineCount,
+                                       const int fineSize)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (x >= fineSize || y >= fineSize)
+        return;
+
+    if (((const float*)((const char*)fineCountMap + x * pitchFineCount))[y] > 0.0f)
+        return;
+
+    // Fine cell center in coarse cell coordinates, where coarse cell i is centered on fine 2i + 0.5
+    float coarseX = 0.5f * x - 0.25f;
+    float coarseY = 0.5f * y - 0.25f;
+    int x0 = static_cast<int>(floorf(coarseX));
+    int y0 = static_cast<int>(floorf(coarseY));
+    float alphaX = coarseX - x0;
+    float alphaY = coarseY - y0;
+    int x1 = min(max(x0 + 1, 0), coarseSize - 1);
+    int y1 = min(max(y0 + 1, 0), coarseSize - 1);
+    x0 = min(max(x0, 0), coarseSize - 1);
+    y0 = min(max(y0, 0), coarseSize - 1);
+
+    const float* row0 = (const float*)((const char*)coarseValueMap + x0 * pitchCoarseValue);
+    const float* row1 = (const float*)((const char*)coarseValueMap + x1 * pitchCoarseValue);
+    float value = (1.0f - alphaX) * ((1.0f - alphaY) * row0[y0] + alphaY * row0[y1])
+                + alphaX * ((1.0f - alphaY) * row1[y0] + alphaY * row1[y1]);
+
+    ((float*)((char*)fineValueMap + x * pitchFineValue))[y] = value;
+}
+
+/**
+ * Fills each unseen cell: the lowest real height within blendStartCells when there is one, blending into
+ * the push-pull value between one and two blend start distances from the nearest real cell. Only unseen
+ * cells are written and only real cells are read, so there is no race. The variance is left invalid.
+ */
+extern "C"
+__global__ void fillUnseenCellsKernel(float* __restrict__ globalMeanMap, size_t pitchGlobalMean,
+                                      const float* __restrict__ globalVarianceMap, size_t pitchGlobalVariance,
+                                      const int* __restrict__ seedMap, size_t pitchSeed,
+                                      const float* __restrict__ pushPullValueMap, size_t pitchPushPullValue,
+                                      const float blendStartCells,
+                                      const float* __restrict__ params)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+
+    if (x >= globalCellsPerAxis || y >= globalCellsPerAxis)
+        return;
+
+    const float* varianceRow = (const float*)((const char*)globalVarianceMap + x * pitchGlobalVariance);
+    if (varianceRow[y] >= 0.0f)
+        return;
+
+    int seed = ((const int*)((const char*)seedMap + x * pitchSeed))[y];
+    if (seed < 0)
+        return; // Nothing has been seen yet, keep the default height
+
+    int seedX = seed / globalCellsPerAxis;
+    int seedY = seed % globalCellsPerAxis;
+    float distance = sqrtf(static_cast<float>((seedX - x) * (seedX - x) + (seedY - y) * (seedY - y)));
+
+    // Near value: the lowest real height within the blend start distance, else the nearest one
+    float nearValue = ((const float*)((const char*)globalMeanMap + seedX * pitchGlobalMean))[seedY];
+    if (distance <= blendStartCells)
+    {
+        int radius = static_cast<int>(floorf(blendStartCells));
+        float radiusSquared = blendStartCells * blendStartCells;
+        for (int dx = -radius; dx <= radius; dx++)
+        {
+            int neighborX = x + dx;
+            if (neighborX < 0 || neighborX >= globalCellsPerAxis)
+                continue;
+            const float* neighborVarianceRow = (const float*)((const char*)globalVarianceMap + neighborX * pitchGlobalVariance);
+            const float* neighborMeanRow = (const float*)((const char*)globalMeanMap + neighborX * pitchGlobalMean);
+            for (int dy = -radius; dy <= radius; dy++)
+            {
+                int neighborY = y + dy;
+                if (neighborY < 0 || neighborY >= globalCellsPerAxis || static_cast<float>(dx * dx + dy * dy) > radiusSquared)
+                    continue;
+                if (neighborVarianceRow[neighborY] >= 0.0f)
+                    nearValue = fminf(nearValue, neighborMeanRow[neighborY]);
+            }
+        }
+    }
+
+    // 0 up to one blend start distance, 1 from two, smooth in between
+    float t = blendStartCells > 0.0f ? fminf(fmaxf((distance - blendStartCells) / blendStartCells, 0.0f), 1.0f) : 1.0f;
+    float blend = t * t * (3.0f - 2.0f * t);
+    float farValue = ((const float*)((const char*)pushPullValueMap + x * pitchPushPullValue))[y];
+
+    ((float*)((char*)globalMeanMap + x * pitchGlobalMean))[y] = (1.0f - blend) * nearValue + blend * farValue;
 }
 
 extern "C"

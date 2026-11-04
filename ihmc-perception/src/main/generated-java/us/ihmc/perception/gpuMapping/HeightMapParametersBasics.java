@@ -118,6 +118,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.icpOutlierDistanceThreshold, icpOutlierDistanceThreshold);
    }
 
+   default void setICPMaxDistance(double icpMaxDistance)
+   {
+      set(HeightMapParameters.icpMaxDistance, icpMaxDistance);
+   }
+
    default void setICPVariancePerMeterOfCorrection(double icpVariancePerMeterOfCorrection)
    {
       set(HeightMapParameters.icpVariancePerMeterOfCorrection, icpVariancePerMeterOfCorrection);
@@ -131,5 +136,15 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setICPConvergenceYawDegrees(double icpConvergenceYawDegrees)
    {
       set(HeightMapParameters.icpConvergenceYawDegrees, icpConvergenceYawDegrees);
+   }
+
+   default void setFillUnseenCells(boolean fillUnseenCells)
+   {
+      set(HeightMapParameters.fillUnseenCells, fillUnseenCells);
+   }
+
+   default void setFillBlendStartDistance(double fillBlendStartDistance)
+   {
+      set(HeightMapParameters.fillBlendStartDistance, fillBlendStartDistance);
    }
 }

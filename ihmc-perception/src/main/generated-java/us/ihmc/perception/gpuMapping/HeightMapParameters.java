@@ -40,9 +40,12 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final IntegerStoredPropertyKey icpMinCorrespondenceCount = keys.addIntegerKey("ICP min correspondence count");
    public static final DoubleStoredPropertyKey icpMaxHorizontalDrift = keys.addDoubleKey("ICP max horizontal drift");
    public static final DoubleStoredPropertyKey icpOutlierDistanceThreshold = keys.addDoubleKey("ICP outlier distance threshold");
+   public static final DoubleStoredPropertyKey icpMaxDistance = keys.addDoubleKey("ICP max distance");
    public static final DoubleStoredPropertyKey icpVariancePerMeterOfCorrection = keys.addDoubleKey("ICP variance per meter of correction");
    public static final DoubleStoredPropertyKey icpConvergenceZMeters = keys.addDoubleKey("ICP convergence Z meters");
    public static final DoubleStoredPropertyKey icpConvergenceYawDegrees = keys.addDoubleKey("ICP convergence yaw degrees");
+   public static final BooleanStoredPropertyKey fillUnseenCells = keys.addBooleanKey("Fill unseen cells");
+   public static final DoubleStoredPropertyKey fillBlendStartDistance = keys.addDoubleKey("Fill blend start distance");
 
    /**
     * Loads this property set.

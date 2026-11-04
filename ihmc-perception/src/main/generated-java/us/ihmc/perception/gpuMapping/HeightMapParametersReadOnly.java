@@ -120,6 +120,11 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(icpOutlierDistanceThreshold);
    }
 
+   default double getICPMaxDistance()
+   {
+      return get(icpMaxDistance);
+   }
+
    default double getICPVariancePerMeterOfCorrection()
    {
       return get(icpVariancePerMeterOfCorrection);
@@ -133,5 +138,15 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    default double getICPConvergenceYawDegrees()
    {
       return get(icpConvergenceYawDegrees);
+   }
+
+   default boolean getFillUnseenCells()
+   {
+      return get(fillUnseenCells);
+   }
+
+   default double getFillBlendStartDistance()
+   {
+      return get(fillBlendStartDistance);
    }
 }
