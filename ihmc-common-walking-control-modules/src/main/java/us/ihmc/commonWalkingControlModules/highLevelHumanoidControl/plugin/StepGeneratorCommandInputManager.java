@@ -262,7 +262,7 @@ public class StepGeneratorCommandInputManager implements Updatable
          shouldSubmitNewRegions.set(true);
 
       // submit the new planar regions
-      if (latestHeightMap.get() != null)
+      if (isOpen && shouldSubmitNewRegions.getAndSet(false) && latestHeightMap.get() != null)
       {
          HeightMapCommand command = latestHeightMap.getAndSet(null);
 

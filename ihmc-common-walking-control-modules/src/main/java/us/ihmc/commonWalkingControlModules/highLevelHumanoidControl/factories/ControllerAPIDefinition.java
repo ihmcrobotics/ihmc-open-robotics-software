@@ -100,6 +100,9 @@ public class ControllerAPIDefinition
       commands.add(RLModelSelectionCommand.class);
       commands.add(MimicManeuverCommand.class);
 
+      // Height maps from perception, for the RL controller's height scan
+      commands.add(HeightMapCommand.class);
+
       controllerSupportedCommands = new ArrayList<>(commands);
 
       controllerSupportedStatusMessages = ControllerAPI.outputMessageClasses.stream().toList();
