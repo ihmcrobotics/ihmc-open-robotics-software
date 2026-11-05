@@ -164,6 +164,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
       RDXEnvironmentObject closestObject = null;
       for (RDXEnvironmentObject object : allObjects)
       {
+         if (!object.isSelectable())
+            continue;
          boolean intersects = object.intersect(pickRay, tempIntersection);
          double distance = tempIntersection.distance(pickRay.getPoint());
          if (intersects && (closestObject == null || distance < closestDistance))
@@ -191,7 +193,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
    {
       ImGui.separator();
 
-      ImGui.checkbox(labels.get("Enable Environment Building"), inputsEnabled);
+      if (ImGui.checkbox(labels.get("Enable Environment Building"), inputsEnabled) && !inputsEnabled.get())
+         stopBuilding();
 
       if (ImGui.sliderFloat("Ambient light", ambientLightAmount.getData(), 0.0f, 1.0f))
       {
@@ -464,10 +467,23 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    /**
     * When enabled, left-click picks objects in the 3D view and the pose gizmo can move the selection.
+    * Disabling it also clears the selection.
     */
    public void setInputsEnabled(boolean enabled)
    {
       inputsEnabled.set(enabled);
+      if (!enabled)
+         stopBuilding();
+   }
+
+   /**
+    * Unselects everything, so the gizmo and the collision meshes go away. A selected object is also
+    * one the simulation treats as being dragged, so leaving it selected would keep it pinned in place.
+    */
+   private void stopBuilding()
+   {
+      isPlacing = false;
+      resetSelection();
    }
 
    public boolean getInputsEnabled()
@@ -477,6 +493,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    public void selectObject(RDXEnvironmentObject object)
    {
+      if (object != null && !object.isSelectable())
+         return;
       updateObjectSelected(selectedObject, object);
       if (selectedObject != null)
          pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
@@ -542,12 +560,13 @@ public class RDXEnvironmentBuilder extends RDXPanel
          {
             object.getRealRenderables(renderables, pool);
          }
-         if (selectedObject != null)
+         // Selection graphics are building tools, so they only show while building is enabled
+         if (inputsEnabled.get() && selectedObject != null)
          {
             selectedObject.getCollisionMeshRenderables(renderables, pool);
             pose3DGizmo.getRenderables(renderables, pool);
          }
-         if (intersectedObject != null && intersectedObject != selectedObject)
+         if (inputsEnabled.get() && intersectedObject != null && intersectedObject != selectedObject)
          {
             intersectedObject.getCollisionMeshRenderables(renderables, pool);
          }

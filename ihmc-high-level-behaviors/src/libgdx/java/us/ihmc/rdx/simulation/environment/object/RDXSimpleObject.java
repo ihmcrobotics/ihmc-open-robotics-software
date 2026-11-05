@@ -232,7 +232,8 @@ public class RDXSimpleObject
       return parts;
    }
 
-   private static File resolveResourceFile(String relativePath)
+   /** A resource on disk, looked up the way visuals are loaded, then in the source resource tree. Null when missing. */
+   protected static File resolveResourceFile(String relativePath)
    {
       if (relativePath == null)
          return null;

@@ -1,0 +1,222 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="sektion_cabinet">
+  <link name="cabinet">
+    <inertial>
+      <origin xyz="-0.0638438705 0.00046804795 0.0144388587" rpy="0 0 0" />
+      <mass value="69.9018741" />
+      <inertia ixx="11.6246149" ixy="-0.000749346826" ixz="-0.154249411" iyy="8.91319725" iyz="0.000378440191" izz="8.28445801" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="cabinet.glb" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="cabinet_collision_0.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="cabinet_collision_1.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="cabinet_collision_2.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="cabinet_collision_3.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="cabinet_collision_4.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="cabinet_collision_5.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="cabinet_collision_6.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="door_left_link">
+    <inertial>
+      <origin xyz="0.000305149837 0.184961768 0.000161069987" rpy="0 0 0" />
+      <mass value="3.89062794" />
+      <inertia ixx="0.0473907296" ixy="-0.000462980838" ixz="7.04923831e-05" iyy="0.0839076741" iyz="6.35238056e-05" izz="0.131018342" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="door_left_link.glb" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="door_left_link_collision_0.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="door_left_link_collision_1.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="door_right_link">
+    <inertial>
+      <origin xyz="0.0011269774 -0.184964771 0.000161027644" rpy="0 0 0" />
+      <mass value="3.890628" />
+      <inertia ixx="0.047394625" ixy="0.000464358226" ixz="7.04051764e-05" iyy="0.0839059738" iyz="-6.38463202e-05" izz="0.13102052" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="door_right_link.glb" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="door_right_link_collision_0.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="door_right_link_collision_1.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="drawer_bottom">
+    <inertial>
+      <origin xyz="0.0258780083 9.5761074e-06 0.000161377574" rpy="0 0 0" />
+      <mass value="43.4289405" />
+      <inertia ixx="2.00302355" ixy="1.44404181e-05" ixz="-0.000365787537" iyy="1.05862678" iyz="-1.8402647e-07" izz="2.97085099" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_bottom.glb" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_bottom_collision_0.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_bottom_collision_1.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="drawer_top">
+    <inertial>
+      <origin xyz="0.0700813598 2.9918848e-05 -0.00688807782" rpy="0 0 0" />
+      <mass value="5.3332658" />
+      <inertia ixx="0.314786847" ixy="8.59078276e-06" ixz="-0.0062874864" iyy="0.246713827" iyz="-4.328104e-06" izz="0.55054754" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_top.glb" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_top_collision_0.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_top_collision_1.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_top_collision_2.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_top_collision_3.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_top_collision_4.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_top_collision_5.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_top_collision_6.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_top_collision_7.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="door_left_joint" type="revolute">
+    <origin xyz="0.3162004 -0.3757 -0.1297301" rpy="3.14159265 -1.57079625 3.14159265" />
+    <parent link="cabinet" />
+    <child link="door_left_link" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.57" upper="0" effort="87" velocity="100.000037" />
+  </joint>
+  <joint name="door_right_joint" type="revolute">
+    <origin xyz="0.3162004 0.3757 -0.1297301" rpy="3.14159265 -1.57079625 3.14159265" />
+    <parent link="cabinet" />
+    <child link="door_right_link" />
+    <axis xyz="1 0 0" />
+    <limit lower="0" upper="1.57" effort="87" velocity="100.000037" />
+  </joint>
+  <joint name="drawer_bottom_joint" type="prismatic">
+    <origin xyz="0.0515004 0 0.1879499" rpy="0 0 0" />
+    <parent link="cabinet" />
+    <child link="drawer_bottom" />
+    <axis xyz="1 0 0" />
+    <limit lower="0" upper="0.4" effort="87" velocity="5729.58008" />
+  </joint>
+  <joint name="drawer_top_joint" type="prismatic">
+    <origin xyz="0.0515004 0 0.3171999" rpy="0 0 0" />
+    <parent link="cabinet" />
+    <child link="drawer_top" />
+    <axis xyz="1 0 0" />
+    <limit lower="0" upper="0.4" effort="87" velocity="5729.58008" />
+  </joint>
+</robot>
