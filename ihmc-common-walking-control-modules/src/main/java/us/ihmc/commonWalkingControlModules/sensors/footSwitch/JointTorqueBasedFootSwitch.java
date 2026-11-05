@@ -717,8 +717,8 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                hasFootHitGround.set(false);
             }
          }
-         hasFootHitGroundFiltered.update();
 
+         // Fast release acts on the previous tick's filtered state; updateFootHitGround() below then sees raw == filtered and resets the window counter.
          fastRelease.set(false);
          double releaseFraction = releaseLoadFraction.getValue();
          if (releaseFraction > 0.0 && fZPlus < releaseFraction * robotTotalWeight)
@@ -726,7 +726,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
             if (hasFootHitGroundFiltered.getValue())
                fastRelease.set(true);
             hasFootHitGround.set(false);
-            hasFootHitGroundFiltered.set(false); // also restarts the glitch window, so touchdown still needs a full window
+            hasFootHitGroundFiltered.set(false); // the counter restarts, so touchdown still needs a full contact window
          }
          updateFootHitGround();
       }
