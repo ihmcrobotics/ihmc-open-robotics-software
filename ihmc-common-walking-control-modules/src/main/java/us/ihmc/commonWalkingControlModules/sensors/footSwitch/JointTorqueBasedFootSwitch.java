@@ -30,6 +30,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
+import us.ihmc.yoVariables.filters.VariableTools;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -83,7 +84,9 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
    private final JacobianBasedBasedTouchdownDetector wrenchDetector;
 
    private final YoInteger contactThresholdWindowSize;
+   private final YoInteger flightThresholdWindowSize;
    private final YoDouble contactThresholdWindowDuration;
+   private final YoDouble flightThresholdWindowDuration;
    private final DoubleProvider switchDT;
 
    private final MovingReferenceFrame soleFrame;
@@ -98,6 +101,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                      DoubleProvider contactForceThresholdHigh,
                                      DoubleProvider contactCoPThreshold,
                                      double contactWindowDuration,
+                                     double flightWindowDuration,
                                      DoubleProvider switchDT,
                                      BooleanProvider compensateGravity,
                                      DoubleProvider horizontalVelocityThreshold,
@@ -147,9 +151,13 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       this.switchDT = switchDT;
 
       contactThresholdWindowDuration = new YoDouble(namePrefix + "ContactThresholdWindowDuration", registry);
+      flightThresholdWindowDuration = new YoDouble(namePrefix + "FlightThresholdWindowDuration", registry);
       contactThresholdWindowDuration.set(contactWindowDuration);
+      flightThresholdWindowDuration.set(flightWindowDuration);
       contactThresholdWindowSize = new YoInteger(namePrefix + "ContactThresholdWindowSize", registry);
+      flightThresholdWindowSize = new YoInteger(namePrefix + "FlightThresholdWindowSize", registry);
       contactThresholdWindowSize.set(Math.max(MINIMUM_WINDOW_SIZE, (int) Math.ceil(contactWindowDuration / switchDT.getValue())));
+      flightThresholdWindowSize.set(Math.max(MINIMUM_WINDOW_SIZE, (int) Math.ceil(flightWindowDuration / switchDT.getValue())));
 
       touchdownDetector = new JointTorqueBasedTouchdownDetector(namePrefix,
                                                                 jointToRead,
@@ -168,6 +176,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                                                contactForceThresholdHigh,
                                                                contactCoPThreshold,
                                                                contactThresholdWindowSize,
+                                                               flightThresholdWindowSize,
                                                                compensateGravity,
                                                                horizontalVelocityThreshold,
                                                                verticalVelocityThreshold,
@@ -206,6 +215,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
    {
       // Account for any changes in the DT by updating the window size to maintain a consistent time window for contact detection.
       contactThresholdWindowSize.set(Math.max(MINIMUM_WINDOW_SIZE, (int) Math.ceil(contactThresholdWindowDuration.getDoubleValue() / switchDT.getValue())));
+      flightThresholdWindowSize.set(Math.max(MINIMUM_WINDOW_SIZE, (int) Math.ceil(flightThresholdWindowDuration.getDoubleValue() / switchDT.getValue())));
 
       touchdownDetector.update();
 
@@ -419,8 +429,13 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       private final GlitchFilteredYoBoolean isPastForceThresholdLowFiltered;
       private final YoBoolean isPastForceThresholdHigh;
       private final YoBoolean hasFootHitGround, isPastCoPThreshold;
-      private final GlitchFilteredYoBoolean hasFootHitGroundFiltered;
+      private final YoBoolean hasFootHitGroundFiltered;
       private final GlitchFilteredYoBoolean isPastCoPThresholdFiltered;
+
+      private final YoInteger footHitGroundWindowSize;
+      private final YoInteger footLeftGroundWindowSize;
+      protected final YoInteger footHitGroundCounter;
+
 
       private final YoDouble jacobianDeterminant;
       private final YoDouble copDistance;
@@ -441,6 +456,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                                  DoubleProvider contactForceThresholdHigh,
                                                  DoubleProvider contactCoPThreshold,
                                                  YoInteger contactThresholdWindowSize,
+                                                 YoInteger flightThresholdWindowSize,
                                                  BooleanProvider compensateGravity,
                                                  DoubleProvider horizontalVelocityThreshold,
                                                  DoubleProvider verticalVelocityThreshold,
@@ -536,10 +552,11 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 
          hasFootHitGround = new YoBoolean(namePrefix + "FootHitGround", registry);
          // Final variable to identify if the foot has hit the ground
-         hasFootHitGroundFiltered = new GlitchFilteredYoBoolean(namePrefix + "HasFootHitGroundFiltered",
-                                                                registry,
-                                                                hasFootHitGround,
-                                                                contactThresholdWindowSize);
+         String footHitGroundPrefix = namePrefix + "HasFootHitGroundFiltered";
+         hasFootHitGroundFiltered = new YoBoolean(footHitGroundPrefix, registry);
+         footHitGroundCounter = new YoInteger(footHitGroundPrefix + "Count", registry);
+         footHitGroundWindowSize = contactThresholdWindowSize;
+         footLeftGroundWindowSize = flightThresholdWindowSize;
 
          centerOfPressure = new YoFramePoint2D(namePrefix + "CenterOfPressure", "", soleFrame, registry);
 
@@ -711,6 +728,19 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
             hasFootHitGround.set(false);
             hasFootHitGroundFiltered.set(false); // also restarts the glitch window, so touchdown still needs a full window
          }
+         updateFootHitGround();
+      }
+
+      private void updateFootHitGround()
+      {
+         if (hasFootHitGround.getValue() != hasFootHitGroundFiltered.getValue())
+            footHitGroundCounter.increment();
+         else
+            footHitGroundCounter.set(0);
+
+         int switchSize = hasFootHitGround.getBooleanValue() ? footHitGroundWindowSize.getIntegerValue() : footLeftGroundWindowSize.getIntegerValue();
+         if (footHitGroundCounter.getIntegerValue() >= switchSize)
+            hasFootHitGroundFiltered.set(hasFootHitGround.getValue());
       }
 
       public boolean hasFootHitGroundSensitive()

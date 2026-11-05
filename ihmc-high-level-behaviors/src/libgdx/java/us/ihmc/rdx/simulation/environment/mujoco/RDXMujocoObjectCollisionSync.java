@@ -14,6 +14,10 @@ import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXInteractableObjectLibrary;
 import us.ihmc.rdx.simulation.environment.object.objects.RDXArticulatedDoorObject;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXProceduralGroundObject;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXProceduralTerrainObject;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.simulationConstructionSetTools.util.environments.procedural.ProceduralTerrainGeometry.TerrainBox;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.simulation.mujoco.Mujoco;
 import us.ihmc.scs2.simulation.mujoco.Mujoco.mjData;
@@ -132,6 +136,8 @@ public class RDXMujocoObjectCollisionSync implements Controller
             shapes.add(shape);
       }
       doorCommands.set(List.copyOf(doors));
+      // Adding or removing the ground changes the shapes, which triggers the recompile that reads this
+      environment.setReplaceFlatGround(environmentBuilder.getAllObjects().stream().anyMatch(RDXProceduralGroundObject.class::isInstance));
 
       List<RDXMujocoCollisionShape> current = environment.getObjectCollisions();
       if (same(current, shapes))
@@ -362,6 +368,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
    /**
     * The first compile names loaded boxes {@code terrain_0_<n>} after the ground geoms. Drop those
     * before injecting {@code rdx_*} geoms so a later rebuild does not stack a second copy.
+    * Also drops the flat ground geoms when procedural ground replaces them.
     */
    private String withoutBakedObjectGeoms(String xml)
    {
@@ -370,7 +377,8 @@ public class RDXMujocoObjectCollisionSync implements Controller
       for (int i = 0; i < lines.length; i++)
       {
          Matcher matcher = FACTORY_TERRAIN_GEOM.matcher(lines[i]);
-         if (matcher.find() && Integer.parseInt(matcher.group(1)) == 0 && Integer.parseInt(matcher.group(2)) >= groundCollisionShapeCount)
+         if (matcher.find() && Integer.parseInt(matcher.group(1)) == 0
+             && (environment.isFlatGroundReplaced() || Integer.parseInt(matcher.group(2)) >= groundCollisionShapeCount))
             continue;
          if (i > 0)
             out.append('\n');
@@ -431,6 +439,21 @@ public class RDXMujocoObjectCollisionSync implements Controller
          assets.append("    <mesh name=\"").append(shape.getName()).append("_mesh\" file=\"")
                .append(shape.getMeshFileName()).append("\"/>\n");
       }
+      for (RDXMujocoCollisionShape shape : shapes)
+      {
+         // Each surface filled down to its bottom is convex, so the convex hull MuJoCo collides with is exact
+         for (int i = 0; i < shape.getTerrainSurfaces().size(); i++)
+         {
+            assets.append("    <mesh name=\"").append(shape.getName()).append("_surface").append(i).append("_mesh\" vertex=\"");
+            for (Point3D vertex : shape.getTerrainSurfaces().get(i).vertices())
+            {
+               assets.append(fmt(vertex.getX())).append(' ').append(fmt(vertex.getY())).append(' ').append(fmt(vertex.getZ())).append(' ');
+               assets.append(fmt(vertex.getX())).append(' ').append(fmt(vertex.getY())).append(' ')
+                     .append(fmt(shape.getTerrainSurfaces().get(i).bottomZ())).append(' ');
+            }
+            assets.append("\"/>\n");
+         }
+      }
       for (RDXArticulatedDoorObject.Dynamics door : doors)
          door.appendAssets(assets);
       if (assets.isEmpty())
@@ -455,6 +478,26 @@ public class RDXMujocoObjectCollisionSync implements Controller
                     + fmt(shape.getPoseInWorld().getPosition().getZ()) + "\" quat=\""
                     + fmt(rotation.getS()) + " " + fmt(rotation.getX()) + " "
                     + fmt(rotation.getY()) + " " + fmt(rotation.getZ()) + "\"";
+      if (shape.getType() == RDXMujocoCollisionShape.Type.TERRAIN)
+      {
+         // One mocap body, so dragging the terrain moves every piece. The first geom keeps the shape name the pose sync looks up.
+         StringBuilder body = new StringBuilder("    <body name=\"" + shape.getBodyName() + "\" mocap=\"true\" " + pose + ">\n");
+         int index = 0;
+         for (TerrainBox box : shape.getTerrainBoxes())
+         {
+            body.append("      <geom class=\"terrain\" name=\"").append(index++ == 0 ? shape.getName() : shape.getName() + "_" + index)
+                .append("\" type=\"box\" size=\"").append(fmt(box.sizeX() / 2.0)).append(' ').append(fmt(box.sizeY() / 2.0)).append(' ')
+                .append(fmt(box.sizeZ() / 2.0)).append("\" pos=\"").append(fmt(box.x())).append(' ').append(fmt(box.y())).append(' ')
+                .append(fmt(box.z())).append("\"/>\n");
+         }
+         for (int i = 0; i < shape.getTerrainSurfaces().size(); i++)
+         {
+            body.append("      <geom class=\"terrain\" name=\"").append(index++ == 0 ? shape.getName() : shape.getName() + "_" + index)
+                .append("\" type=\"mesh\" mesh=\"").append(shape.getName()).append("_surface").append(i).append("_mesh\"/>\n");
+         }
+         return body.append("    </body>\n").toString();
+      }
+
       String geometry;
       if (shape.getType() == RDXMujocoCollisionShape.Type.MESH)
          geometry = "type=\"mesh\" mesh=\"" + shape.getName() + "_mesh\"";
@@ -593,6 +636,10 @@ public class RDXMujocoObjectCollisionSync implements Controller
       boolean dynamic = RDXInteractableObjectLibrary.isInteractable(object);
       double mass = object.getMass();
       boolean selected = object.getIsSelected();
+      // Its collision geometry object is only the bounding box used for picking
+      if (object instanceof RDXProceduralTerrainObject terrain)
+         return new RDXMujocoCollisionShape(name, terrain.getCollisionBoxes(), terrain.getCollisionSurfaces(),
+                                            new us.ihmc.euclid.geometry.Pose3D(terrain.getObjectTransform()), selected);
       File convexMesh = object.getConvexCollisionMeshFile();
       if (convexMesh != null)
       {
