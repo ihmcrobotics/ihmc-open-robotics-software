@@ -118,6 +118,51 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.icpOutlierDistanceThreshold, icpOutlierDistanceThreshold);
    }
 
+   default void setICPMinDistance(double icpMinDistance)
+   {
+      set(HeightMapParameters.icpMinDistance, icpMinDistance);
+   }
+
+   default void setICPMaxDistance(double icpMaxDistance)
+   {
+      set(HeightMapParameters.icpMaxDistance, icpMaxDistance);
+   }
+
+   default void setICPNeighborHeightThreshold(double icpNeighborHeightThreshold)
+   {
+      set(HeightMapParameters.icpNeighborHeightThreshold, icpNeighborHeightThreshold);
+   }
+
+   default void setICPMinConsistentNeighbors(int icpMinConsistentNeighbors)
+   {
+      set(HeightMapParameters.icpMinConsistentNeighbors, icpMinConsistentNeighbors);
+   }
+
+   default void setICPMinPointsPerCell(int icpMinPointsPerCell)
+   {
+      set(HeightMapParameters.icpMinPointsPerCell, icpMinPointsPerCell);
+   }
+
+   default void setICPRobustKernelWidth(double icpRobustKernelWidth)
+   {
+      set(HeightMapParameters.icpRobustKernelWidth, icpRobustKernelWidth);
+   }
+
+   default void setICPMinZCorrection(double icpMinZCorrection)
+   {
+      set(HeightMapParameters.icpMinZCorrection, icpMinZCorrection);
+   }
+
+   default void setICPMinXYCorrection(double icpMinXYCorrection)
+   {
+      set(HeightMapParameters.icpMinXYCorrection, icpMinXYCorrection);
+   }
+
+   default void setICPMinYawCorrectionDegrees(double icpMinYawCorrectionDegrees)
+   {
+      set(HeightMapParameters.icpMinYawCorrectionDegrees, icpMinYawCorrectionDegrees);
+   }
+
    default void setICPVariancePerMeterOfCorrection(double icpVariancePerMeterOfCorrection)
    {
       set(HeightMapParameters.icpVariancePerMeterOfCorrection, icpVariancePerMeterOfCorrection);
@@ -131,5 +176,15 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setICPConvergenceYawDegrees(double icpConvergenceYawDegrees)
    {
       set(HeightMapParameters.icpConvergenceYawDegrees, icpConvergenceYawDegrees);
+   }
+
+   default void setFillUnseenCells(boolean fillUnseenCells)
+   {
+      set(HeightMapParameters.fillUnseenCells, fillUnseenCells);
+   }
+
+   default void setFillBlendStartDistance(double fillBlendStartDistance)
+   {
+      set(HeightMapParameters.fillBlendStartDistance, fillBlendStartDistance);
    }
 }
