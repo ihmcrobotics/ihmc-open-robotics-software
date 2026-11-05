@@ -28,6 +28,7 @@ public class BehaviorTreeDefinitionRegistry
       new DefinitionMapping(SceneActionDefinition.class, BehaviorTreeStateMessage.SCENE_ACTION),
       new DefinitionMapping(MimicActionDefinition.class, BehaviorTreeStateMessage.MIMIC_ACTION),
       new DefinitionMapping(HighLevelStateActionDefinition.class, BehaviorTreeStateMessage.HIGH_LEVEL_STATE_ACTION),
+      new DefinitionMapping(RLWalkActionDefinition.class, BehaviorTreeStateMessage.RL_WALK_ACTION),
       new DefinitionMapping(AI2RNodeDefinition.class, BehaviorTreeStateMessage.AI2R_NODE),
       new DefinitionMapping(DoorTraversalDefinition.class, BehaviorTreeStateMessage.DOOR_TRAVERSAL),
       new DefinitionMapping(BuildingExplorationDefinition.class, BehaviorTreeStateMessage.BUILDING_EXPLORATION),

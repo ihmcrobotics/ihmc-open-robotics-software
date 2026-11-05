@@ -41,6 +41,7 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getSceneActions().clear();
       treeStateMessage.getMimicActions().clear();
       treeStateMessage.getHighLevelStateActions().clear();
+      treeStateMessage.getRlWalkActions().clear();
       treeStateMessage.getAi2rNodes().clear();
       treeStateMessage.getDoorTraversals().clear();
       treeStateMessage.getBuildingExplorations().clear();
@@ -123,6 +124,12 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.HIGH_LEVEL_STATE_ACTION);
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getHighLevelStateActions().size());
             highLevelStateActionState.toMessage(treeStateMessage.getHighLevelStateActions().add());
+         }
+         else if (nodeState instanceof RLWalkActionState rlWalkActionState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.RL_WALK_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getRlWalkActions().size());
+            rlWalkActionState.toMessage(treeStateMessage.getRlWalkActions().add());
          }
          else if (nodeState instanceof AI2RNodeState ai2rNodeState)
          {
@@ -258,6 +265,10 @@ public class ROS2BehaviorTreeMessageTools
       else if (nodeState instanceof HighLevelStateActionState highLevelStateActionState)
       {
          highLevelStateActionState.fromMessage(subscriptionNode.getHighLevelStateActionStateMessage());
+      }
+      else if (nodeState instanceof RLWalkActionState rlWalkActionState)
+      {
+         rlWalkActionState.fromMessage(subscriptionNode.getRLWalkActionStateMessage());
       }
       else if (nodeState instanceof AI2RNodeState ai2rNodeState)
       {
@@ -408,6 +419,15 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setLeafNodeStateMessage(highLevelStateActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeStateMessage(highLevelStateActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(highLevelStateActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.RL_WALK_ACTION ->
+         {
+            RLWalkActionStateMessage rlWalkActionStateMessage = treeStateMessage.getRlWalkActions().get(indexInTypesList);
+            subscriptionNode.setRLWalkActionStateMessage(rlWalkActionStateMessage);
+            subscriptionNode.setActionNodeStateMessage(rlWalkActionStateMessage.getState());
+            subscriptionNode.setLeafNodeStateMessage(rlWalkActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeStateMessage(rlWalkActionStateMessage.getState().getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(rlWalkActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.AI2R_NODE ->
          {
