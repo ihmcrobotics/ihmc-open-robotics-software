@@ -29,6 +29,8 @@ import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectLibrary;
 import us.ihmc.rdx.simulation.environment.object.objects.RDXDirectionalLightObject;
 import us.ihmc.rdx.simulation.environment.object.objects.RDXPointLightObject;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXProceduralGroundObject;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXProceduralTerrainObject;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
@@ -46,11 +48,11 @@ public class RDXEnvironmentBuilder extends RDXPanel
    private final WorkspaceResourceDirectory environmentFilesDirectory = new WorkspaceResourceDirectory(getClass(), "/environments");
    private final ArrayList<RDXEnvironmentObject> allObjects = new ArrayList<>();
    private final ArrayList<RDXEnvironmentObject> lightObjects = new ArrayList<>();
+   private final ArrayList<RDXProceduralTerrainObject> proceduralTerrainObjects = new ArrayList<>();
    private final RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo();
    private final RDX3DPanel panel3D;
-   private final RDXPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
 
-   private final TreeSet<String> environmentFileNames = new TreeSet<>();
+   private final TreeSet<String> environmentFileNames = new TreeSet<>(RDXEnvironmentBuilder::compareFileNames);
    private final Point3D tempIntersection = new Point3D();
    private final Point3D tempTranslation = new Point3D();
    private final Quaternion tempOrientation = new Quaternion();
@@ -61,6 +63,7 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    private boolean loadedFilesOnce = false;
    private boolean isPlacing = false;
+   private boolean confirmingDeleteAll = false;
    private String selectedEnvironmentFile = null;
    private RDXEnvironmentObject selectedObject;
    private RDXEnvironmentObject intersectedObject;
@@ -70,8 +73,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
       super("Environment");
       this.panel3D = panel3D;
       setRenderMethod(this::renderImGuiWidgets);
-      addChild(poseGizmoTunerPanel);
       RDXBaseUI.getInstance().getKeyBindings().register("Delete selected object", "Delete");
+      RDXBaseUI.getInstance().getKeyBindings().register("Deselect object", "Escape");
    }
 
    public void create()
@@ -95,6 +98,11 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    public void process3DViewInput(ImGui3DViewInput viewInput)
    {
+      updateProceduralGround();
+
+      if (selectedObject != null && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
+         resetSelection();
+
       if (inputsEnabled.get())
       {
          if (selectedObject != null)
@@ -192,34 +200,63 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
       ImGui.separator();
       ImGui.text("Selected Object: " + (selectedObject == null ? "" : (selectedObject.getTitleCasedName() + " " + selectedObject.getObjectIndex())));
+      if (selectedObject != null)
+         selectedObject.renderImGuiWidgets();
       ImGui.text("Highlighted Object: " + (intersectedObject == null ? "" : (intersectedObject.getTitleCasedName() + " " + intersectedObject.getObjectIndex())));
 
-      if (ImGui.button("Delete selected object") && selectedObject != null || ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
+      if (ImGui.button("Delete selected object") && selectedObject != null
+          || ImGui.isKeyReleased(ImGuiTools.getDeleteKey()) && !ImGui.getIO().getWantTextInput())
       {
          removeObject(selectedObject);
          resetSelection();
+      }
+
+      if (!confirmingDeleteAll)
+      {
+         if (ImGui.button(labels.get("Delete all objects")))
+            confirmingDeleteAll = true;
+      }
+      else
+      {
+         ImGui.text("Delete all %d objects?".formatted(allObjects.size()));
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Confirm")))
+         {
+            removeAllObjects();
+            // Unselect the file so "Save" can't overwrite it with an empty environment
+            selectedEnvironmentFile = null;
+            confirmingDeleteAll = false;
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Cancel")))
+            confirmingDeleteAll = false;
       }
 
       ImGui.separator();
 
       if (inputsEnabled.get())
       {
+         ImGui.text("Objects:");
          for (RDXEnvironmentObjectFactory objectFactory : RDXEnvironmentObjectLibrary.getObjectFactories())
          {
-            if (ImGui.button(labels.get("Place " + objectFactory.getName())))
-            {
-               if (isPlacing)
-               {
-                  removeObject(selectedObject);
-               }
-
-               RDXEnvironmentObject objectToPlace = objectFactory.getSupplier().get();
-               addObject(objectToPlace);
-               updateObjectSelected(selectedObject, objectToPlace);
-               isPlacing = true;
-            }
+            if (!isProceduralTerrain(objectFactory))
+               renderPlaceButton(objectFactory);
          }
 
+         ImGui.separator();
+         ImGui.text("Procedural Terrain:");
+         for (RDXEnvironmentObjectFactory objectFactory : RDXEnvironmentObjectLibrary.getObjectFactories())
+         {
+            if (isProceduralTerrain(objectFactory))
+               renderPlaceButton(objectFactory);
+         }
+
+         ImGui.separator();
+      }
+
+      if (selectedObject instanceof RDXProceduralTerrainObject terrainObject)
+      {
+         terrainObject.renderImGuiWidgets();
          ImGui.separator();
       }
 
@@ -256,7 +293,9 @@ public class RDXEnvironmentBuilder extends RDXPanel
       ImGui.sameLine();
       if (ImGui.button("Save as"))
       {
-         fileNameToSave = saveString.get();
+         fileNameToSave = saveString.get().trim();
+         if (!fileNameToSave.endsWith(".json"))
+            fileNameToSave += ".json";
       }
       if (fileNameToSave != null)
       {
@@ -281,24 +320,53 @@ public class RDXEnvironmentBuilder extends RDXPanel
                objectNode.put("qy", tempOrientation.getY());
                objectNode.put("qz", tempOrientation.getZ());
                objectNode.put("qs", tempOrientation.getS());
+               if (object instanceof RDXProceduralTerrainObject terrainObject)
+                  terrainObject.saveParameters(objectNode);
             }
          });
          reindexScripts();
       }
+   }
 
-      ImGui.checkbox("Show 3D Widget Tuner", poseGizmoTunerPanel.getIsShowing());
+   private static boolean isProceduralTerrain(RDXEnvironmentObjectFactory objectFactory)
+   {
+      return RDXProceduralTerrainObject.class.isAssignableFrom(objectFactory.getClazz());
+   }
+
+   private void renderPlaceButton(RDXEnvironmentObjectFactory objectFactory)
+   {
+      if (ImGui.button(labels.get("Place " + objectFactory.getName())))
+      {
+         if (isPlacing)
+         {
+            removeObject(selectedObject);
+         }
+
+         RDXEnvironmentObject objectToPlace = objectFactory.getSupplier().get();
+         addObject(objectToPlace);
+         updateObjectSelected(selectedObject, objectToPlace);
+
+         if (objectToPlace instanceof RDXProceduralTerrainObject)
+         {
+            // Terrain is too large to drag with the mouse, so drop it on the ground under the camera focus and position it with the gizmo
+            tempTranslation.set(panel3D.getCamera3D().getFocusPointPose().getPosition());
+            tempTranslation.setZ(0.0);
+            objectToPlace.setPositionInWorld(tempTranslation);
+            pose3DGizmo.getTransformToParent().set(objectToPlace.getObjectTransform());
+            isPlacing = false;
+         }
+         else
+         {
+            isPlacing = true;
+         }
+      }
    }
 
    private void loadEnvironmentInternal(String environmentFileName)
    {
       loadedFilesOnce = true;
       selectedEnvironmentFile = environmentFileName;
-      for (RDXEnvironmentObject object : allObjects.toArray(new RDXEnvironmentObject[0]))
-      {
-         removeObject(object);
-      }
-
-      resetSelection();
+      removeAllObjects();
 
       JSONFileTools.load(new WorkspaceResourceFile(environmentFilesDirectory, selectedEnvironmentFile),
       node ->
@@ -317,6 +385,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
             if (object != null)
             {
+               if (object instanceof RDXProceduralTerrainObject terrainObject)
+                  terrainObject.loadParameters(objectNode);
                tempTranslation.setX(objectNode.get("x").asDouble());
                tempTranslation.setY(objectNode.get("y").asDouble());
                tempTranslation.setZ(objectNode.get("z").asDouble());
@@ -334,6 +404,33 @@ public class RDXEnvironmentBuilder extends RDXPanel
             }
          });
       });
+      updateProceduralGround();
+   }
+
+   /** Cuts the footprints of the procedural terrain out of any procedural ground. Only rebuilds when they moved. */
+   private void updateProceduralGround()
+   {
+      proceduralTerrainObjects.clear();
+      for (RDXEnvironmentObject object : allObjects)
+      {
+         if (object instanceof RDXProceduralTerrainObject terrainObject && !(object instanceof RDXProceduralGroundObject))
+            proceduralTerrainObjects.add(terrainObject);
+      }
+      for (RDXEnvironmentObject object : allObjects)
+      {
+         if (object instanceof RDXProceduralGroundObject groundObject)
+            groundObject.updateHoles(proceduralTerrainObjects);
+      }
+   }
+
+   public void removeAllObjects()
+   {
+      for (RDXEnvironmentObject object : allObjects.toArray(new RDXEnvironmentObject[0]))
+      {
+         removeObject(object);
+      }
+      isPlacing = false;
+      resetSelection();
    }
 
    public void loadEnvironment(String environmentFileName)
@@ -363,6 +460,26 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
          selectedObject = to;
       }
+   }
+
+   /**
+    * When enabled, left-click picks objects in the 3D view and the pose gizmo can move the selection.
+    */
+   public void setInputsEnabled(boolean enabled)
+   {
+      inputsEnabled.set(enabled);
+   }
+
+   public boolean getInputsEnabled()
+   {
+      return inputsEnabled.get();
+   }
+
+   public void selectObject(RDXEnvironmentObject object)
+   {
+      updateObjectSelected(selectedObject, object);
+      if (selectedObject != null)
+         pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
    }
 
    public void addObject(RDXEnvironmentObject environmentObject)
@@ -445,5 +562,52 @@ public class RDXEnvironmentBuilder extends RDXPanel
    public ArrayList<RDXEnvironmentObject> getAllObjects()
    {
       return allObjects;
+   }
+
+   /** Alphabetical order, with digit runs compared as numbers so 2 comes before 10. */
+   private static int compareFileNames(String left, String right)
+   {
+      int i = 0;
+      int j = 0;
+      while (i < left.length() && j < right.length())
+      {
+         if (Character.isDigit(left.charAt(i)) && Character.isDigit(right.charAt(j)))
+         {
+            int leftStart = i;
+            int rightStart = j;
+            while (i < left.length() && Character.isDigit(left.charAt(i)))
+               i++;
+            while (j < right.length() && Character.isDigit(right.charAt(j)))
+               j++;
+            int numberComparison = compareNumericText(left.substring(leftStart, i), right.substring(rightStart, j));
+            if (numberComparison != 0)
+               return numberComparison;
+         }
+         else
+         {
+            int characterComparison = Character.compare(Character.toLowerCase(left.charAt(i)), Character.toLowerCase(right.charAt(j)));
+            if (characterComparison != 0)
+               return characterComparison;
+            i++;
+            j++;
+         }
+      }
+      int lengthComparison = Integer.compare(left.length() - i, right.length() - j);
+      return lengthComparison != 0 ? lengthComparison : left.compareTo(right);
+   }
+
+   private static int compareNumericText(String left, String right)
+   {
+      int leftIndex = 0;
+      int rightIndex = 0;
+      while (leftIndex < left.length() - 1 && left.charAt(leftIndex) == '0')
+         leftIndex++;
+      while (rightIndex < right.length() - 1 && right.charAt(rightIndex) == '0')
+         rightIndex++;
+      int lengthComparison = Integer.compare(left.length() - leftIndex, right.length() - rightIndex);
+      if (lengthComparison != 0)
+         return lengthComparison;
+      int digitComparison = left.substring(leftIndex).compareTo(right.substring(rightIndex));
+      return digitComparison != 0 ? digitComparison : Integer.compare(left.length(), right.length());
    }
 }

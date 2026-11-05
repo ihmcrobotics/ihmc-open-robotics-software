@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.GroundPrepControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPlugin;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
@@ -65,6 +66,8 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
 
    private final YoBoolean isListeningToHighLevelStateMessage = new YoBoolean("isListeningToHighLevelStateMessage", registry);
    private final YoEnum<HighLevelControllerName> requestedHighLevelControllerState;
+   /** Set by a state request so the next state holds the arms, spine and neck where they are, cleared after the next state change */
+   private final YoBoolean keepUpperBodyPose = new YoBoolean("keepUpperBodyPoseOnStateChange", registry);
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
@@ -122,6 +125,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       controllerFactoryHelper.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       controllerFactoryHelper.setLowLevelControllerOutput(lowLevelControllerOutput);
       controllerFactoryHelper.setRequestedHighLevelControllerState(requestedHighLevelControllerState);
+      controllerFactoryHelper.setKeepUpperBodyPose(keepUpperBodyPose);
       controllerFactoryHelper.setForceSensorDataHolder(forceSensorDataHolder);
 
       stateMachine = setUpStateMachine(initialControllerState,
@@ -213,7 +217,13 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       {
          if (commandInputManager.isNewCommandAvailable(HighLevelControllerStateCommand.class))
          {
-            requestedHighLevelControllerState.set(commandInputManager.pollNewestCommand(HighLevelControllerStateCommand.class).getHighLevelControllerName());
+            HighLevelControllerStateCommand command = commandInputManager.pollNewestCommand(HighLevelControllerStateCommand.class);
+            applyGroundPrepTrajectoryTime(command);
+            if (command.getHighLevelControllerName() != null)
+            {
+               requestedHighLevelControllerState.set(command.getHighLevelControllerName());
+               keepUpperBodyPose.set(command.getKeepUpperBodyPose());
+            }
          }
       }
       if (getCurrentHighLevelControlState() == HighLevelControllerName.RL_CONTROL)
@@ -237,7 +247,11 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
             controllerPlugins.get(i).update(time);
          }
 
+         HighLevelControllerName stateBeforeTransition = getCurrentHighLevelControlState();
          stateMachine.doActionAndTransition();
+         // The new state reads the flag when it starts, so it only applies to the state change it was requested with
+         if (getCurrentHighLevelControlState() != stateBeforeTransition)
+            keepUpperBodyPose.set(false);
       }
       catch (Exception e)
       {
@@ -393,6 +407,20 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
    public HighLevelControllerName getCurrentHighLevelControlState()
    {
       return stateMachine.getCurrentStateKey();
+   }
+
+   private void applyGroundPrepTrajectoryTime(HighLevelControllerStateCommand command)
+   {
+      if (command.getTrajectoryTime() <= 0.0)
+         return;
+
+      HighLevelControllerState groundPrepState = highLevelControllerStates.get(HighLevelControllerName.GROUND_PREP_STATE);
+      if (groundPrepState instanceof GroundPrepControllerState groundPrep)
+      {
+         groundPrep.setTimeToMoveInGroundPrep(command.getTrajectoryTime());
+         if (getCurrentHighLevelControlState() == HighLevelControllerName.GROUND_PREP_STATE)
+            groundPrep.requestReinitialize();
+      }
    }
 
    public void addHighLevelStateChangedListener(StateChangedListener<HighLevelControllerName> stateChangedListener)

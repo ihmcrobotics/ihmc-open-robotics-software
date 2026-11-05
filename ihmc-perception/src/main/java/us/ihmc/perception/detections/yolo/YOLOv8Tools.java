@@ -380,6 +380,18 @@ public class YOLOv8Tools
       return getYOLOModelDirectories(YOLOv8Tools.class.getResource("/yolo/"));
    }
 
+   /** Last non-empty path segment, so a trailing slash does not become an empty model name. */
+   public static String modelNameFromDirectory(URL modelBaseDirectory)
+   {
+      String[] path = modelBaseDirectory.getPath().split("[/\\\\]");
+      for (int i = path.length - 1; i >= 0; i--)
+      {
+         if (!path[i].isEmpty())
+            return path[i];
+      }
+      return modelBaseDirectory.getPath();
+   }
+
    public static boolean isValidYOLOModelDirectory(Path yoloModelDirectory)
    {
       try (Stream<Path> onnxFiles = Files.list(yoloModelDirectory).filter(path -> path.getFileName().toString().endsWith(".onnx"));

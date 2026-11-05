@@ -16,7 +16,6 @@ public class GroundPrepControllerStateFactory implements HighLevelControllerStat
       {
          groundPrepControllerState = new GroundPrepControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlledOneDoFJoints(),
                                                                    controllerFactoryHelper.getHighLevelControllerParameters(),
-                                                                   controllerFactoryHelper.getLowLevelControllerOutput(),
                                                                    controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getYoTime());
       }
 

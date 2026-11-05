@@ -1,13 +1,11 @@
 package us.ihmc.rdx.simulation.environment.object.objects;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.tools.RDXModelLoader;
 
 public class RDXDrillObject extends RDXEnvironmentObject
 {
@@ -17,13 +15,12 @@ public class RDXDrillObject extends RDXEnvironmentObject
    public RDXDrillObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = RDXModelLoader.load("environmentObjects/drill/drill.g3dj");
-      setRealisticModel(realisticModel);
+      loadRealisticModel("environmentObjects/drill/drill.g3dj");
 
       double sizeX = 0.2;
       double sizeY = 0.2;
       double sizeZ = 0.3;
-      setMass(2.0f);
+      setMass(1.0f);
       getCollisionShapeOffset().getTranslation().add(sizeX / 2.0 - 0.08 , 0, sizeZ / 2.0);
       getBoundingSphere().setRadius(5.0);
       getBoundingSphere().getPosition().add(sizeX / 2.0, sizeY / 2.0, sizeZ / 2.0);

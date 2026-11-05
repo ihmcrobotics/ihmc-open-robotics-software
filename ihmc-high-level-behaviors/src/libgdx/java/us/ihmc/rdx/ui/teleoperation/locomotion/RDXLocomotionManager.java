@@ -7,12 +7,19 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.*;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.CSGROS2CommunicationHelper;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.subscribers.FilteredNotification;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.LocomotionParameters;
@@ -20,22 +27,34 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.jros2.ROS2Publisher;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.mesh.RDXMutableMultiLineModel;
 import us.ihmc.rdx.ui.*;
 import us.ihmc.rdx.ui.affordances.*;
 import us.ihmc.rdx.ui.footstepPlanner.RDXFootstepPlanning;
 import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
+import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
+import us.ihmc.rdx.visualizers.RDXLineGraphic;
+import us.ihmc.rdx.visualizers.RDXSphereAndArrowGraphic;
+import us.ihmc.rdx.visualizers.RDXSplineGraphic;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
+
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.DoubleBinaryOperator;
 
 /**
  * This class provides easy access to everything that involves mobility for the robot's legs.
@@ -58,10 +77,8 @@ public class RDXLocomotionManager
    private final Notification turnAggressivenessChanged = new Notification();
    private final Notification stepAggressivenessChanged = new Notification();
    private final RDXStoredPropertySetTuner locomotionParametersTuner = new RDXStoredPropertySetTuner("Locomotion Parameters");
-   private final RDXStoredPropertySetTuner aStartFootstepPlanningParametersTuner
-         = new RDXStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation A*)");
-   private final RDXStoredPropertySetTuner turnWalkTurnFootstepPlanningParametersTuner
-         = new RDXStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation Turn Walk Turn)");
+   private final RDXStoredPropertySetTuner aStartFootstepPlanningParametersTuner = new RDXStoredPropertySetTuner(
+         "Footstep Planner Parameters (Teleoperation A*)");
    private final RDXStoredPropertySetTuner bodyPathPlanningParametersTuner = new RDXStoredPropertySetTuner("Body Path Planner Parameters (Teleoperation)");
    private final RDXStoredPropertySetTuner swingFootPlanningParametersTuner = new RDXStoredPropertySetTuner("Swing Foot Planning Parameters (Teleoperation)");
    private ImGuiStoredPropertySetBooleanWidget areFootstepsAdjustableCheckbox;
@@ -82,6 +99,7 @@ public class RDXLocomotionManager
 
    private final SideDependentList<RDXInteractableFoot> interactableFeet = new SideDependentList<>();
    private final RDXBallAndArrowGoalFootstepPlacement ballAndArrowMidFeetPosePlacement = new RDXBallAndArrowGoalFootstepPlacement();
+   private final RDXBallAndArrowPosePlacement posePlacement = new RDXBallAndArrowPosePlacement();
    private final RDXInteractableFootstepPlan interactableFootstepPlan;
    private final RDXFootstepPlanning footstepPlanning;
    private final RDXManualFootstepPlacement manualFootstepPlacement = new RDXManualFootstepPlacement();
@@ -95,9 +113,35 @@ public class RDXLocomotionManager
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
    private final Notification abortedNotification = new Notification();
-   private final FilteredNotification<FootstepQueueStatusMessage> footstepQueueNotification
-         = new FilteredNotification<>(new FootstepQueueAcceptanceFunction());
+   private final FilteredNotification<FootstepQueueStatusMessage> footstepQueueNotification = new FilteredNotification<>(new FootstepQueueAcceptanceFunction());
    private final Timer footstepPlanningCompleteTimer = new Timer();
+
+   //   private final RDXWaypointPlacement waypointPlacement;
+
+   private final ROS2Publisher<ControllerWaypointGoalListMessage> goalListMessagePublisher;
+   /** StepGeneratorCommandInputManager discards waypoint goals unless this heartbeat is alive. */
+   private final ROS2Heartbeat stepGeneratorHeartbeat;
+   /** Every status is queued, since the goal reacher publishes reached and started next in the same tick */
+   private final ConcurrentLinkedQueue<ControllerWaypointStatusMessage> receivedWaypointStatuses = new ConcurrentLinkedQueue<>();
+   private final Pose3D goalPose = new Pose3D();
+   private final ControllerWaypointGoalMessage goalMessage = new ControllerWaypointGoalMessage();
+   private final ControllerWaypointGoalListMessage goalListMessage = new ControllerWaypointGoalListMessage();
+   private static final int maxWaypoints = 10;
+   private final RecyclingArrayList<ControllerWaypointGoalMessage> goalMessageArrayList = new RecyclingArrayList<>(ControllerWaypointGoalMessage::new);
+   private final RecyclingArrayList<Pose3D> goalPoseArrayList = new RecyclingArrayList<>(Pose3D::new);
+   private final RecyclingArrayList<RDXSphereAndArrowGraphic> waypoints = new RecyclingArrayList<>(RDXSphereAndArrowGraphic::new);
+   private RDXSplineGraphic trajectoryGraphic;
+   private int numWaypoints = 0;
+   private boolean waypointsSent = false;
+   private int waypointsCompleted = 0;
+   private static final double SHOW_REACHED_WAYPOINTS_DURATION = 2.0;
+   private final Timer allWaypointsReachedTimer = new Timer();
+   private static final int FACE_GOAL = 0;
+   private static final int KEEP_HEADING = 1;
+   private static final int TURN_WALK_TURN = 2;
+   private final ImInt waypointHeadingMode = new ImInt(FACE_GOAL);
+   private DoubleBinaryOperator pointCloudHeightProvider;
+   private final RDXRLWalkingCommandWidgets rlWalkingCommandWidgets;
 
    // Used for UI logic
    private boolean wasPlanning = false;
@@ -105,8 +149,7 @@ public class RDXLocomotionManager
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                ROS2ControllerHelper controllerHelper,
                                ROS2SyncedRobotModel syncedRobot,
-                               ControllerStatusTracker controllerStatusTracker,
-                               RDXPanel teleoperationPanel)
+                               ControllerStatusTracker controllerStatusTracker)
    {
       this.robotModel = robotModel;
       this.controllerHelper = controllerHelper;
@@ -118,12 +161,6 @@ public class RDXLocomotionManager
       bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
 
-      teleoperationPanel.addChild(locomotionParametersTuner);
-      teleoperationPanel.addChild(aStartFootstepPlanningParametersTuner);
-      teleoperationPanel.addChild(turnWalkTurnFootstepPlanningParametersTuner);
-      teleoperationPanel.addChild(bodyPathPlanningParametersTuner);
-      teleoperationPanel.addChild(swingFootPlanningParametersTuner);
-
       footstepPlanning = new RDXFootstepPlanning(robotModel,
                                                  syncedRobot,
                                                  controllerStatusTracker,
@@ -133,6 +170,18 @@ public class RDXLocomotionManager
                                                  swingFootPlannerParameters);
       interactableFootstepPlan = new RDXInteractableFootstepPlan(controllerStatusTracker);
       controllerFootstepQueueGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+
+      //      waypointPlacement = new RDXWaypointPlacement(controllerHelper, syncedRobot);
+      goalListMessagePublisher = controllerHelper.getROS2Node()
+                                                 .createPublisher(HumanoidControllerAPI.getTopic(ControllerWaypointGoalListMessage.class,
+                                                                                                 robotModel.getSimpleRobotName()));
+      controllerHelper.getROS2Node()
+                      .createSubscriptionSampler(HumanoidControllerAPI.getTopic(ControllerWaypointStatusMessage.class, robotModel.getSimpleRobotName()),
+                                                 status -> receivedWaypointStatuses.add(new ControllerWaypointStatusMessage(status)));
+      stepGeneratorHeartbeat = new ROS2Heartbeat(controllerHelper.getROS2Node(), CSGROS2CommunicationHelper.CSG_HEARTBEAT_TOPIC);
+      stepGeneratorHeartbeat.setAlive(true);
+
+      rlWalkingCommandWidgets = new RDXRLWalkingCommandWidgets(controllerHelper);
    }
 
    public void create(RDXBaseUI baseUI)
@@ -158,20 +207,22 @@ public class RDXLocomotionManager
       swingTimeSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.swingTime, "s", 0.3, 1.5, "%.2f", true);
       transferTimeSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.transferTime, "s", 0.1, 1.5, "%.2f", true);
       swingHeightSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.swingHeight, "m", 0.1, 1.5, "%.2f", true);
-      stepAggressivenessSlider = new ImGuiSliderDouble("Step Aggressiveness", "%.2f",aStarFootstepPlannerParameters.getIdealFootstepLength()
-                                                                                     / aStarFootstepPlannerParameters.getMaxStepReach());
+      stepAggressivenessSlider = new ImGuiSliderDouble("Step Aggressiveness",
+                                                       "%.2f",
+                                                       aStarFootstepPlannerParameters.getIdealFootstepLength()
+                                                       / aStarFootstepPlannerParameters.getMaxStepReach());
       turnAggressivenessSlider = new ImGuiSliderDouble("Turn Aggressiveness", "%.2f", 0.5);
       initialStanceSideRadioButtons = locomotionParametersTuner.createEnumRadioButtons(LocomotionParameters.initialStanceSide, InitialStanceSide.values());
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW, syncedRobot);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
+      posePlacement.create(Color.BLUE, "Place Waypoint", "Placing", "Clear Waypoint");
+      // Pick X and Y on the mid feet plane, then snap Z to the point cloud there if there is one
+      posePlacement.setPickPlaneHeightSupplier(this::getMidFeetHeight);
+      posePlacement.setPositionHeightProvider(this::getWaypointHeight);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(posePlacement::processImGui3DViewInput);
 
-      interactableFootstepPlan.create(baseUI,
-                                      controllerHelper,
-                                      syncedRobot,
-                                      locomotionParameters,
-                                      footstepPlannerParametersToUse,
-                                      swingFootPlannerParameters);
+      interactableFootstepPlan.create(baseUI, controllerHelper, syncedRobot, locomotionParameters, footstepPlannerParametersToUse, swingFootPlannerParameters);
       baseUI.getVRManager().getContext().addVRPickCalculator(interactableFootstepPlan::calculateVRPick);
       baseUI.getVRManager().getContext().addVRInputProcessor(interactableFootstepPlan::processVRInput);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableFootstepPlan::processImGui3DViewInput);
@@ -183,23 +234,27 @@ public class RDXLocomotionManager
 
       walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, footstepPlannerParametersToUse);
 
+      trajectoryGraphic = new RDXSplineGraphic();
+      trajectoryGraphic.createStart(walkPathControlRing.getGoalPose().getPosition(), Color.BLACK);
+
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() -> renderOverlayElements(baseUI.getPrimary3DPanel()));
    }
 
    public void update()
    {
       controllerStatusTracker.checkControllerIsRunning();
+      rlWalkingCommandWidgets.update();
+
+      if (abortedNotification.poll())
+      {
+         deleteAll();
+      }
 
       if (footstepQueueNotification.pollFiltered())
       {
          controllerFootstepQueueGraphic.generateMeshesAsync(footstepQueueNotification.read(), "Controller Queue");
       }
       controllerFootstepQueueGraphic.update(); // Will happen once the async mesh generation has completed on a later tick
-
-      if (abortedNotification.poll())
-      {
-         deleteAll();
-      }
 
       footstepPlannerParametersToUse.set(aStarFootstepPlannerParameters);
 
@@ -299,120 +354,192 @@ public class RDXLocomotionManager
       boolean pauseAvailable = controllerStatusTracker.isWalking();
       boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
       boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
-      
-      if(ImGui.collapsingHeader(labels.get("Locomotion")))
+      boolean waypointsAvailable = numWaypoints > 0;
+
+      if (ImGui.collapsingHeader(labels.get("Locomotion")))
       {
-         float widgetStartX = 125.0f;
+         // "Waypoint Placement:" is the widest label up here, so the widgets start just past it
+         float widgetStartX = ImGui.getCursorPosX() + ImGuiTools.calcTextSizeX("Waypoint Placement:") + ImGui.getStyle().getItemSpacingX();
 
-         ImGui.text("Walking Command:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         if (ImGui.button(labels.get("Abort")))
-         {
-            sendAbortWalkingMessage();
-         }
-         ImGui.sameLine();
-
-         ImGui.beginDisabled(!walkAvailable);
-         if (ImGui.button(labels.get("Walk")))
-         { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
-            interactableFootstepPlan.walkFromSteps();
-         }
-         ImGuiTools.previousWidgetTooltip("Space");
-         ImGui.sameLine();
-         ImGui.endDisabled();
-
-         ImGui.beginDisabled(!pauseAvailable);
-         if (ImGui.button(labels.get("Pause")))
-         {
-            setPauseWalkingAndPublish(true);
-         }
-         ImGuiTools.previousWidgetTooltip("Space");
-         ImGui.sameLine();
-         ImGui.endDisabled();
-
-         ImGui.beginDisabled(!continueAvailable);
-         if (ImGui.button(labels.get("Continue")))
-         {
-            setPauseWalkingAndPublish(false);
-         }
-         ImGuiTools.previousWidgetTooltip("Space");
-         ImGui.endDisabled();
+         rlWalkingCommandWidgets.renderImGuiWidgets(widgetStartX);
          ImGui.separator();
 
-         ImGui.text("Footstep Placement:");
+         ImGui.text("Waypoint Placement:");
          ImGui.sameLine();
          ImGui.setCursorPosX(widgetStartX);
-         manualFootstepPlacement.renderImGuiWidgets();
-         ImGui.separator();
-
-         ImGui.text("Footstep Planning:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
+         ImGui.beginDisabled(numWaypoints == maxWaypoints);
+         if (posePlacement.renderPlaceGoalButton())
             legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
+         ImGui.endDisabled();
 
          ImGui.setCursorPosX(widgetStartX);
-         if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader))
+         ImGui.beginDisabled(!waypointsAvailable);
+         if (ImGui.button(labels.get("Clear all waypoints")))
+            clearWaypoints();
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Send Waypoints")))
+            sendWaypoints();
+         ImGui.endDisabled();
+         ImGui.text("Waypoints:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         ImGui.text(String.valueOf(numWaypoints));
+         ImGui.text("Heading:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         ImGui.radioButton(labels.get("Face goal"), waypointHeadingMode, FACE_GOAL);
+         ImGuiTools.previousWidgetTooltip("Face the waypoint while walking, then turn to its arrow");
+         ImGui.sameLine();
+         ImGui.radioButton(labels.get("Keep heading"), waypointHeadingMode, KEEP_HEADING);
+         ImGuiTools.previousWidgetTooltip("Keep the current facing, walking sideways or backward, then turn to the arrow at the end");
+         ImGui.sameLine();
+         ImGui.radioButton(labels.get("Turn-walk-turn"), waypointHeadingMode, TURN_WALK_TURN);
+         ImGuiTools.previousWidgetTooltip("Turn to face along the line to the waypoint, walk the line, then turn to the arrow");
+         ImGui.separator();
+
+         ImGui.indent();
+         if (ImGui.collapsingHeader(labels.get("Model-based Walking")))
          {
             ImGui.indent();
-            assumeFlatGroundCheckbox.renderImGuiWidget();
-            performAStarSearchCheckbox.renderImGuiWidget();
-            areFootstepsAdjustableCheckbox.renderImGuiWidget();
-            planSwingTrajectoriesCheckbox.renderImGuiWidget();
-            replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
-            planBodyPathCheckbox.renderImGuiWidget();
+            // The labels here are indented, so line the widgets up past the widest one instead of at widgetStartX
+            float modelBasedWidgetStartX = ImGui.getCursorPosX() + ImGuiTools.calcTextSizeX("Turn Aggressiveness:") + 2.0f * ImGui.getStyle().getItemSpacingX();
+            ImGui.text("Walking Command:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            if (ImGui.button(labels.get("Abort")))
+            {
+               sendAbortWalkingMessage();
+            }
+            ImGui.sameLine();
+
+            ImGui.beginDisabled(!walkAvailable);
+            if (ImGui.button(labels.get("Walk")))
+            { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
+               interactableFootstepPlan.walkFromSteps();
+            }
+            ImGuiTools.previousWidgetTooltip("Space");
+            ImGui.sameLine();
+            ImGui.endDisabled();
+
+            ImGui.beginDisabled(!pauseAvailable);
+            if (ImGui.button(labels.get("Pause")))
+            {
+               setPauseWalkingAndPublish(true);
+            }
+            ImGuiTools.previousWidgetTooltip("Space");
+            ImGui.sameLine();
+            ImGui.endDisabled();
+
+            ImGui.beginDisabled(!continueAvailable);
+            if (ImGui.button(labels.get("Continue")))
+            {
+               setPauseWalkingAndPublish(false);
+            }
+            ImGuiTools.previousWidgetTooltip("Space");
+            ImGui.endDisabled();
+            ImGui.separator();
+
+            ImGui.text("Footstep Placement:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            manualFootstepPlacement.renderImGuiWidgets();
+            ImGui.separator();
+
+            ImGui.text("Footstep Planning:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
+               legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
+
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader))
+            {
+               ImGui.indent();
+               assumeFlatGroundCheckbox.renderImGuiWidget();
+               performAStarSearchCheckbox.renderImGuiWidget();
+               areFootstepsAdjustableCheckbox.renderImGuiWidget();
+               planSwingTrajectoriesCheckbox.renderImGuiWidget();
+               replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
+               planBodyPathCheckbox.renderImGuiWidget();
+               ImGui.unindent();
+            }
+
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            initialStanceSideRadioButtons.renderImGuiWidget();
+            ImGui.separator();
+
+            ImGui.text("Swing Time:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            ImGui.setNextItemWidth(-1);
+            swingTimeSlider.renderImGuiWidget();
+            ImGui.text("Transfer Time:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            ImGui.setNextItemWidth(-1);
+            transferTimeSlider.renderImGuiWidget();
+            ImGui.text("Swing Height:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            ImGui.setNextItemWidth(-1);
+            swingHeightSlider.renderImGuiWidget();
+            ImGui.text("Step Aggressiveness:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            ImGui.setNextItemWidth(-1);
+            if (stepAggressivenessSlider.render(0.0, 1.5, true))
+               stepAggressivenessChanged.set();
+            ImGui.text("Turn Aggressiveness:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            ImGui.setNextItemWidth(-1);
+            if (turnAggressivenessSlider.render(0.0, 2.0, true))
+               turnAggressivenessChanged.set();
+            ImGui.separator();
+
+            ImGui.text("Leg Control Mode:");
+            ImGui.sameLine();
+            ImGui.setCursorPosX(modelBasedWidgetStartX);
+            ImGui.text(legControlMode.name());
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("Disable")))
+            {
+               legControlMode = RDXLegControlMode.DISABLED;
+            }
+            walkPathControlRing.renderImGuiWidgets(modelBasedWidgetStartX);
             ImGui.unindent();
          }
-
-         ImGui.setCursorPosX(widgetStartX);
-         initialStanceSideRadioButtons.renderImGuiWidget();
-         ImGui.separator();
-
-         ImGui.text("Swing Time:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         ImGui.setNextItemWidth(-1);
-         swingTimeSlider.renderImGuiWidget();
-         ImGui.text("Transfer Time:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         ImGui.setNextItemWidth(-1);
-         transferTimeSlider.renderImGuiWidget();
-         ImGui.text("Swing Height:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         ImGui.setNextItemWidth(-1);
-         swingHeightSlider.renderImGuiWidget();
-         ImGui.text("Step Aggressiveness:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         ImGui.setNextItemWidth(-1);
-         if (stepAggressivenessSlider.render(0.0, 1.5, true))
-            stepAggressivenessChanged.set();
-         ImGui.text("Turn Aggressiveness:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         ImGui.setNextItemWidth(-1);
-         if (turnAggressivenessSlider.render(0.0, 2.0, true))
-            turnAggressivenessChanged.set();
-         ImGui.separator();
-
-         ImGui.text("Leg Control Mode:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         ImGui.text(legControlMode.name());
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Disable")))
-         {
-            legControlMode = RDXLegControlMode.DISABLED;
-         }
-         walkPathControlRing.renderImGuiWidgets(widgetStartX);
+         ImGui.unindent();
       }
+
+      updateWaypointProgress();
+
+      if (posePlacement.getPlacedNotification().poll() && posePlacement.isPlaced())
+      {
+         goalPose.set(posePlacement.getGoalPose());
+         goalMessage.setXPosition(goalPose.getX());
+         goalMessage.setYPosition(goalPose.getY());
+         goalMessage.setYaw(goalPose.getYaw());
+         goalMessage.setPositionProximity(0.1);
+
+         goalPoseArrayList.add().set(goalPose);
+         goalMessageArrayList.add().set(goalMessage);
+         RDXSphereAndArrowGraphic newWaypoint = waypoints.add();
+         newWaypoint.create(0.05, 0.2, Color.BLUE);
+         newWaypoint.setToPose(goalPose);
+         trajectoryGraphic.createAdditionalPoint(goalPoseArrayList.get(numWaypoints).getPosition(), Color.BLUE);
+         numWaypoints++;
+         posePlacement.clear();
+      }
+
       // Handles all shortcuts for when the spacebar key is pressed
       if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()) && !ImGui.getIO().getWantCaptureKeyboard())
       {
-         if (walkAvailable)
+         if (waypointsAvailable)
+         {
+            sendWaypoints();
+         }
+         else if (walkAvailable)
          {
             interactableFootstepPlan.walkFromSteps();
          }
@@ -427,11 +554,96 @@ public class RDXLocomotionManager
       }
    }
 
+   private void updateWaypointProgress()
+   {
+      ControllerWaypointStatusMessage status;
+      while ((status = receivedWaypointStatuses.poll()) != null)
+      {
+         // A status that is not started means the active waypoint was reached
+         if (status.getIsStarted() || !waypointsSent || waypointsCompleted >= numWaypoints)
+            continue;
+
+         setWaypointColor(waypointsCompleted, Color.GREEN);
+         waypointsCompleted++;
+         if (waypointsCompleted < numWaypoints)
+         {
+            setWaypointColor(waypointsCompleted, Color.RED);
+         }
+         else
+         {
+            LogTools.info("Reached the last waypoint");
+            allWaypointsReachedTimer.reset();
+         }
+      }
+
+      // Show the reached waypoints for a moment before clearing them
+      if (waypointsSent && numWaypoints > 0 && waypointsCompleted >= numWaypoints && !allWaypointsReachedTimer.isRunning(SHOW_REACHED_WAYPOINTS_DURATION))
+         clearWaypoints();
+   }
+
+   private void setWaypointColor(int index, Color color)
+   {
+      waypoints.get(index).create(0.05, 0.2, color);
+      waypoints.get(index).setToPose(goalPoseArrayList.get(index));
+   }
+
+   private void clearWaypoints()
+   {
+      trajectoryGraphic.clear();
+      trajectoryGraphic.createStart(walkPathControlRing.getGoalPose().getPosition(), Color.BLACK);
+      goalPoseArrayList.clear();
+      goalMessageArrayList.clear();
+      waypoints.clear();
+
+      numWaypoints = 0;
+      waypointsCompleted = 0;
+      waypointsSent = false;
+   }
+
+   private double getMidFeetHeight()
+   {
+      return syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
+   }
+
+   private double getWaypointHeight(double x, double y)
+   {
+      if (pointCloudHeightProvider != null)
+      {
+         double height = pointCloudHeightProvider.applyAsDouble(x, y);
+         if (!Double.isNaN(height))
+            return height;
+      }
+      return getMidFeetHeight();
+   }
+
+   /** Gives the point cloud height at a world X and Y, NaN when there is none, so waypoints snap onto it */
+   public void setPointCloudHeightProvider(DoubleBinaryOperator pointCloudHeightProvider)
+   {
+      this.pointCloudHeightProvider = pointCloudHeightProvider;
+   }
+
+   private void sendWaypoints()
+   {
+      setWaypointColor(0, Color.RED);
+
+      for (int i = 0; i < goalMessageArrayList.size(); i++)
+      {
+         goalMessageArrayList.get(i).setKeepHeading(waypointHeadingMode.get() == KEEP_HEADING);
+         goalMessageArrayList.get(i).setTurnWalkTurn(waypointHeadingMode.get() == TURN_WALK_TURN);
+      }
+      goalListMessage.getWaypoints().addAll(goalMessageArrayList);
+      goalListMessagePublisher.publish(goalListMessage);
+      goalListMessage.getWaypoints().clear();
+      waypointsSent = true;
+      waypointsCompleted = 0;
+      receivedWaypointStatuses.clear();
+   }
+
    public void updateWalkPathControlRing()
    {
       walkPathControlRing.update();
    }
-   
+
    public void calculateWalkPathControlRingVRPick(RDXVRContext vrContext)
    {
       if (!manualFootstepPlacement.isPlacingFootstep())
@@ -445,18 +657,20 @@ public class RDXLocomotionManager
          if (walkPathControlRing.getFootstepPlannerGoalGizmo().getPathControlRingGizmo().getIsGizmoHoveredVR().get(RobotSide.RIGHT))
          {
             vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
-            {
-               controller.setBButtonText("Delete all");
-               if (controller.getBButtonActionData().bChanged() && controller.getBButtonActionData().bState())
-               {
-                  deleteAll();
-               }
-               controller.setAButtonText("Walk");
-               if (controller.getAButtonActionData().bChanged() && controller.getAButtonActionData().bState())
-               {
-                  interactableFootstepPlan.walkFromSteps();
-               }
-            });
+                                                                    {
+                                                                       controller.setBButtonText("Delete all");
+                                                                       if (controller.getBButtonActionData().bChanged() && controller.getBButtonActionData()
+                                                                                                                                     .bState())
+                                                                       {
+                                                                          deleteAll();
+                                                                       }
+                                                                       controller.setAButtonText("Walk");
+                                                                       if (controller.getAButtonActionData().bChanged() && controller.getAButtonActionData()
+                                                                                                                                     .bState())
+                                                                       {
+                                                                          interactableFootstepPlan.walkFromSteps();
+                                                                       }
+                                                                    });
          }
 
          walkPathControlRing.processVRInput(vrContext);
@@ -481,15 +695,19 @@ public class RDXLocomotionManager
       controllerFootstepQueueGraphic.destroy();
       bodyPathPlanGraphic.destroy();
       interactableFootstepPlan.destroy();
+      stepGeneratorHeartbeat.destroy();
    }
 
    public void deleteAll()
    {
       ballAndArrowMidFeetPosePlacement.clear();
+      posePlacement.clear();
       manualFootstepPlacement.exitPlacement();
       interactableFootstepPlan.clear();
       bodyPathPlanGraphic.clear();
       walkPathControlRing.delete();
+      if (!waypointsSent && numWaypoints > 0)
+         clearWaypoints();
 
       legControlMode = RDXLegControlMode.DISABLED;
    }
@@ -505,6 +723,7 @@ public class RDXLocomotionManager
       // The abort walking message can only be process when the controller is in walking state, this forces the abort to go through
       pauseWalkingMessage.setPause(false);
       controllerHelper.publishToController(pauseWalkingMessage);
+      numWaypoints = 0;
    }
 
    public void setPauseWalkingAndPublish(boolean pauseWalking)
@@ -532,8 +751,16 @@ public class RDXLocomotionManager
    {
       controllerFootstepQueueGraphic.getRenderables(renderables, pool);
       ballAndArrowMidFeetPosePlacement.getRenderables(renderables, pool);
+      posePlacement.getRenderables(renderables, pool);
       manualFootstepPlacement.getRenderables(renderables, pool);
       interactableFootstepPlan.getRenderables(renderables, pool);
+      for (int i = 0; i < numWaypoints; i++)
+      {
+         waypoints.get(i).getRenderables(renderables, pool);
+      }
+
+      trajectoryGraphic.getRenderables(renderables, pool);
+
       // Only render when planning with body path
       if (locomotionParameters.getPlanWithBodyPath())
          bodyPathPlanGraphic.getRenderables(renderables, pool);

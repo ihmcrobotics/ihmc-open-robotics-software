@@ -36,6 +36,12 @@ uint64 sequence_id
 
 # Specifies the which state the controller should transition into.
 byte high_level_controller_name 255
+# Optional trajectory duration for transitions into joint setpoint states (for example, stand prep or ground prep).
+# Values less than or equal to 0 use the controller's default duration.
+float64 trajectory_time 0.0
+
+# When true, the arms, spine and neck hold their current pose in the new state instead of moving to its home pose.
+bool keep_upper_body_pose false
 }</pre>
 */
 public class HighLevelStateMessage implements ROS2Message<HighLevelStateMessage>
@@ -64,10 +70,21 @@ public class HighLevelStateMessage implements ROS2Message<HighLevelStateMessage>
       Specifies the which state the controller should transition into.
    */
    private byte high_level_controller_name_;
+   /**
+      Optional trajectory duration for transitions into joint setpoint states (for example, stand prep or ground prep).
+      Values less than or equal to 0 use the controller's default duration.
+   */
+   private double trajectory_time_;
+   /**
+      When true, the arms, spine and neck hold their current pose in the new state instead of moving to its home pose.
+   */
+   private boolean keep_upper_body_pose_;
 
    public HighLevelStateMessage()
    {
       high_level_controller_name_ = (byte) 255;
+      trajectory_time_ = (double) 0.0;
+      keep_upper_body_pose_ = (boolean) false;
 
    }
 
@@ -84,6 +101,8 @@ public class HighLevelStateMessage implements ROS2Message<HighLevelStateMessage>
 
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // sequence_id_
       currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // high_level_controller_name_
+      currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // trajectory_time_
+      currentAlignment += 1 + CDRBuffer.alignment(currentAlignment, 1); // keep_upper_body_pose_
 
       return currentAlignment - initialAlignment;
    }
@@ -93,6 +112,8 @@ public class HighLevelStateMessage implements ROS2Message<HighLevelStateMessage>
    {
       buffer.writeLong(sequence_id_);
       buffer.writeByte(high_level_controller_name_);
+      buffer.writeDouble(trajectory_time_);
+      buffer.writeBoolean(keep_upper_body_pose_);
 
    }
 
@@ -101,6 +122,8 @@ public class HighLevelStateMessage implements ROS2Message<HighLevelStateMessage>
    {
       sequence_id_ = buffer.readLong();
       high_level_controller_name_ = buffer.readByte();
+      trajectory_time_ = buffer.readDouble();
+      keep_upper_body_pose_ = buffer.readBoolean();
 
    }
 
@@ -109,6 +132,8 @@ public class HighLevelStateMessage implements ROS2Message<HighLevelStateMessage>
    {
       sequence_id_ = from.sequence_id_;
       high_level_controller_name_ = from.high_level_controller_name_;
+      trajectory_time_ = from.trajectory_time_;
+      keep_upper_body_pose_ = from.keep_upper_body_pose_;
 
    }
 
@@ -130,6 +155,26 @@ public class HighLevelStateMessage implements ROS2Message<HighLevelStateMessage>
    public void setHighLevelControllerName(byte high_level_controller_name_)
    {
       this.high_level_controller_name_ = high_level_controller_name_;
+   }
+
+   public double getTrajectoryTime()
+   {
+      return trajectory_time_;
+   }
+
+   public void setTrajectoryTime(double trajectory_time_)
+   {
+      this.trajectory_time_ = trajectory_time_;
+   }
+
+   public boolean getKeepUpperBodyPose()
+   {
+      return keep_upper_body_pose_;
+   }
+
+   public void setKeepUpperBodyPose(boolean keep_upper_body_pose_)
+   {
+      this.keep_upper_body_pose_ = keep_upper_body_pose_;
    }
 
 
@@ -170,6 +215,10 @@ public class HighLevelStateMessage implements ROS2Message<HighLevelStateMessage>
       builder.append(sequence_id_);
       builder.append("high_level_controller_name_=");
       builder.append(high_level_controller_name_);
+      builder.append("trajectory_time_=");
+      builder.append(trajectory_time_);
+      builder.append("keep_upper_body_pose_=");
+      builder.append(keep_upper_body_pose_);
 
       builder.append("}");
       return builder.toString();

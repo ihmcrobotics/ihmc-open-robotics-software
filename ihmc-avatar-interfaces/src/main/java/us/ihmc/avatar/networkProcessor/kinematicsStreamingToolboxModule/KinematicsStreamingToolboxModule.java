@@ -2,21 +2,26 @@ package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
 import controller_msgs.CapturabilityBasedStatus;
 import controller_msgs.ControllerCrashNotificationPacket;
-import controller_msgs.RobotConfigurationData;
 import controller_msgs.WholeBodyStreamingMessage;
 import controller_msgs.WholeBodyTrajectoryMessage;
-import toolbox_msgs.*;
+import toolbox_msgs.KinematicsStreamingToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsStreamingToolboxContactConfigurationMessage;
+import toolbox_msgs.KinematicsStreamingToolboxInitialConfigurationMessage;
+import toolbox_msgs.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.KinematicsToolboxOutputStatus;
+import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxContactConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInitialConfigurationCommand;
@@ -193,35 +198,35 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2Topic<?> getOutputTopic()
+   public HumanoidROS2Topic<?> getOutputTopic()
    {
       return getOutputTopic(robotName);
    }
 
-   public static ROS2Topic<?> getOutputTopic(String robotName)
+   public static HumanoidROS2Topic<?> getOutputTopic(String robotName)
    {
       return ToolboxAPIs.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2Topic<?> getInputTopic()
+   public HumanoidROS2Topic<?> getInputTopic()
    {
       return getInputTopic(robotName);
    }
 
-   public static ROS2Topic<?> getInputTopic(String robotName)
+   public static HumanoidROS2Topic<?> getInputTopic(String robotName)
    {
       return ToolboxAPIs.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withInput();
    }
 
    public static ROS2Topic<ToolboxStateMessage> getInputStateTopic(String robotName)
    {
-      return getInputTopic(robotName).withType(ToolboxStateMessage.class);
+      return getInputTopic(robotName).withTypeName(ToolboxStateMessage.class);
    }
 
    public static ROS2Topic<KinematicsStreamingToolboxInputMessage> getInputCommandTopic(String robotName)
    {
-      return getInputTopic(robotName).withType(KinematicsStreamingToolboxInputMessage.class);
+      return getInputTopic(robotName).withTypeName(KinematicsStreamingToolboxInputMessage.class);
    }
 
    public static ROS2Topic<KinematicsStreamingToolboxConfigurationMessage> getInputStreamingConfigurationTopic(String robotName)

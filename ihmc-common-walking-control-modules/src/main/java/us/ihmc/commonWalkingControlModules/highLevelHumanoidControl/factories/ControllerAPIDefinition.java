@@ -98,6 +98,7 @@ public class ControllerAPIDefinition
       /** Commands supported by the RL controller, not in this repo*/
       commands.add(Point2DCommand.class);
       commands.add(RLModelSelectionCommand.class);
+      commands.add(MimicManeuverCommand.class);
 
       controllerSupportedCommands = new ArrayList<>(commands);
 

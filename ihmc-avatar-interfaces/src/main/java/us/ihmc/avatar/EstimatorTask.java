@@ -41,6 +41,9 @@ public class EstimatorTask extends HumanoidRobotControlTask
       // For when the task gets reset, so we can observe when it gets triggered.
       timer.reset();
       ticksBehindScheduled.set(0);
+      // Skip the first execute again like at construction, so in the single threaded mode the
+      // scheduler thread runnables refresh the sensor data before the estimator runs.
+      masterContextUpdated = false;
       return super.initialize();
    }
 

@@ -2,23 +2,23 @@ package us.ihmc.avatar.networkProcessor.modules;
 
 import com.google.common.base.CaseFormat;
 import toolbox_msgs.ToolboxStateMessage;
+import us.ihmc.avatar.logging.SCS2YoGraphicLogTools;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.CommandInputManager.HasReceivedInputListener;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.jros2.ROS2Message;
 import us.ihmc.jros2.ROS2Node;
-import us.ihmc.jros2.ROS2Topic;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -139,7 +139,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
       controllerNetworkSubscriber.addMessageFilter(createMessageFilter());
 
-      ros2Node.createSubscriptionSampler(getInputTopic().withType(ToolboxStateMessage.class), sample -> receivedPacket(sample));
+      ros2Node.createSubscriptionSampler(getInputTopic().withTypeName(ToolboxStateMessage.class), sample -> receivedPacket(sample));
       registerExtraPuSubs(ros2Node);
    }
 
@@ -184,7 +184,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
                yoVariableServer = new YoVariableServer(getClass(), modelProvider, yoVariableServerSettings, YO_VARIABLE_SERVER_DT);
                yoVariableServer.setMainRegistry(registry,
                                                 createYoVariableServerJointList(fullRobotModel.getElevator()),
-                                                graphicGroupDefinition);
+                                                SCS2YoGraphicLogTools.toYoGraphicsData(graphicGroupDefinition));
                yoVariableServer.start();
                break;
             }
@@ -531,9 +531,9 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       return Collections.emptySet();
    }
 
-   public abstract ROS2Topic<?> getOutputTopic();
+   public abstract HumanoidROS2Topic<?> getOutputTopic();
 
-   public abstract ROS2Topic<?> getInputTopic();
+   public abstract HumanoidROS2Topic<?> getInputTopic();
 
    public long getServerTime()
    {

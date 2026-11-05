@@ -43,4 +43,9 @@ public class RDXEnvironmentObject extends RDXSimpleObject
    {
       return objectIndex;
    }
+
+   /** Extra controls shown in the environment panel while this object is selected. */
+   public void renderImGuiWidgets()
+   {
+   }
 }

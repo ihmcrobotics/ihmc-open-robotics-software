@@ -9,8 +9,11 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelWrapper;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 public class RhinoBeetleModelFactory implements FullRobotModelFactory
 {
@@ -31,12 +34,8 @@ public class RhinoBeetleModelFactory implements FullRobotModelFactory
                                                            jointMapAndContactInfo,
                                                            jointMapAndContactInfo,
                                                            true);
-   }
 
-   public FloatingRootJointRobot createSdfRobot()
-   {
-
-      return new FloatingRootJointRobot(robotDefinition);
+      new RhinoBeetleSimInitialSetup().initializeRobotDefinition(robotDefinition, jointMapAndContactInfo);
    }
 
    @Override

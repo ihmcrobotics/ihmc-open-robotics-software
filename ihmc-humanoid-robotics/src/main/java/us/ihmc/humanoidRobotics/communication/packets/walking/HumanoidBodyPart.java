@@ -4,7 +4,8 @@ public enum HumanoidBodyPart
 {
    ARM,
    CHEST,
-   PELVIS;
+   PELVIS,
+   HEAD;
 
    public static final HumanoidBodyPart[] values = values();
 
@@ -16,6 +17,7 @@ public enum HumanoidBodyPart
          return true;
       case CHEST:
       case PELVIS:
+      case HEAD:
          return false;
       default:
          throw new RuntimeException("Should not get there.");

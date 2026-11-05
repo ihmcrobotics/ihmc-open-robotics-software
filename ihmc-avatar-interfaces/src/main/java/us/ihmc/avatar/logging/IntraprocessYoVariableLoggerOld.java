@@ -184,7 +184,8 @@ public class IntraprocessYoVariableLoggerOld
 
          long numYoGraphics = registrySendBufferBuilders.stream()
                                                         .filter(b -> b.getSCS2YoGraphics() != null)
-                                                        .mapToLong(b -> b.getSCS2YoGraphics().getChildren().size()).sum();
+                                                        .mapToLong(b -> b.getSCS2YoGraphics().getYoGraphicFieldsDataList().size())
+                                                        .sum();
 
          LogTools.info("Buffer size: {}", singleTickBufferSize);
          LogTools.info("Number of YoVariables: {}", variables.size());

@@ -10,17 +10,18 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * Extends {@link InstantDetection} by holding onto the depth points that coorespond to
- * the detected segmentation of the object. This has already undergone segmentation erosion
- * and outlier points removed.
+ * YOLO detection with an image bounding box and a depth-derived centroid position.
+ * The YOLO executors supply identity orientation; they do not estimate object orientation.
  */
-public class YOLOv8InstantDetection extends InstantDetection
+public class YOLOv8InstantDetection extends InstantDetection implements TrackableDetection
 {
    private final RawImage colorImage;
    private final RawImage depthImage;
    private final RawImage objectMask;
    private final BoundingBox2DReadOnly boundingBox;
    private final List<Point3D32> objectPointCloud;
+
+   private int trackId = -1;
 
    public YOLOv8InstantDetection(String detectedObjectClass,
                                  double confidence,
@@ -41,23 +42,53 @@ public class YOLOv8InstantDetection extends InstantDetection
       this.objectPointCloud = objectPointCloud;
    }
 
+   // ---------------- TrackableDetection ----------------
+
+   @Override
+   public String getObjectClass()
+   {
+      return getDetectedObjectClass();
+   }
+
+   @Override
+   public double getConfidence()
+   {
+      return super.getConfidence();
+   }
+
+   @Override
+   public int getTrackId()
+   {
+      return trackId;
+   }
+
+   @Override
+   public void setTrackId(int trackId)
+   {
+      this.trackId = trackId;
+   }
+
    public List<Point3D32> getObjectPointCloud()
    {
       return objectPointCloud;
    }
+
    public RawImage getColorImage()
    {
       return colorImage;
    }
+
    public RawImage getDepthImage()
    {
       return depthImage;
    }
+
    public RawImage getObjectMask()
    {
       return objectMask;
    }
 
+   @Override
    public BoundingBox2DReadOnly getBoundingBox()
    {
       return boundingBox;

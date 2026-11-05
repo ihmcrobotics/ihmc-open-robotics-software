@@ -1,5 +1,7 @@
 package us.ihmc.rdx.simulation.environment.object;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -9,6 +11,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -23,11 +26,17 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.robotics.interaction.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -41,6 +50,7 @@ public class RDXSimpleObject
    protected final int objectIndex;
    protected RDXEnvironmentObjectFactory factory;
    protected Model realisticModel;
+   protected String visualResourcePath;
    protected RDXModelInstance realisticModelInstance;
    protected RDXModelInstance collisionModelInstance;
    protected final StepCheckIsPointInsideAlgorithm stepCheckIsPointInsideAlgorithm = new StepCheckIsPointInsideAlgorithm();
@@ -115,6 +125,21 @@ public class RDXSimpleObject
       this.originalColor = realisticModelInstance.materials.get(0).get(ColorAttribute.Diffuse);
    }
 
+   /**
+    * Loads the visual model and remembers {@code resourcePath} so {@code <stem>_collision.stl}
+    * beside the visual can be used as MuJoCo collision.
+    */
+   public void loadRealisticModel(String resourcePath)
+   {
+      visualResourcePath = resourcePath;
+      setRealisticModel(RDXModelLoader.load(resourcePath));
+   }
+
+   public String getVisualResourcePath()
+   {
+      return visualResourcePath;
+   }
+
    public void setCollisionModel(Model collisionGraphic)
    {
       this.collisionMesh = collisionGraphic;
@@ -150,6 +175,112 @@ public class RDXSimpleObject
                meshBuilder.addSphere((float) sphere3D.getRadius(), color);
             }
          });
+      }
+      replaceCollisionGraphicWithConvexHull();
+   }
+
+   /**
+    * {@code environmentObjects/bucket/bucket.glb} becomes
+    * {@code environmentObjects/bucket/bucket_collision.stl}, written beside the visual by
+    * {@code scripts/add_rdx_object_from_glb.py}.
+    */
+   public static String collisionMeshResourcePath(String visualResourcePath)
+   {
+      return meshBesideVisual(visualResourcePath, "_collision.stl");
+   }
+
+   private static String meshBesideVisual(String visualResourcePath, String suffix)
+   {
+      if (visualResourcePath == null || visualResourcePath.isBlank())
+         return null;
+      String path = visualResourcePath.replace('\\', '/');
+      int slash = path.lastIndexOf('/');
+      int dot = path.lastIndexOf('.');
+      if (dot <= slash)
+         return null;
+      return path.substring(0, dot) + suffix;
+   }
+
+   /**
+    * The collision mesh beside this object's visual, or null when there is none.
+    * Looks up the file the same way the visual is loaded, then the source resource tree.
+    */
+   public File getConvexCollisionMeshFile()
+   {
+      return findCollisionMeshFile(visualResourcePath);
+   }
+
+   /** {@code <stem>_collision.stl} beside a visual resource, or null when that file is not on disk. */
+   public static File findCollisionMeshFile(String visualResourcePath)
+   {
+      return resolveResourceFile(collisionMeshResourcePath(visualResourcePath));
+   }
+
+   /**
+    * {@code <stem>_collision_convex_<i>.stl} beside a visual resource, from index 0 up to the first
+    * missing one. MuJoCo collides a mesh geom as its convex hull, so a concave part needs these
+    * convex pieces to collide where its surface is. Empty when there are none.
+    */
+   public static List<File> findConvexCollisionPartFiles(String visualResourcePath)
+   {
+      List<File> parts = new ArrayList<>();
+      String prefix = meshBesideVisual(visualResourcePath, "_collision_convex_");
+      if (prefix == null)
+         return parts;
+      for (File part = resolveResourceFile(prefix + 0 + ".stl"); part != null; part = resolveResourceFile(prefix + parts.size() + ".stl"))
+         parts.add(part);
+      return parts;
+   }
+
+   private static File resolveResourceFile(String relativePath)
+   {
+      if (relativePath == null)
+         return null;
+
+      if (Gdx.files != null)
+      {
+         FileHandle handle = Gdx.files.internal(relativePath);
+         if (handle.exists())
+         {
+            try
+            {
+               File file = handle.file();
+               if (file.isFile())
+                  return file;
+            }
+            catch (RuntimeException ignored)
+            {
+            }
+         }
+      }
+
+      Path directory = Path.of("").toAbsolutePath();
+      for (int i = 0; i < 6 && directory != null; i++)
+      {
+         Path candidate = directory.resolve("ihmc-open-robotics-software/ihmc-high-level-behaviors/src/libgdx/resources").resolve(relativePath);
+         if (Files.isRegularFile(candidate))
+            return candidate.toFile();
+         directory = directory.getParent();
+      }
+      return null;
+   }
+
+   private void replaceCollisionGraphicWithConvexHull()
+   {
+      File meshFile = getConvexCollisionMeshFile();
+      if (meshFile == null)
+         return;
+
+      try
+      {
+         Model hull = RDXModelLoader.load(meshFile.getAbsolutePath());
+         LibGDXTools.setOpacity(hull, 0.4f);
+         setCollisionModel(hull);
+         collisionShapeOffset.set(realisticModelOffset);
+      }
+      catch (RuntimeException exception)
+      {
+         LogTools.warn("Convex collision mesh {} was not used for {}: {}", meshFile.getName(), titleCasedName, exception.getMessage());
       }
    }
 

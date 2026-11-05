@@ -17,6 +17,12 @@ public class ControllerWaypointGoalCommand implements Command<ControllerWaypoint
    private double positionProximity = 0.02;
    private double orientationProximity = 0.1;
    private boolean goalOrientationMatters = true;
+   private boolean keepHeading = false;
+   private boolean turnWalkTurn = false;
+   /** 0 or less uses the controller limit */
+   private double maxForwardSpeed = 0.0;
+   /** 0 or less uses the controller limit */
+   private double maxTurningSpeed = 0.0;
 
    public ControllerWaypointGoalCommand()
    {
@@ -32,6 +38,10 @@ public class ControllerWaypointGoalCommand implements Command<ControllerWaypoint
       positionProximity = 0.02;
       orientationProximity = 0.1;
       goalOrientationMatters = true;
+      keepHeading = false;
+      turnWalkTurn = false;
+      maxForwardSpeed = 0.0;
+      maxTurningSpeed = 0.0;
    }
 
    @Override
@@ -46,6 +56,10 @@ public class ControllerWaypointGoalCommand implements Command<ControllerWaypoint
       positionProximity = message.getPositionProximity();
       orientationProximity = message.getOrientationProximity();
       goalOrientationMatters = message.getGoalOrientationMatters();
+      keepHeading = message.getKeepHeading();
+      turnWalkTurn = message.getTurnWalkTurn();
+      maxForwardSpeed = message.getMaxForwardSpeed();
+      maxTurningSpeed = message.getMaxTurningSpeed();
    }
 
    @Override
@@ -76,6 +90,10 @@ public class ControllerWaypointGoalCommand implements Command<ControllerWaypoint
       positionProximity = other.positionProximity;
       orientationProximity = other.orientationProximity;
       goalOrientationMatters = other.goalOrientationMatters;
+      keepHeading = other.keepHeading;
+      turnWalkTurn = other.turnWalkTurn;
+      maxForwardSpeed = other.maxForwardSpeed;
+      maxTurningSpeed = other.maxTurningSpeed;
    }
 
    public void setSequenceId(long sequenceId)
@@ -141,5 +159,45 @@ public class ControllerWaypointGoalCommand implements Command<ControllerWaypoint
    public void setGoalOrientationMatters(boolean goalOrientationMatters)
    {
       this.goalOrientationMatters = goalOrientationMatters;
+   }
+
+   public boolean getKeepHeading()
+   {
+      return keepHeading;
+   }
+
+   public void setKeepHeading(boolean keepHeading)
+   {
+      this.keepHeading = keepHeading;
+   }
+
+   public boolean getTurnWalkTurn()
+   {
+      return turnWalkTurn;
+   }
+
+   public void setTurnWalkTurn(boolean turnWalkTurn)
+   {
+      this.turnWalkTurn = turnWalkTurn;
+   }
+
+   public double getMaxForwardSpeed()
+   {
+      return maxForwardSpeed;
+   }
+
+   public void setMaxForwardSpeed(double maxForwardSpeed)
+   {
+      this.maxForwardSpeed = maxForwardSpeed;
+   }
+
+   public double getMaxTurningSpeed()
+   {
+      return maxTurningSpeed;
+   }
+
+   public void setMaxTurningSpeed(double maxTurningSpeed)
+   {
+      this.maxTurningSpeed = maxTurningSpeed;
    }
 }

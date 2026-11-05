@@ -1,14 +1,12 @@
 package us.ihmc.rdx.simulation.environment.object.objects;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.behaviors.simulation.door.DoorSceneNodeDefinitions;
+import us.ihmc.rdx.simulation.environment.object.DoorModelParameters;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.tools.RDXModelLoader;
 
 public class RDXDoorPanelObject extends RDXEnvironmentObject
 {
@@ -18,8 +16,7 @@ public class RDXDoorPanelObject extends RDXEnvironmentObject
    public RDXDoorPanelObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = RDXModelLoader.load(DoorSceneNodeDefinitions.DOOR_PANEL_VISUAL_MODEL_FILE_PATH);
-      setRealisticModel(realisticModel);
+      loadRealisticModel(DoorModelParameters.DOOR_PANEL_VISUAL_MODEL_FILE_PATH);
 
       double sizeX = 0.1;
       double sizeY = 0.9;

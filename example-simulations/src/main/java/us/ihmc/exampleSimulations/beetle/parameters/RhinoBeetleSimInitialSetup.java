@@ -1,24 +1,19 @@
 package us.ihmc.exampleSimulations.beetle.parameters;
 
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.scs2.definition.QuaternionDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.robot.SixDoFJointDefinition;
+import us.ihmc.scs2.definition.state.SixDoFJointState;
 
 public class RhinoBeetleSimInitialSetup
 {
-   private double groundZ;
-   private double initialYaw;
-   private final RigidBodyTransform rootToWorld = new RigidBodyTransform();
-   private final Vector3D positionInWorld = new Vector3D();
-   private final Quaternion rotation = new Quaternion();
-   private boolean robotInitialized = false;
+   private final double groundZ;
+   private final double initialYaw;
 
    public RhinoBeetleSimInitialSetup()
    {
@@ -31,38 +26,28 @@ public class RhinoBeetleSimInitialSetup
       this.initialYaw = initialYaw;
    }
 
-   public void initializeRobot(FloatingRootJointRobot robot, RhinoBeetleJointNameMapAndContactDefinition jointMap)
+   public void initializeRobotDefinition(RobotDefinition robotDefinition, RhinoBeetleJointNameMapAndContactDefinition jointMap)
    {
-      if (!robotInitialized)
+      robotDefinition.getOneDoFJointDefinition(jointMap.getLegJointName(RobotSextant.FRONT_LEFT, LegJointName.HIP_YAW)).setInitialJointState(-0.7);
+      robotDefinition.getOneDoFJointDefinition(jointMap.getLegJointName(RobotSextant.FRONT_RIGHT, LegJointName.HIP_YAW)).setInitialJointState(0.7);
+      robotDefinition.getOneDoFJointDefinition(jointMap.getLegJointName(RobotSextant.HIND_LEFT, LegJointName.HIP_YAW)).setInitialJointState(0.7);
+      robotDefinition.getOneDoFJointDefinition(jointMap.getLegJointName(RobotSextant.HIND_RIGHT, LegJointName.HIP_YAW)).setInitialJointState(-0.7);
+
+      for (RobotSextant robotSextant : RobotSextant.values)
       {
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(RobotSextant.FRONT_LEFT, LegJointName.HIP_YAW)).setQ(-0.7);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(RobotSextant.FRONT_RIGHT, LegJointName.HIP_YAW)).setQ(0.7);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(RobotSextant.HIND_LEFT, LegJointName.HIP_YAW)).setQ(0.7);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(RobotSextant.HIND_RIGHT, LegJointName.HIP_YAW)).setQ(-0.7);
-         
-         for (RobotSextant robotSextant : RobotSextant.values)
-         {
-            RobotSide robotSide = robotSextant.getRobotSide();
-            robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSextant, LegJointName.HIP_PITCH)).setQ(robotSide.negateIfLeftSide(-0.7));
-            robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSextant, LegJointName.KNEE_PITCH)).setQ(robotSide.negateIfLeftSide(1.8));
-         }
-
-         robot.update();
-         robot.getRootJointToWorldTransform(rootToWorld);
-         rootToWorld.get(rotation, positionInWorld);
-
-         positionInWorld.setZ(groundZ + 0.10);
-
-         robot.setPositionInWorld(positionInWorld);
-
-         FrameQuaternion frameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), rotation);
-         YawPitchRoll yawPitchRoll = new YawPitchRoll(frameOrientation);
-         yawPitchRoll.setYaw(initialYaw);
-         frameOrientation.set(yawPitchRoll);
-
-         robot.setOrientation(frameOrientation);
-         robot.update();
-         robotInitialized = true;
+         RobotSide robotSide = robotSextant.getRobotSide();
+         robotDefinition.getOneDoFJointDefinition(jointMap.getLegJointName(robotSextant, LegJointName.HIP_PITCH))
+                        .setInitialJointState(robotSide.negateIfLeftSide(-0.7));
+         robotDefinition.getOneDoFJointDefinition(jointMap.getLegJointName(robotSextant, LegJointName.KNEE_PITCH))
+                        .setInitialJointState(robotSide.negateIfLeftSide(1.8));
       }
+
+      SixDoFJointDefinition rootJoint = robotDefinition.getFloatingRootJointDefinition();
+      QuaternionDefinition orientation = new QuaternionDefinition();
+      orientation.set(new YawPitchRoll(initialYaw, 0.0, 0.0));
+
+      SixDoFJointState initialState = new SixDoFJointState();
+      initialState.setConfiguration(orientation, new Point3D(0.0, 0.0, groundZ + 0.10));
+      rootJoint.setInitialJointState(initialState);
    }
 }

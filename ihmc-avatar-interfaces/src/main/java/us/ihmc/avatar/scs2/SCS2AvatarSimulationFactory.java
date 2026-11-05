@@ -26,6 +26,7 @@ import us.ihmc.avatar.factory.SingleThreadedRobotController;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLoggerOld;
+import us.ihmc.avatar.logging.SCS2YoGraphicLogTools;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory.IKStreamingRTThread;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
@@ -77,7 +78,6 @@ import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
-import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.MujocoPhysicsEngine;
 import us.ihmc.scs2.simulation.mujoco.physicsEngine.parameters.MujocoSimulationParameters;
@@ -113,7 +113,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class SCS2AvatarSimulationFactory
@@ -169,11 +168,6 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> useImpulseBasedPhysicsEngine = new OptionalFactoryField<>(
          "useImpulseBasePhysicsEngine",
          false);
-   protected final OptionalFactoryField<Boolean> useBulletPhysicsEngine = new OptionalFactoryField<>(
-         "useBulletPhysicsEngine",
-         false);
-   protected final OptionalFactoryField<Consumer<RobotDefinition>> bulletCollisionMutator = new OptionalFactoryField<>(
-         "bulletCollisionMutator");
    protected final OptionalFactoryField<Boolean> useMujocoPhysicsEngine = new OptionalFactoryField<>(
          "useMujocoPhysicsEngine",
          false);
@@ -221,6 +215,7 @@ public class SCS2AvatarSimulationFactory
    protected AvatarEstimatorThread estimatorThread;
    protected AvatarControllerThread controllerThread;
    protected AvatarStepGeneratorThread stepGeneratorThread;
+   protected HeadingAndVelocityEvaluationScript headingAndVelocityEvaluationScript;
    protected IKStreamingRTThread ikStreamingRTThread;
    protected DisposableRobotController robotController;
    protected SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
@@ -347,11 +342,6 @@ public class SCS2AvatarSimulationFactory
          }
       }
 
-      if (useBulletPhysicsEngine.get() && bulletCollisionMutator.hasValue())
-      {
-         bulletCollisionMutator.get().accept(robotDefinition);
-      }
-
       robotInitialSetup.get().initializeRobotDefinition(robotDefinition);
       Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
       lastSimulatedJoints.forEach(lastSimulatedJoint -> robotDefinition.addSubtreeJointsToIgnore(lastSimulatedJoint));
@@ -371,10 +361,6 @@ public class SCS2AvatarSimulationFactory
                physicsEngine.setGlobalContactParameters(impulseBasedPhysicsEngineContactParameters.get());
             return physicsEngine;
          };
-      }
-      else if (useBulletPhysicsEngine.hasValue() && useBulletPhysicsEngine.get())
-      {
-         physicsEngineFactory = (inertialFrame, rootRegistry) -> new BulletPhysicsEngine(inertialFrame, rootRegistry);
       }
       else if (useMujocoPhysicsEngine.hasValue() && useMujocoPhysicsEngine.get())
       {
@@ -424,6 +410,15 @@ public class SCS2AvatarSimulationFactory
          simulationConstructionSet.addTerrainObject(terrainObjectDefinition);
       }
       robot = simulationConstructionSet.addRobot(robotDefinition);
+
+      TObjectDoubleMap<String> jointArmatures = robotModel.getJointArmatures();
+      if (simulationConstructionSet.getPhysicsEngine() instanceof MujocoPhysicsEngine mujocoPhysicsEngine && !jointArmatures.isEmpty())
+      {
+         robot.getControllerManager().addController(new SCS2MujocoJointArmatureSetter(mujocoPhysicsEngine, robot.getName(), jointArmatures));
+      }
+
+      if (asyncROS2Node.hasBeenSet())
+         AbilityHandSimulationController.attachIfNeeded(robot, asyncROS2Node.get(), robotModel);
 
       // The debug variables don't need to be updated when the GUI isn't shown as users won't have a way of debugging
       if (showGUI.get())
@@ -603,12 +598,13 @@ public class SCS2AvatarSimulationFactory
       if (useHeadingAndVelocityScript || parameters != null)
       {
          HumanoidSteppingManager steppingPlugin = stepGeneratorThread.getSteppingManager();
-         HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(robotModel.get()::getStepGeneratorDT,
-                                                                                            stepGeneratorThread.getYoTime(),
-                                                                                            parameters,
-                                                                                            steppingPlugin.getStepGeneratorCommandInputManager().getCommandInputManager(),
-                                                                                            stepGeneratorThread.getYoVariableRegistry());
-         steppingPlugin.addUpdatable(script);
+         headingAndVelocityEvaluationScript = new HeadingAndVelocityEvaluationScript(robotModel.get()::getStepGeneratorDT,
+                                                                                     stepGeneratorThread.getYoTime(),
+                                                                                     parameters,
+                                                                                     steppingPlugin.getStepGeneratorCommandInputManager()
+                                                                                                   .getCommandInputManager(),
+                                                                                     stepGeneratorThread.getYoVariableRegistry());
+         steppingPlugin.addUpdatable(headingAndVelocityEvaluationScript);
       }
       simulationConstructionSet.addYoGraphic(stepGeneratorThread.getSCS2YoGraphics());
    }
@@ -761,11 +757,13 @@ public class SCS2AvatarSimulationFactory
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
          builders.add(new RegistrySendBufferBuilder(estimatorThread.getYoRegistry(), estimatorThread.getFullRobotModel().getElevator(), null));
          builders.add(new RegistrySendBufferBuilder(controllerThread.getYoVariableRegistry(),
-                                                    controllerThread.getSCS2YoGraphics()));
-         builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getSCS2YoGraphics()));
+                                                    SCS2YoGraphicLogTools.toYoGraphicsData(controllerThread.getSCS2YoGraphics())));
+         builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.getYoVariableRegistry(),
+                                                    SCS2YoGraphicLogTools.toYoGraphicsData(stepGeneratorThread.getSCS2YoGraphics())));
          if (ikStreamingRTThread != null)
          {
-            builders.add(new RegistrySendBufferBuilder(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTThread.getSCS2YoGraphics()));
+            builders.add(new RegistrySendBufferBuilder(ikStreamingRTThread.getYoVariableRegistry(),
+                                                        SCS2YoGraphicLogTools.toYoGraphicsData(ikStreamingRTThread.getSCS2YoGraphics())));
          }
          intraprocessYoVariableLogger = new IntraprocessYoVariableLoggerOld(builders, robotModel.getEstimatorDT(), getClass().getSimpleName());
 
@@ -787,19 +785,21 @@ public class SCS2AvatarSimulationFactory
       {
          yoVariableServer.setMainRegistry(estimatorThread.getYoRegistry(),
                                           createYoVariableServerJointList(estimatorThread.getFullRobotModel().getElevator()),
-                                          estimatorThread.getSCS2YoGraphics());
+                                          SCS2YoGraphicLogTools.toYoGraphicsData(estimatorThread.getSCS2YoGraphics()));
          estimatorTask.addCallbackPostTask(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                          estimatorThread.getYoRegistry()));
 
-         yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(), controllerThread.getSCS2YoGraphics());
+         yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(), SCS2YoGraphicLogTools.toYoGraphicsData(controllerThread.getSCS2YoGraphics()));
          controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
                                                                           controllerThread.getYoVariableRegistry()));
-         yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getSCS2YoGraphics());
+         yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(),
+                                      SCS2YoGraphicLogTools.toYoGraphicsData(stepGeneratorThread.getSCS2YoGraphics()));
          stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                              stepGeneratorThread.getYoVariableRegistry()));
          if (ikStreamingRTThread != null && ikStreamingRTThread.isYoVariableServerEnabled())
          {
-            yoVariableServer.addRegistry(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTThread.getSCS2YoGraphics());
+            yoVariableServer.addRegistry(ikStreamingRTThread.getYoVariableRegistry(),
+                                         SCS2YoGraphicLogTools.toYoGraphicsData(ikStreamingRTThread.getSCS2YoGraphics()));
             stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingRTThread.getHumanoidRobotContextData().getTimestamp(),
                                                                                 ikStreamingRTThread.getYoVariableRegistry()));
          }
@@ -839,6 +839,15 @@ public class SCS2AvatarSimulationFactory
             TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
             SubtreeStreams.fromChildren(OneDoFJointBasics.class, robot.getRootBody())
                           .forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
+
+            // Refresh the raw sensor data before initializing the estimator so its first tick does not
+            // consume stale values, e.g. after the simulation has been reset to its initial state. This
+            // matters in particular in the single-threaded mode where the periodic sensor read only
+            // happens after the estimator has run.
+            SensorReader sensorReader = estimatorThread.getSensorReader();
+            long initialTimestamp = sensorReader.read(masterContext.getSensorDataContext());
+            masterContext.setTimestamp(initialTimestamp);
+
             estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
             controllerThread.initialize();
             stepGeneratorThread.initialize();
@@ -860,6 +869,22 @@ public class SCS2AvatarSimulationFactory
          {
             if (robotController instanceof BarrierScheduledRobotController)
                ((BarrierScheduledRobotController) robotController).waitUntilTasksDone();
+         }
+
+         // No @Override so this compiles against SCS2 versions that predate Controller.reset(); once
+         // SCS2 provides it, this method overrides it and gets invoked when the simulation is reset.
+         public void reset()
+         {
+            // The script's sequencer lives outside YoVariables, restart it when the simulation is reset to its initial state.
+            if (headingAndVelocityEvaluationScript != null)
+               headingAndVelocityEvaluationScript.reset();
+         }
+
+         // No @Override so this compiles against SCS2 versions that predate Controller.isResetSupported();
+         // once SCS2 provides it, this method overrides it and reports that reset() above is safe to rely on.
+         public boolean isResetSupported()
+         {
+            return true;
          }
       });
    }
@@ -937,7 +962,28 @@ public class SCS2AvatarSimulationFactory
    private void setupSimulatedRobotTimeProvider()
    {
       simulatedRobotTimeProvider = new SimulatedDRCRobotTimeProvider(simulationDT.get());
-      robot.getControllerManager().addController(() -> simulatedRobotTimeProvider.doControl());
+      robot.getControllerManager().addController(new Controller()
+      {
+         @Override
+         public void doControl()
+         {
+            simulatedRobotTimeProvider.doControl();
+         }
+
+         @Override
+         public void reset()
+         {
+            // The timestamp counter lives outside YoVariables and would otherwise keep counting from
+            // where it left off instead of restarting when the simulation is reset to its initial state.
+            simulatedRobotTimeProvider.set(0);
+         }
+
+         @Override
+         public boolean isResetSupported()
+         {
+            return true;
+         }
+      });
    }
 
    public void setSimulationName(String simulationName)
@@ -1178,16 +1224,6 @@ public class SCS2AvatarSimulationFactory
    public void setGroundContactModelParameters(GroundContactModelParameters groundContactModelParameters)
    {
       this.groundContactModelParameters.set(groundContactModelParameters);
-   }
-
-   public void setUseBulletPhysicsEngine(boolean useBulletPhysicsEngine)
-   {
-      this.useBulletPhysicsEngine.set(useBulletPhysicsEngine);
-   }
-
-   public void setBulletCollisionMutator(Consumer<RobotDefinition> bulletCollisionMutator)
-   {
-      this.bulletCollisionMutator.set(bulletCollisionMutator);
    }
 
    public void setUseMujocoPhysicsEngine(boolean useMujocoPhysicsEngine)

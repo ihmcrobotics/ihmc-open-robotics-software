@@ -8,19 +8,19 @@ import toolbox_msgs.ExternalForceEstimationConfigurationMessage;
 import toolbox_msgs.ToolboxStateMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.HumanoidROS2Topic;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.communication.serialization.ROS2MessageCdrFileTools;
 import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.jros2.ROS2Publisher;
-import us.ihmc.jros2.ROS2Topic;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class ExternalForceEstimationMessageReplay
 {
@@ -45,13 +45,13 @@ public class ExternalForceEstimationMessageReplay
       String name = getClass().getSimpleName();
       ros2Node = new AsyncROS2Node("ihmc_" + name);
 
-      ROS2Topic controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
-      robotConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withType(RobotConfigurationData.class));
-      robotDesiredConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withType(RobotDesiredConfigurationData.class));
+      HumanoidROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+      robotConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(RobotConfigurationData.class));
+      robotDesiredConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(RobotDesiredConfigurationData.class));
 
-      ROS2Topic toolboxInputTopic = ExternalForceEstimationToolboxModule.getInputTopic(robotName);
-      configMessagePublisher = ros2Node.createPublisher(toolboxInputTopic.withType(ExternalForceEstimationConfigurationMessage.class));
-      toolboxStatePublisher = ros2Node.createPublisher(toolboxInputTopic.withType(ToolboxStateMessage.class));
+      HumanoidROS2Topic<?> toolboxInputTopic = ExternalForceEstimationToolboxModule.getInputTopic(robotName);
+      configMessagePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ExternalForceEstimationConfigurationMessage.class));
+      toolboxStatePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ToolboxStateMessage.class));
    }
 
    public void replayAllMessages()

@@ -25,6 +25,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -361,5 +362,10 @@ public class HexapodStepController
    public void initialize()
    {
 
+   }
+
+   public YoGraphicGroupDefinition getSCS2YoGraphics()
+   {
+      return footStepPlanner.getSCS2YoGraphics();
    }
 }

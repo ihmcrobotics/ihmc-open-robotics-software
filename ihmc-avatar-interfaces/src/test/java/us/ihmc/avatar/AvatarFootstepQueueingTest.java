@@ -52,7 +52,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
       AtomicInteger stepCounter = new AtomicInteger();
       simulationTestHelper.getROS2Node().createSubscription(HumanoidControllerAPI.getOutputTopic(getSimpleRobotName())
-                                                                                 .withType(FootstepStatusMessage.class), (p) ->
+                                                                                 .withTypeName(FootstepStatusMessage.class), (p) ->
       {
          if (FootstepStatus.fromByte(p.read().getFootstepStatus()) == FootstepStatus.STARTED)
          {
@@ -128,7 +128,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
       AtomicInteger stepCounter = new AtomicInteger();
       simulationTestHelper.getROS2Node().createSubscription(HumanoidControllerAPI.getOutputTopic(getSimpleRobotName())
-                                                                                 .withType(FootstepStatusMessage.class), (p) ->
+                                                                                 .withTypeName(FootstepStatusMessage.class), (p) ->
       {
          if (FootstepStatus.fromByte(p.read().getFootstepStatus()) == FootstepStatus.STARTED)
          {
@@ -209,7 +209,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
       AtomicInteger stepCounter = new AtomicInteger();
       simulationTestHelper.getROS2Node().createSubscription(HumanoidControllerAPI.getOutputTopic(getSimpleRobotName())
-                                                                                 .withType(FootstepStatusMessage.class), (p) ->
+                                                                                 .withTypeName(FootstepStatusMessage.class), (p) ->
       {
          if (FootstepStatus.fromByte(p.read().getFootstepStatus()) == FootstepStatus.STARTED)
          {

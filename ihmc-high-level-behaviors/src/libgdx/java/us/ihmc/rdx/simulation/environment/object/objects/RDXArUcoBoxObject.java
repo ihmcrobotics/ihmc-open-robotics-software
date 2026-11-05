@@ -1,11 +1,8 @@
 package us.ihmc.rdx.simulation.environment.object.objects;
 
-import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.euclid.shape.primitives.Box3D;
-import us.ihmc.behaviors.simulation.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
-import us.ihmc.rdx.tools.RDXModelLoader;
 
 public class RDXArUcoBoxObject extends RDXEnvironmentObject
 {
@@ -15,14 +12,11 @@ public class RDXArUcoBoxObject extends RDXEnvironmentObject
    public RDXArUcoBoxObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = RDXModelLoader.load(RigidBodySceneObjectDefinitions.BOX_VISUAL_MODEL_FILE_PATH);
-      setRealisticModel(realisticModel);
+      loadRealisticModel("environmentObjects/box/emptyBox.g3dj");
 
       getBoundingSphere().setRadius(0.5);
       setMass(0.3f);
-      Box3D collisionBox = new Box3D(RigidBodySceneObjectDefinitions.BOX_DEPTH,
-                                     RigidBodySceneObjectDefinitions.BOX_WIDTH,
-                                     RigidBodySceneObjectDefinitions.BOX_HEIGHT);
+      Box3D collisionBox = new Box3D(0.31, 0.394, 0.265);
       setCollisionGeometryObject(collisionBox);
    }
 }
