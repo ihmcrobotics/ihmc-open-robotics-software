@@ -64,8 +64,7 @@ public class ProceduralTerrainEnvironment implements CommonAvatarEnvironmentInte
     */
    public void addPyramidSlope(RigidBodyTransformReadOnly transform, double baseSize, double platformSize, double slopeDegrees)
    {
-      for (TerrainSurface surface : ProceduralTerrainGeometry.pyramidSlope(baseSize, platformSize, slopeDegrees))
-         terrain.addTerrainObject(new ConvexPolytopeTerrainObject(toPolytope(transform, surface), SHADES[surface.shade()]));
+      addSurfaces(transform, ProceduralTerrainGeometry.pyramidSlope(baseSize, platformSize, slopeDegrees));
       footprints.add(footprint(transform, baseSize, baseSize));
    }
 
@@ -74,6 +73,17 @@ public class ProceduralTerrainEnvironment implements CommonAvatarEnvironmentInte
    {
       addBoxes(transform, ProceduralTerrainGeometry.unevenTiles(tileSize, maxHeightDelta, gridSize, seed));
       double width = ProceduralTerrainGeometry.unevenTilesPerSide(tileSize, gridSize) * tileSize;
+      footprints.add(footprint(transform, width, width));
+   }
+
+   /**
+    * A bumpy surface of random heights that meets the ground at its edges.
+    * See {@link ProceduralTerrainGeometry#randomHeightField}.
+    */
+   public void addRandomHeightField(RigidBodyTransformReadOnly transform, double cellSize, double maxHeightDelta, double gridSize, long seed)
+   {
+      addSurfaces(transform, ProceduralTerrainGeometry.randomHeightField(cellSize, maxHeightDelta, gridSize, seed));
+      double width = ProceduralTerrainGeometry.randomHeightFieldCellsPerSide(cellSize, gridSize) * cellSize;
       footprints.add(footprint(transform, width, width));
    }
 
@@ -124,6 +134,12 @@ public class ProceduralTerrainEnvironment implements CommonAvatarEnvironmentInte
          boxTransform.appendTranslation(box.x(), box.y(), box.z());
          terrain.addRotatableBox(boxTransform, box.sizeX(), box.sizeY(), box.sizeZ(), SHADES[box.shade()]);
       }
+   }
+
+   private void addSurfaces(RigidBodyTransformReadOnly objectTransform, List<TerrainSurface> surfaces)
+   {
+      for (TerrainSurface surface : surfaces)
+         terrain.addTerrainObject(new ConvexPolytopeTerrainObject(toPolytope(objectTransform, surface), SHADES[surface.shade()]));
    }
 
    /** Each surface becomes the convex solid between it and its bottom. */

@@ -25,8 +25,8 @@ import java.util.ArrayList;
  * so environments built in the UI can be simulated without generating code.
  * <p>
  * Supported: pallets and cinder blocks (as boxes), and the procedural terrain built by
- * {@link ProceduralTerrainEnvironment}: pyramid stairs and uneven tiles (as boxes), hills (as convex
- * solids under each flat surface), and procedural ground. Procedural ground has the other
+ * {@link ProceduralTerrainEnvironment}: pyramid stairs and uneven tiles (as boxes), hills and random
+ * height fields (as convex solids under each flat surface), and procedural ground. Procedural ground has the other
  * procedural terrain cut out of it, so stairs down and pits open into it. Without procedural ground, a
  * 50 x 50 m ground box is added, as in {@link RDXEnvironments}. Other object types are skipped with a
  * warning.
@@ -85,6 +85,11 @@ public class JSONEnvironment implements CommonAvatarEnvironmentInterface
                                                                      node.get("baseSize").asDouble(),
                                                                      node.get("platformSize").asDouble(),
                                                                      node.get("slopeDegrees").asDouble());
+            case "RDXRandomHeightFieldObject" -> terrain.addRandomHeightField(object.transform(),
+                                                                          node.get("cellSize").asDouble(),
+                                                                          node.get("maxHeightDelta").asDouble(),
+                                                                          node.get("gridSize").asDouble(),
+                                                                          node.get("seed").asLong());
             case "RDXProceduralGroundObject" ->
             {
                AppearanceDefinition appearance = ProceduralTerrainEnvironment.DEFAULT_GROUND_APPEARANCE;
