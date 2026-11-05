@@ -100,7 +100,7 @@ public class ControllerAPIDefinition
       commands.add(RLModelSelectionCommand.class);
       commands.add(MimicManeuverCommand.class);
 
-      // Height maps from perception, for the RL controller's height scan
+      // Height maps for the RL controller's height scan, from perception and forwarded by the step generator
       commands.add(HeightMapCommand.class);
 
       controllerSupportedCommands = new ArrayList<>(commands);
