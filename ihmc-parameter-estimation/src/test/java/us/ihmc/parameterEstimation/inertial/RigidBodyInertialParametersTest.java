@@ -1,6 +1,7 @@
 package us.ihmc.parameterEstimation.inertial;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -482,6 +483,123 @@ public class RigidBodyInertialParametersTest
          RigidBodyInertialParameters.fromThetaBasisToPiBasisJacobian(parameterVectorThetaBasis, jacobian);
 
          assertEquals(MatrixFeatures_DDRM.rank(jacobian), PARAMETERS_PER_RIGID_BODY);
+      }
+   }
+
+   /**
+    * U(theta) of Rucker and Wensing, the upper-triangular factor of the pseudo-inertia J = U U^T, with theta ordered (alpha, d1, d2, d3, s12, s13, s23, t1,
+    * t2, t3).
+    */
+   private static DMatrixRMaj buildU(DMatrixRMaj theta)
+   {
+      double scale = Math.exp(theta.get(0));
+      DMatrixRMaj U = new DMatrixRMaj(new double[][] {{Math.exp(theta.get(1)), theta.get(4), theta.get(5), theta.get(7)},
+                                                      {0.0, Math.exp(theta.get(2)), theta.get(6), theta.get(8)},
+                                                      {0.0, 0.0, Math.exp(theta.get(3)), theta.get(9)},
+                                                      {0.0, 0.0, 0.0, 1.0}});
+      CommonOps_DDRM.scale(scale, U);
+      return U;
+   }
+
+   /**
+    * Reads (m, h, I) out of a pseudo-inertia J = [[Sigma, h], [h^T, m]], where Sigma is the second moment of mass about the frame origin and the moment of
+    * inertia about the frame origin is I = tr(Sigma) 1 - Sigma.
+    */
+   private static DMatrixRMaj piFromPseudoInertia(DMatrixRMaj J)
+   {
+      double trace = J.get(0, 0) + J.get(1, 1) + J.get(2, 2);
+      DMatrixRMaj pi = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      pi.set(0, J.get(3, 3));
+      pi.set(1, J.get(0, 3));
+      pi.set(2, J.get(1, 3));
+      pi.set(3, J.get(2, 3));
+      pi.set(4, trace - J.get(0, 0));
+      pi.set(5, -J.get(0, 1));
+      pi.set(6, -J.get(0, 2));
+      pi.set(7, trace - J.get(1, 1));
+      pi.set(8, -J.get(1, 2));
+      pi.set(9, trace - J.get(2, 2));
+      return pi;
+   }
+
+   @Test
+   public void testThetaToPiMatchesPseudoInertiaFactorization()
+   {
+      // Independent check of the closed-form map: build U(theta), form J = U U^T, and read (m, h, I) off the pseudo-inertia.
+      Random random = new Random(4242);
+      DMatrixRMaj pi = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      DMatrixRMaj J = new DMatrixRMaj(4, 4);
+
+      for (int i = 0; i < ITERATIONS; ++i)
+      {
+         DMatrixRMaj theta = nextTheta(random);
+         DMatrixRMaj U = buildU(theta);
+         CommonOps_DDRM.multTransB(U, U, J);
+
+         RigidBodyInertialParameters.fromThetaBasisToPiBasis(theta, pi);
+         assertArrayEquals(piFromPseudoInertia(J).getData(), pi.getData(), EPSILON);
+      }
+   }
+
+   @Test
+   public void testGeneralizedThetaToPiMatchesPseudoInertiaCongruence()
+   {
+      // Eq. (11): the deviation acts on the nominal pseudo-inertia by congruence, J = U(deviation) J0 U(deviation)^T.
+      Random random = new Random(4343);
+      DMatrixRMaj composed = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      DMatrixRMaj pi = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+      DMatrixRMaj J0 = new DMatrixRMaj(4, 4);
+      DMatrixRMaj temp = new DMatrixRMaj(4, 4);
+      DMatrixRMaj J = new DMatrixRMaj(4, 4);
+
+      for (int i = 0; i < ITERATIONS; ++i)
+      {
+         DMatrixRMaj nominal = nextTheta(random);
+         DMatrixRMaj deviation = nextTheta(random);
+         DMatrixRMaj U0 = buildU(nominal);
+         CommonOps_DDRM.multTransB(U0, U0, J0);
+         DMatrixRMaj U = buildU(deviation);
+         CommonOps_DDRM.mult(U, J0, temp);
+         CommonOps_DDRM.multTransB(temp, U, J);
+
+         RigidBodyInertialParameters.composeThetaBasis(deviation, nominal, composed);
+         RigidBodyInertialParameters.fromThetaBasisToPiBasis(composed, pi);
+         assertArrayEquals(piFromPseudoInertia(J).getData(), pi.getData(), EPSILON);
+      }
+   }
+
+   @Test
+   public void testPiBasisOfOffsetSpatialInertia()
+   {
+      // A mecano spatial inertia holds the moment of inertia about its frame origin, which is the convention of the Pi basis, so (m, m c, I) is read off
+      // directly, and the translation parameters t of the Theta basis are the center of mass offset c.
+      Random random = new Random(4444);
+
+      for (int i = 0; i < ITERATIONS; ++i)
+      {
+         SpatialInertia inertia = MecanoRandomTools.nextSpatialInertia(random, bodyFrame, expressedInFrame);
+         inertia.getCenterOfMassOffset().set(EuclidCoreRandomTools.nextVector3D(random, 0.5));
+         // Keep it physical: the moment of inertia about the origin is the centroidal one plus the parallel-axis term.
+         Vector3D c = new Vector3D(inertia.getCenterOfMassOffset());
+         double m = inertia.getMass();
+         Matrix3D parallelAxis = new Matrix3D(m * (c.getY() * c.getY() + c.getZ() * c.getZ()), -m * c.getX() * c.getY(), -m * c.getX() * c.getZ(),
+                                              -m * c.getX() * c.getY(), m * (c.getX() * c.getX() + c.getZ() * c.getZ()), -m * c.getY() * c.getZ(),
+                                              -m * c.getX() * c.getZ(), -m * c.getY() * c.getZ(), m * (c.getX() * c.getX() + c.getY() * c.getY()));
+         inertia.getMomentOfInertia().add(parallelAxis);
+
+         RigidBodyInertialParameters parameters = new RigidBodyInertialParameters(inertia);
+         DMatrixRMaj pi = parameters.getParameterVectorPiBasis();
+         DMatrixRMaj theta = parameters.getParameterVectorThetaBasis();
+
+         assertEquals(m, pi.get(0), EPSILON);
+         assertEquals(m * c.getX(), pi.get(1), EPSILON);
+         assertEquals(m * c.getY(), pi.get(2), EPSILON);
+         assertEquals(m * c.getZ(), pi.get(3), EPSILON);
+         assertEquals(inertia.getMomentOfInertia().getM00(), pi.get(4), EPSILON);
+         assertEquals(inertia.getMomentOfInertia().getM01(), pi.get(5), EPSILON);
+         assertEquals(c.getX(), theta.get(7), EPSILON);
+         assertEquals(c.getY(), theta.get(8), EPSILON);
+         assertEquals(c.getZ(), theta.get(9), EPSILON);
       }
    }
 }

@@ -253,8 +253,9 @@ public class   RegressorTools
       {
          // Mass (option M, ordinal 0) is written first, so it is available to convert the estimated first
          // moment (MCOM = m*c) back to a CoM offset. Matches the pi convention read by
-         // RigidBodyInertialParametersTools.calculateParameterDelta (mass, m*c, and inertia about the CoM),
-         // so pack -> calculateParameterDelta is a round-trip.
+         // RigidBodyInertialParametersTools.calculateParameterDelta (mass, m*c, and inertia about the origin of the
+         // body frame -- mecano's convention, which is NOT about the CoM once c != 0), so pack ->
+         // calculateParameterDelta is a round-trip.
          double bodyMass = bodies[i].getInertia().getMass();
          for (SpatialInertiaBasisOption option : SpatialInertiaBasisOption.values)
          {
