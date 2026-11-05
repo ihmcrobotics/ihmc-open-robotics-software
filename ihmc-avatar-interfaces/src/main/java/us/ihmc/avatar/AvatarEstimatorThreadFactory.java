@@ -139,7 +139,11 @@ public class AvatarEstimatorThreadFactory
    private final OptionalFactoryField<JointDesiredOutputWriter> jointDesiredOutputWriterField = new OptionalFactoryField<>("jointDesiredOutputWriter");
    /** When set, {@link #getMainStateEstimator()} builds the invariant InEKF main estimator instead of the DRC one. */
    private boolean useInvariantStateEstimator = false;
-   private boolean invariantEstimatorYawSeeding = true;
+   /**
+    * Off on hardware since 2026-11-05: against mocap, foot-referenced yaw seeding was the InEKF heading drift
+    * (+44 deg over a 4 min walk with it, +6 deg without). Still switchable at runtime: invariantYawSeedingEnabled.
+    */
+   private boolean invariantEstimatorYawSeeding = false;
    /** Applied to every joint-level KF this factory builds (the boot source and a switchable counterpart), e.g. to install a per-tick pair-noise law. */
    private java.util.function.Consumer<us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter> jointLevelKFConfigurator = null;
    /** Seconds of start-up standing over which the invariant filter estimates and then holds its accelerometer bias; NaN or <= 0 disables. */

@@ -124,6 +124,33 @@ public class InvariantMainStateEstimatorTest
       return rig;
    }
 
+   /**
+    * Yaw seeding is a runtime switch: the constructor only sets its initial state, and turning it on mid-run must
+    * re-anchor rather than act on stale anchors -- in static equilibrium the base must stay at identity either way.
+    */
+   @Test
+   public void testYawSeedingIsARuntimeSwitch()
+   {
+      Rig rig = buildRig(4003L, new RotationMatrix(), 1.0, false); // built with seeding off
+      setGravityConsistentAccel(rig);
+      for (SettableTestIMU imu : rig.imus)
+         imu.setAngularVelocity(0.0, 0.0, 0.0);
+
+      us.ihmc.yoVariables.variable.YoVariable flag = rig.main.getYoRegistry().findVariable("invariantYawSeedingEnabled");
+      assertTrue(flag != null, "invariantYawSeedingEnabled must be published");
+      assertEquals(0.0, flag.getValueAsDouble(), 0.0, "initial state comes from the constructor");
+
+      for (int k = 0; k < 300; k++)
+         rig.doControl();
+      flag.setValueFromDouble(1.0);
+      for (int k = 0; k < 700; k++)
+         rig.doControl();
+
+      RotationMatrix rotation = new RotationMatrix();
+      rig.ekf.getRotation(rotation);
+      assertTrue(rotation.distance(new RotationMatrix()) < 1.0e-3, "switching seeding on in a static stance must not move the base");
+   }
+
    @Test
    public void testStaticEquilibriumStaysPutAndFinite()
    {
