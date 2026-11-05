@@ -443,11 +443,6 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    // place of the upstream provider's (zero until the first rest completes a window).
    private final RestGyroBiasEstimator restGyroBias = new RestGyroBiasEstimator(registry);
    private final YoBoolean yoUseRestGyroBias = new YoBoolean("invariantUseRestGyroBias", registry);
-   // Observability-constrained updates (off by default): world yaw is unobservable, but velocity/contact residuals
-   // leak into it through prior correlations -- +24 deg/min of walking on the 2026-11-05 mocap walks. When true,
-   // every update leaves yaw to gyro integration. The accumulator is the yaw the updates WOULD have injected.
-   private final YoBoolean yoSuppressYawCorrection = new YoBoolean("invariantSuppressYawCorrection", registry);
-   private final YoDouble yoSuppressedYawCorrectionTotal = new YoDouble("invariantSuppressedYawCorrectionTotal", registry);
    private final us.ihmc.euclid.transform.RigidBodyTransform imuToSoleTransform = new us.ihmc.euclid.transform.RigidBodyTransform();
    private final SideDependentList<us.ihmc.euclid.tuple4D.Quaternion> imuInSole = new SideDependentList<>(new us.ihmc.euclid.tuple4D.Quaternion(),
                                                                                                          new us.ihmc.euclid.tuple4D.Quaternion());
@@ -907,7 +902,6 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       // Clamp the upstream gyro bias to a physically plausible range before subtracting: a runaway bias would
       // otherwise be integrated straight into base orientation (the pitch-drift mechanism). Publish the applied
       // (post-clamp) bias for visibility.
-      ekf.setSuppressYawCorrection(yoSuppressYawCorrection.getValue());
       updateRestGyroBias();
       syncGyroBiasEstimation();
       boolean clamped = false;
@@ -1039,7 +1033,6 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          yoContactRInflation.get(side).set(inflation);
          yoContactPContactTrace.get(side).set(covarianceBlockTrace(ekf.getState().contactTangentIndex(contactIndex(side))));
          ekf.update(contactIndex(side), contactInBody, inflatedContactCovariance);
-         yoSuppressedYawCorrectionTotal.add(ekf.getLastSuppressedYawCorrection());
          yoContactNIS.get(side).set(ekf.getLastNormalizedInnovationSquared());
          yoContactInnovationInflation.get(side).set(ekf.getLastInnovationInflation());
          yoContactCondSProxyLog10.get(side).set(Math.log10(ekf.getLastConditionProxy()));
@@ -1243,7 +1236,6 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          kinematicVelocityCovariance.scale(std * std);
          yoKinematicVelocityJointNoiseTrace.get(side).set(addJointVelocityNoise(side, kinematicVelocityCovariance));
          ekf.updateBodyVelocity(kinematicBodyVelocity, kinematicVelocityCovariance, soleInPelvis); // r for the bias columns
-         yoSuppressedYawCorrectionTotal.add(ekf.getLastSuppressedYawCorrection());
          yoKinematicVelocityNIS.get(side).set(ekf.getLastNormalizedInnovationSquared());
          yoKinematicVelocityApplied.get(side).set(ekf.wasLastUpdateApplied());
       }
@@ -1291,7 +1283,6 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       if (apply)
       {
          ekf.applyGravityLeveling();
-         yoSuppressedYawCorrectionTotal.add(ekf.getLastSuppressedYawCorrection());
          yoGravitySecondsSinceUpdate.set(0.0);
       }
       else
@@ -1365,7 +1356,6 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          restBiasInPelvis.setIncludingFrame(imuSensor.getMeasurementFrame(), restGyroBias.getBias());
          restBiasInPelvis.changeFrame(pelvisFrame);
          ekf.updateGyroBias(restBiasInPelvis, us.ihmc.euclid.tools.EuclidCoreTools.square(yoRestGyroBiasMeasurementStd.getDoubleValue()));
-         yoSuppressedYawCorrectionTotal.add(ekf.getLastSuppressedYawCorrection());
       }
       lastRestGyroBiasUpdates = restUpdates;
 

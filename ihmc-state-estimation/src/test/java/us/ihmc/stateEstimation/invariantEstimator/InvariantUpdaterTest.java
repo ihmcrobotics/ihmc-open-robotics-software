@@ -57,59 +57,6 @@ public class InvariantUpdaterTest
 
    }
 
-   /**
-    * Yaw is unobservable to a contact, but a prior correlating yaw with base position still gives it a gain. With
-    * suppression on, the update must leave world yaw exactly where it was (the correction's z rotation is zero),
-    * still shrink the residual, keep P symmetric, and report the yaw it withheld.
-    */
-   @Test
-   public void testSuppressedYawCorrectionLeavesYawUntouched()
-   {
-      for (boolean suppress : new boolean[] {false, true})
-      {
-         Random random = new Random(303L);
-         InvariantState truth = randomState(random);
-         Vector3D measurement = forwardKinematicsFromTruth(truth);
-         InvariantState estimate = perturb(truth, randomError(random, 1.0e-2));
-         DMatrixRMaj P = estimate.getCovariance();
-         CommonOps_DDRM.setIdentity(P);
-         int yaw = estimate.rotationTangentIndex() + 2;
-         P.set(yaw, POSITION_BLOCK, 0.8); // yaw correlated with base x
-         P.set(POSITION_BLOCK, yaw, 0.8);
-
-         DMatrixRMaj residual = new DMatrixRMaj(3, 1);
-         double residualBefore = computeResidual(estimate, measurement, residual);
-         RotationMatrix before = new RotationMatrix();
-         estimate.getRotation(before);
-
-         InvariantUpdater updater = new InvariantUpdater(TANGENT_SIZE);
-         updater.setSuppressYawCorrection(suppress);
-         updater.update(estimate, buildContactJacobian(), residual, scaledIdentity(3, 1.0e-4));
-
-         RotationMatrix after = new RotationMatrix();
-         estimate.getRotation(after);
-         RotationMatrix delta = new RotationMatrix();
-         delta.set(after);
-         delta.multiplyTransposeOther(before); // R⁺·R̂ᵀ = exp(c_R), the left-multiplied correction
-         Vector3D rotationVector = new Vector3D();
-         delta.getRotationVector(rotationVector);
-
-         double residualAfter = computeResidual(estimate, measurement, new DMatrixRMaj(3, 1));
-         assertTrue(residualAfter < residualBefore, "suppress=" + suppress);
-         assertSymmetric(estimate.getCovariance(), 1.0e-9);
-         if (suppress)
-         {
-            assertEquals(0.0, rotationVector.getZ(), 1.0e-12);
-            assertTrue(Math.abs(updater.getLastSuppressedYawCorrection()) > 1.0e-4, "withheld yaw not reported");
-         }
-         else
-         {
-            assertTrue(Math.abs(rotationVector.getZ()) > 1.0e-4, "the correlated prior should have moved yaw");
-            assertEquals(0.0, updater.getLastSuppressedYawCorrection(), 0.0);
-         }
-      }
-   }
-
    /** Moderate error: one update reduces the residual by a large factor (decisively rules out a sign flip). */
    @Test
    public void testUpdateReducesResidualForLargerError()

@@ -82,13 +82,6 @@ public class InvariantUpdater
    // locking them out. NIS is still reported at its raw, pre-inflation value.
    private double innovationInflation = 1.0;     // R scale applied by the gate on the most recent update
    private int innovationInflatedCount = 0;      // running count of updates the gate inflated
-   // Observability-constrained gain: world yaw is unobservable, and with the right-invariant error X̂ = exp(ξ)·X a
-   // global yaw rotation is exactly the z component of ξ_R (zero velocity/position/contact parts). Its gain row is
-   // still nonzero through prior correlations, and on the 2026-11-05 mocap walks systematic velocity/contact
-   // residuals leaked through it at about +24 deg/min of walking. Zeroing that row keeps yaw pure gyro
-   // integration; the Joseph form below stays valid for the modified gain.
-   private boolean suppressYawCorrection = false;
-   private double lastSuppressedYawCorrection = 0.0; // rad the most recent update would have applied to yaw
    private final DMatrixRMaj inflatedMeasurementCovariance = new DMatrixRMaj(1, 1);
    private double lastHPHtTrace = Double.NaN;             // trace(H·P·Hᵀ) of the most recent S assembly
    private double lastMeasurementNoiseTrace = Double.NaN; // trace(R) of the most recent S assembly
@@ -184,7 +177,6 @@ public class InvariantUpdater
    public void update(InvariantState state, DMatrixRMaj H, DMatrixRMaj residual, DMatrixRMaj measurementCovariance, double nisThreshold)
    {
       innovationInflation = 1.0;
-      lastSuppressedYawCorrection = 0.0; // stays 0 if a gate skips this update
       DMatrixRMaj covariance = state.getCovariance();
       int m = covariance.getNumRows();
       int z  = H.getNumRows();
@@ -261,17 +253,6 @@ public class InvariantUpdater
       gain.reshape(m,z);
       CommonOps_DDRM.mult(covarianceTimesHTranspose,innovationCovarianceInverse,gain);
 
-      int yawRow = state.rotationTangentIndex() + 2;
-      double yawCorrection = 0.0;
-      for (int j = 0; j < z; j++)
-         yawCorrection += gain.get(yawRow, j) * residual.get(j, 0);
-      lastSuppressedYawCorrection = suppressYawCorrection ? -yawCorrection : 0.0;
-      if (suppressYawCorrection)
-      {
-         for (int j = 0; j < z; j++)
-            gain.set(yawRow, j, 0.0);
-      }
-
       // c = K·residual ; state update X̂⁺ = exp_G(−c)·X̂
       correctionColumn.reshape(m,1);
       CommonOps_DDRM.mult(gain, residual, correctionColumn);
@@ -346,11 +327,6 @@ public class InvariantUpdater
    public double getInnovationInflation()       { return innovationInflation; }
    /** Running count of updates the innovation gate inflated. */
    public int getInnovationInflatedCount()      { return innovationInflatedCount; }
-   /** When true, every update leaves world yaw untouched (its gain row is zeroed); see the field comment. */
-   public void setSuppressYawCorrection(boolean suppress) { suppressYawCorrection = suppress; }
-   public boolean isSuppressYawCorrection()      { return suppressYawCorrection; }
-   /** Yaw correction (rad) the most recent update would have applied had it not been suppressed; 0 when not suppressing. */
-   public double getLastSuppressedYawCorrection() { return lastSuppressedYawCorrection; }
    /** |δθ| (rad) of the most recent applied correction — H4 anchor-transient diagnostic. */
    public double getLastCorrectionRotationNorm() { return lastCorrectionRotationNorm; }
    /** |δv| (m/s) of the most recent applied correction. */
