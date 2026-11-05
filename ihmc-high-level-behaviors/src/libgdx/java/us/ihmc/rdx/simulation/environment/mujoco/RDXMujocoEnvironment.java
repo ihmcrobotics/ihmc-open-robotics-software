@@ -27,6 +27,9 @@ public class RDXMujocoEnvironment implements CommonAvatarEnvironmentInterface
    private final FlatGroundEnvironment ground = new FlatGroundEnvironment();
    private final AtomicReference<List<RDXMujocoCollisionShape>> objectCollisions = new AtomicReference<>(List.of());
    private final AtomicLong revision = new AtomicLong();
+   private CombinedTerrainObject3D terrain;
+   private long terrainRevision = -1;
+   private boolean terrainReplacesFlatGround;
    /** Procedural ground has holes for the terrain below z = 0, so it replaces the flat ground, which would fill them. */
    private volatile boolean replaceFlatGround;
 
@@ -63,10 +66,17 @@ public class RDXMujocoEnvironment implements CommonAvatarEnvironmentInterface
       return ground.getTerrainObject3D().getTerrainCollisionShapes().size();
    }
 
+   /** Rebuilt only when the object collisions or the flat ground change, so it is cheap to call every frame. */
    @Override
-   public TerrainObject3D getTerrainObject3D()
+   public synchronized TerrainObject3D getTerrainObject3D()
    {
-      CombinedTerrainObject3D terrain = new CombinedTerrainObject3D("RDXMujocoEnvironment");
+      long currentRevision = revision.get();
+      if (terrain != null && terrainRevision == currentRevision && terrainReplacesFlatGround == replaceFlatGround)
+         return terrain;
+      terrainRevision = currentRevision;
+      terrainReplacesFlatGround = replaceFlatGround;
+
+      terrain = new CombinedTerrainObject3D("RDXMujocoEnvironment");
       if (!replaceFlatGround)
          terrain.addTerrainObject(ground.getTerrainObject3D());
       for (RDXMujocoCollisionShape shape : objectCollisions.get())
