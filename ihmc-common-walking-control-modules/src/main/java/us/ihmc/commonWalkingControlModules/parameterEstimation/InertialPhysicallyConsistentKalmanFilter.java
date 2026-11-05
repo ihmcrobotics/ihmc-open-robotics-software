@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.parameterEstimation;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.SpatialInertiaBasisOption;
@@ -102,6 +104,24 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
    private final List<RigidBodyInertialParameters> inertialParameters = new ArrayList<>();
    private final List<YoMatrix> inertialParametersPiBasisWatchers = new ArrayList<>();
    private final List<YoMatrix> inertialParametersThetaBasisWatchers = new ArrayList<>();
+   // Excitation diagnostics (logging only): diag of the theta-space covariance P, and an exponentially windowed
+   // information matrix Omega = sum H_b^T R^-1 H_b per body (time constant INFORMATION_WINDOW), its diagonal,
+   // eigenvalues (ascending) and condition number.
+   private static final double INFORMATION_WINDOW = 2.0;
+   private final List<YoMatrix> covarianceDiagonalWatchers = new ArrayList<>();
+   private final List<YoMatrix> informationDiagonalWatchers = new ArrayList<>();
+   private final List<YoMatrix> informationEigenvalueWatchers = new ArrayList<>();
+   private final List<YoDouble> informationConditionWatchers = new ArrayList<>();
+   private final List<DMatrixRMaj> windowedInformation = new ArrayList<>();
+   private final DMatrixRMaj informationJacobianBlock = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj informationIncrement = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                                                    RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+   private final DMatrixRMaj informationScratch = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                                                  RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+   private final EigenDecomposition_F64<DMatrixRMaj> informationEigenDecomposition =
+         DecompositionFactory_DDRM.eig(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, false, true);
+   private final double[] informationEigenvalues = new double[RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
+   private final DoubleProvider diagnosticsDt;
 
    private final DMatrixRMaj measurementJacobianBlock;
    private final DMatrixRMaj measurementJacobianContainer;
@@ -133,6 +153,7 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
+      diagnosticsDt = dt;
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(model.getRootJoint().subtreeArray());
       Set<SpatialInertiaBasisOption>[] basisSets = parameters.getBasisSets();
@@ -177,6 +198,14 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
             comCouplingList.add(parameters.getCoMLoadCouplingPoint(modelBodies[i].getName()));
             inertialParametersPiBasisWatchers.add(new YoMatrix("pi_" + modelBodies[i].getName() + "_", 10, 1, RigidBodyInertialParametersTools.getNamesForPiBasis(), null, registry));
             inertialParametersThetaBasisWatchers.add(new YoMatrix("theta_" + modelBodies[i].getName() + "_", 10, 1, RigidBodyInertialParametersTools.getNamesForThetaBasis(), null, registry));
+            String[] eigenNames = new String[RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
+            for (int e = 0; e < eigenNames.length; e++)
+               eigenNames[e] = "e" + e;
+            covarianceDiagonalWatchers.add(new YoMatrix("ekfPdiag_" + modelBodies[i].getName() + "_", 10, 1, RigidBodyInertialParametersTools.getNamesForThetaBasis(), null, registry));
+            informationDiagonalWatchers.add(new YoMatrix("ekfInfoDiag_" + modelBodies[i].getName() + "_", 10, 1, RigidBodyInertialParametersTools.getNamesForThetaBasis(), null, registry));
+            informationEigenvalueWatchers.add(new YoMatrix("ekfInfoEig_" + modelBodies[i].getName() + "_", 10, 1, eigenNames, null, registry));
+            informationConditionWatchers.add(new YoDouble("ekfInfoCond_" + modelBodies[i].getName(), registry));
+            windowedInformation.add(new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY));
             estimatedBodyNames.add(modelBodies[i].getName());
             nBodies++;
          }
@@ -308,6 +337,59 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
                                           RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
       }
 
+      filteredResidual.zero();
+      clearResidualFilterMemory = true;
+      updateWatchers();
+   }
+
+   @Override
+   public void applySetpoint(double massScale, double comShiftX, double comShiftY, double comShiftZ, double covarianceScale)
+   {
+      double[] shift = {comShiftX, comShiftY, comShiftZ};
+      for (int i = 0; i < nBodies; ++i)
+      {
+         RigidBodyInertialParameters bodyParameters = inertialParameters.get(i);
+         DMatrixRMaj pi = bodyParameters.getParameterVectorPiBasis();
+         double m = pi.get(0, 0);
+         if (!(m > 0.0))
+            continue;
+         double[] c = {pi.get(1, 0) / m, pi.get(2, 0) / m, pi.get(3, 0) / m};
+         // Rotational inertia about the origin, Pi ordering Ixx, Ixy, Ixz, Iyy, Iyz, Izz.
+         double[][] inertia = {{pi.get(4, 0), pi.get(5, 0), pi.get(6, 0)},
+                               {pi.get(5, 0), pi.get(7, 0), pi.get(8, 0)},
+                               {pi.get(6, 0), pi.get(8, 0), pi.get(9, 0)}};
+         double newMass = massScale * m;
+         double[] newCoM = {c[0] + shift[0], c[1] + shift[1], c[2] + shift[2]};
+         double c2 = c[0] * c[0] + c[1] * c[1] + c[2] * c[2];
+         double n2 = newCoM[0] * newCoM[0] + newCoM[1] * newCoM[1] + newCoM[2] * newCoM[2];
+         double[][] newInertia = new double[3][3];
+         for (int r = 0; r < 3; r++)
+         {
+            for (int k = 0; k < 3; k++)
+            {
+               double delta = r == k ? 1.0 : 0.0;
+               double aboutCoM = inertia[r][k] - m * (c2 * delta - c[r] * c[k]);
+               newInertia[r][k] = massScale * aboutCoM + newMass * (n2 * delta - newCoM[r] * newCoM[k]);
+            }
+         }
+         parameterPiBasisContainer.set(0, 0, newMass);
+         for (int r = 0; r < 3; r++)
+            parameterPiBasisContainer.set(1 + r, 0, newMass * newCoM[r]);
+         parameterPiBasisContainer.set(4, 0, newInertia[0][0]);
+         parameterPiBasisContainer.set(5, 0, newInertia[0][1]);
+         parameterPiBasisContainer.set(6, 0, newInertia[0][2]);
+         parameterPiBasisContainer.set(7, 0, newInertia[1][1]);
+         parameterPiBasisContainer.set(8, 0, newInertia[1][2]);
+         parameterPiBasisContainer.set(9, 0, newInertia[2][2]);
+         bodyParameters.setParameterVectorPiBasis(parameterPiBasisContainer);
+         bodyParameters.update();
+         MatrixMissingTools.setMatrixRows(state,
+                                          i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                          bodyParameters.getParameterVectorPiBasis(),
+                                          0,
+                                          RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+      }
+      CommonOps_DDRM.scale(covarianceScale, covariance);
       filteredResidual.zero();
       clearResidualFilterMemory = true;
       updateWatchers();
@@ -457,6 +539,58 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
       if (priorAvailable && tikhonovPriorEnabled.getValue() && !isParametersHeld())
          applyTikhonovPrior();
       updateWatchers();
+      updateExcitationDiagnostics();
+   }
+
+   /** Logging only: diag(P), and the windowed information matrix of each body's theta block with its spectrum. */
+   private void updateExcitationDiagnostics()
+   {
+      int n = RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY;
+      double decay = Math.exp(-diagnosticsDt.getValue() / INFORMATION_WINDOW);
+      int nMeasurements = measurementJacobian.getNumRows();
+      informationJacobianBlock.reshape(nMeasurements, n);
+      for (int b = 0; b < nBodies; ++b)
+      {
+         YoMatrix pDiagonal = covarianceDiagonalWatchers.get(b);
+         for (int j = 0; j < n; j++)
+            pDiagonal.set(j, 0, covariance.get(b * n + j, b * n + j));
+
+         // H_b^T R^-1 H_b with R diagonal.
+         CommonOps_DDRM.extract(measurementJacobian, 0, nMeasurements, b * n, (b + 1) * n, informationJacobianBlock, 0, 0);
+         informationIncrement.zero();
+         for (int r = 0; r < nMeasurements; r++)
+         {
+            double rInverse = 1.0 / measurementCovariance.get(r, r);
+            for (int j = 0; j < n; j++)
+            {
+               double hj = informationJacobianBlock.get(r, j) * rInverse;
+               if (hj == 0.0)
+                  continue;
+               for (int k = 0; k < n; k++)
+                  informationIncrement.add(j, k, hj * informationJacobianBlock.get(r, k));
+            }
+         }
+         DMatrixRMaj omega = windowedInformation.get(b);
+         CommonOps_DDRM.scale(decay, omega);
+         CommonOps_DDRM.addEquals(omega, informationIncrement);
+
+         YoMatrix infoDiagonal = informationDiagonalWatchers.get(b);
+         for (int j = 0; j < n; j++)
+            infoDiagonal.set(j, 0, omega.get(j, j));
+
+         informationScratch.set(omega);
+         if (informationEigenDecomposition.decompose(informationScratch))
+         {
+            for (int e = 0; e < n; e++)
+               informationEigenvalues[e] = informationEigenDecomposition.getEigenvalue(e).getReal();
+            java.util.Arrays.sort(informationEigenvalues);
+            YoMatrix eigen = informationEigenvalueWatchers.get(b);
+            for (int e = 0; e < n; e++)
+               eigen.set(e, 0, informationEigenvalues[e]);
+            double smallest = Math.max(informationEigenvalues[0], 1.0e-300);
+            informationConditionWatchers.get(b).set(informationEigenvalues[n - 1] / smallest);
+         }
+      }
    }
 
    /**

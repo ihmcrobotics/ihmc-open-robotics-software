@@ -142,6 +142,21 @@ public class InertialBaselineCalculator
    }
 
    /**
+    * Clears the rate limiters' memory WITHOUT zeroing the deltas, so their next update jumps straight to the current
+    * estimate instead of slewing toward it (used to apply an estimator setpoint to the controller immediately).
+    */
+   public void resetRateLimiters()
+   {
+      for (int i = 0; i < parameterDeltas.length; i++)
+      {
+         if (basisSets[i].isEmpty())
+            continue;
+         for (int j = 0; j < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; j++)
+            rateLimitedParameterDeltas[i][j].reset();
+      }
+   }
+
+   /**
     * Zeroes the parameter deltas and clears the rate limiters' memory, so that nothing of a previous (possibly
     * diverged) estimate is left to slew back down from.
     */

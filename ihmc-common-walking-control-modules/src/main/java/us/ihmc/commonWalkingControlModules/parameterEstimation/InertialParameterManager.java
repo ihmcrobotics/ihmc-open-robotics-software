@@ -232,6 +232,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoBoolean passThroughEstimatesToController;
    private final YoDouble passThroughGain;
    private final YoBoolean resetEstimator;
+   // Transient-test hook (see applyEstimatorSetpoint()): one-shot, self-cleared.
+   private final YoBoolean applyEstimatorSetpoint;
+   private final YoDouble estimatorSetpointMassScale;
+   private final YoDouble estimatorSetpointComShiftX;
+   private final YoDouble estimatorSetpointComShiftY;
+   private final YoDouble estimatorSetpointComShiftZ;
+   private final YoDouble estimatorSetpointCovarianceScale;
+   private final YoBoolean estimatorSetpointBypassRateLimit;
 
    private final YoBoolean areParametersPhysicallyConsistent;
 
@@ -534,6 +542,19 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       resetEstimator = new YoBoolean("resetEstimator", registry);
       resetEstimator.set(false);
 
+      // Transient testing: move the estimate to a setpoint relative to the current estimate (mass x scale, CoM +
+      // shift, about-CoM inertia x scale, covariance x scale) and watch it reconverge. With bypassRateLimit the
+      // controller model jumps to the setpoint at once; otherwise it slews through the usual rate limiters.
+      applyEstimatorSetpoint = new YoBoolean("applyEstimatorSetpoint", registry);
+      estimatorSetpointMassScale = new YoDouble("estimatorSetpointMassScale", registry);
+      estimatorSetpointMassScale.set(1.0);
+      estimatorSetpointComShiftX = new YoDouble("estimatorSetpointComShiftX", registry);
+      estimatorSetpointComShiftY = new YoDouble("estimatorSetpointComShiftY", registry);
+      estimatorSetpointComShiftZ = new YoDouble("estimatorSetpointComShiftZ", registry);
+      estimatorSetpointCovarianceScale = new YoDouble("estimatorSetpointCovarianceScale", registry);
+      estimatorSetpointCovarianceScale.set(1.0);
+      estimatorSetpointBypassRateLimit = new YoBoolean("estimatorSetpointBypassRateLimit", registry);
+
       areParametersPhysicallyConsistent = new YoBoolean("areParametersPhysicallyConsistent", registry);
       areParametersPhysicallyConsistent.set(false);
    }
@@ -570,6 +591,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          resetEstimator();
          resetEstimator.set(false);
+         return;
+      }
+
+      if (applyEstimatorSetpoint.getValue())
+      {
+         applyEstimatorSetpoint();
+         applyEstimatorSetpoint.set(false);
          return;
       }
 
@@ -674,6 +702,24 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
     * enabled ({@code enableFilter}), and the pass-through gain.
     * </p>
     */
+   private void applyEstimatorSetpoint()
+   {
+      filter.applySetpoint(estimatorSetpointMassScale.getValue(),
+                           estimatorSetpointComShiftX.getValue(),
+                           estimatorSetpointComShiftY.getValue(),
+                           estimatorSetpointComShiftZ.getValue(),
+                           estimatorSetpointCovarianceScale.getValue());
+      estimate.set(filter.getState());
+      filteredEstimate.set(estimate);
+      clearEstimateFilterMemory = true;
+      residual.zero();
+      if (estimatorSetpointBypassRateLimit.getValue())
+         baselineCalculator.resetRateLimiters();
+      LogTools.info("Estimator setpoint applied: mass x" + estimatorSetpointMassScale.getValue() + ", CoM shift ("
+                    + estimatorSetpointComShiftX.getValue() + ", " + estimatorSetpointComShiftY.getValue() + ", "
+                    + estimatorSetpointComShiftZ.getValue() + "), covariance x" + estimatorSetpointCovarianceScale.getValue());
+   }
+
    private void resetEstimator()
    {
       filter.reset();

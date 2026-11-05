@@ -33,6 +33,14 @@ public interface OnlineInertialEstimator
     */
    default void setPriorScaleForBody(int bodyIndex, double scale) { }
 
+   /**
+    * Transient-test hook: moves every estimated body to a setpoint derived from its CURRENT estimate -- mass scaled by
+    * {@code massScale}, CoM shifted by ({@code comShiftX}, {@code comShiftY}, {@code comShiftZ}) in the body frame, and
+    * the rotational inertia about the CoM scaled by {@code massScale} -- and scales the covariance by
+    * {@code covarianceScale}. Default no-op for estimators that do not support it.
+    */
+   default void applySetpoint(double massScale, double comShiftX, double comShiftY, double comShiftZ, double covarianceScale) { }
+
    /** The current estimate, in the Pi basis. */
    DMatrix getState();
 
