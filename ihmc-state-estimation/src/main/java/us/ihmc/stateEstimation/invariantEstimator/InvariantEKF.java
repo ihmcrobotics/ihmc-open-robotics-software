@@ -406,12 +406,6 @@ public class InvariantEKF
    /** Isotropic convenience: sets σ_roll² = σ_pitch² for the gravity-leveling measurement noise. */
    public void setTiltMeasurementVariance(double tiltMeasurementVariance) { gravityUpdater.setTiltMeasurementVariance(tiltMeasurementVariance); }
 
-   /** Observability-constrained updates: when true, no measurement update corrects world yaw. See {@link InvariantUpdater#setSuppressYawCorrection}. */
-   public void setSuppressYawCorrection(boolean suppress) { updater.setSuppressYawCorrection(suppress); }
-
-   /** Yaw correction (rad) the most recent update would have applied had it not been suppressed. */
-   public double getLastSuppressedYawCorrection() { return updater.getLastSuppressedYawCorrection(); }
-
    /** Gates the gravity-leveling PITCH observation on/off (roll is always observed). See {@link GravityLevelingUpdater#setPitchObservable}. */
    public void setGravityPitchObservable(boolean pitchObservable) { gravityUpdater.setPitchObservable(pitchObservable); }
 

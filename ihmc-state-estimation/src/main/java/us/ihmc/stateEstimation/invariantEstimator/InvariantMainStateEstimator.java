@@ -152,7 +152,12 @@ public class InvariantMainStateEstimator implements StateEstimatorController
    private final HumanoidReferenceFrames referenceFrames;
 
    private final InvariantEKFStateEstimator invariantEstimator;
-   private final FootReferencedYawCorrector yawCorrector; // null when yaw seeding is disabled
+   private final FootReferencedYawCorrector yawCorrector;
+   // Foot-referenced yaw seeding, switchable at runtime. On the 2026-11-05 mocap walks it was the source of the
+   // InEKF heading drift (+11/+31/+44 deg over three walks with it, +1.5/+2.8/+5.7 without, against mocap):
+   // a stance foot that twists or slips, or leg-FK yaw error, is read as pelvis yaw and nudged in every tick.
+   private final YoBoolean yoYawSeedingEnabled;
+   private boolean yawSeedingWasEnabled;
    private final InvariantCenterOfMassUpdater centerOfMassUpdater;
 
    private final ProprioceptivePreFilter preFilter; // may be null: raw sensor pass-through
@@ -280,22 +285,18 @@ public class InvariantMainStateEstimator implements StateEstimatorController
                && invariantEstimator.getContactProbability(RobotSide.RIGHT) >= ON_GROUND_INIT_CONTACT_PROBABILITY_THRESHOLD);
       }
 
-      if (enableYawSeeding)
-      {
-         SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
-         for (RobotSide side : RobotSide.values)
-            soleFrames.put(side, referenceFrames.getSoleFrame(side));
-
-         yawCorrector = new FootReferencedYawCorrector(invariantEstimator.getInvariantEKF(),
-                                                       referenceFrames.getPelvisFrame(),
-                                                       soleFrames,
-                                                       invariantEstimator::getContactProbability,
-                                                       registry);
-      }
-      else
-      {
-         yawCorrector = null;
-      }
+      // Always built so it can be switched on at runtime; enableYawSeeding only sets the initial state.
+      SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+         soleFrames.put(side, referenceFrames.getSoleFrame(side));
+      yawCorrector = new FootReferencedYawCorrector(invariantEstimator.getInvariantEKF(),
+                                                    referenceFrames.getPelvisFrame(),
+                                                    soleFrames,
+                                                    invariantEstimator::getContactProbability,
+                                                    registry);
+      yoYawSeedingEnabled = new YoBoolean("invariantYawSeedingEnabled", registry);
+      yoYawSeedingEnabled.set(enableYawSeeding);
+      yawSeedingWasEnabled = enableYawSeeding;
 
       centerOfMassUpdater = new InvariantCenterOfMassUpdater(rootJoint, centerOfMassDataHolder);
       registry.addChild(centerOfMassUpdater.getRegistry());
@@ -312,7 +313,11 @@ public class InvariantMainStateEstimator implements StateEstimatorController
 
       invariantEstimator.doControl();
 
-      if (yawCorrector != null)
+      boolean yawSeeding = yoYawSeedingEnabled.getValue();
+      if (yawSeeding && !yawSeedingWasEnabled)
+         yawCorrector.reset(); // anchors taken while disabled are stale; re-anchor at the next touchdown
+      yawSeedingWasEnabled = yawSeeding;
+      if (yawSeeding)
          yawCorrector.correct();
 
       writeRootJoint();
@@ -458,8 +463,7 @@ public class InvariantMainStateEstimator implements StateEstimatorController
 
       invariantEstimator.initializeEstimator(rootJointTransform, jointPositions);
 
-      if (yawCorrector != null)
-         yawCorrector.reset();
+      yawCorrector.reset();
 
       centerOfMassUpdater.initialize();
    }
