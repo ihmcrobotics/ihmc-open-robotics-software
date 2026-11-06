@@ -189,6 +189,11 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
       return duration + stepDuration * footsteps.getFootstepDataList().size();
    }
 
+   protected double getExtraSwingHeightTestSimulationDuration(double swingHeight)
+   {
+      return 0.0;
+   }
+
    @Test
    public void testReallyHighFootstep()
    {
@@ -208,7 +213,7 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
 
       FootstepDataListMessage footstepDataList = createFootstepsForSwingHeightTest(currentHeight);
       simulationTestHelper.publishToController(footstepDataList);
-      success = success && simulationTestHelper.simulateNow(getSimDuration(footstepDataList));
+      success = success && simulationTestHelper.simulateNow(getSimDuration(footstepDataList) + getExtraSwingHeightTestSimulationDuration(currentHeight));
       assertTrue(success);
 
       Point3D center = new Point3D(1.2, 0.0, .75);
@@ -238,7 +243,7 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
 
       FootstepDataListMessage footstepDataList = createFootstepsForSwingHeightTest(currentHeight);
       simulationTestHelper.publishToController(footstepDataList);
-      success = success && simulationTestHelper.simulateNow(getSimDuration(footstepDataList));
+      success = success && simulationTestHelper.simulateNow(getSimDuration(footstepDataList) + getExtraSwingHeightTestSimulationDuration(currentHeight));
       assertTrue(success);
 
       Point3D center = new Point3D(1.2, 0.0, .75);
