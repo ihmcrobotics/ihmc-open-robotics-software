@@ -21,14 +21,20 @@ public class TriangleWaveFunctionGenerator extends BaseFunctionGenerator
       double amplitude = getAmplitude();
 
       if (angle <= Math.PI)
-      { // Going up
+      { // Positive
          double alpha = angle / Math.PI;
-         return offset + EuclidCoreTools.interpolate(-amplitude, amplitude, alpha);
+         if (alpha < 0.5) // Going up
+            return offset + EuclidCoreTools.interpolate(0, amplitude, alpha * 2.0);
+         else // Going down
+            return offset + EuclidCoreTools.interpolate(amplitude, 0, 2.0 * (alpha - 0.5));
       }
       else
-      { // Going down
+      { // Negative
          double alpha = (angle - Math.PI) / Math.PI;
-         return offset + EuclidCoreTools.interpolate(amplitude, -amplitude, alpha);
+         if (alpha < 0.5) // Going down
+            return offset + EuclidCoreTools.interpolate(0.0, -amplitude, alpha * 2.0);
+         else // Going up
+            return offset + EuclidCoreTools.interpolate(-amplitude, 0, 2.0 * (alpha - 0.5));
       }
    }
 

@@ -70,6 +70,7 @@ public class YoFunctionGeneratorNew
    private final SquareWaveFunctionGenerator squareFunction = new SquareWaveFunctionGenerator();
    private final WhiteNoiseFunctionGenerator whiteNoiseFunction = new WhiteNoiseFunctionGenerator();
    private final ChirpLinearFunctionGenerator chirpLinearFunction = new ChirpLinearFunctionGenerator();
+   private final ChirpExponentialFunctionGenerator chirpExponentialFunction = new ChirpExponentialFunctionGenerator();
    private final TimeToDTConverter timeToDTConverter;
    private final DoubleProvider dt;
 
@@ -139,6 +140,13 @@ public class YoFunctionGeneratorNew
       chirpLinearFunction.setHighFrequency(chirpHighFrequency);
       chirpLinearFunction.setChirpDuration(chirpDuration);
 
+      chirpExponentialFunction.setOffset(offset);
+      chirpExponentialFunction.setAmplitude(amplitude);
+      chirpExponentialFunction.setPhase(phase);
+      chirpExponentialFunction.setLowFrequency(chirpLowFrequency);
+      chirpExponentialFunction.setHighFrequency(chirpHighFrequency);
+      chirpExponentialFunction.setChirpDuration(chirpDuration);
+
       offset.set(0.0);
       amplitude.set(0.0);
       phase.set(0.0);
@@ -151,6 +159,16 @@ public class YoFunctionGeneratorNew
    public void reset()
    {
       angle.set(0.0);
+      BaseFunctionGenerator function = switch (mode.getValue())
+      {
+         case SQUARE -> squareFunction;
+         case SINE -> sineFunction;
+         case SAWTOOTH -> sawtoothFunction;
+         case TRIANGLE -> triangleFunction;
+         default -> null;
+      };
+      if (function != null)
+         function.resetAngle();
    }
 
    private final MutableDouble valueA = new MutableDouble();
@@ -264,6 +282,10 @@ public class YoFunctionGeneratorNew
             // For viz purposes
             chirpCurrentFrequency.set(chirpLinearFunction.getFrequency());
          }
+         else if (mode.getValue() == YoFunctionGeneratorMode.CHIRP_EXPONENTIAL)
+         {
+            chirpCurrentFrequency.set(chirpExponentialFunction.getFrequency());
+         }
       }
    }
 
@@ -279,6 +301,7 @@ public class YoFunctionGeneratorNew
          case SAWTOOTH:
          case TRIANGLE:
          case CHIRP_LINEAR:
+         case CHIRP_EXPONENTIAL:
             return true;
          default:
             return false;
@@ -316,6 +339,17 @@ public class YoFunctionGeneratorNew
          chirpLinearFunction.setBaseFunction(baseFunction);
          chirpLinearFunction.resetChirp();
       }
+      if (mode == YoFunctionGeneratorMode.CHIRP_EXPONENTIAL)
+      {
+         BaseFunctionGenerator baseFunction = chirpBaseFunctionMode.getValue().function;
+         baseFunction.setOffset(offset);
+         baseFunction.setAmplitude(amplitude);
+         baseFunction.setFrequency(frequency);
+         baseFunction.setPhase(phase);
+         baseFunction.resetAngle();
+         chirpExponentialFunction.setBaseFunction(baseFunction);
+         chirpExponentialFunction.resetChirp();
+      }
    }
 
    private double compute(YoFunctionGeneratorMode mode, double dt, MutableDouble value, MutableDouble valueDot, MutableDouble valueDDot)
@@ -338,6 +372,8 @@ public class YoFunctionGeneratorNew
             return computeFunction(triangleFunction, dt, value, valueDot, valueDDot);
          case CHIRP_LINEAR:
             return computeChirpLinear(dt, value, valueDot, valueDDot);
+         case CHIRP_EXPONENTIAL:
+            return computeChirpExponential(dt, value, valueDot, valueDDot);
          default:
             return Double.NaN;
       }
@@ -375,6 +411,15 @@ public class YoFunctionGeneratorNew
       valueDot.setValue(chirpLinearFunction.getValueDot());
       valueDDot.setValue(chirpLinearFunction.getValueDDot());
       return chirpLinearFunction.getAngle();
+   }
+
+   private double computeChirpExponential(double dt, MutableDouble value, MutableDouble valueDot, MutableDouble valueDDot)
+   {
+      chirpExponentialFunction.integrateAngle(dt);
+      value.setValue(chirpExponentialFunction.getValue());
+      valueDot.setValue(chirpExponentialFunction.getValueDot());
+      valueDDot.setValue(chirpExponentialFunction.getValueDDot());
+      return chirpExponentialFunction.getAngle();
    }
 
    /**

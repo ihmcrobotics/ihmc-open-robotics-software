@@ -317,6 +317,19 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerFactoriesMap.put(customControllerStateFactory.getStateEnum(), customControllerStateFactory);
    }
 
+   public void removeControlState(HighLevelControllerName name)
+   {
+      controllerFactoriesMap.remove(name);
+      int i = 0;
+      while (i < controllerStateFactories.size())
+      {
+         if (controllerStateFactories.get(i).getStateEnum().equals(name))
+            controllerStateFactories.remove(i);
+         else
+            i++;
+      }
+   }
+
    /**
     * Adds a transition from {@code currentControlStateEnum} to {@code nextControlStateEnum} that will
     * trigger as soon as {@code currentControlStateEnum}'s
