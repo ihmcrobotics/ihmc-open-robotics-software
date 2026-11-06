@@ -98,6 +98,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    public void process3DViewInput(ImGui3DViewInput viewInput)
    {
+      updateProceduralGround();
+
       if (selectedObject != null && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
          resetSelection();
 
