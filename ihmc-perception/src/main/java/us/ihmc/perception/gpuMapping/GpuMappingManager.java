@@ -95,6 +95,15 @@ public class GpuMappingManager
       controllerHeightMapMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(HeightMapMessageForController.class, robotName));
    }
 
+   /**
+    * Resets the height map to the feet on the next {@link #update}, the same as a {@link PerceptionAPI#RESET_HEIGHT_MAP} message
+    * but without waiting for it to arrive.
+    */
+   public void requestReset()
+   {
+      resetHeightMapRequested.set();
+   }
+
    boolean firstTick = true;
    /**
     * Update the Height Map with the latest depth image from the sensor
