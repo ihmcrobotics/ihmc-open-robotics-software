@@ -26,6 +26,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.simulation.environment.mujoco.RDXMujocoArticulatedDynamics;
+import us.ihmc.rdx.simulation.environment.isaac.RDXIsaacSimArticulatedObject;
+import us.ihmc.rdx.simulation.environment.isaac.RDXIsaacSimLink;
 import us.ihmc.rdx.simulation.environment.mujoco.RDXMujocoArticulatedObject;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelInstance;
@@ -71,7 +73,7 @@ import java.util.Map;
  * Joint positions come from the simulation, or from the sliders while "Override joint positions"
  * is checked.
  */
-public class RDXURDFArticulatedObject extends RDXEnvironmentObject implements RDXMujocoArticulatedObject
+public class RDXURDFArticulatedObject extends RDXEnvironmentObject implements RDXMujocoArticulatedObject, RDXIsaacSimArticulatedObject
 {
    /** N m s/rad or N s/m, used when the URDF gives no damping. The articulated door's hinge uses the same. */
    private static final double DEFAULT_DAMPING = 2.0;
@@ -723,6 +725,57 @@ public class RDXURDFArticulatedObject extends RDXEnvironmentObject implements RD
    /** Model addresses of one placed object: its welded root body, then {qpos, dof} for each movable joint. */
    private record Binding(int rootBody, int[][] joints)
    {
+   }
+
+   // -------------------------------------------------------------------------------------------
+   // Isaac Sim export
+   // -------------------------------------------------------------------------------------------
+
+   @Override
+   public List<RDXIsaacSimLink> getIsaacSimLinks()
+   {
+      List<RDXIsaacSimLink> links = new ArrayList<>();
+      for (int i = 0; i < parts.size(); i++)
+      {
+         PartDefinition part = parts.get(i);
+         RDXIsaacSimLink link;
+         if (part.parentIndex < 0)
+         {
+            link = RDXIsaacSimLink.root(part.name);
+         }
+         else
+         {
+            RDXIsaacSimLink.JointType type = switch (part.type)
+            {
+               case REVOLUTE -> RDXIsaacSimLink.JointType.REVOLUTE;
+               case CONTINUOUS -> RDXIsaacSimLink.JointType.CONTINUOUS;
+               case PRISMATIC -> RDXIsaacSimLink.JointType.PRISMATIC;
+               default -> RDXIsaacSimLink.JointType.FIXED;
+            };
+            link = RDXIsaacSimLink.child(part.name, part.parentIndex, type, part.jointOrigin, part.axis).setJointName(part.jointName);
+            if (part.type.isMovable())
+            {
+               link.setLimits(part.lower, part.upper);
+               link.setPosition(jointPositions[i]);
+               link.setDrive(part.damping > 0.0 ? part.damping : DEFAULT_DAMPING, 0.0);
+            }
+         }
+         link.setMass(Math.max(part.mass, MIN_MASS), new Point3D(part.inertiaPose.getTranslation()));
+         if (i == 0)
+            link.addVisual(realisticModel, realisticModelOffset);
+         for (PlacedMesh visual : visualInstances.get(i))
+            link.addVisual(visual.instance.model, visual.origin);
+         for (PlacedMesh collision : collisionInstances.get(i))
+            link.addCollision(RDXIsaacSimLink.Collision.mesh(collision.instance.model, collision.origin));
+         links.add(link);
+      }
+      return links;
+   }
+
+   @Override
+   public List<String[]> getIsaacSimExcludedLinkPairs()
+   {
+      return excludedBodyPairs;
    }
 
    // -------------------------------------------------------------------------------------------

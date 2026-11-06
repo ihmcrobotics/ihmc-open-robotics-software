@@ -24,6 +24,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.simulation.environment.isaac.RDXIsaacSimEnvironmentExporter;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectLibrary;
@@ -65,6 +66,7 @@ public class RDXEnvironmentBuilder extends RDXPanel
    private boolean isPlacing = false;
    private boolean confirmingDeleteAll = false;
    private String selectedEnvironmentFile = null;
+   private String isaacSimExportStatus = null;
    private RDXEnvironmentObject selectedObject;
    private RDXEnvironmentObject intersectedObject;
 
@@ -328,6 +330,37 @@ public class RDXEnvironmentBuilder extends RDXPanel
             }
          });
          reindexScripts();
+      }
+
+      ImGui.separator();
+      if (ImGui.button(labels.get("Export to Isaac Sim")))
+         exportToIsaacSim();
+      ImGuiTools.previousWidgetTooltip("Writes this environment as a USD stage Isaac Sim opens, under " + isaacSimExportRoot());
+      if (isaacSimExportStatus != null)
+         ImGui.textWrapped(isaacSimExportStatus);
+   }
+
+   /** {@code ~/.ihmc/isaacSimExports}, one folder per environment. */
+   private static java.nio.file.Path isaacSimExportRoot()
+   {
+      return java.nio.file.Paths.get(System.getProperty("user.home"), ".ihmc", "isaacSimExports");
+   }
+
+   private void exportToIsaacSim()
+   {
+      String environmentName = selectedEnvironmentFile == null ? "Untitled" : selectedEnvironmentFile.replaceFirst("\\.json$", "");
+      try
+      {
+         java.nio.file.Path stage = new RDXIsaacSimEnvironmentExporter().export(environmentName,
+                                                                                allObjects,
+                                                                                ambientLightAmount.get(),
+                                                                                isaacSimExportRoot().resolve(environmentName));
+         isaacSimExportStatus = "Exported " + stage;
+      }
+      catch (java.io.IOException | RuntimeException exception)
+      {
+         isaacSimExportStatus = "Isaac Sim export failed: " + exception.getMessage();
+         LogTools.error(isaacSimExportStatus, exception);
       }
    }
 

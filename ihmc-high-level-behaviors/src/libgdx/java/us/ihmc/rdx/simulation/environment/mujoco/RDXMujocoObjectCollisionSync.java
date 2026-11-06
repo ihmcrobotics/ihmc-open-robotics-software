@@ -73,7 +73,6 @@ public class RDXMujocoObjectCollisionSync implements Controller
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final Set<String> warnedUnsupportedTypes = new HashSet<>();
    private final Set<String> warnedMissingHulls = new HashSet<>();
-   private final RigidBodyTransform collisionToWorld = new RigidBodyTransform();
    private final Quaternion quaternion = new Quaternion();
 
    private final AtomicReference<List<RDXMujocoArticulatedDynamics>> articulatedCommands = new AtomicReference<>(List.of());
@@ -633,10 +632,20 @@ public class RDXMujocoObjectCollisionSync implements Controller
 
    private RDXMujocoCollisionShape toCollisionShape(RDXEnvironmentObject object)
    {
+      return toCollisionShape(object, warnedMissingHulls, warnedUnsupportedTypes);
+   }
+
+   /**
+    * The collision MuJoCo simulates for {@code object}, in the world frame, or null when it has none.
+    * The sets hold what was already warned about, so each warning is logged once.
+    */
+   public static RDXMujocoCollisionShape toCollisionShape(RDXEnvironmentObject object, Set<String> warnedMissingHulls, Set<String> warnedUnsupportedTypes)
+   {
       Shape3DBasics geometry = object.getCollisionGeometryObject();
       if (geometry == null)
          return null;
 
+      RigidBodyTransform collisionToWorld = new RigidBodyTransform();
       String name = "rdx_" + object.getPascalCasedName() + "_" + object.getObjectIndex();
       boolean dynamic = RDXInteractableObjectLibrary.isInteractable(object);
       double mass = object.getMass();

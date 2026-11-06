@@ -245,6 +245,27 @@ Then the script drives each joint to both limits, with the other joints closed a
 | `--force` | Replace an existing resource folder and class. |
 | `--dry-run` | Print the parts, joints and checks without writing files. |
 
+# Export an RDX environment to Isaac Sim
+
+The other direction: an RDX environment becomes one USD stage that Isaac Sim opens. USD is Isaac Sim's own format and holds both what a GLB holds (meshes, materials) and what a URDF holds (links, joints, limits, masses, colliders). No script is needed, because RDX exports from its loaded models, so `.g3dj`, `.glb` and procedural terrain all export the same way.
+
+In the **Environment** panel, load or build the environment and click **Export to Isaac Sim**. The stage is written to `~/.ihmc/isaacSimExports/<environment>/<environment>.usda`, with its textures in `textures/` beside it. Open it in Isaac Sim with **File > Open** and press **Play**.
+
+The stage has:
+
+| RDX | USD |
+| --- | --- |
+| Each object's visual | `Mesh` prims under `<object>/Visuals`, with `UsdPreviewSurface` materials. Textures are read back from the GPU as PNGs. |
+| The collision MuJoCo simulates (convex hull, box, sphere, procedural terrain pieces) | Hidden collider prims under `<object>/Collisions`. Hulls use the `convexHull` approximation. |
+| Objects in `RDXInteractableObjectLibrary` (bottle, box, drill, ...) | Rigid bodies with the object's mass, so they fall and can be pushed. Everything else is static. |
+| URDF objects and the articulated door | Fixed-base articulations: a rigid body per link, a revolute, prismatic or fixed joint per link with the same axis, limits, damping and spring as in MuJoCo, and the current joint positions. Contact exclusions become filtered pairs. |
+| Point and directional lights | `SphereLight` and `DistantLight`, plus a `DomeLight` scaled by the ambient light. |
+| MuJoCo's flat ground | An invisible ground plane at z = 0, unless the environment has procedural ground. |
+
+The robot is not exported. Joint names are the URDF's, so the cabinet's joints are `door_left_joint`, `door_right_joint`, `drawer_bottom_joint` and `drawer_top_joint`. The door's latch is MuJoCo-side logic and is not exported. Its panel swings freely once the lever turns, or without it.
+
+For example, EmptyRoom plus a cabinet, a bottle, a box, a table and uneven tiles exports in about a second as a 7 MB stage. In Isaac Sim the bottle dropped from 1 m to rest at z = 0.079 m, the same height as in MuJoCo. Pushing the cabinet's joints opened the top drawer to its 0.4 m limit and swung both doors open. The bottom drawer stayed behind the closed doors.
+
 # Requirements
 
 Python 3 with `trimesh` and `numpy`. `make_convex_collision_parts.py` also needs `scipy`:
