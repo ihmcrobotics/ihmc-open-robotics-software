@@ -392,9 +392,16 @@ public class RDXTeleoperationManager extends RDXPanel
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderResetSimulationOverlay);
       if (teleportSimulationCallback != null)
       {
-         double spawnYaw = syncedRobot.getRobotModel().getDefaultRobotInitialSetup().getInitialYaw();
-         new RDXTeleportRobotTool().create(baseUI, teleportGroundTruthTerrain, spawnYaw, this::teleportSimulation);
+         new RDXTeleportRobotTool().create(baseUI, teleportGroundTruthTerrain, this::getPelvisYawInWorld, this::teleportSimulation);
       }
+   }
+
+   /** Where the teleport arrow starts, so it points the way the robot faces now. */
+   private double getPelvisYawInWorld()
+   {
+      FramePose3D pelvisPose = new FramePose3D(syncedRobot.getReferenceFrames().getPelvisFrame());
+      pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
+      return pelvisPose.getYaw();
    }
 
    private void teleportSimulation(Pose3DReadOnly midFeetGoal)

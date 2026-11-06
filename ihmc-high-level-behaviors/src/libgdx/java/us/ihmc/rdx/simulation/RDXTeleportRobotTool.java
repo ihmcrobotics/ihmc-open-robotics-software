@@ -23,11 +23,12 @@ import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 import java.util.function.Consumer;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 /**
  * Hold {@link #KEY} over the 3D view to show where the robot's mid-feet point will go: the highest point of the ground truth
- * terrain under the mouse. The arrow is the pelvis facing, starting at the spawn facing; while holding, the left and right arrow
+ * terrain under the mouse. The arrow is the pelvis facing, starting at the robot's current pelvis yaw; while holding, the left and right arrow
  * keys rotate it counterclockwise and clockwise. Releasing calls the teleport callback with that pose, e.g. to reset a simulation there.
  */
 public class RDXTeleportRobotTool
@@ -41,7 +42,7 @@ public class RDXTeleportRobotTool
    private final Point3D goal = new Point3D();
    private final RigidBodyTransform arrowPose = new RigidBodyTransform();
    private double yaw;
-   private double spawnYaw;
+   private DoubleSupplier initialYaw;
    private RDXModelInstance disc;
    private RDXModelInstance arrow;
    private boolean active = false;
@@ -49,12 +50,15 @@ public class RDXTeleportRobotTool
 
    /**
     * @param groundTruthTerrain the terrain the simulation collides with, or null for flat ground at z = 0
-    * @param spawnYaw           the pelvis yaw the robot spawns with, where the arrow starts
+    * @param initialYaw         the robot's current pelvis yaw, read each time the key is pressed, where the arrow starts
     * @param teleport           called with the mid-feet goal pose, position and yaw, when the key is released
     */
-   public void create(RDXBaseUI baseUI, Supplier<? extends TerrainObject3D> groundTruthTerrain, double spawnYaw, Consumer<Pose3DReadOnly> teleport)
+   public void create(RDXBaseUI baseUI,
+                      Supplier<? extends TerrainObject3D> groundTruthTerrain,
+                      DoubleSupplier initialYaw,
+                      Consumer<Pose3DReadOnly> teleport)
    {
-      this.spawnYaw = spawnYaw;
+      this.initialYaw = initialYaw;
       RDXBaseUI.getInstance().getKeyBindings().register("Teleport robot: hold, release to reset the sim there", String.valueOf(KEY));
       RDXBaseUI.getInstance().getKeyBindings().register("Teleport robot: rotate counterclockwise / clockwise", "T + Left / Right arrow");
       Color color = new Color(0.1f, 0.6f, 1.0f, 1.0f);
@@ -85,7 +89,7 @@ public class RDXTeleportRobotTool
       {
          active = true;
          goalValid = false;
-         yaw = spawnYaw;
+         yaw = initialYaw.getAsDouble();
       }
       if (!active)
          return;
