@@ -108,6 +108,17 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
    // information matrix Omega = sum H_b^T R^-1 H_b per body (time constant INFORMATION_WINDOW), its diagonal,
    // eigenvalues (ascending) and condition number.
    private static final double INFORMATION_WINDOW = 2.0;
+   // Optional geometric prior (Cho, Lee and Shin, ICRA 2024; Lee, Wensing and Park, T-RO 2020): instead of the diagonal
+   // per-channel variances, use R_prior = (w H0)^-1 per body, where H0 is the Hessian at theta = 0 of the log-det
+   // (Bregman) divergence D(J(theta) || J_nominal) between pseudo-inertias. Coordinate-invariant: mass, first moment
+   // and rotational inertia are weighted by their effect on the pseudo-inertia rather than by hand-picked variances.
+   // -DinertialEstimator.priorMetric=DIAG (default) | LOGDET, -DinertialEstimator.logDetPriorWeight (default 10).
+   private static final boolean LOG_DET_PRIOR = "LOGDET".equalsIgnoreCase(System.getProperty("inertialEstimator.priorMetric", "DIAG"));
+   private static final double LOG_DET_PRIOR_WEIGHT = Double.parseDouble(System.getProperty("inertialEstimator.logDetPriorWeight", "10.0"));
+   // ALL: geometric prior on every channel. INERTIA: geometric metric restricted to the rotational-inertia channels
+   // (d, s), leaving mass (alpha) and first moment (t) unregularized, as in the paper's inertia-only prior.
+   private static final boolean LOG_DET_PRIOR_INERTIA_ONLY = "INERTIA".equalsIgnoreCase(System.getProperty("inertialEstimator.logDetPriorSubspace", "INERTIA"));
+   private final List<DMatrixRMaj> logDetPriorCovarianceBlocks = new ArrayList<>();
    private final List<YoMatrix> covarianceDiagonalWatchers = new ArrayList<>();
    private final List<YoMatrix> informationDiagonalWatchers = new ArrayList<>();
    private final List<YoMatrix> informationEigenvalueWatchers = new ArrayList<>();
@@ -212,6 +223,12 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
       }
 
       comCouplingPoints = comCouplingList.toArray(new double[0][]);
+      if (LOG_DET_PRIOR && parameters.useGeneralizedPhysicalConsistency())
+      {
+         for (RigidBodyInertialParameters bodyParameters : inertialParameters)
+            logDetPriorCovarianceBlocks.add(computeLogDetPriorCovariance(bodyParameters, LOG_DET_PRIOR_WEIGHT));
+         LogTools.info("InertialPhysicallyConsistentKalmanFilter: log-det (geometric) prior, weight " + LOG_DET_PRIOR_WEIGHT);
+      }
       for (double[] cp : comCouplingPoints)
          if (cp != null)
             hasCoMCoupling = true;
@@ -627,6 +644,18 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
          priorCovarianceDiag.set(base + 8, base + 8, sb * varT);
          priorCovarianceDiag.set(base + 9, base + 9, sb * varT3);
       }
+      if (!logDetPriorCovarianceBlocks.isEmpty())
+      {
+         priorCovarianceDiag.zero();
+         for (int b = 0; b < nBodies; ++b)
+         {
+            int base = b * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY;
+            MatrixMissingTools.setMatrixBlock(priorCovarianceDiag, base, base, logDetPriorCovarianceBlocks.get(b), 0, 0,
+                                              RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                              RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                              priorBodyScale[b].getValue());
+         }
+      }
 
       for (int i = 0; i < nBodies; ++i)
          MatrixMissingTools.setMatrixRows(priorThetaFull,
@@ -753,6 +782,93 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
    private void filter(DMatrix matrixToFilter, AlphaFilteredYoMatrix filterContainer)
    {
       filterContainer.setAndSolve(matrixToFilter);
+   }
+
+   /** (w H0)^-1, with H0 the Hessian of the log-det divergence to the nominal at theta = 0 (central differences). */
+   private static DMatrixRMaj computeLogDetPriorCovariance(RigidBodyInertialParameters bodyParameters, double weight)
+   {
+      int n = RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY;
+      DMatrixRMaj nominalPi = new DMatrixRMaj(bodyParameters.getParameterVectorPiBasis());
+      DMatrixRMaj nominalTheta = new DMatrixRMaj(n, 1);
+      RigidBodyInertialParameters.fromPiBasisToThetaBasis(nominalPi, nominalTheta);
+      DMatrixRMaj nominalPseudoInverse = pseudoInertia(nominalPi);
+      CommonOps_DDRM.invert(nominalPseudoInverse);
+
+      double h = 1.0e-3;
+      DMatrixRMaj hessian = new DMatrixRMaj(n, n);
+      double d0 = logDetDivergence(new DMatrixRMaj(n, 1), nominalTheta, nominalPseudoInverse);
+      for (int j = 0; j < n; j++)
+      {
+         for (int k = j; k < n; k++)
+         {
+            double[] signs = {1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0};
+            double[] values = new double[4];
+            for (int c = 0; c < 4; c++)
+            {
+               DMatrixRMaj deviation = new DMatrixRMaj(n, 1);
+               deviation.add(j, 0, signs[2 * c] * h);
+               deviation.add(k, 0, signs[2 * c + 1] * h);
+               values[c] = logDetDivergence(deviation, nominalTheta, nominalPseudoInverse) - d0;
+            }
+            double value = (values[0] - values[1] - values[2] + values[3]) / (4.0 * h * h);
+            hessian.set(j, k, value);
+            hessian.set(k, j, value);
+         }
+      }
+      CommonOps_DDRM.scale(weight, hessian);
+      DMatrixRMaj covarianceBlock = new DMatrixRMaj(n, n);
+      if (LOG_DET_PRIOR_INERTIA_ONLY)
+      {
+         // Prior information only on the inertia channels 1..6; alpha and t get a negligible prior (variance 1e6).
+         DMatrixRMaj inertiaInformation = CommonOps_DDRM.extract(hessian, 1, 7, 1, 7);
+         DMatrixRMaj inertiaCovariance = new DMatrixRMaj(6, 6);
+         if (!CommonOps_DDRM.invert(inertiaInformation, inertiaCovariance))
+            throw new RuntimeException("Log-det prior inertia Hessian is singular");
+         CommonOps_DDRM.insert(inertiaCovariance, covarianceBlock, 1, 1);
+         covarianceBlock.set(0, 0, 1.0e6);
+         for (int t = 7; t < n; t++)
+            covarianceBlock.set(t, t, 1.0e6);
+         return covarianceBlock;
+      }
+      if (!CommonOps_DDRM.invert(hessian, covarianceBlock))
+         throw new RuntimeException("Log-det prior Hessian is singular");
+      return covarianceBlock;
+   }
+
+   private static double logDetDivergence(DMatrixRMaj deviation, DMatrixRMaj nominalTheta, DMatrixRMaj nominalPseudoInverse)
+   {
+      int n = RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY;
+      DMatrixRMaj composed = new DMatrixRMaj(n, 1);
+      DMatrixRMaj pi = new DMatrixRMaj(n, 1);
+      RigidBodyInertialParameters.composeThetaBasis(deviation, nominalTheta, composed);
+      RigidBodyInertialParameters.fromThetaBasisToPiBasis(composed, pi);
+      DMatrixRMaj product = new DMatrixRMaj(4, 4);
+      CommonOps_DDRM.mult(nominalPseudoInverse, pseudoInertia(pi), product);
+      return -Math.log(CommonOps_DDRM.det(product)) + CommonOps_DDRM.trace(product) - 4.0;
+   }
+
+   /** Pseudo-inertia [[0.5 tr(I) 1 - I, m c], [(m c)^T, m]] from a Pi-basis vector (I about the body-frame origin). */
+   private static DMatrixRMaj pseudoInertia(DMatrixRMaj pi)
+   {
+      double ixx = pi.get(4, 0), ixy = pi.get(5, 0), ixz = pi.get(6, 0), iyy = pi.get(7, 0), iyz = pi.get(8, 0), izz = pi.get(9, 0);
+      double halfTrace = 0.5 * (ixx + iyy + izz);
+      DMatrixRMaj pseudo = new DMatrixRMaj(4, 4);
+      pseudo.set(0, 0, halfTrace - ixx);
+      pseudo.set(1, 1, halfTrace - iyy);
+      pseudo.set(2, 2, halfTrace - izz);
+      pseudo.set(0, 1, -ixy);
+      pseudo.set(1, 0, -ixy);
+      pseudo.set(0, 2, -ixz);
+      pseudo.set(2, 0, -ixz);
+      pseudo.set(1, 2, -iyz);
+      pseudo.set(2, 1, -iyz);
+      for (int r = 0; r < 3; r++)
+      {
+         pseudo.set(r, 3, pi.get(1 + r, 0));
+         pseudo.set(3, r, pi.get(1 + r, 0));
+      }
+      pseudo.set(3, 3, pi.get(0, 0));
+      return pseudo;
    }
 
    private void updateWatchers()
