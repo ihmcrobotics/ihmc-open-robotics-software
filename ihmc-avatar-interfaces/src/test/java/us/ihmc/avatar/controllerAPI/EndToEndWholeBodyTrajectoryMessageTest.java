@@ -48,6 +48,19 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
    private SCS2AvatarTestingSimulation simulationTestHelper;
 
+   protected SCS2AvatarTestingSimulation createSimulationTestHelper()
+   {
+      SCS2AvatarTestingSimulationFactory testSimulationFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                        simulationTestingParameters);
+      configureSimulationFactory(testSimulationFactory);
+      return testSimulationFactory.createAvatarTestingSimulation();
+   }
+
+   /** Extension point for subclasses to tweak the simulation factory (e.g. swap physics engine) before the simulation is built. No-op by default. */
+   protected void configureSimulationFactory(SCS2AvatarTestingSimulationFactory testSimulationFactory)
+   {
+   }
+
    @Test
    public void testSingleWaypoint() throws Exception
    {
@@ -56,7 +69,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       Random random = new Random(564574L);
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
@@ -195,7 +208,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       Random random = new Random(564574L);
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
@@ -320,7 +333,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       Random random = new Random(564574L);
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
@@ -446,7 +459,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
@@ -477,7 +490,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
