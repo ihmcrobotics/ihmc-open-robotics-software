@@ -354,10 +354,27 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
 
          yoPositionTau.set(kp.getValue() * yoPositionError.getValue());
          yoVelocityTau.set(kd.getValue() * yoVelocityError.getValue());
+
          double torque = MathTools.clamp(yoControllerTau.getValue() + yoPositionTau.getValue() + yoVelocityTau.getValue(),
                                          simOutput.getEffortLimitLower(),
                                          simOutput.getEffortLimitUpper());
-         simInput.setEffort(torque);
+
+         // Publish the impedance command alongside the torque it collapses to, so a physics engine
+         // that models actuators can close the loop at its own rate instead of holding a
+         // controller-rate torque constant between physics steps. An engine that cannot simply reads
+         // the effort, as it always has.
+         //
+         // The setpoints are reconstructed from the clamped errors, which preserves the
+         // feedback-error limits exactly: adding a clamped error back onto the measurement is the
+         // same as clamping the setpoint around it. Publishing here rather than from a separate
+         // writer is what keeps the command downstream of corruption, velocity scaling, the clamps,
+         // InterpolatedSCS2OutputWriter and the low-level output processor.
+         simInput.setEffortAndCommand(torque,
+                                      yoControllerTau.getValue(),
+                                      simOutput.getQ() + yoPositionError.getValue(),
+                                      simOutput.getQd() + yoVelocityError.getValue(),
+                                      kp.getValue(),
+                                      kd.getValue());
          previousVelocity.set(simOutput.getQd());
       }
 
