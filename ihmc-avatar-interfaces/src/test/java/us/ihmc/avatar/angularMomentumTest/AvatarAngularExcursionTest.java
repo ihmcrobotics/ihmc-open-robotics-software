@@ -46,6 +46,46 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
 
    protected abstract double getStepWidth();
 
+   protected double getMoveInPlaceYawTolerance()
+   {
+      return 5e-3;
+   }
+
+   protected double getMoveInPlacePitchTolerance()
+   {
+      return 5e-3;
+   }
+
+   protected double getMoveInPlaceRollTolerance()
+   {
+      return 5e-3;
+   }
+
+   protected double getForwardWalkYawTolerance()
+   {
+      return 1e-2;
+   }
+
+   protected double getForwardWalkRollTolerance()
+   {
+      return 1e-2;
+   }
+
+   protected double getForwardWalkPitchTolerance()
+   {
+      return 1e-1;
+   }
+
+   protected double getExtraWalkInASquareSimulationDuration()
+   {
+      return 0.0;
+   }
+
+   protected double getWalkInASquareYawTolerance()
+   {
+      return 1e-3;
+   }
+
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
@@ -121,9 +161,9 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
       YoDouble angularExcursionPitch = (YoDouble) simulationTestHelper.findVariable("angularExcursionPitch");
       YoDouble angularExcursionRoll = (YoDouble) simulationTestHelper.findVariable("angularExcursionRoll");
 
-      assertEquals(0.0, angularExcursionYaw.getDoubleValue(), 5e-3);
-      assertEquals(0.0, angularExcursionPitch.getDoubleValue(), 5e-3);
-      assertEquals(0.0, angularExcursionRoll.getDoubleValue(), 5e-3);
+      assertEquals(0.0, angularExcursionYaw.getDoubleValue(), getMoveInPlaceYawTolerance());
+      assertEquals(0.0, angularExcursionPitch.getDoubleValue(), getMoveInPlacePitchTolerance());
+      assertEquals(0.0, angularExcursionRoll.getDoubleValue(), getMoveInPlaceRollTolerance());
    }
 
    @Test
@@ -173,9 +213,9 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
       double simulationTime = initialTransfer + (transfer + swing) * (footsteps.getFootstepDataList().size() + 1) + 1.0;
       assertTrue(simulationTestHelper.simulateNow(simulationTime));
 
-      assertEquals(0.0, angularExcursionYaw.getDoubleValue(), 1e-2);
-      assertEquals(0.0, angularExcursionRoll.getDoubleValue(), 1e-2);
-      assertEquals(0.0, angularExcursionPitch.getDoubleValue(), 1e-1);
+      assertEquals(0.0, angularExcursionYaw.getDoubleValue(), getForwardWalkYawTolerance());
+      assertEquals(0.0, angularExcursionRoll.getDoubleValue(), getForwardWalkRollTolerance());
+      assertEquals(0.0, angularExcursionPitch.getDoubleValue(), getForwardWalkPitchTolerance());
    }
 
    @Test
@@ -221,7 +261,13 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
 //         assertEquals(0.0, angularExcursionRoll.getDoubleValue(), 1e-3);
       }
 
-      assertEquals(0.0, angularExcursionYaw.getDoubleValue(), 1e-3);
+      double extraSimulationDuration = getExtraWalkInASquareSimulationDuration();
+      if (extraSimulationDuration > 0.0)
+      {
+         assertTrue(simulationTestHelper.simulateNow(extraSimulationDuration));
+      }
+
+      assertEquals(0.0, angularExcursionYaw.getDoubleValue(), getWalkInASquareYawTolerance());
    }
 
 
