@@ -204,6 +204,17 @@ public interface InertialEstimationParameters
       return false;
    }
 
+   /**
+    * State constraint for the linear {@link us.ihmc.commonWalkingControlModules.parameterEstimation.InertialKalmanFilter}
+    * (pi basis), applied by projecting the state after every update: NONE (default, unconstrained), MASS_CLAMP (each
+    * body's mass held at or above a small floor), or PSD_PROJECT (each body's 4x4 pseudo-inertia projected onto the
+    * positive semidefinite cone, i.e. full physical consistency). Ignored by the physically consistent EKF.
+    */
+   default String getKalmanFilterConstraint()
+   {
+      return "NONE";
+   }
+
    /** KNOWN (Stage A, prescribed squeeze) vs JACOBIAN (Stage B, force backed out of arm torques). */
    default GraspRejectionMethod getGraspRejectionMethod()
    {

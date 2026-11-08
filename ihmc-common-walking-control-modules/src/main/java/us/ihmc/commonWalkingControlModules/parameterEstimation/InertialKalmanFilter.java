@@ -3,19 +3,26 @@ package us.ihmc.commonWalkingControlModules.parameterEstimation;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.SpatialInertiaBasisOption;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
+import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoMatrix;
+import us.ihmc.yoVariables.math.YoMatrix;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -61,6 +68,26 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
     */
    private boolean clearResidualFilterMemory = false;
 
+   /** State constraint applied after every update; see {@link InertialEstimationParameters#getKalmanFilterConstraint()}. */
+   private enum StateConstraint
+   {
+      NONE, MASS_CLAMP, PSD_PROJECT
+   }
+
+   private static final int PI_SIZE = 10;
+   /** Floor on each body's mass [kg] (MASS_CLAMP) and on the pseudo-inertia eigenvalues (PSD_PROJECT). */
+   private static final double MASS_FLOOR = 0.05;
+   private static final double EIGENVALUE_FLOOR = 1.0e-6;
+
+   private final StateConstraint stateConstraint;
+   /** Per-body pi-basis estimate watchers ("pi_<body>_*"), named as in the physically consistent EKF for like-for-like logging. */
+   private final List<YoMatrix> piWatchers = new ArrayList<>();
+   private final List<Integer> piWatcherOffsets = new ArrayList<>();
+   private final DMatrixRMaj piBlock = new DMatrixRMaj(PI_SIZE, 1);
+   private final DMatrixRMaj pseudoInertia = new DMatrixRMaj(4, 4);
+   private final DMatrixRMaj projectedPseudoInertia = new DMatrixRMaj(4, 4);
+   private final EigenDecomposition_F64<DMatrixRMaj> eigenDecomposition = DecompositionFactory_DDRM.eig(4, true, true);
+
    public InertialKalmanFilter(FullRobotModel model, InertialEstimationParameters parameters, DoubleProvider dt, YoRegistry parentRegistry)
    {
       super(parameters.getURDFParameters(parameters.getBasisSets()),
@@ -97,6 +124,22 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
       filteredResidual = new AlphaFilteredYoMatrix("filteredResidual_", postProcessingAlpha, nDoFs, 1, parameters.getMeasurementNames(), null, registry);
 
       setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
+
+      RigidBodyReadOnly[] modelBodies = model.getRootBody().subtreeArray();
+      int offset = 0;
+      for (int i = 0; i < modelBodies.length && i < basisSets.length; i++)
+      {
+         if (basisSets[i].size() == PI_SIZE)
+         {
+            piWatchers.add(new YoMatrix("pi_" + modelBodies[i].getName() + "_", PI_SIZE, 1, RigidBodyInertialParametersTools.getNamesForPiBasis(), null, registry));
+            piWatcherOffsets.add(offset);
+         }
+         offset += basisSets[i].size();
+      }
+
+      stateConstraint = StateConstraint.valueOf(parameters.getKalmanFilterConstraint());
+      if (stateConstraint != StateConstraint.NONE && getState().getNumRows() % PI_SIZE != 0)
+         throw new IllegalArgumentException("KF state constraint " + stateConstraint + " needs the full 10-parameter pi basis per body");
    }
 
    /** On top of the base class re-seeding the state and covariance, clear the residual filter's memory. */
@@ -172,6 +215,102 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
       // pre-reset one. Back to the tuned alpha from here on.
       clearResidualFilterMemory = false;
       getMeasurementResidual().set(filteredResidual);
+   }
+
+   /**
+    * Constrained KF by state projection (Simon 2010): after the update, project each body's pi block onto the
+    * constraint set. The covariance is left as is. MASS_CLAMP floors the mass only; PSD_PROJECT is the Frobenius-norm
+    * projection of the pseudo-inertia onto the positive semidefinite cone (eigenvalue clipping), which makes the
+    * estimate fully physically consistent without a solver.
+    */
+   @Override
+   public void postSolveHook()
+   {
+      if (stateConstraint != StateConstraint.NONE && !isParametersHeld())
+         applyStateConstraint();
+
+      for (int i = 0; i < piWatchers.size(); i++)
+      {
+         CommonOps_DDRM.extract(state, piWatcherOffsets.get(i), piWatcherOffsets.get(i) + PI_SIZE, 0, 1, piBlock, 0, 0);
+         piWatchers.get(i).set(piBlock);
+      }
+   }
+
+   private void applyStateConstraint()
+   {
+
+      for (int offset = 0; offset + PI_SIZE <= state.getNumRows(); offset += PI_SIZE)
+      {
+         if (stateConstraint == StateConstraint.MASS_CLAMP)
+         {
+            if (state.get(offset, 0) < MASS_FLOOR)
+               state.set(offset, 0, MASS_FLOOR);
+         }
+         else
+         {
+            projectPseudoInertia(offset);
+         }
+      }
+   }
+
+   private void projectPseudoInertia(int offset)
+   {
+      double m = state.get(offset, 0);
+      double hx = state.get(offset + 1, 0), hy = state.get(offset + 2, 0), hz = state.get(offset + 3, 0);
+      double ixx = state.get(offset + 4, 0), ixy = state.get(offset + 5, 0), ixz = state.get(offset + 6, 0);
+      double iyy = state.get(offset + 7, 0), iyz = state.get(offset + 8, 0), izz = state.get(offset + 9, 0);
+
+      // J = [S h; h^T m] with S = 0.5 tr(I) I_3 - I
+      double halfTrace = 0.5 * (ixx + iyy + izz);
+      pseudoInertia.set(0, 0, halfTrace - ixx);
+      pseudoInertia.set(1, 1, halfTrace - iyy);
+      pseudoInertia.set(2, 2, halfTrace - izz);
+      pseudoInertia.set(0, 1, -ixy);
+      pseudoInertia.set(1, 0, -ixy);
+      pseudoInertia.set(0, 2, -ixz);
+      pseudoInertia.set(2, 0, -ixz);
+      pseudoInertia.set(1, 2, -iyz);
+      pseudoInertia.set(2, 1, -iyz);
+      pseudoInertia.set(0, 3, hx);
+      pseudoInertia.set(3, 0, hx);
+      pseudoInertia.set(1, 3, hy);
+      pseudoInertia.set(3, 1, hy);
+      pseudoInertia.set(2, 3, hz);
+      pseudoInertia.set(3, 2, hz);
+      pseudoInertia.set(3, 3, m);
+
+      if (!eigenDecomposition.decompose(pseudoInertia))
+         return;
+      boolean clipped = false;
+      for (int i = 0; i < 4; i++)
+         clipped |= eigenDecomposition.getEigenvalue(i).getReal() < EIGENVALUE_FLOOR;
+      if (!clipped)
+         return;
+
+      // J+ = sum_i max(lambda_i, eps) v_i v_i^T
+      projectedPseudoInertia.zero();
+      for (int i = 0; i < 4; i++)
+      {
+         double lambda = Math.max(eigenDecomposition.getEigenvalue(i).getReal(), EIGENVALUE_FLOOR);
+         DMatrixRMaj v = eigenDecomposition.getEigenVector(i);
+         for (int r = 0; r < 4; r++)
+            for (int c = 0; c < 4; c++)
+               projectedPseudoInertia.add(r, c, lambda * v.get(r, 0) * v.get(c, 0));
+      }
+
+      // Back to pi: m = J33, h = J(0:2,3), I = tr(S) I_3 - S
+      DMatrixRMaj J = projectedPseudoInertia;
+      double traceS = J.get(0, 0) + J.get(1, 1) + J.get(2, 2);
+      state.set(offset, 0, J.get(3, 3));
+      state.set(offset + 1, 0, J.get(0, 3));
+      state.set(offset + 2, 0, J.get(1, 3));
+      state.set(offset + 3, 0, J.get(2, 3));
+      state.set(offset + 4, 0, traceS - J.get(0, 0));
+      state.set(offset + 5, 0, -J.get(0, 1));
+      state.set(offset + 6, 0, -J.get(0, 2));
+      state.set(offset + 7, 0, traceS - J.get(1, 1));
+      state.set(offset + 8, 0, -J.get(1, 2));
+      state.set(offset + 9, 0, traceS - J.get(2, 2));
    }
 
    @Override
