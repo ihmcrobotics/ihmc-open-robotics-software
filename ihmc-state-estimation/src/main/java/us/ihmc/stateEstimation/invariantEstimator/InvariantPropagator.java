@@ -36,6 +36,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
  * {@code ξ̇ = A_c ξ − Ad_X̂·[δb; 0; …; 0]} (Hartley et al., "imperfect" InEKF). Discretized to first order:
  * {@code Φ_ξb = −Φ_g·Ad_X̂·E·Δt}, E selecting the rotation columns, and a random walk σ_b² on the bias block.
  * While the bias is inactive both are zero and the block is decoupled.</p>
+ *
+ * <p><b>Kinematic-velocity error state</b> (optional, see {@link InvariantState#hasKinematicVelocityBias}). The error of
+ * the kinematic body-velocity measurement is not white: against motion capture it stays correlated for 50-200 ms
+ * while the measurement arrives at 1 kHz, so treating it as white counts one error hundreds of times. It is modelled
+ * as a first-order Gauss-Markov process {@code ḃ_v = −b_v/τ + w}, {@code E[w wᵀ] = (2σ²/τ)·I}, which has stationary
+ * standard deviation σ: {@code Φ_bb = e^{−Δt/τ}·I}, no coupling into the group (it is a measurement error, not a
+ * state of the robot). While inactive, Φ_bb = I, no noise, and the block is decoupled.</p>
  */
 public class InvariantPropagator
 {
@@ -45,6 +52,10 @@ public class InvariantPropagator
    private final int gyroBiasIndex;
    private boolean gyroBiasActive = false;
    private double gyroBiasRandomWalkVariance = 0.0;
+   /** Tangent index of the kinematic-velocity error block, or -1 without one. */
+   private final int kinematicVelocityBiasIndex;
+   private boolean kinematicVelocityBiasActive = false;
+   private double kinematicVelocityBiasTimeConstant = Double.NaN;
    /** Ad_X̂ of the group part alone ((9+3N)²); embedded in {@link #adjoint} with an identity bias block. */
    private final DMatrixRMaj groupAdjoint;
    /** World-frame gravity g = (0, 0, -|g|). Set from the robot process's gravity, never hard-coded here. */
@@ -101,6 +112,21 @@ public class InvariantPropagator
                               double gravitationalAcceleration,
                               boolean withGyroBias)
    {
+      this(numberOfContacts, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration, withGyroBias, false);
+   }
+
+   /**
+    * @param withKinematicVelocityBias sizes Φ, Q and P for the kinematic-velocity error block of
+    *                                  {@link InvariantState#InvariantState(int, boolean, boolean)}.
+    */
+   public InvariantPropagator(int numberOfContacts,
+                              double gyroVariance,
+                              double accelVariance,
+                              double contactVariance,
+                              double gravitationalAcceleration,
+                              boolean withGyroBias,
+                              boolean withKinematicVelocityBias)
+   {
       if (numberOfContacts < 0)
          throw new IllegalArgumentException("numberOfContacts must be >= 0, was " + numberOfContacts);
       requireNonNegativeFinite("gyroVariance", gyroVariance);
@@ -112,7 +138,8 @@ public class InvariantPropagator
 
       groupTangentSize = 3 + 3 * (2 + numberOfContacts); // 9 + 3N
       gyroBiasIndex = withGyroBias ? groupTangentSize : -1;
-      int m = groupTangentSize + (withGyroBias ? 3 : 0);
+      kinematicVelocityBiasIndex = withKinematicVelocityBias ? groupTangentSize + (withGyroBias ? 3 : 0) : -1;
+      int m = groupTangentSize + (withGyroBias ? 3 : 0) + (withKinematicVelocityBias ? 3 : 0);
       groupAdjoint = new DMatrixRMaj(groupTangentSize, groupTangentSize);
 
       processNoise = new DMatrixRMaj(m, m);
@@ -169,6 +196,33 @@ public class InvariantPropagator
    }
 
    /**
+    * Couples (or decouples) the kinematic-velocity error block as a Gauss-Markov process with time constant τ (s) and
+    * stationary standard deviation σ (m/s): Q_c = 2σ²/τ on the block. Inactive: Φ_bb = I and no noise.
+    */
+   public void setKinematicVelocityBias(boolean active, double timeConstant, double standardDeviation)
+   {
+      if (kinematicVelocityBiasIndex < 0)
+      {
+         if (active)
+            throw new IllegalStateException("built without a kinematic-velocity error state");
+         return;
+      }
+      if (active && !(timeConstant > 0.0 && Double.isFinite(timeConstant)))
+         throw new IllegalArgumentException("timeConstant must be positive and finite, was " + timeConstant);
+      requireNonNegativeFinite("standardDeviation", standardDeviation);
+      kinematicVelocityBiasActive = active;
+      kinematicVelocityBiasTimeConstant = timeConstant;
+      double variance = active ? 2.0 * standardDeviation * standardDeviation / timeConstant : 0.0;
+      for (int j = 0; j < 3; j++)
+         processNoise.set(kinematicVelocityBiasIndex + j, kinematicVelocityBiasIndex + j, variance);
+   }
+
+   public boolean isKinematicVelocityBiasActive()
+   {
+      return kinematicVelocityBiasActive;
+   }
+
+   /**
     * @throws IllegalArgumentException if {@code value} is negative OR non-finite. {@code value < 0.0} alone
     *                                  would miss NaN (every comparison with NaN is false), which would
     *                                  otherwise write straight into the process-noise diagonal and poison Q.
@@ -192,6 +246,13 @@ public class InvariantPropagator
    {
       predictCovariance(state, dt);
       predictMean(state, angularVelocity, linearAcceleration, dt);
+      if (kinematicVelocityBiasIndex >= 0 && kinematicVelocityBiasActive)
+      {
+         // The Gauss-Markov mean decays with the same e^{−Δt/τ} as Φ_bb. Leaving b̂_v constant while Φ shrinks its
+         // error claims a pull toward zero the estimate never gets, and the unobservable v + b_v direction then
+         // drifts apart without bound (seen in replay: v and −b̂_v both ran to 17 m/s while P said 2 cm/s).
+         state.getKinematicVelocityBias().scale(Math.exp(-dt / kinematicVelocityBiasTimeConstant));
+      }
    }
 
    /** Mean update R⁺/v⁺/p⁺ using Γ₀/Γ₁/Γ₂; contacts unchanged. */
@@ -237,17 +298,27 @@ public class InvariantPropagator
    {
       buildStateTransition(dt);
       SEK3Utils.adjoint(state.getGroupElement(), groupAdjoint, adjointRotation, adjointColumn, adjointHat);
-      if (gyroBiasIndex < 0)
+      if (adjoint.getNumRows() == groupTangentSize)
       {
          adjoint.set(groupAdjoint);
       }
       else
       {
-         // Ad on the group block, identity on the bias block (the bias noise is body-frame, not transported).
+         // Ad on the group block, identity on the Euclidean blocks (their noise is body-frame, not transported).
          adjoint.zero();
          CommonOps_DDRM.insert(groupAdjoint, adjoint, 0, 0);
+         for (int j = groupTangentSize; j < adjoint.getNumRows(); j++)
+            adjoint.set(j, j, 1.0);
+      }
+      if (kinematicVelocityBiasIndex >= 0 && kinematicVelocityBiasActive)
+      {
+         // Gauss-Markov decay; a measurement error, so no coupling to the group block.
+         double decay = Math.exp(-dt / kinematicVelocityBiasTimeConstant);
          for (int j = 0; j < 3; j++)
-            adjoint.set(gyroBiasIndex + j, gyroBiasIndex + j, 1.0);
+            Phi.set(kinematicVelocityBiasIndex + j, kinematicVelocityBiasIndex + j, decay);
+      }
+      if (gyroBiasIndex >= 0)
+      {
          if (gyroBiasActive)
          {
             // Φ_ξb = −Φ_g·Ad_X̂·E·Δt: Φ_g times the rotation columns of Ad, into the group rows of the bias columns.

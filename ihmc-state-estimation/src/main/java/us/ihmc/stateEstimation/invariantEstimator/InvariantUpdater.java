@@ -156,6 +156,17 @@ public class InvariantUpdater
       update(state, contactUpdater.getMeasurementJacobian(), contactUpdater.getResidual(), contactUpdater.getMeasurementCovariance(), nisThreshold);
    }
 
+   private boolean considerKinematicVelocityBias = false;
+
+   /**
+    * Treats the kinematic-velocity error block as a Schmidt "consider" state: kept in P (so every update accounts for
+    * the correlated measurement error) but never corrected. Off: an ordinary estimated state.
+    */
+   public void setConsiderKinematicVelocityBias(boolean consider)
+   {
+      considerKinematicVelocityBias = consider;
+   }
+
    /**
     * Applies one right-invariant correction to the state in place.
     *
@@ -253,6 +264,16 @@ public class InvariantUpdater
       gain.reshape(m,z);
       CommonOps_DDRM.mult(covarianceTimesHTranspose,innovationCovarianceInverse,gain);
 
+      // Schmidt "consider" block: its gain rows are zero, so its mean never moves and the Joseph form below keeps P
+      // consistent with that suboptimal gain -- the error is accounted for in the covariance without being estimated.
+      int consider = considerKinematicVelocityBias ? state.kinematicVelocityBiasTangentIndex() : -1;
+      if (consider >= 0)
+      {
+         for (int i = 0; i < 3; i++)
+            for (int j = 0; j < z; j++)
+               gain.set(consider + i, j, 0.0);
+      }
+
       // c = K·residual ; state update X̂⁺ = exp_G(−c)·X̂
       correctionColumn.reshape(m,1);
       CommonOps_DDRM.mult(gain, residual, correctionColumn);
@@ -272,9 +293,13 @@ public class InvariantUpdater
             groupCorrectionArray = new double[groupSize]; // once
          System.arraycopy(correctionArray, 0, groupCorrectionArray, 0, groupSize);
          groupCorrection = groupCorrectionArray;
-         // Euclidean bias block: b̂⁺ = b̂ − c_b (correctionArray already holds −c).
+         // Euclidean bias blocks: b̂⁺ = b̂ − c_b (correctionArray already holds −c).
          int b = state.gyroBiasTangentIndex();
-         state.getGyroBias().add(correctionArray[b], correctionArray[b + 1], correctionArray[b + 2]);
+         if (b >= 0)
+            state.getGyroBias().add(correctionArray[b], correctionArray[b + 1], correctionArray[b + 2]);
+         int bv = state.kinematicVelocityBiasTangentIndex();
+         if (bv >= 0)
+            state.getKinematicVelocityBias().add(correctionArray[bv], correctionArray[bv + 1], correctionArray[bv + 2]);
       }
       SEK3Utils.exp(groupCorrection, expDelta, expPhi, expRotation, expJacobian);
       newGroupElement.reshape(expDelta.getNumRows(), expDelta.getNumCols());

@@ -28,7 +28,8 @@ import us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter;
  * <p><b>Covariance</b> P is an m×m {@link DMatrixRMaj} (m = 9 + 3N) in the tangent ordering
  * {@code [δφ; δv; δp; δp_c0; …]}, matching the adjoint dimension. Tangent block offsets are
  * given by the {@code *TangentIndex} accessors. With the gyro bias, m = 12 + 3N and the last block is
- * {@code δb_g = b̂_g − b_g}, the estimate minus the truth, matching the group error {@code X̂ = exp(ξ)·X}.</p>
+ * {@code δb_g = b̂_g − b_g}, the estimate minus the truth, matching the group error {@code X̂ = exp(ξ)·X}.
+ * The optional kinematic-velocity error block follows it with the same convention, {@code δb_v = b̂_v − b_v}.</p>
  */
 public class InvariantState
 {
@@ -46,6 +47,12 @@ public class InvariantState
    private final boolean hasGyroBias;
    /** Body-frame gyro bias estimate b̂_g (rad/s); zero and unused without the bias state. */
    private final us.ihmc.euclid.tuple3D.Vector3D gyroBias = new us.ihmc.euclid.tuple3D.Vector3D();
+   private final boolean hasKinematicVelocityBias;
+   /**
+    * Body-frame error of the kinematic body-velocity measurement b̂_v (m/s): the time-correlated part of
+    * {@code y − Rᵀv}. Zero and unused without the block. Appended after the gyro bias block.
+    */
+   private final us.ihmc.euclid.tuple3D.Vector3D kinematicVelocityBias = new us.ihmc.euclid.tuple3D.Vector3D();
 
    /**
     * Creates a state with the given number of contacts, X = identity and P = 0.
@@ -63,6 +70,16 @@ public class InvariantState
     */
    public InvariantState(int numberOfContacts, boolean withGyroBias)
    {
+      this(numberOfContacts, withGyroBias, false);
+   }
+
+   /**
+    * @param numberOfContacts          the number of contact columns N (≥ 0).
+    * @param withGyroBias              appends a 3-dim body-frame gyro bias block to the tangent/covariance.
+    * @param withKinematicVelocityBias appends a 3-dim body-frame kinematic-velocity measurement error block after it.
+    */
+   public InvariantState(int numberOfContacts, boolean withGyroBias, boolean withKinematicVelocityBias)
+   {
       if (numberOfContacts < 0)
          throw new IllegalArgumentException("numberOfContacts must be >= 0, was " + numberOfContacts);
 
@@ -72,7 +89,8 @@ public class InvariantState
       int n = 3 + k;                // group matrix size
       groupTangentSize = 3 + 3 * k; // tangent size of the group part
       hasGyroBias = withGyroBias;
-      int m = groupTangentSize + (withGyroBias ? 3 : 0); // tangent / covariance size
+      hasKinematicVelocityBias = withKinematicVelocityBias;
+      int m = groupTangentSize + (withGyroBias ? 3 : 0) + (withKinematicVelocityBias ? 3 : 0); // tangent / covariance size
 
       groupElement = new DMatrixRMaj(n, n);
       CommonOps_DDRM.setIdentity(groupElement);
@@ -114,6 +132,24 @@ public class InvariantState
    public int gyroBiasTangentIndex()
    {
       return hasGyroBias ? groupTangentSize : -1;
+   }
+
+   /** @return whether this state carries the kinematic-velocity measurement error block. */
+   public boolean hasKinematicVelocityBias()
+   {
+      return hasKinematicVelocityBias;
+   }
+
+   /** @return the tangent start index of the kinematic-velocity error block (after the gyro bias block), or -1 without it. */
+   public int kinematicVelocityBiasTangentIndex()
+   {
+      return hasKinematicVelocityBias ? groupTangentSize + (hasGyroBias ? 3 : 0) : -1;
+   }
+
+   /** @return the live body-frame kinematic-velocity measurement error estimate. Mutating it mutates the state. */
+   public us.ihmc.euclid.tuple3D.Vector3D getKinematicVelocityBias()
+   {
+      return kinematicVelocityBias;
    }
 
    /** @return the live body-frame gyro bias estimate. Mutating it mutates the state. */
