@@ -368,6 +368,26 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final RearFootReleaseLatch rearFootReleaseLatch = new RearFootReleaseLatch();
 
    /**
+    * Toe pivot (off by default: pitch rate 0). A sole pitching toe-down about its front edge (heel-off) is stationary at
+    * that edge, not at the CoP: the torque-estimated, low-pass-filtered CoP stays 7-8 cm behind the toe line while the
+    * heel lifts (11/05 mocap: filtered CoP at +3.5..+4.1 cm from the sole center, the toe line at +10.5..+11.6 cm), so the
+    * kinematic velocity of that foot reads the foot's rotation as a base velocity, downward. While the sole's pitch rate
+    * (sole frame, toe-down positive) exceeds {@code invariantKinematicVelocityPivotPitchRate} and the raw CoP is ahead
+    * of the sole center, the stationary point's x is moved to {@code invariantKinematicVelocityPivotEdgeX}. The heel
+    * edge is deliberately NOT used at heel-strike: that early-stance positive error partly offsets the late negative
+    * one, and pivoting both edges made the drift worse in replay (−4.3 vs −3.4 mm/s on morning walk 1).
+    */
+   private final YoDouble yoKinematicVelocityPivotPitchRate = new YoDouble("invariantKinematicVelocityPivotPitchRate", registry);
+   private final YoDouble yoKinematicVelocityPivotEdgeX = new YoDouble("invariantKinematicVelocityPivotEdgeX", registry);
+   private final SideDependentList<YoDouble> yoKinematicVelocitySolePitchRate = new SideDependentList<>(new YoDouble("invariantKinematicVelocitySolePitchRateLeft", registry),
+                                                                                                        new YoDouble("invariantKinematicVelocitySolePitchRateRight", registry));
+   private final SideDependentList<YoBoolean> yoKinematicVelocityPivoting = new SideDependentList<>(new YoBoolean("invariantKinematicVelocityPivotingLeft", registry),
+                                                                                                     new YoBoolean("invariantKinematicVelocityPivotingRight", registry));
+   public static final double DEFAULT_KINEMATIC_VELOCITY_PIVOT_PITCH_RATE = 0.1; // rad/s, when enabled
+   public static final double DEFAULT_KINEMATIC_VELOCITY_PIVOT_EDGE_X = 0.105; // m ahead of the sole center (Alex V2 toe line)
+   private final us.ihmc.mecano.spatial.Twist soleTwist = new us.ihmc.mecano.spatial.Twist();
+
+   /**
     * Initial roll/pitch standard deviation (rad, world x/y rotation error) used when the filter is initialized;
     * non-positive or NaN keeps the isotropic {@code initialCovariance}. With P = 1·I the tilt σ is 1 rad, and the
     * first velocity residual is explained as tilt through the velocity-rotation coupling the propagation builds
@@ -714,6 +734,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoKinematicVelocityTrustLoad.set(DEFAULT_KINEMATIC_VELOCITY_TRUST_LOAD);
       yoKinematicVelocityRearRelease.set(false);
       yoKinematicVelocityRearReleaseLoad.set(DEFAULT_KINEMATIC_VELOCITY_REAR_RELEASE_LOAD);
+      yoKinematicVelocityPivotPitchRate.set(0.0); // off; DEFAULT_KINEMATIC_VELOCITY_PIVOT_PITCH_RATE when turned on
+      yoKinematicVelocityPivotEdgeX.set(DEFAULT_KINEMATIC_VELOCITY_PIVOT_EDGE_X);
       yoKinematicVelocityUntrustLoad.set(DEFAULT_KINEMATIC_VELOCITY_UNTRUST_LOAD);
       yoCoPFilterBreakFrequency.set(DEFAULT_COP_FILTER_BREAK_FREQUENCY);
       // Default fallback: forward-kinematics-only contact detection on the estimator's own sole frames
@@ -1163,6 +1185,22 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          filtered.setY(alpha * filtered.getY() + (1.0 - alpha) * rawCoP.getY());
       }
       stationaryPoint.setIncludingFrame(soleFrame, filtered.getX(), filtered.getY(), 0.0);
+
+      double pivotRate = yoKinematicVelocityPivotPitchRate.getDoubleValue();
+      if (pivotRate > 0.0)
+      {
+         soleFrame.getTwistOfFrame(soleTwist); // sole relative to world, expressed in the sole frame
+         double pitchRate = soleTwist.getAngularPart().getY();
+         yoKinematicVelocitySolePitchRate.get(side).set(pitchRate);
+         boolean pivot = pitchRate > pivotRate && rawCoP.getX() >= 0.0;
+         yoKinematicVelocityPivoting.get(side).set(pivot);
+         if (pivot)
+            stationaryPoint.setX(yoKinematicVelocityPivotEdgeX.getDoubleValue());
+      }
+      else
+      {
+         yoKinematicVelocityPivoting.get(side).set(false);
+      }
    }
 
    /** One body-velocity update per foot in contact: y = −(ω × r + ṙ), all in the pelvis frame. */
