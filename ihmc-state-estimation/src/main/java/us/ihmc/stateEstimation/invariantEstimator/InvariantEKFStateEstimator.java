@@ -365,6 +365,9 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final SideDependentList<YoBoolean> yoKinematicVelocityRearReleased = new SideDependentList<>(new YoBoolean("invariantKinematicVelocityRearReleasedLeft", registry),
                                                                                                          new YoBoolean("invariantKinematicVelocityRearReleasedRight", registry));
    public static final double DEFAULT_KINEMATIC_VELOCITY_REAR_RELEASE_LOAD = 0.5;
+   /** Unloading rate (load fraction per second) below which a light foot is standing sway, not a weight transfer. */
+   private final YoDouble yoKinematicVelocityRearReleaseRate = new YoDouble("invariantKinematicVelocityRearReleaseRate", registry);
+   public static final double DEFAULT_KINEMATIC_VELOCITY_REAR_RELEASE_RATE = 1.0; // 1/s: 0.02 over the 20 ms window
    private final RearFootReleaseLatch rearFootReleaseLatch = new RearFootReleaseLatch();
 
    /**
@@ -734,6 +737,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoKinematicVelocityTrustLoad.set(DEFAULT_KINEMATIC_VELOCITY_TRUST_LOAD);
       yoKinematicVelocityRearRelease.set(false);
       yoKinematicVelocityRearReleaseLoad.set(DEFAULT_KINEMATIC_VELOCITY_REAR_RELEASE_LOAD);
+      yoKinematicVelocityRearReleaseRate.set(DEFAULT_KINEMATIC_VELOCITY_REAR_RELEASE_RATE);
       yoKinematicVelocityPivotPitchRate.set(0.0); // off; DEFAULT_KINEMATIC_VELOCITY_PIVOT_PITCH_RATE when turned on
       yoKinematicVelocityPivotEdgeX.set(DEFAULT_KINEMATIC_VELOCITY_PIVOT_EDGE_X);
       yoKinematicVelocityUntrustLoad.set(DEFAULT_KINEMATIC_VELOCITY_UNTRUST_LOAD);
@@ -1339,6 +1343,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       rearFootReleaseLatch.update(yoKinematicVelocityRearRelease.getBooleanValue(),
                                   yoKinematicVelocityRearReleaseLoad.getDoubleValue(),
                                   yoKinematicVelocityUntrustLoad.getDoubleValue(),
+                                  yoKinematicVelocityRearReleaseRate.getDoubleValue() * RearFootReleaseLatch.RATE_WINDOW * dt,
                                   copSources.get(RobotSide.LEFT).getFootLoadPercentage(),
                                   copSources.get(RobotSide.RIGHT).getFootLoadPercentage(),
                                   yoKinematicVelocityLoadTrusted.get(RobotSide.LEFT).getBooleanValue(),
