@@ -465,12 +465,15 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          = new us.ihmc.yoVariables.variable.YoEnum<>("invariantKinematicVelocityErrorModel", registry, KinematicVelocityErrorModel.class);
    private final YoDouble yoKinematicVelocityErrorTimeConstant = new YoDouble("invariantKinematicVelocityErrorTimeConstant", registry);
    private final YoDouble yoKinematicVelocityErrorStd = new YoDouble("invariantKinematicVelocityErrorStd", registry);
+   /** Vertical (body z) stationary std of the error state; the horizontal one is invariantKinematicVelocityErrorStd. */
+   private final YoDouble yoKinematicVelocityErrorStdZ = new YoDouble("invariantKinematicVelocityErrorStdZ", registry);
    private final YoDouble yoKinematicVelocityErrorX = new YoDouble("invariantKinematicVelocityErrorX", registry);
    private final YoDouble yoKinematicVelocityErrorY = new YoDouble("invariantKinematicVelocityErrorY", registry);
    private final YoDouble yoKinematicVelocityErrorZ = new YoDouble("invariantKinematicVelocityErrorZ", registry);
    private final YoDouble yoKinematicVelocityErrorStateStd = new YoDouble("invariantKinematicVelocityErrorStateStd", registry);
    public static final double DEFAULT_KINEMATIC_VELOCITY_ERROR_TIME_CONSTANT = 0.1; // s
-   public static final double DEFAULT_KINEMATIC_VELOCITY_ERROR_STD = 0.03; // m/s
+   public static final double DEFAULT_KINEMATIC_VELOCITY_ERROR_STD = 0.03; // m/s, x and y
+   public static final double DEFAULT_KINEMATIC_VELOCITY_ERROR_STD_Z = 0.03; // m/s; isotropic until the per-axis replay is in
    private KinematicVelocityErrorModel kinematicVelocityErrorModelInUse = KinematicVelocityErrorModel.WHITE;
    private double kinematicVelocityErrorParametersInUse = Double.NaN;
    /**
@@ -651,6 +654,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoKinematicVelocityErrorModel.set(KinematicVelocityErrorModel.WHITE);
       yoKinematicVelocityErrorTimeConstant.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_TIME_CONSTANT);
       yoKinematicVelocityErrorStd.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_STD);
+      yoKinematicVelocityErrorStdZ.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_STD_Z);
       yoGyroBiasRandomWalkStd.set(DEFAULT_GYRO_BIAS_RANDOM_WALK_STD);
       yoGyroBiasInitialStd.set(DEFAULT_GYRO_BIAS_INITIAL_STD);
       yoRestGyroBiasMeasurementStd.set(DEFAULT_REST_GYRO_BIAS_MEASUREMENT_STD);
@@ -888,11 +892,13 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       if (bv >= 0)
       {
          // The measurement-error block starts at its stationary variance when modelled, zero (decoupled) otherwise.
-         double variance = ekf.isKinematicVelocityErrorModelActive()
-               ? us.ihmc.euclid.tools.EuclidCoreTools.square(yoKinematicVelocityErrorStd.getDoubleValue()) : 0.0;
+         boolean modelled = ekf.isKinematicVelocityErrorModelActive();
          for (int i = 0; i < 3; i++)
+         {
+            double std = i < 2 ? yoKinematicVelocityErrorStd.getDoubleValue() : yoKinematicVelocityErrorStdZ.getDoubleValue();
             for (int j = 0; j < 3; j++)
-               startCovariance.set(bv + i, bv + j, i == j ? variance : 0.0);
+               startCovariance.set(bv + i, bv + j, i == j && modelled ? std * std : 0.0);
+         }
          ekf.getKinematicVelocityBias().setToZero();
       }
 
@@ -1434,11 +1440,12 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          model = KinematicVelocityErrorModel.WHITE;
       double tau = yoKinematicVelocityErrorTimeConstant.getDoubleValue();
       double std = yoKinematicVelocityErrorStd.getDoubleValue();
-      double parameters = 31.0 * tau + std;
+      double stdZ = yoKinematicVelocityErrorStdZ.getDoubleValue();
+      double parameters = 31.0 * tau + std + 7.0 * stdZ;
       if (model != kinematicVelocityErrorModelInUse || parameters != kinematicVelocityErrorParametersInUse)
       {
          boolean active = model != KinematicVelocityErrorModel.WHITE;
-         ekf.setKinematicVelocityErrorModel(active, model == KinematicVelocityErrorModel.CONSIDER, tau, std);
+         ekf.setKinematicVelocityErrorModel(active, model == KinematicVelocityErrorModel.CONSIDER, tau, std, stdZ);
          org.ejml.data.DMatrixRMaj covariance = ekf.getState().getCovariance();
          int bv = ekf.getState().kinematicVelocityBiasTangentIndex();
          int m = covariance.getNumRows();
@@ -1449,7 +1456,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
                covariance.set(bv + i, k, 0.0);
                covariance.set(k, bv + i, 0.0);
             }
-            covariance.set(bv + i, bv + i, active ? std * std : 0.0);
+            covariance.set(bv + i, bv + i, active ? (i < 2 ? std * std : stdZ * stdZ) : 0.0);
          }
          ekf.getKinematicVelocityBias().setToZero();
          kinematicVelocityErrorModelInUse = model;

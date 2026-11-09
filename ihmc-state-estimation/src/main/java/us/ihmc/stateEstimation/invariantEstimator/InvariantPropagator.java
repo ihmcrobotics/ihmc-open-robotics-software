@@ -201,6 +201,18 @@ public class InvariantPropagator
     */
    public void setKinematicVelocityBias(boolean active, double timeConstant, double standardDeviation)
    {
+      setKinematicVelocityBias(active, timeConstant, standardDeviation, standardDeviation);
+   }
+
+   /**
+    * As {@link #setKinematicVelocityBias(boolean, double, double)} with separate stationary standard deviations for the
+    * horizontal (x, y) and vertical (z) body axes. The vertical error is both smaller (innovation σ_z 1.6 cm/s against
+    * 2.8-3.7 in x/y on the 10/13 log) and more harmful to model: a z error state lets the residual accelerometer z bias
+    * be explained as measurement error, and the vertical velocity then follows the IMU (b̂_z grew in proportion to τ,
+    * +1.2 mm/s at τ = 0.05 s, and the height drift with it).
+    */
+   public void setKinematicVelocityBias(boolean active, double timeConstant, double horizontalStandardDeviation, double verticalStandardDeviation)
+   {
       if (kinematicVelocityBiasIndex < 0)
       {
          if (active)
@@ -209,12 +221,15 @@ public class InvariantPropagator
       }
       if (active && !(timeConstant > 0.0 && Double.isFinite(timeConstant)))
          throw new IllegalArgumentException("timeConstant must be positive and finite, was " + timeConstant);
-      requireNonNegativeFinite("standardDeviation", standardDeviation);
+      requireNonNegativeFinite("horizontalStandardDeviation", horizontalStandardDeviation);
+      requireNonNegativeFinite("verticalStandardDeviation", verticalStandardDeviation);
       kinematicVelocityBiasActive = active;
       kinematicVelocityBiasTimeConstant = timeConstant;
-      double variance = active ? 2.0 * standardDeviation * standardDeviation / timeConstant : 0.0;
       for (int j = 0; j < 3; j++)
-         processNoise.set(kinematicVelocityBiasIndex + j, kinematicVelocityBiasIndex + j, variance);
+      {
+         double std = j < 2 ? horizontalStandardDeviation : verticalStandardDeviation;
+         processNoise.set(kinematicVelocityBiasIndex + j, kinematicVelocityBiasIndex + j, active ? 2.0 * std * std / timeConstant : 0.0);
+      }
    }
 
    public boolean isKinematicVelocityBiasActive()
