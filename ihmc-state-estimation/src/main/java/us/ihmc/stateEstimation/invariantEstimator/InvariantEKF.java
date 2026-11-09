@@ -389,7 +389,17 @@ public class InvariantEKF
     */
    public void setKinematicVelocityErrorModel(boolean active, boolean consider, double timeConstant, double standardDeviation)
    {
-      propagator.setKinematicVelocityBias(active, timeConstant, standardDeviation);
+      setKinematicVelocityErrorModel(active, consider, timeConstant, standardDeviation, standardDeviation);
+   }
+
+   /** As above with separate horizontal (x, y) and vertical (z) stationary standard deviations; see {@link InvariantPropagator}. */
+   public void setKinematicVelocityErrorModel(boolean active,
+                                              boolean consider,
+                                              double timeConstant,
+                                              double horizontalStandardDeviation,
+                                              double verticalStandardDeviation)
+   {
+      propagator.setKinematicVelocityBias(active, timeConstant, horizontalStandardDeviation, verticalStandardDeviation);
       updater.setConsiderKinematicVelocityBias(active && consider);
    }
 
