@@ -351,6 +351,23 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    public static final double DEFAULT_KINEMATIC_VELOCITY_UNTRUST_LOAD = 0.25;
 
    /**
+    * Rear-foot early release (off by default). In double support the foot being unloaded is rolling about its toe line
+    * while the kinematic velocity treats the filtered CoP, 7-8 cm behind it, as stationary; and its leg is springing
+    * back as ~200 N leaves it. Both bias that foot's measurement downward (KV z error -16 and -29 mm/s in the last two
+    * stance deciles on 11/05 mocap), which is most of the InEKF height drift. With this on, a trusted foot whose load is
+    * below {@code invariantKinematicVelocityRearReleaseLoad} and has been falling over the last
+    * {@value RearFootReleaseLatch#RATE_WINDOW} ticks, while the other foot is trusted, is released until it lifts (load below
+    * the untrust load) -- the existing hysteresis would otherwise re-trust it at once, since its load is still above
+    * the trust load. The loading front foot is never released (its load is rising).
+    */
+   private final YoBoolean yoKinematicVelocityRearRelease = new YoBoolean("invariantKinematicVelocityRearRelease", registry);
+   private final YoDouble yoKinematicVelocityRearReleaseLoad = new YoDouble("invariantKinematicVelocityRearReleaseLoad", registry);
+   private final SideDependentList<YoBoolean> yoKinematicVelocityRearReleased = new SideDependentList<>(new YoBoolean("invariantKinematicVelocityRearReleasedLeft", registry),
+                                                                                                         new YoBoolean("invariantKinematicVelocityRearReleasedRight", registry));
+   public static final double DEFAULT_KINEMATIC_VELOCITY_REAR_RELEASE_LOAD = 0.5;
+   private final RearFootReleaseLatch rearFootReleaseLatch = new RearFootReleaseLatch();
+
+   /**
     * Initial roll/pitch standard deviation (rad, world x/y rotation error) used when the filter is initialized;
     * non-positive or NaN keeps the isotropic {@code initialCovariance}. With P = 1·I the tilt σ is 1 rad, and the
     * first velocity residual is explained as tilt through the velocity-rotation coupling the propagation builds
@@ -695,6 +712,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoStartupSettleTimeout.set(DEFAULT_STARTUP_SETTLE_TIMEOUT);
       yoStartupTiltAlignmentEnabled.set(true);
       yoKinematicVelocityTrustLoad.set(DEFAULT_KINEMATIC_VELOCITY_TRUST_LOAD);
+      yoKinematicVelocityRearRelease.set(false);
+      yoKinematicVelocityRearReleaseLoad.set(DEFAULT_KINEMATIC_VELOCITY_REAR_RELEASE_LOAD);
       yoKinematicVelocityUntrustLoad.set(DEFAULT_KINEMATIC_VELOCITY_UNTRUST_LOAD);
       yoCoPFilterBreakFrequency.set(DEFAULT_COP_FILTER_BREAK_FREQUENCY);
       // Default fallback: forward-kinematics-only contact detection on the estimator's own sole frames
@@ -1232,6 +1251,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          return;
       double std = yoKinematicVelocityStd.getDoubleValue();
       boolean loadGate = yoKinematicVelocityUseLoadGate.getBooleanValue() && copSources != null;
+      if (loadGate)
+         updateRearFootRelease();
       for (RobotSide side : RobotSide.values)
       {
          if (loadGate)
@@ -1239,6 +1260,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
             double load = copSources.get(side).getFootLoadPercentage();
             YoBoolean trusted = yoKinematicVelocityLoadTrusted.get(side);
             if (!Double.isFinite(load))
+               trusted.set(false);
+            else if (yoKinematicVelocityRearReleased.get(side).getBooleanValue())
                trusted.set(false);
             else if (load > yoKinematicVelocityTrustLoad.getDoubleValue())
                trusted.set(true);
@@ -1270,6 +1293,20 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          yoKinematicVelocityNIS.get(side).set(ekf.getLastNormalizedInnovationSquared());
          yoKinematicVelocityApplied.get(side).set(ekf.wasLastUpdateApplied());
       }
+   }
+
+   /** Advances {@link #rearFootReleaseLatch} and mirrors it into {@link #yoKinematicVelocityRearReleased}. */
+   private void updateRearFootRelease()
+   {
+      rearFootReleaseLatch.update(yoKinematicVelocityRearRelease.getBooleanValue(),
+                                  yoKinematicVelocityRearReleaseLoad.getDoubleValue(),
+                                  yoKinematicVelocityUntrustLoad.getDoubleValue(),
+                                  copSources.get(RobotSide.LEFT).getFootLoadPercentage(),
+                                  copSources.get(RobotSide.RIGHT).getFootLoadPercentage(),
+                                  yoKinematicVelocityLoadTrusted.get(RobotSide.LEFT).getBooleanValue(),
+                                  yoKinematicVelocityLoadTrusted.get(RobotSide.RIGHT).getBooleanValue());
+      for (RobotSide side : RobotSide.values)
+         yoKinematicVelocityRearReleased.get(side).set(rearFootReleaseLatch.isReleased(side));
    }
 
    /** Trace of the 3×3 diagonal block of the EKF covariance starting at {@code tangentIndex}. */
