@@ -66,8 +66,29 @@ public class InvariantEKF
                        double gravitationalAcceleration,
                        boolean withGyroBias)
    {
-      state = new InvariantState(numberOfContacts, withGyroBias);
-      propagator = new InvariantPropagator(numberOfContacts, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration, withGyroBias);
+      this(numberOfContacts, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration, withGyroBias, false);
+   }
+
+   /**
+    * @param withKinematicVelocityBias carries a body-frame kinematic-velocity measurement error state; inactive until
+    *                                  {@link #setKinematicVelocityErrorModel} turns it on.
+    */
+   public InvariantEKF(int numberOfContacts,
+                       double gyroVariance,
+                       double accelVariance,
+                       double contactVariance,
+                       double gravitationalAcceleration,
+                       boolean withGyroBias,
+                       boolean withKinematicVelocityBias)
+   {
+      state = new InvariantState(numberOfContacts, withGyroBias, withKinematicVelocityBias);
+      propagator = new InvariantPropagator(numberOfContacts,
+                                           gyroVariance,
+                                           accelVariance,
+                                           contactVariance,
+                                           gravitationalAcceleration,
+                                           withGyroBias,
+                                           withKinematicVelocityBias);
       updater = new InvariantUpdater(state.getTangentSize());
       updater.setContactUpdater(new ContactUpdater(numberOfContacts));
       gravityUpdater = new GravityLevelingUpdater(state.getTangentSize(),
@@ -337,7 +358,50 @@ public class InvariantEKF
             for (int c = 0; c < 3; c++)
                velocityJacobian.set(r, b + c, couple ? velocityBiasColumns.getElement(r, c) : 0.0);
       }
+      int bv = state.kinematicVelocityBiasTangentIndex();
+      if (bv >= 0)
+      {
+         // y = Rᵀv + b_v + n. With δb_v = b̂_v − b_v the de-biased measurement y − b̂_v = Rᵀv − δb_v + n, so the
+         // residual R̂(y − b̂_v) − v̂ gains −R̂·δb_v: H on the block is −R̂ (zero while the block is inactive).
+         boolean active = propagator.isKinematicVelocityBiasActive();
+         if (active)
+         {
+            velocityRotation.transform(state.getKinematicVelocityBias(), velocityBiasWorld);
+            velocityResidual.add(0, 0, -velocityBiasWorld.getX());
+            velocityResidual.add(1, 0, -velocityBiasWorld.getY());
+            velocityResidual.add(2, 0, -velocityBiasWorld.getZ());
+         }
+         for (int r = 0; r < 3; r++)
+            for (int c = 0; c < 3; c++)
+               velocityJacobian.set(r, bv + c, active ? -velocityRotation.getElement(r, c) : 0.0);
+      }
       updater.update(state, velocityJacobian, velocityResidual, velocityNoise);
+   }
+
+   private final us.ihmc.euclid.tuple3D.Vector3D velocityBiasWorld = new us.ihmc.euclid.tuple3D.Vector3D();
+
+   /**
+    * Models the kinematic body-velocity measurement error as a first-order Gauss-Markov process (time constant τ s,
+    * stationary standard deviation σ m/s) carried in the state; see {@link InvariantPropagator#setKinematicVelocityBias}.
+    *
+    * @param active   off: the block is decoupled and the measurement is treated as white, as before.
+    * @param consider Schmidt consider: the error is accounted for in P but never estimated (its mean stays zero).
+    */
+   public void setKinematicVelocityErrorModel(boolean active, boolean consider, double timeConstant, double standardDeviation)
+   {
+      propagator.setKinematicVelocityBias(active, timeConstant, standardDeviation);
+      updater.setConsiderKinematicVelocityBias(active && consider);
+   }
+
+   public boolean isKinematicVelocityErrorModelActive()
+   {
+      return propagator.isKinematicVelocityBiasActive();
+   }
+
+   /** @return the live body-frame kinematic-velocity measurement error estimate (zero without the block). */
+   public us.ihmc.euclid.tuple3D.Vector3D getKinematicVelocityBias()
+   {
+      return state.getKinematicVelocityBias();
    }
 
    private final DMatrixRMaj biasJacobian = new DMatrixRMaj(3, 1);

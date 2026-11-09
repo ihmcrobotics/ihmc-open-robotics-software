@@ -385,7 +385,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final YoDouble yoStartupElapsed = new YoDouble("invariantStartupElapsed", registry);
    public static final double DEFAULT_STARTUP_SETTLE_DURATION = 0.1;
    public static final double DEFAULT_STARTUP_SETTLE_TIMEOUT = 2.0;
-   private final org.ejml.data.DMatrixRMaj startCovariance = new org.ejml.data.DMatrixRMaj(12 + 3 * NUMBER_OF_CONTACTS, 12 + 3 * NUMBER_OF_CONTACTS);
+   private final org.ejml.data.DMatrixRMaj startCovariance = new org.ejml.data.DMatrixRMaj(15 + 3 * NUMBER_OF_CONTACTS, 15 + 3 * NUMBER_OF_CONTACTS);
    /**
     * Start-up tilt alignment: before the start-up settle ends, the first {@link #STARTUP_TILT_ALIGNMENT_WINDOW} of
     * quasi-static accelerometer readings sets roll/pitch directly (yaw kept from the initial pose), and the filter
@@ -418,6 +418,21 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final YoDouble yoGyroBiasStateStdX = new YoDouble("invariantGyroBiasStateStdX", registry);
    private final YoDouble yoGyroBiasStateStdY = new YoDouble("invariantGyroBiasStateStdY", registry);
    private final YoDouble yoGyroBiasStateStdZ = new YoDouble("invariantGyroBiasStateStdZ", registry);
+
+   // The kinematic body-velocity measurement's time-correlated error (see KinematicVelocityErrorModel). WHITE by
+   // default, which leaves the filter exactly as before; STATE / CONSIDER carry a Gauss-Markov block (τ, σ).
+   private final us.ihmc.yoVariables.variable.YoEnum<KinematicVelocityErrorModel> yoKinematicVelocityErrorModel
+         = new us.ihmc.yoVariables.variable.YoEnum<>("invariantKinematicVelocityErrorModel", registry, KinematicVelocityErrorModel.class);
+   private final YoDouble yoKinematicVelocityErrorTimeConstant = new YoDouble("invariantKinematicVelocityErrorTimeConstant", registry);
+   private final YoDouble yoKinematicVelocityErrorStd = new YoDouble("invariantKinematicVelocityErrorStd", registry);
+   private final YoDouble yoKinematicVelocityErrorX = new YoDouble("invariantKinematicVelocityErrorX", registry);
+   private final YoDouble yoKinematicVelocityErrorY = new YoDouble("invariantKinematicVelocityErrorY", registry);
+   private final YoDouble yoKinematicVelocityErrorZ = new YoDouble("invariantKinematicVelocityErrorZ", registry);
+   private final YoDouble yoKinematicVelocityErrorStateStd = new YoDouble("invariantKinematicVelocityErrorStateStd", registry);
+   public static final double DEFAULT_KINEMATIC_VELOCITY_ERROR_TIME_CONSTANT = 0.1; // s
+   public static final double DEFAULT_KINEMATIC_VELOCITY_ERROR_STD = 0.03; // m/s
+   private KinematicVelocityErrorModel kinematicVelocityErrorModelInUse = KinematicVelocityErrorModel.WHITE;
+   private double kinematicVelocityErrorParametersInUse = Double.NaN;
    /**
     * (rad/s)/sqrt(s). Replay of the 2026-10-06 Alex002 logs: 1e-5 gives the smallest bias error at rest entry
     * (0.6/1.2/0.4 mrad/s roll/pitch/yaw); 1e-4 and 1e-3 let walking drag the bias (up to 4 mrad/s yaw, 1.6 deg/min).
@@ -592,7 +607,10 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       this.sensorOutputMap = sensorOutputMap;
       this.imuBiasProvider = Objects.requireNonNull(imuBiasProvider, "imuBiasProvider must not be null (use ZeroIMUBiasProvider)");
 
-      ekf = new InvariantEKF(NUMBER_OF_CONTACTS, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration, true);
+      ekf = new InvariantEKF(NUMBER_OF_CONTACTS, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration, true, true);
+      yoKinematicVelocityErrorModel.set(KinematicVelocityErrorModel.WHITE);
+      yoKinematicVelocityErrorTimeConstant.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_TIME_CONSTANT);
+      yoKinematicVelocityErrorStd.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_STD);
       yoGyroBiasRandomWalkStd.set(DEFAULT_GYRO_BIAS_RANDOM_WALK_STD);
       yoGyroBiasInitialStd.set(DEFAULT_GYRO_BIAS_INITIAL_STD);
       yoRestGyroBiasMeasurementStd.set(DEFAULT_REST_GYRO_BIAS_MEASUREMENT_STD);
@@ -821,6 +839,18 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
                startCovariance.set(b + i, b + j, !active ? 0.0 : keepRotation ? current.get(b + i, b + j) : (i == j ? initialVariance : 0.0));
       }
 
+      int bv = ekf.getState().kinematicVelocityBiasTangentIndex();
+      if (bv >= 0)
+      {
+         // The measurement-error block starts at its stationary variance when modelled, zero (decoupled) otherwise.
+         double variance = ekf.isKinematicVelocityErrorModelActive()
+               ? us.ihmc.euclid.tools.EuclidCoreTools.square(yoKinematicVelocityErrorStd.getDoubleValue()) : 0.0;
+         for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+               startCovariance.set(bv + i, bv + j, i == j ? variance : 0.0);
+         ekf.getKinematicVelocityBias().setToZero();
+      }
+
       if (keep)
       {
          for (int i = 0; i < 3; i++)
@@ -904,6 +934,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       // (post-clamp) bias for visibility.
       updateRestGyroBias();
       syncGyroBiasEstimation();
+      syncKinematicVelocityErrorModel();
       boolean clamped = false;
       if (ekf.isGyroBiasEstimationActive())
       {
@@ -1312,6 +1343,47 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     * provider's, clamped), with the initial variance and no cross-covariance. While on, a new rest estimate enters
     * as a direct bias measurement.
     */
+   /**
+    * Applies invariantKinematicVelocityErrorModel / TimeConstant / Std. On any change the block is re-seeded: zero mean,
+    * stationary variance σ² (zero when WHITE), no cross-covariance.
+    */
+   private void syncKinematicVelocityErrorModel()
+   {
+      KinematicVelocityErrorModel model = yoKinematicVelocityErrorModel.getEnumValue();
+      if (model == null)
+         model = KinematicVelocityErrorModel.WHITE;
+      double tau = yoKinematicVelocityErrorTimeConstant.getDoubleValue();
+      double std = yoKinematicVelocityErrorStd.getDoubleValue();
+      double parameters = 31.0 * tau + std;
+      if (model != kinematicVelocityErrorModelInUse || parameters != kinematicVelocityErrorParametersInUse)
+      {
+         boolean active = model != KinematicVelocityErrorModel.WHITE;
+         ekf.setKinematicVelocityErrorModel(active, model == KinematicVelocityErrorModel.CONSIDER, tau, std);
+         org.ejml.data.DMatrixRMaj covariance = ekf.getState().getCovariance();
+         int bv = ekf.getState().kinematicVelocityBiasTangentIndex();
+         int m = covariance.getNumRows();
+         for (int i = 0; i < 3; i++)
+         {
+            for (int k = 0; k < m; k++)
+            {
+               covariance.set(bv + i, k, 0.0);
+               covariance.set(k, bv + i, 0.0);
+            }
+            covariance.set(bv + i, bv + i, active ? std * std : 0.0);
+         }
+         ekf.getKinematicVelocityBias().setToZero();
+         kinematicVelocityErrorModelInUse = model;
+         kinematicVelocityErrorParametersInUse = parameters;
+      }
+      us.ihmc.euclid.tuple3D.Vector3D bias = ekf.getKinematicVelocityBias();
+      yoKinematicVelocityErrorX.set(bias.getX());
+      yoKinematicVelocityErrorY.set(bias.getY());
+      yoKinematicVelocityErrorZ.set(bias.getZ());
+      int bv = ekf.getState().kinematicVelocityBiasTangentIndex();
+      org.ejml.data.DMatrixRMaj covariance = ekf.getState().getCovariance();
+      yoKinematicVelocityErrorStateStd.set(Math.sqrt(Math.max(0.0, (covariance.get(bv, bv) + covariance.get(bv + 1, bv + 1) + covariance.get(bv + 2, bv + 2)) / 3.0)));
+   }
+
    private void syncGyroBiasEstimation()
    {
       boolean active = yoEstimateGyroBias.getValue();
