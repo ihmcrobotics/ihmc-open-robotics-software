@@ -2,12 +2,12 @@ package us.ihmc.rdx.ui.lerobot;
 
 import static us.ihmc.lerobot.VLAUpdateThread.UI;
 
-import behavior_msgs.VLAOperationMessage;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.ArmTrajectoryMessage;
+import ihmc_common_msgs.VLAOperationMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;

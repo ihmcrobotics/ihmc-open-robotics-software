@@ -1,12 +1,12 @@
 package us.ihmc.behaviors.tools;
 
-import behavior_msgs.MinimalFootstepListMessage;
-import behavior_msgs.MinimalFootstepMessage;
 import controller_msgs.FootstepDataListMessage;
 import controller_msgs.FootstepDataMessage;
 import controller_msgs.FootstepQueueStatusMessage;
 import controller_msgs.FootstepStatusMessage;
 import controller_msgs.QueuedFootstepStatusMessage;
+import ihmc_common_msgs.MinimalFootstepListMessage;
+import ihmc_common_msgs.MinimalFootstepMessage;
 import ihmc_common_msgs.Point2DMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
