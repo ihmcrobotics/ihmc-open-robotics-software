@@ -13,6 +13,9 @@ import org.lwjgl.system.MemoryUtil;
 import us.ihmc.log.LogTools;
 
 import java.io.IOException;
+import java.lang.ref.Reference;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AssimpResourceImporter
 {
@@ -22,6 +25,10 @@ public class AssimpResourceImporter
    {
       ensureAssimpInitialSetup();
 
+      // Assimp keeps only the addresses of these garbage collected structs, so they are held here until
+      // the import returns. Otherwise a garbage collection during the import frees them while Assimp
+      // still reads through them, and the JVM crashes in native code.
+      List<AssimpOpenedFile> openedFiles = new ArrayList<>();
       AIFileOpenProcI assimpFileOpenFunction = new AIFileOpenProcI()
       {
          /**
@@ -42,6 +49,7 @@ public class AssimpResourceImporter
             {
                throw new RuntimeException(e);
             }
+            openedFiles.add(assimpOpenedFile);
             return assimpOpenedFile.getAssimpFileStructAddress();
          }
       };
@@ -59,6 +67,8 @@ public class AssimpResourceImporter
       assimpFileIO.UserData(MemoryUtil.memAddress(MemoryUtil.memAlloc(1)));
 
       AIScene assimpScene = Assimp.aiImportFileExWithProperties(resourcePath, postProcessingSteps, assimpFileIO, assimpPropertyStore);
+      Reference.reachabilityFence(assimpFileIO);
+      Reference.reachabilityFence(openedFiles);
 
       if (assimpScene == null)
       {

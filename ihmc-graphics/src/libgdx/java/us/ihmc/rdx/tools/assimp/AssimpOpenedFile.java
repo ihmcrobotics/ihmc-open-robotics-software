@@ -24,6 +24,8 @@ import java.util.function.Supplier;
 
 public class AssimpOpenedFile
 {
+   /** Assimp holds only this struct's address, so the reference keeps it from being garbage collected */
+   private final AIFile assimpFile;
    private final long assimpFileStructAddress;
    private final String fileName;
 
@@ -52,7 +54,7 @@ public class AssimpOpenedFile
 
       final MutableLong position = new MutableLong(0);
 
-      AIFile assimpFile = AIFile.create();
+      assimpFile = AIFile.create();
 
       AIFileReadProcI assimpFileReadFunction = new AIFileReadProcI()
       {
@@ -66,8 +68,13 @@ public class AssimpOpenedFile
 
             LogTools.debug(StringTools.format("{}: Read size: {} count: {} desired bytes: {} bytes left: {} going to be read: {}", fileName, size, count, desiredNumberOfBytesToRead, bytesLeftInFile, bytesToBeRead));
 
-            ByteBuffer characterBufferToReadTo = MemoryUtil.memByteBuffer(characterBufferToReadToAddress, byteArray.length);
+            if (bytesToBeRead <= 0)
+               return 0;
+
+            ByteBuffer characterBufferToReadTo = MemoryUtil.memByteBuffer(characterBufferToReadToAddress, (int) bytesToBeRead);
             characterBufferToReadTo.put(byteArray, (int) position.longValue(), (int) bytesToBeRead);
+            // Like fread, so a file read in several blocks continues where the last read ended
+            position.add(bytesToBeRead);
 
             return bytesToBeRead;
          }
