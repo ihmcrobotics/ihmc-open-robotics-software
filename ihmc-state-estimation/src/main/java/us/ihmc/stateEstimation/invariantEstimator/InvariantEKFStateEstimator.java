@@ -291,6 +291,21 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     */
    private final YoBoolean yoKinematicVelocityEnabled = new YoBoolean("invariantKinematicVelocityEnabled", registry);
    private final YoDouble yoKinematicVelocityStd = new YoDouble("invariantKinematicVelocityStd", registry);
+   /** Diagnostics: the per-foot kinematic body-velocity measurement y (pelvis frame), NaN when the foot is not applied. */
+   private final SideDependentList<YoDouble[]> yoKinematicVelocityMeasurement = new SideDependentList<>(
+         new YoDouble[] {new YoDouble("invariantKinematicVelocityMeasuredXLeft", registry), new YoDouble("invariantKinematicVelocityMeasuredYLeft", registry), new YoDouble("invariantKinematicVelocityMeasuredZLeft", registry)},
+         new YoDouble[] {new YoDouble("invariantKinematicVelocityMeasuredXRight", registry), new YoDouble("invariantKinematicVelocityMeasuredYRight", registry), new YoDouble("invariantKinematicVelocityMeasuredZRight", registry)});
+   /**
+    * Array-observed kinematic-velocity noise: the kinematic velocity assumes a rigid leg, and the IMU array measures
+    * how badly that leg is violating rigidity right now (fast off-axis residual of its IMU pairs, previous tick).
+    * On 11/05 that violation predicted the per-foot kinematic-velocity error (Spearman +0.55..+0.63, top quintile
+    * 3x the bottom). R_v gets gain * violation^2 on its diagonal. 0 (default) = off.
+    */
+   private final YoDouble yoKinematicVelocityArrayViolationGain = new YoDouble("invariantKinematicVelocityArrayViolationGain", registry);
+   private final SideDependentList<YoDouble> yoKinematicVelocityArrayViolation = new SideDependentList<>(new YoDouble("invariantKinematicVelocityArrayViolationLeft", registry),
+                                                                                                         new YoDouble("invariantKinematicVelocityArrayViolationRight", registry));
+   private java.util.function.ToDoubleFunction<RobotSide> legViolationSource = null;
+
    private final SideDependentList<YoDouble> yoKinematicVelocityNIS = new SideDependentList<>(new YoDouble("invariantKinematicVelocityNISLeft", registry),
                                                                                                new YoDouble("invariantKinematicVelocityNISRight", registry));
    private final SideDependentList<YoBoolean> yoKinematicVelocityApplied = new SideDependentList<>(new YoBoolean("invariantKinematicVelocityAppliedLeft", registry),
@@ -1277,6 +1292,12 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     * {@link #yoKinematicVelocityUseJointCovariance}). The leg Jacobians are built from the same one-DoF joint path
     * the covariance is packed against, so their columns line up by construction.
     */
+   /** Per-leg rigidity violation from the IMU array (see invariantKinematicVelocityArrayViolationGain). */
+   public void setKinematicVelocityLegViolationSource(java.util.function.ToDoubleFunction<RobotSide> source)
+   {
+      this.legViolationSource = source;
+   }
+
    public void setKinematicVelocityJointCovarianceSource(us.ihmc.stateEstimation.jointLevel.OneDoFJointStateSource source,
                                                          us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics pelvis,
                                                          SideDependentList<? extends us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics> feet)
@@ -1352,6 +1373,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       {
          yoKinematicVelocityApplied.get(side).set(false);
          yoKinematicVelocityNIS.get(side).setToNaN();
+         for (YoDouble m : yoKinematicVelocityMeasurement.get(side))
+            m.setToNaN();
       }
       if (!yoKinematicVelocityEnabled.getBooleanValue())
          return;
@@ -1395,8 +1418,21 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          kinematicVelocityCovariance.setIdentity();
          kinematicVelocityCovariance.scale(std * std);
          yoKinematicVelocityJointNoiseTrace.get(side).set(addJointVelocityNoise(side, kinematicVelocityCovariance));
+         double violation = legViolationSource == null ? Double.NaN : legViolationSource.applyAsDouble(side);
+         yoKinematicVelocityArrayViolation.get(side).set(violation);
+         double violationGain = yoKinematicVelocityArrayViolationGain.getDoubleValue();
+         if (violationGain > 0.0 && Double.isFinite(violation))
+         {
+            double extra = violationGain * violation * violation;
+            kinematicVelocityCovariance.setM00(kinematicVelocityCovariance.getM00() + extra);
+            kinematicVelocityCovariance.setM11(kinematicVelocityCovariance.getM11() + extra);
+            kinematicVelocityCovariance.setM22(kinematicVelocityCovariance.getM22() + extra);
+         }
          ekf.updateBodyVelocity(kinematicBodyVelocity, kinematicVelocityCovariance, soleInPelvis); // r for the bias columns
          yoKinematicVelocityNIS.get(side).set(ekf.getLastNormalizedInnovationSquared());
+         yoKinematicVelocityMeasurement.get(side)[0].set(kinematicBodyVelocity.getX());
+         yoKinematicVelocityMeasurement.get(side)[1].set(kinematicBodyVelocity.getY());
+         yoKinematicVelocityMeasurement.get(side)[2].set(kinematicBodyVelocity.getZ());
          yoKinematicVelocityApplied.get(side).set(ekf.wasLastUpdateApplied());
          if (ekf.wasLastUpdateApplied())
             anisKinematicVelocity.add(ekf.getLastNormalizedInnovationSquared(), 3);

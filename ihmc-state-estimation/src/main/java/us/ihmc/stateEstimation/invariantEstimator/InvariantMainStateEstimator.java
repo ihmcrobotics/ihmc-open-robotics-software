@@ -280,6 +280,7 @@ public class InvariantMainStateEstimator implements StateEstimatorController
             preFilter instanceof us.ihmc.stateEstimation.jointLevel.SwitchableJointLevelSource switchable ? switchable.getJointKF() : preFilter;
       if (unwrappedPreFilter instanceof JointLevelKFPreFilter jointLevelKF)
       {
+         invariantEstimator.setKinematicVelocityLegViolationSource(jointLevelKF::getLegOffAxisViolation);
          jointLevelKF.setInitializationGate(() ->
                   invariantEstimator.getContactProbability(RobotSide.LEFT) >= ON_GROUND_INIT_CONTACT_PROBABILITY_THRESHOLD
                && invariantEstimator.getContactProbability(RobotSide.RIGHT) >= ON_GROUND_INIT_CONTACT_PROBABILITY_THRESHOLD);

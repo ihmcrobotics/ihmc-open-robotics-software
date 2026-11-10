@@ -105,6 +105,8 @@ public class PairOffAxisNoiseProvider
    /** Trailing history of the raw same-tick inflation, per pair. Emission reads this, never the current tick. */
    private final double[][] extraHistory;
    private final double[] emitted;
+   private final double[] lastOffAxisNorm;
+   private final double[] lastFastNorm;
    /** Per pair, the projector onto colspace(J_e) from this tick's decomposition (3x3, row-major). */
    private final double[][] onAxisProjector;
 
@@ -148,6 +150,8 @@ public class PairOffAxisNoiseProvider
       // oldest of them before it had been read.
       this.extraHistory = new double[numberOfPairs][causalWindow + 1];
       this.emitted = new double[numberOfPairs];
+      this.lastOffAxisNorm = new double[numberOfPairs];
+      this.lastFastNorm = new double[numberOfPairs];
       this.onAxisProjector = new double[numberOfPairs][9];
    }
 
@@ -214,6 +218,8 @@ public class PairOffAxisNoiseProvider
             fastSquared += fast * fast;
          }
 
+         lastFastNorm[e] = Math.sqrt(fastSquared);
+         lastOffAxisNorm[e] = Math.sqrt(offAxis.get(0, 0) * offAxis.get(0, 0) + offAxis.get(1, 0) * offAxis.get(1, 0) + offAxis.get(2, 0) * offAxis.get(2, 0));
          double ratio = Math.sqrt(fastSquared) / scale[e];
          double raw = ratio * ratio * sigmaZero[e];
          // A non-finite z (a dropped IMU frame) must not poison the history: it would make the
@@ -233,6 +239,18 @@ public class PairOffAxisNoiseProvider
     * (3x3 row-major; zero when the pair has no joint in its span). The caller uses it to put the inflation on the
     * off-axis directions only. Valid until the next call; do not modify.
     */
+   /** |r_off_e| of the latest update (rad/s), diagnostics. */
+   public double getLastOffAxisNorm(int pair)
+   {
+      return lastOffAxisNorm[pair];
+   }
+
+   /** |fast_e| (off-axis minus its trailing median) of the latest update (rad/s), diagnostics. */
+   public double getLastFastNorm(int pair)
+   {
+      return lastFastNorm[pair];
+   }
+
    public double[] getOnAxisProjector(int pair)
    {
       return onAxisProjector[pair];

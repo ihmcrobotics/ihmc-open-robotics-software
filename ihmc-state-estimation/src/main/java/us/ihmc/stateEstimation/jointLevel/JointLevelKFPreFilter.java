@@ -705,6 +705,29 @@ public class JointLevelKFPreFilter implements ProprioceptivePreFilter
       return chains;
    }
 
+   /**
+    * The IMU array's rigidity violation on one leg: root-sum-square of the fast off-axis residual of every pair whose
+    * child IMU is on that leg (sensor name starts with "left"/"right"), from the previous stacked update. NaN without
+    * an off-axis provider. Measured, not estimated: a gyro reading the rigid-link model cannot explain.
+    */
+   public double getLegOffAxisViolation(us.ihmc.robotics.robotSide.RobotSide side)
+   {
+      String prefix = side.getLowerCaseName();
+      double sum = 0.0;
+      boolean any = false;
+      for (int e = 0; e < state.pairs.size(); e++)
+      {
+         if (!state.pairs.get(e).child.getSensorName().toLowerCase().startsWith(prefix))
+            continue;
+         double v = biasUpdate.previousOffAxisFastNorm(e);
+         if (!Double.isFinite(v))
+            continue;
+         sum += v * v;
+         any = true;
+      }
+      return any ? Math.sqrt(sum) : Double.NaN;
+   }
+
    /** Per-pair {@code (tr(Sigma_child) + tr(Sigma_parent)) / 3} from this filter's own gyro Sigma. */
    public double[] getSigmaZeroPerPair()
    {

@@ -93,6 +93,11 @@ final class JointKFBiasUpdate
     * whenever it is present it overwrites the field every assembly.
     */
    private PairOffAxisNoiseProvider offAxisNoiseProvider = null;
+   /** Diagnostics: per-pair |off-axis| and |fast off-axis| from the provider (NaN without one). */
+   private final us.ihmc.yoVariables.variable.YoDouble[] yoOffAxisNorm;
+   private final us.ihmc.yoVariables.variable.YoDouble[] yoOffAxisFastNorm;
+   /** |fast off-axis| per pair from the PREVIOUS stacked update: what stage 2 may read this tick without circularity. */
+   private final double[] previousFastNorm;
    /** Views onto each pair's {@code Jang}, filled once; the provider needs the span, not a copy. */
    private DMatrixRMaj[] pairJacobians = null;
 
@@ -157,6 +162,17 @@ final class JointKFBiasUpdate
       // Sigma is floored and cached on the FIRST buildStackedMeasurement, not here — see buildAndFloorSigma.
 
       yoActiveAnchorCount = new YoInteger("jointKFActiveAnchorCount", registry);
+      yoOffAxisNorm = new us.ihmc.yoVariables.variable.YoDouble[state.numberOfIMUPairs];
+      yoOffAxisFastNorm = new us.ihmc.yoVariables.variable.YoDouble[state.numberOfIMUPairs];
+      previousFastNorm = new double[state.numberOfIMUPairs];
+      java.util.Arrays.fill(previousFastNorm, Double.NaN);
+      for (int e = 0; e < state.numberOfIMUPairs; e++)
+      {
+         yoOffAxisNorm[e] = new us.ihmc.yoVariables.variable.YoDouble("jointKFOffAxisNorm_" + e, registry);
+         yoOffAxisFastNorm[e] = new us.ihmc.yoVariables.variable.YoDouble("jointKFOffAxisFastNorm_" + e, registry);
+         yoOffAxisNorm[e].setToNaN();
+         yoOffAxisFastNorm[e].setToNaN();
+      }
       yoBiasPTrace = new YoDouble("jointKF_biasPTrace", registry);
       yoAnchorGatedCount = new YoInteger("jointKFAnchorGatedCount", registry);
       yoAnchorRawResidual = new YoDouble[state.footAnchors.size()];
@@ -317,6 +333,15 @@ final class JointKFBiasUpdate
       // only point in the tick where both are current and neither has yet influenced an estimate.
       if (offAxisNoiseProvider != null)
          pairExtraVariance = offAxisNoiseProvider.update(zg, pairJacobians());
+      if (offAxisNoiseProvider != null)
+      {
+         for (int e = 0; e < yoOffAxisNorm.length; e++)
+         {
+            previousFastNorm[e] = yoOffAxisFastNorm[e].getValue();
+            yoOffAxisNorm[e].set(offAxisNoiseProvider.getLastOffAxisNorm(e));
+            yoOffAxisFastNorm[e].set(offAxisNoiseProvider.getLastFastNorm(e));
+         }
+      }
 
       // Active stance-anchor rows. A planted foot has zero angular velocity, so
       //    omega_base^meas = -J_F qd_F - J_U qd_U + b_base + noise
@@ -542,6 +567,12 @@ final class JointKFBiasUpdate
     * than the one about to run it, which would otherwise show up only as an unexplained difference
     * against the offline arm.</p>
     */
+   /** Per-pair |fast off-axis| from the previous update (NaN before the first, or without a provider). */
+   double previousOffAxisFastNorm(int pair)
+   {
+      return previousFastNorm[pair];
+   }
+
    public void setOffAxisNoiseProvider(PairOffAxisNoiseProvider provider)
    {
       this.offAxisNoiseProvider = provider;
