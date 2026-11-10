@@ -197,6 +197,12 @@ public class RDXFocusBasedCamera extends Camera
       focusPointPose.getPosition().set(translation);
    }
 
+   /** Turns the camera about the vertical axis through the focus point. Positive is counterclockwise seen from above. */
+   public void rotateCameraYaw(double yaw)
+   {
+      longitude -= yaw;
+   }
+
    public void updateCameraPose()
    {
       zoom = MathTools.clamp(zoom, 0.1, 100.0);
