@@ -52,6 +52,7 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXBottleObject.FACTORY);
       objectFactories.add(RDXTrowelObject.FACTORY);
       objectFactories.add(RDXBucketObject.FACTORY);
+      objectFactories.add(RDXSektionCabinetObject.FACTORY);
       objectFactories.sort(Comparator.comparing(RDXEnvironmentObjectFactory::getName, String.CASE_INSENSITIVE_ORDER));
    }
 
