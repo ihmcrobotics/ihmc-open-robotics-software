@@ -11,7 +11,9 @@ public class RDXCustomSceneLoader
       EMPTY_ROOM,
       ROUGH_TERRAIN,
       EXPLOSIVE_BREACHING,
-      ROOMS;
+      ROOMS,
+      /** A scanned multi-story house with its entrance in front of the robot. Needs scripts/hm3d_to_rdx.py run locally. */
+      HM3D_BUILDING;
    }
 
    public static String getEnvironmentName(RDXDemoScene demoScene)
@@ -22,6 +24,7 @@ public class RDXCustomSceneLoader
          case ROOMS -> "Rooms.json";
          case ROUGH_TERRAIN -> "StairsAndCinderBlockPath.json";
          case EMPTY_ROOM -> "EmptyRoom.json";
+         case HM3D_BUILDING -> "HM3DBuilding.json";
          default -> "FlatGround.json";
       };
    }

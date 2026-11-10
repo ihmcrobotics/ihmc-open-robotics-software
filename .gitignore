@@ -95,3 +95,6 @@
 **/.attach_pid*
 **/*.blend1
 **/*.hdf5
+
+# HM3D scans are licensed for academic, non-commercial use only; convert them locally with scripts/hm3d_to_rdx.py
+ihmc-high-level-behaviors/src/libgdx/resources/environmentObjects/hm3d/

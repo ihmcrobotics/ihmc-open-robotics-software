@@ -1,0 +1,126 @@
+{
+  "ambientLight" : 0.01,
+  "objects" : [
+    {
+      "type" : "RDXLabFloorObject",
+      "x" : 0.0,
+      "y" : -20.0,
+      "z" : -0.005,
+      "qx" : 0.0,
+      "qy" : 0.0,
+      "qz" : 0.0,
+      "qs" : 1.0
+    },
+    {
+      "type" : "RDXLabFloorObject",
+      "x" : 0.0,
+      "y" : 0.0,
+      "z" : -0.005,
+      "qx" : 0.0,
+      "qy" : 0.0,
+      "qz" : 0.0,
+      "qs" : 1.0
+    },
+    {
+      "type" : "RDXLabFloorObject",
+      "x" : 0.0,
+      "y" : 20.0,
+      "z" : -0.005,
+      "qx" : 0.0,
+      "qy" : 0.0,
+      "qz" : 0.0,
+      "qs" : 1.0
+    },
+    {
+      "type" : "RDXLabFloorObject",
+      "x" : 20.0,
+      "y" : -20.0,
+      "z" : -0.005,
+      "qx" : 0.0,
+      "qy" : 0.0,
+      "qz" : 0.0,
+      "qs" : 1.0
+    },
+    {
+      "type" : "RDXLabFloorObject",
+      "x" : 20.0,
+      "y" : 0.0,
+      "z" : -0.005,
+      "qx" : 0.0,
+      "qy" : 0.0,
+      "qz" : 0.0,
+      "qs" : 1.0
+    },
+    {
+      "type" : "RDXLabFloorObject",
+      "x" : 20.0,
+      "y" : 20.0,
+      "z" : -0.005,
+      "qx" : 0.0,
+      "qy" : 0.0,
+      "qz" : 0.0,
+      "qs" : 1.0
+    },
+    {
+      "type" : "RDXHM3DSceneObject",
+      "x" : 9.9286,
+      "y" : 0.2386,
+      "z" : 0.0,
+      "qx" : 0.0,
+      "qy" : 0.0,
+      "qz" : 1.0,
+      "qs" : 0.0,
+      "scene" : "00337-CFVBbU9Rsyb"
+    },
+    {
+      "type" : "RDXArticulatedDoorObject",
+      "x" : 1.6422315349968246,
+      "y" : -0.639320168189615,
+      "z" : 3.179474879610781e-17,
+      "qx" : 0.0,
+      "qy" : 0.0,
+      "qz" : 0.0,
+      "qs" : 1.0
+    },
+    {
+      "type" : "RDXPointLightObject",
+      "x" : -2.0,
+      "y" : 10.0,
+      "z" : 12.0,
+      "qx" : 0.0,
+      "qy" : 0.0,
+      "qz" : 0.0,
+      "qs" : 1.0
+    },
+    {
+      "type" : "RDXPointLightObject",
+      "x" : -2.0,
+      "y" : -10.0,
+      "z" : 12.0,
+      "qx" : 0.0,
+      "qy" : 0.0,
+      "qz" : 0.0,
+      "qs" : 1.0
+    },
+    {
+      "type" : "RDXPointLightObject",
+      "x" : 22.0,
+      "y" : 10.0,
+      "z" : 12.0,
+      "qx" : 0.0,
+      "qy" : 0.0,
+      "qz" : 0.0,
+      "qs" : 1.0
+    },
+    {
+      "type" : "RDXPointLightObject",
+      "x" : 22.0,
+      "y" : -10.0,
+      "z" : 12.0,
+      "qx" : 0.0,
+      "qy" : 0.0,
+      "qz" : 0.0,
+      "qs" : 1.0
+    }
+  ]
+}

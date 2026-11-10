@@ -1,6 +1,7 @@
 package us.ihmc.rdx.simulation.environment.object;
 
 import us.ihmc.rdx.simulation.environment.object.objects.*;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXHM3DSceneObject;
 import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXProceduralGroundObject;
 import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXPyramidSlopeObject;
 import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXPyramidStairsObject;
@@ -26,6 +27,7 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXPyramidSlopeObject.FACTORY);
       objectFactories.add(RDXUnevenTilesObject.FACTORY);
       objectFactories.add(RDXProceduralGroundObject.FACTORY);
+      objectFactories.add(RDXHM3DSceneObject.FACTORY);
       objectFactories.add(RDXWorkPlatformObject.FACTORY);
       objectFactories.add(RDXRightJerseyBarrierObject.FACTORY);
       objectFactories.add(RDXLeftJerseyBarrierObject.FACTORY);
