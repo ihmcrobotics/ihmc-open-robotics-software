@@ -219,4 +219,16 @@ public class PairOffAxisNoiseProviderTest
       assertEquals(0.0, inPlaneMax, 1.0e-12, "a burst inside the observable plane carries joint information and must not inflate");
       assertTrue(outOfPlaneMax > 0.0, "a burst normal to the observable plane is a rigidity violation and must inflate");
    }
+
+   /** getOnAxisProjector: for a pair whose span is the x axis, P = e_x e_x^T, so (I - P) leaves only y and z inflated. */
+   @Test
+   public void testOnAxisProjectorIsTheSpanOfTheJacobian()
+   {
+      PairOffAxisNoiseProvider provider = provider();
+      provider.update(z(0.3, 0.2, -0.1), xAxisJacobian());
+      double[] p = provider.getOnAxisProjector(0);
+      double[] expected = {1, 0, 0, 0, 0, 0, 0, 0, 0};
+      for (int k = 0; k < 9; k++)
+         org.junit.jupiter.api.Assertions.assertEquals(expected[k], p[k], 1.0e-12, "projector entry " + k);
+   }
 }

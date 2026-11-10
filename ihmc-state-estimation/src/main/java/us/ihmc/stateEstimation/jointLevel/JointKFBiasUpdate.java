@@ -399,8 +399,21 @@ final class JointKFBiasUpdate
             double extra = pairExtraVariance[e];
             if (!Double.isFinite(extra) || extra < 0.0)
                throw new IllegalStateException("pair " + e + " extra variance must be finite and non-negative, was " + extra);
-            for (int d = 0; d < 3; d++)
-               Rg.add(3 * e + d, 3 * e + d, extra);
+            double onAxisFraction = parameters.offAxisOnAxisFraction.getValue();
+            if (offAxisNoiseProvider == null || onAxisFraction == 1.0)
+            {
+               for (int d = 0; d < 3; d++)
+                  Rg.add(3 * e + d, 3 * e + d, extra);
+            }
+            else
+            {
+               // extra * ((I - P) + f P) = extra * (I - (1 - f) P): PSD for 0 <= f <= 1, so Rg stays PD.
+               double f = Math.max(0.0, Math.min(1.0, onAxisFraction));
+               double[] projector = offAxisNoiseProvider.getOnAxisProjector(e);
+               for (int r = 0; r < 3; r++)
+                  for (int c = 0; c < 3; c++)
+                     Rg.add(3 * e + r, 3 * e + c, extra * ((r == c ? 1.0 : 0.0) - (1.0 - f) * projector[3 * r + c]));
+            }
          }
       }
 

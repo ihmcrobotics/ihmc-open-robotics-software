@@ -103,6 +103,7 @@ final class JointKFParameters
    final YoDouble anchorVar;
    final YoDouble anchorResidualGate;
    final YoDouble sigmaGyroFloor;
+   final YoDouble offAxisOnAxisFraction;
 
    // ================================ Boot-time ================================
 
@@ -134,6 +135,11 @@ final class JointKFParameters
                                                         + "<= 0 or non-finite disables.", ANCHOR_RESIDUAL_GATE, registry);
       sigmaGyroFloor = create("sigmaGyroFloor", LIVE + "Gyro measurement-noise floor ((rad/s)^2 per axis), and "
                                                 + "the S-pivot floor for every non-encoder block.", SIGMA_GYRO_FLOOR, registry);
+      offAxisOnAxisFraction = create("offAxisOnAxisFraction", LIVE + "How much of the off-axis noise law's inflation (arm 6) "
+                                                + "lands on the joint-informative (on-axis) directions of a pair: extra * ((I - P) + f P), P the "
+                                                + "projector onto colspace(J_e). 1 (default) = isotropic, the original law; 0 = off-axis "
+                                                + "directions only, so the rigidity violation de-weights only the rows that carry no joint "
+                                                + "information. No effect without an off-axis provider.", 1.0, registry);
 
       encoderVar = create("encoderVar", BOOT + "Fallback encoder position variance (rad^2) for joints with no "
                                         + "wired per-joint noise.", ENCODER_VAR, registry);
