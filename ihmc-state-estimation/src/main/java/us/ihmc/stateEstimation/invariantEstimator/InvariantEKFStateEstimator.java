@@ -146,6 +146,16 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private boolean runningAsMain = false;
    private StateEstimatorMode operatingMode = StateEstimatorMode.NORMAL;
    private boolean heldLastTick = false;
+   /**
+    * Both feet below the contact threshold for at most this long (s) is a short flight, not hanging: the filter keeps
+    * integrating the IMU (no contact or kinematic-velocity updates) instead of zeroing the base velocity and
+    * re-anchoring with zero velocity afterwards. 0 (the default) keeps the original immediate hold. In the 11/05 replay
+    * the RL gait's fast steps briefly drop both foot switches below 0.5 for ~60 ms at 0.87 m/s; the hold then reset
+    * the velocity to zero mid-stride (a 14 cm/s RMS error over the following 3 s).
+    */
+   private final YoDouble yoNoContactHoldDelay = new YoDouble("invariantNoContactHoldDelay", registry);
+   private final YoDouble yoNoContactDuration = new YoDouble("invariantNoContactDuration", registry);
+   private final YoBoolean yoShortFlight = new YoBoolean("invariantShortFlight", registry);
    private static final double CONTACT_HOLD_THRESHOLD = 0.5; // both feet below -> base translation will be unobservable
    private final Vector3D zeroVelocity = new Vector3D(); // final, stays zero
 
@@ -1052,6 +1062,25 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
 
       updateStartupTiltAlignment();
       boolean startupHold = updateStartupSettle(noContact);
+
+      yoNoContactDuration.set(noContact ? yoNoContactDuration.getDoubleValue() + dt : 0.0);
+      boolean shortFlight = noContact && !heldLastTick && operatingMode != StateEstimatorMode.FROZEN && !startupHold
+                            && yoNoContactDuration.getDoubleValue() <= yoNoContactHoldDelay.getDoubleValue();
+      yoShortFlight.set(shortFlight);
+      if (shortFlight)
+      {
+         // Short flight: nothing measures translation, but the velocity is real -- keep integrating it. The touchdown
+         // re-seed re-anchors each foot when its probability rises again, so no re-anchor (and no velocity reset).
+         ekf.predict(angularVelocity, linearAcceleration, dt);
+         updateGravityLeveling();
+         for (RobotSide side : RobotSide.values)
+         {
+            yoContactNIS.get(side).setToNaN();
+            yoContactUpdateApplied.get(side).set(false);
+         }
+         updateYoVariables();
+         return;
+      }
 
       if (operatingMode == StateEstimatorMode.FROZEN || noContact || startupHold)
       {

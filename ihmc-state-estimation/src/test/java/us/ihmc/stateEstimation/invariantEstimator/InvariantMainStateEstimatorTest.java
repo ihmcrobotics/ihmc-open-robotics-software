@@ -31,6 +31,7 @@ import us.ihmc.stateEstimation.jointLevel.JointLevelKFTestSupport;
 import us.ihmc.stateEstimation.jointLevel.SettableTestIMU;
 import us.ihmc.stateEstimation.jointLevel.SettableTestSensorMap;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * "Full filter" tests of {@link InvariantMainStateEstimator} — the InEKF floating-base estimator wrapping a
@@ -326,6 +327,53 @@ public class InvariantMainStateEstimatorTest
    }
 
    // ---------------------------------------------------------------------------------------------------------
+
+   /**
+    * invariantNoContactHoldDelay: a no-contact gap shorter than the delay is a short flight (the 11/05 RL gait drops both
+    * foot switches for ~60 ms at 0.87 m/s), so the base velocity keeps integrating; longer than the delay it is held as
+    * before. With the default 0 the hold is immediate.
+    */
+   @Test
+   public void testShortFlightKeepsTheVelocity()
+   {
+      assertEquals(0.5, velocityAfterNoContact(0.15, 60), 1.0e-2, "a 60 ms flight under a 150 ms delay keeps v");
+      assertEquals(0.0, velocityAfterNoContact(0.0, 60), 1.0e-9, "default: held immediately");
+      assertEquals(0.0, velocityAfterNoContact(0.15, 200), 1.0e-9, "past the delay: held");
+   }
+
+   /** @return v_x after the filter, in contact and at rest, is given v_x = 0.5 and then loses both feet for n ticks. */
+   private static double velocityAfterNoContact(double delay, int n)
+   {
+      Rig rig = buildRig(4011L, new RotationMatrix(), 1.0, false);
+      double[] probability = {1.0};
+      rig.main.getInvariantEKFStateEstimator().setContactProbabilityProvider(new ContactProbabilityProvider()
+      {
+         @Override
+         public void update()
+         {
+         }
+
+         @Override
+         public double getContactProbability(RobotSide side)
+         {
+            return probability[0];
+         }
+      });
+      ((YoDouble) rig.main.getInvariantEKFStateEstimator().getYoRegistry().findVariable("invariantNoContactHoldDelay")).set(delay);
+      setGravityConsistentAccel(rig);
+      for (SettableTestIMU imu : rig.imus)
+         imu.setAngularVelocity(0.0, 0.0, 0.0);
+      for (int k = 0; k < 500; k++)
+         rig.doControl();
+      rig.ekf.getState().setBaseVelocity(new Vector3D(0.5, 0.0, 0.0));
+      probability[0] = 0.0;
+      for (int k = 0; k < n; k++)
+         rig.doControl();
+      Vector3D velocity = new Vector3D();
+      rig.ekf.getBaseVelocity(velocity);
+      assertPipelineFinite(rig, "short flight");
+      return velocity.getX();
+   }
 
    /** Sets every IMU's specific force to the true stationary reading at its current orientation: g_up in world. */
    private static void setGravityConsistentAccel(Rig rig)
