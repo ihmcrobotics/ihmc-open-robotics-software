@@ -105,6 +105,8 @@ public class PairOffAxisNoiseProvider
    /** Trailing history of the raw same-tick inflation, per pair. Emission reads this, never the current tick. */
    private final double[][] extraHistory;
    private final double[] emitted;
+   /** Per pair, the projector onto colspace(J_e) from this tick's decomposition (3x3, row-major). */
+   private final double[][] onAxisProjector;
 
    private long tick = 0L;
    private boolean warnedSigmaZeroMismatch = false;
@@ -146,6 +148,7 @@ public class PairOffAxisNoiseProvider
       // oldest of them before it had been read.
       this.extraHistory = new double[numberOfPairs][causalWindow + 1];
       this.emitted = new double[numberOfPairs];
+      this.onAxisProjector = new double[numberOfPairs][9];
    }
 
    /** The pair chains ("parentImu-&gt;childImu") the fitted constants were keyed to, in artifact order. */
@@ -225,6 +228,16 @@ public class PairOffAxisNoiseProvider
       return emitted;
    }
 
+   /**
+    * The projector onto pair {@code e}'s joint span, {@code P_e = U_keep U_keep^T}, from the latest {@link #update}
+    * (3x3 row-major; zero when the pair has no joint in its span). The caller uses it to put the inflation on the
+    * off-axis directions only. Valid until the next call; do not modify.
+    */
+   public double[] getOnAxisProjector(int pair)
+   {
+      return onAxisProjector[pair];
+   }
+
    /** Clears the history so a second replay in the same process does not inherit the first one's tail. */
    public void reset()
    {
@@ -242,6 +255,7 @@ public class PairOffAxisNoiseProvider
    private void projectOffAxis(int pair, DMatrixRMaj jacobian, DMatrixRMaj z, DMatrixRMaj offToPack)
    {
       offToPack.set(z);
+      Arrays.fill(onAxisProjector[pair], 0.0);
       int columns = jacobian.getNumCols();
       if (columns == 0)
          return; // no joint in the span: everything the pair sees is off-axis, which is the correct reading.
@@ -276,6 +290,9 @@ public class PairOffAxisNoiseProvider
             component += u.get(r, k) * z.get(r, 0);
          for (int r = 0; r < 3; r++)
             offToPack.add(r, 0, -component * u.get(r, k));
+         for (int r = 0; r < 3; r++)
+            for (int c = 0; c < 3; c++)
+               onAxisProjector[pair][3 * r + c] += u.get(r, k) * u.get(c, k);
       }
    }
 
