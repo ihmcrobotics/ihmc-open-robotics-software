@@ -35,6 +35,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.euclid.YoQuaternion;
+import us.ihmc.stateEstimation.consistency.RollingANIS;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -236,6 +237,24 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    /** Watchdog: seconds since the tilt update last fired. A corrector that stops firing must be visible — the
     *  old gate latched off silently for the last 247 s of hardware log 20260712_163634 (FINDINGS.md §F.3). */
    private final YoDouble yoGravitySecondsSinceUpdate = new YoDouble("invariantGravitySecondsSinceUpdate", registry);
+   /** NIS of the gravity-leveling update on the ticks it is applied, NaN otherwise. Its informative dimension is 2
+    *  (roll and pitch; the residual of two unit vectors has no first-order component along gravity), 1 when pitch is
+    *  gated off (σ_pitch² is then 1e6, so the pitch direction contributes nothing). */
+   private final YoDouble yoGravityNIS = new YoDouble("invariantGravityNIS", registry);
+
+   // Onboard consistency monitor (logging only): rolling ANIS/d per measurement channel, so the per-channel NIS the
+   // evaluation protocol reports is readable from a closed-loop robot log with no motion capture. Ideal value 1;
+   // above 1 the channel is overconfident. Exponentially weighted over APPLIED updates only, time constant
+   // invariantConsistencyMonitorWindow (s). See RollingANIS.
+   public static final double DEFAULT_CONSISTENCY_MONITOR_WINDOW = 5.0;
+   private final YoDouble yoConsistencyMonitorWindow = new YoDouble("invariantConsistencyMonitorWindow", registry);
+   /** Kinematic body velocity, both feet pooled (3 per applied foot). */
+   private final RollingANIS anisKinematicVelocity = new RollingANIS("invariantAnisKinematicVelocity", yoConsistencyMonitorWindow, registry);
+   /** Contact position, both feet pooled, stance feet only (probability above 0.5): a swing foot's update runs with an
+    *  inflated R whose NIS is ~0 by construction and says nothing about the stance tuning. */
+   private final RollingANIS anisContact = new RollingANIS("invariantAnisContact", yoConsistencyMonitorWindow, registry);
+   /** Gravity leveling, quasi-static ticks only. */
+   private final RollingANIS anisGravity = new RollingANIS("invariantAnisGravity", yoConsistencyMonitorWindow, registry);
 
    // Per-foot contact-update conditioning diagnostics (mirrors the JointKF S-conditioning): cond(S) proxy (log10),
    // residual norm, and whether the update was applied (the conditioning gate can skip it). Plus a global
@@ -737,6 +756,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       double lowerTail = 0.5 * (1.0 - CONSISTENCY_CONFIDENCE);
       yoContactNISLowerBound.set(contactNISDistribution.inverseCumulativeProbability(lowerTail));
       yoContactNISUpperBound.set(contactNISDistribution.inverseCumulativeProbability(1.0 - lowerTail));
+      yoConsistencyMonitorWindow.set(DEFAULT_CONSISTENCY_MONITOR_WINDOW);
+      yoGravityNIS.setToNaN();
       yoContactNISGate.set(Double.NaN); // off; chi2_3(DEFAULT_CONTACT_NIS_GATE_PROBABILITY) = 16.27 when enabled for diagnosis
       // Defaults measured on the 2026-09-28 Alex RL log (replay, full session): no divergence (time at |v| > 2 m/s
       // 1.4-3.2% -> 0 on the invariant arms) and a steady vertical velocity bias of +-1 mm/s (DRC: +4).
@@ -1151,6 +1172,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          yoContactPContactTrace.get(side).set(covarianceBlockTrace(ekf.getState().contactTangentIndex(contactIndex(side))));
          ekf.update(contactIndex(side), contactInBody, inflatedContactCovariance);
          yoContactNIS.get(side).set(ekf.getLastNormalizedInnovationSquared());
+         if (ekf.wasLastUpdateApplied() && contactProbability > 0.5)
+            anisContact.add(ekf.getLastNormalizedInnovationSquared(), CONTACT_MEASUREMENT_DOF);
          yoContactInnovationInflation.get(side).set(ekf.getLastInnovationInflation());
          yoContactCondSProxyLog10.get(side).set(Math.log10(ekf.getLastConditionProxy()));
          yoContactResidualNorm.get(side).set(ekf.getLastResidualNorm());
@@ -1375,6 +1398,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          ekf.updateBodyVelocity(kinematicBodyVelocity, kinematicVelocityCovariance, soleInPelvis); // r for the bias columns
          yoKinematicVelocityNIS.get(side).set(ekf.getLastNormalizedInnovationSquared());
          yoKinematicVelocityApplied.get(side).set(ekf.wasLastUpdateApplied());
+         if (ekf.wasLastUpdateApplied())
+            anisKinematicVelocity.add(ekf.getLastNormalizedInnovationSquared(), 3);
       }
    }
 
@@ -1436,9 +1461,19 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       {
          ekf.applyGravityLeveling();
          yoGravitySecondsSinceUpdate.set(0.0);
+         if (ekf.wasLastUpdateApplied())
+         {
+            yoGravityNIS.set(ekf.getLastNormalizedInnovationSquared());
+            anisGravity.add(yoGravityNIS.getDoubleValue(), pitchObservable ? 2 : 1);
+         }
+         else
+         {
+            yoGravityNIS.setToNaN();
+         }
       }
       else
       {
+         yoGravityNIS.setToNaN();
          yoGravitySecondsSinceUpdate.add(dt);
       }
    }
@@ -1622,6 +1657,10 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
 
    private void updateYoVariables()
    {
+      // Every doControl path ends here; a channel that added nothing this tick keeps its average.
+      anisKinematicVelocity.commit(dt);
+      anisContact.commit(dt);
+      anisGravity.commit(dt);
       ekf.getBasePosition(tempVector);
       yoBasePosition.set(tempVector);
 

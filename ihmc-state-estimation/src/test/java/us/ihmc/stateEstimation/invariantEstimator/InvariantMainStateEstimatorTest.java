@@ -57,6 +57,7 @@ public class InvariantMainStateEstimatorTest
       SettableTestIMU pelvisIMU;
       List<SettableTestIMU> imus;
       JointLevelKFPreFilter preFilter;
+      YoRegistry preFilterRegistry = new YoRegistry("preFilter");
       InvariantMainStateEstimator main;
       InvariantEKF ekf;
 
@@ -101,7 +102,7 @@ public class InvariantMainStateEstimatorTest
       pairParameters.add(new IMUBasedJointStateEstimatorParameters("leftLeg", true, "pelvisIMU", "leftFootIMU", 0.0, 0.0));
       pairParameters.add(new IMUBasedJointStateEstimatorParameters("rightLeg", true, "pelvisIMU", "rightFootIMU", 0.0, 0.0));
       List<RigidBodyBasics> feet = Arrays.asList(rig.model.getFoot(RobotSide.LEFT), rig.model.getFoot(RobotSide.RIGHT));
-      rig.preFilter = JointLevelKFTestSupport.newPreFilter(rig.sensorMap, pairParameters, feet, DT, new YoRegistry("preFilter"));
+      rig.preFilter = JointLevelKFTestSupport.newPreFilter(rig.sensorMap, pairParameters, feet, DT, rig.preFilterRegistry);
 
       rig.main = new InvariantMainStateEstimator(rig.model,
                                                  rig.sensorMap,
@@ -181,6 +182,17 @@ public class InvariantMainStateEstimatorTest
       }
 
       assertPipelineFinite(rig, "static equilibrium");
+
+      // Onboard consistency monitor: the stance channels ran, so their rolling ANIS/d is defined.
+      YoRegistry invariantRegistry = rig.main.getInvariantEKFStateEstimator().getYoRegistry();
+      for (String channel : new String[] {"invariantAnisContact", "invariantAnisKinematicVelocity"})
+      {
+         double anis = ((YoDouble) invariantRegistry.findVariable(channel)).getValue();
+         assertTrue(Double.isFinite(anis) && anis >= 0.0, channel + " = " + anis);
+      }
+      double anisGravity = ((YoDouble) invariantRegistry.findVariable("invariantAnisGravity")).getValue();
+      assertTrue(Double.isNaN(anisGravity) || anisGravity >= 0.0, "invariantAnisGravity = " + anisGravity);
+      assertTrue(Double.isFinite(((YoDouble) rig.preFilterRegistry.findVariable("jointKFAnisEncoder")).getValue()));
    }
 
    @Test

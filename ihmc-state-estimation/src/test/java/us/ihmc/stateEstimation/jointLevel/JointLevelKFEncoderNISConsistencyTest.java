@@ -138,6 +138,11 @@ class JointLevelKFEncoderNISConsistencyTest
          assertNotNull(yoNIS[i]);
       }
 
+      // A window far longer than the run makes the rolling ANIS/d the plain mean over these updates.
+      ((YoDouble) fixture.registry.findVariable("jointKFConsistencyMonitorWindow")).set(1.0e6);
+      YoDouble yoAnisEncoder = (YoDouble) fixture.registry.findVariable("jointKFAnisEncoder");
+      assertNotNull(yoAnisEncoder);
+
       Random random = new Random(SEED + 7);
       DMatrixRMaj z = new DMatrixRMaj(n, 1);
       double[] sumNIS = new double[n];
@@ -166,8 +171,14 @@ class JointLevelKFEncoderNISConsistencyTest
       }
 
       double[] mean = new double[n];
+      double pooledMean = 0.0;
       for (int i = 0; i < n; i++)
+      {
          mean[i] = sumNIS[i] / trials;
+         pooledMean += mean[i] / n;
+      }
+      // Onboard monitor: encoder NIS pooled over the joints, averaged over the applied updates.
+      assertEquals(pooledMean, yoAnisEncoder.getValue(), 1.0e-3 * pooledMean, "jointKFAnisEncoder must be the pooled mean encoder NIS");
       return mean;
    }
 }
