@@ -291,7 +291,8 @@ final class JointKFPrediction
       for (int i = 0; i < state.numberOfJoints; i++)
       {
          rotorInertiaDiag[i] = yoRotorInertia[i].getValue();
-         sigmaTauPerJoint[i] = sigmaTauIsFallback[i] ? sigmaTauFallback : yoAlpha[i].getValue() * tauMaxPerJoint[i];
+         double scale = parameters.processNoiseScale.getValue();
+         sigmaTauPerJoint[i] = scale * (sigmaTauIsFallback[i] ? sigmaTauFallback : yoAlpha[i].getValue() * tauMaxPerJoint[i]);
       }
    }
 
