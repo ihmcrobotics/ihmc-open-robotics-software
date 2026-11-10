@@ -382,6 +382,12 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     */
    private final YoDouble yoKinematicVelocityPivotPitchRate = new YoDouble("invariantKinematicVelocityPivotPitchRate", registry);
    private final YoDouble yoKinematicVelocityPivotEdgeX = new YoDouble("invariantKinematicVelocityPivotEdgeX", registry);
+   /**
+    * The raw CoP must be at least this far ahead of the sole center (m) for the toe pivot. 0 (the original rule) lets it
+    * fire at touchdown too: in the 11/05 replay half of all pivot ticks fall in the first 20% of stance, while the foot
+    * flattens about its HEEL with the CoP behind center (median -1.9 cm, p90 up to +1.8 cm).
+    */
+   private final YoDouble yoKinematicVelocityPivotMinCoPX = new YoDouble("invariantKinematicVelocityPivotMinCoPX", registry);
    private final SideDependentList<YoDouble> yoKinematicVelocitySolePitchRate = new SideDependentList<>(new YoDouble("invariantKinematicVelocitySolePitchRateLeft", registry),
                                                                                                         new YoDouble("invariantKinematicVelocitySolePitchRateRight", registry));
    private final SideDependentList<YoBoolean> yoKinematicVelocityPivoting = new SideDependentList<>(new YoBoolean("invariantKinematicVelocityPivotingLeft", registry),
@@ -1202,7 +1208,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          soleFrame.getTwistOfFrame(soleTwist); // sole relative to world, expressed in the sole frame
          double pitchRate = soleTwist.getAngularPart().getY();
          yoKinematicVelocitySolePitchRate.get(side).set(pitchRate);
-         boolean pivot = pitchRate > pivotRate && rawCoP.getX() >= 0.0;
+         boolean pivot = pitchRate > pivotRate && rawCoP.getX() >= yoKinematicVelocityPivotMinCoPX.getDoubleValue();
          yoKinematicVelocityPivoting.get(side).set(pivot);
          if (pivot)
             stationaryPoint.setX(yoKinematicVelocityPivotEdgeX.getDoubleValue());
