@@ -1,6 +1,8 @@
 package us.ihmc.rdx.simulation.environment.object.objects;
 
+import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
 
@@ -9,19 +11,30 @@ public class RDXLabFloorObject extends RDXEnvironmentObject
    public static final String NAME = "Lab Floor";
    public static final RDXEnvironmentObjectFactory FACTORY = new RDXEnvironmentObjectFactory(NAME, RDXLabFloorObject.class);
 
+   private final Box3D collisionBox;
+   private final Point3D secondIntersection = new Point3D();
+
    public RDXLabFloorObject()
    {
       super(NAME, FACTORY);
       loadRealisticModel("environmentObjects/labFloor/LabFloor.g3dj");
 
-      double sizeX = 0.3;
-      double sizeY = 0.3;
+      // LabFloor.g3dj is a unit plane scaled to 20 x 20 m
+      double sizeX = 20.0;
+      double sizeY = 20.0;
       double sizeZ = 0.01;
       setMass(10000.0f);
-      getBoundingSphere().setRadius(0.7);
-      Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
+      getBoundingSphere().setRadius(0.5 * Math.hypot(sizeX, sizeY));
+      getCollisionShapeOffset().getTranslation().setZ(-0.5 * sizeZ);
+      collisionBox = new Box3D(sizeX, sizeY, sizeZ);
       setCollisionGeometryObject(collisionBox);
-//      getBulletCollisionOffset().getTranslation().addZ(-1.0);
+   }
+
+   /** Exact ray-box test; the default sampling test misses a box this thin. */
+   @Override
+   public boolean intersect(Line3DReadOnly pickRay, Point3D intersectionToPack)
+   {
+      return collisionBox.intersectionWith(pickRay, intersectionToPack, secondIntersection) > 0;
    }
 
    @Override

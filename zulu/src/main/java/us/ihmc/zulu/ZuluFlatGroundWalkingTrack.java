@@ -42,7 +42,6 @@ public class ZuluFlatGroundWalkingTrack
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
       avatarSimulationFactory.setInitializeEstimatorToActual(true);
       avatarSimulationFactory.setUseImpulseBasedPhysicsEngine(false);
-      avatarSimulationFactory.setUseBulletPhysicsEngine(false);
       avatarSimulationFactory.setUsePerfectSensors(true);
       if (kinematicsSimulation)
       {
