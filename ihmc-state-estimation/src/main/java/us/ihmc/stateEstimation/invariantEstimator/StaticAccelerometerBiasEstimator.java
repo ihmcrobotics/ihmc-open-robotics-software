@@ -25,6 +25,11 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * {@code staticAccelBiasState} says so. Setting {@code staticAccelBiasReestimate} true (with the robot
  * standing still) discards the held value and collects a new one.
  * <p>
+ * {@code staticAccelBiasRefreshAtRest} (off by default) keeps collecting after the first estimate: every completed
+ * window of stillness replaces the held bias. On the 11/05 Alex002 sessions the along-gravity bias measured at
+ * successive rests ranged over -0.126..-0.152 m/s^2 within one session, so a value held from start-up can be off by
+ * 0.02 m/s^2; with the kinematic-velocity error state on, that leaks into the vertical velocity.
+ * <p>
  * Allocation-free per tick.
  */
 public class StaticAccelerometerBiasEstimator
@@ -46,6 +51,8 @@ public class StaticAccelerometerBiasEstimator
    private final YoDouble meanSpecificForceNorm;
    private final YoDouble biasX, biasY, biasZ;
    private final YoBoolean reestimate;
+   private final YoBoolean refreshAtRest;
+   private final YoInteger refreshes;
 
    private final Vector3D sum = new Vector3D();
    private final Vector3D bias = new Vector3D();
@@ -73,6 +80,8 @@ public class StaticAccelerometerBiasEstimator
       biasY = new YoDouble("staticAccelBiasY", registry);
       biasZ = new YoDouble("staticAccelBiasZ", registry);
       reestimate = new YoBoolean("staticAccelBiasReestimate", registry);
+      refreshAtRest = new YoBoolean("staticAccelBiasRefreshAtRest", registry);
+      refreshes = new YoInteger("staticAccelBiasRefreshes", registry);
       state.set(State.COLLECTING);
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -93,7 +102,8 @@ public class StaticAccelerometerBiasEstimator
          publishBias();
          state.set(State.COLLECTING);
       }
-      if (state.getValue() == State.HELD)
+      boolean held = state.getValue() == State.HELD;
+      if (held && !refreshAtRest.getValue())
          return;
 
       if (!(rawGyroNorm <= stillGyroNorm) || !Double.isFinite(rawSpecificForce.getX() + rawSpecificForce.getY() + rawSpecificForce.getZ()))
@@ -114,10 +124,18 @@ public class StaticAccelerometerBiasEstimator
          meanSpecificForceNorm.set(norm);
          bias.scale((norm - gravityMagnitude) / norm);
          publishBias();
+         if (held)
+         {
+            // A refresh: start the next window so a long rest keeps re-measuring, quietly.
+            refreshes.increment();
+            restartWindow();
+            return;
+         }
          state.set(State.HELD);
          // Once per estimate, not per tick: the operator's confirmation that the robot stood still long enough.
          us.ihmc.log.LogTools.info(String.format("Accelerometer bias held after %.1f s standing: |a| = %.4f m/s^2, bias = (%.4f, %.4f, %.4f)",
                                                  samples * dt, norm, bias.getX(), bias.getY(), bias.getZ()));
+         restartWindow(); // a refresh, if enabled, needs a full new window of stillness
       }
    }
 
