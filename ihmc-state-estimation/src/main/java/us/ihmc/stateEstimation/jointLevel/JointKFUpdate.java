@@ -9,6 +9,7 @@ import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
+import us.ihmc.stateEstimation.consistency.RollingANIS;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -163,6 +164,19 @@ final class JointKFUpdate
    private final YoDouble yoStackedNISDof;
    private final YoDouble yoMinSDiag;
    private final YoDouble yoMaxSDiag;
+   /**
+    * Onboard consistency monitor (logging only): rolling ANIS/d of the stacked gyro update (its NIS / dof) and of the
+    * encoder update (per-joint nu_i^2 / S_ii pooled over the joints in that tick's update), exponentially weighted over
+    * APPLIED updates only -- a gated or rolled-back update leaves the average untouched -- with time constant
+    * jointKFConsistencyMonitorWindow (s). Ideal value 1; read from a closed-loop robot log, no motion capture needed.
+    */
+   public static final double DEFAULT_CONSISTENCY_MONITOR_WINDOW = 5.0;
+   private final YoDouble yoConsistencyMonitorWindow;
+   private final RollingANIS anisStacked;
+   private final RollingANIS anisEncoder;
+   /** This update's encoder NIS sum and row count, gathered before the gates and committed only if it is applied. */
+   private double encoderNISSum;
+   private int encoderNISCount;
    // Per-channel diagnostics, indexed by joint state index. NIS = nu_i^2 / S_ii; E[NIS] = 1 for a consistent
    // filter, so a per-joint mean far from 1 reads directly as "R_i is wrong by that factor". Published BEFORE
    // the conditioning gates, so a gated tick still shows the innovation that tripped it. encR is constant (the
@@ -265,6 +279,10 @@ final class JointKFUpdate
       yoCondSProxyLog10 = new YoDouble("jointKFCondSProxyLog10", registry);
       yoStackedNIS = new YoDouble("jointKFStackedNIS", registry);
       yoStackedNISDof = new YoDouble("jointKFStackedNISDof", registry);
+      yoConsistencyMonitorWindow = new YoDouble("jointKFConsistencyMonitorWindow", registry);
+      yoConsistencyMonitorWindow.set(DEFAULT_CONSISTENCY_MONITOR_WINDOW);
+      anisStacked = new RollingANIS("jointKFAnisStacked", yoConsistencyMonitorWindow, registry);
+      anisEncoder = new RollingANIS("jointKFAnisEncoder", yoConsistencyMonitorWindow, registry);
       yoMinSDiag = new YoDouble("jointKFMinSDiag", registry);
       yoMaxSDiag = new YoDouble("jointKFMaxSDiag", registry);
       createMeasurementYoVariables(registry, useDirectVelocityMeasurement);
@@ -632,12 +650,17 @@ final class JointKFUpdate
       // makes a real fault look like it is somewhere else.)
       // The channels are DISTINCT and must never cross-publish — an enum field, not a string prefix, is what
       // keeps that true.
+      encoderNISSum = 0.0;
+      encoderNISCount = 0;
       if (channel.nisChannel == Channel.NisChannel.ENCODER && yoEncNIS != null)
       {
          for (int i = 0; i < k; i++)
          {
             int jointIndex = encRowJointIndex[i];
-            yoEncNIS[jointIndex].set(nu.get(i, 0) * nu.get(i, 0) / S.get(i, i));
+            double encoderNIS = nu.get(i, 0) * nu.get(i, 0) / S.get(i, i);
+            yoEncNIS[jointIndex].set(encoderNIS);
+            encoderNISSum += encoderNIS;
+            encoderNISCount++;
             yoEncInnov[jointIndex].set(nu.get(i, 0)); // rad
          }
       }
@@ -732,7 +755,14 @@ final class JointKFUpdate
          state.P.set(PBackup);
          if (!state.warnedNonFiniteInput)
             state.warnNonFiniteInputOnce("the " + channel.label + " update produced a non-finite state; rolled back to the prior estimate");
+         return;
       }
+
+      // Applied: feed the consistency monitor (each channel's update runs once per tick).
+      if (channel == Channel.STACKED_GYRO)
+         anisStacked.update(yoStackedNIS.getDoubleValue(), k, dt);
+      else if (channel.nisChannel == Channel.NisChannel.ENCODER && encoderNISCount > 0)
+         anisEncoder.update(encoderNISSum, encoderNISCount, dt);
    }
 
    /**
