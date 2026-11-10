@@ -44,6 +44,11 @@ public class HumanoidModelCovarianceHelper
     * matching {@link #estimatedBodyNames}. Re-read every tick in {@link #getProcessCovariance()}.
     */
    private final YoDouble[] qBodyScale;
+   /**
+    * Static per-body Q multiplier set by the user (e.g. sim studies via a yoSet hook), applied on top of
+    * {@link #qBodyScale}, which the adaptation gate overwrites every tick. Default 1.0 = no change.
+    */
+   private final YoDouble[] qBodyUserScale;
    /** Names of the estimated bodies, in estimated-body order, so callers can map a side/name to a block index. */
    private final String[] estimatedBodyNames;
 
@@ -85,6 +90,7 @@ public class HumanoidModelCovarianceHelper
          if (!set.isEmpty())
             nEstimatedBodies++;
       qBodyScale = new YoDouble[nEstimatedBodies];
+      qBodyUserScale = new YoDouble[nEstimatedBodies];
       estimatedBodyNames = new String[nEstimatedBodies];
       int p = 0;
       int b = 0;
@@ -108,6 +114,8 @@ public class HumanoidModelCovarianceHelper
          estimatedBodyNames[b] = body.getName();
          qBodyScale[b] = new YoDouble(body.getName() + "_processScale", registry);
          qBodyScale[b].set(1.0);
+         qBodyUserScale[b] = new YoDouble(body.getName() + "_processScaleUser", registry);
+         qBodyUserScale[b].set(1.0);
          b++;
       }
       processCovariance = new DMatrixRMaj(parameters.getNumberOfParameters(), parameters.getNumberOfParameters());
@@ -153,7 +161,7 @@ public class HumanoidModelCovarianceHelper
          if (set.isEmpty())
             continue;
 
-         double scale = qBodyScale[b].getValue();
+         double scale = qBodyScale[b].getValue() * qBodyUserScale[b].getValue();
          for (SpatialInertiaBasisOption option : JointTorqueRegressorCalculator.SpatialInertiaBasisOption.values)
          {
             if (set.contains(option))
