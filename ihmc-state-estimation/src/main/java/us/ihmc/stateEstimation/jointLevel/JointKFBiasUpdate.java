@@ -421,7 +421,8 @@ final class JointKFBiasUpdate
       {
          for (int e = 0; e < E; e++)
          {
-            double extra = pairExtraVariance[e];
+            double alphaMultiplier = parameters.offAxisAlphaMultiplier.getValue();
+            double extra = pairExtraVariance[e] / (offAxisNoiseProvider != null && alphaMultiplier > 0.0 ? alphaMultiplier * alphaMultiplier : 1.0);
             if (!Double.isFinite(extra) || extra < 0.0)
                throw new IllegalStateException("pair " + e + " extra variance must be finite and non-negative, was " + extra);
             double onAxisFraction = parameters.offAxisOnAxisFraction.getValue();
