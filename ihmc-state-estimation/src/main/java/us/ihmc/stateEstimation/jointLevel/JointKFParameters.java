@@ -105,6 +105,7 @@ final class JointKFParameters
    final YoDouble sigmaGyroFloor;
    final YoDouble offAxisOnAxisFraction;
    final YoDouble processNoiseScale;
+   final YoDouble offAxisAlphaMultiplier;
 
    // ================================ Boot-time ================================
 
@@ -136,6 +137,9 @@ final class JointKFParameters
                                                         + "<= 0 or non-finite disables.", ANCHOR_RESIDUAL_GATE, registry);
       sigmaGyroFloor = create("sigmaGyroFloor", LIVE + "Gyro measurement-noise floor ((rad/s)^2 per axis), and "
                                                 + "the S-pivot floor for every non-encoder block.", SIGMA_GYRO_FLOOR, registry);
+      offAxisAlphaMultiplier = create("offAxisAlphaMultiplier", LIVE + "Multiplies the off-axis law's fitted alpha (s_e = alpha * median), "
+                                              + "so the inflation scales by 1/m^2. 1 (default) = the artifact's alpha. Lets alpha be refitted "
+                                              + "for a different law form (e.g. offAxisOnAxisFraction = 0) without a new artifact.", 1.0, registry);
       processNoiseScale = create("processNoiseScale", LIVE + "Multiplies every joint's sigma_tau (so Qa by its square) on the "
                                          + "mass-matrix process-noise path. 1 (default) = the calibrated alphas. A diagnostic for whether "
                                          + "the stacked NIS excess is process noise (Q too small) rather than pair noise (R).", 1.0, registry);
