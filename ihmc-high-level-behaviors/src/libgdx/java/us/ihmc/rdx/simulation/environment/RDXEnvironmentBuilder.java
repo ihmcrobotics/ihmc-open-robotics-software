@@ -398,40 +398,6 @@ public class RDXEnvironmentBuilder extends RDXPanel
       }
    }
 
-   private static boolean isProceduralTerrain(RDXEnvironmentObjectFactory objectFactory)
-   {
-      return RDXProceduralTerrainObject.class.isAssignableFrom(objectFactory.getClazz());
-   }
-
-   private void renderPlaceButton(RDXEnvironmentObjectFactory objectFactory)
-   {
-      if (ImGui.button(labels.get("Place " + objectFactory.getName())))
-      {
-         if (isPlacing)
-         {
-            removeObject(selectedObject);
-         }
-
-         RDXEnvironmentObject objectToPlace = objectFactory.getSupplier().get();
-         addObject(objectToPlace);
-         updateObjectSelected(selectedObject, objectToPlace);
-
-         if (objectToPlace instanceof RDXProceduralTerrainObject)
-         {
-            // Terrain is too large to drag with the mouse, so drop it on the ground under the camera focus and position it with the gizmo
-            tempTranslation.set(panel3D.getCamera3D().getFocusPointPose().getPosition());
-            tempTranslation.setZ(0.0);
-            objectToPlace.setPositionInWorld(tempTranslation);
-            pose3DGizmo.getTransformToParent().set(objectToPlace.getObjectTransform());
-            isPlacing = false;
-         }
-         else
-         {
-            isPlacing = true;
-         }
-      }
-   }
-
    private void loadEnvironmentInternal(String environmentFileName)
    {
       loadedFilesOnce = true;
