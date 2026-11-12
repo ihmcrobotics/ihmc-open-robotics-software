@@ -75,11 +75,6 @@ public class RDXProceduralGroundObject extends RDXProceduralTerrainObject
    protected void buildMeshes(ArrayList<Consumer<RDXMultiColorMeshBuilder>> meshBuilders)
    {
       List<List<Point2D>> pieces = ProceduralTerrainGeometry.groundPieces(sizeX.get(), sizeY.get(), holes);
-      for (List<Point2D> piece : pieces)
-      {
-         List<Point3D> vertices = piece.stream().map(point -> new Point3D(point.getX(), point.getY(), 0.0)).toList();
-         getCollisionSurfaces().add(new ProceduralTerrainGeometry.TerrainSurface(vertices, -BASE_THICKNESS, 0));
-      }
       meshBuilders.add(meshBuilder ->
       {
          for (List<Point2D> piece : pieces)

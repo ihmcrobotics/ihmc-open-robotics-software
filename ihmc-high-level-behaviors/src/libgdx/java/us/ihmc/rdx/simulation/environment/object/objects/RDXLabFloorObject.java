@@ -30,13 +30,6 @@ public class RDXLabFloorObject extends RDXEnvironmentObject
       setCollisionGeometryObject(collisionBox);
    }
 
-   /** Clicking the floor should not select it and put a gizmo on it. */
-   @Override
-   public boolean isSelectable()
-   {
-      return false;
-   }
-
    /** Exact ray-box test; the default sampling test misses a box this thin. */
    @Override
    public boolean intersect(Line3DReadOnly pickRay, Point3D intersectionToPack)
