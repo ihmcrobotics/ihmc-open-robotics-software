@@ -6,7 +6,9 @@ import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiMouseButton;
+import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
@@ -42,6 +44,8 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RDXEnvironmentBuilder extends RDXPanel
 {
@@ -54,6 +58,12 @@ public class RDXEnvironmentBuilder extends RDXPanel
    private final RDX3DPanel panel3D;
 
    private final TreeSet<String> environmentFileNames = new TreeSet<>(RDXEnvironmentBuilder::compareFileNames);
+   /** File name to the shared name of the files it is listed with, for files listed in a group */
+   private final Map<String, String> environmentGroups = new HashMap<>();
+   /** File name to what tells it apart within its group: "3", "Pull Door" */
+   private final Map<String, String> environmentVariantNames = new HashMap<>();
+   /** The words in a file name: CinderBlockPath12 is Cinder, Block, Path, 12 */
+   private static final Pattern NAME_WORD = Pattern.compile("[A-Z][a-z]*|[a-z]+|\\d+");
    private final Point3D tempIntersection = new Point3D();
    private final Point3D tempTranslation = new Point3D();
    private final Quaternion tempOrientation = new Quaternion();
@@ -408,14 +418,56 @@ public class RDXEnvironmentBuilder extends RDXPanel
             matches.add(environmentFileName);
       }
 
+      // Rows in file order; a group takes the place of its first file
+      Map<String, List<String>> groupMatches = new LinkedHashMap<>();
+      List<String> rows = new ArrayList<>();
+      for (String environmentFileName : matches)
+      {
+         String group = environmentGroups.get(environmentFileName);
+         if (group == null)
+         {
+            rows.add(environmentFileName);
+         }
+         else
+         {
+            if (!groupMatches.containsKey(group))
+               rows.add(group);
+            groupMatches.computeIfAbsent(group, key -> new ArrayList<>()).add(environmentFileName);
+         }
+      }
+
       float rowHeight = ImGui.getTextLineHeightWithSpacing();
       float listHeight = rowHeight * Math.max(1, Math.min(matches.size(), OBJECT_LIST_VISIBLE_ROWS)) + ImGui.getStyle().getWindowPaddingY() * 2.0f;
       if (ImGui.beginChild(labels.getHidden("Environment list"), 0.0f, listHeight, true))
       {
-         for (String environmentFileName : matches)
+         for (String row : rows)
          {
-            if (ImGui.selectable(labels.get(environmentFileName, "Environment"), environmentFileName.equals(selectedEnvironmentFile)))
-               loadEnvironmentInternal(environmentFileName);
+            List<String> groupFiles = groupMatches.get(row);
+            if (groupFiles == null)
+            {
+               if (ImGui.selectable(labels.get(row, "Environment"), row.equals(selectedEnvironmentFile)))
+                  loadEnvironmentInternal(row);
+               continue;
+            }
+
+            boolean containsSelected = groupFiles.contains(selectedEnvironmentFile);
+            if (!search.isEmpty())
+               ImGui.setNextItemOpen(true, ImGuiCond.Always);
+            else if (containsSelected)
+               ImGui.setNextItemOpen(true, ImGuiCond.Once);
+            int flags = ImGuiTreeNodeFlags.SpanAvailWidth | (containsSelected ? ImGuiTreeNodeFlags.Selected : ImGuiTreeNodeFlags.None);
+            if (ImGui.treeNodeEx(labels.get(row, "EnvironmentGroup"), flags))
+            {
+               for (String environmentFileName : groupFiles)
+               {
+                  String variant = environmentVariantNames.get(environmentFileName);
+                  if (ImGui.selectable(labels.get(variant, environmentFileName), environmentFileName.equals(selectedEnvironmentFile)))
+                     loadEnvironmentInternal(environmentFileName);
+                  if (ImGui.isItemHovered())
+                     ImGui.setTooltip(environmentFileName);
+               }
+               ImGui.treePop();
+            }
          }
          if (matches.isEmpty())
             ImGui.textDisabled(environmentFileNames.isEmpty() ? "No environment files" : "No environments match \"" + environmentSearch.get().trim() + "\"");
@@ -638,6 +690,7 @@ public class RDXEnvironmentBuilder extends RDXPanel
             environmentFileNames.add(path);
          }
       });
+      groupEnvironmentFiles();
    }
 
    private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
@@ -680,6 +733,58 @@ public class RDXEnvironmentBuilder extends RDXPanel
    }
 
    /** Alphabetical order, with digit runs compared as numbers so 2 comes before 10. */
+   /**
+    * Files that share their leading words with other files form one expandable row: CinderBlockPath1.json to
+    * CinderBlockPath13.json become CinderBlockPath with rows 1 to 13, and EmptyRoomPullDoor.json and
+    * EmptyRoomPushDoor.json become EmptyRoom with rows Pull Door and Push Door. A file named just the shared words,
+    * like Stairs.json next to StairsAndCinderBlockPath.json, keeps them apart.
+    */
+   private void groupEnvironmentFiles()
+   {
+      environmentGroups.clear();
+      environmentVariantNames.clear();
+
+      Map<String, List<String>> words = new HashMap<>();
+      Set<String> baseNames = new HashSet<>();
+      for (String environmentFileName : environmentFileNames)
+      {
+         String baseName = environmentFileName.endsWith(".json") ? environmentFileName.substring(0, environmentFileName.length() - 5) : environmentFileName;
+         baseNames.add(baseName);
+         List<String> fileWords = new ArrayList<>();
+         Matcher matcher = NAME_WORD.matcher(baseName);
+         while (matcher.find())
+            fileWords.add(matcher.group());
+         words.put(environmentFileName, fileWords);
+      }
+
+      for (String environmentFileName : environmentFileNames)
+      {
+         List<String> fileWords = words.get(environmentFileName);
+         for (int length = fileWords.size() - 1; length >= 1; length--)
+         {
+            List<String> prefix = fileWords.subList(0, length);
+            String group = String.join("", prefix);
+            if (baseNames.contains(group))
+               continue;
+            boolean shared = false;
+            for (Map.Entry<String, List<String>> other : words.entrySet())
+            {
+               if (!other.getKey().equals(environmentFileName) && other.getValue().size() > length && other.getValue().subList(0, length).equals(prefix))
+               {
+                  shared = true;
+                  break;
+               }
+            }
+            if (shared)
+            {
+               environmentGroups.put(environmentFileName, group);
+               environmentVariantNames.put(environmentFileName, String.join(" ", fileWords.subList(length, fileWords.size())));
+               break;
+            }
+         }
+      }
+   }
+
    private static int compareFileNames(String left, String right)
    {
       int i = 0;
