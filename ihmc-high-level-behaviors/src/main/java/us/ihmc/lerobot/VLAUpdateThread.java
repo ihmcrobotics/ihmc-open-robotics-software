@@ -1,6 +1,6 @@
 package us.ihmc.lerobot;
 
-import behavior_msgs.VLAOperationMessage;
+import ihmc_common_msgs.VLAOperationMessage;
 import ihmc_common_msgs.YoRegistryMessage;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;

@@ -15,8 +15,6 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.tools.ImGuiScrollableLogArea;
-import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.string.StringTools;
 
 public class RDXUIDemo
@@ -28,7 +26,6 @@ public class RDXUIDemo
    private long renderCount = 0;
    private final ImBoolean option = new ImBoolean();
    private final ImString textForArea = new ImString();
-   private final ImGuiHandWidget handWidget = new ImGuiHandWidget();
 
    public RDXUIDemo()
    {
@@ -118,8 +115,6 @@ public class RDXUIDemo
       logArea.renderImGuiWidgets();
 
       ImGuiTools.inputText("Text area", textForArea);
-
-      handWidget.render(RobotSide.LEFT, ImGui.getFontSize(), false);
    }
 
    private void renderWindow2()

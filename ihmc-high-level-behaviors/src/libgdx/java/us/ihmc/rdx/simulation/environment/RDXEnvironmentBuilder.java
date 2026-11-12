@@ -24,6 +24,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.simulation.environment.isaac.RDXIsaacSimEnvironmentExporter;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectLibrary;
@@ -65,6 +66,7 @@ public class RDXEnvironmentBuilder extends RDXPanel
    private boolean isPlacing = false;
    private boolean confirmingDeleteAll = false;
    private String selectedEnvironmentFile = null;
+   private String isaacSimExportStatus = null;
    private RDXEnvironmentObject selectedObject;
    private RDXEnvironmentObject intersectedObject;
 
@@ -164,6 +166,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
       RDXEnvironmentObject closestObject = null;
       for (RDXEnvironmentObject object : allObjects)
       {
+         if (!object.isSelectable())
+            continue;
          boolean intersects = object.intersect(pickRay, tempIntersection);
          double distance = tempIntersection.distance(pickRay.getPoint());
          if (intersects && (closestObject == null || distance < closestDistance))
@@ -191,7 +195,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
    {
       ImGui.separator();
 
-      ImGui.checkbox(labels.get("Enable Environment Building"), inputsEnabled);
+      if (ImGui.checkbox(labels.get("Enable Environment Building"), inputsEnabled) && !inputsEnabled.get())
+         stopBuilding();
 
       if (ImGui.sliderFloat("Ambient light", ambientLightAmount.getData(), 0.0f, 1.0f))
       {
@@ -325,6 +330,71 @@ public class RDXEnvironmentBuilder extends RDXPanel
             }
          });
          reindexScripts();
+      }
+
+      ImGui.separator();
+      if (ImGui.button(labels.get("Export to Isaac Sim")))
+         exportToIsaacSim();
+      ImGuiTools.previousWidgetTooltip("Writes this environment as a USD stage Isaac Sim opens, under " + isaacSimExportRoot());
+      if (isaacSimExportStatus != null)
+         ImGui.textWrapped(isaacSimExportStatus);
+   }
+
+   /** {@code ~/.ihmc/isaacSimExports}, one folder per environment. */
+   private static java.nio.file.Path isaacSimExportRoot()
+   {
+      return java.nio.file.Paths.get(System.getProperty("user.home"), ".ihmc", "isaacSimExports");
+   }
+
+   private void exportToIsaacSim()
+   {
+      String environmentName = selectedEnvironmentFile == null ? "Untitled" : selectedEnvironmentFile.replaceFirst("\\.json$", "");
+      try
+      {
+         java.nio.file.Path stage = new RDXIsaacSimEnvironmentExporter().export(environmentName,
+                                                                                allObjects,
+                                                                                ambientLightAmount.get(),
+                                                                                isaacSimExportRoot().resolve(environmentName));
+         isaacSimExportStatus = "Exported " + stage;
+      }
+      catch (java.io.IOException | RuntimeException exception)
+      {
+         isaacSimExportStatus = "Isaac Sim export failed: " + exception.getMessage();
+         LogTools.error(isaacSimExportStatus, exception);
+      }
+   }
+
+   private static boolean isProceduralTerrain(RDXEnvironmentObjectFactory objectFactory)
+   {
+      return RDXProceduralTerrainObject.class.isAssignableFrom(objectFactory.getClazz());
+   }
+
+   private void renderPlaceButton(RDXEnvironmentObjectFactory objectFactory)
+   {
+      if (ImGui.button(labels.get("Place " + objectFactory.getName())))
+      {
+         if (isPlacing)
+         {
+            removeObject(selectedObject);
+         }
+
+         RDXEnvironmentObject objectToPlace = objectFactory.getSupplier().get();
+         addObject(objectToPlace);
+         updateObjectSelected(selectedObject, objectToPlace);
+
+         if (objectToPlace instanceof RDXProceduralTerrainObject)
+         {
+            // Terrain is too large to drag with the mouse, so drop it on the ground under the camera focus and position it with the gizmo
+            tempTranslation.set(panel3D.getCamera3D().getFocusPointPose().getPosition());
+            tempTranslation.setZ(0.0);
+            objectToPlace.setPositionInWorld(tempTranslation);
+            pose3DGizmo.getTransformToParent().set(objectToPlace.getObjectTransform());
+            isPlacing = false;
+         }
+         else
+         {
+            isPlacing = true;
+         }
       }
    }
 
@@ -464,10 +534,23 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    /**
     * When enabled, left-click picks objects in the 3D view and the pose gizmo can move the selection.
+    * Disabling it also clears the selection.
     */
    public void setInputsEnabled(boolean enabled)
    {
       inputsEnabled.set(enabled);
+      if (!enabled)
+         stopBuilding();
+   }
+
+   /**
+    * Unselects everything, so the gizmo and the collision meshes go away. A selected object is also
+    * one the simulation treats as being dragged, so leaving it selected would keep it pinned in place.
+    */
+   private void stopBuilding()
+   {
+      isPlacing = false;
+      resetSelection();
    }
 
    public boolean getInputsEnabled()
@@ -477,6 +560,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    public void selectObject(RDXEnvironmentObject object)
    {
+      if (object != null && !object.isSelectable())
+         return;
       updateObjectSelected(selectedObject, object);
       if (selectedObject != null)
          pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
@@ -542,12 +627,13 @@ public class RDXEnvironmentBuilder extends RDXPanel
          {
             object.getRealRenderables(renderables, pool);
          }
-         if (selectedObject != null)
+         // Selection graphics are building tools, so they only show while building is enabled
+         if (inputsEnabled.get() && selectedObject != null)
          {
             selectedObject.getCollisionMeshRenderables(renderables, pool);
             pose3DGizmo.getRenderables(renderables, pool);
          }
-         if (intersectedObject != null && intersectedObject != selectedObject)
+         if (inputsEnabled.get() && intersectedObject != null && intersectedObject != selectedObject)
          {
             intersectedObject.getCollisionMeshRenderables(renderables, pool);
          }

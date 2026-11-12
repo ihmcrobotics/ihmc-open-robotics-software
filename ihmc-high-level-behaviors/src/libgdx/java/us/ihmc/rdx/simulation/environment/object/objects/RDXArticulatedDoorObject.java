@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.scs2.simulation.mujoco.Mujoco;
 import us.ihmc.scs2.simulation.mujoco.Mujoco.mjData;
@@ -22,6 +23,10 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
+import us.ihmc.rdx.simulation.environment.isaac.RDXIsaacSimArticulatedObject;
+import us.ihmc.rdx.simulation.environment.isaac.RDXIsaacSimLink;
+import us.ihmc.rdx.simulation.environment.mujoco.RDXMujocoArticulatedDynamics;
+import us.ihmc.rdx.simulation.environment.mujoco.RDXMujocoArticulatedObject;
 import us.ihmc.rdx.simulation.environment.object.RDXSimpleObject;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -30,8 +35,10 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static us.ihmc.rdx.simulation.environment.object.DoorModelParameters.*;
 
@@ -46,7 +53,7 @@ import static us.ihmc.rdx.simulation.environment.object.DoorModelParameters.*;
  * side of the panel. A joint move updates the panel and lever visuals and their collision meshes.
  * Collision shapes are the transparent overlay drawn while the door is selected.
  */
-public class RDXArticulatedDoorObject extends RDXEnvironmentObject
+public class RDXArticulatedDoorObject extends RDXEnvironmentObject implements RDXMujocoArticulatedObject, RDXIsaacSimArticulatedObject
 {
    public static final String NAME = "Articulated Door";
    public static final RDXEnvironmentObjectFactory FACTORY = new RDXEnvironmentObjectFactory(NAME, RDXArticulatedDoorObject.class);
@@ -476,16 +483,76 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
       }
    }
 
+   /** Frame, panel, lever and the other-side lever, with the same joints and gains MuJoCo uses. The latch is not exported. */
+   @Override
+   public List<RDXIsaacSimLink> getIsaacSimLinks()
+   {
+      RDXIsaacSimLink frame = RDXIsaacSimLink.root("frame").setMass(getMass(), null);
+      frame.addVisual(realisticModel, realisticModelOffset);
+      double jambCenterZ = DOOR_PANEL_GROUND_GAP_HEIGHT + DOOR_PANEL_HEIGHT / 2.0;
+      for (double jambCenterY : new double[] {hingeJambCenterY(), latchJambCenterY()})
+      {
+         RigidBodyTransform jamb = new RigidBodyTransform(realisticModelOffset);
+         jamb.appendTranslation(0.0, jambCenterY, jambCenterZ);
+         frame.addCollision(RDXIsaacSimLink.Collision.box(FRAME_JAMB_DEPTH, FRAME_JAMB_WIDTH, DOOR_PANEL_HEIGHT, jamb));
+      }
+
+      RDXIsaacSimLink panel = RDXIsaacSimLink.child("panel", 0, RDXIsaacSimLink.JointType.REVOLUTE, panelOffsetFromFrame, new Vector3D(0.0, 0.0, 1.0))
+                                             .setLimits(0.0, HINGE_LIMIT)
+                                             .setPosition(hingeAngle)
+                                             .setDrive(Dynamics.HINGE_DAMPING, 0.0)
+                                             .setDensity(Dynamics.PANEL_DENSITY);
+      panel.addVisual(panelInstance.model, panelVisualOffset);
+      if (panelCollisionInstance != null)
+         panel.addCollision(RDXIsaacSimLink.Collision.mesh(panelCollisionInstance.model, panelVisualOffset));
+
+      RDXIsaacSimLink lever = RDXIsaacSimLink.child("lever", 1, RDXIsaacSimLink.JointType.REVOLUTE, leverOffsetFromPanel, new Vector3D(1.0, 0.0, 0.0))
+                                             .setLimits(-DOOR_LEVER_MAX_TURN_ANGLE, DOOR_LEVER_MAX_TURN_ANGLE)
+                                             .setPosition(leverAngle)
+                                             .setDrive(Dynamics.LEVER_DAMPING, Dynamics.LEVER_STIFFNESS)
+                                             .setDensity(Dynamics.LEVER_DENSITY);
+      lever.addVisual(leverInstance.model, leverMeshOffset);
+      for (RDXModelInstance piece : leverCollisionInstances)
+         lever.addCollision(RDXIsaacSimLink.Collision.mesh(piece.model, leverMeshOffset));
+
+      RDXIsaacSimLink leverOtherSide = RDXIsaacSimLink.child("leverOtherside", 2, RDXIsaacSimLink.JointType.FIXED, leverOtherSideOffset, null)
+                                                      .setDensity(Dynamics.LEVER_DENSITY);
+      leverOtherSide.addVisual(leverOtherSideInstance.model, leverOtherSideMeshOffset);
+      for (RDXModelInstance piece : leverOtherSideCollisionInstances)
+         leverOtherSide.addCollision(RDXIsaacSimLink.Collision.mesh(piece.model, leverOtherSideMeshOffset));
+      return List.of(frame, panel, lever, leverOtherSide);
+   }
+
+   /** Same pairs as the MuJoCo contact excludes. */
+   @Override
+   public List<String[]> getIsaacSimExcludedLinkPairs()
+   {
+      return List.of(new String[] {"panel", "leverOtherside"}, new String[] {"frame", "leverOtherside"});
+   }
+
    /**
     * Physics snapshot of this placed door. The environment panel's Articulated Door button creates
     * this object; the simulation compiles this snapshot, it does not create a second door.
     */
+   @Override
    public Dynamics captureDynamics()
    {
       return Dynamics.from(this);
    }
 
-   public static final class Dynamics
+   /** Hinge then lever, as {@link Dynamics#syncJoints} returns them. */
+   @Override
+   public void applySimulatedJointPositions(double[] jointPositions)
+   {
+      if (isJointPositionOverridden())
+         return;
+      if (Math.abs(getHingeAngle() - jointPositions[0]) > 1.0e-5)
+         setHingeAngleFromInteraction(jointPositions[0]);
+      if (Math.abs(getLeverAngle() - jointPositions[1]) > 1.0e-5)
+         setLeverAngleFromInteraction(jointPositions[1]);
+   }
+
+   public static final class Dynamics implements RDXMujocoArticulatedDynamics
    {
       /** Lever angle, either direction, at which the panel is free to swing. Below this the hinge stays shut. */
       public static final double UNLATCH_LEVER_ANGLE = 0.5;
@@ -607,6 +674,37 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
          return baseName + "_lever_" + piece + ".stl";
       }
 
+      /** Hinge and lever. */
+      @Override
+      public int getDegreesOfFreedom()
+      {
+         return 2;
+      }
+
+      @Override
+      public Map<String, String> getMeshFiles()
+      {
+         Map<String, String> files = new LinkedHashMap<>();
+         if (panelMeshPath != null)
+            files.put(panelMeshFileName(), panelMeshPath);
+         for (int piece = 0; piece < leverMeshPaths.size(); piece++)
+            files.put(leverMeshFileName(piece), leverMeshPaths.get(piece));
+         return files;
+      }
+
+      @Override
+      public Object bind(mjModel model)
+      {
+         return JointIds.resolve(model, baseName);
+      }
+
+      @Override
+      public double[] syncJoints(mjModel model, mjData data, Object binding, boolean seedFromCommand)
+      {
+         return syncJoints(model, data, (JointIds) binding, seedFromCommand);
+      }
+
+      @Override
       public void appendAssets(StringBuilder assets)
       {
          appendMeshAsset(assets, baseName + "_panel", panelMeshFileName(), panelMeshPath);

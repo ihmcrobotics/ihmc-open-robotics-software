@@ -50,6 +50,8 @@ public abstract class RDXProceduralTerrainObject extends RDXEnvironmentObject
    private final Point3D firstIntersection = new Point3D();
    private final Point3D secondIntersection = new Point3D();
    private Box3D boundingBox;
+   private final ArrayList<TerrainBox> collisionBoxes = new ArrayList<>();
+   private final ArrayList<TerrainSurface> collisionSurfaces = new ArrayList<>();
 
    public RDXProceduralTerrainObject(String titleCasedName, RDXEnvironmentObjectFactory factory)
    {
@@ -88,6 +90,18 @@ public abstract class RDXProceduralTerrainObject extends RDXEnvironmentObject
 
    public abstract void loadParameters(JsonNode objectNode);
 
+   /** Boxes to collide with in physics, in the object frame. The collision geometry object is only the bounding box. */
+   public List<TerrainBox> getCollisionBoxes()
+   {
+      return collisionBoxes;
+   }
+
+   /** Convex solids (each surface filled down to its bottom) to collide with in physics, in the object frame. */
+   public List<TerrainSurface> getCollisionSurfaces()
+   {
+      return collisionSurfaces;
+   }
+
    /**
     * Regenerates the meshes and collision box from the current parameters, keeping the current pose.
     */
@@ -97,6 +111,8 @@ public abstract class RDXProceduralTerrainObject extends RDXEnvironmentObject
          model.dispose();
       models.clear();
       additionalModelInstances.clear();
+      collisionBoxes.clear();
+      collisionSurfaces.clear();
 
       ArrayList<Consumer<RDXMultiColorMeshBuilder>> meshBuilders = new ArrayList<>();
       buildMeshes(meshBuilders);
@@ -137,8 +153,9 @@ public abstract class RDXProceduralTerrainObject extends RDXEnvironmentObject
    /**
     * Splits boxes into mesh builders of at most {@link #MAX_BOXES_PER_MESH} boxes each.
     */
-   protected static void addBoxesToMeshBuilders(List<TerrainBox> boxes, ArrayList<Consumer<RDXMultiColorMeshBuilder>> meshBuilders)
+   protected void addBoxesToMeshBuilders(List<TerrainBox> boxes, ArrayList<Consumer<RDXMultiColorMeshBuilder>> meshBuilders)
    {
+      collisionBoxes.addAll(boxes);
       for (int start = 0; start < boxes.size(); start += MAX_BOXES_PER_MESH)
       {
          List<TerrainBox> chunk = boxes.subList(start, Math.min(boxes.size(), start + MAX_BOXES_PER_MESH));
@@ -158,8 +175,9 @@ public abstract class RDXProceduralTerrainObject extends RDXEnvironmentObject
     * Adds each surface as a solid: its top, the vertical walls down to its bottom, and the bottom.
     * Walls shared by neighboring surfaces are hidden inside the terrain.
     */
-   protected static void addSurfacesToMeshBuilder(List<TerrainSurface> surfaces, ArrayList<Consumer<RDXMultiColorMeshBuilder>> meshBuilders)
+   protected void addSurfacesToMeshBuilder(List<TerrainSurface> surfaces, ArrayList<Consumer<RDXMultiColorMeshBuilder>> meshBuilders)
    {
+      collisionSurfaces.addAll(surfaces);
       meshBuilders.add(meshBuilder ->
       {
          for (TerrainSurface surface : surfaces)
