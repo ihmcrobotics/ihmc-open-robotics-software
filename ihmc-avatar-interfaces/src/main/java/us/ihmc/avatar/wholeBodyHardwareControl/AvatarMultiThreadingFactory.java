@@ -108,6 +108,7 @@ public class AvatarMultiThreadingFactory
 
    // Estimator
    private final AvatarEstimatorThread avatarEstimator;
+   private StateEstimatorController mainStateEstimator;
    private final OptionalFactoryField<Map<HighLevelControllerName, StateEstimatorMode>> estimatorModeMapReference = new OptionalFactoryField<>("estimatorModeMapReference");
    private final List<Runnable> preEstimatorRunnables = new ArrayList<>();
    private final List<Runnable> postEstimatorRunnables = new ArrayList<>();
@@ -262,7 +263,21 @@ public class AvatarMultiThreadingFactory
       avatarEstimatorThreadFactory.setGravity(GRAVITY);
       //      if (secondaryEstimatorFactory != null)
       //         avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryEstimatorFactory);
+      boolean alexExternalPoseDefault = "alex".equalsIgnoreCase(robotModel.getSimpleRobotName());
+      boolean externalPoseEnabled = Boolean.parseBoolean(System.getProperty("ihmc.estimator.externalPose.enabled",
+                                                                            Boolean.toString(alexExternalPoseDefault)));
+      if (externalPoseEnabled)
+      {
+         var communicator = new us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator(
+               estimatorAsyncROS2Node, robotModel.getSimpleRobotName());
+         estimatorAsyncROS2Node.createSubscriptionSampler(
+               us.ihmc.communication.StateEstimatorAPI.getTopic(ihmc_common_msgs.StampedPosePacket.class, robotModel.getSimpleRobotName()),
+               communicator::receivedPacket);
+         avatarEstimatorThreadFactory.setExternalPelvisCorrectorSubscriber(communicator);
+         LogTools.warn("External pelvis pose corrections enabled for the hardware estimator");
+      }
       StateEstimatorController stateEstimator = avatarEstimatorThreadFactory.getMainStateEstimator();
+      mainStateEstimator = stateEstimator;
 
       // Create state estimator from its factory
       AvatarEstimatorThread avatarEstimator = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
@@ -1043,6 +1058,11 @@ public class AvatarMultiThreadingFactory
    public FullHumanoidRobotModel getEstimatorFullRobotModel()
    {
       return avatarEstimator.getFullRobotModel();
+   }
+
+   public StateEstimatorController getMainStateEstimator()
+   {
+      return mainStateEstimator;
    }
 
    public void addPreEstimatorThreadRunnable(Runnable runnable)
