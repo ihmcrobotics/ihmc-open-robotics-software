@@ -413,6 +413,21 @@ final class JointKFBiasUpdate
       LSigma.reshape(rows, 3 * m);
       CommonOps_DDRM.mult(Lmix, Sigma, LSigma);
       CommonOps_DDRM.multTransB(LSigma, Lmix, Rg);
+      double pairNoiseScale = parameters.pairNoiseScale.getValue();
+      if (pairNoiseScale != 1.0 && pairNoiseScale > 0.0)
+      {
+         // D Rg D with D = diag(sqrt(s) on the pair rows, 1 on the anchor rows): the pair block scales by s, the
+         // pair-anchor cross terms (they share the base IMU) by sqrt(s), so Rg stays positive semi-definite for any s > 0.
+         int pairRows = 3 * E;
+         double root = Math.sqrt(pairNoiseScale);
+         for (int r = 0; r < Rg.getNumRows(); r++)
+            for (int c = 0; c < Rg.getNumCols(); c++)
+            {
+               double f = (r < pairRows ? root : 1.0) * (c < pairRows ? root : 1.0);
+               if (f != 1.0)
+                  Rg.set(r, c, Rg.get(r, c) * f);
+            }
+      }
 
       // Time-varying pair noise, if a provider supplied any for this tick. Applied AFTER the
       // congruence and BEFORE the anchor blocks and the symmetrize, so it lands on exactly the pair
