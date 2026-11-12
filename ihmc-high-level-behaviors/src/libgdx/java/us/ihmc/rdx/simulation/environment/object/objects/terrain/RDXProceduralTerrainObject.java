@@ -43,6 +43,8 @@ public abstract class RDXProceduralTerrainObject extends RDXEnvironmentObject
    protected static final double BASE_THICKNESS = ProceduralTerrainGeometry.BASE_THICKNESS;
    /** Keeps each mesh under the 16-bit index limit of the mesh interpreter. */
    private static final int MAX_BOXES_PER_MESH = 2000;
+   /** A quadrilateral surface has as many vertices as a box. */
+   private static final int MAX_SURFACES_PER_MESH = 2000;
 
    protected final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ArrayList<Model> models = new ArrayList<>();
@@ -50,6 +52,8 @@ public abstract class RDXProceduralTerrainObject extends RDXEnvironmentObject
    private final Point3D firstIntersection = new Point3D();
    private final Point3D secondIntersection = new Point3D();
    private Box3D boundingBox;
+   private final ArrayList<TerrainBox> collisionBoxes = new ArrayList<>();
+   private final ArrayList<TerrainSurface> collisionSurfaces = new ArrayList<>();
 
    public RDXProceduralTerrainObject(String titleCasedName, RDXEnvironmentObjectFactory factory)
    {
@@ -88,6 +92,18 @@ public abstract class RDXProceduralTerrainObject extends RDXEnvironmentObject
 
    public abstract void loadParameters(JsonNode objectNode);
 
+   /** Boxes to collide with in physics, in the object frame. The collision geometry object is only the bounding box. */
+   public List<TerrainBox> getCollisionBoxes()
+   {
+      return collisionBoxes;
+   }
+
+   /** Convex solids (each surface filled down to its bottom) to collide with in physics, in the object frame. */
+   public List<TerrainSurface> getCollisionSurfaces()
+   {
+      return collisionSurfaces;
+   }
+
    /**
     * Regenerates the meshes and collision box from the current parameters, keeping the current pose.
     */
@@ -97,6 +113,8 @@ public abstract class RDXProceduralTerrainObject extends RDXEnvironmentObject
          model.dispose();
       models.clear();
       additionalModelInstances.clear();
+      collisionBoxes.clear();
+      collisionSurfaces.clear();
 
       ArrayList<Consumer<RDXMultiColorMeshBuilder>> meshBuilders = new ArrayList<>();
       buildMeshes(meshBuilders);
@@ -137,8 +155,9 @@ public abstract class RDXProceduralTerrainObject extends RDXEnvironmentObject
    /**
     * Splits boxes into mesh builders of at most {@link #MAX_BOXES_PER_MESH} boxes each.
     */
-   protected static void addBoxesToMeshBuilders(List<TerrainBox> boxes, ArrayList<Consumer<RDXMultiColorMeshBuilder>> meshBuilders)
+   protected void addBoxesToMeshBuilders(List<TerrainBox> boxes, ArrayList<Consumer<RDXMultiColorMeshBuilder>> meshBuilders)
    {
+      collisionBoxes.addAll(boxes);
       for (int start = 0; start < boxes.size(); start += MAX_BOXES_PER_MESH)
       {
          List<TerrainBox> chunk = boxes.subList(start, Math.min(boxes.size(), start + MAX_BOXES_PER_MESH));
@@ -156,29 +175,35 @@ public abstract class RDXProceduralTerrainObject extends RDXEnvironmentObject
 
    /**
     * Adds each surface as a solid: its top, the vertical walls down to its bottom, and the bottom.
-    * Walls shared by neighboring surfaces are hidden inside the terrain.
+    * Walls shared by neighboring surfaces are hidden inside the terrain. Splits surfaces into mesh builders
+    * of at most {@link #MAX_SURFACES_PER_MESH} surfaces each.
     */
-   protected static void addSurfacesToMeshBuilder(List<TerrainSurface> surfaces, ArrayList<Consumer<RDXMultiColorMeshBuilder>> meshBuilders)
+   protected void addSurfacesToMeshBuilder(List<TerrainSurface> surfaces, ArrayList<Consumer<RDXMultiColorMeshBuilder>> meshBuilders)
    {
-      meshBuilders.add(meshBuilder ->
+      collisionSurfaces.addAll(surfaces);
+      for (int start = 0; start < surfaces.size(); start += MAX_SURFACES_PER_MESH)
       {
-         for (TerrainSurface surface : surfaces)
+         List<TerrainSurface> chunk = surfaces.subList(start, Math.min(surfaces.size(), start + MAX_SURFACES_PER_MESH));
+         meshBuilders.add(meshBuilder ->
          {
-            List<Point3D> top = surface.vertices();
-            List<Point3D> bottom = top.stream().map(vertex -> new Point3D(vertex.getX(), vertex.getY(), surface.bottomZ())).toList();
-            meshBuilder.addPolygon(top, SHADES[surface.shade()]);
-            for (int i = 0; i < top.size(); i++)
+            for (TerrainSurface surface : chunk)
             {
-               int next = (i + 1) % top.size();
-               // Counter-clockwise seen from outside
-               meshBuilder.addPolygon(List.of(bottom.get(i), bottom.get(next), top.get(next), top.get(i)), Color.GRAY);
+               List<Point3D> top = surface.vertices();
+               List<Point3D> bottom = top.stream().map(vertex -> new Point3D(vertex.getX(), vertex.getY(), surface.bottomZ())).toList();
+               meshBuilder.addPolygon(top, SHADES[surface.shade()]);
+               for (int i = 0; i < top.size(); i++)
+               {
+                  int next = (i + 1) % top.size();
+                  // Counter-clockwise seen from outside
+                  meshBuilder.addPolygon(List.of(bottom.get(i), bottom.get(next), top.get(next), top.get(i)), Color.GRAY);
+               }
+               // Counter-clockwise seen from below
+               ArrayList<Point3D> bottomSeenFromBelow = new ArrayList<>(bottom);
+               Collections.reverse(bottomSeenFromBelow);
+               meshBuilder.addPolygon(bottomSeenFromBelow, Color.GRAY);
             }
-            // Counter-clockwise seen from below
-            ArrayList<Point3D> bottomSeenFromBelow = new ArrayList<>(bottom);
-            Collections.reverse(bottomSeenFromBelow);
-            meshBuilder.addPolygon(bottomSeenFromBelow, Color.GRAY);
-         }
-      });
+         });
+      }
    }
 
    /** Renders the parameter widgets and rebuilds the terrain if one changed. */
