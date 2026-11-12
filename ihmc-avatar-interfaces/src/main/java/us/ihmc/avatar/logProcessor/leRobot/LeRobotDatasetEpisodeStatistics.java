@@ -8,7 +8,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -121,6 +120,8 @@ public class LeRobotDatasetEpisodeStatistics
          RGBL sumSq = sumSquares.get(side);
          RGB mean = means.get(side);
          RGB std = stds.get(side);
+         if (totalPixels == 0)
+            continue;
          
          // Calculate averages and normalize to 0.0-1.0
          mean.r = (float) sum.r / (totalPixels * 255.0f);
@@ -157,105 +158,126 @@ public class LeRobotDatasetEpisodeStatistics
       taskIndexStats.calculate();
    }
 
-   public void writeJson(ObjectNode stats, SideDependentList<Path> zedVideoDirs)
+   /**
+    * @param videoFeatureKeys  feature name for each side, e.g. "observation.images.cam_zed_left"
+    */
+   public void writeJson(ObjectNode stats, SideDependentList<String> videoFeatureKeys)
    {
       for (RobotSide side : RobotSide.values)
       {
+         String featureKey = videoFeatureKeys.get(side);
+         if (featureKey == null)
+            continue;
+
+         // Always write the camera key so lerobot's dataset.meta.stats lookup never KeyErrors.
+         // If no frames were processed the pixel stats default to 0 (safe since pi0_fast uses VISUAL: IDENTITY).
          RGB mean = means.get(side);
          RGB std = stds.get(side);
-   
+
          // RGB
-         ObjectNode video = stats.putObject(zedVideoDirs.get(side).getFileName().toString());
-         ArrayNode min = video.putArray("min"); // Looks like we can leave 0.0
-         min.addArray().addArray().add(0.0f);
-         min.addArray().addArray().add(0.0f);
-         min.addArray().addArray().add(0.0f);
-         ArrayNode max = video.putArray("max"); // Looks like we can leave 1.0
-         max.addArray().addArray().add(1.0f);
-         max.addArray().addArray().add(1.0f);
-         max.addArray().addArray().add(1.0f);
-         ArrayNode meanNode = video.putArray("mean");
-         meanNode.addArray().addArray().add(mean.r);
-         meanNode.addArray().addArray().add(mean.g);
-         meanNode.addArray().addArray().add(mean.b);
-         ArrayNode stdNode = video.putArray("std");
-         stdNode.addArray().addArray().add(std.r);
-         stdNode.addArray().addArray().add(std.g);
-         stdNode.addArray().addArray().add(std.b);
+         ObjectNode video = stats.putObject(featureKey);
+         addRGB(video.putArray("min"), 0.0f, 0.0f, 0.0f); // Looks like we can leave 0.0
+         addRGB(video.putArray("max"), 1.0f, 1.0f, 1.0f); // Looks like we can leave 1.0
+         addRGB(video.putArray("mean"), mean.r, mean.g, mean.b);
+         addRGB(video.putArray("std"), std.r, std.g, std.b);
          video.putArray("count").add(sizes[side.ordinal()]);
       }
 
-      ObjectNode state = stats.putObject("observation.state");
-      ArrayNode min = state.putArray("min");
-      ArrayNode max = state.putArray("max");
-      ArrayNode mean = state.putArray("mean");
-      ArrayNode std = state.putArray("std");
-      
-      for (LeRobotFloatStatisticsCalculator calculator : stateStats)
-      {
-         min.add(calculator.getMin());
-         max.add(calculator.getMax());
-         mean.add(calculator.getMean());
-         std.add(calculator.getStddev());
-      }
-      state.putArray("count").add(length);
-      
-      ObjectNode action = stats.putObject("action");
-      min = action.putArray("min");
-      max = action.putArray("max");
-      mean = action.putArray("mean");
-      std = action.putArray("std");
-      
-      for (LeRobotFloatStatisticsCalculator calculator : actionStats)
-      {
-         min.add(calculator.getMin());
-         max.add(calculator.getMax());
-         mean.add(calculator.getMean());
-         std.add(calculator.getStddev());
-      }
-      action.putArray("count").add(length);
+      writeVectorStats(stats, "observation.state", stateStats);
+      writeVectorStats(stats, "action", actionStats);
+      writeScalarStats(stats, "episode_index", episodeIndexStats, false);
+      writeScalarStats(stats, "frame_index", frameIndexStats, false);
+      writeScalarStats(stats, "timestamp", timestampStats);
+      writeScalarStats(stats, "next.done", nextDoneStats, true);
+      writeScalarStats(stats, "index", indexStats, false);
+      writeScalarStats(stats, "task_index", taskIndexStats, false);
+   }
 
-      ObjectNode fieldStats = stats.putObject("episode_index");
-      fieldStats.putArray("min").add(episodeIndexStats.getMin());
-      fieldStats.putArray("max").add(episodeIndexStats.getMax());
-      fieldStats.putArray("mean").add(episodeIndexStats.getMean());
-      fieldStats.putArray("std").add(episodeIndexStats.getStddev());
+   private static void addRGB(ArrayNode node, float r, float g, float b)
+   {
+      node.addArray().addArray().add(r);
+      node.addArray().addArray().add(g);
+      node.addArray().addArray().add(b);
+   }
+
+   private void writeVectorStats(ObjectNode stats, String name, List<LeRobotFloatStatisticsCalculator> calculators)
+   {
+      ObjectNode fieldStats = stats.putObject(name);
+      ArrayNode min = fieldStats.putArray("min");
+      ArrayNode max = fieldStats.putArray("max");
+      ArrayNode mean = fieldStats.putArray("mean");
+      ArrayNode std = fieldStats.putArray("std");
+      for (LeRobotFloatStatisticsCalculator calculator : calculators)
+      {
+         min.add(calculator.getMin());
+         max.add(calculator.getMax());
+         mean.add(calculator.getMean());
+         std.add(calculator.getStddev());
+      }
       fieldStats.putArray("count").add(length);
-      
-      fieldStats = stats.putObject("frame_index");
-      fieldStats.putArray("min").add(frameIndexStats.getMin());
-      fieldStats.putArray("max").add(frameIndexStats.getMax());
-      fieldStats.putArray("mean").add(frameIndexStats.getMean());
-      fieldStats.putArray("std").add(frameIndexStats.getStddev());
+   }
+
+   private void writeScalarStats(ObjectNode stats, String name, LeRobotFloatStatisticsCalculator calculator)
+   {
+      ObjectNode fieldStats = stats.putObject(name);
+      fieldStats.putArray("min").add(calculator.getMin());
+      fieldStats.putArray("max").add(calculator.getMax());
+      fieldStats.putArray("mean").add(calculator.getMean());
+      fieldStats.putArray("std").add(calculator.getStddev());
       fieldStats.putArray("count").add(length);
-      
-      fieldStats = stats.putObject("timestamp");
-      fieldStats.putArray("min").add(timestampStats.getMin());
-      fieldStats.putArray("max").add(timestampStats.getMax());
-      fieldStats.putArray("mean").add(timestampStats.getMean());
-      fieldStats.putArray("std").add(timestampStats.getStddev());
+   }
+
+   private void writeScalarStats(ObjectNode stats, String name, LeRobotIntegerStatisticsCalculator calculator, boolean booleanExtrema)
+   {
+      ObjectNode fieldStats = stats.putObject(name);
+      if (booleanExtrema)
+      {
+         fieldStats.putArray("min").add(calculator.getMin() == 1);
+         fieldStats.putArray("max").add(calculator.getMax() == 1);
+      }
+      else
+      {
+         fieldStats.putArray("min").add(calculator.getMin());
+         fieldStats.putArray("max").add(calculator.getMax());
+      }
+      fieldStats.putArray("mean").add(calculator.getMean());
+      fieldStats.putArray("std").add(calculator.getStddev());
       fieldStats.putArray("count").add(length);
-      
-      fieldStats = stats.putObject("next.done");
-      fieldStats.putArray("min").add(nextDoneStats.getMin() == 1);
-      fieldStats.putArray("max").add(nextDoneStats.getMax() == 1);
-      fieldStats.putArray("mean").add(nextDoneStats.getMean());
-      fieldStats.putArray("std").add(nextDoneStats.getStddev());
-      fieldStats.putArray("count").add(length);
-      
-      fieldStats = stats.putObject("index");
-      fieldStats.putArray("min").add(indexStats.getMin());
-      fieldStats.putArray("max").add(indexStats.getMax());
-      fieldStats.putArray("mean").add(indexStats.getMean());
-      fieldStats.putArray("std").add(indexStats.getStddev());
-      fieldStats.putArray("count").add(length);
-      
-      fieldStats = stats.putObject("task_index");
-      fieldStats.putArray("min").add(taskIndexStats.getMin());
-      fieldStats.putArray("max").add(taskIndexStats.getMax());
-      fieldStats.putArray("mean").add(taskIndexStats.getMean());
-      fieldStats.putArray("std").add(taskIndexStats.getStddev());
-      fieldStats.putArray("count").add(length);
+   }
+
+   public void mergeFrom(LeRobotDatasetEpisodeStatistics other)
+   {
+      length += other.length;
+      for (RobotSide side : RobotSide.values)
+      {
+         sizes[side.ordinal()] += other.sizes[side.ordinal()];
+         RGBL mySum = sums.get(side);
+         RGBL otherSum = other.sums.get(side);
+         mySum.r += otherSum.r;
+         mySum.g += otherSum.g;
+         mySum.b += otherSum.b;
+         RGBL mySumSq = sumSquares.get(side);
+         RGBL otherSumSq = other.sumSquares.get(side);
+         mySumSq.r += otherSumSq.r;
+         mySumSq.g += otherSumSq.g;
+         mySumSq.b += otherSumSq.b;
+      }
+      if (stateStats.isEmpty() && !other.stateStats.isEmpty())
+         for (int i = 0; i < other.stateStats.size(); i++)
+            stateStats.add(new LeRobotFloatStatisticsCalculator());
+      for (int i = 0; i < Math.min(stateStats.size(), other.stateStats.size()); i++)
+         stateStats.get(i).mergeFrom(other.stateStats.get(i));
+      if (actionStats.isEmpty() && !other.actionStats.isEmpty())
+         for (int i = 0; i < other.actionStats.size(); i++)
+            actionStats.add(new LeRobotFloatStatisticsCalculator());
+      for (int i = 0; i < Math.min(actionStats.size(), other.actionStats.size()); i++)
+         actionStats.get(i).mergeFrom(other.actionStats.get(i));
+      episodeIndexStats.mergeFrom(other.episodeIndexStats);
+      frameIndexStats.mergeFrom(other.frameIndexStats);
+      timestampStats.mergeFrom(other.timestampStats);
+      nextDoneStats.mergeFrom(other.nextDoneStats);
+      indexStats.mergeFrom(other.indexStats);
+      taskIndexStats.mergeFrom(other.taskIndexStats);
    }
 
    public void loadJSON(JsonNode lineRoot)
