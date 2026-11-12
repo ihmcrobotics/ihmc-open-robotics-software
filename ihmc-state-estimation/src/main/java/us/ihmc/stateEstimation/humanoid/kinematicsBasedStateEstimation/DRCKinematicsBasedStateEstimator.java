@@ -65,6 +65,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final IMUYawDriftEstimator imuYawDriftEstimator;
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
+   private Runnable prePelvisCorrectionCallback;
 
    private final double estimatorDT;
    private final double gravityMagnitude;
@@ -357,6 +358,10 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       List<RigidBodyBasics> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
       imuBiasStateEstimator.compute(trustedFeet);
 
+      // Optional read-only diagnostic snapshot after KIO prediction, before localization changes the model root.
+      if (prePelvisCorrectionCallback != null)
+         prePelvisCorrectionCallback.run();
+
       if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {
          pelvisPoseHistoryCorrection.doControl(sensorOutput.getWallTime());
@@ -409,6 +414,14 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+   }
+
+   /** Install before starting estimator threads. The callback must not modify estimator/model state. */
+   public void setPrePelvisCorrectionCallback(Runnable callback)
+   {
+      if (prePelvisCorrectionCallback != null)
+         throw new IllegalStateException("Pre-pelvis-correction callback already installed");
+      prePelvisCorrectionCallback = java.util.Objects.requireNonNull(callback);
    }
 
    /** Read on the estimator thread after its update. No estimator state is changed by this snapshot. */
