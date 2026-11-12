@@ -1052,6 +1052,18 @@ public class AvatarMultiThreadingFactory
       return mainStateEstimator;
    }
 
+   /** Configure before build/start. The estimator model remains independent of the selected controller-output model. */
+   public void configureEstimatorOutputModel(FullHumanoidRobotModel outputModel, us.ihmc.robotics.robotController.OutputProcessor processor,
+                                             java.util.function.Consumer<us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData> contextTransformer)
+   {
+      avatarEstimator.configureOutputModel(outputModel, processor, contextTransformer);
+   }
+
+   public us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly getEstimatorSensorOutput()
+   {
+      return avatarEstimator.getSensorReader().getProcessedSensorOutputMap();
+   }
+
    public void addPreEstimatorThreadRunnable(Runnable runnable)
    {
       preEstimatorRunnables.add(runnable);

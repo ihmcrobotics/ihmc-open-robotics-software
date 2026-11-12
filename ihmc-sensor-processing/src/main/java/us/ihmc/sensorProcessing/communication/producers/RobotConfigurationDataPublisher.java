@@ -24,7 +24,7 @@ import java.util.List;
 
 public class RobotConfigurationDataPublisher implements RawOutputWriter
 {
-   private final FloatingJointStateReadOnly rootJointSensorData;
+   private FloatingJointStateReadOnly rootJointSensorData;
    private final List<? extends OneDoFJointStateReadOnly> jointSensorData;
    private final List<? extends IMUSensorReadOnly> imuSensorData;
    private final List<? extends ForceSensorDataReadOnly> forceSensorData;
@@ -87,6 +87,14 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    @Override
    public void initialize()
    {
+   }
+
+   /** Configure before the estimator thread starts. Joint/sensor/timestamp sources remain unchanged. */
+   public void setRootJointSensorData(FloatingJointStateReadOnly rootJointSensorData)
+   {
+      if (RobotFrameDataPublisher.ENABLE_ROBOT_FRAME_DATA_PUBLISHERS && !robotFrameDataPublishers.isEmpty())
+         throw new IllegalStateException("Rebind auxiliary frame publishers before changing the published root model");
+      this.rootJointSensorData = java.util.Objects.requireNonNull(rootJointSensorData);
    }
 
    @Override
