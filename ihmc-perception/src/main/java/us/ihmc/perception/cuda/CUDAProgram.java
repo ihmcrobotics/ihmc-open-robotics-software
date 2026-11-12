@@ -301,19 +301,32 @@ public class CUDAProgram implements AutoCloseable
    private static String getComputeVersion()
    {
       if (!hasCUDA())
+      {
          LogTools.fatal("CUDA Runtime has not been found. To install CUDA Toolkit, follow the instructions in ihmc-perception/README.md.");
+         return "compute_80";
+      }
 
       if (!hasCUDADevice())
+      {
          LogTools.fatal("No CUDA device found. An NVIDIA GPU is required to run this code.");
+         return "compute_80";
+      }
 
       cudaDeviceProp deviceProperties = new cudaDeviceProp();
       cudaGetDeviceProperties(deviceProperties, 0);
       int majorVersion = deviceProperties.major();
       int minorVersion = deviceProperties.minor();
 
-      String computeVersion = "compute_" + majorVersion + "0";
+      // This binding's NVRTC is CUDA 12.6, which rejects compute_100 and compute_120.
+      // major + "0" turns a 12.0 Blackwell device into compute_120. compute_90 is the newest
+      // virtual architecture 12.6 accepts, and the driver JITs that PTX onto newer GPUs.
+      int targetMajor = Math.min(majorVersion, 9);
+      String computeVersion = "compute_" + targetMajor + "0";
 
-      LogTools.debug("Found CUDA architecture {}.{}. Targeting {} for CUDA kernel compilation.", majorVersion, minorVersion, computeVersion);
+      if (majorVersion > 9)
+         LogTools.warn("CUDA device is {}.{}. Compiling kernels for {} because this NVRTC does not accept the device architecture.", majorVersion, minorVersion, computeVersion);
+      else
+         LogTools.debug("Found CUDA architecture {}.{}. Targeting {} for CUDA kernel compilation.", majorVersion, minorVersion, computeVersion);
 
       deviceProperties.close();
 
