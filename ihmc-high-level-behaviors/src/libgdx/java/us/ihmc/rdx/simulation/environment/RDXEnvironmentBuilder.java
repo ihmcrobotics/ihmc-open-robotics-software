@@ -61,6 +61,10 @@ public class RDXEnvironmentBuilder extends RDXPanel
    private final ImFloat ambientLightAmount = new ImFloat(0.4f);
    private final ImBoolean inputsEnabled = new ImBoolean(false);
    private final ImString saveString = new ImString(256);
+   private final ImString objectSearch = new ImString(64);
+   private final ImString environmentSearch = new ImString(64);
+   /** Rows the object list shows before it scrolls. */
+   private static final int OBJECT_LIST_VISIBLE_ROWS = 8;
 
    private boolean loadedFilesOnce = false;
    private boolean isPlacing = false;
@@ -198,11 +202,6 @@ public class RDXEnvironmentBuilder extends RDXPanel
       if (ImGui.checkbox(labels.get("Enable Environment Building"), inputsEnabled) && !inputsEnabled.get())
          stopBuilding();
 
-      if (ImGui.sliderFloat("Ambient light", ambientLightAmount.getData(), 0.0f, 1.0f))
-      {
-         panel3D.getScene().setAmbientLightIntensity(ambientLightAmount.get());
-      }
-
       ImGui.separator();
       ImGui.text("Selected Object: " + (selectedObject == null ? "" : (selectedObject.getTitleCasedName() + " " + selectedObject.getObjectIndex())));
       if (selectedObject != null)
@@ -241,21 +240,7 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
       if (inputsEnabled.get())
       {
-         ImGui.text("Objects:");
-         for (RDXEnvironmentObjectFactory objectFactory : RDXEnvironmentObjectLibrary.getObjectFactories())
-         {
-            if (!isProceduralTerrain(objectFactory))
-               renderPlaceButton(objectFactory);
-         }
-
-         ImGui.separator();
-         ImGui.text("Procedural Terrain:");
-         for (RDXEnvironmentObjectFactory objectFactory : RDXEnvironmentObjectLibrary.getObjectFactories())
-         {
-            if (isProceduralTerrain(objectFactory))
-               renderPlaceButton(objectFactory);
-         }
-
+         renderObjectList();
          ImGui.separator();
       }
 
@@ -270,27 +255,17 @@ public class RDXEnvironmentBuilder extends RDXPanel
       {
          loadEnvironmentInternal(selectedEnvironmentFile);
       }
-      boolean reindexClicked = ImGui.button(labels.get("Reindex scripts"));
-      if (!loadedFilesOnce || reindexClicked)
+      String fileNameToSave = null;
+      boolean refreshClicked = renderEnvironmentList();
+      if (!loadedFilesOnce || refreshClicked)
       {
          loadedFilesOnce = true;
          reindexScripts();
       }
-      String fileNameToSave = null;
-      for (String environmentFileName : environmentFileNames)
+      if (selectedEnvironmentFile != null)
       {
-         if (ImGui.radioButton(environmentFileName, selectedEnvironmentFile != null && selectedEnvironmentFile.equals(environmentFileName)))
-         {
-            loadEnvironmentInternal(environmentFileName);
-         }
-         if (selectedEnvironmentFile != null && selectedEnvironmentFile.equals(environmentFileName))
-         {
-            ImGui.sameLine();
-            if (ImGui.button("Save"))
-            {
-               fileNameToSave = environmentFileName;
-            }
-         }
+         if (ImGui.button(labels.get("Save " + selectedEnvironmentFile)))
+            fileNameToSave = selectedEnvironmentFile;
       }
 
       ImGui.separator();
@@ -369,32 +344,117 @@ public class RDXEnvironmentBuilder extends RDXPanel
       return RDXProceduralTerrainObject.class.isAssignableFrom(objectFactory.getClazz());
    }
 
-   private void renderPlaceButton(RDXEnvironmentObjectFactory objectFactory)
+   /**
+    * A search box over a short scrolling list of the placeable objects, sorted by name, with the procedural terrain
+    * last. Clicking a row places that object.
+    */
+   private void renderObjectList()
    {
-      if (ImGui.button(labels.get("Place " + objectFactory.getName())))
+      ImGui.text("Place object:");
+      ImGui.setNextItemWidth(-1.0f);
+      ImGui.inputTextWithHint(labels.getHidden("Object search"), "Type to search", objectSearch);
+      String search = objectSearch.get().trim().toLowerCase(Locale.ROOT);
+
+      List<RDXEnvironmentObjectFactory> objects = new ArrayList<>();
+      List<RDXEnvironmentObjectFactory> terrain = new ArrayList<>();
+      for (RDXEnvironmentObjectFactory objectFactory : RDXEnvironmentObjectLibrary.getObjectFactories())
       {
-         if (isPlacing)
-         {
-            removeObject(selectedObject);
-         }
+         if (search.isEmpty() || objectFactory.getName().toLowerCase(Locale.ROOT).contains(search))
+            (isProceduralTerrain(objectFactory) ? terrain : objects).add(objectFactory);
+      }
+      Comparator<RDXEnvironmentObjectFactory> byName = Comparator.comparing(RDXEnvironmentObjectFactory::getName, String.CASE_INSENSITIVE_ORDER);
+      objects.sort(byName);
+      terrain.sort(byName);
 
-         RDXEnvironmentObject objectToPlace = objectFactory.getSupplier().get();
-         addObject(objectToPlace);
-         updateObjectSelected(selectedObject, objectToPlace);
+      int rows = objects.size() + terrain.size() + (terrain.isEmpty() ? 0 : 1);
+      float rowHeight = ImGui.getTextLineHeightWithSpacing();
+      float listHeight = rowHeight * Math.max(1, Math.min(rows, OBJECT_LIST_VISIBLE_ROWS)) + ImGui.getStyle().getWindowPaddingY() * 2.0f;
+      if (ImGui.beginChild(labels.getHidden("Object list"), 0.0f, listHeight, true))
+      {
+         for (RDXEnvironmentObjectFactory objectFactory : objects)
+            renderPlaceRow(objectFactory);
+         if (!terrain.isEmpty())
+         {
+            ImGui.textDisabled("Procedural terrain");
+            for (RDXEnvironmentObjectFactory objectFactory : terrain)
+               renderPlaceRow(objectFactory);
+         }
+         if (rows == 0)
+            ImGui.textDisabled("No objects match \"" + objectSearch.get().trim() + "\"");
+      }
+      ImGui.endChild();
+   }
 
-         if (objectToPlace instanceof RDXProceduralTerrainObject)
+   /**
+    * A search box with a refresh button over a short scrolling list of the environment files. Clicking a row loads
+    * that environment.
+    *
+    * @return true when the refresh button was clicked
+    */
+   private boolean renderEnvironmentList()
+   {
+      float refreshButtonWidth = ImGui.getFrameHeight();
+      ImGui.setNextItemWidth(-(refreshButtonWidth + ImGui.getStyle().getItemSpacingX()));
+      ImGui.inputTextWithHint(labels.getHidden("Environment search"), "Type to search", environmentSearch);
+      ImGui.sameLine();
+      boolean refreshClicked = ImGuiTools.refreshButton(labels.getHidden("Refresh environments"));
+      ImGuiTools.previousWidgetTooltip("Refresh the environment file list");
+      String search = environmentSearch.get().trim().toLowerCase(Locale.ROOT);
+
+      List<String> matches = new ArrayList<>();
+      for (String environmentFileName : environmentFileNames)
+      {
+         if (search.isEmpty() || environmentFileName.toLowerCase(Locale.ROOT).contains(search))
+            matches.add(environmentFileName);
+      }
+
+      float rowHeight = ImGui.getTextLineHeightWithSpacing();
+      float listHeight = rowHeight * Math.max(1, Math.min(matches.size(), OBJECT_LIST_VISIBLE_ROWS)) + ImGui.getStyle().getWindowPaddingY() * 2.0f;
+      if (ImGui.beginChild(labels.getHidden("Environment list"), 0.0f, listHeight, true))
+      {
+         for (String environmentFileName : matches)
          {
-            // Terrain is too large to drag with the mouse, so drop it on the ground under the camera focus and position it with the gizmo
-            tempTranslation.set(panel3D.getCamera3D().getFocusPointPose().getPosition());
-            tempTranslation.setZ(0.0);
-            objectToPlace.setPositionInWorld(tempTranslation);
-            pose3DGizmo.getTransformToParent().set(objectToPlace.getObjectTransform());
-            isPlacing = false;
+            if (ImGui.selectable(labels.get(environmentFileName, "Environment"), environmentFileName.equals(selectedEnvironmentFile)))
+               loadEnvironmentInternal(environmentFileName);
          }
-         else
-         {
-            isPlacing = true;
-         }
+         if (matches.isEmpty())
+            ImGui.textDisabled(environmentFileNames.isEmpty() ? "No environment files" : "No environments match \"" + environmentSearch.get().trim() + "\"");
+      }
+      ImGui.endChild();
+      return refreshClicked;
+   }
+
+   private void renderPlaceRow(RDXEnvironmentObjectFactory objectFactory)
+   {
+      if (ImGui.selectable(labels.get(objectFactory.getName(), "Place")))
+         placeObject(objectFactory);
+      if (ImGui.isItemHovered())
+         ImGui.setTooltip("Place " + objectFactory.getName());
+   }
+
+   private void placeObject(RDXEnvironmentObjectFactory objectFactory)
+   {
+      if (isPlacing)
+      {
+         removeObject(selectedObject);
+      }
+
+      RDXEnvironmentObject objectToPlace = objectFactory.getSupplier().get();
+      addObject(objectToPlace);
+      updateObjectSelected(selectedObject, objectToPlace);
+
+      if (objectToPlace instanceof RDXProceduralTerrainObject)
+      {
+         // Terrain is too large to drag with the mouse, so drop it on the ground under the camera focus and position it with the gizmo
+         tempTranslation.set(panel3D.getCamera3D().getFocusPointPose().getPosition());
+         tempTranslation.setZ(0.0);
+         objectToPlace.setPositionInWorld(tempTranslation);
+         pose3DGizmo.getTransformToParent().set(objectToPlace.getObjectTransform());
+         isPlacing = false;
+      }
+      else
+      {
+         isPlacing = true;
       }
    }
 
@@ -551,7 +611,10 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    public void removeObject(RDXEnvironmentObject environmentObject)
    {
+      if (environmentObject == null)
+         return;
       allObjects.remove(environmentObject);
+      environmentObject.removedFromEnvironment();
 
       if (environmentObject instanceof RDXPointLightObject lightObject)
       {
