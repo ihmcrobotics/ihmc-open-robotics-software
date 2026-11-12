@@ -80,7 +80,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
    {
       this.cameraForTracking = cameraForTracking;
       trackRobot.set(true);
-      lockOrientation.set(true);
+      lockOrientation.set(false);
    }
 
    @Override
