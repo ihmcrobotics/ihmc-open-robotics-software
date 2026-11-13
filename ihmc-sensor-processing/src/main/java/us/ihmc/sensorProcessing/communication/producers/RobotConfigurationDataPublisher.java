@@ -25,6 +25,7 @@ import java.util.List;
 public class RobotConfigurationDataPublisher implements RawOutputWriter
 {
    private FloatingJointStateReadOnly rootJointSensorData;
+   private java.util.function.Supplier<FloatingJointStateReadOnly> rootJointSensorDataSupplier;
    private final List<? extends OneDoFJointStateReadOnly> jointSensorData;
    private final List<? extends IMUSensorReadOnly> imuSensorData;
    private final List<? extends ForceSensorDataReadOnly> forceSensorData;
@@ -95,6 +96,13 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       if (RobotFrameDataPublisher.ENABLE_ROBOT_FRAME_DATA_PUBLISHERS && !robotFrameDataPublishers.isEmpty())
          throw new IllegalStateException("Rebind auxiliary frame publishers before changing the published root model");
       this.rootJointSensorData = java.util.Objects.requireNonNull(rootJointSensorData);
+      rootJointSensorDataSupplier = null;
+   }
+
+   public void setRootJointSensorDataSupplier(java.util.function.Supplier<FloatingJointStateReadOnly> supplier)
+   {
+      setRootJointSensorData(rootJointSensorData); // Preserve the auxiliary-frame safety check.
+      rootJointSensorDataSupplier = java.util.Objects.requireNonNull(supplier);
    }
 
    @Override
@@ -111,6 +119,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       robotConfigurationData.setSyncTimestamp(timestampHolder.getSyncTimestamp());
 
       // Write root joint data
+      FloatingJointStateReadOnly rootJointSensorData = rootJointSensorDataSupplier == null ? this.rootJointSensorData : rootJointSensorDataSupplier.get();
       robotConfigurationData.getRootOrientation().getQuaternion().set(rootJointSensorData.getPose().getOrientation());
       robotConfigurationData.getRootPosition().getPoint().set(rootJointSensorData.getPose().getPosition());
       robotConfigurationData.getPelvisAngularVelocity().getVector().set(rootJointSensorData.getTwist().getAngularPart());
