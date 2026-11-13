@@ -40,7 +40,6 @@ import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -71,8 +70,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 
 /**
  * This class is responsible for creating the estimator, controller, and optionally step generator and IK streaming modules.
@@ -1056,25 +1053,9 @@ public class AvatarMultiThreadingFactory
       return mainStateEstimator;
    }
 
-   /** Configure before build/start. The estimator model remains independent of the selected controller-output model. */
-   public void configureEstimatorOutputModel(FullHumanoidRobotModel outputModel,
-                                             OutputProcessor processor,
-                                             Consumer<HumanoidRobotContextData> contextTransformer)
-   {
-      avatarEstimator.configureOutputModel(outputModel, processor, contextTransformer);
-   }
-
    public SensorOutputMapReadOnly getEstimatorSensorOutput()
    {
       return avatarEstimator.getSensorReader().getProcessedSensorOutputMap();
-   }
-
-   public void configureEstimatorOutputModel(FullHumanoidRobotModel outputModel,
-                                             OutputProcessor processor,
-                                             Consumer<HumanoidRobotContextData> transformer,
-                                             BooleanSupplier active)
-   {
-      avatarEstimator.configureOutputModel(outputModel, processor, transformer, active);
    }
 
    public void addPreEstimatorThreadRunnable(Runnable runnable)

@@ -20,14 +20,10 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotController.ModularRobotController;
-import us.ihmc.robotics.robotController.OutputProcessor;
-import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.sensorProcessing.sensorProcessors.FloatingJointStateReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
@@ -37,9 +33,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 
 public class AvatarEstimatorThread extends ModularRobotController implements SCS2YoGraphicHolder
 {
@@ -48,11 +42,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
 
    private final SensorReader sensorReader;
    private final FullHumanoidRobotModel estimatorFullRobotModel;
-   private FullHumanoidRobotModel controllerOutputModel;
-   private BooleanSupplier controllerOutputActive = () -> true;
-   private Consumer<HumanoidRobotContextData> outputContextTransformer;
-   private final CenterOfMassDataHolder rawCenterOfMass = new CenterOfMassDataHolder();
-   private boolean restoreRawCenterOfMass;
    private final StateEstimatorController mainStateEstimator;
    private final PairList<BooleanSupplier, StateEstimatorController> secondaryStateEstimators;
 
@@ -107,11 +96,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
       try
       {
          // In the case the SensorReader.compute() does fill the sensor data, it has to be called before initialize of the state estimator.
-         if (restoreRawCenterOfMass)
-         {
-            humanoidRobotContextData.getCenterOfMassDataHolder().set(rawCenterOfMass);
-            restoreRawCenterOfMass = false;
-         }
          sensorReader.compute(humanoidRobotContextData.getTimestamp(), humanoidRobotContextData.getSensorDataContext());
 
          if (firstTick.getBooleanValue())
@@ -135,14 +119,7 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
             runnables.get(i).run();
          }
 
-         boolean useOutput = controllerOutputModel != null && controllerOutputActive.getAsBoolean();
-         HumanoidRobotContextTools.updateContext(useOutput ? controllerOutputModel : estimatorFullRobotModel, humanoidRobotContextData.getProcessedJointData());
-         if (useOutput && outputContextTransformer != null)
-         {
-            rawCenterOfMass.set(humanoidRobotContextData.getCenterOfMassDataHolder());
-            outputContextTransformer.accept(humanoidRobotContextData);
-            restoreRawCenterOfMass = true;
-         }
+         HumanoidRobotContextTools.updateContext(estimatorFullRobotModel, humanoidRobotContextData.getProcessedJointData());
          humanoidRobotContextData.setEstimatorRan(!firstTick.getValue());
       }
       catch (Throwable e)
@@ -222,35 +199,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
    public void addEstimatorRunnable(Runnable runnable)
    {
       this.runnables.add(runnable);
-   }
-
-   /** Install before thread startup. KIO keeps its own model; controller context and published root use the selected model. */
-   public void configureOutputModel(FullHumanoidRobotModel outputModel, OutputProcessor processor, Consumer<HumanoidRobotContextData> contextTransformer)
-   {
-      configureOutputModel(outputModel, processor, contextTransformer, () -> true);
-   }
-
-   public void configureOutputModel(FullHumanoidRobotModel outputModel,
-                                    OutputProcessor processor,
-                                    Consumer<HumanoidRobotContextData> contextTransformer,
-                                    BooleanSupplier active)
-   {
-      // The processor must select the predicate's value on this estimator thread, so publication and context agree.
-      if (!firstTick.getValue() || controllerOutputModel != null || getOutputProcessor() != null)
-         throw new IllegalStateException("Estimator output already configured");
-      if (!(getRawOutputWriter() instanceof RobotConfigurationDataPublisher publisher))
-         throw new IllegalStateException("Selected model requires a RobotConfigurationData publisher");
-      Objects.requireNonNull(outputModel);
-      Objects.requireNonNull(processor);
-      if (outputModel == estimatorFullRobotModel)
-         throw new IllegalArgumentException("Selected output must not alias the raw estimator model");
-      controllerOutputActive = Objects.requireNonNull(active);
-      var selectedRoot = FloatingJointStateReadOnly.fromFloatingJoint(outputModel.getRootJoint());
-      var nativeRoot = FloatingJointStateReadOnly.fromFloatingJoint(estimatorFullRobotModel.getRootJoint());
-      publisher.setRootJointSensorDataSupplier(() -> controllerOutputActive.getAsBoolean() ? selectedRoot : nativeRoot);
-      controllerOutputModel = outputModel;
-      outputContextTransformer = contextTransformer;
-      setOutputProcessor(processor);
    }
 
    @Deprecated // TODO: Split up the sensor reader and move the part needed outside out of this class!
