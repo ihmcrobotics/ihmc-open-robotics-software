@@ -88,9 +88,16 @@ public class YOLOv8Model
    private final float[] maskThresholds;
    private float nmsThreshold;
 
+   /**
+    * Optional {@code class_names.yaml} key. {@code false} turns off OpenCV's DNN layer fusion for the model: OpenCV 4.10's
+    * CUDA backend fails to fuse YOLO26's layers (fuseLayers: biasLayerData->outputBlobsWrappers.size() == 1).
+    */
+   public static final String LAYER_FUSION_KEY = "opencv_layer_fusion";
+
    public YOLOv8Model(URL modelBaseDirectory)
    {
       modelName = YOLOv8Tools.modelNameFromDirectory(modelBaseDirectory);
+      boolean layerFusion;
 
       URL classNamesFileURL = YOLOv8Tools.getClassNamesFile(modelBaseDirectory);
       URL onnxFileURL = YOLOv8Tools.getONNXFile(modelBaseDirectory);
@@ -99,9 +106,10 @@ public class YOLOv8Model
       {
          // Parse class_names.yaml
          Yaml yaml = new Yaml();
-         Map<String, List<Object>> classNamesData = yaml.load(classNamesFile);
-         List<Object> names = classNamesData.get("names");
+         Map<String, Object> classNamesData = yaml.load(classNamesFile);
+         List<?> names = (List<?>) classNamesData.get("names");
          detectableObjects.addAll(names.stream().map(Object::toString).toList());
+         layerFusion = !Boolean.FALSE.equals(classNamesData.get(LAYER_FUSION_KEY));
 
          // Read the YOLO net
          Objects.requireNonNull(onnxFile);
@@ -115,6 +123,8 @@ public class YOLOv8Model
       // Use CUDA backends
       yoloNet.setPreferableBackend(opencv_dnn.DNN_BACKEND_CUDA);
       yoloNet.setPreferableTarget(opencv_dnn.DNN_TARGET_CUDA);
+      if (!layerFusion)
+         yoloNet.enableFusion(false);
 
       outputNames = yoloNet.getUnconnectedOutLayersNames();
 
