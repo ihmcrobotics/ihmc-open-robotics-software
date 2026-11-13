@@ -6,7 +6,8 @@ building cannot collide as one mesh: the hull would fill every room. Instead the
 
 * Walkable surfaces (floors, stair treads, furniture tops) are binned at a fine pitch, snapped to
   the dominant floor heights, small scan holes are filled, and each surface is extended down to a
-  solid slab so stairs become solid steps.
+  solid slab so stairs become solid steps. Rugs and mats, flat patches a few centimeters above a floor
+  and bordered only by it, are put down onto the floor, so they don't become steps that trip the robot.
 * Everything else (walls, furniture) becomes, per story, columns from the floor up to the tallest
   obstacle in each coarse cell that has scan points within the robot's reach. Cells with points only
   overhead (door headers, beams) stay open. Scan points just above or below a nearby walkable surface (stair
@@ -142,6 +143,35 @@ def flatten_patches(cx, cy, top, snapped, shape, args):
     top[other] = np.round(flattened / 0.005) * 0.005
     rough_cells = (cx[rough], cy[rough], top[rough])
     return cx[keep], cy[keep], top[keep], rough_cells
+
+
+def flatten_rugs(cx, cy, top, levels, shape, args) -> np.ndarray:
+    """
+    Rugs and mats are scanned a few centimeters thick. As walkable slabs they become solid steps with
+    sharp edges that catch a walking robot's feet. A flat patch at most args.rug_height above a floor,
+    bordered only by that floor or other such patches, is put down onto the floor. A low patch next to
+    anything higher, like the first tread of a staircase, stays as it is. A cell can hold surfaces of
+    several stories, so each story's surfaces are looked at on their own.
+    """
+    top = top.copy()
+    for level in levels:
+        candidate = (top > level + 0.005) & (top <= level + args.rug_height)
+        if not candidate.any():
+            continue
+        # Higher walkable surfaces a step or so above this floor: a stair tread, a landing
+        higher = (top > level + args.rug_height) & (top <= level + 2.0 * args.max_step)
+        higher_grid = np.zeros(shape, dtype=bool)
+        higher_grid[cx[higher], cy[higher]] = True
+        rug_grid = np.zeros(shape, dtype=bool)
+        rug_grid[cx[candidate], cy[candidate]] = True
+        labels, count = ndimage.label(rug_grid)
+        cell_label = labels[cx, cy]
+        for label in range(1, count + 1):
+            patch = labels == label
+            border = ndimage.binary_dilation(patch) & ~patch
+            if not (border & higher_grid).any():
+                top[candidate & (cell_label == label)] = level
+    return top
 
 
 def reachable_from_floors(cx, cy, top, levels, shape, args) -> np.ndarray:
@@ -638,6 +668,7 @@ def convert(glb: Path, args: argparse.Namespace) -> None:
     snapped = np.isin(top, levels)
     top[~snapped] = np.round(top[~snapped] / args.step_quantum) * args.step_quantum
     cx, cy, top, (rough_x, rough_y, rough_top) = flatten_patches(cx, cy, top, snapped, shape, args)
+    top = flatten_rugs(cx, cy, top, levels, shape, args)
     # Furniture tops are not walked on: they become obstacles, so only stairs and landings stay walkable
     reachable = reachable_from_floors(cx, cy, top, levels, shape, args)
     rough_x, rough_y, rough_top = (np.append(rough_x, cx[~reachable]), np.append(rough_y, cy[~reachable]),
@@ -845,6 +876,8 @@ def main() -> None:
     parser.add_argument("--min-story-height", type=float, default=1.8, help="Floors of two stories are at least this far apart (m)")
     parser.add_argument("--fill-under-height", type=float, default=1.8,
                         help="A floor is filled under anything standing on it up to this height (m)")
+    parser.add_argument("--rug-height", type=float, default=0.10,
+                        help="Flat patches this low above a floor, bordered only by it, are rugs: they are put down onto the floor (m)")
     parser.add_argument("--min-slab", type=float, default=0.04, help="Minimum thickness of a walkable slab (m)")
     parser.add_argument("--max-slab", type=float, default=0.30, help="Maximum thickness of a walkable slab (m)")
     parser.add_argument("--trip-clearance", type=float, default=0.12,
