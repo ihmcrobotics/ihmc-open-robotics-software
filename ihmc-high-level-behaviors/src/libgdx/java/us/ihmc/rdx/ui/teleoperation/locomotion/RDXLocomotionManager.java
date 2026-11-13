@@ -679,6 +679,15 @@ public class RDXLocomotionManager
 
    public void calculateWalkPathControlRing3DViewPick(ImGui3DViewInput input)
    {
+      // The ring plans for the WALKING controller, so it does not take the mouse in other states, e.g. RL_CONTROL.
+      // Only WALKING publishes CapturabilityBasedStatus, so this also works when no state change was received, e.g. a sim started in RL_CONTROL.
+      if (!controllerStatusTracker.isInWalkingState())
+      {
+         // Leaving WALKING with the ring selected clears it like Escape does
+         if (walkPathControlRing.isSelected())
+            deleteAll();
+         return;
+      }
       if (!manualFootstepPlacement.isPlacingFootstep())
          walkPathControlRing.calculate3DViewPick(input);
    }

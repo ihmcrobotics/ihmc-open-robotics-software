@@ -86,6 +86,7 @@ public class AvatarStepGeneratorThread implements SCS2YoGraphicHolder
                                                     csgTime);
       csgCommandInputManager = steppingManager.getStepGeneratorCommandInputManager();
       statusMessageOutputManager = steppingManager.getStatusMessageOutputManager();
+      csgCommandInputManager.addHeightMapCommandConsumer(controllerCommandInputManager::submitCommand);
 
       // create the callback listeners for the planar regions in the stepping plugin
       if (ros2Node != null)

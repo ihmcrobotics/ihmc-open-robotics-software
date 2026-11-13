@@ -24,11 +24,14 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.simulation.environment.isaac.RDXIsaacSimEnvironmentExporter;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectLibrary;
 import us.ihmc.rdx.simulation.environment.object.objects.RDXDirectionalLightObject;
 import us.ihmc.rdx.simulation.environment.object.objects.RDXPointLightObject;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXProceduralGroundObject;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXProceduralTerrainObject;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
@@ -46,6 +49,7 @@ public class RDXEnvironmentBuilder extends RDXPanel
    private final WorkspaceResourceDirectory environmentFilesDirectory = new WorkspaceResourceDirectory(getClass(), "/environments");
    private final ArrayList<RDXEnvironmentObject> allObjects = new ArrayList<>();
    private final ArrayList<RDXEnvironmentObject> lightObjects = new ArrayList<>();
+   private final ArrayList<RDXProceduralTerrainObject> proceduralTerrainObjects = new ArrayList<>();
    private final RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo();
    private final RDX3DPanel panel3D;
 
@@ -60,7 +64,9 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    private boolean loadedFilesOnce = false;
    private boolean isPlacing = false;
+   private boolean confirmingDeleteAll = false;
    private String selectedEnvironmentFile = null;
+   private String isaacSimExportStatus = null;
    private RDXEnvironmentObject selectedObject;
    private RDXEnvironmentObject intersectedObject;
 
@@ -94,6 +100,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    public void process3DViewInput(ImGui3DViewInput viewInput)
    {
+      updateProceduralGround();
+
       if (selectedObject != null && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
          resetSelection();
 
@@ -158,6 +166,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
       RDXEnvironmentObject closestObject = null;
       for (RDXEnvironmentObject object : allObjects)
       {
+         if (!object.isSelectable())
+            continue;
          boolean intersects = object.intersect(pickRay, tempIntersection);
          double distance = tempIntersection.distance(pickRay.getPoint());
          if (intersects && (closestObject == null || distance < closestDistance))
@@ -185,7 +195,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
    {
       ImGui.separator();
 
-      ImGui.checkbox(labels.get("Enable Environment Building"), inputsEnabled);
+      if (ImGui.checkbox(labels.get("Enable Environment Building"), inputsEnabled) && !inputsEnabled.get())
+         stopBuilding();
 
       if (ImGui.sliderFloat("Ambient light", ambientLightAmount.getData(), 0.0f, 1.0f))
       {
@@ -198,32 +209,59 @@ public class RDXEnvironmentBuilder extends RDXPanel
          selectedObject.renderImGuiWidgets();
       ImGui.text("Highlighted Object: " + (intersectedObject == null ? "" : (intersectedObject.getTitleCasedName() + " " + intersectedObject.getObjectIndex())));
 
-      if (ImGui.button("Delete selected object") && selectedObject != null || ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
+      if (ImGui.button("Delete selected object") && selectedObject != null
+          || ImGui.isKeyReleased(ImGuiTools.getDeleteKey()) && !ImGui.getIO().getWantTextInput())
       {
          removeObject(selectedObject);
          resetSelection();
+      }
+
+      if (!confirmingDeleteAll)
+      {
+         if (ImGui.button(labels.get("Delete all objects")))
+            confirmingDeleteAll = true;
+      }
+      else
+      {
+         ImGui.text("Delete all %d objects?".formatted(allObjects.size()));
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Confirm")))
+         {
+            removeAllObjects();
+            // Unselect the file so "Save" can't overwrite it with an empty environment
+            selectedEnvironmentFile = null;
+            confirmingDeleteAll = false;
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Cancel")))
+            confirmingDeleteAll = false;
       }
 
       ImGui.separator();
 
       if (inputsEnabled.get())
       {
+         ImGui.text("Objects:");
          for (RDXEnvironmentObjectFactory objectFactory : RDXEnvironmentObjectLibrary.getObjectFactories())
          {
-            if (ImGui.button(labels.get("Place " + objectFactory.getName())))
-            {
-               if (isPlacing)
-               {
-                  removeObject(selectedObject);
-               }
-
-               RDXEnvironmentObject objectToPlace = objectFactory.getSupplier().get();
-               addObject(objectToPlace);
-               updateObjectSelected(selectedObject, objectToPlace);
-               isPlacing = true;
-            }
+            if (!isProceduralTerrain(objectFactory))
+               renderPlaceButton(objectFactory);
          }
 
+         ImGui.separator();
+         ImGui.text("Procedural Terrain:");
+         for (RDXEnvironmentObjectFactory objectFactory : RDXEnvironmentObjectLibrary.getObjectFactories())
+         {
+            if (isProceduralTerrain(objectFactory))
+               renderPlaceButton(objectFactory);
+         }
+
+         ImGui.separator();
+      }
+
+      if (selectedObject instanceof RDXProceduralTerrainObject terrainObject)
+      {
+         terrainObject.renderImGuiWidgets();
          ImGui.separator();
       }
 
@@ -260,7 +298,9 @@ public class RDXEnvironmentBuilder extends RDXPanel
       ImGui.sameLine();
       if (ImGui.button("Save as"))
       {
-         fileNameToSave = saveString.get();
+         fileNameToSave = saveString.get().trim();
+         if (!fileNameToSave.endsWith(".json"))
+            fileNameToSave += ".json";
       }
       if (fileNameToSave != null)
       {
@@ -285,9 +325,76 @@ public class RDXEnvironmentBuilder extends RDXPanel
                objectNode.put("qy", tempOrientation.getY());
                objectNode.put("qz", tempOrientation.getZ());
                objectNode.put("qs", tempOrientation.getS());
+               if (object instanceof RDXProceduralTerrainObject terrainObject)
+                  terrainObject.saveParameters(objectNode);
             }
          });
          reindexScripts();
+      }
+
+      ImGui.separator();
+      if (ImGui.button(labels.get("Export to Isaac Sim")))
+         exportToIsaacSim();
+      ImGuiTools.previousWidgetTooltip("Writes this environment as a USD stage Isaac Sim opens, under " + isaacSimExportRoot());
+      if (isaacSimExportStatus != null)
+         ImGui.textWrapped(isaacSimExportStatus);
+   }
+
+   /** {@code ~/.ihmc/isaacSimExports}, one folder per environment. */
+   private static java.nio.file.Path isaacSimExportRoot()
+   {
+      return java.nio.file.Paths.get(System.getProperty("user.home"), ".ihmc", "isaacSimExports");
+   }
+
+   private void exportToIsaacSim()
+   {
+      String environmentName = selectedEnvironmentFile == null ? "Untitled" : selectedEnvironmentFile.replaceFirst("\\.json$", "");
+      try
+      {
+         java.nio.file.Path stage = new RDXIsaacSimEnvironmentExporter().export(environmentName,
+                                                                                allObjects,
+                                                                                ambientLightAmount.get(),
+                                                                                isaacSimExportRoot().resolve(environmentName));
+         isaacSimExportStatus = "Exported " + stage;
+      }
+      catch (java.io.IOException | RuntimeException exception)
+      {
+         isaacSimExportStatus = "Isaac Sim export failed: " + exception.getMessage();
+         LogTools.error(isaacSimExportStatus, exception);
+      }
+   }
+
+   private static boolean isProceduralTerrain(RDXEnvironmentObjectFactory objectFactory)
+   {
+      return RDXProceduralTerrainObject.class.isAssignableFrom(objectFactory.getClazz());
+   }
+
+   private void renderPlaceButton(RDXEnvironmentObjectFactory objectFactory)
+   {
+      if (ImGui.button(labels.get("Place " + objectFactory.getName())))
+      {
+         if (isPlacing)
+         {
+            removeObject(selectedObject);
+         }
+
+         RDXEnvironmentObject objectToPlace = objectFactory.getSupplier().get();
+         addObject(objectToPlace);
+         updateObjectSelected(selectedObject, objectToPlace);
+
+         if (objectToPlace instanceof RDXProceduralTerrainObject)
+         {
+            // Terrain is too large to drag with the mouse, so drop it on the ground under the camera focus and position it with the gizmo
+            tempTranslation.set(panel3D.getCamera3D().getFocusPointPose().getPosition());
+            tempTranslation.setZ(0.0);
+            objectToPlace.setPositionInWorld(tempTranslation);
+            pose3DGizmo.getTransformToParent().set(objectToPlace.getObjectTransform());
+            isPlacing = false;
+         }
+         else
+         {
+            isPlacing = true;
+         }
       }
    }
 
@@ -295,12 +402,7 @@ public class RDXEnvironmentBuilder extends RDXPanel
    {
       loadedFilesOnce = true;
       selectedEnvironmentFile = environmentFileName;
-      for (RDXEnvironmentObject object : allObjects.toArray(new RDXEnvironmentObject[0]))
-      {
-         removeObject(object);
-      }
-
-      resetSelection();
+      removeAllObjects();
 
       JSONFileTools.load(new WorkspaceResourceFile(environmentFilesDirectory, selectedEnvironmentFile),
       node ->
@@ -319,6 +421,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
             if (object != null)
             {
+               if (object instanceof RDXProceduralTerrainObject terrainObject)
+                  terrainObject.loadParameters(objectNode);
                tempTranslation.setX(objectNode.get("x").asDouble());
                tempTranslation.setY(objectNode.get("y").asDouble());
                tempTranslation.setZ(objectNode.get("z").asDouble());
@@ -336,6 +440,33 @@ public class RDXEnvironmentBuilder extends RDXPanel
             }
          });
       });
+      updateProceduralGround();
+   }
+
+   /** Cuts the footprints of the procedural terrain out of any procedural ground. Only rebuilds when they moved. */
+   private void updateProceduralGround()
+   {
+      proceduralTerrainObjects.clear();
+      for (RDXEnvironmentObject object : allObjects)
+      {
+         if (object instanceof RDXProceduralTerrainObject terrainObject && !(object instanceof RDXProceduralGroundObject))
+            proceduralTerrainObjects.add(terrainObject);
+      }
+      for (RDXEnvironmentObject object : allObjects)
+      {
+         if (object instanceof RDXProceduralGroundObject groundObject)
+            groundObject.updateHoles(proceduralTerrainObjects);
+      }
+   }
+
+   public void removeAllObjects()
+   {
+      for (RDXEnvironmentObject object : allObjects.toArray(new RDXEnvironmentObject[0]))
+      {
+         removeObject(object);
+      }
+      isPlacing = false;
+      resetSelection();
    }
 
    public void loadEnvironment(String environmentFileName)
@@ -369,10 +500,23 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    /**
     * When enabled, left-click picks objects in the 3D view and the pose gizmo can move the selection.
+    * Disabling it also clears the selection.
     */
    public void setInputsEnabled(boolean enabled)
    {
       inputsEnabled.set(enabled);
+      if (!enabled)
+         stopBuilding();
+   }
+
+   /**
+    * Unselects everything, so the gizmo and the collision meshes go away. A selected object is also
+    * one the simulation treats as being dragged, so leaving it selected would keep it pinned in place.
+    */
+   private void stopBuilding()
+   {
+      isPlacing = false;
+      resetSelection();
    }
 
    public boolean getInputsEnabled()
@@ -382,6 +526,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    public void selectObject(RDXEnvironmentObject object)
    {
+      if (object != null && !object.isSelectable())
+         return;
       updateObjectSelected(selectedObject, object);
       if (selectedObject != null)
          pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
@@ -447,12 +593,13 @@ public class RDXEnvironmentBuilder extends RDXPanel
          {
             object.getRealRenderables(renderables, pool);
          }
-         if (selectedObject != null)
+         // Selection graphics are building tools, so they only show while building is enabled
+         if (inputsEnabled.get() && selectedObject != null)
          {
             selectedObject.getCollisionMeshRenderables(renderables, pool);
             pose3DGizmo.getRenderables(renderables, pool);
          }
-         if (intersectedObject != null && intersectedObject != selectedObject)
+         if (inputsEnabled.get() && intersectedObject != null && intersectedObject != selectedObject)
          {
             intersectedObject.getCollisionMeshRenderables(renderables, pool);
          }

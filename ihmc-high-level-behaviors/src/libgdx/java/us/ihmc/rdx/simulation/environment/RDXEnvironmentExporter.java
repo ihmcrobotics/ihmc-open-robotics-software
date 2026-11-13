@@ -2,6 +2,7 @@ package us.ihmc.rdx.simulation.environment;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.simulationConstructionSetTools.util.environments.JSONEnvironment;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -29,7 +30,7 @@ public class RDXEnvironmentExporter
                             JSONTools.forEachArrayElement(node, "objects", objectNode ->
                             {
                                String objectTypeName = objectNode.get("type").asText();
-                               Vector3D size = getSize(objectTypeName);
+                               Vector3D size = JSONEnvironment.getBoxSize(objectTypeName);
 
                                if (size != null)
                                {
@@ -52,31 +53,6 @@ public class RDXEnvironmentExporter
       StringSelection stringSelection = new StringSelection(stringBuilder.toString());
       Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
       clipboard.setContents(stringSelection, null);
-   }
-
-   private static Vector3D getSize(String type)
-   {
-      switch (type)
-      {
-         case "RDXPalletObject" ->
-         {
-            return new Vector3D(1.21, 1.013, 0.155);
-         }
-         case "RDXSmallCinderBlockRoughed" ->
-         {
-            return new Vector3D(0.393, 0.192, 0.0884);
-         }
-         case "RDXMediumCinderBlockRoughed" ->
-         {
-            return new Vector3D(0.393001, 0.188522, 0.141535);
-         }
-         case "RDXLargeCinderBlockRoughed" ->
-         {
-            return new Vector3D(0.393, 0.19, 0.192);
-         }
-      }
-
-      return null;
    }
 
    public static void main(String[] args)

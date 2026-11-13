@@ -25,7 +25,6 @@ tasks.register<jros2GenTask>("generateMessages") {
    group = "build"
 
    packagePaths = listOf(
-      projectDir.resolve("messages/ihmc_interfaces/behavior_msgs").absolutePath,
       projectDir.resolve("messages/ihmc_interfaces/controller_msgs").absolutePath,
       projectDir.resolve("messages/ihmc_interfaces/ihmc_common_msgs").absolutePath,
       projectDir.resolve("messages/ihmc_interfaces/perception_msgs").absolutePath,

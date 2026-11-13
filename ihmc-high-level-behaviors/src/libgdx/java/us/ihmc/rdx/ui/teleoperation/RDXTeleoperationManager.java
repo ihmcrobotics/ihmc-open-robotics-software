@@ -13,6 +13,10 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.log.LogTools;
+import us.ihmc.rdx.simulation.RDXTeleportRobotTool;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
@@ -55,6 +59,8 @@ import us.ihmc.tools.gui.YoAppearanceTools;
 
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * The teleoperation manager is the top level class for managing UI for
@@ -119,6 +125,8 @@ public class RDXTeleoperationManager extends RDXPanel
    private final ImDouble trajectoryDuration = new ImDouble();
    /** When set, a Reset Sim button is shown at the top of the 3D view. Left unset for the real robot. */
    private Runnable resetSimulationCallback;
+   private Supplier<? extends TerrainObject3D> teleportGroundTruthTerrain;
+   private Consumer<Pose3DReadOnly> teleportSimulationCallback;
 
    /** This tracker should be shared with the sub-managers to keep the state consistent. */
    private final ControllerStatusTracker controllerStatusTracker;
@@ -382,6 +390,25 @@ public class RDXTeleoperationManager extends RDXPanel
       clearInteractablesAndLocomotionGraphics();
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderResetSimulationOverlay);
+      if (teleportSimulationCallback != null)
+      {
+         double spawnYaw = syncedRobot.getRobotModel().getDefaultRobotInitialSetup().getInitialYaw();
+         new RDXTeleportRobotTool().create(baseUI, teleportGroundTruthTerrain, spawnYaw, this::teleportSimulation);
+      }
+   }
+
+   private void teleportSimulation(Pose3DReadOnly midFeetGoal)
+   {
+      try
+      {
+         LogTools.info("Resetting the simulation with the robot at {}", midFeetGoal);
+         teleportSimulationCallback.accept(midFeetGoal);
+      }
+      catch (RuntimeException exception)
+      {
+         LogTools.error("Failed to teleport the robot: {}", exception.getMessage());
+         RDXBaseUI.pushNotification("Failed to teleport the robot");
+      }
    }
 
    public void update()
@@ -842,5 +869,18 @@ public class RDXTeleoperationManager extends RDXPanel
    public void setResetSimulationCallback(Runnable resetSimulationCallback)
    {
       this.resetSimulationCallback = resetSimulationCallback;
+   }
+
+   /**
+    * Enables teleporting the robot in simulation with {@link RDXTeleportRobotTool}: hold the key, place the mid-feet goal on the
+    * terrain, release to call {@code teleportSimulationCallback}, which resets the simulation with the robot there. Call before
+    * {@link #create}. Leave this unset for the real robot.
+    *
+    * @param groundTruthTerrain the terrain the simulation collides with, which the goal snaps to
+    */
+   public void setTeleportSimulationCallback(Supplier<? extends TerrainObject3D> groundTruthTerrain, Consumer<Pose3DReadOnly> teleportSimulationCallback)
+   {
+      this.teleportGroundTruthTerrain = groundTruthTerrain;
+      this.teleportSimulationCallback = teleportSimulationCallback;
    }
 }
