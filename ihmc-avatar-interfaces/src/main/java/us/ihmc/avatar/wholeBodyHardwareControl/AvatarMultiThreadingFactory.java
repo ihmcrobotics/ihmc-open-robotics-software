@@ -1064,6 +1064,11 @@ public class AvatarMultiThreadingFactory
       return avatarEstimator.getSensorReader().getProcessedSensorOutputMap();
    }
 
+   public void configureEstimatorOutputModel(FullHumanoidRobotModel outputModel, us.ihmc.robotics.robotController.OutputProcessor processor,
+         java.util.function.Consumer<us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData> transformer,
+         java.util.function.BooleanSupplier active)
+   { avatarEstimator.configureOutputModel(outputModel, processor, transformer, active); }
+
    public void addPreEstimatorThreadRunnable(Runnable runnable)
    {
       preEstimatorRunnables.add(runnable);
