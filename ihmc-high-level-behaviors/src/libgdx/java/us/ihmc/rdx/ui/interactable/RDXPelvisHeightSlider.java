@@ -235,9 +235,9 @@ public class RDXPelvisHeightSlider
       double midFeetZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
       double desiredHeightInWorld = desiredHeight + midFeetZ;
 
-      double change = Math.abs(desiredHeight - valueFromRobot);
-      double trajectoryTime = change * teleoperationParameters.getPelvisHeightChangeVelocity() * sendPeriod;
-      trajectoryTime = MathTools.clamp(trajectoryTime, 0.5, 1000.0); // Safety
+      double minTrajectoryTime = Math.abs(desiredHeight - valueFromRobot) / teleoperationParameters.getPelvisHeightChangeVelocity();
+      double trajectoryTime = teleoperationParameters.getTrajectoryTime();
+      trajectoryTime = MathTools.clamp(trajectoryTime, minTrajectoryTime, 1000.0); // Safety
 
       LogTools.info(StringTools.format3D("Commanding height trajectory. traj. time: {} desired: {} (pelvis - midFeetZ): {} in world: {}",
                                          trajectoryTime,

@@ -73,8 +73,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltips);
       stepChecker = footstepPlan.getStepChecker();
 
-      RDXBaseUI.getInstance().getKeyBindings().register("Place left footstep", "R");
-      RDXBaseUI.getInstance().getKeyBindings().register("Place right footstep", "T");
       RDXBaseUI.getInstance().getKeyBindings().register("Delete last interactable footstep", "Delete");
       RDXBaseUI.getInstance().getKeyBindings().register("Cancel footstep placement", "Escape");
    }
@@ -94,19 +92,15 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
-      boolean panel3DIsHovered = latestInput != null && latestInput.isWindowHovered();
-
-      if (ImGui.button(labels.get("Left")) || (panel3DIsHovered && ImGui.isKeyPressed('R')))
+      if (ImGui.button(labels.get("Left")))
       {
          createNewFootstep(RobotSide.LEFT);
       }
-      ImGuiTools.previousWidgetTooltip("R");
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Right")) || (panel3DIsHovered && ImGui.isKeyPressed('T')))
+      if (ImGui.button(labels.get("Right")))
       {
          createNewFootstep(RobotSide.RIGHT);
       }
-      ImGuiTools.previousWidgetTooltip("T");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Square Up")))
       {
