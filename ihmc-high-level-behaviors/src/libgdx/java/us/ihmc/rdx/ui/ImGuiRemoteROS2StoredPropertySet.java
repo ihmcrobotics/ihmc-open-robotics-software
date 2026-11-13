@@ -11,6 +11,7 @@ import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.tools.property.StoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 public class ImGuiRemoteROS2StoredPropertySet
@@ -93,6 +94,12 @@ public class ImGuiRemoteROS2StoredPropertySet
    {
       storedPropertySetChangedByImGuiUser = true;
       publishIfNecessary();
+   }
+
+   /** Shows the property but does not let the user change it, for example one the remote only reads at startup. */
+   public void setReadOnly(StoredPropertyKey<?> key)
+   {
+      imGuiStoredPropertySetTuner.setReadOnly(key);
    }
 
    public StoredPropertySetBasics getStoredPropertySet()

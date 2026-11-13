@@ -126,6 +126,13 @@ public class RDXPersonObject extends RDXEnvironmentObject
       LIVE.add(this);
    }
 
+   @Override
+   public void removedFromEnvironment()
+   {
+      super.removedFromEnvironment();
+      LIVE.remove(this);
+   }
+
    public static List<RDXPersonObject> livePeople()
    {
       return LIVE;
