@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiMouseButton;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
@@ -205,36 +207,108 @@ public class RDXEnvironmentBuilder extends RDXPanel
 
    }
 
+   /**
+    * Three sections: the environment file (pick, load, save), editing it in the 3D view (place, select, delete), and
+    * export.
+    */
    public void renderImGuiWidgets()
    {
-      ImGui.separator();
+      renderFileSection();
+      ImGui.spacing();
+      renderEditSection();
+      ImGui.spacing();
+      renderExportSection();
+   }
 
-      if (ImGui.checkbox(labels.get("Enable Environment Building"), inputsEnabled) && !inputsEnabled.get())
-         stopBuilding();
+   private void renderFileSection()
+   {
+      ImGuiTools.separatorText("Environment file");
 
-      ImGui.separator();
-      ImGui.text("Selected Object: " + (selectedObject == null ? "" : (selectedObject.getTitleCasedName() + " " + selectedObject.getObjectIndex())));
-      if (selectedObject != null)
-         selectedObject.renderImGuiWidgets();
-      ImGui.text("Highlighted Object: " + (intersectedObject == null ? "" : (intersectedObject.getTitleCasedName() + " " + intersectedObject.getObjectIndex())));
-
-      if (ImGui.button("Delete selected object") && selectedObject != null
-          || ImGui.isKeyReleased(ImGuiTools.getDeleteKey()) && !ImGui.getIO().getWantTextInput())
+      if (!loadedFilesOnce && selectedEnvironmentFile != null)
+         loadEnvironmentInternal(selectedEnvironmentFile);
+      boolean refreshClicked = renderEnvironmentList();
+      if (!loadedFilesOnce || refreshClicked)
       {
-         removeObject(selectedObject);
-         resetSelection();
+         loadedFilesOnce = true;
+         reindexScripts();
       }
 
-      if (!confirmingDeleteAll)
+      if (selectedEnvironmentFile == null)
+         ImGui.textDisabled("No file loaded");
+      else
+         ImGui.text("Loaded: " + selectedEnvironmentFile);
+
+      String fileNameToSave = null;
+      ImGui.beginDisabled(selectedEnvironmentFile == null);
+      if (ImGui.button(labels.get("Save")))
+         fileNameToSave = selectedEnvironmentFile;
+      ImGui.endDisabled();
+      ImGuiTools.previousWidgetTooltip(selectedEnvironmentFile == null ? "Load a file first, or use Save as" : "Overwrite " + selectedEnvironmentFile);
+
+      ImGui.sameLine();
+      String saveAsLabel = labels.get("Save as");
+      float saveAsWidth = ImGuiTools.calcTextSizeX("Save as") + ImGui.getStyle().getFramePaddingX() * 2.0f;
+      ImGui.setNextItemWidth(-(saveAsWidth + ImGui.getStyle().getItemSpacingX()));
+      boolean enterPressed = ImGui.inputTextWithHint(labels.getHidden("Save as name"), "New file name", saveString, ImGuiInputTextFlags.EnterReturnsTrue);
+      ImGui.sameLine();
+      boolean saveAsClicked = ImGui.button(saveAsLabel);
+      if ((enterPressed || saveAsClicked) && !saveString.get().trim().isEmpty())
       {
-         if (ImGui.button(labels.get("Delete all objects")))
-            confirmingDeleteAll = true;
+         fileNameToSave = saveString.get().trim();
+         if (!fileNameToSave.endsWith(".json"))
+            fileNameToSave += ".json";
+      }
+
+      if (fileNameToSave != null)
+         saveEnvironment(fileNameToSave);
+   }
+
+   private void renderEditSection()
+   {
+      ImGuiTools.separatorText("Edit");
+
+      if (ImGui.checkbox(labels.get("Edit in the 3D view"), inputsEnabled) && !inputsEnabled.get())
+         stopBuilding();
+      ImGuiTools.previousWidgetTooltip("Place objects, and click objects in the 3D view to select and move them");
+
+      if (ImGui.isKeyReleased(ImGuiTools.getDeleteKey()) && !ImGui.getIO().getWantTextInput())
+         deleteSelectedObject();
+
+      if (inputsEnabled.get())
+         renderObjectList();
+
+      if (selectedObject == null)
+      {
+         ImGui.textDisabled(inputsEnabled.get() ? "Nothing selected. Click an object in the 3D view." : "Nothing selected");
       }
       else
       {
+         ImGui.alignTextToFramePadding();
+         ImGui.text("Selected: " + objectName(selectedObject));
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Delete")))
+            deleteSelectedObject();
+         ImGuiTools.previousWidgetTooltip("Delete key");
+         ImGui.indent();
+         selectedObject.renderImGuiWidgets();
+         ImGui.unindent();
+      }
+      if (intersectedObject != null && intersectedObject != selectedObject)
+         ImGui.textDisabled("Under the mouse: " + objectName(intersectedObject));
+
+      if (!confirmingDeleteAll)
+      {
+         ImGui.beginDisabled(allObjects.isEmpty());
+         if (ImGui.button(labels.get("Delete all objects")))
+            confirmingDeleteAll = true;
+         ImGui.endDisabled();
+      }
+      else
+      {
+         ImGui.alignTextToFramePadding();
          ImGui.text("Delete all %d objects?".formatted(allObjects.size()));
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Confirm")))
+         if (ImGui.button(labels.get("Delete all")))
          {
             removeAllObjects();
             // Unselect the file so "Save" can't overwrite it with an empty environment
@@ -245,84 +319,61 @@ public class RDXEnvironmentBuilder extends RDXPanel
          if (ImGui.button(labels.get("Cancel")))
             confirmingDeleteAll = false;
       }
+   }
 
-      ImGui.separator();
+   private void renderExportSection()
+   {
+      if (ImGui.collapsingHeader(labels.get("Export")))
+      {
+         if (ImGui.button(labels.get("Export to Isaac Sim")))
+            exportToIsaacSim();
+         ImGuiTools.previousWidgetTooltip("Writes this environment as a USD stage Isaac Sim opens, under " + isaacSimExportRoot());
+         if (isaacSimExportStatus != null)
+            ImGui.textWrapped(isaacSimExportStatus);
+      }
+   }
 
-      if (inputsEnabled.get())
-      {
-         renderObjectList();
-         ImGui.separator();
-      }
+   private static String objectName(RDXEnvironmentObject object)
+   {
+      return object.getTitleCasedName() + " " + object.getObjectIndex();
+   }
 
-      if (selectedObject instanceof RDXProceduralTerrainObject terrainObject)
-      {
-         terrainObject.renderImGuiWidgets();
-         ImGui.separator();
-      }
+   private void deleteSelectedObject()
+   {
+      if (selectedObject == null)
+         return;
+      removeObject(selectedObject);
+      resetSelection();
+   }
 
-      ImGui.text("Environments:");
-      if (!loadedFilesOnce && selectedEnvironmentFile != null)
+   private void saveEnvironment(String fileName)
+   {
+      JSONFileTools.saveToClasspath("ihmc-open-robotics-software",
+                                    "ihmc-high-level-behaviors/src/libgdx/resources",
+                                    "environments/" + fileName,
+      rootNode ->
       {
-         loadEnvironmentInternal(selectedEnvironmentFile);
-      }
-      String fileNameToSave = null;
-      boolean refreshClicked = renderEnvironmentList();
-      if (!loadedFilesOnce || refreshClicked)
-      {
-         loadedFilesOnce = true;
-         reindexScripts();
-      }
-      if (selectedEnvironmentFile != null)
-      {
-         if (ImGui.button(labels.get("Save " + selectedEnvironmentFile)))
-            fileNameToSave = selectedEnvironmentFile;
-      }
-
-      ImGui.separator();
-      ImGuiTools.inputText("###saveText", saveString);
-      ImGui.sameLine();
-      if (ImGui.button("Save as"))
-      {
-         fileNameToSave = saveString.get().trim();
-         if (!fileNameToSave.endsWith(".json"))
-            fileNameToSave += ".json";
-      }
-      if (fileNameToSave != null)
-      {
-         JSONFileTools.saveToClasspath("ihmc-open-robotics-software",
-                                       "ihmc-high-level-behaviors/src/libgdx/resources",
-                                       "environments/" + fileNameToSave,
-         rootNode ->
+         rootNode.put("ambientLight", ambientLightAmount.get());
+         ArrayNode objectsArrayNode = rootNode.putArray("objects");
+         for (RDXEnvironmentObject object : allObjects)
          {
-            rootNode.put("ambientLight", ambientLightAmount.get());
-            ArrayNode objectsArrayNode = rootNode.putArray("objects");
-            for (RDXEnvironmentObject object : allObjects)
-            {
-               ObjectNode objectNode = objectsArrayNode.addObject();
-               objectNode.put("type", object.getClass().getSimpleName());
-               tempTransform.set(object.getObjectTransform());
-               tempTranslation.set(tempTransform.getTranslation());
-               tempOrientation.set(tempTransform.getRotation());
-               objectNode.put("x", tempTranslation.getX());
-               objectNode.put("y", tempTranslation.getY());
-               objectNode.put("z", tempTranslation.getZ());
-               objectNode.put("qx", tempOrientation.getX());
-               objectNode.put("qy", tempOrientation.getY());
-               objectNode.put("qz", tempOrientation.getZ());
-               objectNode.put("qs", tempOrientation.getS());
-               if (object instanceof RDXProceduralTerrainObject terrainObject)
-                  terrainObject.saveParameters(objectNode);
-            }
-         });
-         reindexScripts();
-      }
-
-      ImGui.separator();
-      if (ImGui.button(labels.get("Export to Isaac Sim")))
-         exportToIsaacSim();
-      ImGuiTools.previousWidgetTooltip("Writes this environment as a USD stage Isaac Sim opens, under " + isaacSimExportRoot());
-      if (isaacSimExportStatus != null)
-         ImGui.textWrapped(isaacSimExportStatus);
+            ObjectNode objectNode = objectsArrayNode.addObject();
+            objectNode.put("type", object.getClass().getSimpleName());
+            tempTransform.set(object.getObjectTransform());
+            tempTranslation.set(tempTransform.getTranslation());
+            tempOrientation.set(tempTransform.getRotation());
+            objectNode.put("x", tempTranslation.getX());
+            objectNode.put("y", tempTranslation.getY());
+            objectNode.put("z", tempTranslation.getZ());
+            objectNode.put("qx", tempOrientation.getX());
+            objectNode.put("qy", tempOrientation.getY());
+            objectNode.put("qz", tempOrientation.getZ());
+            objectNode.put("qs", tempOrientation.getS());
+            if (object instanceof RDXProceduralTerrainObject terrainObject)
+               terrainObject.saveParameters(objectNode);
+         }
+      });
+      reindexScripts();
    }
 
    /** {@code ~/.ihmc/isaacSimExports}, one folder per environment. */
@@ -360,7 +411,7 @@ public class RDXEnvironmentBuilder extends RDXPanel
     */
    private void renderObjectList()
    {
-      ImGui.text("Place object:");
+      ImGui.textDisabled("Click to place:");
       ImGui.setNextItemWidth(-1.0f);
       ImGui.inputTextWithHint(labels.getHidden("Object search"), "Type to search", objectSearch);
       String search = objectSearch.get().trim().toLowerCase(Locale.ROOT);
@@ -445,7 +496,7 @@ public class RDXEnvironmentBuilder extends RDXPanel
             List<String> groupFiles = groupMatches.get(row);
             if (groupFiles == null)
             {
-               if (ImGui.selectable(labels.get(row, "Environment"), row.equals(selectedEnvironmentFile)))
+               if (renderLeafEnvironmentRow(row))
                   loadEnvironmentInternal(row);
                continue;
             }
@@ -474,6 +525,34 @@ public class RDXEnvironmentBuilder extends RDXPanel
       }
       ImGui.endChild();
       return refreshClicked;
+   }
+
+   /**
+    * A file in no group, drawn like a group's row so the names line up: a selectable spanning the row, with the
+    * tree node's arrow in the disabled text color and the name at the tree node's label offset.
+    *
+    * @return true when clicked
+    */
+   private boolean renderLeafEnvironmentRow(String environmentFileName)
+   {
+      // The row's start, as a tree node sees it; the selectable's item rectangle is padded by half the item spacing
+      float startX = ImGui.getCursorPosX();
+      float rowScreenX = ImGui.getCursorScreenPosX();
+      float rowScreenY = ImGui.getCursorScreenPosY();
+      boolean clicked = ImGui.selectable(labels.getHidden(environmentFileName + "Environment"), environmentFileName.equals(selectedEnvironmentFile));
+      ImGui.sameLine(startX + ImGui.getTreeNodeToLabelSpacing());
+      ImGui.text(environmentFileName);
+
+      // Where ImGui draws a closed, unframed tree node's arrow (RenderArrow at the frame padding, scale 0.7)
+      float fontSize = ImGui.getFontSize();
+      float radius = fontSize * 0.40f * 0.70f;
+      float centerX = rowScreenX + ImGui.getStyle().getFramePaddingX() + fontSize * 0.5f;
+      float centerY = rowScreenY + fontSize * 0.15f + fontSize * 0.5f * 0.70f;
+      ImGui.getWindowDrawList().addTriangleFilled(centerX + 0.750f * radius, centerY,
+                                                  centerX - 0.750f * radius, centerY + 0.866f * radius,
+                                                  centerX - 0.750f * radius, centerY - 0.866f * radius,
+                                                  ImGui.getColorU32(ImGuiCol.TextDisabled));
+      return clicked;
    }
 
    private void renderPlaceRow(RDXEnvironmentObjectFactory objectFactory)
