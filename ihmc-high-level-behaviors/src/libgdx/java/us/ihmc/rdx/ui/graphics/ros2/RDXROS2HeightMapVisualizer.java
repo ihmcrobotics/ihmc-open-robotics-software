@@ -19,14 +19,17 @@ import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
+import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.gpuMapping.HeightMapData;
 import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
+import us.ihmc.perception.gpuMapping.HeightMapParameters;
 import us.ihmc.perception.gpuMapping.HeightMapTools;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySet;
 import us.ihmc.rdx.ui.graphics.RDXChunkedMapRenderer;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapRenderer;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
@@ -58,6 +61,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private ROS2Heartbeat heightMapRequestHeartbeat;
    private ROS2Heartbeat terrainMapRequestHeartbeat;
    private ROS2Heartbeat heightMapControllerRequestHeartbeat;
+   private ImGuiRemoteROS2StoredPropertySet heightMapParameterTuner;
    private Mat heightMap;
    private Mat traversabilityScore;
    private HeightMapData latestHeightMapData;
@@ -230,6 +234,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
          ImGui.checkbox(labels.get("Enable Chunked Map"), enableChunkedMapRenderer);
          ImGui.checkbox(labels.get("Show Traversability"), colorBasedOnTraversability);
       }
+
+      if (heightMapParameterTuner != null && ImGui.collapsingHeader(labels.get("Height Map Parameters")))
+         heightMapParameterTuner.renderImGuiWidgetsWithUpdateButton();
       ImGui.unindent();
    }
 
@@ -351,6 +358,22 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       requestTerrainMap.set(request);
       if (terrainMapRequestHeartbeat != null)
          terrainMapRequestHeartbeat.setAlive(request);
+   }
+
+   /**
+    * Adds a "Height Map Parameters" section to this visualizer that tunes the height map parameters of the remote
+    * mapping process (ActiveMappingParameterToolBox). The tuner is disabled until the remote's values arrive.
+    * <p>
+    * The cell size and the local and global widths are read only: the mapping sizes its GPU buffers from them once at
+    * startup but reads the cell size every frame, so changing them live makes the kernels index past the buffers and
+    * crashes the process.
+    */
+   public void setupHeightMapParameterTuner(ROS2Node ros2Node)
+   {
+      heightMapParameterTuner = new ImGuiRemoteROS2StoredPropertySet(ros2Node, new HeightMapParameters(), PerceptionComms.HEIGHT_MAP_PARAMETERS);
+      heightMapParameterTuner.setReadOnly(HeightMapParameters.cellSize);
+      heightMapParameterTuner.setReadOnly(HeightMapParameters.localWidthInMeters);
+      heightMapParameterTuner.setReadOnly(HeightMapParameters.globalWidthInMeters);
    }
 
    public void setupHeightMapControllerRequestHeartbeat(ROS2Node ros2Node)

@@ -54,4 +54,9 @@ public class RDXEnvironmentObject extends RDXSimpleObject
    public void renderImGuiWidgets()
    {
    }
+
+   /** Called when the environment builder removes this object, to drop anything it registered outside the builder. */
+   public void removedFromEnvironment()
+   {
+   }
 }

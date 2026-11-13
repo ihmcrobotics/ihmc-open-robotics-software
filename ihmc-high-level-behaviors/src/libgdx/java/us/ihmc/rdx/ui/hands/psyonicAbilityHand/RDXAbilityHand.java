@@ -105,44 +105,86 @@ public class RDXAbilityHand implements RDXHandInterface
       }
    }
 
+   /** Grips in rows by use, with the row label and each button's text. */
+   private static final String[] GRIP_ROW_LABELS = {"Hand", "Grasp", "Lever", "Key"};
+   private static final AbilityHandGrip[][] GRIP_ROWS = {{AbilityHandGrip.OPEN, AbilityHandGrip.CLOSE, AbilityHandGrip.RELAX, AbilityHandGrip.FLAT},
+                                                         {AbilityHandGrip.PINCH, AbilityHandGrip.HOOK, AbilityHandGrip.HANDLE},
+                                                         {AbilityHandGrip.DOOR_LEVER_OPEN, AbilityHandGrip.DOOR_LEVER_CLOSE, AbilityHandGrip.DOOR_LEVER_CRUSH},
+                                                         {AbilityHandGrip.KEY_OPEN, AbilityHandGrip.KEY_CLOSE}};
+   private static final String[][] GRIP_BUTTON_TEXT = {{"Open", "Close", "Relax", "Flat"},
+                                                       {"Pinch", "Hook", "Handle"},
+                                                       {"Open", "Close", "Crush"},
+                                                       {"Open", "Close"}};
+   private static final int GRIP_COLUMNS = 4;
+
    @Override
    public void renderImGuiWidgets()
    {
-      ImGuiTools.separatorText(getSide().toString() + " Ability Hand", ImGuiTools.getSmallBoldFont());
+      ImGuiTools.separatorText(handSide.getPascalCaseName() + " Ability Hand", ImGuiTools.getSmallBoldFont());
+      if (latestState == null)
+      {
+         ImGui.sameLine();
+         ImGui.textDisabled("(not connected)");
+      }
 
       ImGui.beginDisabled(latestState == null);
 
-      for (AbilityHandGrip grip : AbilityHandGrip.values)
+      float rowStartX = ImGui.getCursorPosX();
+      float labelColumnWidth = ImGui.calcTextSize("Rotator").x + ImGui.getStyle().getItemSpacingX() * 2.0f;
+      float spacing = ImGui.getStyle().getItemSpacingX();
+
+      // Grips: one row per use, buttons the same width so the columns line up
+      float buttonWidth = (ImGui.getContentRegionAvailX() - labelColumnWidth - spacing * (GRIP_COLUMNS - 1)) / GRIP_COLUMNS;
+      for (int row = 0; row < GRIP_ROWS.length; row++)
       {
-         if (ImGui.button(labels.get(grip.name())))
-            executeGrip = grip;
-         if (grip != AbilityHandGrip.values[5] && grip != AbilityHandGrip.values[7] && grip != AbilityHandGrip.values[AbilityHandGrip.values.length - 1])
-            ImGui.sameLine();
+         ImGui.alignTextToFramePadding();
+         ImGui.textDisabled(GRIP_ROW_LABELS[row]);
+         for (int column = 0; column < GRIP_ROWS[row].length; column++)
+         {
+            ImGui.sameLine(rowStartX + labelColumnWidth + column * (buttonWidth + spacing));
+            if (ImGui.button(labels.get(GRIP_BUTTON_TEXT[row][column], GRIP_ROWS[row][column].name()), buttonWidth, 0.0f))
+               executeGrip = GRIP_ROWS[row][column];
+         }
       }
 
+      ImGui.spacing();
+
+      // One speed for every finger
       boolean scheduleExecutePosition = false;
+      ImGui.alignTextToFramePadding();
+      ImGui.textDisabled("Speed");
+      ImGui.sameLine(rowStartX + labelColumnWidth);
+      ImGui.pushItemWidth(ImGui.getContentRegionAvailX());
+      if (ImGuiTools.volatileInputFloat(labels.getHidden("Speed"), desiredVelocities[0], 1.0f, 10.0f, "%.0f deg/s"))
+      {
+         for (int i = 1; i < 6; i++)
+            desiredVelocities[i].set(desiredVelocities[0].get());
+         scheduleExecutePosition = true;
+      }
+      ImGui.popItemWidth();
+
+      // Fingers: the handle is the goal, the notch and the number are where the finger is
       for (int i = 0; i < 6; i++)
       {
          float sliderMin = 0.0f;
          float sliderMax = i == 5 ? -120.0f : 120.0f; // thumb rotator moves negative
          float actuatorPosition = latestState == null ? Float.NaN : latestState.getActuatorPositions()[i];
-         float currentNotch = (actuatorPosition - sliderMin) / (sliderMax - sliderMin);
-         float sliderWidth = ImGui.getColumnWidth() * 0.6f;
-         ImGuiTools.renderSliderOrProgressNotch(currentNotch * sliderWidth, ImGui.getColorU32(ImGuiCol.Text));
 
+         ImGui.alignTextToFramePadding();
+         ImGui.textDisabled(FINGER_NAMES[i]);
+         ImGui.sameLine(rowStartX + labelColumnWidth);
+
+         float sliderWidth = ImGui.getContentRegionAvailX();
+         if (!Float.isNaN(actuatorPosition))
+         {
+            float currentNotch = (actuatorPosition - sliderMin) / (sliderMax - sliderMin);
+            ImGuiTools.renderSliderOrProgressNotch(currentNotch * sliderWidth, ImGui.getColorU32(ImGuiCol.Text));
+         }
          ImGui.pushItemWidth(sliderWidth);
-         scheduleExecutePosition |= ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), desiredPositions[i].getData(), sliderMin, sliderMax,
-                               "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], actuatorPosition, EuclidCoreMissingTools.DEGREE_SYMBOL));
+         String positionText = Float.isNaN(actuatorPosition) ? "--" : "%.0f%s".formatted(actuatorPosition, EuclidCoreMissingTools.DEGREE_SYMBOL);
+         scheduleExecutePosition |= ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), desiredPositions[i].getData(), sliderMin, sliderMax, positionText);
          if (!ImGui.isItemActive() && !executePosition && latestState != null) // Prevent overriding externally submitted positions too
             desiredPositions[i].set(latestState.getGoalPositions()[i]);
-         ImGui.popItemWidth();
-         ImGui.sameLine();
-         ImGui.pushItemWidth(ImGui.getColumnWidth());
-         boolean velocityInput = ImGuiTools.volatileInputFloat(labels.getHidden("Velocity" + i), desiredVelocities[i], 0.1f, 1.0f, "%.2f deg/s");
-         if (velocityInput)
-            for (int j = 0; j < 6; j++)
-               desiredVelocities[j].set(desiredVelocities[i].get());
-         scheduleExecutePosition |= velocityInput;
          ImGui.popItemWidth();
       }
 
