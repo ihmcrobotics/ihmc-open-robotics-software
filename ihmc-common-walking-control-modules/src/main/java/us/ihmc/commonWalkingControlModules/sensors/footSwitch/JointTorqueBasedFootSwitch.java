@@ -200,9 +200,8 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
    {
       // In a singular configuration contact detection falls back to velocity; that is not evidence of ground support.
       double determinant = wrenchDetector.jacobianDeterminant.getValue();
-      return useJacobianTranspose.getValue() && Double.isFinite(determinant)
-            && determinant > wrenchDetector.jacobianDeterminantThreshold.getValue()
-            && Double.isFinite(getFootLoadPercentage());
+      return useJacobianTranspose.getValue() && Double.isFinite(determinant) && determinant > wrenchDetector.jacobianDeterminantThreshold.getValue()
+             && Double.isFinite(getFootLoadPercentage());
    }
 
    @Override
