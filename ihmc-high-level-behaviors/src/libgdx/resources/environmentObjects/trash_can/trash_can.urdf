@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="trash_can">
+  <link name="base">
+    <inertial>
+      <origin xyz="0.0102354351 -0.0100044874 -0.125000366" rpy="0 0 0" />
+      <mass value="10" />
+      <inertia ixx="1.22679525" ixy="-0.000478496823" ixz="-0.0253037784" iyy="1.24249735" iyz="-0.0160581222" izz="0.770109227" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="base.glb" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="base_collision_0.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="base_collision_1.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="base_collision_2.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="base_collision_3.stl" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="base_collision_4.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="lid">
+    <inertial>
+      <origin xyz="0.374347274 -0.00669560473 -0.0381629829" rpy="0 0 0" />
+      <mass value="1" />
+      <inertia ixx="0.0216978344" ixy="-0.000229738134" ixz="0.001199763" iyy="0.0248903028" iyz="0.000156747357" izz="0.0452468806" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="lid.glb" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="lid_collision_0.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="lid_joint" type="revolute">
+    <origin xyz="-0.345 0 0.485" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="lid" />
+    <axis xyz="0 -1 0" />
+    <limit lower="0" upper="1.9" effort="50" velocity="5" />
+    <dynamics damping="0.3" friction="0.05" />
+  </joint>
+</robot>

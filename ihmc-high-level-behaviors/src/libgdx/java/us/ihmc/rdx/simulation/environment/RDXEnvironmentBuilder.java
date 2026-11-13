@@ -289,9 +289,12 @@ public class RDXEnvironmentBuilder extends RDXPanel
          if (ImGui.button(labels.get("Delete")))
             deleteSelectedObject();
          ImGuiTools.previousWidgetTooltip("Delete key");
-         ImGui.indent();
-         selectedObject.renderImGuiWidgets();
-         ImGui.unindent();
+         if (selectedObject != null) // Delete just cleared it
+         {
+            ImGui.indent();
+            selectedObject.renderImGuiWidgets();
+            ImGui.unindent();
+         }
       }
       if (intersectedObject != null && intersectedObject != selectedObject)
          ImGui.textDisabled("Under the mouse: " + objectName(intersectedObject));

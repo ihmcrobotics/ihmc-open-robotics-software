@@ -1,0 +1,10 @@
+{
+  "urdf": "trash_can.urdf",
+  "excludeContacts": [
+    {
+      "body1": "base",
+      "body2": "lid",
+      "reason": "movable joint"
+    }
+  ]
+}
