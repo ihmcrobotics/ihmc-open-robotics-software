@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BooleanSupplier;
 
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commons.Conversions;
@@ -66,9 +65,9 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final IMUBiasStateEstimator imuBiasStateEstimator;
    private final IMUYawDriftEstimator imuYawDriftEstimator;
 
-   private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
+   private PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
+   private PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber;
    private Runnable prePelvisCorrectionCallback;
-   private BooleanSupplier externalPelvisCorrectionEnabled = () -> true;
 
    private final double estimatorDT;
    private final double gravityMagnitude;
@@ -353,11 +352,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
             break;
       }
 
-      if (momentumStateUpdater != null)
-         momentumStateUpdater.update();
-
-      yoRootTwist.setMatchingFrame(rootJoint.getJointTwist());
-
+      // The IMU biases are estimated from the uncorrected pelvis state, so this runs before the pelvis pose correction.
       List<RigidBodyBasics> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
       imuBiasStateEstimator.compute(trustedFeet);
 
@@ -365,10 +360,16 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       if (prePelvisCorrectionCallback != null)
          prePelvisCorrectionCallback.run();
 
-      if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null && externalPelvisCorrectionEnabled.getAsBoolean())
+      if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {
          pelvisPoseHistoryCorrection.doControl(sensorOutput.getWallTime());
       }
+
+      // After the pelvis pose correction, so the center of mass and momentum are computed from the corrected state.
+      if (momentumStateUpdater != null)
+         momentumStateUpdater.update();
+
+      yoRootTwist.setMatchingFrame(rootJoint.getJointTwist());
 
       updateVisualizers();
    }
@@ -416,7 +417,26 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
+      this.externalPelvisPoseSubscriber = externalPelvisPoseSubscriber;
       pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+   }
+
+   /** The pelvis pose correction in use: the default one built by this estimator, unless replaced. */
+   public PelvisPoseHistoryCorrectionInterface getPelvisPoseHistoryCorrection()
+   {
+      return pelvisPoseHistoryCorrection;
+   }
+
+   /**
+    * Replaces the pelvis pose correction, for example with a {@link PelvisPoseCorrectionSeries} that runs the default one
+    * from {@link #getPelvisPoseHistoryCorrection()} and others in turn. Install before starting the estimator thread. An
+    * external pose subscriber already set is passed on to the new correction.
+    */
+   public void setPelvisPoseHistoryCorrection(PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection)
+   {
+      this.pelvisPoseHistoryCorrection = Objects.requireNonNull(pelvisPoseHistoryCorrection);
+      if (externalPelvisPoseSubscriber != null)
+         pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
    }
 
    /** Install before starting estimator threads. The callback must not modify estimator/model state. */
@@ -425,78 +445,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       if (prePelvisCorrectionCallback != null)
          throw new IllegalStateException("Pre-pelvis-correction callback already installed");
       prePelvisCorrectionCallback = Objects.requireNonNull(callback);
-   }
-
-   /** Optional source policy; default preserves the existing native estimator behavior. */
-   public void setExternalPelvisCorrectionEnabled(BooleanSupplier enabled)
-   {
-      externalPelvisCorrectionEnabled = Objects.requireNonNull(enabled);
-   }
-
-   /** Read on the estimator thread after its update. No estimator state is changed by this snapshot. */
-   public record GroundSupportSnapshot(long wallTime, long monotonicTime, boolean normal, int feet, int contactingFeet, int reliableLoadFeet, int trustedFeet,
-                                       double minimumFootLoad, double totalFootLoad, double linearSpeed, double angularSpeed, double accelerationDeviation)
-   {
-   }
-
-   public GroundSupportSnapshot getGroundSupportSnapshot()
-   {
-      var data = new GroundSupportData();
-      packGroundSupportSnapshot(data);
-      return new GroundSupportSnapshot(data.wall,
-                                       data.mono,
-                                       data.normal,
-                                       data.feet,
-                                       data.contacting,
-                                       data.reliable,
-                                       data.trusted,
-                                       data.minimumLoad,
-                                       data.totalLoad,
-                                       data.linearSpeed,
-                                       data.angularSpeed,
-                                       data.accelerationDeviation);
-   }
-
-   /** Mutable caller-owned telemetry for allocation-free estimator snapshots. */
-   public static class GroundSupportData
-   {
-      public long wall, mono;
-      public boolean normal;
-      public int feet, contacting, reliable, trusted;
-      public double minimumLoad, totalLoad, linearSpeed, angularSpeed, accelerationDeviation;
-   }
-
-   public void packGroundSupportSnapshot(GroundSupportData destination)
-   {
-      int contacting = 0, reliable = 0;
-      double minimumLoad = Double.POSITIVE_INFINITY, totalLoad = 0;
-      for (int i = 0; i < footSwitchList.size(); i++)
-      {
-         FootSwitchInterface foot = footSwitchList.get(i);
-         if (foot.hasFootHitGroundFiltered())
-            contacting++;
-         if (foot.isFootLoadPercentageReliable())
-            reliable++;
-         double load = foot.getFootLoadPercentage();
-         minimumLoad = Math.min(minimumLoad, load);
-         totalLoad += load;
-      }
-      double accelerationDeviation = imusToVisualize.isEmpty() ? Double.NaN : 0.0;
-      for (int i = 0; i < imusToVisualize.size(); i++)
-         accelerationDeviation = Math.max(accelerationDeviation, Math.abs(imusToVisualize.get(i).getLinearAccelerationMeasurement().norm() - gravityMagnitude));
-      boolean normal = operatingMode.getEnumValue() == StateEstimatorMode.NORMAL;
-      destination.wall = sensorOutput.getWallTime();
-      destination.mono = sensorOutput.getMonotonicTime();
-      destination.normal = normal;
-      destination.feet = footSwitchList.size();
-      destination.contacting = contacting;
-      destination.reliable = reliable;
-      destination.trusted = normal ? pelvisLinearStateUpdater.getNumberOfTrustedFeet() : 0;
-      destination.minimumLoad = minimumLoad;
-      destination.totalLoad = totalLoad;
-      destination.linearSpeed = rootJoint.getJointTwist().getLinearPart().norm();
-      destination.angularSpeed = rootJoint.getJointTwist().getAngularPart().norm();
-      destination.accelerationDeviation = accelerationDeviation;
    }
 
    @Override
