@@ -48,6 +48,7 @@ import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
@@ -108,6 +109,7 @@ public class AvatarMultiThreadingFactory
 
    // Estimator
    private final AvatarEstimatorThread avatarEstimator;
+   private StateEstimatorController mainStateEstimator;
    private final OptionalFactoryField<Map<HighLevelControllerName, StateEstimatorMode>> estimatorModeMapReference = new OptionalFactoryField<>("estimatorModeMapReference");
    private final List<Runnable> preEstimatorRunnables = new ArrayList<>();
    private final List<Runnable> postEstimatorRunnables = new ArrayList<>();
@@ -263,6 +265,7 @@ public class AvatarMultiThreadingFactory
       //      if (secondaryEstimatorFactory != null)
       //         avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryEstimatorFactory);
       StateEstimatorController stateEstimator = avatarEstimatorThreadFactory.getMainStateEstimator();
+      mainStateEstimator = stateEstimator;
 
       // Create state estimator from its factory
       AvatarEstimatorThread avatarEstimator = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
@@ -1043,6 +1046,16 @@ public class AvatarMultiThreadingFactory
    public FullHumanoidRobotModel getEstimatorFullRobotModel()
    {
       return avatarEstimator.getFullRobotModel();
+   }
+
+   public StateEstimatorController getMainStateEstimator()
+   {
+      return mainStateEstimator;
+   }
+
+   public SensorOutputMapReadOnly getEstimatorSensorOutput()
+   {
+      return avatarEstimator.getSensorReader().getProcessedSensorOutputMap();
    }
 
    public void addPreEstimatorThreadRunnable(Runnable runnable)

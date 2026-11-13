@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import gnu.trove.map.TObjectDoubleMap;
@@ -64,9 +65,12 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final IMUBiasStateEstimator imuBiasStateEstimator;
    private final IMUYawDriftEstimator imuYawDriftEstimator;
 
-   private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
+   private PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
+   private PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber;
+   private Runnable prePelvisCorrectionCallback;
 
    private final double estimatorDT;
+   private final double gravityMagnitude;
 
    private boolean visualizeMeasurementFrames = false;
    private final List<IMUSensorReadOnly> imusToVisualize;
@@ -100,6 +104,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                            ForceSensorDataHolder forceSensorDataHolderToUpdate)
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
+      gravityMagnitude = Math.abs(gravitationalAcceleration);
       this.sensorOutput = sensorOutputMap;
       this.footSwitchList = new ArrayList<>(footSwitches.values());
 
@@ -347,18 +352,24 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
             break;
       }
 
-      if (momentumStateUpdater != null)
-         momentumStateUpdater.update();
-
-      yoRootTwist.setMatchingFrame(rootJoint.getJointTwist());
-
+      // The IMU biases are estimated from the uncorrected pelvis state, so this runs before the pelvis pose correction.
       List<RigidBodyBasics> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
       imuBiasStateEstimator.compute(trustedFeet);
+
+      // Optional read-only diagnostic snapshot after KIO prediction, before localization changes the model root.
+      if (prePelvisCorrectionCallback != null)
+         prePelvisCorrectionCallback.run();
 
       if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {
          pelvisPoseHistoryCorrection.doControl(sensorOutput.getWallTime());
       }
+
+      // After the pelvis pose correction, so the center of mass and momentum are computed from the corrected state.
+      if (momentumStateUpdater != null)
+         momentumStateUpdater.update();
+
+      yoRootTwist.setMatchingFrame(rootJoint.getJointTwist());
 
       updateVisualizers();
    }
@@ -406,7 +417,34 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
+      this.externalPelvisPoseSubscriber = externalPelvisPoseSubscriber;
       pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+   }
+
+   /** The pelvis pose correction in use: the default one built by this estimator, unless replaced. */
+   public PelvisPoseHistoryCorrectionInterface getPelvisPoseHistoryCorrection()
+   {
+      return pelvisPoseHistoryCorrection;
+   }
+
+   /**
+    * Replaces the pelvis pose correction, for example with a {@link PelvisPoseCorrectionSeries} that runs the default one
+    * from {@link #getPelvisPoseHistoryCorrection()} and others in turn. Install before starting the estimator thread. An
+    * external pose subscriber already set is passed on to the new correction.
+    */
+   public void setPelvisPoseHistoryCorrection(PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection)
+   {
+      this.pelvisPoseHistoryCorrection = Objects.requireNonNull(pelvisPoseHistoryCorrection);
+      if (externalPelvisPoseSubscriber != null)
+         pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+   }
+
+   /** Install before starting estimator threads. The callback must not modify estimator/model state. */
+   public void setPrePelvisCorrectionCallback(Runnable callback)
+   {
+      if (prePelvisCorrectionCallback != null)
+         throw new IllegalStateException("Pre-pelvis-correction callback already installed");
+      prePelvisCorrectionCallback = Objects.requireNonNull(callback);
    }
 
    @Override
