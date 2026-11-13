@@ -21,11 +21,13 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 public class RobotConfigurationDataPublisher implements RawOutputWriter
 {
    private FloatingJointStateReadOnly rootJointSensorData;
-   private java.util.function.Supplier<FloatingJointStateReadOnly> rootJointSensorDataSupplier;
+   private Supplier<FloatingJointStateReadOnly> rootJointSensorDataSupplier;
    private final List<? extends OneDoFJointStateReadOnly> jointSensorData;
    private final List<? extends IMUSensorReadOnly> imuSensorData;
    private final List<? extends ForceSensorDataReadOnly> forceSensorData;
@@ -95,14 +97,14 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    {
       if (RobotFrameDataPublisher.ENABLE_ROBOT_FRAME_DATA_PUBLISHERS && !robotFrameDataPublishers.isEmpty())
          throw new IllegalStateException("Rebind auxiliary frame publishers before changing the published root model");
-      this.rootJointSensorData = java.util.Objects.requireNonNull(rootJointSensorData);
+      this.rootJointSensorData = Objects.requireNonNull(rootJointSensorData);
       rootJointSensorDataSupplier = null;
    }
 
-   public void setRootJointSensorDataSupplier(java.util.function.Supplier<FloatingJointStateReadOnly> supplier)
+   public void setRootJointSensorDataSupplier(Supplier<FloatingJointStateReadOnly> supplier)
    {
       setRootJointSensorData(rootJointSensorData); // Preserve the auxiliary-frame safety check.
-      rootJointSensorDataSupplier = java.util.Objects.requireNonNull(supplier);
+      rootJointSensorDataSupplier = Objects.requireNonNull(supplier);
    }
 
    @Override

@@ -29,6 +29,7 @@ import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static us.ihmc.zed.ZEDTools.throwOnError;
@@ -86,7 +87,7 @@ public class ZEDImageSensor extends ImageSensor
    private long lastGrabTimestamp;
 
    private boolean positionalTrackingEnabled = false;
-   private final java.util.LinkedHashMap<Long, RigidBodyTransform> trackedPosesBySequence = new java.util.LinkedHashMap<>();
+   private final LinkedHashMap<Long, RigidBodyTransform> trackedPosesBySequence = new LinkedHashMap<>();
 
    /** Valid tracked left-camera pose for the current grab, or null on tracking loss. */
    protected RigidBodyTransform getTrackedPoseForCurrentGrab()
@@ -103,6 +104,7 @@ public class ZEDImageSensor extends ImageSensor
          return pose == null ? null : new RigidBodyTransform(pose);
       }
    }
+
    private final MutableReferenceFrame trackedSensorFrame;
    private final RigidBodyTransform trackedPoseOffset = new RigidBodyTransform();
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
@@ -411,13 +413,11 @@ public class ZEDImageSensor extends ImageSensor
                                             transformToWorld.prependOrientation(trackedPoseOffset.getRotation());
                                             transformToWorld.prependTranslation(trackedPoseOffset.getTranslation());
                                          });
-            if (trackingState == SL_POSITIONAL_TRACKING_STATE_OK
-                  && !euclidRotation.containsNaN() && !euclidTranslation.containsNaN())
+            if (trackingState == SL_POSITIONAL_TRACKING_STATE_OK && !euclidRotation.containsNaN() && !euclidTranslation.containsNaN())
             {
                synchronized (trackedPosesBySequence)
                {
-                  trackedPosesBySequence.put(grabSequenceNumber,
-                        new RigidBodyTransform(trackedSensorFrame.getReferenceFrame().getTransformToWorldFrame()));
+                  trackedPosesBySequence.put(grabSequenceNumber, new RigidBodyTransform(trackedSensorFrame.getReferenceFrame().getTransformToWorldFrame()));
                   while (trackedPosesBySequence.size() > 120)
                      trackedPosesBySequence.remove(trackedPosesBySequence.keySet().iterator().next());
                }

@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commons.Conversions;
@@ -66,7 +68,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
    private Runnable prePelvisCorrectionCallback;
-   private java.util.function.BooleanSupplier externalPelvisCorrectionEnabled = () -> true;
+   private BooleanSupplier externalPelvisCorrectionEnabled = () -> true;
 
    private final double estimatorDT;
    private final double gravityMagnitude;
@@ -422,25 +424,37 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    {
       if (prePelvisCorrectionCallback != null)
          throw new IllegalStateException("Pre-pelvis-correction callback already installed");
-      prePelvisCorrectionCallback = java.util.Objects.requireNonNull(callback);
+      prePelvisCorrectionCallback = Objects.requireNonNull(callback);
    }
 
    /** Optional source policy; default preserves the existing native estimator behavior. */
-   public void setExternalPelvisCorrectionEnabled(java.util.function.BooleanSupplier enabled)
-   { externalPelvisCorrectionEnabled = java.util.Objects.requireNonNull(enabled); }
+   public void setExternalPelvisCorrectionEnabled(BooleanSupplier enabled)
+   {
+      externalPelvisCorrectionEnabled = Objects.requireNonNull(enabled);
+   }
 
    /** Read on the estimator thread after its update. No estimator state is changed by this snapshot. */
-   public record GroundSupportSnapshot(long wallTime, long monotonicTime, boolean normal, int feet,
-                                       int contactingFeet, int reliableLoadFeet, int trustedFeet,
-                                       double minimumFootLoad, double totalFootLoad,
-                                       double linearSpeed, double angularSpeed, double accelerationDeviation) { }
+   public record GroundSupportSnapshot(long wallTime, long monotonicTime, boolean normal, int feet, int contactingFeet, int reliableLoadFeet, int trustedFeet,
+                                       double minimumFootLoad, double totalFootLoad, double linearSpeed, double angularSpeed, double accelerationDeviation)
+   {
+   }
 
    public GroundSupportSnapshot getGroundSupportSnapshot()
    {
       var data = new GroundSupportData();
       packGroundSupportSnapshot(data);
-      return new GroundSupportSnapshot(data.wall, data.mono, data.normal, data.feet, data.contacting, data.reliable, data.trusted,
-            data.minimumLoad, data.totalLoad, data.linearSpeed, data.angularSpeed, data.accelerationDeviation);
+      return new GroundSupportSnapshot(data.wall,
+                                       data.mono,
+                                       data.normal,
+                                       data.feet,
+                                       data.contacting,
+                                       data.reliable,
+                                       data.trusted,
+                                       data.minimumLoad,
+                                       data.totalLoad,
+                                       data.linearSpeed,
+                                       data.angularSpeed,
+                                       data.accelerationDeviation);
    }
 
    /** Mutable caller-owned telemetry for allocation-free estimator snapshots. */
@@ -459,23 +473,30 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       for (int i = 0; i < footSwitchList.size(); i++)
       {
          FootSwitchInterface foot = footSwitchList.get(i);
-         if (foot.hasFootHitGroundFiltered()) contacting++;
-         if (foot.isFootLoadPercentageReliable()) reliable++;
+         if (foot.hasFootHitGroundFiltered())
+            contacting++;
+         if (foot.isFootLoadPercentageReliable())
+            reliable++;
          double load = foot.getFootLoadPercentage();
          minimumLoad = Math.min(minimumLoad, load);
          totalLoad += load;
       }
       double accelerationDeviation = imusToVisualize.isEmpty() ? Double.NaN : 0.0;
       for (int i = 0; i < imusToVisualize.size(); i++)
-         accelerationDeviation = Math.max(accelerationDeviation,
-               Math.abs(imusToVisualize.get(i).getLinearAccelerationMeasurement().norm() - gravityMagnitude));
+         accelerationDeviation = Math.max(accelerationDeviation, Math.abs(imusToVisualize.get(i).getLinearAccelerationMeasurement().norm() - gravityMagnitude));
       boolean normal = operatingMode.getEnumValue() == StateEstimatorMode.NORMAL;
-      destination.wall = sensorOutput.getWallTime(); destination.mono = sensorOutput.getMonotonicTime(); destination.normal = normal;
-      destination.feet = footSwitchList.size(); destination.contacting = contacting; destination.reliable = reliable;
+      destination.wall = sensorOutput.getWallTime();
+      destination.mono = sensorOutput.getMonotonicTime();
+      destination.normal = normal;
+      destination.feet = footSwitchList.size();
+      destination.contacting = contacting;
+      destination.reliable = reliable;
       destination.trusted = normal ? pelvisLinearStateUpdater.getNumberOfTrustedFeet() : 0;
-      destination.minimumLoad = minimumLoad; destination.totalLoad = totalLoad;
+      destination.minimumLoad = minimumLoad;
+      destination.totalLoad = totalLoad;
       destination.linearSpeed = rootJoint.getJointTwist().getLinearPart().norm();
-      destination.angularSpeed = rootJoint.getJointTwist().getAngularPart().norm(); destination.accelerationDeviation = accelerationDeviation;
+      destination.angularSpeed = rootJoint.getJointTwist().getAngularPart().norm();
+      destination.accelerationDeviation = accelerationDeviation;
    }
 
    @Override
