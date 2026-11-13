@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiHoveredFlags;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.rdx.imgui.*;
@@ -10,6 +11,7 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.TreeSet;
 
 public class RDXStoredPropertySetTuner extends RDXPanel
@@ -23,6 +25,7 @@ public class RDXStoredPropertySetTuner extends RDXPanel
 
    private final ArrayList<ImGuiStoredPropertySetWidget> imGuiWidgetRenderers = new ArrayList<>();
    private final HashMap<StoredPropertyKey<?>, ImGuiStoredPropertySetWidget> imGuiWidgetRendererMap = new HashMap<>();
+   private final HashSet<ImGuiStoredPropertySetWidget> readOnlyWidgets = new HashSet<>();
 
    public RDXStoredPropertySetTuner(String name)
    {
@@ -142,12 +145,27 @@ public class RDXStoredPropertySetTuner extends RDXPanel
    {
       for (ImGuiStoredPropertySetWidget widget : imGuiWidgetRenderers)
       {
+         boolean readOnly = readOnlyWidgets.contains(widget);
+         if (readOnly)
+            ImGui.beginDisabled();
          widget.renderImGuiWidget();
+         if (readOnly)
+         {
+            ImGui.endDisabled();
+            if (ImGui.isItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+               ImGui.setTooltip("Read only: only takes effect at startup");
+         }
       }
 
       boolean returnAnyChanged = anyParameterChanged;
       anyParameterChanged = false;
       return returnAnyChanged;
+   }
+
+   /** Shows the property but does not let the user change it, for example one that only takes effect at startup. Call after create. */
+   public void setReadOnly(StoredPropertyKey<?> key)
+   {
+      readOnlyWidgets.add(imGuiWidgetRendererMap.get(key));
    }
 
    public boolean changed(StoredPropertyKey<?> key)
