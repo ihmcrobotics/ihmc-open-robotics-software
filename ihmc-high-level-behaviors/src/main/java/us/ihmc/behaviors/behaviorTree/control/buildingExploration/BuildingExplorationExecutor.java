@@ -49,8 +49,9 @@ import java.util.Set;
  * counts, so doors off to the side are passed by. If a DoorTraversal step fails, the tree stays stopped at
  * that step, as the door behavior does on its own, so the operator can retry it or finish the door by
  * hand. When exploring starts again with the robot still in front of that door, the door is skipped for
- * the rest of the run. Pausing the tree's automatic execution stops exploring and leaves the tree at the
- * wait, so pressing play resumes it.
+ * the rest of the run. Only the first {@link #DOORS_TO_HAND_OVER} doors of a run are handed over; after
+ * that it only explores, passing doors by. Pausing the tree's automatic execution stops exploring and
+ * leaves the tree at the wait, so pressing play resumes it.
  */
 public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<BuildingExplorationState, BuildingExplorationDefinition>
 {
@@ -73,6 +74,8 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
    private static final double TRAVERSED_DOOR_RADIUS = 1.5;
    /** While the planner has a path, a door further than this from it is not on the way and is passed by */
    private static final double DOOR_PATH_DISTANCE = 1.0;
+   /** Doors handed to DoorTraversal per run (per load of the tree); later doors are passed by while exploring */
+   public static final int DOORS_TO_HAND_OVER = 1;
 
    /** The step generator drops waypoint goals until it has heard this heartbeat for this long */
    private static final double HEARTBEAT_LEAD_TIME = 1.0;
@@ -217,7 +220,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
       if (!exploring)
          return;
 
-      Point3D door = findDoorAhead();
+      Point3D door = doorsHandedOver < DOORS_TO_HAND_OVER ? findDoorAhead() : null;
       if (door != null)
       {
          state.getLogger().info("Door ahead at (%.2f, %.2f), %.1f m away. Handing over to door traversal."
@@ -478,7 +481,9 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
          activity = "not exploring";
       String goal = lastGoalSent == null ? "none yet" : "%s, %.0f s ago".formatted(lastGoalSent, now - lastGoalTime);
       String stop = lastStop == null ? "none yet" : "%s, %.0f s ago".formatted(lastStop, now - lastStopTime);
-      statusMessage.setData("%s | last goal sent: %s | last stop: %s | doors handed over: %d".formatted(activity, goal, stop, doorsHandedOver));
+      String doors = doorsHandedOver < DOORS_TO_HAND_OVER ? "%d of %d".formatted(doorsHandedOver, DOORS_TO_HAND_OVER)
+                                                          : "%d, exploring only now".formatted(doorsHandedOver);
+      statusMessage.setData("%s | last goal sent: %s | last stop: %s | doors handed over: %s".formatted(activity, goal, stop, doors));
       statusPublisher.publish(statusMessage);
    }
 
