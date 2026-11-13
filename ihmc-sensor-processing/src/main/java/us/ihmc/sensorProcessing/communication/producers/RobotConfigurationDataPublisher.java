@@ -21,10 +21,13 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 public class RobotConfigurationDataPublisher implements RawOutputWriter
 {
-   private final FloatingJointStateReadOnly rootJointSensorData;
+   private FloatingJointStateReadOnly rootJointSensorData;
+   private Supplier<FloatingJointStateReadOnly> rootJointSensorDataSupplier;
    private final List<? extends OneDoFJointStateReadOnly> jointSensorData;
    private final List<? extends IMUSensorReadOnly> imuSensorData;
    private final List<? extends ForceSensorDataReadOnly> forceSensorData;
@@ -89,6 +92,21 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    {
    }
 
+   /** Configure before the estimator thread starts. Joint/sensor/timestamp sources remain unchanged. */
+   public void setRootJointSensorData(FloatingJointStateReadOnly rootJointSensorData)
+   {
+      if (RobotFrameDataPublisher.ENABLE_ROBOT_FRAME_DATA_PUBLISHERS && !robotFrameDataPublishers.isEmpty())
+         throw new IllegalStateException("Rebind auxiliary frame publishers before changing the published root model");
+      this.rootJointSensorData = Objects.requireNonNull(rootJointSensorData);
+      rootJointSensorDataSupplier = null;
+   }
+
+   public void setRootJointSensorDataSupplier(Supplier<FloatingJointStateReadOnly> supplier)
+   {
+      setRootJointSensorData(rootJointSensorData); // Preserve the auxiliary-frame safety check.
+      rootJointSensorDataSupplier = Objects.requireNonNull(supplier);
+   }
+
    @Override
    public void write()
    {
@@ -103,6 +121,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       robotConfigurationData.setSyncTimestamp(timestampHolder.getSyncTimestamp());
 
       // Write root joint data
+      FloatingJointStateReadOnly rootJointSensorData = rootJointSensorDataSupplier == null ? this.rootJointSensorData : rootJointSensorDataSupplier.get();
       robotConfigurationData.getRootOrientation().getQuaternion().set(rootJointSensorData.getPose().getOrientation());
       robotConfigurationData.getRootPosition().getPoint().set(rootJointSensorData.getPose().getPosition());
       robotConfigurationData.getPelvisAngularVelocity().getVector().set(rootJointSensorData.getTwist().getAngularPart());
