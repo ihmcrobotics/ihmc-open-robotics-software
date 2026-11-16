@@ -69,6 +69,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -97,6 +98,20 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
    private SCS2AvatarTestingSimulation simulationTestHelper;
 
+   protected SCS2AvatarTestingSimulation createSimulationTestHelper(CommonAvatarEnvironmentInterface environment)
+   {
+      SCS2AvatarTestingSimulationFactory testSimulationFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                        environment,
+                                                                                                                                        simulationTestingParameters);
+      configureSimulationFactory(testSimulationFactory);
+      return testSimulationFactory.createAvatarTestingSimulation();
+   }
+
+   /** Extension point for subclasses to tweak the simulation factory (e.g. swap physics engine) before the simulation is built. No-op by default. */
+   protected void configureSimulationFactory(SCS2AvatarTestingSimulationFactory testSimulationFactory)
+   {
+   }
+
    @Test
    public void testSingleWaypoint() throws Exception
    {
@@ -109,9 +124,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    {
       Random random = new Random(564574L);
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
-                                                                                            new FlatGroundEnvironment(),
-                                                                                            simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper(new FlatGroundEnvironment());
       simulationTestHelper.start();
 
       List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
@@ -414,9 +427,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       Random random = new Random(453563);
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
-                                                                                            new FlatGroundEnvironment(),
-                                                                                            simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper(new FlatGroundEnvironment());
       simulationTestHelper.start();
 
       List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
@@ -609,9 +620,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCRobotModel robotModel = getRobotModel();
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
-                                                                                            new FlatGroundEnvironment(),
-                                                                                            simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper(new FlatGroundEnvironment());
       simulationTestHelper.start();
 
       ThreadTools.sleep(200);
@@ -735,9 +744,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCRobotModel robotModel = getRobotModel();
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
-                                                                                            new FlatGroundEnvironment(),
-                                                                                            simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper(new FlatGroundEnvironment());
       simulationTestHelper.start();
 
       ThreadTools.sleep(200);
@@ -1014,9 +1021,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
-                                                                                            new FlatGroundEnvironment(),
-                                                                                            simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper(new FlatGroundEnvironment());
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
@@ -1155,9 +1160,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       Random random = new Random(564574L);
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
-                                                                                            new FlatGroundEnvironment(),
-                                                                                            simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper(new FlatGroundEnvironment());
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
@@ -1239,9 +1242,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
-                                                                                            new FlatGroundEnvironment(),
-                                                                                            simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper(new FlatGroundEnvironment());
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
@@ -1298,9 +1299,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       YoRegistry testRegistry = new YoRegistry("testStreaming");
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
-                                                                                            new FlatGroundEnvironment(),
-                                                                                            simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper(new FlatGroundEnvironment());
       simulationTestHelper.start();
       simulationTestHelper.getRootRegistry().addChild(testRegistry);
 
