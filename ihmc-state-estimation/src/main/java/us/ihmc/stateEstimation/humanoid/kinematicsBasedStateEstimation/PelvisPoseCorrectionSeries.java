@@ -10,15 +10,18 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BooleanSupplier;
 
 /**
  * Runs several pelvis pose corrections one after another each estimator tick. Each correction starts from the pelvis pose the
  * previous one left, so a later correction refines the result of an earlier one.
  * <p>
+ * A correction runs only on the ticks where it {@link PelvisPoseHistoryCorrectionInterface#isActive() is active}. One that is
+ * not active is skipped entirely: it neither changes the pelvis pose nor receives the poses that arrive while it is off.
+ * {@link PelvisPoseCorrectionMode} sets which corrections are active.
+ * </p>
+ * <p>
  * The external pose subscriber is read once per tick, and each new external pose is offered to every correction that is
- * active on that tick. A correction that is not active is skipped entirely: it neither changes the pelvis pose nor receives
- * the poses that arrive while it is off.
+ * active on that tick.
  * </p>
  */
 public class PelvisPoseCorrectionSeries implements PelvisPoseHistoryCorrectionInterface
@@ -38,16 +41,10 @@ public class PelvisPoseCorrectionSeries implements PelvisPoseHistoryCorrectionIn
       this.name = name;
    }
 
-   /** Adds a correction that always runs, after the ones already added. */
+   /** Adds a correction after the ones already added. It runs on the ticks where it is active. */
    public void addCorrection(PelvisPoseHistoryCorrectionInterface correction)
    {
-      addCorrection(correction, () -> true);
-   }
-
-   /** Adds a correction, after the ones already added, that runs only on the ticks where {@code active} is true. */
-   public void addCorrection(PelvisPoseHistoryCorrectionInterface correction, BooleanSupplier active)
-   {
-      Stage stage = new Stage(Objects.requireNonNull(correction), Objects.requireNonNull(active));
+      Stage stage = new Stage(Objects.requireNonNull(correction));
       stages.add(stage);
       if (externalPoseSubscriber != null)
          correction.setExternalPelvisCorrectorSubscriber(stage);
@@ -70,7 +67,7 @@ public class PelvisPoseCorrectionSeries implements PelvisPoseHistoryCorrectionIn
       for (int i = 0; i < stages.size(); i++)
       {
          Stage stage = stages.get(i);
-         boolean active = stage.active.getAsBoolean();
+         boolean active = stage.correction.isActive();
          stage.hasNewPose = hasNewExternalPose && active;
          if (active)
             stage.correction.doControl(timestamp);
@@ -84,6 +81,26 @@ public class PelvisPoseCorrectionSeries implements PelvisPoseHistoryCorrectionIn
       externalPoseSubscriber = externalPelvisPoseSubscriber;
       for (int i = 0; i < stages.size(); i++)
          stages.get(i).correction.setExternalPelvisCorrectorSubscriber(stages.get(i));
+   }
+
+   /** Whether any correction in the series is active. */
+   @Override
+   public boolean isActive()
+   {
+      for (int i = 0; i < stages.size(); i++)
+      {
+         if (stages.get(i).correction.isActive())
+            return true;
+      }
+      return false;
+   }
+
+   /** Switches every correction in the series on or off. */
+   @Override
+   public void setActive(boolean active)
+   {
+      for (int i = 0; i < stages.size(); i++)
+         stages.get(i).correction.setActive(active);
    }
 
    @Override
@@ -103,13 +120,11 @@ public class PelvisPoseCorrectionSeries implements PelvisPoseHistoryCorrectionIn
    private class Stage implements PelvisPoseCorrectionCommunicatorInterface
    {
       private final PelvisPoseHistoryCorrectionInterface correction;
-      private final BooleanSupplier active;
       private boolean hasNewPose;
 
-      private Stage(PelvisPoseHistoryCorrectionInterface correction, BooleanSupplier active)
+      private Stage(PelvisPoseHistoryCorrectionInterface correction)
       {
          this.correction = correction;
-         this.active = active;
       }
 
       @Override

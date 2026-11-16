@@ -9,7 +9,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -44,10 +44,10 @@ public class PelvisPoseCorrectionSeriesTest
    {
       var first = new RecordingCorrection("first");
       var second = new RecordingCorrection("second");
-      var secondActive = new AtomicBoolean(false);
+      second.setActive(false);
       var series = new PelvisPoseCorrectionSeries();
       series.addCorrection(first);
-      series.addCorrection(second, secondActive::get);
+      series.addCorrection(second);
       series.setExternalPelvisCorrectorSubscriber(externalPoses);
 
       externalPoses.offer(5);
@@ -55,7 +55,7 @@ public class PelvisPoseCorrectionSeriesTest
       assertEquals(List.of("first"), runOrder);
       assertEquals(List.of(5L), first.receivedTimestamps);
 
-      secondActive.set(true);
+      second.setActive(true);
       series.doControl(2);
       assertEquals(List.of("first", "first", "second"), runOrder);
       assertTrue(second.receivedTimestamps.isEmpty(), "A pose that arrived while inactive is not delivered later");
@@ -63,6 +63,39 @@ public class PelvisPoseCorrectionSeriesTest
       externalPoses.offer(7);
       series.doControl(3);
       assertEquals(List.of(7L), second.receivedTimestamps);
+   }
+
+   @Test
+   public void modesSwitchTheTwoCorrectionsAndCoverEveryCombination()
+   {
+      var nativeCorrection = new RecordingCorrection("native");
+      var ekfCorrection = new RecordingCorrection("ekf");
+      var series = new PelvisPoseCorrectionSeries();
+      series.addCorrection(nativeCorrection);
+      series.addCorrection(ekfCorrection);
+      series.setExternalPelvisCorrectorSubscriber(externalPoses);
+
+      var expectedRuns = Map.of(PelvisPoseCorrectionMode.NONE,
+                                List.<String>of(),
+                                PelvisPoseCorrectionMode.NATIVE,
+                                List.of("native"),
+                                PelvisPoseCorrectionMode.EKF,
+                                List.of("ekf"),
+                                PelvisPoseCorrectionMode.NATIVE_THEN_EKF,
+                                List.of("native", "ekf"));
+      assertEquals(PelvisPoseCorrectionMode.values().length, expectedRuns.size());
+      for (var mode : PelvisPoseCorrectionMode.values())
+      {
+         mode.apply(nativeCorrection, ekfCorrection);
+         runOrder.clear();
+         series.doControl(1);
+         assertEquals(expectedRuns.get(mode), runOrder, mode.name());
+         assertEquals(mode.usesExternalPoses(), series.isActive());
+      }
+
+      series.setActive(false);
+      assertFalse(nativeCorrection.isActive());
+      assertFalse(ekfCorrection.isActive());
    }
 
    @Test
@@ -83,6 +116,7 @@ public class PelvisPoseCorrectionSeriesTest
       private final String name;
       private final List<Long> receivedTimestamps = new ArrayList<>();
       private PelvisPoseCorrectionCommunicatorInterface subscriber;
+      private boolean active = true;
 
       private RecordingCorrection(String name)
       {
@@ -101,6 +135,18 @@ public class PelvisPoseCorrectionSeriesTest
       public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
       {
          subscriber = externalPelvisPoseSubscriber;
+      }
+
+      @Override
+      public boolean isActive()
+      {
+         return active;
+      }
+
+      @Override
+      public void setActive(boolean active)
+      {
+         this.active = active;
       }
 
       @Override

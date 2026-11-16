@@ -40,6 +40,8 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    private final FloatingJointBasics rootJoint;
    private final ReferenceFrame pelvisReferenceFrame;
    private final YoRegistry registry;
+   /** Whether a {@link PelvisPoseCorrectionSeries} runs this correction. */
+   private final YoBoolean active;
    private static final double DEFAULT_BREAK_FREQUENCY = 0.015;
 
    private final RigidBodyTransform pelvisPose = new RigidBodyTransform();
@@ -136,6 +138,8 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
       this.registry = new YoRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
+      active = new YoBoolean("nativePelvisPoseCorrectionActive", registry);
+      active.set(true);
 
       stateEstimatorPelvisPoseBuffer = new TimeStampedTransformBuffer(pelvisBufferSize);
 
@@ -483,6 +487,18 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
+   }
+
+   @Override
+   public boolean isActive()
+   {
+      return active.getValue();
+   }
+
+   @Override
+   public void setActive(boolean active)
+   {
+      this.active.set(active);
    }
 
    @Override
