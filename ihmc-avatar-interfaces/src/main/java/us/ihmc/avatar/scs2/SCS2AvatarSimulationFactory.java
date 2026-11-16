@@ -5,7 +5,6 @@ import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLev
 
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import ihmc_common_msgs.StampedPosePacket;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarEstimatorThreadFactory;
@@ -46,12 +45,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Ex
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StandReadyControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingManager;
-import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.jros2.AsyncROS2Node;
 import us.ihmc.log.LogTools;
@@ -510,20 +507,9 @@ public class SCS2AvatarSimulationFactory
          sensorReaderFactory = SCS2SensorReaderFactory.newSensorReaderFactory(controllerInput,
                                                                               stateEstimatorParameters);
 
+      // Without one set here, the estimator thread factory creates the standard PelvisPoseCorrectionCommunicator, as on hardware.
       if (externalPelvisCorrectorSubscriber.hasValue())
-      {
          pelvisPoseCorrectionCommunicator = externalPelvisCorrectorSubscriber.get();
-      }
-      else
-      {
-         if (asyncROS2Node.hasBeenSet())
-         {
-            pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(asyncROS2Node.get(), robotName);
-            asyncROS2Node.get()
-                            .createSubscriptionSampler(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName),
-                                                       sample -> pelvisPoseCorrectionCommunicator.receivedPacket(sample));
-         }
-      }
 
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
       AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
@@ -535,7 +521,8 @@ public class SCS2AvatarSimulationFactory
       avatarEstimatorThreadFactory.configureWithDRCRobotModel(robotModel.get(), robotInitialSetup.get());
       avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(contextDataFactory);
-      avatarEstimatorThreadFactory.setExternalPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
+      if (pelvisPoseCorrectionCommunicator != null)
+         avatarEstimatorThreadFactory.setExternalPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
       if (simulationOutputWriter != null)
          avatarEstimatorThreadFactory.setJointDesiredOutputWriter(simulationOutputWriter);
       avatarEstimatorThreadFactory.setGravity(gravity.get());

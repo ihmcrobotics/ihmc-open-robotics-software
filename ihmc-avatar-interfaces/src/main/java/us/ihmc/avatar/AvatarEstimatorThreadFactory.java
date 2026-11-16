@@ -21,6 +21,7 @@ import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.jros2.AsyncROS2Node;
@@ -318,6 +319,11 @@ public class AvatarEstimatorThreadFactory
     * <p>
     * This is used internally to the state estimator to slowly correct the drift on the estimated robot
     * position.
+    * </p>
+    * <p>
+    * If none is set and {@link #setROS2Info} was called, a {@link PelvisPoseCorrectionCommunicator} on the ROS 2 node is used, so
+    * the estimator takes external poses from the robot's standard {@code StampedPosePacket} topic, in simulation and on hardware
+    * alike.
     * </p>
     *
     * @param externalPelvisPoseSubscriber the pelvis pose subscriber.
@@ -762,8 +768,19 @@ public class AvatarEstimatorThreadFactory
       return sensorInformationField.get();
    }
 
+   /**
+    * The subscriber set with {@link #setExternalPelvisCorrectorSubscriber}, or else, given ROS 2 info, the standard
+    * {@link PelvisPoseCorrectionCommunicator}, created on the first call. {@code null} without either.
+    */
    public PelvisPoseCorrectionCommunicatorInterface getExternalPelvisPoseSubscriberField()
    {
+      if (!externalPelvisPoseSubscriberField.hasValue() && asyncROS2NodeField.hasValue() && outputTopicField.hasValue())
+      {
+         // The output topic is built from the robot name, so it gives the name the standard topics are built from.
+         String robotName = outputTopicField.get().getRobotName();
+         externalPelvisPoseSubscriberField.set(new PelvisPoseCorrectionCommunicator(asyncROS2NodeField.get(), robotName));
+      }
+
       if (externalPelvisPoseSubscriberField.hasValue())
          return externalPelvisPoseSubscriberField.get();
       else
