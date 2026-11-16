@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import gnu.trove.map.TObjectDoubleMap;
@@ -38,6 +37,8 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfM
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.MomentumStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.SimpleMomentumStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.WrenchBasedMomentumStateUpdater;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ekf.EKFPelvisPoseCorrection;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ekf.FusedPoseEstimatorParameters;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -65,9 +66,10 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final IMUBiasStateEstimator imuBiasStateEstimator;
    private final IMUYawDriftEstimator imuYawDriftEstimator;
 
-   private PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
-   private PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber;
-   private Runnable prePelvisCorrectionCallback;
+   /** The native pelvis pose corrector, then the EKF pelvis pose correction; {@link PelvisPoseCorrectionMode} sets which run. */
+   private final PelvisPoseCorrectionSeries pelvisPoseCorrections = new PelvisPoseCorrectionSeries();
+   private final PelvisPoseHistoryCorrectionInterface nativePelvisPoseCorrection;
+   private final EKFPelvisPoseCorrection ekfPelvisPoseCorrection;
 
    private final double estimatorDT;
    private final double gravityMagnitude;
@@ -122,20 +124,24 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          parameters.setMaxTranslationalCorrectionSpeed(0.5);
          parameters.setMaxRotationalCorrectionSpeed(0.5);
 
-         this.pelvisPoseHistoryCorrection = new NewPelvisPoseHistoryCorrection(inverseDynamicsStructure,
-                                                                               stateEstimatorParameters.getEstimatorDT(),
-                                                                               registry,
-                                                                               null,
-                                                                               1000,
-                                                                               parameters);
+         nativePelvisPoseCorrection = new NewPelvisPoseHistoryCorrection(inverseDynamicsStructure,
+                                                                         stateEstimatorParameters.getEstimatorDT(),
+                                                                         registry,
+                                                                         null,
+                                                                         1000,
+                                                                         parameters);
       }
       else
       {
-         this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure,
-                                                                            stateEstimatorParameters.getEstimatorDT(),
-                                                                            registry,
-                                                                            1000);
+         nativePelvisPoseCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure,
+                                                                      stateEstimatorParameters.getEstimatorDT(),
+                                                                      registry,
+                                                                      1000);
       }
+      ekfPelvisPoseCorrection = new EKFPelvisPoseCorrection(rootJoint, sensorOutputMap::getMonotonicTime, new FusedPoseEstimatorParameters(), registry);
+      pelvisPoseCorrections.addCorrection(nativePelvisPoseCorrection);
+      pelvisPoseCorrections.addCorrection(ekfPelvisPoseCorrection);
+      setPelvisPoseCorrectionMode(PelvisPoseCorrectionMode.NATIVE);
 
       List<IMUSensorReadOnly> imuProcessedOutputs = new ArrayList<>();
       List<IMUSensorReadOnly> imusToUseForMomentumEstimate = new ArrayList<>();
@@ -356,13 +362,9 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       List<RigidBodyBasics> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
       imuBiasStateEstimator.compute(trustedFeet);
 
-      // Optional read-only diagnostic snapshot after KIO prediction, before localization changes the model root.
-      if (prePelvisCorrectionCallback != null)
-         prePelvisCorrectionCallback.run();
-
-      if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
+      if (usePelvisCorrector.getBooleanValue())
       {
-         pelvisPoseHistoryCorrection.doControl(sensorOutput.getWallTime());
+         pelvisPoseCorrections.doControl(sensorOutput.getWallTime());
       }
 
       // After the pelvis pose correction, so the center of mass and momentum are computed from the corrected state.
@@ -417,34 +419,28 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
-      this.externalPelvisPoseSubscriber = externalPelvisPoseSubscriber;
-      pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
-   }
-
-   /** The pelvis pose correction in use: the default one built by this estimator, unless replaced. */
-   public PelvisPoseHistoryCorrectionInterface getPelvisPoseHistoryCorrection()
-   {
-      return pelvisPoseHistoryCorrection;
+      pelvisPoseCorrections.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
    }
 
    /**
-    * Replaces the pelvis pose correction, for example with a {@link PelvisPoseCorrectionSeries} that runs the default one
-    * from {@link #getPelvisPoseHistoryCorrection()} and others in turn. Install before starting the estimator thread. An
-    * external pose subscriber already set is passed on to the new correction.
+    * Sets which pelvis pose corrections are active. The default is {@link PelvisPoseCorrectionMode#NATIVE}. Each correction's
+    * active yo-variable can still be changed at runtime afterwards.
     */
-   public void setPelvisPoseHistoryCorrection(PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection)
+   public void setPelvisPoseCorrectionMode(PelvisPoseCorrectionMode mode)
    {
-      this.pelvisPoseHistoryCorrection = Objects.requireNonNull(pelvisPoseHistoryCorrection);
-      if (externalPelvisPoseSubscriber != null)
-         pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+      mode.apply(nativePelvisPoseCorrection, ekfPelvisPoseCorrection);
    }
 
-   /** Install before starting estimator threads. The callback must not modify estimator/model state. */
-   public void setPrePelvisCorrectionCallback(Runnable callback)
+   /** The native pelvis pose corrector and the EKF pelvis pose correction, run in that order. */
+   public PelvisPoseCorrectionSeries getPelvisPoseCorrections()
    {
-      if (prePelvisCorrectionCallback != null)
-         throw new IllegalStateException("Pre-pelvis-correction callback already installed");
-      prePelvisCorrectionCallback = Objects.requireNonNull(callback);
+      return pelvisPoseCorrections;
+   }
+
+   /** The EKF pelvis pose correction, the second stage of {@link #getPelvisPoseCorrections()}. */
+   public EKFPelvisPoseCorrection getEKFPelvisPoseCorrection()
+   {
+      return ekfPelvisPoseCorrection;
    }
 
    @Override
@@ -488,7 +484,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(forceSensorStateUpdater.getSCS2YoGraphics());
       group.addChild(pelvisLinearStateUpdater.getSCS2YoGraphics());
-      group.addChild(pelvisPoseHistoryCorrection.getSCS2YoGraphics());
+      group.addChild(pelvisPoseCorrections.getSCS2YoGraphics());
       if (momentumStateUpdater != null)
          group.addChild(momentumStateUpdater.getSCS2YoGraphics());
       if (copVisualizer != null)

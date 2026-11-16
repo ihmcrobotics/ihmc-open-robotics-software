@@ -44,6 +44,8 @@ public class EKFPelvisPoseCorrection implements PelvisPoseHistoryCorrectionInter
    private final FusedPoseEstimator fusedPoseEstimator;
    private final RigidBodyTransform estimatorPelvisPose = new RigidBodyTransform();
    private final RigidBodyTransform correctedPelvisPose = new RigidBodyTransform();
+   /** Whether a {@link us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPoseCorrectionSeries} runs this correction. */
+   private final YoBoolean active = new YoBoolean("ekfPelvisPoseCorrectionActive", registry);
    private final YoBoolean applyCorrection = new YoBoolean("applyEKFPelvisPoseCorrection", registry);
    private final YoDouble publishPeriod = new YoDouble("ekfCorrectedPelvisPosePublishPeriod", registry);
    private final YoFramePoseUsingYawPitchRoll yoCorrectedPelvisPose = new YoFramePoseUsingYawPitchRoll("ekfCorrectedPelvisPose", worldFrame, registry);
@@ -121,6 +123,18 @@ public class EKFPelvisPoseCorrection implements PelvisPoseHistoryCorrectionInter
       correctedPosePacket.setTimestamp(wallTime);
       correctedPosePacket.getPose().set(correctedPelvisPose);
       correctedPosePublisher.accept(correctedPosePacket);
+   }
+
+   @Override
+   public boolean isActive()
+   {
+      return active.getValue();
+   }
+
+   @Override
+   public void setActive(boolean active)
+   {
+      this.active.set(active);
    }
 
    /** Restarts the filter, for example after the estimator is reinitialized. */
