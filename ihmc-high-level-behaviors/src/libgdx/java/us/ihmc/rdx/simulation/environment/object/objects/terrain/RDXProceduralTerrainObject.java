@@ -43,6 +43,8 @@ public abstract class RDXProceduralTerrainObject extends RDXEnvironmentObject
    protected static final double BASE_THICKNESS = ProceduralTerrainGeometry.BASE_THICKNESS;
    /** Keeps each mesh under the 16-bit index limit of the mesh interpreter. */
    private static final int MAX_BOXES_PER_MESH = 2000;
+   /** A quadrilateral surface has as many vertices as a box. */
+   private static final int MAX_SURFACES_PER_MESH = 2000;
 
    protected final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ArrayList<Model> models = new ArrayList<>();
@@ -173,30 +175,37 @@ public abstract class RDXProceduralTerrainObject extends RDXEnvironmentObject
 
    /**
     * Adds each surface as a solid: its top, the vertical walls down to its bottom, and the bottom.
-    * Walls shared by neighboring surfaces are hidden inside the terrain.
+    * Walls shared by neighboring surfaces are hidden inside the terrain. Splits surfaces into mesh builders
+    * of at most {@link #MAX_SURFACES_PER_MESH} surfaces each.
     */
    protected void addSurfacesToMeshBuilder(List<TerrainSurface> surfaces, ArrayList<Consumer<RDXMultiColorMeshBuilder>> meshBuilders)
    {
       collisionSurfaces.addAll(surfaces);
-      meshBuilders.add(meshBuilder ->
+      for (int start = 0; start < surfaces.size(); start += MAX_SURFACES_PER_MESH)
       {
-         for (TerrainSurface surface : surfaces)
+         List<TerrainSurface> chunk = surfaces.subList(start, Math.min(surfaces.size(), start + MAX_SURFACES_PER_MESH));
+         meshBuilders.add(meshBuilder -> addSurfaces(chunk, meshBuilder));
+      }
+   }
+
+   private static void addSurfaces(List<TerrainSurface> surfaces, RDXMultiColorMeshBuilder meshBuilder)
+   {
+      for (TerrainSurface surface : surfaces)
+      {
+         List<Point3D> top = surface.vertices();
+         List<Point3D> bottom = top.stream().map(vertex -> new Point3D(vertex.getX(), vertex.getY(), surface.bottomZ())).toList();
+         meshBuilder.addPolygon(top, SHADES[surface.shade()]);
+         for (int i = 0; i < top.size(); i++)
          {
-            List<Point3D> top = surface.vertices();
-            List<Point3D> bottom = top.stream().map(vertex -> new Point3D(vertex.getX(), vertex.getY(), surface.bottomZ())).toList();
-            meshBuilder.addPolygon(top, SHADES[surface.shade()]);
-            for (int i = 0; i < top.size(); i++)
-            {
-               int next = (i + 1) % top.size();
-               // Counter-clockwise seen from outside
-               meshBuilder.addPolygon(List.of(bottom.get(i), bottom.get(next), top.get(next), top.get(i)), Color.GRAY);
-            }
-            // Counter-clockwise seen from below
-            ArrayList<Point3D> bottomSeenFromBelow = new ArrayList<>(bottom);
-            Collections.reverse(bottomSeenFromBelow);
-            meshBuilder.addPolygon(bottomSeenFromBelow, Color.GRAY);
+            int next = (i + 1) % top.size();
+            // Counter-clockwise seen from outside
+            meshBuilder.addPolygon(List.of(bottom.get(i), bottom.get(next), top.get(next), top.get(i)), Color.GRAY);
          }
-      });
+         // Counter-clockwise seen from below
+         ArrayList<Point3D> bottomSeenFromBelow = new ArrayList<>(bottom);
+         Collections.reverse(bottomSeenFromBelow);
+         meshBuilder.addPolygon(bottomSeenFromBelow, Color.GRAY);
+      }
    }
 
    /** Renders the parameter widgets and rebuilds the terrain if one changed. */

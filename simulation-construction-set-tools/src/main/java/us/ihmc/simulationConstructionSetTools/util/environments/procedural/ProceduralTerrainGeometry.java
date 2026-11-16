@@ -20,6 +20,8 @@ public class ProceduralTerrainGeometry
    /** Solid material added under the lowest surface so the terrain is never paper thin. */
    public static final double BASE_THICKNESS = 0.05;
    public static final int MAX_TILES_PER_SIDE = 150;
+   /** Each cell is two convex solids in physics, so this is lower than the tile limit. */
+   public static final int MAX_HEIGHT_FIELD_CELLS_PER_SIDE = 100;
    private static final double EPSILON = 1e-9;
 
    /**
@@ -178,6 +180,64 @@ public class ProceduralTerrainGeometry
          }
       }
       return boxes;
+   }
+
+   // Random height field, after IsaacLab's HfRandomUniformTerrainCfg
+
+   public static int randomHeightFieldCellsPerSide(double cellSize, double gridSize)
+   {
+      return (int) Math.min(MAX_HEIGHT_FIELD_CELLS_PER_SIDE, Math.max(1, Math.floor(gridSize / cellSize + EPSILON)));
+   }
+
+   /**
+    * Random height at each interior grid point, drawn uniformly from [0, maxHeightDelta]; points on the outer
+    * edge stay at 0 so the field meets the surrounding ground without a step. The same seed always gives the
+    * same heights.
+    *
+    * @return heights[i][j] at x = -halfWidth + i * cellSize, y = -halfWidth + j * cellSize.
+    */
+   public static double[][] randomHeightFieldHeights(double cellSize, double maxHeightDelta, double gridSize, long seed)
+   {
+      int cellsPerSide = randomHeightFieldCellsPerSide(cellSize, gridSize);
+      Random random = new Random(seed);
+      double[][] heights = new double[cellsPerSide + 1][cellsPerSide + 1];
+      for (int i = 1; i < cellsPerSide; i++)
+      {
+         for (int j = 1; j < cellsPerSide; j++)
+            heights[i][j] = random.nextDouble() * maxHeightDelta;
+      }
+      return heights;
+   }
+
+   /**
+    * A continuous, bumpy surface: a grid of random heights (see {@link #randomHeightFieldHeights}) with each
+    * cell split into two flat triangles. IsaacLab draws heights from a noise range and upsamples them to a
+    * finer mesh; here each triangle is flat, so the surface is exactly what the physics engine collides with.
+    */
+   public static List<TerrainSurface> randomHeightField(double cellSize, double maxHeightDelta, double gridSize, long seed)
+   {
+      double[][] heights = randomHeightFieldHeights(cellSize, maxHeightDelta, gridSize, seed);
+      int cellsPerSide = heights.length - 1;
+      double halfWidth = 0.5 * cellsPerSide * cellSize;
+
+      ArrayList<TerrainSurface> surfaces = new ArrayList<>();
+      for (int i = 0; i < cellsPerSide; i++)
+      {
+         for (int j = 0; j < cellsPerSide; j++)
+         {
+            double x0 = -halfWidth + i * cellSize;
+            double y0 = -halfWidth + j * cellSize;
+            Point3D p00 = new Point3D(x0, y0, heights[i][j]);
+            Point3D p10 = new Point3D(x0 + cellSize, y0, heights[i + 1][j]);
+            Point3D p11 = new Point3D(x0 + cellSize, y0 + cellSize, heights[i + 1][j + 1]);
+            Point3D p01 = new Point3D(x0, y0 + cellSize, heights[i][j + 1]);
+            int shade = (i + j) % 2;
+            // Counter-clockwise seen from above
+            surfaces.add(new TerrainSurface(List.of(p00, p10, p11), -BASE_THICKNESS, shade));
+            surfaces.add(new TerrainSurface(List.of(p00, p11, p01), -BASE_THICKNESS, shade));
+         }
+      }
+      return surfaces;
    }
 
    // Ground with holes
