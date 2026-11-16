@@ -4,6 +4,7 @@ import us.ihmc.rdx.simulation.environment.object.objects.*;
 import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXProceduralGroundObject;
 import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXPyramidSlopeObject;
 import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXPyramidStairsObject;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXRandomHeightFieldObject;
 import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXUnevenTilesObject;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXPyramidStairsObject.FACTORY);
       objectFactories.add(RDXPyramidSlopeObject.FACTORY);
       objectFactories.add(RDXUnevenTilesObject.FACTORY);
+      objectFactories.add(RDXRandomHeightFieldObject.FACTORY);
       objectFactories.add(RDXProceduralGroundObject.FACTORY);
       objectFactories.add(RDXWorkPlatformObject.FACTORY);
       objectFactories.add(RDXRightJerseyBarrierObject.FACTORY);
@@ -52,6 +54,7 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXBottleObject.FACTORY);
       objectFactories.add(RDXTrowelObject.FACTORY);
       objectFactories.add(RDXBucketObject.FACTORY);
+      objectFactories.add(RDXSektionCabinetObject.FACTORY);
       objectFactories.sort(Comparator.comparing(RDXEnvironmentObjectFactory::getName, String.CASE_INSENSITIVE_ORDER));
    }
 
