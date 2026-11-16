@@ -17,7 +17,9 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.LongSupplier;
 
 /**
  * Turns a camera's VIO tracking into pelvis pose measurements for the state estimator in the controller process. It runs in the
@@ -38,7 +40,11 @@ import java.util.function.Function;
  * <li>Session status, on {@link ExternalPoseCorrectionAPI#getSourceStatusTopic(String)}.</li>
  * </ul>
  * VIO starts as soon as the camera is ready, and restarts with a new session on each message on
- * {@link ExternalPoseCorrectionAPI#getResetSourceTopic(String)}.
+ * {@link ExternalPoseCorrectionAPI#getResetSourceTopic(String)}, or on {@link #requestTrackingRestart()}.
+ * </p>
+ * <p>
+ * A simulation can run it without ROS 2 and on simulation time: see
+ * {@link #VIOPelvisPoseProvider(String, FullHumanoidRobotModel, HumanoidRobotSensorInformation, Function, ROS2Node, LongSupplier, Consumer)}.
  * </p>
  */
 public class VIOPelvisPoseProvider implements AutoCloseable
@@ -49,6 +55,8 @@ public class VIOPelvisPoseProvider implements AutoCloseable
    private static final long STATUS_LOG_PERIOD_NANOSECONDS = 5_000_000_000L;
 
    private final ROS2Node ros2Node;
+   private final LongSupplier wallClock;
+   private final Consumer<StampedPosePacket> pelvisPoseListener;
    private final ROS2Publisher<StampedPosePacket> pelvisPosePublisher;
    private final ROS2Publisher<StampedPosePacket> cameraPosePublisher;
    private final ROS2Publisher<ExternalPoseSourceStatus> statusPublisher;
@@ -79,7 +87,31 @@ public class VIOPelvisPoseProvider implements AutoCloseable
                                 Function<HumanoidReferenceFrames, ReferenceFrame> cameraFrameSelector,
                                 ROS2Node ros2Node)
    {
+      this(robotName, robotStateModel, sensorInformation, cameraFrameSelector, ros2Node, VIOPelvisPoseProvider::getSystemWallTime, null);
+   }
+
+   /**
+    * @param robotName           the robot name the topics are scoped by.
+    * @param robotStateModel     a robot model for this provider only, which it sets from each robot state.
+    * @param sensorInformation   the robot's sensor information, for its reference frames.
+    * @param cameraFrameSelector selects the tracking camera's mounting frame from the robot's reference frames.
+    * @param ros2Node            the node to publish and subscribe on, or {@code null} to neither publish nor subscribe.
+    * @param wallClock           the current wall time, in ns, that robot state and exposure timestamps are checked against. On
+    *                            hardware it's the computer's clock; in simulation, the simulation time.
+    * @param pelvisPoseListener  receives every converted pelvis pose on the calling thread, in addition to the topic, or
+    *                            {@code null}.
+    */
+   public VIOPelvisPoseProvider(String robotName,
+                                FullHumanoidRobotModel robotStateModel,
+                                HumanoidRobotSensorInformation sensorInformation,
+                                Function<HumanoidReferenceFrames, ReferenceFrame> cameraFrameSelector,
+                                ROS2Node ros2Node,
+                                LongSupplier wallClock,
+                                Consumer<StampedPosePacket> pelvisPoseListener)
+   {
       this.ros2Node = ros2Node;
+      this.wallClock = wallClock;
+      this.pelvisPoseListener = pelvisPoseListener;
       this.robotStateModel = robotStateModel;
       robotStateReferenceFrames = new HumanoidReferenceFrames(robotStateModel, sensorInformation);
       robotStateCameraFrame = cameraFrameSelector.apply(robotStateReferenceFrames);
@@ -89,45 +121,65 @@ public class VIOPelvisPoseProvider implements AutoCloseable
                                                                                    robotStateModel.getForceSensorDefinitions(),
                                                                                    robotStateModel.getIMUDefinitions());
 
-      pelvisPosePublisher = ros2Node.createPublisher(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName));
-      cameraPosePublisher = ros2Node.createPublisher(ExternalPoseCorrectionAPI.getSensorPoseTopic(robotName));
-      statusPublisher = ros2Node.createPublisher(ExternalPoseCorrectionAPI.getSourceStatusTopic(robotName));
-      // Every converted pose is published; the controller decides what to use. The calculator's validity check isn't used here.
+      // Every converted pose is published; the controller decides what to use.
       vioRootPoseCalculator = new VIORootPoseCalculator(this::publishVIOPosesInControllerFrame);
 
-      resetSubscription = ros2Node.createSubscriptionSampler(ExternalPoseCorrectionAPI.getResetSourceTopic(robotName),
-                                                             resetMessage -> requestTrackingRestart());
+      if (ros2Node == null)
+      {
+         pelvisPosePublisher = null;
+         cameraPosePublisher = null;
+         statusPublisher = null;
+         resetSubscription = null;
+      }
+      else
+      {
+         pelvisPosePublisher = ros2Node.createPublisher(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName));
+         cameraPosePublisher = ros2Node.createPublisher(ExternalPoseCorrectionAPI.getSensorPoseTopic(robotName));
+         statusPublisher = ros2Node.createPublisher(ExternalPoseCorrectionAPI.getSourceStatusTopic(robotName));
+         resetSubscription = ros2Node.createSubscriptionSampler(ExternalPoseCorrectionAPI.getResetSourceTopic(robotName),
+                                                                resetMessage -> requestTrackingRestart());
+      }
 
       LogTools.info("VIO pelvis pose provider started. Requires synchronized camera and controller wall clocks and a calibrated camera mounting.");
    }
 
-   /** Publishes every converted pose: the root pose for the controller, and the camera pose for the operator UI. */
+   /**
+    * Publishes every converted pose: the root pose for the controller, and the camera pose for the operator UI. The root pose
+    * also goes to the pelvis pose listener.
+    */
    private void publishVIOPosesInControllerFrame(long exposureTimestamp,
                                                  RigidBodyTransformReadOnly rootPoseInControllerWorld,
                                                  RigidBodyTransformReadOnly cameraPoseInControllerWorld)
    {
       trackingSession.markAnchored();
-      publishStampedPose(pelvisPosePublisher, exposureTimestamp, rootPoseInControllerWorld);
-      publishStampedPose(cameraPosePublisher, exposureTimestamp, cameraPoseInControllerWorld);
+      StampedPosePacket pelvisPose = createStampedPose(exposureTimestamp, rootPoseInControllerWorld);
+      if (pelvisPosePublisher != null)
+      {
+         pelvisPosePublisher.publish(pelvisPose);
+         cameraPosePublisher.publish(createStampedPose(exposureTimestamp, cameraPoseInControllerWorld));
+      }
+      if (pelvisPoseListener != null)
+         pelvisPoseListener.accept(pelvisPose);
    }
 
-   private void publishStampedPose(ROS2Publisher<StampedPosePacket> publisher, long exposureTimestamp, RigidBodyTransformReadOnly pose)
+   private StampedPosePacket createStampedPose(long exposureTimestamp, RigidBodyTransformReadOnly pose)
    {
       StampedPosePacket stampedPose = new StampedPosePacket();
       stampedPose.setTimestamp(exposureTimestamp);
       stampedPose.setConfidenceFactor(1.0);
       stampedPose.getFrameId().append(trackingSession.getSessionId());
       stampedPose.getPose().set(pose);
-      publisher.publish(stampedPose);
+      return stampedPose;
    }
 
-   private synchronized void requestTrackingRestart()
+   /** Starts a new VIO session, as a message on the reset topic does. The camera's grab thread picks it up. */
+   public synchronized void requestTrackingRestart()
    {
       if (closed)
          return;
       initialTrackingStartRequested = true;
       trackingRestartFailure = "";
-      trackingSession.requestTrackingRestart(getCurrentWallTime());
+      trackingSession.requestTrackingRestart(wallClock.getAsLong());
       vioRootPoseCalculator.resetForNewSession();
       publishStatus();
    }
@@ -146,7 +198,7 @@ public class VIOPelvisPoseProvider implements AutoCloseable
    /** On the camera grab thread, after it restarted tracking for {@code requestToken}. */
    public synchronized void finishTrackingRestart(long requestToken, boolean restartSucceeded)
    {
-      if (closed || !trackingSession.finishTrackingRestart(requestToken, restartSucceeded, getCurrentWallTime()))
+      if (closed || !trackingSession.finishTrackingRestart(requestToken, restartSucceeded, wallClock.getAsLong()))
          return;
       if (!restartSucceeded)
          trackingRestartFailure = "Camera tracking restart failed; use Start / Reset VIO to retry";
@@ -172,6 +224,9 @@ public class VIOPelvisPoseProvider implements AutoCloseable
 
    private void publishStatus()
    {
+      lastStatusPublishTime = System.nanoTime();
+      if (statusPublisher == null)
+         return;
       ExternalPoseSourceStatus status = new ExternalPoseSourceStatus();
       status.setSessionId(trackingSession.getSessionId());
       status.setSessionStartTime(trackingSession.getSessionStartTime());
@@ -180,7 +235,6 @@ public class VIOPelvisPoseProvider implements AutoCloseable
       status.setRejectedCount(vioRootPoseCalculator.getRejectedCount());
       status.setDetail(trackingRestartFailure.isEmpty() ? vioRootPoseCalculator.getStatusDescription() : trackingRestartFailure);
       statusPublisher.publish(status);
-      lastStatusPublishTime = System.nanoTime();
    }
 
    /** A robot state published by the controller: computes the pelvis and camera poses in the robot's world. */
@@ -201,7 +255,7 @@ public class VIOPelvisPoseProvider implements AutoCloseable
       long robotStateTimestamp = robotConfigurationData.getWallTime();
       if (!trackingSession.acceptsDataAt(robotStateTimestamp))
          return;
-      if (Math.abs(getCurrentWallTime() - robotStateTimestamp) > MAXIMUM_INPUT_AGE_NANOSECONDS)
+      if (Math.abs(wallClock.getAsLong() - robotStateTimestamp) > MAXIMUM_INPUT_AGE_NANOSECONDS)
       {
          vioRootPoseCalculator.recordRejection("stale robot state or unsynchronized wall clocks");
          logStatusIfDue();
@@ -239,7 +293,7 @@ public class VIOPelvisPoseProvider implements AutoCloseable
    {
       if (closed || !trackingSession.acceptsDataAt(exposureTimestamp))
          return;
-      if (Math.abs(getCurrentWallTime() - exposureTimestamp) > MAXIMUM_INPUT_AGE_NANOSECONDS)
+      if (Math.abs(wallClock.getAsLong() - exposureTimestamp) > MAXIMUM_INPUT_AGE_NANOSECONDS)
       {
          vioRootPoseCalculator.recordRejection("stale image or unsynchronized camera wall clock");
       }
@@ -264,7 +318,7 @@ public class VIOPelvisPoseProvider implements AutoCloseable
       }
    }
 
-   private static long getCurrentWallTime()
+   private static long getSystemWallTime()
    {
       return System.currentTimeMillis() * 1_000_000L;
    }
@@ -277,6 +331,8 @@ public class VIOPelvisPoseProvider implements AutoCloseable
       {
          closed = true;
       }
+      if (ros2Node == null)
+         return;
       ros2Node.destroySubscription(resetSubscription);
       ros2Node.destroyPublisher(pelvisPosePublisher);
       ros2Node.destroyPublisher(cameraPosePublisher);
