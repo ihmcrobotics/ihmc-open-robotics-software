@@ -58,9 +58,9 @@ public final class EKFOutputSmoother
    /**
     * @param kinematicPose the kinematic pose estimate this tick. Not modified.
     * @param target        the EKF's estimate this tick, which the output is rate limited toward. Not modified.
-    * @param result        the smoothed pose. Modified.
+    * @param resultToPack        the smoothed pose. Modified.
     */
-   public void update(RigidBodyTransformReadOnly kinematicPose, RigidBodyTransformReadOnly target, RigidBodyTransform result)
+   public void update(RigidBodyTransformReadOnly kinematicPose, RigidBodyTransformReadOnly target, RigidBodyTransform resultToPack)
    {
       if (!isFinite(kinematicPose) || !isFinite(target))
          throw new IllegalArgumentException("Output smoother requires finite poses");
@@ -87,7 +87,7 @@ public final class EKFOutputSmoother
          outputOrientation.update(orientationInput);
       }
       previousKinematicPose.set(kinematicPose);
-      result.set(outputOrientation, outputPosition);
+      resultToPack.set(outputOrientation, outputPosition);
    }
 
    private static boolean isFinite(RigidBodyTransformReadOnly pose)
