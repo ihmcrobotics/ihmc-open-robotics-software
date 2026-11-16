@@ -20,25 +20,31 @@ import java.util.Objects;
  * {@link PelvisPoseCorrectionMode} sets which corrections are active.
  * </p>
  * <p>
- * The external pose subscriber is read once per tick, and each new external pose is offered to every correction that is
- * active on that tick.
+ * The external pose subscriber is read once per tick. Each new external pose is first checked by the
+ * {@link StampedPosePacketValidator}, and a valid one is offered to every correction that is active on that tick. After the
+ * corrections have run, the resulting pelvis pose is recorded in the validator, so later external poses are compared with the
+ * estimator's output.
  * </p>
  */
 public class PelvisPoseCorrectionSeries implements PelvisPoseHistoryCorrectionInterface
 {
    private final String name;
+   private final StampedPosePacketValidator stampedPosePacketValidator;
    private final List<Stage> stages = new ArrayList<>();
    private final StampedPosePacket latestExternalPose = new StampedPosePacket();
    private PelvisPoseCorrectionCommunicatorInterface externalPoseSubscriber;
 
-   public PelvisPoseCorrectionSeries()
+   /** @param stampedPosePacketValidator checks each new external pose before any correction sees it. */
+   public PelvisPoseCorrectionSeries(StampedPosePacketValidator stampedPosePacketValidator)
    {
-      this(PelvisPoseCorrectionSeries.class.getSimpleName());
+      this(PelvisPoseCorrectionSeries.class.getSimpleName(), stampedPosePacketValidator);
    }
 
-   public PelvisPoseCorrectionSeries(String name)
+   /** @param stampedPosePacketValidator checks each new external pose before any correction sees it. */
+   public PelvisPoseCorrectionSeries(String name, StampedPosePacketValidator stampedPosePacketValidator)
    {
       this.name = name;
+      this.stampedPosePacketValidator = Objects.requireNonNull(stampedPosePacketValidator);
    }
 
    /** Adds a correction after the ones already added. It runs on the ticks where it is active. */
@@ -57,7 +63,7 @@ public class PelvisPoseCorrectionSeries implements PelvisPoseHistoryCorrectionIn
       if (externalPoseSubscriber != null && externalPoseSubscriber.hasNewPose())
       {
          StampedPosePacket externalPose = externalPoseSubscriber.getNewExternalPose();
-         if (externalPose != null)
+         if (externalPose != null && stampedPosePacketValidator.isValid(externalPose))
          {
             latestExternalPose.set(externalPose);
             hasNewExternalPose = true;
@@ -72,6 +78,9 @@ public class PelvisPoseCorrectionSeries implements PelvisPoseHistoryCorrectionIn
          if (active)
             stage.correction.doControl(timestamp);
       }
+
+      // Every correction has run, so the root joint holds this tick's output pelvis pose.
+      stampedPosePacketValidator.recordEstimatedPelvisPose(timestamp);
    }
 
    /** Each correction receives its own view of this subscriber, so every one of them sees every new external pose. */

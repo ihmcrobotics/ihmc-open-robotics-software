@@ -1,4 +1,4 @@
-package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ekf;
+package us.ihmc.robotics.kinematics;
 
 import us.ihmc.commons.lists.RingBuffer;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -8,15 +8,31 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
 import javax.annotation.Nullable;
 
-/** Bounded exposure pairing. No extrapolation, no corrected-state substitution. */
+/**
+ * A bounded history of timestamped poses, for looking up a pose at a past time, such as a measurement's exposure time.
+ * <p>
+ * Timestamps must increase: a pose that isn't newer than the newest one is ignored. A lookup between two poses interpolates
+ * between them, if they're at most {@link #MAXIMUM_INTERPOLATION_GAP_NANOSECONDS} apart. Nothing is extrapolated. Allocation-free
+ * after construction.
+ * </p>
+ */
 public final class PoseHistory
 {
-   private static final int CAPACITY = 300;
-   private final RingBuffer<TimeStampedPose> poses = new RingBuffer<>(CAPACITY, TimeStampedPose::new);
+   /** Two poses further apart than this, in ns, aren't interpolated between. */
+   public static final long MAXIMUM_INTERPOLATION_GAP_NANOSECONDS = 50_000_000L;
+   public static final int DEFAULT_CAPACITY = 300;
+   private final RingBuffer<TimeStampedPose> poses;
    private final Pose3D interpolatedPose = new Pose3D();
 
    public PoseHistory()
    {
+      this(DEFAULT_CAPACITY);
+   }
+
+   /** @param capacity how many poses are kept; adding one more drops the oldest. */
+   public PoseHistory(int capacity)
+   {
+      poses = new RingBuffer<>(capacity, TimeStampedPose::new);
    }
 
    public void clear()
@@ -52,7 +68,7 @@ public final class PoseHistory
             if (previous < 0)
                return false;
             TimeStampedPose previousStampedPose = poses.getFromFirst(previous);
-            if (stampedPose.getTimestamp() - previousStampedPose.getTimestamp() > 50_000_000L)
+            if (stampedPose.getTimestamp() - previousStampedPose.getTimestamp() > MAXIMUM_INTERPOLATION_GAP_NANOSECONDS)
                return false;
 
             double alpha = (double) (timestamp - previousStampedPose.getTimestamp()) / (stampedPose.getTimestamp() - previousStampedPose.getTimestamp());
