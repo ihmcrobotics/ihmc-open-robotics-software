@@ -105,6 +105,8 @@ public class RDXEnvironmentBuilder extends RDXPanel
       if (selectedObject != null && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
          resetSelection();
 
+      updateProceduralGround();
+
       if (inputsEnabled.get())
       {
          if (selectedObject != null)
