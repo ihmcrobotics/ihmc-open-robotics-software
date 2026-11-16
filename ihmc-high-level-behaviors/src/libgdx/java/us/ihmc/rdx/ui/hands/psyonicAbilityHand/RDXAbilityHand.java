@@ -108,11 +108,11 @@ public class RDXAbilityHand implements RDXHandInterface
    /** Grips in rows by use, with the row label and each button's text. */
    private static final String[] GRIP_ROW_LABELS = {"Hand", "Grasp", "Lever", "Key"};
    private static final AbilityHandGrip[][] GRIP_ROWS = {{AbilityHandGrip.OPEN, AbilityHandGrip.CLOSE, AbilityHandGrip.RELAX, AbilityHandGrip.FLAT},
-                                                         {AbilityHandGrip.PINCH, AbilityHandGrip.HOOK, AbilityHandGrip.HANDLE},
+                                                         {AbilityHandGrip.PINCH, AbilityHandGrip.HOOK},
                                                          {AbilityHandGrip.DOOR_LEVER_OPEN, AbilityHandGrip.DOOR_LEVER_CLOSE, AbilityHandGrip.DOOR_LEVER_CRUSH},
                                                          {AbilityHandGrip.KEY_OPEN, AbilityHandGrip.KEY_CLOSE}};
    private static final String[][] GRIP_BUTTON_TEXT = {{"Open", "Close", "Relax", "Flat"},
-                                                       {"Pinch", "Hook", "Handle"},
+                                                       {"Pinch", "Hook"},
                                                        {"Open", "Close", "Crush"},
                                                        {"Open", "Close"}};
    private static final int GRIP_COLUMNS = 4;
