@@ -1,14 +1,19 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ekf;
 
-/** Tuning for {@link FusedPoseEstimator}. Read once, when the estimator is created. */
-public class FusedPoseEstimatorParameters
+/**
+ * Initial tuning for {@link EKFPoseFuser}. Read once, when the fuser is created; the values become yo-variables, which
+ * can be changed at runtime.
+ */
+public class EKFPoseFusionParameters
 {
    private double positionProcessStandardDeviation = 0.10;
-   private double angleProcessStandardDeviation = Math.toRadians(5.0);
+   private double orientationProcessStandardDeviation = Math.toRadians(5.0);
    private double positionMeasurementStandardDeviation = 0.10;
-   private double angleMeasurementStandardDeviation = Math.toRadians(5.0);
-   private double translationGate = 0.20;
-   private double rotationGate = Math.toRadians(15.0);
+   private double orientationMeasurementStandardDeviation = Math.toRadians(5.0);
+   private double maximumPositionInnovation = 0.20;
+   private double maximumOrientationInnovation = Math.toRadians(15.0);
+   /** The chi-square value for six degrees of freedom at 99.9 %. */
+   private double maximumNormalizedInnovationSquared = 22.458;
    private double maximumCorrectionTranslationSpeed = 0.5;
    private double maximumCorrectionRotationSpeed = 0.5;
    private long maximumMeasurementTimeOffset = 200_000_000L;
@@ -26,14 +31,14 @@ public class FusedPoseEstimatorParameters
    }
 
    /** How fast the kinematic orientation estimate may drift, in rad per sqrt(s). */
-   public double getAngleProcessStandardDeviation()
+   public double getOrientationProcessStandardDeviation()
    {
-      return angleProcessStandardDeviation;
+      return orientationProcessStandardDeviation;
    }
 
-   public void setAngleProcessStandardDeviation(double angleProcessStandardDeviation)
+   public void setOrientationProcessStandardDeviation(double orientationProcessStandardDeviation)
    {
-      this.angleProcessStandardDeviation = angleProcessStandardDeviation;
+      this.orientationProcessStandardDeviation = orientationProcessStandardDeviation;
    }
 
    /** The position error of one pose measurement, in m. */
@@ -48,36 +53,47 @@ public class FusedPoseEstimatorParameters
    }
 
    /** The orientation error of one pose measurement, in rad. */
-   public double getAngleMeasurementStandardDeviation()
+   public double getOrientationMeasurementStandardDeviation()
    {
-      return angleMeasurementStandardDeviation;
+      return orientationMeasurementStandardDeviation;
    }
 
-   public void setAngleMeasurementStandardDeviation(double angleMeasurementStandardDeviation)
+   public void setOrientationMeasurementStandardDeviation(double orientationMeasurementStandardDeviation)
    {
-      this.angleMeasurementStandardDeviation = angleMeasurementStandardDeviation;
+      this.orientationMeasurementStandardDeviation = orientationMeasurementStandardDeviation;
    }
 
    /** A pose measurement further than this from the prediction, in m, is rejected. */
-   public double getTranslationGate()
+   public double getMaximumPositionInnovation()
    {
-      return translationGate;
+      return maximumPositionInnovation;
    }
 
-   public void setTranslationGate(double translationGate)
+   public void setMaximumPositionInnovation(double maximumPositionInnovation)
    {
-      this.translationGate = translationGate;
+      this.maximumPositionInnovation = maximumPositionInnovation;
    }
 
    /** A pose measurement rotated further than this from the prediction, in rad, is rejected. */
-   public double getRotationGate()
+   public double getMaximumOrientationInnovation()
    {
-      return rotationGate;
+      return maximumOrientationInnovation;
    }
 
-   public void setRotationGate(double rotationGate)
+   public void setMaximumOrientationInnovation(double maximumOrientationInnovation)
    {
-      this.rotationGate = rotationGate;
+      this.maximumOrientationInnovation = maximumOrientationInnovation;
+   }
+
+   /** A pose measurement whose normalized innovation squared is larger than this is rejected as statistically inconsistent. */
+   public double getMaximumNormalizedInnovationSquared()
+   {
+      return maximumNormalizedInnovationSquared;
+   }
+
+   public void setMaximumNormalizedInnovationSquared(double maximumNormalizedInnovationSquared)
+   {
+      this.maximumNormalizedInnovationSquared = maximumNormalizedInnovationSquared;
    }
 
    /** The fastest the output may move toward the corrected position, in m/s. */
@@ -115,7 +131,7 @@ public class FusedPoseEstimatorParameters
 
    /**
     * If the wall and monotonic time steps of one tick differ by more than this, in ns, the clocks are considered faulty and
-    * pose measurements are ignored until {@link FusedPoseEstimator#reset()}.
+    * pose measurements are ignored until {@link EKFPoseFuser#reset()}.
     */
    public long getMaximumClockDisagreement()
    {

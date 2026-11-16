@@ -38,7 +38,7 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfM
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.SimpleMomentumStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.WrenchBasedMomentumStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ekf.EKFPelvisPoseCorrection;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ekf.FusedPoseEstimatorParameters;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ekf.EKFPoseFusionParameters;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -67,7 +67,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final IMUYawDriftEstimator imuYawDriftEstimator;
 
    /** The native pelvis pose corrector, then the EKF pelvis pose correction; {@link PelvisPoseCorrectionMode} sets which run. */
-   private final PelvisPoseCorrectionSeries pelvisPoseCorrections = new PelvisPoseCorrectionSeries();
+   private final PelvisPoseCorrectionSeries pelvisPoseCorrections;
    private final PelvisPoseHistoryCorrectionInterface nativePelvisPoseCorrection;
    private final EKFPelvisPoseCorrection ekfPelvisPoseCorrection;
 
@@ -138,7 +138,12 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                                                       registry,
                                                                       1000);
       }
-      ekfPelvisPoseCorrection = new EKFPelvisPoseCorrection(rootJoint, sensorOutputMap::getMonotonicTime, new FusedPoseEstimatorParameters(), registry);
+      ekfPelvisPoseCorrection = new EKFPelvisPoseCorrection(rootJoint,
+                                                            sensorOutputMap::getMonotonicTime,
+                                                            new EKFPoseFusionParameters(),
+                                                            estimatorDT,
+                                                            registry);
+      pelvisPoseCorrections = new PelvisPoseCorrectionSeries(new StampedPosePacketValidator(rootJoint, registry));
       pelvisPoseCorrections.addCorrection(nativePelvisPoseCorrection);
       pelvisPoseCorrections.addCorrection(ekfPelvisPoseCorrection);
       setPelvisPoseCorrectionMode(PelvisPoseCorrectionMode.NATIVE);

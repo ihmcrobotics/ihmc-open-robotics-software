@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 
 /**
- * Pelvis pose correction that fuses the estimator's pelvis pose with external pose measurements in a {@link FusedPoseEstimator},
+ * Pelvis pose correction that fuses the estimator's pelvis pose with external pose measurements in a {@link EKFPoseFuser},
  * an alternative to {@link us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.NewPelvisPoseHistoryCorrection}.
  * <p>
  * Each external pose's timestamp must be the wall time of its exposure, and its frame ID names the world it is expressed in:
@@ -41,7 +41,7 @@ public class EKFPelvisPoseCorrection implements PelvisPoseHistoryCorrectionInter
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final FloatingJointBasics rootJoint;
    private final LongSupplier monotonicClock;
-   private final FusedPoseEstimator fusedPoseEstimator;
+   private final EKFPoseFuser ekfPoseFuser;
    private final RigidBodyTransform estimatorPelvisPose = new RigidBodyTransform();
    private final RigidBodyTransform correctedPelvisPose = new RigidBodyTransform();
    /** Whether a {@link us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPoseCorrectionSeries} runs this correction. */
@@ -58,15 +58,17 @@ public class EKFPelvisPoseCorrection implements PelvisPoseHistoryCorrectionInter
    /**
     * @param rootJoint      the estimator's root joint, which holds the pelvis pose to correct.
     * @param monotonicClock the estimator's monotonic time, in ns; the wall time comes from {@link #doControl(long)}.
+    * @param estimatorDT    the estimator period, in seconds.
     */
    public EKFPelvisPoseCorrection(FloatingJointBasics rootJoint,
                                   LongSupplier monotonicClock,
-                                  FusedPoseEstimatorParameters parameters,
+                                  EKFPoseFusionParameters parameters,
+                                  double estimatorDT,
                                   YoRegistry parentRegistry)
    {
       this.rootJoint = rootJoint;
       this.monotonicClock = monotonicClock;
-      fusedPoseEstimator = new FusedPoseEstimator(parameters);
+      ekfPoseFuser = new EKFPoseFuser(parameters, estimatorDT, registry);
       applyCorrection.set(true);
       publishPeriod.set(0.02);
       correctedPosePacket.getFrameId().append(worldFrame.getName());
@@ -99,7 +101,7 @@ public class EKFPelvisPoseCorrection implements PelvisPoseHistoryCorrectionInter
       long monotonicTime = monotonicClock.getAsLong();
       rootJoint.getJointConfiguration(estimatorPelvisPose);
       StampedPosePacket poseMeasurement = poseMeasurementSubscriber.hasNewPose() ? poseMeasurementSubscriber.getNewExternalPose() : null;
-      fusedPoseEstimator.update(timestamp, monotonicTime, estimatorPelvisPose, poseMeasurement, correctedPelvisPose);
+      ekfPoseFuser.update(timestamp, monotonicTime, estimatorPelvisPose, poseMeasurement, correctedPelvisPose);
       yoCorrectedPelvisPose.set(correctedPelvisPose);
 
       if (applyCorrection.getValue())
@@ -140,12 +142,12 @@ public class EKFPelvisPoseCorrection implements PelvisPoseHistoryCorrectionInter
    /** Restarts the filter, for example after the estimator is reinitialized. */
    public void reset()
    {
-      fusedPoseEstimator.reset();
+      ekfPoseFuser.reset();
    }
 
    public String getStatus()
    {
-      return fusedPoseEstimator.getStatus();
+      return ekfPoseFuser.getStatus();
    }
 
    @Override

@@ -12,20 +12,20 @@ public class PelvisPoseCorrectionCommunicatorTest
    @Test
    public void copiesAReusedPacketAndHandsPosesOverInOrder()
    {
-      var communicator = new PelvisPoseCorrectionCommunicator(null, null);
-      var reused = new StampedPosePacket(); // Like a subscription sampler's sample.
+      PelvisPoseCorrectionCommunicator communicator = new PelvisPoseCorrectionCommunicator(null, null);
+      StampedPosePacket reusedPacket = new StampedPosePacket(); // Like a subscription sampler's sample.
       for (long timestamp = 1; timestamp <= 3; timestamp++)
       {
-         reused.setTimestamp(timestamp);
-         communicator.receivedPacket(reused);
+         reusedPacket.setTimestamp(timestamp);
+         communicator.receivedPacket(reusedPacket);
       }
-      reused.setTimestamp(99);
+      reusedPacket.setTimestamp(99);
 
       for (long expected = 1; expected <= 3; expected++)
       {
          assertTrue(communicator.hasNewPose());
          StampedPosePacket pose = communicator.getNewExternalPose();
-         assertNotSame(reused, pose);
+         assertNotSame(reusedPacket, pose);
          assertEquals(expected, pose.getTimestamp());
       }
       assertFalse(communicator.hasNewPose());
@@ -35,8 +35,8 @@ public class PelvisPoseCorrectionCommunicatorTest
    @Test
    public void returnedPoseStaysValidUntilTheNextOneIsTaken()
    {
-      var communicator = new PelvisPoseCorrectionCommunicator(null, null);
-      var packet = new StampedPosePacket();
+      PelvisPoseCorrectionCommunicator communicator = new PelvisPoseCorrectionCommunicator(null, null);
+      StampedPosePacket packet = new StampedPosePacket();
       packet.setTimestamp(1);
       communicator.receivedPacket(packet);
       StampedPosePacket first = communicator.getNewExternalPose();
@@ -52,8 +52,8 @@ public class PelvisPoseCorrectionCommunicatorTest
    @Test
    public void overwritesTheOldestPosesWhenFull()
    {
-      var communicator = new PelvisPoseCorrectionCommunicator(null, null);
-      var packet = new StampedPosePacket();
+      PelvisPoseCorrectionCommunicator communicator = new PelvisPoseCorrectionCommunicator(null, null);
+      StampedPosePacket packet = new StampedPosePacket();
       for (long timestamp = 1; timestamp <= 100; timestamp++)
       {
          packet.setTimestamp(timestamp);
@@ -79,11 +79,11 @@ public class PelvisPoseCorrectionCommunicatorTest
    @Test
    public void concurrentReadsAreConsistentAndInOrder() throws InterruptedException
    {
-      var communicator = new PelvisPoseCorrectionCommunicator(null, null);
-      var done = new AtomicBoolean();
-      var writer = new Thread(() ->
+      PelvisPoseCorrectionCommunicator communicator = new PelvisPoseCorrectionCommunicator(null, null);
+      AtomicBoolean writerDone = new AtomicBoolean();
+      Thread writer = new Thread(() ->
       {
-         var packet = new StampedPosePacket(); // Reused, like a subscription sampler's sample.
+         StampedPosePacket packet = new StampedPosePacket(); // Reused, like a subscription sampler's sample.
          for (long timestamp = 1; timestamp <= 2_000_000; timestamp++)
          {
             packet.setTimestamp(timestamp);
@@ -92,13 +92,13 @@ public class PelvisPoseCorrectionCommunicatorTest
             packet.getFrameId().append(timestamp % 3 == 0 ? "a" : "session-" + timestamp);
             communicator.receivedPacket(packet);
          }
-         done.set(true);
+         writerDone.set(true);
       });
       writer.start();
 
       long last = 0;
       long taken = 0;
-      while (!done.get() || communicator.hasNewPose())
+      while (!writerDone.get() || communicator.hasNewPose())
       {
          StampedPosePacket pose = communicator.getNewExternalPose();
          if (pose == null)

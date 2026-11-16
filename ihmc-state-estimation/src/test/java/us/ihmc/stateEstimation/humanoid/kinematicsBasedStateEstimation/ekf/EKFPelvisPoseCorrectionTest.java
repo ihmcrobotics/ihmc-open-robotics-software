@@ -21,12 +21,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class EKFPelvisPoseCorrectionTest
 {
-   private static final long WALL = 1_793_212_000_000_000_000L, MONO = 10_000_000_000L, TICK = 1_000_000L;
+   private static final long WALL = 1_793_212_000_000_000_000L;
+   private static final long MONO = 10_000_000_000L;
+   private static final long TICK = 1_000_000L;
 
    private final AtomicLong monotonicTime = new AtomicLong(MONO);
    private final SixDoFJoint rootJoint = new SixDoFJoint("pelvis", new RigidBody("elevator", ReferenceFrame.getWorldFrame()));
    private final YoRegistry registry = new YoRegistry("test");
-   private final EKFPelvisPoseCorrection correction = new EKFPelvisPoseCorrection(rootJoint, monotonicTime::get, new FusedPoseEstimatorParameters(), registry);
+   private final EKFPelvisPoseCorrection correction = new EKFPelvisPoseCorrection(rootJoint,
+                                                                                  monotonicTime::get,
+                                                                                  new EKFPoseFusionParameters(),
+                                                                                  TICK * 1.0e-9,
+                                                                                  registry);
    private final PoseQueue measurements = new PoseQueue();
    private final List<StampedPosePacket> published = new ArrayList<>();
    private final RigidBodyTransform kinematicPose = new RigidBodyTransform();

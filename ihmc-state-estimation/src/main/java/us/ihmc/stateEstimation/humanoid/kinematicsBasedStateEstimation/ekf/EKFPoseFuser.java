@@ -3,54 +3,56 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ekf;
 import ihmc_common_msgs.StampedPosePacket;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.robotics.kinematics.PoseHistory;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Fuses a kinematic pose estimate with delayed pose measurements, for example from visual-inertial odometry, using a
  * {@link PoseErrorEKF}. A bounded history of kinematic pose estimates compensates each measurement's delay, each measurement
  * corrects the filter once, and an {@link EKFOutputSmoother} limits how fast the result moves.
  */
-public final class FusedPoseEstimator
+public final class EKFPoseFuser
 {
-   private final long maximumMeasurementTimeOffset, maximumClockDisagreement;
-   private final PoseHistory poseHistory = new PoseHistory();
-   private final PoseErrorEKF filter;
-   private final EKFOutputSmoother output;
+   private final long maximumMeasurementTimeOffset;
+   private final long maximumClockDisagreement;
+   private final PoseHistory poseHistory = new PoseHistory(1000);
+   private final PoseErrorEKF poseErrorEKF;
+   private final EKFOutputSmoother outputSmoother;
    private final RigidBodyTransform kinematicPoseAtExposure = new RigidBodyTransform();
    private final RigidBodyTransform kinematicMotionSinceExposure = new RigidBodyTransform();
    private final RigidBodyTransform delayCompensatedMeasuredPose = new RigidBodyTransform();
    private final RigidBodyTransform posterior = new RigidBodyTransform();
    private final StringBuilder measurementFrameId = new StringBuilder();
    private boolean hasMeasurementFrame;
-   private long previousWallTime, previousMonotonicTime;
+   private long previousWallTime;
+   private long previousMonotonicTime;
    private volatile boolean clockFault;
 
-   public FusedPoseEstimator()
-   {
-      this(new FusedPoseEstimatorParameters());
-   }
-
-   public FusedPoseEstimator(FusedPoseEstimatorParameters parameters)
+   /**
+    * @param estimatorDT the time between two calls to {@link #update}, in seconds.
+    * @param registry    the registry the output smoother's speed limits and smoothed pose are added to.
+    */
+   public EKFPoseFuser(EKFPoseFusionParameters parameters, double estimatorDT, YoRegistry registry)
    {
       maximumMeasurementTimeOffset = parameters.getMaximumMeasurementTimeOffset();
       maximumClockDisagreement = parameters.getMaximumClockDisagreement();
-      filter = new PoseErrorEKF(parameters.getPositionProcessStandardDeviation(),
-                                parameters.getAngleProcessStandardDeviation(),
-                                parameters.getPositionMeasurementStandardDeviation(),
-                                parameters.getAngleMeasurementStandardDeviation(),
-                                parameters.getTranslationGate(),
-                                parameters.getRotationGate());
-      output = new EKFOutputSmoother(parameters.getMaximumCorrectionTranslationSpeed(), parameters.getMaximumCorrectionRotationSpeed());
+      poseErrorEKF = new PoseErrorEKF(parameters, registry);
+      outputSmoother = new EKFOutputSmoother(parameters.getMaximumCorrectionTranslationSpeed(),
+                                             parameters.getMaximumCorrectionRotationSpeed(),
+                                             estimatorDT,
+                                             registry);
       reset();
    }
 
    public void reset()
    {
       poseHistory.clear();
-      filter.reset();
-      output.reset();
+      poseErrorEKF.reset();
+      outputSmoother.reset();
       measurementFrameId.setLength(0);
       hasMeasurementFrame = false;
-      previousWallTime = previousMonotonicTime = 0;
+      previousWallTime = 0;
+      previousMonotonicTime = 0;
       clockFault = false;
    }
 
@@ -90,7 +92,7 @@ public final class FusedPoseEstimator
          {
             if (!hasMeasurementFrame || CharSequence.compare(poseMeasurement.getFrameId(), measurementFrameId) != 0)
             {
-               filter.resetMeasurementAlignment();
+               poseErrorEKF.resetMeasurementAlignment();
                measurementFrameId.setLength(0);
                measurementFrameId.append(poseMeasurement.getFrameId());
                hasMeasurementFrame = true;
@@ -104,8 +106,8 @@ public final class FusedPoseEstimator
             hasMeasurement = true;
          }
       }
-      filter.update(monotonicTime, kinematicPoseEstimate, hasMeasurement ? delayCompensatedMeasuredPose : null, posterior);
-      output.update(monotonicTime, kinematicPoseEstimate, posterior, fusedPoseToPack);
+      poseErrorEKF.update(monotonicTime, kinematicPoseEstimate, hasMeasurement ? delayCompensatedMeasuredPose : null, posterior);
+      outputSmoother.update(kinematicPoseEstimate, posterior, fusedPoseToPack);
    }
 
    private boolean isWithinMaximumTimeOffset(long timestamp, long currentWallTime)
@@ -115,6 +117,6 @@ public final class FusedPoseEstimator
 
    public String getStatus()
    {
-      return (clockFault ? "CLOCK FAULT; pose measurements paused; " : "") + filter.getStatus();
+      return (clockFault ? "CLOCK FAULT; pose measurements paused; " : "") + poseErrorEKF.getStatus();
    }
 }

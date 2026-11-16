@@ -1,4 +1,4 @@
-package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ekf;
+package us.ihmc.robotics.kinematics;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -10,7 +10,7 @@ public class PoseHistoryTest
    @Test
    public void ringWrapsWithoutRetainingExpiredOrAliasedEntries()
    {
-      var history = new PoseHistory();
+      PoseHistory history = new PoseHistory();
       var pose = new RigidBodyTransform();
       var result = new RigidBodyTransform();
       long base = 1_000_000_000L;
@@ -34,7 +34,7 @@ public class PoseHistoryTest
    public void interpolatesBetweenEntriesButNeverExtrapolatesOrBridgesLongGaps()
    {
       long wall = 1_793_212_000_000_000_000L, step = 5_000_000L;
-      var history = new PoseHistory();
+      PoseHistory history = new PoseHistory();
       history.add(wall, pose(0));
       history.add(wall + 2 * step, pose(.02));
       var result = new RigidBodyTransform();
