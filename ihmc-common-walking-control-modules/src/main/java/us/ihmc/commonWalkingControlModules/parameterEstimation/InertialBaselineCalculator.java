@@ -43,6 +43,19 @@ public class InertialBaselineCalculator
    private final RateLimitedYoVariable[][] rateLimitedParameterDeltas;
    private final DMatrixRMaj rateLimitedParameterDeltaContainer;
 
+   /**
+    * [TMECH] 1 = rate-limit each body's parameters by ONE common fraction of the remaining step (the most rate-constrained
+    * parameter sets it) instead of each parameter on its own. Independent per-parameter saturation is not a convex
+    * combination of the previous and the new body, so a consistent estimate can be handed on as a non-physical intermediate
+    * (seen at clip onset: principal moment -0.25 kg m^2 for 40 ms); a common fraction keeps every intermediate inside the
+    * convex set. 0 (default) = per-parameter rate limiting, unchanged. Settable with yoSet.
+    */
+   private final us.ihmc.yoVariables.variable.YoDouble uniformRateLimit;
+   private final YoDouble[] maxRates;
+   private final double dt;
+   /** Set by {@link #resetRateLimiters()}: in uniform mode the next update jumps to the target, as the per-parameter limiters do. */
+   private boolean jumpNext = true;
+
    public InertialBaselineCalculator(FullHumanoidRobotModel model, InertialEstimationParameters parameters, double dt, YoRegistry parentRegistry)
    {
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -59,6 +72,9 @@ public class InertialBaselineCalculator
       String[] basisNames = RigidBodyInertialParametersTools.getNamesForPiBasis();
       double[] defaultMaxParameterDeltaRates = parameters.getMaxParameterDeltaRates();
       YoDouble[] maxParameterDeltaRates = new YoDouble[RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
+      maxRates = maxParameterDeltaRates;
+      this.dt = dt;
+      uniformRateLimit = new YoDouble("uniformRateLimit", registry);
       for (int i = 0; i < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; i++)
       {
          maxParameterDeltaRates[i] = new YoDouble("maxDeltaRate_" + basisNames[i], registry);
@@ -102,9 +118,29 @@ public class InertialBaselineCalculator
             continue;
 
          RigidBodyInertialParametersTools.calculateParameterDelta(bodies[i].getInertia(), urdfSpatialInertias[i], parameterDeltas[i]);
-         for (int j = 0; j < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; j++)
-            rateLimitedParameterDeltas[i][j].update();
+         if (uniformRateLimit.getValue() > 0.5)
+         {
+            double fraction = 1.0;
+            for (int j = 0; j < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY && !jumpNext; j++)
+            {
+               double step = Math.abs(parameterDeltas[i].get(j, 0) - rateLimitedParameterDeltas[i][j].getDoubleValue());
+               double limit = maxRates[j].getValue() * dt;
+               if (step > limit)
+                  fraction = Math.min(fraction, limit / step);
+            }
+            for (int j = 0; j < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; j++)
+            {
+               double current = rateLimitedParameterDeltas[i][j].getDoubleValue();
+               rateLimitedParameterDeltas[i][j].set(current + fraction * (parameterDeltas[i].get(j, 0) - current));
+            }
+         }
+         else
+         {
+            for (int j = 0; j < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; j++)
+               rateLimitedParameterDeltas[i][j].update();
+         }
       }
+      jumpNext = false;
    }
 
    /**
@@ -147,6 +183,7 @@ public class InertialBaselineCalculator
     */
    public void resetRateLimiters()
    {
+      jumpNext = true;
       for (int i = 0; i < parameterDeltas.length; i++)
       {
          if (basisSets[i].isEmpty())
@@ -162,6 +199,7 @@ public class InertialBaselineCalculator
     */
    public void resetParameterDeltas()
    {
+      jumpNext = true;
       for (int i = 0; i < parameterDeltas.length; i++)
       {
          if (basisSets[i].isEmpty())  // Only the bodies we're estimating have deltas
