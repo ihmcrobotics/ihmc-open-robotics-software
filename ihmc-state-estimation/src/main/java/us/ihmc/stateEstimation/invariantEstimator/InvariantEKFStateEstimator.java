@@ -499,6 +499,31 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final Point3D startupHoldCandidate = new Point3D();
    private final Vector3D startupHoldSoleInWorld = new Vector3D();
    private final RotationMatrix startupHoldRotation = new RotationMatrix();
+
+   /**
+    * Yaw audit: how much each kind of measurement update turned the estimated heading this tick (rad, world z), and
+    * the world-yaw standard deviation. Heading is unobservable for this filter, so only the gyro should turn it; an
+    * update that does is pulling an innovation into the unobservable direction through the covariance.
+    */
+   private final YoDouble yoYawChangeContact = new YoDouble("invariantYawChangeContact", registry);
+   private final YoDouble yoYawChangeKinematicVelocity = new YoDouble("invariantYawChangeKinematicVelocity", registry);
+   private final YoDouble yoYawChangeGravity = new YoDouble("invariantYawChangeGravity", registry);
+   private final YoDouble yoYawChangeFromUpdates = new YoDouble("invariantYawChangeFromUpdatesIntegrated", registry);
+   private final YoDouble yoYawStd = new YoDouble("invariantYawStd", registry);
+   private final RotationMatrix yawAuditRotation = new RotationMatrix();
+
+   private double auditYaw()
+   {
+      ekf.getRotation(yawAuditRotation);
+      return yawAuditRotation.getYaw();
+   }
+
+   private void recordYawChange(YoDouble perTick, double yawBefore)
+   {
+      double change = us.ihmc.euclid.tools.EuclidCoreTools.angleDifferenceMinusPiToPi(auditYaw(), yawBefore);
+      perTick.add(change);
+      yoYawChangeFromUpdates.add(change);
+   }
    public static final double DEFAULT_STARTUP_SETTLE_DURATION = 0.1;
    public static final double DEFAULT_STARTUP_SETTLE_TIMEOUT = 2.0;
    private final org.ejml.data.DMatrixRMaj startCovariance = new org.ejml.data.DMatrixRMaj(15 + 3 * NUMBER_OF_CONTACTS, 15 + 3 * NUMBER_OF_CONTACTS);
@@ -1218,11 +1243,17 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
 
       // Gravity-leveling: the roll/pitch anchor the contact update cannot provide (its Jacobian has a zero
       // rotation block). Diagnostic refreshed every tick; update applied only when quasi-static.
+      yoYawChangeContact.set(0.0);
+      yoYawChangeKinematicVelocity.set(0.0);
+      yoYawChangeGravity.set(0.0);
+      double yawBefore = auditYaw();
       updateGravityLeveling();
+      recordYawChange(yoYawChangeGravity, yawBefore);
 
       // Knob 1 (measurement covariance): inflate a swing foot's contact FK noise so it stops dragging the
       // base velocity, while a stance foot keeps constraining it.
       yoContactPBaseTrace.set(covarianceBlockTrace(ekf.getState().basePositionTangentIndex()));
+      yawBefore = auditYaw();
       ekf.setContactNISGate(yoContactNISGate.getDoubleValue());
       for (RobotSide side : RobotSide.values)
       {
@@ -1267,7 +1298,12 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          yoContactCorrectionVelNorm.get(side).set(ekf.getLastCorrectionVelocityNorm());
          yoContactCorrectionPosNorm.get(side).set(ekf.getLastCorrectionPositionNorm());
       }
+      recordYawChange(yoYawChangeContact, yawBefore);
+      yawBefore = auditYaw();
       updateKinematicVelocity();
+      recordYawChange(yoYawChangeKinematicVelocity, yawBefore);
+      int r = ekf.getState().rotationTangentIndex();
+      yoYawStd.set(Math.sqrt(Math.max(0.0, ekf.getState().getCovariance().get(r + 2, r + 2))));
       yoInvariantUpdateGateSkipCount.set(ekf.getUpdateGateSkipCount());
       yoContactInnovationInflatedCount.set(ekf.getInnovationInflatedCount());
 
