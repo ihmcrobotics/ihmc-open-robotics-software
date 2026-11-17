@@ -324,6 +324,14 @@ public class InvariantEKF
     *
     * @param leverArm r, the stationary point in the body frame; null (or no active bias state) leaves H as before.
     */
+   private boolean kinematicVelocityHeadingConsider = false;
+
+   /** If true, kinematic-velocity updates cannot turn the heading or move the yaw-axis gyro bias (see {@link InvariantUpdater#considerHeadingForNextUpdate}). */
+   public void setKinematicVelocityHeadingConsider(boolean consider)
+   {
+      kinematicVelocityHeadingConsider = consider;
+   }
+
    public void updateBodyVelocity(Tuple3DReadOnly bodyVelocity, Matrix3DReadOnly bodyVelocityCovariance, Tuple3DReadOnly leverArm)
    {
       int m = state.getTangentSize();
@@ -375,6 +383,8 @@ public class InvariantEKF
             for (int c = 0; c < 3; c++)
                velocityJacobian.set(r, bv + c, active ? -velocityRotation.getElement(r, c) : 0.0);
       }
+      if (kinematicVelocityHeadingConsider)
+         updater.considerHeadingForNextUpdate();
       updater.update(state, velocityJacobian, velocityResidual, velocityNoise);
    }
 

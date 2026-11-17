@@ -510,6 +510,13 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final YoDouble yoYawChangeGravity = new YoDouble("invariantYawChangeGravity", registry);
    private final YoDouble yoYawChangeFromUpdates = new YoDouble("invariantYawChangeFromUpdatesIntegrated", registry);
    private final YoDouble yoYawStd = new YoDouble("invariantYawStd", registry);
+   /**
+    * Kinematic-velocity updates may not turn the heading or move the yaw-axis gyro bias (Schmidt consider on those two
+    * rows). The kinematic velocity carries the gyro bias through its lever arm, -(omega - b) x r, and propagation
+    * correlates the bias with the unobservable heading, so a large horizontal innovation (a slipping or rebounding foot)
+    * otherwise turns the heading: 5-7 deg per stairs run in MuJoCo, with the gyro exact.
+    */
+   private final YoBoolean yoKinematicVelocityHeadingConsider = new YoBoolean("invariantKinematicVelocityHeadingConsider", registry);
    private final RotationMatrix yawAuditRotation = new RotationMatrix();
 
    private double auditYaw()
@@ -1300,6 +1307,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       }
       recordYawChange(yoYawChangeContact, yawBefore);
       yawBefore = auditYaw();
+      ekf.setKinematicVelocityHeadingConsider(yoKinematicVelocityHeadingConsider.getValue());
       updateKinematicVelocity();
       recordYawChange(yoYawChangeKinematicVelocity, yawBefore);
       int r = ekf.getState().rotationTangentIndex();
