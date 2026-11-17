@@ -377,6 +377,17 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final YoBoolean yoKinematicVelocityUseLoadGate = new YoBoolean("invariantKinematicVelocityUseLoadGate", registry);
    private final YoDouble yoKinematicVelocityTrustLoad = new YoDouble("invariantKinematicVelocityTrustLoad", registry);
    private final YoDouble yoKinematicVelocityUntrustLoad = new YoDouble("invariantKinematicVelocityUntrustLoad", registry);
+   /**
+    * Seconds a foot must have been in trusted contact (probability above 0.5) before its kinematic velocity is used;
+    * 0 = from the first trusted tick (the original behaviour). Right after touchdown the sole is not yet stationary: on
+    * a hard landing it is pressed into the ground and pushed back out. In MuJoCo (perceptive walking, 2026-11-17) a
+    * foot landing on a stair step at ~0.5 m/s rose 6-7 mm over the first ~100 ms of trusted contact (sole up to
+    * 150 mm/s), read as the pelvis sinking: about -10 mm of height error per step up, the same in the DRC estimator.
+    */
+   private final YoDouble yoKinematicVelocityTouchdownDelay = new YoDouble("invariantKinematicVelocityTouchdownDelay", registry);
+   private final SideDependentList<YoDouble> yoKinematicVelocityTrustedContactTime = new SideDependentList<>(side -> new YoDouble(
+         "invariantKinematicVelocityTrustedContactTime" + side.getPascalCaseName(),
+         registry));
    private final SideDependentList<YoBoolean> yoKinematicVelocityLoadTrusted = new SideDependentList<>(new YoBoolean("invariantKinematicVelocityLoadTrustedLeft", registry),
                                                                                                         new YoBoolean("invariantKinematicVelocityLoadTrustedRight", registry));
    public static final double DEFAULT_KINEMATIC_VELOCITY_TRUST_LOAD = 0.35;
@@ -1454,7 +1465,14 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
             else if (load < yoKinematicVelocityUntrustLoad.getDoubleValue())
                trusted.set(false);
          }
+         YoDouble trustedContactTime = yoKinematicVelocityTrustedContactTime.get(side);
          if (yoContactProbability.get(side).getDoubleValue() <= 0.5)
+         {
+            trustedContactTime.set(0.0);
+            continue;
+         }
+         trustedContactTime.add(dt);
+         if (trustedContactTime.getDoubleValue() < yoKinematicVelocityTouchdownDelay.getDoubleValue())
             continue;
          if (loadGate && !yoKinematicVelocityLoadTrusted.get(side).getBooleanValue())
             continue;
