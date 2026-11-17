@@ -27,9 +27,6 @@ import us.ihmc.stateEstimation.jointLevel.ZeroIMUBiasProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.BooleanSupplier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,81 +69,26 @@ public class InvariantMainStateEstimator implements StateEstimatorController
    private final OneDoFJointBasics[] oneDoFJoints;
    private final FloatingJointBasics rootJoint;
 
-   // Anti-damping filter on the controller-facing hip/knee pitch qd (2026-07-16), gated on WALKING.
-   // NOTCH (11.8 Hz, Q=2): surgical, <5° phase at 3 Hz — hardware showed the mode slides to the
-   // notch shoulder (13.8 Hz, injection 2.7 -> 0.096 W): a 19 ms loop delay anti-damps a BAND, not
-   // a line. LOW_PASS (2nd-order Butterworth, 7 Hz): rolls off the whole harmful band — what the
-   // old ALPHA_COMPLEMENTARY chain did implicitly — at ~15-20° phase cost at 3 Hz. Selectable LIVE
-   // via the controllerFacingQdFilterType YoEnum.
-   private static final double NOTCH_CENTER_HZ = 11.8;
-   private static final double NOTCH_Q = 2.0;
-   private static final double LOW_PASS_CORNER_HZ = 7.0;
-   // BAND_STOP: wide notch covering the whole delay-induced anti-damping band. f0 = 13.5 Hz,
-   // Q = 1.2 gives a -3 dB stopband of exactly 9.0-20.25 Hz (BW = f0/Q = 11.25 Hz, geometric
-   // symmetry: 9.0 * 20.25 = 13.5^2) at only ~-11 deg phase at 3 Hz — the middle ground between
-   // NOTCH (too narrow, mode slides to 13.8 Hz) and LOW_PASS (kills balance, -37 deg at 3 Hz).
-   // Design math: .claude-reports/2026-07-16-filter-theory.md §5.
-   private static final double BAND_STOP_CENTER_HZ = 13.5;
-   private static final double BAND_STOP_Q = 1.2;
+   /**
+    * The anti-damping filter on the hip/knee pitch states handed to the controller (see
+    * {@link ControllerFacingJointFilter}). The invariant filter computes from the unfiltered states; the filtered ones
+    * are written into the shared model only after it ran, right before the root joint is published.
+    */
+   private final ControllerFacingJointFilter controllerFacingFilter;
+   /** The joint states the estimator computed this tick, per index of {@link #oneDoFJoints}. */
+   private final double[] estimatorJointPositions;
+   private final double[] estimatorJointVelocities;
+   /** The controller-facing joint states, per index of {@link #oneDoFJoints}. */
+   private final double[] controllerFacingJointPositions;
+   private final double[] controllerFacingJointVelocities;
 
-   public enum ControllerFacingQdFilterType { NONE, NOTCH, LOW_PASS, BAND_STOP }
-
-   /** Which controller-facing joint quantities the selected filter applies to (live-switchable). */
-   public enum ControllerFacingFilteredQuantity { JOINT_VELOCITIES, JOINT_POSITIONS, BOTH }
-
-   private final YoBoolean yoControllerFacingNotchEnabled;
-   private final us.ihmc.yoVariables.variable.YoEnum<ControllerFacingQdFilterType> yoControllerFacingQdFilterType;
-   private final us.ihmc.yoVariables.variable.YoEnum<ControllerFacingFilteredQuantity> yoControllerFacingFilteredQuantity;
-   private final Map<String, Biquad> controllerFacingNotches = new HashMap<>();
-   private final Map<String, Biquad> controllerFacingLowPasses = new HashMap<>();
-   private final Map<String, Biquad> controllerFacingNotchesQ = new HashMap<>();
-   private final Map<String, Biquad> controllerFacingLowPassesQ = new HashMap<>();
-   private final Map<String, Biquad> controllerFacingBandStops = new HashMap<>();
-   private final Map<String, Biquad> controllerFacingBandStopsQ = new HashMap<>();
-   /** Supplies "high-level controller is in WALKING" (not RL_CONTROL); null = ungated. */
-   private BooleanSupplier walkingGate = null;
-
-   /** Wire to the high-level controller state: gate closes the filter outside WALKING (e.g. RL_CONTROL). */
-   public void setControllerFacingNotchGate(BooleanSupplier walkingGate)
+   /**
+    * Tells the controller-facing filter whether an RL controller state is active, where it is off by default
+    * ({@code controllerFacingQdFilterInRL}). Wire to the high-level controller state.
+    */
+   public void setRLControllerStateActive(boolean active)
    {
-      this.walkingGate = walkingGate;
-   }
-
-   /** RBJ biquad, direct form 1; fixed coefficients (shape, f0, Q, dt known at construction). */
-   private static final class Biquad
-   {
-      private final double b0, b1, b2, a1, a2;
-      private double x1, x2, y1, y2;
-
-      private Biquad(double b0, double b1, double b2, double a1, double a2)
-      {
-         this.b0 = b0; this.b1 = b1; this.b2 = b2; this.a1 = a1; this.a2 = a2;
-      }
-
-      static Biquad notch(double centerHz, double q, double dt)
-      {
-         double w0 = 2.0 * Math.PI * centerHz * dt;
-         double alpha = Math.sin(w0) / (2.0 * q);
-         double a0 = 1.0 + alpha;
-         return new Biquad(1.0 / a0, -2.0 * Math.cos(w0) / a0, 1.0 / a0, -2.0 * Math.cos(w0) / a0, (1.0 - alpha) / a0);
-      }
-
-      static Biquad lowPass(double cornerHz, double dt)
-      {
-         double w0 = 2.0 * Math.PI * cornerHz * dt;
-         double alpha = Math.sin(w0) / (2.0 * Math.sqrt(0.5)); // Q = 1/sqrt(2): Butterworth
-         double a0 = 1.0 + alpha;
-         double c = 1.0 - Math.cos(w0);
-         return new Biquad(0.5 * c / a0, c / a0, 0.5 * c / a0, -2.0 * Math.cos(w0) / a0, (1.0 - alpha) / a0);
-      }
-
-      double update(double x)
-      {
-         double y = b0 * x + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
-         x2 = x1; x1 = x;
-         y2 = y1; y1 = y;
-         return y;
-      }
+      controllerFacingFilter.setRLStateActive(active);
    }
 
    private final HumanoidReferenceFrames referenceFrames;
@@ -242,34 +184,18 @@ public class InvariantMainStateEstimator implements StateEstimatorController
          invariantEstimator.setKinematicVelocityJointCovarianceSource(preFilter, fullRobotModel.getPelvis(), feet);
       registry.addChild(invariantEstimator.getYoRegistry());
 
-      // 2026-07-16 anti-damping fix: notch the CONTROLLER-FACING qd of the pitch-plane leg joints
-      // (hips + knees — the two measured energy injectors) around the measured 11.8 Hz mode. With
-      // the measured ~19 ms loop delay, velocity feedback near f = 1/(4·τ_d) ≈ 13 Hz injects energy
-      // (+2.7 W measured, L knee, log jointKF_Osc_0716). The old ALPHA_COMPLEMENTARY chain
-      // attenuated this band implicitly; the JointKF passes it at unity gain. Estimator-internal
-      // consumers (InEKF, anchors, biases) keep the full-bandwidth signal — only the hand-off to
-      // the shared model the WBC reads is filtered, and only when the walking gate is active.
-      yoControllerFacingNotchEnabled = new YoBoolean("controllerFacingQdNotchEnabled", registry);
-      yoControllerFacingNotchEnabled.set(true);
-      yoControllerFacingQdFilterType = new us.ihmc.yoVariables.variable.YoEnum<>("controllerFacingQdFilterType", registry, ControllerFacingQdFilterType.class);
-      // Default BAND_STOP (2026-07-16): LOW_PASS broke balance on hardware (-37 deg phase at 3 Hz);
-      // the wide notch covers the whole 9-20.25 Hz anti-damping band at only ~-11 deg. Live-switchable.
-      yoControllerFacingQdFilterType.set(ControllerFacingQdFilterType.BAND_STOP);
-      yoControllerFacingFilteredQuantity = new us.ihmc.yoVariables.variable.YoEnum<>("controllerFacingFilteredQuantity", registry, ControllerFacingFilteredQuantity.class);
-      yoControllerFacingFilteredQuantity.set(ControllerFacingFilteredQuantity.JOINT_VELOCITIES);
+      // 2026-07-16 anti-damping filter on the controller-facing hip/knee pitch states; see ControllerFacingJointFilter.
+      List<String> filteredJointNames = new ArrayList<>();
       for (OneDoFJointBasics joint : oneDoFJoints)
       {
-         String name = joint.getName();
-         if (name.contains("HIP_Y") || name.contains("KNEE_Y"))
-         {
-            controllerFacingNotches.put(name, Biquad.notch(NOTCH_CENTER_HZ, NOTCH_Q, dt));
-            controllerFacingLowPasses.put(name, Biquad.lowPass(LOW_PASS_CORNER_HZ, dt));
-            controllerFacingNotchesQ.put(name, Biquad.notch(NOTCH_CENTER_HZ, NOTCH_Q, dt));
-            controllerFacingLowPassesQ.put(name, Biquad.lowPass(LOW_PASS_CORNER_HZ, dt));
-            controllerFacingBandStops.put(name, Biquad.notch(BAND_STOP_CENTER_HZ, BAND_STOP_Q, dt));
-            controllerFacingBandStopsQ.put(name, Biquad.notch(BAND_STOP_CENTER_HZ, BAND_STOP_Q, dt));
-         }
+         if (ControllerFacingJointFilter.isHipOrKneePitch(joint.getName()))
+            filteredJointNames.add(joint.getName());
       }
+      controllerFacingFilter = new ControllerFacingJointFilter(filteredJointNames, dt, registry);
+      estimatorJointPositions = new double[oneDoFJoints.length];
+      estimatorJointVelocities = new double[oneDoFJoints.length];
+      controllerFacingJointPositions = new double[oneDoFJoints.length];
+      controllerFacingJointVelocities = new double[oneDoFJoints.length];
 
       // Defer the joint-level KF's initialization until both feet are firmly in contact. Seeding it while the
       // robot hangs leaves the exported base-IMU gyro bias unobservable (its only anchor is the phase-2 stance
@@ -321,6 +247,9 @@ public class InvariantMainStateEstimator implements StateEstimatorController
       if (yawSeeding)
          yawCorrector.correct();
 
+      // The invariant filter has run on the estimator's joint states; from here on the model carries what the
+      // controller reads.
+      applyControllerFacingJointStates();
       writeRootJoint();
 
       // CoM position/velocity for the controller, derived from the InEKF base just written to the root joint.
@@ -349,6 +278,7 @@ public class InvariantMainStateEstimator implements StateEstimatorController
     */
    private void updateJoints()
    {
+      controllerFacingFilter.updateGate();
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJointBasics joint = oneDoFJoints[i];
@@ -368,49 +298,36 @@ public class InvariantMainStateEstimator implements StateEstimatorController
                velocity = estimatedVelocity;
          }
 
-         // Anti-damping filter on the WBC-facing qd (see field comments). ALL filters always run
-         // so their state stays warm (bumpless live switching via the YoEnum); the selected output
-         // is only USED when the master switch is on AND the walking gate reports the WALKING
-         // high-level state (not RL_CONTROL).
-         Biquad notch = controllerFacingNotches.get(joint.getName());
-         if (notch != null)
-         {
-            double notchedQd = notch.update(velocity);
-            double lowPassedQd = controllerFacingLowPasses.get(joint.getName()).update(velocity);
-            double notchedQ = controllerFacingNotchesQ.get(joint.getName()).update(position);
-            double lowPassedQ = controllerFacingLowPassesQ.get(joint.getName()).update(position);
-            double bandStoppedQd = controllerFacingBandStops.get(joint.getName()).update(velocity);
-            double bandStoppedQ = controllerFacingBandStopsQ.get(joint.getName()).update(position);
-            if (yoControllerFacingNotchEnabled.getBooleanValue() && (walkingGate == null || walkingGate.getAsBoolean()))
-            {
-               ControllerFacingFilteredQuantity quantity = yoControllerFacingFilteredQuantity.getEnumValue();
-               boolean applyVelocity = quantity != ControllerFacingFilteredQuantity.JOINT_POSITIONS;
-               boolean applyPosition = quantity != ControllerFacingFilteredQuantity.JOINT_VELOCITIES;
-               switch (yoControllerFacingQdFilterType.getEnumValue())
-               {
-                  case NOTCH ->
-                  {
-                     if (applyVelocity) velocity = notchedQd;
-                     if (applyPosition) position = notchedQ;
-                  }
-                  case LOW_PASS ->
-                  {
-                     if (applyVelocity) velocity = lowPassedQd;
-                     if (applyPosition) position = lowPassedQ;
-                  }
-                  case BAND_STOP ->
-                  {
-                     if (applyVelocity) velocity = bandStoppedQd;
-                     if (applyPosition) position = bandStoppedQ;
-                  }
-                  case NONE -> { }
-               }
-            }
-         }
+         estimatorJointPositions[i] = position;
+         estimatorJointVelocities[i] = velocity;
+         controllerFacingFilter.update(joint.getName(), position, velocity);
+         controllerFacingJointPositions[i] = controllerFacingFilter.getFilteredPosition();
+         controllerFacingJointVelocities[i] = controllerFacingFilter.getFilteredVelocity();
 
-         joint.setQ(position);
-         joint.setQd(velocity);
+         // The estimator computes from its own, full-bandwidth states. Only the A/B switch hands it the filtered ones.
+         boolean estimatorReadsFiltered = controllerFacingFilter.isInvariantFilterUsingFilteredStates();
+         joint.setQ(estimatorReadsFiltered ? controllerFacingJointPositions[i] : position);
+         joint.setQd(estimatorReadsFiltered ? controllerFacingJointVelocities[i] : velocity);
          joint.setTau(jointOutput.getEffort());
+      }
+      fullRobotModel.getElevator().updateFramesRecursively();
+   }
+
+   /**
+    * Writes the controller-facing joint states into the shared model, for everything the controller reads from here on
+    * (root-joint frames, CoM, the published context). Called once the estimator is done with this tick's joint states.
+    */
+   private void applyControllerFacingJointStates()
+   {
+      if (!controllerFacingFilter.isActive() || controllerFacingFilter.isInvariantFilterUsingFilteredStates())
+         return; // already in the model: the estimator's states, or the filtered ones under the A/B switch
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         OneDoFJointBasics joint = oneDoFJoints[i];
+         if (!controllerFacingFilter.filtersJoint(joint.getName()))
+            continue;
+         joint.setQ(controllerFacingJointPositions[i]);
+         joint.setQd(controllerFacingJointVelocities[i]);
       }
       fullRobotModel.getElevator().updateFramesRecursively();
    }
@@ -448,6 +365,7 @@ public class InvariantMainStateEstimator implements StateEstimatorController
       updateJoints();
       referenceFrames.updateFrames();
       invariantEstimator.initialize();
+      applyControllerFacingJointStates();
       centerOfMassUpdater.initialize();
    }
 
@@ -466,6 +384,7 @@ public class InvariantMainStateEstimator implements StateEstimatorController
 
       yawCorrector.reset();
 
+      applyControllerFacingJointStates();
       centerOfMassUpdater.initialize();
    }
 
