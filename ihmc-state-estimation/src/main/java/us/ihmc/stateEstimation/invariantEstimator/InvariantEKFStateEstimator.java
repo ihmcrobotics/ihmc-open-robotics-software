@@ -517,6 +517,12 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     * otherwise turns the heading: 5-7 deg per stairs run in MuJoCo, with the gyro exact.
     */
    private final YoBoolean yoKinematicVelocityHeadingConsider = new YoBoolean("invariantKinematicVelocityHeadingConsider", registry);
+   /**
+    * Soft innovation gate for the kinematic velocity (NIS, 3 dof; 0 or NaN = off, the original behaviour): above it the
+    * measurement noise is inflated by NIS / gate. Without it a foot that is still moving when it becomes trusted (a hard
+    * touchdown on a stair edge) can throw the base velocity by 1 m/s in one tick: MuJoCo stairs, 2026-11-17.
+    */
+   private final YoDouble yoKinematicVelocityNISGate = new YoDouble("invariantKinematicVelocityNISGate", registry);
    private final RotationMatrix yawAuditRotation = new RotationMatrix();
 
    private double auditYaw()
@@ -1308,6 +1314,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       recordYawChange(yoYawChangeContact, yawBefore);
       yawBefore = auditYaw();
       ekf.setKinematicVelocityHeadingConsider(yoKinematicVelocityHeadingConsider.getValue());
+      ekf.setKinematicVelocityNISGate(yoKinematicVelocityNISGate.getDoubleValue());
       updateKinematicVelocity();
       recordYawChange(yoYawChangeKinematicVelocity, yawBefore);
       int r = ekf.getState().rotationTangentIndex();
