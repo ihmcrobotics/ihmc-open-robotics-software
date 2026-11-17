@@ -325,6 +325,16 @@ public class InvariantEKF
     * @param leverArm r, the stationary point in the body frame; null (or no active bias state) leaves H as before.
     */
    private boolean kinematicVelocityHeadingConsider = false;
+   private double kinematicVelocityNISGate = Double.NaN;
+
+   /**
+    * Innovation gate for the kinematic velocity, as the contact update has one: above this NIS the measurement noise is
+    * scaled by NIS / gate before the gain is formed (see {@link InvariantUpdater#update}). NaN or non-positive: off.
+    */
+   public void setKinematicVelocityNISGate(double nisGate)
+   {
+      kinematicVelocityNISGate = nisGate;
+   }
 
    /** If true, kinematic-velocity updates cannot turn the heading or move the yaw-axis gyro bias (see {@link InvariantUpdater#considerHeadingForNextUpdate}). */
    public void setKinematicVelocityHeadingConsider(boolean consider)
@@ -385,7 +395,7 @@ public class InvariantEKF
       }
       if (kinematicVelocityHeadingConsider)
          updater.considerHeadingForNextUpdate();
-      updater.update(state, velocityJacobian, velocityResidual, velocityNoise);
+      updater.update(state, velocityJacobian, velocityResidual, velocityNoise, kinematicVelocityNISGate);
    }
 
    private final us.ihmc.euclid.tuple3D.Vector3D velocityBiasWorld = new us.ihmc.euclid.tuple3D.Vector3D();
