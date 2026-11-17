@@ -41,6 +41,14 @@ public interface OnlineInertialEstimator
     */
    default void applySetpoint(double massScale, double comShiftX, double comShiftY, double comShiftZ, double covarianceScale) { }
 
+   /**
+    * [TMECH] Transient-test hook: sets estimated body {@code bodyIndex} to the ABSOLUTE rigid body {@code pi} (Pi basis,
+    * 10 x 1: m, m c, rotational inertia about the body origin Ixx Ixy Ixz Iyy Iyz Izz) and, if {@code resetCovariance},
+    * re-initializes the covariance to the one the filter was constructed with. Unlike {@link #applySetpoint} it does not
+    * depend on the current estimate, so the same body can be imposed on every estimator. Default no-op.
+    */
+   default void setBodyState(int bodyIndex, DMatrix pi, boolean resetCovariance) { }
+
    /** The current estimate, in the Pi basis. */
    DMatrix getState();
 

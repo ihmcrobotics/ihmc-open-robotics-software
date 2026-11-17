@@ -412,6 +412,28 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
       updateWatchers();
    }
 
+   @Override
+   public void setBodyState(int bodyIndex, DMatrix pi, boolean resetCovariance)
+   {
+      if (bodyIndex < 0 || bodyIndex >= nBodies)
+         return;
+      RigidBodyInertialParameters bodyParameters = inertialParameters.get(bodyIndex);
+      for (int r = 0; r < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; r++)
+         parameterPiBasisContainer.set(r, 0, pi.get(r, 0));
+      bodyParameters.setParameterVectorPiBasis(parameterPiBasisContainer);
+      bodyParameters.update();
+      MatrixMissingTools.setMatrixRows(state,
+                                       bodyIndex * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                       bodyParameters.getParameterVectorPiBasis(),
+                                       0,
+                                       RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+      if (resetCovariance)
+         covariance.set(initialCovariance);
+      filteredResidual.zero();
+      clearResidualFilterMemory = true;
+      updateWatchers();
+   }
+
    /** For inertial parameters, the process model is the identity mapping -- we assume that the parameters are constant. */
    @Override
    protected DMatrixRMaj processModel(DMatrixRMaj parametersToEstimate)

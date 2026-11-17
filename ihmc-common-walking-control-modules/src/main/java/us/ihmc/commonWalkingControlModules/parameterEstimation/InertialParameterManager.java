@@ -46,6 +46,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.*;
@@ -240,6 +241,12 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoDouble estimatorSetpointComShiftZ;
    private final YoDouble estimatorSetpointCovarianceScale;
    private final YoBoolean estimatorSetpointBypassRateLimit;
+   // [TMECH] Absolute-body reset (see applyBodyReset()): one-shot, self-cleared. Body index, Pi-basis body, covariance re-init.
+   private final YoBoolean applyBodyReset;
+   private final YoInteger bodyResetIndex;
+   private final YoDouble[] bodyResetPi = new YoDouble[10];
+   private final YoBoolean bodyResetCovariance;
+   private final YoInteger bodyResetCount;
 
    private final YoBoolean areParametersPhysicallyConsistent;
 
@@ -554,6 +561,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       estimatorSetpointCovarianceScale = new YoDouble("estimatorSetpointCovarianceScale", registry);
       estimatorSetpointCovarianceScale.set(1.0);
       estimatorSetpointBypassRateLimit = new YoBoolean("estimatorSetpointBypassRateLimit", registry);
+      applyBodyReset = new YoBoolean("applyBodyReset", registry);
+      bodyResetIndex = new YoInteger("bodyResetIndex", registry);
+      for (int i = 0; i < bodyResetPi.length; i++)
+         bodyResetPi[i] = new YoDouble("bodyResetPi_" + i, registry);
+      bodyResetCovariance = new YoBoolean("bodyResetCovariance", registry);
+      bodyResetCovariance.set(true);
+      bodyResetCount = new YoInteger("bodyResetCount", registry);
 
       areParametersPhysicallyConsistent = new YoBoolean("areParametersPhysicallyConsistent", registry);
       areParametersPhysicallyConsistent.set(false);
@@ -591,6 +605,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          resetEstimator();
          resetEstimator.set(false);
+         return;
+      }
+
+      if (applyBodyReset.getValue())
+      {
+         applyBodyReset();
+         applyBodyReset.set(false);
          return;
       }
 
@@ -718,6 +739,28 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       LogTools.info("Estimator setpoint applied: mass x" + estimatorSetpointMassScale.getValue() + ", CoM shift ("
                     + estimatorSetpointComShiftX.getValue() + ", " + estimatorSetpointComShiftY.getValue() + ", "
                     + estimatorSetpointComShiftZ.getValue() + "), covariance x" + estimatorSetpointCovarianceScale.getValue());
+   }
+
+   /**
+    * [TMECH] Puts estimated body {@code bodyResetIndex} at the absolute rigid body {@code bodyResetPi_*} (and, with
+    * {@code bodyResetCovariance}, the covariance back to its initial value), for every estimator type alike. The
+    * estimate is handed on at once (rate limiters reset) so the controller sees the imposed body immediately.
+    */
+   private void applyBodyReset()
+   {
+      DMatrixRMaj pi = new DMatrixRMaj(10, 1);
+      for (int i = 0; i < 10; i++)
+         pi.set(i, 0, bodyResetPi[i].getValue());
+      filter.setBodyState(bodyResetIndex.getValue(), pi, bodyResetCovariance.getValue());
+      estimate.set(filter.getState());
+      filteredEstimate.set(estimate);
+      clearEstimateFilterMemory = true;
+      residual.zero();
+      baselineCalculator.resetRateLimiters();
+      bodyResetCount.increment();
+      LogTools.info("Body reset " + bodyResetCount.getValue() + ": body " + bodyResetIndex.getValue() + " set to m=" + pi.get(0, 0)
+                    + " c=(" + pi.get(1, 0) / pi.get(0, 0) + ", " + pi.get(2, 0) / pi.get(0, 0) + ", " + pi.get(3, 0) / pi.get(0, 0) + ")"
+                    + (bodyResetCovariance.getValue() ? ", covariance re-initialized" : ""));
    }
 
    private void resetEstimator()

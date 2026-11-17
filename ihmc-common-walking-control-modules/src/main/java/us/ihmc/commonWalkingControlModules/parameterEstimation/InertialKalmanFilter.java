@@ -151,6 +151,20 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
       clearResidualFilterMemory = true;
    }
 
+   /** [TMECH] Absolute Pi-basis state, so the body is written straight into rows 10 i .. 10 i + 9 (full basis only). */
+   @Override
+   public void setBodyState(int bodyIndex, DMatrix pi, boolean resetCovariance)
+   {
+      if (state.getNumRows() % PI_SIZE != 0 || bodyIndex < 0 || (bodyIndex + 1) * PI_SIZE > state.getNumRows())
+         return;
+      for (int r = 0; r < PI_SIZE; r++)
+         state.set(bodyIndex * PI_SIZE + r, 0, pi.get(r, 0));
+      if (resetCovariance)
+         covariance.set(initialCovariance);
+      filteredResidual.zero();
+      clearResidualFilterMemory = true;
+   }
+
    /** For inertial parameters, the process model is the identity mapping -- we assume that the parameters are constant. */
    @Override
    protected DMatrixRMaj processModel(DMatrixRMaj parametersToEstimate)
