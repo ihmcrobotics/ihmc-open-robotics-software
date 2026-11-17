@@ -157,6 +157,18 @@ public class InvariantUpdater
    }
 
    private boolean considerKinematicVelocityBias = false;
+   private boolean considerHeadingForNextUpdate = false;
+
+   /**
+    * Treats the heading (the world-z rotation error) and the body-z gyro bias as Schmidt "consider" states for the next
+    * {@link #update} only: their gain rows are zeroed, so that update cannot turn the heading or move the yaw-axis bias,
+    * and the Joseph form keeps P consistent with the suboptimal gain. Heading is unobservable for this filter; an update
+    * that turns it does so only through covariance it built up, and a large innovation then rotates the heading.
+    */
+   public void considerHeadingForNextUpdate()
+   {
+      considerHeadingForNextUpdate = true;
+   }
 
    /**
     * Treats the kinematic-velocity error block as a Schmidt "consider" state: kept in P (so every update accounts for
@@ -272,6 +284,19 @@ public class InvariantUpdater
          for (int i = 0; i < 3; i++)
             for (int j = 0; j < z; j++)
                gain.set(consider + i, j, 0.0);
+      }
+      if (considerHeadingForNextUpdate)
+      {
+         considerHeadingForNextUpdate = false;
+         int headingRow = state.rotationTangentIndex() + 2;
+         for (int j = 0; j < z; j++)
+            gain.set(headingRow, j, 0.0);
+         int bias = state.gyroBiasTangentIndex();
+         if (bias >= 0)
+         {
+            for (int j = 0; j < z; j++)
+               gain.set(bias + 2, j, 0.0);
+         }
       }
 
       // c = K·residual ; state update X̂⁺ = exp_G(−c)·X̂
