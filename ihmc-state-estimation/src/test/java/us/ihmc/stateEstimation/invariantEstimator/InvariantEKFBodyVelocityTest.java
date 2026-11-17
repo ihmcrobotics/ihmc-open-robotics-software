@@ -79,4 +79,38 @@ public class InvariantEKFBodyVelocityTest
       ekf.getState().getBaseVelocity(estimate);
       assertTrue(estimate.epsilonEquals(truth, 1.0e-12));
    }
+
+   /**
+    * With the heading correlated with velocity in P (as propagation builds up through the gyro bias), a horizontal
+    * velocity innovation turns the heading; with the heading considered it must not, while velocity is still corrected.
+    */
+   @Test
+   public void testHeadingConsiderKeepsTheHeadingWhenItIsCorrelatedWithVelocity()
+   {
+      for (boolean consider : new boolean[] {false, true})
+      {
+         InvariantEKF ekf = filter(new RotationMatrix(), new Vector3D(0.3, 0.0, 0.0), 1.0);
+         // Correlate the heading (rotation row 2) with the x velocity
+         int r = ekf.getState().rotationTangentIndex();
+         int v = ekf.getState().baseVelocityTangentIndex();
+         ekf.getState().getCovariance().set(r + 2, v, 0.8);
+         ekf.getState().getCovariance().set(v, r + 2, 0.8);
+         ekf.setKinematicVelocityHeadingConsider(consider);
+
+         Matrix3D noise = new Matrix3D();
+         noise.setIdentity();
+         noise.scale(1.0e-4);
+         ekf.updateBodyVelocity(new Vector3D(0.0, 0.0, 0.0), noise);
+
+         RotationMatrix after = new RotationMatrix();
+         ekf.getState().getRotation(after);
+         Vector3D velocity = new Vector3D();
+         ekf.getState().getBaseVelocity(velocity);
+         assertTrue(Math.abs(velocity.getX()) < 0.01, "velocity must still be corrected, got " + velocity.getX());
+         if (consider)
+            assertEquals(0.0, after.getYaw(), 1.0e-12, "the heading must not move");
+         else
+            assertTrue(Math.abs(after.getYaw()) > 0.05, "without consider the correlated heading moves, got " + after.getYaw());
+      }
+   }
 }
