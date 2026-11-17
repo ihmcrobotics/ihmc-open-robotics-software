@@ -170,6 +170,19 @@ public class InvariantUpdater
       considerHeadingForNextUpdate = true;
    }
 
+   private boolean considerPositionForNextUpdate = false;
+
+   /**
+    * Treats the world positions (base and every contact anchor) as Schmidt consider states for the next {@link #update}
+    * only: that update cannot move them, and the Joseph form keeps P consistent. Absolute position is unobservable, so
+    * its variance grows without bound and its correlation with velocity builds up; a large velocity innovation then
+    * moves the base by metres through that correlation alone.
+    */
+   public void considerPositionForNextUpdate()
+   {
+      considerPositionForNextUpdate = true;
+   }
+
    /**
     * Treats the kinematic-velocity error block as a Schmidt "consider" state: kept in P (so every update accounts for
     * the correlated measurement error) but never corrected. Off: an ordinary estimated state.
@@ -284,6 +297,21 @@ public class InvariantUpdater
          for (int i = 0; i < 3; i++)
             for (int j = 0; j < z; j++)
                gain.set(consider + i, j, 0.0);
+      }
+      if (considerPositionForNextUpdate)
+      {
+         considerPositionForNextUpdate = false;
+         int base = state.basePositionTangentIndex();
+         for (int i = 0; i < 3; i++)
+            for (int j = 0; j < z; j++)
+               gain.set(base + i, j, 0.0);
+         for (int contact = 0; contact < state.getNumberOfContacts(); contact++)
+         {
+            int c = state.contactTangentIndex(contact);
+            for (int i = 0; i < 3; i++)
+               for (int j = 0; j < z; j++)
+                  gain.set(c + i, j, 0.0);
+         }
       }
       if (considerHeadingForNextUpdate)
       {
