@@ -113,4 +113,27 @@ public class InvariantEKFBodyVelocityTest
             assertTrue(Math.abs(after.getYaw()) > 0.05, "without consider the correlated heading moves, got " + after.getYaw());
       }
    }
+
+   /** A wildly wrong measurement moves the velocity much less with the NIS gate than without it. */
+   @Test
+   public void testTheNISGateLimitsAWildMeasurement()
+   {
+      double[] moved = new double[2];
+      for (int gated = 0; gated < 2; gated++)
+      {
+         InvariantEKF ekf = filter(new RotationMatrix(), new Vector3D(), 1.0e-3);
+         if (gated == 1)
+            ekf.setKinematicVelocityNISGate(16.0);
+         Matrix3D noise = new Matrix3D();
+         noise.setIdentity();
+         noise.scale(1.0e-3);
+         ekf.updateBodyVelocity(new Vector3D(1.0, 0.0, 0.0), noise);
+         Vector3D velocity = new Vector3D();
+         ekf.getState().getBaseVelocity(velocity);
+         moved[gated] = velocity.getX();
+      }
+      // Prior and noise equal: ungated gain 0.5. NIS = 1 / 0.002 = 500 > 16, so R is inflated about 31 times.
+      assertTrue(moved[0] > 0.4, "ungated: the update moves halfway, moved " + moved[0]);
+      assertTrue(moved[1] < 0.1, "gated: the correction is cut, moved " + moved[1] + " against " + moved[0]);
+   }
 }
