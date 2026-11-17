@@ -570,6 +570,8 @@ public class SCS2AvatarSimulationFactory
          avatarEstimatorThreadFactory.setJointLevelKFConfigurator(jointLevelKFConfigurator);
       }
       estimatorThread = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
+      // The hardware process does this in setupHighLevelControllerCallback; the simulation does not call that.
+      estimatorThread.attachControllerStateToMainEstimator(highLevelHumanoidControllerFactory.get());
    }
 
    private void setupControllerThread()

@@ -14,6 +14,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.stateEstimation.invariantEstimator.InvariantMainStateEstimator;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.jros2.ROS2Publisher;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -194,6 +195,27 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
                mainStateEstimator.requestStateEstimatorMode(requestedMode);
          }
       });
+      attachControllerStateToMainEstimator(controllerFactory);
+   }
+
+   /**
+    * Tells the main estimator which high-level controller state is active, where it needs it: the invariant main
+    * estimator's controller-facing hip/knee filter is off in the RL controller states by default
+    * ({@code controllerFacingQdFilterInRL}). The hardware path calls this from {@link #setupHighLevelControllerCallback};
+    * a simulation calls it directly.
+    */
+   public void attachControllerStateToMainEstimator(HighLevelHumanoidControllerFactory controllerFactory)
+   {
+      if (!(mainStateEstimator instanceof InvariantMainStateEstimator invariantMainStateEstimator))
+         return;
+      controllerFactory.attachControllerStateChangedListener((oldState, newState) -> invariantMainStateEstimator.setRLControllerStateActive(
+            isRLControllerState(newState)));
+   }
+
+   /** The states that run an RL policy, or blend into or out of one. */
+   public static boolean isRLControllerState(Enum<?> state)
+   {
+      return state == HighLevelControllerName.RL_TRANSITION_STATE || state == HighLevelControllerName.RL_CONTROL || state == HighLevelControllerName.EXIT_RL;
    }
 
    public void addEstimatorRunnable(Runnable runnable)
