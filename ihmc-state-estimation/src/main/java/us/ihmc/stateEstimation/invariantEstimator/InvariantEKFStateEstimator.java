@@ -473,6 +473,21 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final YoBoolean yoStartupSettled = new YoBoolean("invariantStartupSettled", registry);
    private final YoDouble yoStartupQuietTime = new YoDouble("invariantStartupQuietTime", registry);
    private final YoDouble yoStartupElapsed = new YoDouble("invariantStartupElapsed", registry);
+   /**
+    * While the start-up settle holds the filter with a foot in contact, move the base with the stance feet (leg
+    * odometry: each trusted foot keeps the world point where it was first trusted) instead of freezing it. A robot
+    * that starts moving at once, as an RL policy does in simulation, otherwise drifts away from a frozen estimate for
+    * the whole timeout (60-140 mm in the perceptive walking test, kept for the rest of the run). Hanging and FROZEN
+    * keep the frozen position: nothing measures translation there.
+    */
+   private final YoBoolean yoStartupHoldTracksKinematics = new YoBoolean("invariantStartupHoldTracksKinematics", registry);
+   private final SideDependentList<Point3D> startupHoldFootAnchors = new SideDependentList<>(new Point3D(), new Point3D());
+   private final boolean[] startupHoldFootAnchored = new boolean[RobotSide.values.length];
+   private final FramePoint3D startupHoldSoleInBody = new FramePoint3D();
+   private final Vector3D startupHoldBasePosition = new Vector3D();
+   private final Point3D startupHoldCandidate = new Point3D();
+   private final Vector3D startupHoldSoleInWorld = new Vector3D();
+   private final RotationMatrix startupHoldRotation = new RotationMatrix();
    public static final double DEFAULT_STARTUP_SETTLE_DURATION = 0.1;
    public static final double DEFAULT_STARTUP_SETTLE_TIMEOUT = 2.0;
    private final org.ejml.data.DMatrixRMaj startCovariance = new org.ejml.data.DMatrixRMaj(15 + 3 * NUMBER_OF_CONTACTS, 15 + 3 * NUMBER_OF_CONTACTS);
@@ -789,6 +804,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoStartupSettleEnabled.set(true);
       yoStartupSettleDuration.set(DEFAULT_STARTUP_SETTLE_DURATION);
       yoStartupSettleTimeout.set(DEFAULT_STARTUP_SETTLE_TIMEOUT);
+      yoStartupHoldTracksKinematics.set(true);
       yoStartupTiltAlignmentEnabled.set(true);
       yoKinematicVelocityTrustLoad.set(DEFAULT_KINEMATIC_VELOCITY_TRUST_LOAD);
       yoKinematicVelocityRearRelease.set(false);
@@ -827,6 +843,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private void resetStartupSettle()
    {
       yoStartupSettled.set(false);
+      java.util.Arrays.fill(startupHoldFootAnchored, false);
       yoStartupQuietTime.set(0.0);
       yoStartupElapsed.set(0.0);
       yoStartupTiltAligned.set(false);
@@ -912,6 +929,44 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          return false;
       }
       return true;
+   }
+
+   /**
+    * Leg odometry for the start-up hold (see {@link #yoStartupHoldTracksKinematics}): a foot is anchored at its current
+    * world position when it becomes trusted (contact probability above 0.5), and the base is placed so that the
+    * anchored feet stay where they were, averaged over them. A foot that lifts loses its anchor and is re-anchored where
+    * it lands. Position only; the hold keeps the velocity at zero and the re-anchor at release seeds the contacts.
+    */
+   private void trackBaseWithStanceFeet()
+   {
+      ekf.getRotation(startupHoldRotation);
+      ekf.getState().getBasePosition(startupHoldBasePosition);
+      startupHoldCandidate.setToZero();
+      int anchoredFeet = 0;
+      for (RobotSide side : RobotSide.values)
+      {
+         int index = side.ordinal();
+         if (getContactProbability(side) <= 0.5)
+         {
+            startupHoldFootAnchored[index] = false;
+            continue;
+         }
+         startupHoldSoleInBody.setToZero(soleFrames.get(side));
+         startupHoldSoleInBody.changeFrame(pelvisFrame);
+         startupHoldRotation.transform(startupHoldSoleInBody, startupHoldSoleInWorld); // R r: sole relative to the base, in world
+         if (!startupHoldFootAnchored[index])
+         {
+            startupHoldFootAnchors.get(side).add(startupHoldBasePosition, startupHoldSoleInWorld);
+            startupHoldFootAnchored[index] = true;
+         }
+         startupHoldCandidate.add(startupHoldFootAnchors.get(side));
+         startupHoldCandidate.sub(startupHoldSoleInWorld);
+         anchoredFeet++;
+      }
+      if (anchoredFeet == 0)
+         return;
+      startupHoldCandidate.scale(1.0 / anchoredFeet);
+      ekf.getState().setBasePosition(startupHoldCandidate);
    }
 
    /**
@@ -1128,6 +1183,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          // translation is held — and it is the ONLY roll/pitch observation available while hanging/no-contact.
          updateGravityLeveling();
          ekf.getState().setBaseVelocity(zeroVelocity);
+         if (startupHold && !noContact && operatingMode != StateEstimatorMode.FROZEN && yoStartupHoldTracksKinematics.getValue())
+            trackBaseWithStanceFeet();
          heldLastTick = true;
          for (RobotSide side : RobotSide.values)
          {
