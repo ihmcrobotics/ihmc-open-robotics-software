@@ -71,7 +71,9 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
    /** State constraint applied after every update; see {@link InertialEstimationParameters#getKalmanFilterConstraint()}. */
    private enum StateConstraint
    {
-      NONE, MASS_CLAMP, PSD_PROJECT
+      NONE, MASS_CLAMP, PSD_PROJECT,
+      /** Constrained MAP: projection onto the pseudo-inertia LMI in the filter's own P^-1 metric ({@link PseudoInertiaConstrainedProjection}). */
+      LMI_MAP
    }
 
    private static final int PI_SIZE = 10;
@@ -87,6 +89,14 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
    private final DMatrixRMaj pseudoInertia = new DMatrixRMaj(4, 4);
    private final DMatrixRMaj projectedPseudoInertia = new DMatrixRMaj(4, 4);
    private final EigenDecomposition_F64<DMatrixRMaj> eigenDecomposition = DecompositionFactory_DDRM.eig(4, true, true);
+   // LMI_MAP: constrained-MAP projection in the P^-1 metric (eps = 1e-6 on the pseudo-inertia eigenvalues, duality gap 1e-6).
+   private final PseudoInertiaConstrainedProjection lmiProjection = new PseudoInertiaConstrainedProjection(1.0e-6, 1.0e-6);
+   private final DMatrixRMaj lmiW = new DMatrixRMaj(PI_SIZE, PI_SIZE);
+   private final DMatrixRMaj lmiStart = new DMatrixRMaj(PI_SIZE, 1);
+   private final DMatrixRMaj lmiResult = new DMatrixRMaj(PI_SIZE, 1);
+   private DMatrixRMaj lmiLast = null;
+   private us.ihmc.yoVariables.variable.YoDouble lmiDistance, lmiNewtonSteps;
+   private us.ihmc.yoVariables.variable.YoBoolean lmiActive;
 
    public InertialKalmanFilter(FullRobotModel model, InertialEstimationParameters parameters, DoubleProvider dt, YoRegistry parentRegistry)
    {
@@ -138,6 +148,13 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
       }
 
       stateConstraint = StateConstraint.valueOf(parameters.getKalmanFilterConstraint());
+      if (stateConstraint == StateConstraint.LMI_MAP)
+      {
+         // registered at construction so the variables are in the session's buffer
+         lmiDistance = new us.ihmc.yoVariables.variable.YoDouble("lmiMapDistance", registry);
+         lmiNewtonSteps = new us.ihmc.yoVariables.variable.YoDouble("lmiMapNewtonSteps", registry);
+         lmiActive = new us.ihmc.yoVariables.variable.YoBoolean("lmiMapActive", registry);
+      }
       if (stateConstraint != StateConstraint.NONE && getState().getNumRows() % PI_SIZE != 0)
          throw new IllegalArgumentException("KF state constraint " + stateConstraint + " needs the full 10-parameter pi basis per body");
    }
@@ -260,11 +277,52 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
             if (state.get(offset, 0) < MASS_FLOOR)
                state.set(offset, 0, MASS_FLOOR);
          }
+         else if (stateConstraint == StateConstraint.LMI_MAP)
+         {
+            projectLmiMap(offset);
+         }
          else
          {
             projectPseudoInertia(offset);
          }
       }
+   }
+
+   private void projectLmiMap(int offset)
+   {
+      if (lmiLast == null)
+      {
+         lmiLast = new DMatrixRMaj(state.getNumRows(), 1);
+         lmiLast.set(initialState);
+      }
+      CommonOps_DDRM.extract(state, offset, offset + PI_SIZE, 0, 1, piBlock, 0, 0);
+      // W = (P_block)^-1, the information of this body's block (cross-body coupling ignored; one body in this study)
+      CommonOps_DDRM.extract(covariance, offset, offset + PI_SIZE, offset, offset + PI_SIZE, lmiW, 0, 0);
+      for (int i = 0; i < PI_SIZE; i++)
+         lmiW.add(i, i, 1.0e-12);
+      DMatrixRMaj pBlock = lmiW.copy();
+      if (!CommonOps_DDRM.invertSPD(pBlock, lmiW))
+      {
+         lmiW.set(pBlock);
+         CommonOps_DDRM.invert(lmiW);
+      }
+      // warm start at the last projection if still strictly feasible, else the URDF body
+      CommonOps_DDRM.extract(lmiLast, offset, offset + PI_SIZE, 0, 1, lmiStart, 0, 0);
+      if (!lmiProjection.isStrictlyConsistent(lmiStart))
+         CommonOps_DDRM.extract(initialState, offset, offset + PI_SIZE, 0, 1, lmiStart, 0, 0);
+      if (!lmiProjection.project(piBlock, lmiW, lmiStart, lmiResult))
+      {
+         projectPseudoInertia(offset);
+         return;
+      }
+      for (int r = 0; r < PI_SIZE; r++)
+      {
+         state.set(offset + r, 0, lmiResult.get(r));
+         lmiLast.set(offset + r, 0, lmiResult.get(r));
+      }
+      lmiDistance.set(lmiProjection.getLastDistance());
+      lmiNewtonSteps.set(lmiProjection.getLastNewtonSteps());
+      lmiActive.set(lmiProjection.wasLastActive());
    }
 
    private void projectPseudoInertia(int offset)

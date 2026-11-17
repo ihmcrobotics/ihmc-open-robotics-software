@@ -1,0 +1,273 @@
+package us.ihmc.commonWalkingControlModules.parameterEstimation;
+
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
+
+/**
+ * Constrained MAP projection of one rigid body's Pi-basis estimate onto the physically consistent set, in a given metric:
+ *
+ * <pre>
+ *    minimize   1/2 (pi - piHat)^T W (pi - piHat)
+ *    subject to J(pi) - eps I  is positive semidefinite,
+ * </pre>
+ *
+ * where J(pi) is the 4 x 4 pseudo-inertia (Wensing, Kim and Slotine, RA-L 2018), linear in pi. With W = P^-1, the inverse of
+ * the Kalman filter's covariance, this is the maximum a-posteriori estimate of the Gaussian posterior restricted to the
+ * consistent set -- "estimate projection" in the sense of Simon (IET CTA 2010), not the Euclidean eigenvalue clip.
+ * <p>
+ * Solved by a primal log-barrier interior-point method (Boyd and Vandenberghe, Ch. 11): for an increasing barrier weight t,
+ * Newton on t * f0(pi) - log det(J(pi) - eps I), with backtracking that keeps the Cholesky factor of J - eps I defined. The
+ * objective is a Mahalanobis distance, so the duality-gap tolerance 4 / t is dimensionless. No external solver; about a
+ * hundred 10 x 10 Newton steps worst case. If piHat is already consistent the constraint is inactive and piHat is returned.
+ * </p>
+ */
+public class PseudoInertiaConstrainedProjection
+{
+   public static final int N = 10;
+
+   private final double eps;
+   private final double gapTolerance;
+   private final DMatrixRMaj[] basis = new DMatrixRMaj[N];
+
+   private final DMatrixRMaj jt = new DMatrixRMaj(4, 4);
+   private final DMatrixRMaj jtInv = new DMatrixRMaj(4, 4);
+   private final DMatrixRMaj[] b = new DMatrixRMaj[N];
+   private final DMatrixRMaj grad = new DMatrixRMaj(N, 1);
+   private final DMatrixRMaj hess = new DMatrixRMaj(N, N);
+   private final DMatrixRMaj step = new DMatrixRMaj(N, 1);
+   private final DMatrixRMaj diff = new DMatrixRMaj(N, 1);
+   private final DMatrixRMaj wDiff = new DMatrixRMaj(N, 1);
+   private final DMatrixRMaj trial = new DMatrixRMaj(N, 1);
+   private final DMatrixRMaj x = new DMatrixRMaj(N, 1);
+   private final LinearSolverDense<DMatrixRMaj> newtonSolver = LinearSolverFactory_DDRM.symmPosDef(N);
+   private final LinearSolverDense<DMatrixRMaj> generalSolver = LinearSolverFactory_DDRM.linear(N);
+
+   private int lastNewtonSteps;
+   private double lastDistance;
+   private boolean lastActive;
+
+   public PseudoInertiaConstrainedProjection(double eps, double gapTolerance)
+   {
+      this.eps = eps;
+      this.gapTolerance = gapTolerance;
+      for (int i = 0; i < N; i++)
+      {
+         basis[i] = new DMatrixRMaj(4, 4);
+         b[i] = new DMatrixRMaj(4, 4);
+      }
+      // J = [S h; h^T m], S = 1/2 tr(I) 1 - I; pi = (m, hx, hy, hz, Ixx, Ixy, Ixz, Iyy, Iyz, Izz)
+      basis[0].set(3, 3, 1.0);
+      for (int k = 0; k < 3; k++)
+      {
+         basis[1 + k].set(k, 3, 1.0);
+         basis[1 + k].set(3, k, 1.0);
+      }
+      int[] diagIndex = {4, 7, 9};
+      for (int a = 0; a < 3; a++)
+         for (int k = 0; k < 3; k++)
+            basis[diagIndex[a]].set(k, k, k == a ? -0.5 : 0.5);
+      basis[5].set(0, 1, -1.0);
+      basis[5].set(1, 0, -1.0);
+      basis[6].set(0, 2, -1.0);
+      basis[6].set(2, 0, -1.0);
+      basis[8].set(1, 2, -1.0);
+      basis[8].set(2, 1, -1.0);
+   }
+
+   public static void pseudoInertia(DMatrixRMaj pi, DMatrixRMaj jToPack)
+   {
+      double m = pi.get(0), ixx = pi.get(4), ixy = pi.get(5), ixz = pi.get(6), iyy = pi.get(7), iyz = pi.get(8), izz = pi.get(9);
+      double halfTrace = 0.5 * (ixx + iyy + izz);
+      jToPack.reshape(4, 4);
+      jToPack.set(0, 0, halfTrace - ixx);
+      jToPack.set(1, 1, halfTrace - iyy);
+      jToPack.set(2, 2, halfTrace - izz);
+      jToPack.set(0, 1, -ixy);
+      jToPack.set(1, 0, -ixy);
+      jToPack.set(0, 2, -ixz);
+      jToPack.set(2, 0, -ixz);
+      jToPack.set(1, 2, -iyz);
+      jToPack.set(2, 1, -iyz);
+      for (int k = 0; k < 3; k++)
+      {
+         jToPack.set(k, 3, pi.get(1 + k));
+         jToPack.set(3, k, pi.get(1 + k));
+      }
+      jToPack.set(3, 3, m);
+   }
+
+   /** log det(J(pi) - eps I) via Cholesky, or NaN if J - eps I is not positive definite. Leaves (J - eps I)^-1 in jtInv. */
+   private double logDetShifted(DMatrixRMaj pi)
+   {
+      pseudoInertia(pi, jt);
+      for (int k = 0; k < 4; k++)
+         jt.add(k, k, -eps);
+      // 4 x 4 Cholesky by hand (no allocation)
+      double[][] l = new double[4][4];
+      double logDet = 0.0;
+      for (int i = 0; i < 4; i++)
+      {
+         for (int j = 0; j <= i; j++)
+         {
+            double s = jt.get(i, j);
+            for (int k = 0; k < j; k++)
+               s -= l[i][k] * l[j][k];
+            if (i == j)
+            {
+               if (!(s > 0.0))
+                  return Double.NaN;
+               l[i][i] = Math.sqrt(s);
+               logDet += 2.0 * Math.log(l[i][i]);
+            }
+            else
+            {
+               l[i][j] = s / l[j][j];
+            }
+         }
+      }
+      // inverse from the factor: solve L L^T X = I column by column
+      for (int c = 0; c < 4; c++)
+      {
+         double[] y = new double[4];
+         for (int i = 0; i < 4; i++)
+         {
+            double s = i == c ? 1.0 : 0.0;
+            for (int k = 0; k < i; k++)
+               s -= l[i][k] * y[k];
+            y[i] = s / l[i][i];
+         }
+         for (int i = 3; i >= 0; i--)
+         {
+            double s = y[i];
+            for (int k = i + 1; k < 4; k++)
+               s -= l[k][i] * jtInv.get(k, c);
+            jtInv.set(i, c, s / l[i][i]);
+         }
+      }
+      return logDet;
+   }
+
+   public boolean isStrictlyConsistent(DMatrixRMaj pi)
+   {
+      return !Double.isNaN(logDetShifted(pi));
+   }
+
+   private double objective(DMatrixRMaj pi, DMatrixRMaj piHat, DMatrixRMaj w, double t)
+   {
+      double logDet = logDetShifted(pi);
+      if (Double.isNaN(logDet))
+         return Double.POSITIVE_INFINITY;
+      CommonOps_DDRM.subtract(pi, piHat, diff);
+      CommonOps_DDRM.mult(w, diff, wDiff);
+      return 0.5 * t * CommonOps_DDRM.dot(diff, wDiff) - logDet;
+   }
+
+   /**
+    * Projects {@code piHat} in the metric {@code w} (symmetric positive definite, 10 x 10). {@code feasibleStart} must be strictly
+    * consistent (J - eps I positive definite), e.g. the nominal body or the previous projection. Returns false (and leaves
+    * {@code result} = feasibleStart) only if the start is not strictly feasible.
+    */
+   public boolean project(DMatrixRMaj piHat, DMatrixRMaj w, DMatrixRMaj feasibleStart, DMatrixRMaj result)
+   {
+      lastNewtonSteps = 0;
+      if (isStrictlyConsistent(piHat))
+      {
+         result.set(piHat);
+         lastActive = false;
+         lastDistance = 0.0;
+         return true;
+      }
+      lastActive = true;
+      x.set(feasibleStart);
+      result.set(feasibleStart);
+      if (!isStrictlyConsistent(x))
+         return false;
+
+      // Initial barrier weight balancing the two terms at the start (Boyd and Vandenberghe 11.3.1): t0 = m / f0(x0), m = 4.
+      CommonOps_DDRM.subtract(x, piHat, diff);
+      CommonOps_DDRM.mult(w, diff, wDiff);
+      double f0Start = 0.5 * CommonOps_DDRM.dot(diff, wDiff);
+      double t0 = 4.0 / Math.max(f0Start, 1.0e-12);
+      for (double t = t0; ; t *= 10.0)
+      {
+         for (int newton = 0; newton < 200; newton++)
+         {
+            double f = objective(x, piHat, w, t); // also leaves jtInv at x
+            // gradient and Hessian of the barrier: g_i = -tr(Jt^-1 A_i), H_ij = tr(Jt^-1 A_i Jt^-1 A_j)
+            for (int i = 0; i < N; i++)
+               CommonOps_DDRM.mult(jtInv, basis[i], b[i]);
+            for (int i = 0; i < N; i++)
+            {
+               grad.set(i, t * wDiff.get(i) - trace(b[i]));
+               for (int j = i; j < N; j++)
+               {
+                  double h = t * w.get(i, j) + traceOfProduct(b[i], b[j]);
+                  hess.set(i, j, h);
+                  hess.set(j, i, h);
+               }
+            }
+            LinearSolverDense<DMatrixRMaj> solver = newtonSolver.setA(hess.copy()) ? newtonSolver : generalSolver;
+            if (solver == generalSolver && !generalSolver.setA(hess.copy()))
+               break;
+            solver.solve(grad, step);
+            double decrement2 = CommonOps_DDRM.dot(grad, step);
+            if (!(decrement2 > 1.0e-12))
+               break;
+            double alpha = 1.0;
+            double fTrial;
+            do
+            {
+               CommonOps_DDRM.add(x, -alpha, step, trial);
+               fTrial = objective(trial, piHat, w, t);
+               alpha *= 0.5;
+            }
+            while ((fTrial > f - 0.25 * 2.0 * alpha * decrement2 || Double.isInfinite(fTrial)) && alpha > 1.0e-12);
+            if (Double.isInfinite(fTrial))
+               break;
+            x.set(trial);
+            lastNewtonSteps++;
+            if (decrement2 < 1.0e-10)
+               break;
+         }
+         if (4.0 / t < gapTolerance)
+            break;
+      }
+      result.set(x);
+      CommonOps_DDRM.subtract(x, piHat, diff);
+      CommonOps_DDRM.mult(w, diff, wDiff);
+      lastDistance = Math.sqrt(Math.max(0.0, CommonOps_DDRM.dot(diff, wDiff)));
+      return true;
+   }
+
+   private static double trace(DMatrixRMaj a)
+   {
+      return a.get(0, 0) + a.get(1, 1) + a.get(2, 2) + a.get(3, 3);
+   }
+
+   private static double traceOfProduct(DMatrixRMaj a, DMatrixRMaj c)
+   {
+      double s = 0.0;
+      for (int i = 0; i < 4; i++)
+         for (int k = 0; k < 4; k++)
+            s += a.get(i, k) * c.get(k, i);
+      return s;
+   }
+
+   public int getLastNewtonSteps()
+   {
+      return lastNewtonSteps;
+   }
+
+   /** Mahalanobis distance sqrt((pi - piHat)^T W (pi - piHat)) of the last projection (0 if the constraint was inactive). */
+   public double getLastDistance()
+   {
+      return lastDistance;
+   }
+
+   public boolean wasLastActive()
+   {
+      return lastActive;
+   }
+}
