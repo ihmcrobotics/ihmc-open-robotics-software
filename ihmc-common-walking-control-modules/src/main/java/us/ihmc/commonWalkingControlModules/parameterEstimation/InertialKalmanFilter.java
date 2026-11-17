@@ -73,7 +73,13 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
    {
       NONE, MASS_CLAMP, PSD_PROJECT,
       /** Constrained MAP: projection onto the pseudo-inertia LMI in the filter's own P^-1 metric ({@link PseudoInertiaConstrainedProjection}). */
-      LMI_MAP
+      LMI_MAP,
+      /**
+       * [TMECH] Log-determinant (entropic) MAP of Lee, Wensing and Park (T-RO 2020), output only: the filter recursion keeps
+       * the unconstrained mean (the least-squares sufficient statistic), and every tick the estimate handed out is
+       * argmin 1/2 |pi - mean|^2_{P^-1} + gamma D(J(pi) || J_nominal). See {@link PseudoInertiaConstrainedProjection#logDetMap}.
+       */
+      LOGDET_MAP
    }
 
    private static final int PI_SIZE = 10;
@@ -97,6 +103,14 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
    private DMatrixRMaj lmiLast = null;
    private us.ihmc.yoVariables.variable.YoDouble lmiDistance, lmiNewtonSteps;
    private us.ihmc.yoVariables.variable.YoBoolean lmiActive;
+   // LOGDET_MAP: exact divergence (eps = 0); the unconstrained mean is restored before every prediction step.
+   private final PseudoInertiaConstrainedProjection logDetMapSolver = new PseudoInertiaConstrainedProjection(0.0, 1.0e-6);
+   private final DMatrixRMaj logDetJ0Inverse = new DMatrixRMaj(4, 4);
+   private final double logDetMapWeight;
+   private DMatrixRMaj unconstrainedMean = null;
+   private DMatrixRMaj logDetMapLast = null;
+   private us.ihmc.yoVariables.variable.YoDouble logDetMapDivergence, logDetMapNewtonSteps, logDetMapDistance;
+   private us.ihmc.yoVariables.variable.YoBoolean logDetMapConverged;
 
    public InertialKalmanFilter(FullRobotModel model, InertialEstimationParameters parameters, DoubleProvider dt, YoRegistry parentRegistry)
    {
@@ -155,6 +169,14 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
          lmiNewtonSteps = new us.ihmc.yoVariables.variable.YoDouble("lmiMapNewtonSteps", registry);
          lmiActive = new us.ihmc.yoVariables.variable.YoBoolean("lmiMapActive", registry);
       }
+      logDetMapWeight = parameters.getKalmanFilterLogDetWeight();
+      if (stateConstraint == StateConstraint.LOGDET_MAP)
+      {
+         logDetMapDivergence = new us.ihmc.yoVariables.variable.YoDouble("logDetMapDivergence", registry);
+         logDetMapNewtonSteps = new us.ihmc.yoVariables.variable.YoDouble("logDetMapNewtonSteps", registry);
+         logDetMapDistance = new us.ihmc.yoVariables.variable.YoDouble("logDetMapDistance", registry);
+         logDetMapConverged = new us.ihmc.yoVariables.variable.YoBoolean("logDetMapConverged", registry);
+      }
       if (stateConstraint != StateConstraint.NONE && getState().getNumRows() % PI_SIZE != 0)
          throw new IllegalArgumentException("KF state constraint " + stateConstraint + " needs the full 10-parameter pi basis per body");
    }
@@ -166,6 +188,10 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
       super.reset();
       filteredResidual.zero();
       clearResidualFilterMemory = true;
+      if (unconstrainedMean != null)
+         unconstrainedMean.set(state);
+      if (logDetMapLast != null)
+         logDetMapLast.set(state);
    }
 
    /** [TMECH] Absolute Pi-basis state, so the body is written straight into rows 10 i .. 10 i + 9 (full basis only). */
@@ -175,7 +201,13 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
       if (state.getNumRows() % PI_SIZE != 0 || bodyIndex < 0 || (bodyIndex + 1) * PI_SIZE > state.getNumRows())
          return;
       for (int r = 0; r < PI_SIZE; r++)
+      {
          state.set(bodyIndex * PI_SIZE + r, 0, pi.get(r, 0));
+         if (unconstrainedMean != null)
+            unconstrainedMean.set(bodyIndex * PI_SIZE + r, 0, pi.get(r, 0));
+         if (logDetMapLast != null)
+            logDetMapLast.set(bodyIndex * PI_SIZE + r, 0, pi.get(r, 0));
+      }
       if (resetCovariance)
          covariance.set(initialCovariance);
       filteredResidual.zero();
@@ -254,16 +286,73 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
     * projection of the pseudo-inertia onto the positive semidefinite cone (eigenvalue clipping), which makes the
     * estimate fully physically consistent without a solver.
     */
+   /** LOGDET_MAP: the recursion runs on the unconstrained mean, so put it back before the prediction and residual. */
+   @Override
+   protected void preSolveHook()
+   {
+      if (stateConstraint == StateConstraint.LOGDET_MAP && unconstrainedMean != null)
+         state.set(unconstrainedMean);
+   }
+
    @Override
    public void postSolveHook()
    {
-      if (stateConstraint != StateConstraint.NONE && !isParametersHeld())
+      if (stateConstraint == StateConstraint.LOGDET_MAP)
+         applyLogDetMap(); // also while held: the mean is then unchanged, and the MAP of an unchanged mean is unchanged
+      else if (stateConstraint != StateConstraint.NONE && !isParametersHeld())
          applyStateConstraint();
 
       for (int i = 0; i < piWatchers.size(); i++)
       {
          CommonOps_DDRM.extract(state, piWatcherOffsets.get(i), piWatcherOffsets.get(i) + PI_SIZE, 0, 1, piBlock, 0, 0);
          piWatchers.get(i).set(piBlock);
+      }
+   }
+
+   private void applyLogDetMap()
+   {
+      if (unconstrainedMean == null)
+      {
+         unconstrainedMean = new DMatrixRMaj(state.getNumRows(), 1);
+         logDetMapLast = new DMatrixRMaj(initialState);
+      }
+      unconstrainedMean.set(state);
+      for (int offset = 0; offset + PI_SIZE <= state.getNumRows(); offset += PI_SIZE)
+      {
+         CommonOps_DDRM.extract(unconstrainedMean, offset, offset + PI_SIZE, 0, 1, piBlock, 0, 0);
+         // W = (P_block)^-1 (cross-body coupling ignored; one body in this study)
+         CommonOps_DDRM.extract(covariance, offset, offset + PI_SIZE, offset, offset + PI_SIZE, lmiW, 0, 0);
+         for (int i = 0; i < PI_SIZE; i++)
+            lmiW.add(i, i, 1.0e-12);
+         DMatrixRMaj pBlock = lmiW.copy();
+         if (!CommonOps_DDRM.invertSPD(pBlock, lmiW))
+         {
+            lmiW.set(pBlock);
+            CommonOps_DDRM.invert(lmiW);
+         }
+         // prior body J0 = the nominal (initial) body
+         CommonOps_DDRM.extract(initialState, offset, offset + PI_SIZE, 0, 1, lmiStart, 0, 0);
+         PseudoInertiaConstrainedProjection.pseudoInertia(lmiStart, pseudoInertia);
+         logDetJ0Inverse.set(pseudoInertia);
+         CommonOps_DDRM.invert(logDetJ0Inverse);
+         double logDetJ0 = logDetMapSolver.logDet(lmiStart);
+         // warm start at the last MAP if strictly feasible, else the nominal body
+         CommonOps_DDRM.extract(logDetMapLast, offset, offset + PI_SIZE, 0, 1, lmiResult, 0, 0);
+         if (logDetMapSolver.isStrictlyConsistent(lmiResult))
+            lmiStart.set(lmiResult);
+         DMatrixRMaj prior = new DMatrixRMaj(PI_SIZE, 1);
+         CommonOps_DDRM.extract(initialState, offset, offset + PI_SIZE, 0, 1, prior, 0, 0);
+         if (!logDetMapSolver.logDetMap(piBlock, lmiW, prior, logDetMapWeight, lmiStart, lmiResult))
+            lmiResult.set(lmiStart);
+         for (int r = 0; r < PI_SIZE; r++)
+         {
+            state.set(offset + r, 0, lmiResult.get(r));
+            logDetMapLast.set(offset + r, 0, lmiResult.get(r));
+         }
+         logDetMapDivergence.set(logDetMapSolver.logDetDivergence(lmiResult, logDetJ0Inverse, logDetJ0));
+         logDetMapNewtonSteps.set(logDetMapSolver.getLastNewtonSteps());
+         logDetMapDistance.set(logDetMapSolver.getLastDistance());
+         logDetMapConverged.set(logDetMapSolver.wasLastConverged());
       }
    }
 

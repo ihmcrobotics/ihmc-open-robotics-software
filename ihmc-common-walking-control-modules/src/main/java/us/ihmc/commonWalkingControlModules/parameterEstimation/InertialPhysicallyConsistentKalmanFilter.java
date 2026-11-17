@@ -204,7 +204,13 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
             // Generalized (Eq. (11)) parameterization: estimate a physically-consistent deviation from the
             // known nominal inertia of this body (theta = 0 is the nominal). Off by default (absolute Eq. (1)).
             if (parameters.useGeneralizedPhysicalConsistency())
-               bodyParameters.enableGeneralizedParameterization();
+            {
+               // [TMECH ablation] same deviation form and slots, exponential-eigenvalue map instead of log-Cholesky
+               if (parameters.useExponentialEigenvalueParameterization())
+                  bodyParameters.enableExponentialEigenvalueParameterization();
+               else
+                  bodyParameters.enableGeneralizedParameterization();
+            }
             inertialParameters.add(bodyParameters);
             comCouplingList.add(parameters.getCoMLoadCouplingPoint(modelBodies[i].getName()));
             inertialParametersPiBasisWatchers.add(new YoMatrix("pi_" + modelBodies[i].getName() + "_", 10, 1, RigidBodyInertialParametersTools.getNamesForPiBasis(), null, registry));
@@ -223,6 +229,8 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
       }
 
       comCouplingPoints = comCouplingList.toArray(new double[0][]);
+      if (LOG_DET_PRIOR && parameters.useGeneralizedPhysicalConsistency() && parameters.useExponentialEigenvalueParameterization())
+         throw new RuntimeException("priorMetric=LOGDET is implemented for the log-Cholesky deviation only");
       if (LOG_DET_PRIOR && parameters.useGeneralizedPhysicalConsistency())
       {
          for (RigidBodyInertialParameters bodyParameters : inertialParameters)

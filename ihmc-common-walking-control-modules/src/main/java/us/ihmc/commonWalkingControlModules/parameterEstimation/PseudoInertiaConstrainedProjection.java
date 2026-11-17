@@ -47,6 +47,9 @@ public class PseudoInertiaConstrainedProjection
    private int lastNewtonSteps;
    private double lastDistance;
    private boolean lastActive;
+   private boolean lastConverged;
+   private final DMatrixRMaj j0Inv = new DMatrixRMaj(4, 4);
+   private final double[] ldC = new double[N];
 
    public PseudoInertiaConstrainedProjection(double eps, double gapTolerance)
    {
@@ -239,6 +242,147 @@ public class PseudoInertiaConstrainedProjection
       CommonOps_DDRM.mult(w, diff, wDiff);
       lastDistance = Math.sqrt(Math.max(0.0, CommonOps_DDRM.dot(diff, wDiff)));
       return true;
+   }
+
+   /**
+    * [TMECH] Log-determinant (entropic) MAP of Lee, Wensing and Park (T-RO 2020), solved recursively on the filter's summary:
+    *
+    * <pre>
+    *    minimize   1/2 (pi - piHat)^T W (pi - piHat)  +  gamma * D(J(pi) || J0),
+    *    D(J || J0) = -log det(J0^-1 J) + tr(J0^-1 J) - 4      (Bregman divergence of -log det; zero iff J = J0),
+    * </pre>
+    *
+    * with (piHat, W^-1) the unconstrained linear Kalman filter's mean and covariance, i.e. the least-squares data term
+    * over all measurements so far (with the filter's random-walk forgetting), and J0 the prior body. The log-det term keeps
+    * the minimizer strictly inside the physically consistent set (it is +infinity on its boundary), so no separate barrier
+    * or continuation is needed: the problem is strictly convex and damped Newton converges in a few steps from a warm start.
+    * {@code priorBody} (Pi basis) gives J0 and must be strictly consistent; {@code feasibleStart} is the warm start (the prior
+    * body is used if it is not strictly consistent). Uses this instance's eps shift in the log-det (construct with eps = 0 for
+    * the exact divergence).
+    */
+   public boolean logDetMap(DMatrixRMaj piHat, DMatrixRMaj w, DMatrixRMaj priorBody, double gamma, DMatrixRMaj feasibleStart,
+                            DMatrixRMaj result)
+   {
+      lastNewtonSteps = 0;
+      lastActive = true;
+      result.set(feasibleStart);
+      if (!isStrictlyConsistent(priorBody))
+         return false;
+      pseudoInertia(priorBody, j0Inv);
+      CommonOps_DDRM.invert(j0Inv);
+      // c_i = tr(J0^-1 A_i): gradient of the linear term tr(J0^-1 J(pi))
+      for (int i = 0; i < N; i++)
+         ldC[i] = traceOfProduct(j0Inv, basis[i]);
+      boolean warm = isStrictlyConsistent(feasibleStart);
+      x.set(warm ? feasibleStart : priorBody);
+      // Online the warm start (last tick's MAP) is usually within a step or two of the answer. If not (a long move along a
+      // nearly singular face of the consistent set), keep the improved feasible iterate and continue next tick from it,
+      // like a real-time iteration: f decreases monotonically, so the estimate handed out only gets better.
+      boolean converged = logDetNewton(piHat, w, gamma, 50);
+      if (!converged && !warm)
+      {
+         // Cold or far start: path following from the prior body (the minimizer as gamma -> infinity), dividing gamma by 10
+         // per stage as in a barrier method (Boyd and Vandenberghe 11.3), so each stage starts near its own minimizer.
+         x.set(priorBody);
+         CommonOps_DDRM.subtract(x, piHat, diff);
+         CommonOps_DDRM.mult(w, diff, wDiff);
+         double gammaK = Math.max(gamma, 0.25 * 0.5 * CommonOps_DDRM.dot(diff, wDiff));
+         while (true)
+         {
+            converged = logDetNewton(piHat, w, gammaK, 100);
+            if (gammaK <= gamma)
+               break;
+            gammaK = Math.max(gamma, 0.1 * gammaK);
+         }
+      }
+      result.set(x);
+      CommonOps_DDRM.subtract(x, piHat, diff);
+      CommonOps_DDRM.mult(w, diff, wDiff);
+      lastDistance = Math.sqrt(Math.max(0.0, CommonOps_DDRM.dot(diff, wDiff)));
+      lastConverged = converged;
+      return true;
+   }
+
+   /** Damped Newton on the log-det MAP objective from x (in place); true if the Newton decrement fell below tolerance. */
+   private boolean logDetNewton(DMatrixRMaj piHat, DMatrixRMaj w, double gamma, int maxSteps)
+   {
+      for (int newton = 0; newton < maxSteps; newton++)
+      {
+         double f = logDetMapObjective(x, piHat, w, ldC, gamma); // leaves jtInv at x and wDiff = W (x - piHat)
+         for (int i = 0; i < N; i++)
+            CommonOps_DDRM.mult(jtInv, basis[i], b[i]);
+         for (int i = 0; i < N; i++)
+         {
+            grad.set(i, wDiff.get(i) + gamma * (ldC[i] - trace(b[i])));
+            for (int j = i; j < N; j++)
+            {
+               double h = w.get(i, j) + gamma * traceOfProduct(b[i], b[j]);
+               hess.set(i, j, h);
+               hess.set(j, i, h);
+            }
+         }
+         LinearSolverDense<DMatrixRMaj> solver = newtonSolver.setA(hess.copy()) ? newtonSolver : generalSolver;
+         if (solver == generalSolver && !generalSolver.setA(hess.copy()))
+            return false;
+         solver.solve(grad, step);
+         double decrement2 = CommonOps_DDRM.dot(grad, step);
+         // suboptimality ~ decrement^2 / 2, in the objective's (Mahalanobis) units; relative floor for round-off in f
+         double tolerance = 2.0e-10 + 1.0e-12 * Math.abs(f);
+         if (!(decrement2 > tolerance))
+            return true;
+         double alpha = 1.0;
+         double fTrial;
+         do
+         {
+            CommonOps_DDRM.add(x, -alpha, step, trial);
+            fTrial = logDetMapObjective(trial, piHat, w, ldC, gamma);
+            alpha *= 0.5;
+         }
+         while ((fTrial > f - 0.25 * 2.0 * alpha * decrement2 || Double.isInfinite(fTrial)) && alpha > 1.0e-12);
+         // line search exhausted: no representable decrease left, i.e. converged to working precision if the decrement is small
+         boolean exhausted = alpha <= 1.0e-12;
+         if (Double.isInfinite(fTrial) || fTrial > f)
+            return decrement2 < 1.0e-6 * (1.0 + Math.abs(f));
+         x.set(trial);
+         lastNewtonSteps++;
+         if (exhausted)
+            return decrement2 < 1.0e-6 * (1.0 + Math.abs(f));
+      }
+      return false;
+   }
+
+   public boolean wasLastConverged()
+   {
+      return lastConverged;
+   }
+
+   /** D(J(pi) || J0) for J0 given by its inverse and log det; NaN if J(pi) - eps I is not positive definite. */
+   public double logDetDivergence(DMatrixRMaj pi, DMatrixRMaj j0Inverse, double logDetJ0)
+   {
+      double logDet = logDetShifted(pi);
+      if (Double.isNaN(logDet))
+         return Double.NaN;
+      pseudoInertia(pi, jt);
+      return -(logDet - logDetJ0) + traceOfProduct(j0Inverse, jt) - 4.0;
+   }
+
+   /** log det J(pi) (eps-shifted), NaN if not positive definite. */
+   public double logDet(DMatrixRMaj pi)
+   {
+      return logDetShifted(pi);
+   }
+
+   private double logDetMapObjective(DMatrixRMaj pi, DMatrixRMaj piHat, DMatrixRMaj w, double[] c, double gamma)
+   {
+      double logDet = logDetShifted(pi);
+      if (Double.isNaN(logDet))
+         return Double.POSITIVE_INFINITY;
+      CommonOps_DDRM.subtract(pi, piHat, diff);
+      CommonOps_DDRM.mult(w, diff, wDiff);
+      double linear = 0.0;
+      for (int i = 0; i < N; i++)
+         linear += c[i] * pi.get(i);
+      return 0.5 * CommonOps_DDRM.dot(diff, wDiff) + gamma * (linear - logDet);
    }
 
    private static double trace(DMatrixRMaj a)

@@ -215,6 +215,18 @@ public interface InertialEstimationParameters
       return "NONE";
    }
 
+   /** [TMECH ablation] Generalized EKF with the exponential-eigenvalue map (Martinez, Griffin, Mastalli 2025) instead of log-Cholesky. */
+   default boolean useExponentialEigenvalueParameterization()
+   {
+      return false;
+   }
+
+   /** [TMECH] Weight gamma of the log-determinant divergence to the nominal body for the linear KF's LOGDET_MAP output (Lee, Wensing and Park 2020). */
+   default double getKalmanFilterLogDetWeight()
+   {
+      return 1.0;
+   }
+
    /** KNOWN (Stage A, prescribed squeeze) vs JACOBIAN (Stage B, force backed out of arm torques). */
    default GraspRejectionMethod getGraspRejectionMethod()
    {

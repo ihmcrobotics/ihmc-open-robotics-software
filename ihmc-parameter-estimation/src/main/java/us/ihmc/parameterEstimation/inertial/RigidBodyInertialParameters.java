@@ -88,6 +88,28 @@ public class RigidBodyInertialParameters
    private final DMatrixRMaj composeJacobianScratch = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, PARAMETERS_PER_RIGID_BODY);
 
    /**
+    * [TMECH ablation] Exponential-eigenvalue parameterization (Martinez, Griffin and Mastalli, RA-L 2025), in deviation form
+    * (sub-mode of generalized: theta = 0 is the nominal). With the nominal mass m0, CoM c0 and about-CoM second moments
+    * Sigma_c0 = R0 diag(L0) R0^T:
+    * <pre>
+    *    m = m0 e^(2 a),  c = c0 + dc,  R = R0 Exp(w),  L_i = L0_i e^(2 (a + s_i)),  Sigma_c = R diag(L) R^T,
+    *    J = [Sigma_c + m c c^T, m c; m c^T, m]
+    * </pre>
+    * with theta ordered (a, s1, s2, s3, w1, w2, w3, dc1, dc2, dc3) so that the slots line up with the log-Cholesky deviation
+    * (alpha, d, s, t): density scaling, log length scalings, an orientation change, a CoM shift; theta = 0 on the shape slots is
+    * the mass-scaled nominal, as d = s = 0 in log-Cholesky, so the same per-slot priors and noise apply. m > 0 and L > 0 make
+    * every theta fully physically consistent. The map is singular (rank-deficient Jacobian in w) for equal principal moments.
+    */
+   private boolean exponentialEigenvalue = false;
+   private double eeMass0;
+   private final double[] eeCom0 = new double[3];
+   private final double[][] eeR0 = new double[3][3];
+   private final double[] eeL0 = new double[3];
+   private final DMatrixRMaj eeScratch = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+   private final DMatrixRMaj eeScratchPi = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+   private final DMatrixRMaj eeScratchPi2 = new DMatrixRMaj(PARAMETERS_PER_RIGID_BODY, 1);
+
+   /**
     * Creates a {@code RigidBodyInertialParameters} object from a rigid body's {@code SpatialInertia}, in order to store the inertial parameters
     * in both default mass / first moment of mass / moment of inertia form (Pi basis) and a fully physically consistent form (Theta basis).
     * <p>
@@ -161,7 +183,11 @@ public class RigidBodyInertialParameters
     */
    private void fromPiBasisToThetaBasis()
    {
-      if (generalized)
+      if (exponentialEigenvalue)
+      {
+         eePiToTheta(parameterVectorPiBasis, parameterVectorThetaBasis);
+      }
+      else if (generalized)
       {  // Pi -> absolute theta' -> deviation theta relative to the nominal.
          fromPiBasisToThetaBasis(parameterVectorPiBasis, composedThetaScratch);
          decomposeThetaBasis(composedThetaScratch, nominalThetaBasis, parameterVectorThetaBasis);
@@ -177,7 +203,11 @@ public class RigidBodyInertialParameters
     */
    private void fromThetaBasisToPiBasis()
    {
-      if (generalized)
+      if (exponentialEigenvalue)
+      {
+         eeThetaToPi(parameterVectorThetaBasis, parameterVectorPiBasis);
+      }
+      else if (generalized)
       {  // deviation theta -> absolute theta' (compose with nominal) -> Pi.
          composeThetaBasis(parameterVectorThetaBasis, nominalThetaBasis, composedThetaScratch);
          fromThetaBasisToPiBasis(composedThetaScratch, parameterVectorPiBasis);
@@ -205,6 +235,201 @@ public class RigidBodyInertialParameters
       isThetaBasisUpToDate = true;
    }
 
+   /** [TMECH ablation] Deviation-form exponential-eigenvalue parameterization with the CURRENT inertia as the nominal. */
+   public void enableExponentialEigenvalueParameterization()
+   {
+      double m = parameterVectorPiBasis.get(0);
+      double[] c = {parameterVectorPiBasis.get(1) / m, parameterVectorPiBasis.get(2) / m, parameterVectorPiBasis.get(3) / m};
+      double[][] sc = aboutComSecondMoment(parameterVectorPiBasis);
+      org.ejml.data.DMatrixRMaj a = new DMatrixRMaj(sc);
+      org.ejml.interfaces.decomposition.EigenDecomposition_F64<DMatrixRMaj> eig = org.ejml.dense.row.factory.DecompositionFactory_DDRM.eig(3, true, true);
+      eig.decompose(a);
+      for (int k = 0; k < 3; k++)
+      {
+         eeL0[k] = Math.max(eig.getEigenvalue(k).getReal(), 1.0e-9);
+         DMatrixRMaj v = eig.getEigenVector(k);
+         for (int r = 0; r < 3; r++)
+            eeR0[r][k] = v.get(r);
+      }
+      if (det3(eeR0) < 0.0)
+         for (int r = 0; r < 3; r++)
+            eeR0[r][2] = -eeR0[r][2];
+      eeMass0 = m;
+      System.arraycopy(c, 0, eeCom0, 0, 3);
+      generalized = true;
+      exponentialEigenvalue = true;
+      parameterVectorThetaBasis.zero();
+      eeThetaToPi(parameterVectorThetaBasis, parameterVectorPiBasis); // = the nominal up to round-off
+      isPiBasisUpToDate = true;
+      isThetaBasisUpToDate = true;
+   }
+
+   public boolean isExponentialEigenvalue()
+   {
+      return exponentialEigenvalue;
+   }
+
+   private void eeThetaToPi(DMatrixRMaj theta, DMatrixRMaj piToPack)
+   {
+      double a = theta.get(0);
+      double m = eeMass0 * Math.exp(2.0 * a);
+      double[] c = {eeCom0[0] + theta.get(7), eeCom0[1] + theta.get(8), eeCom0[2] + theta.get(9)};
+      double[][] r = mult3(eeR0, so3Exp(theta.get(4), theta.get(5), theta.get(6)));
+      double[] l = new double[3];
+      for (int k = 0; k < 3; k++)
+         l[k] = eeL0[k] * Math.exp(2.0 * (a + theta.get(1 + k)));
+      double[][] sigma = new double[3][3];
+      for (int i = 0; i < 3; i++)
+         for (int j = 0; j < 3; j++)
+         {
+            double v = m * c[i] * c[j];
+            for (int k = 0; k < 3; k++)
+               v += r[i][k] * l[k] * r[j][k];
+            sigma[i][j] = v;
+         }
+      double tr = sigma[0][0] + sigma[1][1] + sigma[2][2];
+      piToPack.reshape(PARAMETERS_PER_RIGID_BODY, 1);
+      piToPack.set(0, m);
+      piToPack.set(1, m * c[0]);
+      piToPack.set(2, m * c[1]);
+      piToPack.set(3, m * c[2]);
+      piToPack.set(4, tr - sigma[0][0]);
+      piToPack.set(5, -sigma[0][1]);
+      piToPack.set(6, -sigma[0][2]);
+      piToPack.set(7, tr - sigma[1][1]);
+      piToPack.set(8, -sigma[1][2]);
+      piToPack.set(9, tr - sigma[2][2]);
+   }
+
+   /** Inverse map: eigenvectors are permuted / sign-flipped to the proper rotation closest to R0, so w is the smallest rotation. */
+   private void eePiToTheta(DMatrixRMaj pi, DMatrixRMaj thetaToPack)
+   {
+      double m = Math.max(pi.get(0), 1.0e-9);
+      double a = 0.5 * Math.log(m / eeMass0);
+      double[][] sc = aboutComSecondMoment(pi);
+      org.ejml.interfaces.decomposition.EigenDecomposition_F64<DMatrixRMaj> eig = org.ejml.dense.row.factory.DecompositionFactory_DDRM.eig(3, true, true);
+      eig.decompose(new DMatrixRMaj(sc));
+      double[] lam = new double[3];
+      double[][] v = new double[3][3];
+      for (int k = 0; k < 3; k++)
+      {
+         lam[k] = Math.max(eig.getEigenvalue(k).getReal(), 1.0e-12);
+         DMatrixRMaj e = eig.getEigenVector(k);
+         for (int r = 0; r < 3; r++)
+            v[r][k] = e.get(r);
+      }
+      int[][] perms = {{0, 1, 2}, {0, 2, 1}, {1, 0, 2}, {1, 2, 0}, {2, 0, 1}, {2, 1, 0}};
+      double best = Double.NEGATIVE_INFINITY;
+      double[][] bestR = null;
+      double[] bestL = null;
+      for (int[] p : perms)
+         for (int signs = 0; signs < 8; signs++)
+         {
+            double[][] r = new double[3][3];
+            for (int k = 0; k < 3; k++)
+            {
+               double sg = ((signs >> k) & 1) == 0 ? 1.0 : -1.0;
+               for (int row = 0; row < 3; row++)
+                  r[row][k] = sg * v[row][p[k]];
+            }
+            if (det3(r) < 0.0)
+               continue;
+            double[][] rel = mult3(transpose3(eeR0), r);
+            double tr = rel[0][0] + rel[1][1] + rel[2][2]; // cos(angle) = (tr - 1) / 2: maximize
+            if (tr > best)
+            {
+               best = tr;
+               bestR = rel;
+               bestL = new double[] {lam[p[0]], lam[p[1]], lam[p[2]]};
+            }
+         }
+      double[] w = so3Log(bestR);
+      thetaToPack.reshape(PARAMETERS_PER_RIGID_BODY, 1);
+      thetaToPack.set(0, a);
+      for (int k = 0; k < 3; k++)
+      {
+         thetaToPack.set(1 + k, 0.5 * Math.log(bestL[k] / eeL0[k]) - a);
+         thetaToPack.set(4 + k, w[k]);
+         thetaToPack.set(7 + k, pi.get(1 + k) / m - eeCom0[k]);
+      }
+   }
+
+   /** About-CoM second moment Sigma_c = (1/2 tr(I) 1 - I) - m c c^T (I about the body origin). */
+   private static double[][] aboutComSecondMoment(DMatrixRMaj pi)
+   {
+      double m = pi.get(0);
+      double[] h = {pi.get(1), pi.get(2), pi.get(3)};
+      double[][] in = {{pi.get(4), pi.get(5), pi.get(6)}, {pi.get(5), pi.get(7), pi.get(8)}, {pi.get(6), pi.get(8), pi.get(9)}};
+      double half = 0.5 * (in[0][0] + in[1][1] + in[2][2]);
+      double[][] s = new double[3][3];
+      for (int i = 0; i < 3; i++)
+         for (int j = 0; j < 3; j++)
+            s[i][j] = (i == j ? half : 0.0) - in[i][j] - h[i] * h[j] / m;
+      return s;
+   }
+
+   private static double[][] so3Exp(double wx, double wy, double wz)
+   {
+      double th = Math.sqrt(wx * wx + wy * wy + wz * wz);
+      double[][] k = {{0, -wz, wy}, {wz, 0, -wx}, {-wy, wx, 0}};
+      double a, b;
+      if (th < 1.0e-8)
+      {
+         a = 1.0 - th * th / 6.0;
+         b = 0.5 - th * th / 24.0;
+      }
+      else
+      {
+         a = Math.sin(th) / th;
+         b = (1.0 - Math.cos(th)) / (th * th);
+      }
+      double[][] k2 = mult3(k, k);
+      double[][] r = new double[3][3];
+      for (int i = 0; i < 3; i++)
+         for (int j = 0; j < 3; j++)
+            r[i][j] = (i == j ? 1.0 : 0.0) + a * k[i][j] + b * k2[i][j];
+      return r;
+   }
+
+   private static double[] so3Log(double[][] r)
+   {
+      double cos = Math.max(-1.0, Math.min(1.0, 0.5 * (r[0][0] + r[1][1] + r[2][2] - 1.0)));
+      double th = Math.acos(cos);
+      double[] v = {r[2][1] - r[1][2], r[0][2] - r[2][0], r[1][0] - r[0][1]};
+      double f = th < 1.0e-8 ? 0.5 : th / (2.0 * Math.sin(th));
+      if (Math.PI - th < 1.0e-6)
+      {  // near pi: axis from the diagonal
+         double[] ax = {Math.sqrt(Math.max(0, (r[0][0] + 1) / 2)), Math.sqrt(Math.max(0, (r[1][1] + 1) / 2)), Math.sqrt(Math.max(0, (r[2][2] + 1) / 2))};
+         return new double[] {th * ax[0], th * Math.copySign(ax[1], r[0][1] + r[1][0]), th * Math.copySign(ax[2], r[0][2] + r[2][0])};
+      }
+      return new double[] {f * v[0], f * v[1], f * v[2]};
+   }
+
+   private static double[][] mult3(double[][] a, double[][] b)
+   {
+      double[][] c = new double[3][3];
+      for (int i = 0; i < 3; i++)
+         for (int j = 0; j < 3; j++)
+            for (int k = 0; k < 3; k++)
+               c[i][j] += a[i][k] * b[k][j];
+      return c;
+   }
+
+   private static double[][] transpose3(double[][] a)
+   {
+      double[][] t = new double[3][3];
+      for (int i = 0; i < 3; i++)
+         for (int j = 0; j < 3; j++)
+            t[i][j] = a[j][i];
+      return t;
+   }
+
+   private static double det3(double[][] a)
+   {
+      return a[0][0] * (a[1][1] * a[2][2] - a[1][2] * a[2][1]) - a[0][1] * (a[1][0] * a[2][2] - a[1][2] * a[2][0])
+             + a[0][2] * (a[1][0] * a[2][1] - a[1][1] * a[2][0]);
+   }
+
    public boolean isGeneralized()
    {
       return generalized;
@@ -217,7 +442,22 @@ public class RigidBodyInertialParameters
     */
    public void packThetaToPiBasisJacobian(DMatrixRMaj jacobianToPack)
    {
-      if (generalized)
+      if (exponentialEigenvalue)
+      {  // central differences of the closed-form map (10 x 2 evaluations, ~microseconds)
+         jacobianToPack.reshape(PARAMETERS_PER_RIGID_BODY, PARAMETERS_PER_RIGID_BODY);
+         for (int j = 0; j < PARAMETERS_PER_RIGID_BODY; j++)
+         {
+            double step = 1.0e-6;
+            eeScratch.set(parameterVectorThetaBasis);
+            eeScratch.add(j, 0, step);
+            eeThetaToPi(eeScratch, eeScratchPi);
+            eeScratch.add(j, 0, -2.0 * step);
+            eeThetaToPi(eeScratch, eeScratchPi2);
+            for (int i = 0; i < PARAMETERS_PER_RIGID_BODY; i++)
+               jacobianToPack.set(i, j, (eeScratchPi.get(i) - eeScratchPi2.get(i)) / (2.0 * step));
+         }
+      }
+      else if (generalized)
       {
          composeThetaBasis(parameterVectorThetaBasis, nominalThetaBasis, composedThetaScratch);
          fromThetaBasisToPiBasisJacobian(composedThetaScratch, eq1JacobianScratch);
