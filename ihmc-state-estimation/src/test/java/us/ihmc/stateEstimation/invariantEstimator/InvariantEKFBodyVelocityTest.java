@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Random;
 
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -135,5 +136,41 @@ public class InvariantEKFBodyVelocityTest
       // Prior and noise equal: ungated gain 0.5. NIS = 1 / 0.002 = 500 > 16, so R is inflated about 31 times.
       assertTrue(moved[0] > 0.4, "ungated: the update moves halfway, moved " + moved[0]);
       assertTrue(moved[1] < 0.1, "gated: the correction is cut, moved " + moved[1] + " against " + moved[0]);
+   }
+
+   /**
+    * Absolute position is unobservable and, while walking, picks up a strong correlation with velocity. A wild velocity
+    * innovation then moved the base by metres through that correlation alone (MuJoCo stairs descent, 2026-11-17).
+    * With position consider on, the velocity is still corrected and the positions do not move.
+    */
+   @Test
+   public void testPositionConsiderKeepsTheBaseWhenItIsCorrelatedWithVelocity()
+   {
+      double[] velocityMoved = new double[2];
+      double[] positionMoved = new double[2];
+      for (int consider = 0; consider < 2; consider++)
+      {
+         InvariantEKF ekf = filter(new RotationMatrix(), new Vector3D(), 1.0e-2);
+         ekf.setKinematicVelocityPositionConsider(consider == 1);
+         DMatrixRMaj covariance = ekf.getState().getCovariance();
+         int v = ekf.getState().baseVelocityTangentIndex();
+         int p = ekf.getState().basePositionTangentIndex();
+         covariance.set(p, p, 1.0); // a large, velocity-correlated position variance
+         covariance.set(p, v, 0.09);
+         covariance.set(v, p, 0.09);
+         Matrix3D noise = new Matrix3D();
+         noise.setIdentity();
+         noise.scale(1.0e-2);
+         ekf.updateBodyVelocity(new Vector3D(1.0, 0.0, 0.0), noise);
+         Vector3D velocity = new Vector3D();
+         ekf.getState().getBaseVelocity(velocity);
+         Vector3D position = new Vector3D();
+         ekf.getState().getBasePosition(position);
+         velocityMoved[consider] = velocity.getX();
+         positionMoved[consider] = position.getX();
+      }
+      assertTrue(positionMoved[0] > 1.0, "without consider the correlation moves the base, moved " + positionMoved[0]);
+      assertEquals(0.0, positionMoved[1], 1.0e-12, "with consider the base must not move");
+      assertEquals(velocityMoved[0], velocityMoved[1], 1.0e-12, "the velocity correction is unchanged");
    }
 }
