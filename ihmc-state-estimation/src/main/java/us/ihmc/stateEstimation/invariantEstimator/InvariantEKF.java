@@ -326,6 +326,13 @@ public class InvariantEKF
     */
    private boolean kinematicVelocityHeadingConsider = false;
    private double kinematicVelocityNISGate = Double.NaN;
+   private boolean kinematicVelocityPositionConsider = false;
+
+   /** If true, kinematic-velocity updates cannot move the world positions (see {@link InvariantUpdater#considerPositionForNextUpdate}). */
+   public void setKinematicVelocityPositionConsider(boolean consider)
+   {
+      kinematicVelocityPositionConsider = consider;
+   }
 
    /**
     * Innovation gate for the kinematic velocity, as the contact update has one: above this NIS the measurement noise is
@@ -395,6 +402,8 @@ public class InvariantEKF
       }
       if (kinematicVelocityHeadingConsider)
          updater.considerHeadingForNextUpdate();
+      if (kinematicVelocityPositionConsider)
+         updater.considerPositionForNextUpdate();
       updater.update(state, velocityJacobian, velocityResidual, velocityNoise, kinematicVelocityNISGate);
    }
 

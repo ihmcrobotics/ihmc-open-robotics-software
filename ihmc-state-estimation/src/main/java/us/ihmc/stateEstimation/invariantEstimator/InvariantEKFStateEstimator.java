@@ -523,6 +523,12 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     * touchdown on a stair edge) can throw the base velocity by 1 m/s in one tick: MuJoCo stairs, 2026-11-17.
     */
    private final YoDouble yoKinematicVelocityNISGate = new YoDouble("invariantKinematicVelocityNISGate", registry);
+   /**
+    * Kinematic-velocity updates may not move the world positions (base and contact anchors; Schmidt consider). Absolute
+    * position is unobservable and its covariance grows with its correlation to velocity, so a large kinematic-velocity
+    * innovation (a hard touchdown going down a step) otherwise moved the base by 0.4-4.7 m in one tick in MuJoCo.
+    */
+   private final YoBoolean yoKinematicVelocityPositionConsider = new YoBoolean("invariantKinematicVelocityPositionConsider", registry);
    private final RotationMatrix yawAuditRotation = new RotationMatrix();
 
    private double auditYaw()
@@ -1318,6 +1324,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yawBefore = auditYaw();
       ekf.setKinematicVelocityHeadingConsider(yoKinematicVelocityHeadingConsider.getValue());
       ekf.setKinematicVelocityNISGate(yoKinematicVelocityNISGate.getDoubleValue());
+      ekf.setKinematicVelocityPositionConsider(yoKinematicVelocityPositionConsider.getValue());
       updateKinematicVelocity();
       recordYawChange(yoYawChangeKinematicVelocity, yawBefore);
       int r = ekf.getState().rotationTangentIndex();
