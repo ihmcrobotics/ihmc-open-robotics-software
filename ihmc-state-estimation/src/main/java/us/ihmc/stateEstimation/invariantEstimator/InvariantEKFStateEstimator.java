@@ -512,7 +512,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    private final YoDouble yoYawStd = new YoDouble("invariantYawStd", registry);
    /**
     * Kinematic-velocity updates may not turn the heading or move the yaw-axis gyro bias (Schmidt consider on those two
-    * rows). The kinematic velocity carries the gyro bias through its lever arm, -(omega - b) x r, and propagation
+    * rows; on by default, false restores the original update). The kinematic velocity carries the gyro bias through its lever arm, -(omega - b) x r, and propagation
     * correlates the bias with the unobservable heading, so a large horizontal innovation (a slipping or rebounding foot)
     * otherwise turns the heading: 5-7 deg per stairs run in MuJoCo, with the gyro exact.
     */
@@ -854,6 +854,9 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoStartupSettleDuration.set(DEFAULT_STARTUP_SETTLE_DURATION);
       yoStartupSettleTimeout.set(DEFAULT_STARTUP_SETTLE_TIMEOUT);
       yoStartupHoldTracksKinematics.set(true);
+      // On by default (2026-11-17): on the 11/05 replays it changes nothing (velocity, drift and NEES identical, heading
+      // -0.1 to -0.3 deg); on MuJoCo stairs it removes the update-driven heading excursions (up to 110-140 deg).
+      yoKinematicVelocityHeadingConsider.set(true);
       yoStartupTiltAlignmentEnabled.set(true);
       yoKinematicVelocityTrustLoad.set(DEFAULT_KINEMATIC_VELOCITY_TRUST_LOAD);
       yoKinematicVelocityRearRelease.set(false);
