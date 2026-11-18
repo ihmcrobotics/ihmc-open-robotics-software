@@ -180,7 +180,20 @@ public class InvariantUpdater
     */
    public void considerPositionForNextUpdate()
    {
+      considerPositionForNextUpdate(false);
+   }
+
+   private int consideredPositionAxes = 3;
+
+   /**
+    * @param horizontalOnly consider only the world x and y of every position (the right-invariant position error is
+    *                       expressed in world), leaving the height free to be corrected through its correlation with
+    *                       velocity: on the 2026-11-05 motion-capture walks that correction is what holds the height.
+    */
+   public void considerPositionForNextUpdate(boolean horizontalOnly)
+   {
       considerPositionForNextUpdate = true;
+      consideredPositionAxes = horizontalOnly ? 2 : 3;
    }
 
    /**
@@ -302,13 +315,13 @@ public class InvariantUpdater
       {
          considerPositionForNextUpdate = false;
          int base = state.basePositionTangentIndex();
-         for (int i = 0; i < 3; i++)
+         for (int i = 0; i < consideredPositionAxes; i++)
             for (int j = 0; j < z; j++)
                gain.set(base + i, j, 0.0);
          for (int contact = 0; contact < state.getNumberOfContacts(); contact++)
          {
             int c = state.contactTangentIndex(contact);
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < consideredPositionAxes; i++)
                for (int j = 0; j < z; j++)
                   gain.set(c + i, j, 0.0);
          }
