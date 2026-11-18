@@ -328,6 +328,13 @@ public class InvariantEKF
    private double kinematicVelocityNISGate = Double.NaN;
    private boolean kinematicVelocityPositionConsider = false;
    private boolean kinematicVelocityPositionConsiderHorizontalOnly = true;
+   private double kinematicVelocityPositionConsiderNIS = Double.NaN;
+
+   /** With position consider on: consider only updates whose NIS exceeds this (NaN or <= 0: every update). */
+   public void setKinematicVelocityPositionConsiderNIS(double nisThreshold)
+   {
+      kinematicVelocityPositionConsiderNIS = nisThreshold;
+   }
 
    /** With position consider on: true considers only the world x and y (default), false all three axes. */
    public void setKinematicVelocityPositionConsiderHorizontalOnly(boolean horizontalOnly)
@@ -410,7 +417,7 @@ public class InvariantEKF
       if (kinematicVelocityHeadingConsider)
          updater.considerHeadingForNextUpdate();
       if (kinematicVelocityPositionConsider)
-         updater.considerPositionForNextUpdate(kinematicVelocityPositionConsiderHorizontalOnly);
+         updater.considerPositionForNextUpdate(kinematicVelocityPositionConsiderHorizontalOnly, kinematicVelocityPositionConsiderNIS);
       updater.update(state, velocityJacobian, velocityResidual, velocityNoise, kinematicVelocityNISGate);
    }
 
