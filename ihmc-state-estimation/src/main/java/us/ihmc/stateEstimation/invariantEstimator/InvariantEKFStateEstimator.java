@@ -801,6 +801,9 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       // motion-capture replays velocity, NEES and height drift are unchanged (|drift change| <= 0.06 mm/s).
       yoKinematicVelocityPositionConsider.set(true);
       yoKinematicVelocityPositionConsiderNIS.set(9.0);
+      // On by default (2026-11-18): a stiff touchdown's first trusted tick can read 5-7 m/s (MuJoCo stairs, solref 0.005);
+      // at 100 only gross outliers are touched, and the 11/05 motion-capture results are unchanged (drift <= 0.07 mm/s).
+      yoKinematicVelocityNISGate.set(100.0);
       yoKinematicVelocityErrorStd.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_STD);
       yoKinematicVelocityErrorStdZ.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_STD_Z);
       yoGyroBiasRandomWalkStd.set(DEFAULT_GYRO_BIAS_RANDOM_WALK_STD);
