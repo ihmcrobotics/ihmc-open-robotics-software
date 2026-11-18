@@ -546,6 +546,11 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     * motion-capture replays (drift -0.4 to -2...-4.4 mm/s): the velocity-height correlation is doing real work there.
     */
    private final YoBoolean yoKinematicVelocityPositionConsiderHorizontalOnly = new YoBoolean("invariantKinematicVelocityPositionConsiderHorizontalOnly", registry);
+   /**
+    * Position consider applies only to kinematic-velocity updates with NIS above this (0 = every update). Always
+    * considering cost 0.5% of the path in horizontal error on 11/05; the MuJoCo jumps came from NIS 9-8000 updates.
+    */
+   private final YoDouble yoKinematicVelocityPositionConsiderNIS = new YoDouble("invariantKinematicVelocityPositionConsiderNIS", registry);
    private final RotationMatrix yawAuditRotation = new RotationMatrix();
 
    private double auditYaw()
@@ -795,6 +800,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       // On by default (2026-11-18): removes the 0.5-4 m horizontal jumps on hard touchdowns in MuJoCo; on the 11/05
       // motion-capture replays velocity, NEES and height drift are unchanged (|drift change| <= 0.06 mm/s).
       yoKinematicVelocityPositionConsider.set(true);
+      yoKinematicVelocityPositionConsiderNIS.set(9.0);
       yoKinematicVelocityErrorStd.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_STD);
       yoKinematicVelocityErrorStdZ.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_STD_Z);
       yoGyroBiasRandomWalkStd.set(DEFAULT_GYRO_BIAS_RANDOM_WALK_STD);
@@ -1348,6 +1354,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       ekf.setKinematicVelocityNISGate(yoKinematicVelocityNISGate.getDoubleValue());
       ekf.setKinematicVelocityPositionConsider(yoKinematicVelocityPositionConsider.getValue());
       ekf.setKinematicVelocityPositionConsiderHorizontalOnly(yoKinematicVelocityPositionConsiderHorizontalOnly.getValue());
+      ekf.setKinematicVelocityPositionConsiderNIS(yoKinematicVelocityPositionConsiderNIS.getDoubleValue());
       updateKinematicVelocity();
       recordYawChange(yoYawChangeKinematicVelocity, yawBefore);
       int r = ekf.getState().rotationTangentIndex();
