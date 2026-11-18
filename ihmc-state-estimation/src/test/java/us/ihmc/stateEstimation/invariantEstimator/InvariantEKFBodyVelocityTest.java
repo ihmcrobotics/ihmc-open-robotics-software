@@ -173,4 +173,36 @@ public class InvariantEKFBodyVelocityTest
       assertEquals(0.0, positionMoved[1], 1.0e-12, "with consider the base must not move");
       assertEquals(velocityMoved[0], velocityMoved[1], 1.0e-12, "the velocity correction is unchanged");
    }
+
+   /** Horizontal-only consider (the default) keeps x and y but still lets the correlated height be corrected. */
+   @Test
+   public void testHorizontalPositionConsiderStillCorrectsTheHeight()
+   {
+      double[] heightMoved = new double[2];
+      for (int horizontalOnly = 0; horizontalOnly < 2; horizontalOnly++)
+      {
+         InvariantEKF ekf = filter(new RotationMatrix(), new Vector3D(), 1.0e-2);
+         ekf.setKinematicVelocityPositionConsider(true);
+         ekf.setKinematicVelocityPositionConsiderHorizontalOnly(horizontalOnly == 1);
+         DMatrixRMaj covariance = ekf.getState().getCovariance();
+         int v = ekf.getState().baseVelocityTangentIndex();
+         int p = ekf.getState().basePositionTangentIndex();
+         for (int axis = 0; axis < 3; axis++)
+         {
+            covariance.set(p + axis, p + axis, 1.0);
+            covariance.set(p + axis, v + axis, 0.09);
+            covariance.set(v + axis, p + axis, 0.09);
+         }
+         Matrix3D noise = new Matrix3D();
+         noise.setIdentity();
+         noise.scale(1.0e-2);
+         ekf.updateBodyVelocity(new Vector3D(1.0, 0.0, 1.0), noise);
+         Vector3D position = new Vector3D();
+         ekf.getState().getBasePosition(position);
+         assertEquals(0.0, position.getX(), 1.0e-12, "x is considered either way");
+         heightMoved[horizontalOnly] = position.getZ();
+      }
+      assertEquals(0.0, heightMoved[0], 1.0e-12, "all-axes consider keeps the height");
+      assertTrue(heightMoved[1] > 1.0, "horizontal-only consider lets the height move, moved " + heightMoved[1]);
+   }
 }
