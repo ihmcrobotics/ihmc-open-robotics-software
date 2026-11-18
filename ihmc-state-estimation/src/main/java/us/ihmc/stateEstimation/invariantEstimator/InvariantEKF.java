@@ -327,6 +327,13 @@ public class InvariantEKF
    private boolean kinematicVelocityHeadingConsider = false;
    private double kinematicVelocityNISGate = Double.NaN;
    private boolean kinematicVelocityPositionConsider = false;
+   private boolean kinematicVelocityPositionConsiderHorizontalOnly = true;
+
+   /** With position consider on: true considers only the world x and y (default), false all three axes. */
+   public void setKinematicVelocityPositionConsiderHorizontalOnly(boolean horizontalOnly)
+   {
+      kinematicVelocityPositionConsiderHorizontalOnly = horizontalOnly;
+   }
 
    /** If true, kinematic-velocity updates cannot move the world positions (see {@link InvariantUpdater#considerPositionForNextUpdate}). */
    public void setKinematicVelocityPositionConsider(boolean consider)
@@ -403,7 +410,7 @@ public class InvariantEKF
       if (kinematicVelocityHeadingConsider)
          updater.considerHeadingForNextUpdate();
       if (kinematicVelocityPositionConsider)
-         updater.considerPositionForNextUpdate();
+         updater.considerPositionForNextUpdate(kinematicVelocityPositionConsiderHorizontalOnly);
       updater.update(state, velocityJacobian, velocityResidual, velocityNoise, kinematicVelocityNISGate);
    }
 

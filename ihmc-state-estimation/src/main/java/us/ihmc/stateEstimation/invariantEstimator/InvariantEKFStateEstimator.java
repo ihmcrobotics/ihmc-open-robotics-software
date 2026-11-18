@@ -6,6 +6,7 @@ import gnu.trove.map.TObjectDoubleMap;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.ejml.data.DMatrixRMaj;
 
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -385,6 +386,17 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     * 150 mm/s), read as the pelvis sinking: about -10 mm of height error per step up, the same in the DRC estimator.
     */
    private final YoDouble yoKinematicVelocityTouchdownDelay = new YoDouble("invariantKinematicVelocityTouchdownDelay", registry);
+   /**
+    * Extra standard deviation (m/s) on the world-vertical component of the kinematic velocity for the first
+    * {@code invariantKinematicVelocityTouchdownVerticalWindow} seconds a foot is trusted (0 = off). In MuJoCo the landed
+    * sole is still pushed back up out of the ground (0.7-3.3 mm over ~100 ms, 2026-11-18) while it is already trusted,
+    * so the stationary-foot velocity reads the pelvis as sinking: -5 mm/s on flat, -25 climbing, -13 descending. Unlike
+    * the touchdown delay, the horizontal components stay in.
+    */
+   private final YoDouble yoKinematicVelocityTouchdownVerticalStd = new YoDouble("invariantKinematicVelocityTouchdownVerticalStd", registry);
+   private final YoDouble yoKinematicVelocityTouchdownVerticalWindow = new YoDouble("invariantKinematicVelocityTouchdownVerticalWindow", registry);
+   private final us.ihmc.euclid.matrix.RotationMatrix touchdownRotation = new us.ihmc.euclid.matrix.RotationMatrix();
+   private final us.ihmc.euclid.tuple3D.Vector3D touchdownVerticalInBody = new us.ihmc.euclid.tuple3D.Vector3D();
    private final SideDependentList<YoDouble> yoKinematicVelocityTrustedContactTime = new SideDependentList<>(side -> new YoDouble(
          "invariantKinematicVelocityTrustedContactTime" + side.getPascalCaseName(),
          registry));
@@ -529,6 +541,11 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     * innovation (a hard touchdown going down a step) otherwise moved the base by 0.4-4.7 m in one tick in MuJoCo.
     */
    private final YoBoolean yoKinematicVelocityPositionConsider = new YoBoolean("invariantKinematicVelocityPositionConsider", registry);
+   /**
+    * Position consider on the world x and y only (default true). Considering the height too wrecked it on the 11/05
+    * motion-capture replays (drift -0.4 to -2...-4.4 mm/s): the velocity-height correlation is doing real work there.
+    */
+   private final YoBoolean yoKinematicVelocityPositionConsiderHorizontalOnly = new YoBoolean("invariantKinematicVelocityPositionConsiderHorizontalOnly", registry);
    private final RotationMatrix yawAuditRotation = new RotationMatrix();
 
    private double auditYaw()
@@ -773,6 +790,8 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       ekf = new InvariantEKF(NUMBER_OF_CONTACTS, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration, true, true);
       yoKinematicVelocityErrorModel.set(KinematicVelocityErrorModel.WHITE);
       yoKinematicVelocityErrorTimeConstant.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_TIME_CONSTANT);
+      yoKinematicVelocityTouchdownVerticalWindow.set(0.1);
+      yoKinematicVelocityPositionConsiderHorizontalOnly.set(true);
       yoKinematicVelocityErrorStd.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_STD);
       yoKinematicVelocityErrorStdZ.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_STD_Z);
       yoGyroBiasRandomWalkStd.set(DEFAULT_GYRO_BIAS_RANDOM_WALK_STD);
@@ -1325,6 +1344,7 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       ekf.setKinematicVelocityHeadingConsider(yoKinematicVelocityHeadingConsider.getValue());
       ekf.setKinematicVelocityNISGate(yoKinematicVelocityNISGate.getDoubleValue());
       ekf.setKinematicVelocityPositionConsider(yoKinematicVelocityPositionConsider.getValue());
+      ekf.setKinematicVelocityPositionConsiderHorizontalOnly(yoKinematicVelocityPositionConsiderHorizontalOnly.getValue());
       updateKinematicVelocity();
       recordYawChange(yoYawChangeKinematicVelocity, yawBefore);
       int r = ekf.getState().rotationTangentIndex();
@@ -1563,6 +1583,18 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
             kinematicVelocityCovariance.setM00(kinematicVelocityCovariance.getM00() + extra);
             kinematicVelocityCovariance.setM11(kinematicVelocityCovariance.getM11() + extra);
             kinematicVelocityCovariance.setM22(kinematicVelocityCovariance.getM22() + extra);
+         }
+         double touchdownVerticalStd = yoKinematicVelocityTouchdownVerticalStd.getDoubleValue();
+         if (touchdownVerticalStd > 0.0 && trustedContactTime.getDoubleValue() < yoKinematicVelocityTouchdownVerticalWindow.getDoubleValue())
+         {
+            // N += s^2 u u^T with u the world vertical in the body frame (the measurement is a body-frame velocity).
+            ekf.getState().getRotation(touchdownRotation);
+            touchdownRotation.inverseTransform(Axis3D.Z, touchdownVerticalInBody);
+            double variance = touchdownVerticalStd * touchdownVerticalStd;
+            for (int i = 0; i < 3; i++)
+               for (int j = 0; j < 3; j++)
+                  kinematicVelocityCovariance.setElement(i, j, kinematicVelocityCovariance.getElement(i, j)
+                                                               + variance * touchdownVerticalInBody.getElement(i) * touchdownVerticalInBody.getElement(j));
          }
          ekf.updateBodyVelocity(kinematicBodyVelocity, kinematicVelocityCovariance, soleInPelvis); // r for the bias columns
          yoKinematicVelocityNIS.get(side).set(ekf.getLastNormalizedInnovationSquared());
