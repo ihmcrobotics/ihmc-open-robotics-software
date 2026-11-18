@@ -192,8 +192,22 @@ public class InvariantUpdater
     */
    public void considerPositionForNextUpdate(boolean horizontalOnly)
    {
+      considerPositionForNextUpdate(horizontalOnly, Double.NaN);
+   }
+
+   private double positionConsiderNISThreshold = Double.NaN;
+
+   /**
+    * @param nisThreshold consider the positions only when the update's NIS exceeds it (NaN or <= 0: always). Ordinary
+    *                     kinematic-velocity updates do correct the horizontal position through its correlation with
+    *                     velocity (always considering it raised the 11/05 end-of-walk horizontal error from 0.7-1.3% to
+    *                     1.4-2.0% of the path); only the wild ones moved it by metres.
+    */
+   public void considerPositionForNextUpdate(boolean horizontalOnly, double nisThreshold)
+   {
       considerPositionForNextUpdate = true;
       consideredPositionAxes = horizontalOnly ? 2 : 3;
+      positionConsiderNISThreshold = nisThreshold;
    }
 
    /**
@@ -311,9 +325,11 @@ public class InvariantUpdater
             for (int j = 0; j < z; j++)
                gain.set(consider + i, j, 0.0);
       }
-      if (considerPositionForNextUpdate)
+      boolean positionConsidered = considerPositionForNextUpdate
+                                   && !(positionConsiderNISThreshold > 0.0 && normalizedInnovationSquared <= positionConsiderNISThreshold);
+      considerPositionForNextUpdate = false;
+      if (positionConsidered)
       {
-         considerPositionForNextUpdate = false;
          int base = state.basePositionTangentIndex();
          for (int i = 0; i < consideredPositionAxes; i++)
             for (int j = 0; j < z; j++)
