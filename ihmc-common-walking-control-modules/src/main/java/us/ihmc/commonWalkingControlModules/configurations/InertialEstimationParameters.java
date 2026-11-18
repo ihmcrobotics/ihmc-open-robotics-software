@@ -227,6 +227,15 @@ public interface InertialEstimationParameters
       return 1.0;
    }
 
+   /**
+    * [TMECH] Directional forgetting factor mu of the RLS_LOGDET estimator (Cho, Lee and Shin, ICRA 2024; Cao and Schwartz 2000):
+    * information in the excited directions is scaled by mu per update. 1 = no forgetting.
+    */
+   default double getRlsForgettingFactor()
+   {
+      return 1.0;
+   }
+
    /** KNOWN (Stage A, prescribed squeeze) vs JACOBIAN (Stage B, force backed out of arm torques). */
    default GraspRejectionMethod getGraspRejectionMethod()
    {

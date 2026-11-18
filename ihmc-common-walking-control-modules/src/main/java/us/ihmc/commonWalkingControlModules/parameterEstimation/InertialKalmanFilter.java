@@ -79,7 +79,15 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
        * the unconstrained mean (the least-squares sufficient statistic), and every tick the estimate handed out is
        * argmin 1/2 |pi - mean|^2_{P^-1} + gamma D(J(pi) || J_nominal). See {@link PseudoInertiaConstrainedProjection#logDetMap}.
        */
-      LOGDET_MAP
+      LOGDET_MAP,
+      /**
+       * [TMECH] Recursive least squares with log-determinant divergence regularisation (Cho, Lee and Shin, ICRA 2024): the
+       * information form (Omega, b) of the least-squares data term -- same filtered residual and regressor as the KF, weight
+       * W = R^-1, no L2 prior, Cao-Schwartz directional forgetting (mu) -- and each tick the estimate handed out is
+       * argmin 1/2 theta^T Omega theta - b^T theta + alpha D(J(theta) || J_nominal), by damped Newton. The linear KF keeps running
+       * underneath only for the innovation gate, so the gate is identical to the KF's.
+       */
+      RLS_LOGDET
    }
 
    private static final int PI_SIZE = 10;
@@ -111,6 +119,10 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
    private DMatrixRMaj logDetMapLast = null;
    private us.ihmc.yoVariables.variable.YoDouble logDetMapDivergence, logDetMapNewtonSteps, logDetMapDistance;
    private us.ihmc.yoVariables.variable.YoBoolean logDetMapConverged;
+   // RLS_LOGDET: information form of the least-squares data term, and the last estimate (needed by the forgetting term)
+   private final double rlsForgetting;
+   private DMatrixRMaj rlsOmega = null, rlsB = null, rlsTheta = null;
+   private us.ihmc.yoVariables.variable.YoDouble rlsInformationTrace;
 
    public InertialKalmanFilter(FullRobotModel model, InertialEstimationParameters parameters, DoubleProvider dt, YoRegistry parentRegistry)
    {
@@ -170,7 +182,13 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
          lmiActive = new us.ihmc.yoVariables.variable.YoBoolean("lmiMapActive", registry);
       }
       logDetMapWeight = parameters.getKalmanFilterLogDetWeight();
-      if (stateConstraint == StateConstraint.LOGDET_MAP)
+      rlsForgetting = parameters.getRlsForgettingFactor();
+      if (stateConstraint == StateConstraint.RLS_LOGDET)
+      {
+         rlsInformationTrace = new us.ihmc.yoVariables.variable.YoDouble("rlsInformationTrace", registry);
+         rlsInit();
+      }
+      if (stateConstraint == StateConstraint.LOGDET_MAP || stateConstraint == StateConstraint.RLS_LOGDET)
       {
          logDetMapDivergence = new us.ihmc.yoVariables.variable.YoDouble("logDetMapDivergence", registry);
          logDetMapNewtonSteps = new us.ihmc.yoVariables.variable.YoDouble("logDetMapNewtonSteps", registry);
@@ -192,6 +210,12 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
          unconstrainedMean.set(state);
       if (logDetMapLast != null)
          logDetMapLast.set(state);
+      if (rlsOmega != null)
+      {
+         rlsOmega.zero();  // Omega_0 = 0 (no L2 prior), as in the paper
+         rlsB.zero();
+         rlsTheta.set(state);
+      }
    }
 
    /** [TMECH] Absolute Pi-basis state, so the body is written straight into rows 10 i .. 10 i + 9 (full basis only). */
@@ -210,6 +234,8 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
       }
       if (resetCovariance)
          covariance.set(initialCovariance);
+      if (rlsOmega != null)
+         rlsSetBody(bodyIndex, pi, resetCovariance);
       filteredResidual.zero();
       clearResidualFilterMemory = true;
    }
@@ -290,8 +316,17 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
    @Override
    protected void preSolveHook()
    {
-      if (stateConstraint == StateConstraint.LOGDET_MAP && unconstrainedMean != null)
+      if ((stateConstraint == StateConstraint.LOGDET_MAP || stateConstraint == StateConstraint.RLS_LOGDET) && unconstrainedMean != null)
          state.set(unconstrainedMean);
+   }
+
+   /** RLS_LOGDET: the KF update (for the gate) as usual, then the RLS information update from the same accepted measurement. */
+   @Override
+   protected void updateStep()
+   {
+      super.updateStep();
+      if (stateConstraint == StateConstraint.RLS_LOGDET)
+         rlsUpdate();
    }
 
    @Override
@@ -299,6 +334,8 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
    {
       if (stateConstraint == StateConstraint.LOGDET_MAP)
          applyLogDetMap(); // also while held: the mean is then unchanged, and the MAP of an unchanged mean is unchanged
+      else if (stateConstraint == StateConstraint.RLS_LOGDET)
+         applyRlsLogDet();
       else if (stateConstraint != StateConstraint.NONE && !isParametersHeld())
          applyStateConstraint();
 
@@ -347,6 +384,139 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
          for (int r = 0; r < PI_SIZE; r++)
          {
             state.set(offset + r, 0, lmiResult.get(r));
+            logDetMapLast.set(offset + r, 0, lmiResult.get(r));
+         }
+         logDetMapDivergence.set(logDetMapSolver.logDetDivergence(lmiResult, logDetJ0Inverse, logDetJ0));
+         logDetMapNewtonSteps.set(logDetMapSolver.getLastNewtonSteps());
+         logDetMapDistance.set(logDetMapSolver.getLastDistance());
+         logDetMapConverged.set(logDetMapSolver.wasLastConverged());
+      }
+   }
+
+   private void rlsInit()
+   {
+      int n = state.getNumRows();
+      rlsOmega = new DMatrixRMaj(n, n);
+      rlsB = new DMatrixRMaj(n, 1);
+      rlsTheta = new DMatrixRMaj(initialState);
+   }
+
+   /** Reset: re-centre the information form on the given body with the KF's initial covariance as its weight (the KF reset semantics). */
+   private void rlsSetBody(int bodyIndex, DMatrix pi, boolean resetInformation)
+   {
+      int o = bodyIndex * PI_SIZE, n = state.getNumRows();
+      DMatrixRMaj block = new DMatrixRMaj(PI_SIZE, PI_SIZE);
+      if (resetInformation)
+      {
+         CommonOps_DDRM.extract(initialCovariance, o, o + PI_SIZE, o, o + PI_SIZE, block, 0, 0);
+         CommonOps_DDRM.invert(block);
+         for (int r = 0; r < n; r++)
+            for (int c = o; c < o + PI_SIZE; c++)
+            {
+               rlsOmega.set(r, c, 0.0);
+               rlsOmega.set(c, r, 0.0);
+            }
+         CommonOps_DDRM.insert(block, rlsOmega, o, o);
+      }
+      else
+      {
+         CommonOps_DDRM.extract(rlsOmega, o, o + PI_SIZE, o, o + PI_SIZE, block, 0, 0);
+      }
+      DMatrixRMaj p = new DMatrixRMaj(PI_SIZE, 1);
+      for (int r = 0; r < PI_SIZE; r++)
+      {
+         p.set(r, 0, pi.get(r, 0));
+         rlsTheta.set(o + r, 0, pi.get(r, 0));
+      }
+      DMatrixRMaj bb = new DMatrixRMaj(PI_SIZE, 1);
+      CommonOps_DDRM.mult(block, p, bb);
+      CommonOps_DDRM.insert(bb, rlsB, o, 0);
+   }
+
+   /** One RLS step (Cho et al. eq. 17, 22, 28) on the accepted measurement: forgetting along the excited directions, then add Gamma^T W Gamma. */
+   private void rlsUpdate()
+   {
+      if (rlsOmega == null)
+         rlsInit();
+      int n = state.getNumRows(), m = measurementJacobian.getNumRows();
+      DMatrixRMaj gamma = measurementJacobian;
+      // y such that y = Gamma theta + noise: the (filtered) residual about the predicted state plus Gamma times that state
+      DMatrixRMaj y = new DMatrixRMaj(getMeasurementResidual());
+      CommonOps_DDRM.multAdd(gamma, predictedState, y);
+      DMatrixRMaj w = new DMatrixRMaj(measurementCovariance);
+      if (!CommonOps_DDRM.invertSPD(new DMatrixRMaj(measurementCovariance), w))
+         CommonOps_DDRM.pinv(measurementCovariance, w);
+      if (rlsForgetting < 1.0)
+      {
+         DMatrixRMaj og = new DMatrixRMaj(n, m);
+         CommonOps_DDRM.multTransB(rlsOmega, gamma, og);  // Omega Gamma^T
+         if (CommonOps_DDRM.elementMaxAbs(og) > 1.0e-12)
+         {
+            DMatrixRMaj sMat = new DMatrixRMaj(m, m), sInv = new DMatrixRMaj(m, m), t = new DMatrixRMaj(n, m), g = new DMatrixRMaj(n, n);
+            CommonOps_DDRM.mult(gamma, og, sMat);  // Gamma Omega Gamma^T
+            CommonOps_DDRM.pinv(sMat, sInv);
+            CommonOps_DDRM.mult(og, sInv, t);
+            CommonOps_DDRM.multTransB(1.0 - rlsForgetting, t, og, g);  // G = (1 - mu) Omega Gamma^T (Gamma Omega Gamma^T)^+ Gamma Omega
+            CommonOps_DDRM.subtractEquals(rlsOmega, g);
+            CommonOps_DDRM.multAdd(-1.0, g, rlsTheta, rlsB);         // b -= G theta_(k-1)
+         }
+      }
+      DMatrixRMaj gw = new DMatrixRMaj(n, m);
+      CommonOps_DDRM.multTransA(gamma, w, gw);
+      CommonOps_DDRM.multAdd(gw, gamma, rlsOmega);  // Omega += Gamma^T W Gamma
+      CommonOps_DDRM.multAdd(gw, y, rlsB);          // b += Gamma^T W y
+      for (int r = 0; r < n; r++)                   // keep Omega exactly symmetric
+         for (int c = r + 1; c < n; c++)
+         {
+            double v = 0.5 * (rlsOmega.get(r, c) + rlsOmega.get(c, r));
+            rlsOmega.set(r, c, v);
+            rlsOmega.set(c, r, v);
+         }
+   }
+
+   /** argmin 1/2 theta^T Omega theta - b^T theta + alpha D(J(theta) || J_nominal), per body, warm-started at the last estimate. */
+   private void applyRlsLogDet()
+   {
+      if (unconstrainedMean == null)
+      {
+         unconstrainedMean = new DMatrixRMaj(state.getNumRows(), 1);
+         logDetMapLast = new DMatrixRMaj(initialState);
+      }
+      unconstrainedMean.set(state);  // the KF mean, restored before the next prediction (gate only)
+      if (rlsOmega == null)
+         rlsInit();
+      int n = state.getNumRows();
+      rlsInformationTrace.set(CommonOps_DDRM.trace(rlsOmega));
+      // theta_LS = (Omega + delta I)^-1 b, delta a tiny ridge so the not-yet-excited directions sit at 0 with weight ~0
+      DMatrixRMaj reg = new DMatrixRMaj(rlsOmega);
+      double delta = 1.0e-9 * Math.max(CommonOps_DDRM.trace(rlsOmega) / n, 1.0e-6);
+      for (int i = 0; i < n; i++)
+         reg.add(i, i, delta);
+      DMatrixRMaj thetaLs = new DMatrixRMaj(n, 1);
+      DMatrixRMaj regInv = new DMatrixRMaj(n, n);
+      if (!CommonOps_DDRM.invertSPD(new DMatrixRMaj(reg), regInv))
+         CommonOps_DDRM.pinv(reg, regInv);
+      CommonOps_DDRM.mult(regInv, rlsB, thetaLs);
+      for (int offset = 0; offset + PI_SIZE <= n; offset += PI_SIZE)
+      {
+         CommonOps_DDRM.extract(thetaLs, offset, offset + PI_SIZE, 0, 1, piBlock, 0, 0);
+         CommonOps_DDRM.extract(reg, offset, offset + PI_SIZE, offset, offset + PI_SIZE, lmiW, 0, 0);
+         DMatrixRMaj prior = new DMatrixRMaj(PI_SIZE, 1);
+         CommonOps_DDRM.extract(initialState, offset, offset + PI_SIZE, 0, 1, prior, 0, 0);
+         PseudoInertiaConstrainedProjection.pseudoInertia(prior, pseudoInertia);
+         logDetJ0Inverse.set(pseudoInertia);
+         CommonOps_DDRM.invert(logDetJ0Inverse);
+         double logDetJ0 = logDetMapSolver.logDet(prior);
+         lmiStart.set(prior);
+         CommonOps_DDRM.extract(rlsTheta, offset, offset + PI_SIZE, 0, 1, lmiResult, 0, 0);
+         if (logDetMapSolver.isStrictlyConsistent(lmiResult))
+            lmiStart.set(lmiResult);
+         if (!logDetMapSolver.logDetMap(piBlock, lmiW, prior, logDetMapWeight, lmiStart, lmiResult))
+            lmiResult.set(lmiStart);
+         for (int r = 0; r < PI_SIZE; r++)
+         {
+            state.set(offset + r, 0, lmiResult.get(r));
+            rlsTheta.set(offset + r, 0, lmiResult.get(r));
             logDetMapLast.set(offset + r, 0, lmiResult.get(r));
          }
          logDetMapDivergence.set(logDetMapSolver.logDetDivergence(lmiResult, logDetJ0Inverse, logDetJ0));
