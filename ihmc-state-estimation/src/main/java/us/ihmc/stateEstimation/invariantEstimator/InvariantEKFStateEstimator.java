@@ -792,6 +792,9 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoKinematicVelocityErrorTimeConstant.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_TIME_CONSTANT);
       yoKinematicVelocityTouchdownVerticalWindow.set(0.1);
       yoKinematicVelocityPositionConsiderHorizontalOnly.set(true);
+      // On by default (2026-11-18): removes the 0.5-4 m horizontal jumps on hard touchdowns in MuJoCo; on the 11/05
+      // motion-capture replays velocity, NEES and height drift are unchanged (|drift change| <= 0.06 mm/s).
+      yoKinematicVelocityPositionConsider.set(true);
       yoKinematicVelocityErrorStd.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_STD);
       yoKinematicVelocityErrorStdZ.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_STD_Z);
       yoGyroBiasRandomWalkStd.set(DEFAULT_GYRO_BIAS_RANDOM_WALK_STD);
