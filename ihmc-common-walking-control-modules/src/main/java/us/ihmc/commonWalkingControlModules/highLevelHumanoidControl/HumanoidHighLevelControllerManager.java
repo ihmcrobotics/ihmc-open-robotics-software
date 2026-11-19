@@ -223,6 +223,16 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
             {
                requestedHighLevelControllerState.set(command.getHighLevelControllerName());
                keepUpperBodyPose.set(command.getKeepUpperBodyPose());
+
+               // No transition happens, so no state change would be reported. Report the current state anyway, so a
+               // client that started after the last transition, and asks for the state the controller is in, learns it.
+               HighLevelControllerName currentState = getCurrentHighLevelControlState();
+               if (command.getHighLevelControllerName() == currentState)
+               {
+                  highLevelStateChangeStatusMessage.setInitialHighLevelControllerName(currentState.toByte());
+                  highLevelStateChangeStatusMessage.setEndHighLevelControllerName(currentState.toByte());
+                  statusMessageOutputManager.reportStatusMessage(highLevelStateChangeStatusMessage);
+               }
             }
          }
       }

@@ -21,7 +21,7 @@ public class RDXCustomSceneLoader
          case EXPLOSIVE_BREACHING -> "BreachingDemo.json";
          case ROOMS -> "Rooms.json";
          case ROUGH_TERRAIN -> "StairsAndCinderBlockPath.json";
-         case EMPTY_ROOM -> "EmptyRoom.json";
+         case EMPTY_ROOM -> "EmptyRoomPullDoor.json";
          default -> "FlatGround.json";
       };
    }
