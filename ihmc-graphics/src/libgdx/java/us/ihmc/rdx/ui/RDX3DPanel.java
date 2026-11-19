@@ -53,7 +53,6 @@ public class RDX3DPanel extends RDXPanel
    private final ArrayList<Consumer<ImGui3DViewInput>> imgui3DViewInputProcessors = new ArrayList<>();
    private final Map<Object, Consumer<ImGui3DViewInput>> imgui3DViewPickCalculatorOwnerKeyMap = new HashMap<>();
    private final Map<Object, Consumer<ImGui3DViewInput>> imgui3DViewInputProcessorOwnerKeyMap = new HashMap<>();
-   private final RDX3DPanelToolbar toolbar = new RDX3DPanelToolbar();
    private final ArrayList<Runnable> imGuiOverlayAdditions = new ArrayList<>();
    private final TreeMap<String, RDX3DOverlayPanel> overlayPanels = new TreeMap<>();
    private final Map<Object, Runnable> imGuiOverlayAdditionOwnerKeyMap = new HashMap<>();
@@ -234,8 +233,6 @@ public class RDX3DPanel extends RDXPanel
             }
          }
 
-         toolbar.render(windowSizeX, windowPositionX, windowPositionY);
-
          if (ImGui.isWindowHovered() && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Right))
          {
             camera3D.setCameraFocusPoint(inputCalculator.getPickPointInWorld());
@@ -326,11 +323,6 @@ public class RDX3DPanel extends RDXPanel
       {
          LogTools.error(1, "libGDX is not being used for input!");
       }
-   }
-
-   public RDX3DPanelToolbarButton addToolbarButton()
-   {
-      return toolbar.addButton();
    }
 
    public void setAddFocusSphere(boolean addFocusSphere)
@@ -496,11 +488,6 @@ public class RDX3DPanel extends RDXPanel
    public float getWindowPositionY()
    {
       return windowPositionY;
-   }
-
-   public RDX3DPanelToolbar getToolbar()
-   {
-      return toolbar;
    }
 
    public String getPanelName()

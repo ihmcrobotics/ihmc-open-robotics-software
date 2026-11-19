@@ -21,6 +21,7 @@ public class WalkingControllerStateFactory implements HighLevelControllerStateFa
                                                              controllerFactoryHelper.getHighLevelControllerParameters(),
                                                              controllerFactoryHelper.getWalkingControllerParameters(),
                                                              controllerFactoryHelper.getHighLevelControllerParameters().getControlDT(getStateEnum()));
+         walkingControllerState.setKeepUpperBodyPose(controllerFactoryHelper.getKeepUpperBodyPose());
       }
 
       return walkingControllerState;

@@ -102,6 +102,13 @@ public class ControllerStatusTracker
    {
       HighLevelControllerName initialState = HighLevelControllerName.fromByte(message.getInitialHighLevelControllerName());
       HighLevelControllerName endState = HighLevelControllerName.fromByte(message.getEndHighLevelControllerName());
+      if (initialState == endState) // The controller reporting the state it is in, after a request for that state
+      {
+         if (latestKnownState != endState)
+            statusLogger.info("Controller is in {}", endState);
+         latestKnownState = endState;
+         return;
+      }
       if (latestKnownState != initialState)
       {
          statusLogger.warn("We didn't know the state of the controller: ours: {} != controller said: {}", latestKnownState, initialState);
@@ -203,6 +210,15 @@ public class ControllerStatusTracker
    public HighLevelControllerName getLatestKnownState()
    {
       return latestKnownState;
+   }
+
+   /**
+    * Sets the known controller state until the controller reports a state change, e.g. when the
+    * controller started before this tracker subscribed.
+    */
+   public void setLatestKnownState(HighLevelControllerName latestKnownState)
+   {
+      this.latestKnownState = latestKnownState;
    }
 
    private void triggerNotWalkingStateAnymoreCallbacks()

@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.scs2.simulation.mujoco.Mujoco;
 import us.ihmc.scs2.simulation.mujoco.Mujoco.mjData;
@@ -22,6 +23,10 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
+import us.ihmc.rdx.simulation.environment.isaac.RDXIsaacSimArticulatedObject;
+import us.ihmc.rdx.simulation.environment.isaac.RDXIsaacSimLink;
+import us.ihmc.rdx.simulation.environment.mujoco.RDXMujocoArticulatedDynamics;
+import us.ihmc.rdx.simulation.environment.mujoco.RDXMujocoArticulatedObject;
 import us.ihmc.rdx.simulation.environment.object.RDXSimpleObject;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -30,8 +35,10 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static us.ihmc.rdx.simulation.environment.object.DoorModelParameters.*;
 
@@ -46,7 +53,7 @@ import static us.ihmc.rdx.simulation.environment.object.DoorModelParameters.*;
  * side of the panel. A joint move updates the panel and lever visuals and their collision meshes.
  * Collision shapes are the transparent overlay drawn while the door is selected.
  */
-public class RDXArticulatedDoorObject extends RDXEnvironmentObject
+public class RDXArticulatedDoorObject extends RDXEnvironmentObject implements RDXMujocoArticulatedObject, RDXIsaacSimArticulatedObject
 {
    public static final String NAME = "Articulated Door";
    public static final RDXEnvironmentObjectFactory FACTORY = new RDXEnvironmentObjectFactory(NAME, RDXArticulatedDoorObject.class);
@@ -62,7 +69,7 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
    private final RigidBodyTransform leverOtherSideOffset = new RigidBodyTransform();
    /** Front lever mesh: door_handle.glb yawed onto the arm, two panel thicknesses out. */
    private final RigidBodyTransform leverMeshOffset = new RigidBodyTransform();
-   /** Other-side lever mesh. Same local +X offset; the 180° pitch sends it the other way through the panel. */
+   /** Other-side lever mesh. Same local +X offset; the 180 degree pitch sends it the other way through the panel. */
    private final RigidBodyTransform leverOtherSideMeshOffset = new RigidBodyTransform();
 
    private final RigidBodyTransform hingeRotation = new RigidBodyTransform();
@@ -88,9 +95,15 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
 
    private final File panelCollisionFile;
    private final File leverCollisionFile;
+   /**
+    * What MuJoCo collides the lever with. MuJoCo uses a mesh geom's convex hull, and the lever is
+    * concave (the hull fills the gap between the bar and the rose), so this is the lever cut into
+    * convex pieces when they are on disk, else the single collision mesh.
+    */
+   private final List<File> leverPhysicsMeshFiles = new ArrayList<>();
    private final RDXModelInstance panelCollisionInstance;
-   private final RDXModelInstance leverCollisionInstance;
-   private final RDXModelInstance leverOtherSideCollisionInstance;
+   private final List<RDXModelInstance> leverCollisionInstances = new ArrayList<>();
+   private final List<RDXModelInstance> leverOtherSideCollisionInstances = new ArrayList<>();
 
    private static final double HINGE_LIMIT = 1.7;
 
@@ -170,8 +183,17 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
       panelCollisionFile = RDXSimpleObject.findCollisionMeshFile(DoorModelParameters.DOOR_PANEL_VISUAL_MODEL_FILE_PATH);
       leverCollisionFile = RDXSimpleObject.findCollisionMeshFile(DoorModelParameters.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH);
       panelCollisionInstance = collisionInstance(panelCollisionFile, "panel");
-      leverCollisionInstance = collisionInstance(leverCollisionFile, "lever");
-      leverOtherSideCollisionInstance = collisionInstance(leverCollisionFile, "lever");
+      leverPhysicsMeshFiles.addAll(RDXSimpleObject.findConvexCollisionPartFiles(DoorModelParameters.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH));
+      if (leverPhysicsMeshFiles.isEmpty() && leverCollisionFile != null)
+         leverPhysicsMeshFiles.add(leverCollisionFile);
+      // Draw the shapes the physics collides with, not the concave mesh MuJoCo would hull.
+      for (File leverPhysicsMeshFile : leverPhysicsMeshFiles)
+      {
+         leverCollisionInstances.add(collisionInstance(leverPhysicsMeshFile, "lever"));
+         leverOtherSideCollisionInstances.add(collisionInstance(leverPhysicsMeshFile, "lever"));
+      }
+      if (leverPhysicsMeshFiles.isEmpty())
+         LogTools.warn("Articulated door has no lever collision mesh");
 
       double sizeX = 0.25;
       double sizeY = DOOR_PANEL_WIDTH + DOOR_FRAME_PILLAR_SIZE_X;
@@ -348,8 +370,10 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
       addCollisionRenderable(renderables, pool, hingeJambInstance);
       addCollisionRenderable(renderables, pool, latchJambInstance);
       addCollisionRenderable(renderables, pool, panelCollisionInstance);
-      addCollisionRenderable(renderables, pool, leverCollisionInstance);
-      addCollisionRenderable(renderables, pool, leverOtherSideCollisionInstance);
+      for (RDXModelInstance instance : leverCollisionInstances)
+         addCollisionRenderable(renderables, pool, instance);
+      for (RDXModelInstance instance : leverOtherSideCollisionInstances)
+         addCollisionRenderable(renderables, pool, instance);
    }
 
    @Override
@@ -364,8 +388,10 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
       place(hingeJambInstance, hingeJambFrame);
       place(latchJambInstance, latchJambFrame);
       place(panelCollisionInstance, panelVisualFrame);
-      place(leverCollisionInstance, leverMeshFrame);
-      place(leverOtherSideCollisionInstance, leverOtherSideMeshFrame);
+      for (RDXModelInstance instance : leverCollisionInstances)
+         place(instance, leverMeshFrame);
+      for (RDXModelInstance instance : leverOtherSideCollisionInstances)
+         place(instance, leverOtherSideMeshFrame);
    }
 
    private void updateJointTransforms()
@@ -457,31 +483,99 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
       }
    }
 
+   /** Frame, panel, lever and the other-side lever, with the same joints and gains MuJoCo uses. The latch is not exported. */
+   @Override
+   public List<RDXIsaacSimLink> getIsaacSimLinks()
+   {
+      RDXIsaacSimLink frame = RDXIsaacSimLink.root("frame").setMass(getMass(), null);
+      frame.addVisual(realisticModel, realisticModelOffset);
+      double jambCenterZ = DOOR_PANEL_GROUND_GAP_HEIGHT + DOOR_PANEL_HEIGHT / 2.0;
+      for (double jambCenterY : new double[] {hingeJambCenterY(), latchJambCenterY()})
+      {
+         RigidBodyTransform jamb = new RigidBodyTransform(realisticModelOffset);
+         jamb.appendTranslation(0.0, jambCenterY, jambCenterZ);
+         frame.addCollision(RDXIsaacSimLink.Collision.box(FRAME_JAMB_DEPTH, FRAME_JAMB_WIDTH, DOOR_PANEL_HEIGHT, jamb));
+      }
+
+      RDXIsaacSimLink panel = RDXIsaacSimLink.child("panel", 0, RDXIsaacSimLink.JointType.REVOLUTE, panelOffsetFromFrame, new Vector3D(0.0, 0.0, 1.0))
+                                             .setLimits(0.0, HINGE_LIMIT)
+                                             .setPosition(hingeAngle)
+                                             .setDrive(Dynamics.HINGE_DAMPING, 0.0)
+                                             .setDensity(Dynamics.PANEL_DENSITY);
+      panel.addVisual(panelInstance.model, panelVisualOffset);
+      if (panelCollisionInstance != null)
+         panel.addCollision(RDXIsaacSimLink.Collision.mesh(panelCollisionInstance.model, panelVisualOffset));
+
+      RDXIsaacSimLink lever = RDXIsaacSimLink.child("lever", 1, RDXIsaacSimLink.JointType.REVOLUTE, leverOffsetFromPanel, new Vector3D(1.0, 0.0, 0.0))
+                                             .setLimits(-DOOR_LEVER_MAX_TURN_ANGLE, DOOR_LEVER_MAX_TURN_ANGLE)
+                                             .setPosition(leverAngle)
+                                             .setDrive(Dynamics.LEVER_DAMPING, Dynamics.LEVER_STIFFNESS)
+                                             .setDensity(Dynamics.LEVER_DENSITY);
+      lever.addVisual(leverInstance.model, leverMeshOffset);
+      for (RDXModelInstance piece : leverCollisionInstances)
+         lever.addCollision(RDXIsaacSimLink.Collision.mesh(piece.model, leverMeshOffset));
+
+      RDXIsaacSimLink leverOtherSide = RDXIsaacSimLink.child("leverOtherside", 2, RDXIsaacSimLink.JointType.FIXED, leverOtherSideOffset, null)
+                                                      .setDensity(Dynamics.LEVER_DENSITY);
+      leverOtherSide.addVisual(leverOtherSideInstance.model, leverOtherSideMeshOffset);
+      for (RDXModelInstance piece : leverOtherSideCollisionInstances)
+         leverOtherSide.addCollision(RDXIsaacSimLink.Collision.mesh(piece.model, leverOtherSideMeshOffset));
+      return List.of(frame, panel, lever, leverOtherSide);
+   }
+
+   /** Same pairs as the MuJoCo contact excludes. */
+   @Override
+   public List<String[]> getIsaacSimExcludedLinkPairs()
+   {
+      return List.of(new String[] {"panel", "leverOtherside"}, new String[] {"frame", "leverOtherside"});
+   }
+
    /**
     * Physics snapshot of this placed door. The environment panel's Articulated Door button creates
     * this object; the simulation compiles this snapshot, it does not create a second door.
     */
+   @Override
    public Dynamics captureDynamics()
    {
       return Dynamics.from(this);
    }
 
-   public static final class Dynamics
+   /** Hinge then lever, as {@link Dynamics#syncJoints} returns them. */
+   @Override
+   public void applySimulatedJointPositions(double[] jointPositions)
+   {
+      if (isJointPositionOverridden())
+         return;
+      if (Math.abs(getHingeAngle() - jointPositions[0]) > 1.0e-5)
+         setHingeAngleFromInteraction(jointPositions[0]);
+      if (Math.abs(getLeverAngle() - jointPositions[1]) > 1.0e-5)
+         setLeverAngleFromInteraction(jointPositions[1]);
+   }
+
+   public static final class Dynamics implements RDXMujocoArticulatedDynamics
    {
       /** Lever angle, either direction, at which the panel is free to swing. Below this the hinge stays shut. */
       public static final double UNLATCH_LEVER_ANGLE = 0.5;
       /** How close to closed the panel must be before a released lever catches it. */
       public static final double LATCH_CATCH_ANGLE = 0.05;
+      /**
+       * Lever angle, either direction, below which a released lever lets the bolt catch again. Lower than
+       * {@link #UNLATCH_LEVER_ANGLE}, so a hand holding the lever near that threshold does not latch and
+       * unlatch the door every tick while pulling it.
+       */
+      public static final double RELATCH_LEVER_ANGLE = 0.3;
 
       private static final double PANEL_DENSITY = 400.0;
       private static final double LEVER_DENSITY = 800.0;
       private static final double HINGE_DAMPING = 2.0;
       private static final double LEVER_DAMPING = 0.1;
+      /** Kg m^2. The lever pieces weigh a few grams, and with less inertia a gripping hand made the lever snap and chatter. */
+      private static final double LEVER_ARMATURE = 0.01;
       private static final double LEVER_STIFFNESS = DOOR_LEVER_MAX_TORQUE / DOOR_LEVER_MAX_TURN_ANGLE;
 
       private final String baseName;
       private final String panelMeshPath;
-      private final String leverMeshPath;
+      private final List<String> leverMeshPaths;
       private final Pose3D rootPose;
       private final RigidBodyTransform panelOffset;
       private final RigidBodyTransform leverOffset;
@@ -495,7 +589,7 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
 
       private Dynamics(String baseName,
                      String panelMeshPath,
-                     String leverMeshPath,
+                     List<String> leverMeshPaths,
                      Pose3D rootPose,
                      RigidBodyTransform panelOffset,
                      RigidBodyTransform leverOffset,
@@ -509,7 +603,7 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
       {
          this.baseName = baseName;
          this.panelMeshPath = panelMeshPath;
-         this.leverMeshPath = leverMeshPath;
+         this.leverMeshPaths = leverMeshPaths;
          this.rootPose = rootPose;
          this.panelOffset = panelOffset;
          this.leverOffset = leverOffset;
@@ -526,17 +620,17 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
       {
          String baseName = "rdx_" + door.getPascalCasedName() + "_" + door.getObjectIndex();
          String panelMeshPath = null;
-         String leverMeshPath = null;
          for (CollisionMesh part : door.getCollisionMeshes())
          {
             if ("panel".equals(part.getSuffix()))
                panelMeshPath = part.getMeshFile().getAbsolutePath();
-            else if ("lever".equals(part.getSuffix()))
-               leverMeshPath = part.getMeshFile().getAbsolutePath();
          }
+         List<String> leverMeshPaths = new ArrayList<>();
+         for (File leverPhysicsMeshFile : door.leverPhysicsMeshFiles)
+            leverMeshPaths.add(leverPhysicsMeshFile.getAbsolutePath());
          return new Dynamics(baseName,
                            panelMeshPath,
-                           leverMeshPath,
+                           leverMeshPaths,
                            new Pose3D(door.getObjectTransform()),
                            new RigidBodyTransform(door.getPanelOffsetFromFrame()),
                            new RigidBodyTransform(door.getLeverOffsetFromPanel()),
@@ -559,14 +653,15 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
          return panelMeshPath;
       }
 
-      public String getLeverMeshPath()
+      /** One mesh per convex lever piece, each its own geom on the lever bodies. */
+      public List<String> getLeverMeshPaths()
       {
-         return leverMeshPath;
+         return leverMeshPaths;
       }
 
       public String structureKey()
       {
-         return baseName + "|door|jambs|" + panelMeshPath + "|" + leverMeshPath;
+         return baseName + "|door|jambs|" + panelMeshPath + "|" + String.join("|", leverMeshPaths);
       }
 
       public String panelMeshFileName()
@@ -574,15 +669,47 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
          return baseName + "_panel.stl";
       }
 
-      public String leverMeshFileName()
+      public String leverMeshFileName(int piece)
       {
-         return baseName + "_lever.stl";
+         return baseName + "_lever_" + piece + ".stl";
       }
 
+      /** Hinge and lever. */
+      @Override
+      public int getDegreesOfFreedom()
+      {
+         return 2;
+      }
+
+      @Override
+      public Map<String, String> getMeshFiles()
+      {
+         Map<String, String> files = new LinkedHashMap<>();
+         if (panelMeshPath != null)
+            files.put(panelMeshFileName(), panelMeshPath);
+         for (int piece = 0; piece < leverMeshPaths.size(); piece++)
+            files.put(leverMeshFileName(piece), leverMeshPaths.get(piece));
+         return files;
+      }
+
+      @Override
+      public Object bind(mjModel model)
+      {
+         return JointIds.resolve(model, baseName);
+      }
+
+      @Override
+      public double[] syncJoints(mjModel model, mjData data, Object binding, boolean seedFromCommand)
+      {
+         return syncJoints(model, data, (JointIds) binding, seedFromCommand);
+      }
+
+      @Override
       public void appendAssets(StringBuilder assets)
       {
          appendMeshAsset(assets, baseName + "_panel", panelMeshFileName(), panelMeshPath);
-         appendMeshAsset(assets, baseName + "_lever", leverMeshFileName(), leverMeshPath);
+         for (int piece = 0; piece < leverMeshPaths.size(); piece++)
+            appendMeshAsset(assets, leverMeshName(piece), leverMeshFileName(piece), leverMeshPaths.get(piece));
       }
 
       public void appendBodies(StringBuilder bodies)
@@ -605,15 +732,27 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
                .append(fmt(-DOOR_LEVER_MAX_TURN_ANGLE)).append(' ').append(fmt(DOOR_LEVER_MAX_TURN_ANGLE))
                .append("\" damping=\"").append(fmt(LEVER_DAMPING))
                .append("\" stiffness=\"").append(fmt(LEVER_STIFFNESS))
-               .append("\" armature=\"0.001\"/>\n");
-         appendGeom(bodies, baseName + "_lever", baseName + "_lever_mesh", leverMeshOffset, leverMeshPath, LEVER_DENSITY);
+               .append("\" armature=\"").append(fmt(LEVER_ARMATURE)).append("\"/>\n");
+         for (int piece = 0; piece < leverMeshPaths.size(); piece++)
+            appendGeom(bodies, leverMeshName(piece), leverMeshName(piece) + "_mesh", leverMeshOffset, leverMeshPaths.get(piece), LEVER_DENSITY);
          bodies.append("          <body name=\"").append(baseName).append("_leverOtherside\" ")
                .append(transformPose(leverOtherSideOffset)).append(">\n");
-         appendGeom(bodies, baseName + "_leverOtherside", baseName + "_lever_mesh", leverOtherSideMeshOffset, leverMeshPath, LEVER_DENSITY);
+         for (int piece = 0; piece < leverMeshPaths.size(); piece++)
+            appendGeom(bodies,
+                       baseName + "_leverOtherside_" + piece,
+                       leverMeshName(piece) + "_mesh",
+                       leverOtherSideMeshOffset,
+                       leverMeshPaths.get(piece),
+                       LEVER_DENSITY);
          bodies.append("          </body>\n");
          bodies.append("        </body>\n");
          bodies.append("      </body>\n");
          bodies.append("    </body>\n");
+      }
+
+      private String leverMeshName(int piece)
+      {
+         return baseName + "_lever_" + piece;
       }
 
       public void appendExcludes(StringBuilder contact)
@@ -648,17 +787,14 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
             return new double[] {hingeAngle, leverAngle};
          }
 
-         boolean unlatched = Math.abs(lever) >= UNLATCH_LEVER_ANGLE;
-         boolean caught = hinge <= LATCH_CATCH_ANGLE;
          DoublePointer damping = model.dof_damping();
-         if (!unlatched && caught)
+         if (ids.updateLatch(Math.abs(lever), hinge))
          {
-            // A positive-only sliver still lets one push step run past the catch angle. Pin it shut.
+            // A positive-only sliver still lets one push step run past the catch angle. The joint limit
+            // and damping hold it shut. Writing qpos here moved the panel under a gripping hand every
+            // tick, and the lever between them chattered.
             setHingeRange(range, ids.hingeJoint, 0.0, 1.0e-8);
             damping.put(ids.hingeDof, 1.0e6);
-            data.qpos().put(ids.hingeQpos, 0.0);
-            data.qvel().put(ids.hingeDof, 0.0);
-            hinge = 0.0;
          }
          else
          {
@@ -749,6 +885,11 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
       private final int leverQpos;
       private final int hingeDof;
       private final int leverDof;
+      /**
+       * Null until the first update. Kept here because these ids last as long as the compiled model,
+       * while {@link Dynamics} is a fresh snapshot every frame.
+       */
+      private Boolean latched;
 
       private JointIds(int frameBody, int hingeJoint, int leverJoint, int hingeQpos, int leverQpos, int hingeDof, int leverDof)
       {
@@ -759,6 +900,19 @@ public class RDXArticulatedDoorObject extends RDXEnvironmentObject
          this.leverQpos = leverQpos;
          this.hingeDof = hingeDof;
          this.leverDof = leverDof;
+      }
+
+      /** Unlatches past {@link Dynamics#UNLATCH_LEVER_ANGLE}, and latches again only once the lever is released and the panel is shut. */
+      private boolean updateLatch(double leverAngleMagnitude, double hingeAngle)
+      {
+         boolean caught = hingeAngle <= Dynamics.LATCH_CATCH_ANGLE;
+         if (latched == null)
+            latched = caught && leverAngleMagnitude < Dynamics.UNLATCH_LEVER_ANGLE;
+         else if (latched && leverAngleMagnitude >= Dynamics.UNLATCH_LEVER_ANGLE)
+            latched = false;
+         else if (!latched && caught && leverAngleMagnitude < Dynamics.RELATCH_LEVER_ANGLE)
+            latched = true;
+         return latched;
       }
 
       public static JointIds resolve(mjModel model, String baseName)

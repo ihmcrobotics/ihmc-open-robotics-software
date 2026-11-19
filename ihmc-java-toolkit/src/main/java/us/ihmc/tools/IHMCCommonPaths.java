@@ -32,8 +32,6 @@ public class IHMCCommonPaths
    private static final String ELEVATION_DATASETS_DIRECTORY_NAME = "elevation-maps";
    public static final Path ELEVATION_DATASETS_DIRECTORY = PLANNING_DATASETS_DIRECTORY.resolve(ELEVATION_DATASETS_DIRECTORY_NAME);
 
-   private static final String CONTINUOUS_HIKING_DIRECTORY_NAME = "continuous-hiking";
-   public static final Path CONTINUOUS_HIKING_DIRECTORY = LOGS_DIRECTORY.resolve(CONTINUOUS_HIKING_DIRECTORY_NAME);
 
    private static final String TERRAIN_MAP_DIRECTORY_NAME = "terrain-map";
    public static final Path TERRAIN_MAP_DIRECTORY = LOGS_DIRECTORY.resolve(TERRAIN_MAP_DIRECTORY_NAME);

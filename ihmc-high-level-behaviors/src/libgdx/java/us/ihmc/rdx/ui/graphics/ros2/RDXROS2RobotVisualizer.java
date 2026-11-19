@@ -1,20 +1,18 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.FootstepStatusMessage;
 import controller_msgs.RobotConfigurationData;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.tools.MinimalFootstep;
-import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.StateEstimatorAPI;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.jros2.ROS2Node;
 import us.ihmc.jros2.ROS2Topic;
@@ -26,16 +24,10 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
-import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
-import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
-import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotConfigurationData>
 {
@@ -43,22 +35,20 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
    private final RDXMultiBodyGraphic multiBodyGraphic;
    private final ROS2Topic<RobotConfigurationData> topic;
    private final ImBoolean trackRobot = new ImBoolean(false);
-   private final ImBoolean hideChest = new ImBoolean(false);
-   private final ImBoolean showHistory = new ImBoolean(false);
+   private final ImBoolean lockOrientation = new ImBoolean(false);
    private RDXFocusBasedCamera cameraForTracking = null;
    private final Point3D previousRobotMidFeetUnderPelvis = new Point3D();
    private final Point3D latestRobotMidFeetUnderPelvis = new Point3D();
    private final Point3D robotTranslationDifference = new Point3D();
-   private final String chestName;
+   private double previousRobotYaw = Double.NaN;
+   private double filteredRobotYaw = Double.NaN;
+   /** Time constant of the camera yaw filter, in seconds. */
+   private static final double YAW_SMOOTHING_TIME_CONSTANT = 0.5;
+   private final Vector3D focusPointOffsetFromRobot = new Vector3D();
+   private final Point3D newFocusPoint = new Point3D();
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiSliderFloat opacitySlider = new ImGuiSliderFloat("Opacity", "%.2f", 1.0f);
-   private final Pose3D lastHistoryPelvisPose = new Pose3D();
-   private final Pose3D currentHistoryPelvisPose = new Pose3D();
-   private final RDXTrajectoryGraphic pelvisPoseHistoryGraphic = new RDXTrajectoryGraphic(Color.SKY);
-   private final ConcurrentLinkedQueue<MinimalFootstep> completedFootstepThreadBarrier = new ConcurrentLinkedQueue<>();
-   private final List<MinimalFootstep> footstepHistory = new ArrayList<>();
-   private final RDXFootstepPlanGraphic footstepHistoryGraphic;
    private final ArrayList<RDXInteractableFrameModel> interactableFrameModels = new ArrayList<>();
 
    private boolean snappedToRobotOnStart = false;
@@ -74,11 +64,6 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
       multiBodyGraphic = new RDXMultiBodyGraphic(getTitle());
       syncedRobot.addRobotConfigurationDataReceivedCallback(getFrequency()::ping);
       previousRobotMidFeetUnderPelvis.setToNaN();
-      chestName = syncedRobot.getRobotModel().getJointMap().getChestName();
-      footstepHistoryGraphic = new RDXFootstepPlanGraphic(syncedRobot.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
-      footstepHistoryGraphic.setOpacity(0.7f);
-      footstepHistoryGraphic.setColor(RobotSide.LEFT, Color.SKY);
-      footstepHistoryGraphic.setColor(RobotSide.RIGHT, Color.SKY);
    }
 
    public void createAndSetupStandalone(RDXBaseUI baseUI)
@@ -95,6 +80,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
    {
       this.cameraForTracking = cameraForTracking;
       trackRobot.set(true);
+      lockOrientation.set(false);
    }
 
    @Override
@@ -104,12 +90,6 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
 
       multiBodyGraphic.create();
       multiBodyGraphic.loadRobotModelAndGraphics(syncedRobot.getRobotModel().getRobotDefinition(), syncedRobot.getFullRobotModel().getElevator());
-
-      ros2Node.createSubscriptionSampler(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()), sample ->
-      {
-         if (sample.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
-            completedFootstepThreadBarrier.add(new MinimalFootstep(sample));
-      });
    }
 
    @Override
@@ -121,30 +101,10 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
          multiBodyGraphic.update();
 
          if (cameraForTracking != null && trackRobot.get())
-         {
-            latestRobotMidFeetUnderPelvis.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getPosition());
-            if (!previousRobotMidFeetUnderPelvis.containsNaN())
-            {
-               robotTranslationDifference.sub(latestRobotMidFeetUnderPelvis, previousRobotMidFeetUnderPelvis);
-               cameraForTracking.translateCameraFocusPoint(robotTranslationDifference);
-            }
-            previousRobotMidFeetUnderPelvis.set(latestRobotMidFeetUnderPelvis);
-         }
-
-         if (hideChest.get())
-         {
-            multiBodyGraphic.getMultiBody().getRigidBodiesToHide().add(chestName);
-         }
-         else
-         {
-            multiBodyGraphic.getMultiBody().getRigidBodiesToHide().remove(chestName);
-         }
+            trackRobotWithCamera();
 
          for (RDXInteractableFrameModel interactableFrameModel : interactableFrameModels)
-         {
-            interactableFrameModel.setShowing(!hideChest.get());
             interactableFrameModel.update();
-         }
       }
 
       if (!snappedToRobotOnStart && syncedRobot.hasReceivedFirstMessage())
@@ -152,30 +112,58 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
          teleportCameraToRobotPelvis();
          snappedToRobotOnStart = true;
       }
+   }
 
-      syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToDesiredFrame(currentHistoryPelvisPose, ReferenceFrame.getWorldFrame());
-      if (!EuclidCoreMissingTools.epsilonEquals(lastHistoryPelvisPose, currentHistoryPelvisPose, Math.toRadians(2.0), 0.02))
-      {
-         // FIXME: This can crash the UI when it has too many points
-//         lastHistoryPelvisPose.set(currentHistoryPelvisPose);
-//         pelvisPoseHistoryGraphic.update(0.01, currentHistoryPelvisPose);
-      }
+   /**
+    * Moves the camera with the robot. With the orientation locked, the camera also turns with the
+    * robot's yaw, so it keeps its view of the robot, e.g. always from behind.
+    */
+   private void trackRobotWithCamera()
+   {
+      FramePose3DReadOnly robotPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
+      latestRobotMidFeetUnderPelvis.set(robotPose.getPosition());
+      double latestRobotYaw = filterRobotYaw(robotPose.getYaw());
 
-      // Avoid generating the meshes when we aren't showing them, just because the footstep plan graphic isn't super optimized
-      if (showHistory.get())
+      if (!previousRobotMidFeetUnderPelvis.containsNaN())
       {
-         boolean added = false;
-         while (!completedFootstepThreadBarrier.isEmpty())
+         if (lockOrientation.get() && !Double.isNaN(previousRobotYaw))
          {
-            added = true;
-            footstepHistory.add(completedFootstepThreadBarrier.poll());
+            double yawDifference = EuclidCoreTools.trimAngleMinusPiToPi(latestRobotYaw - previousRobotYaw);
+            // Turn the focus point about the robot so the whole view stays fixed relative to the robot
+            focusPointOffsetFromRobot.sub(cameraForTracking.getFocusPointPose().getPosition(), previousRobotMidFeetUnderPelvis);
+            double cos = Math.cos(yawDifference);
+            double sin = Math.sin(yawDifference);
+            newFocusPoint.set(latestRobotMidFeetUnderPelvis.getX() + cos * focusPointOffsetFromRobot.getX() - sin * focusPointOffsetFromRobot.getY(),
+                              latestRobotMidFeetUnderPelvis.getY() + sin * focusPointOffsetFromRobot.getX() + cos * focusPointOffsetFromRobot.getY(),
+                              latestRobotMidFeetUnderPelvis.getZ() + focusPointOffsetFromRobot.getZ());
+            cameraForTracking.setCameraFocusPoint(newFocusPoint);
+            cameraForTracking.rotateCameraYaw(yawDifference);
          }
+         else
+         {
+            robotTranslationDifference.sub(latestRobotMidFeetUnderPelvis, previousRobotMidFeetUnderPelvis);
+            cameraForTracking.translateCameraFocusPoint(robotTranslationDifference);
+         }
+      }
+      previousRobotMidFeetUnderPelvis.set(latestRobotMidFeetUnderPelvis);
+      previousRobotYaw = latestRobotYaw;
+   }
 
-         if (added)
-            footstepHistoryGraphic.generateMeshes(footstepHistory);
+   /**
+    * Low-pass filters the robot heading for the camera, so the view does not sway with the pelvis on
+    * every step and turns smoothly.
+    */
+   private double filterRobotYaw(double robotYaw)
+   {
+      if (Double.isNaN(filteredRobotYaw))
+      {
+         filteredRobotYaw = robotYaw;
+         return filteredRobotYaw;
       }
 
-      footstepHistoryGraphic.update();
+      double alpha = 1.0 - Math.exp(-Gdx.graphics.getDeltaTime() / YAW_SMOOTHING_TIME_CONSTANT);
+      filteredRobotYaw = EuclidCoreTools.trimAngleMinusPiToPi(filteredRobotYaw + alpha * EuclidCoreTools.trimAngleMinusPiToPi(robotYaw - filteredRobotYaw));
+      return filteredRobotYaw;
    }
 
    @Override
@@ -202,26 +190,28 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
       if (ImGui.checkbox(labels.get("Track robot"), trackRobot))
       {
          if (!trackRobot.get())
+         {
             previousRobotMidFeetUnderPelvis.setToNaN();
+            previousRobotYaw = Double.NaN;
+            filteredRobotYaw = Double.NaN;
+         }
       }
+      ImGuiTools.previousWidgetTooltip("Moves the camera with the robot.");
       ImGui.sameLine();
-      ImGui.checkbox(labels.get("Hide chest"), hideChest);
+      ImGui.beginDisabled(!trackRobot.get());
+      if (ImGui.checkbox(labels.get("Lock orientation"), lockOrientation))
+      {
+         previousRobotYaw = Double.NaN;
+         filteredRobotYaw = Double.NaN;
+      }
+      ImGui.endDisabled();
+      ImGuiTools.previousWidgetTooltip("While tracking, also turns the camera with the robot's heading (yaw only).");
       if (multiBodyGraphic.isRobotLoaded() && opacitySlider.render(0.0f, 1.0f))
       {
          multiBodyGraphic.setOpacity(opacitySlider.getFloatValue());
 
          for (RDXInteractableFrameModel interactableFrameModel : interactableFrameModels)
             interactableFrameModel.getModelInstance().setOpacity(opacitySlider.getFloatValue());
-      }
-
-      ImGui.checkbox(labels.get("Show History"), showHistory);
-      ImGuiTools.previousWidgetTooltip("(The history is always recording.)");
-      ImGui.sameLine();
-      if (ImGui.button("Clear"))
-      {
-         pelvisPoseHistoryGraphic.clear();
-         footstepHistory.clear();
-         footstepHistoryGraphic.clear();
       }
    }
 
@@ -232,12 +222,6 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
 
       super.getRenderables(renderables, pool, sceneLevels);
       multiBodyGraphic.getRenderables(renderables, pool, sceneLevels);
-
-      if (showHistory.get())
-      {
-         pelvisPoseHistoryGraphic.getRenderables(renderables, pool);
-         footstepHistoryGraphic.getRenderables(renderables, pool);
-      }
    }
 
    @Override
@@ -252,7 +236,6 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
    public void destroy()
    {
       super.destroy();
-      footstepHistoryGraphic.destroy();
       multiBodyGraphic.destroy();
    }
 
@@ -272,9 +255,9 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
       return trackRobot;
    }
 
-   public ImBoolean getHideChest()
+   public ImBoolean getLockOrientation()
    {
-      return hideChest;
+      return lockOrientation;
    }
 
    public void teleportCameraToRobotPelvis()

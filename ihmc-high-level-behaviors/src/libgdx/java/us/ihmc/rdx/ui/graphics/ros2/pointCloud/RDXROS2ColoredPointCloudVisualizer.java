@@ -75,6 +75,14 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
       visualizer.update();
    }
 
+   /** Median world Z of the point cloud near the given world XY, or NaN when there is none */
+   public double getPointCloudHeight(double x, double y, double radius)
+   {
+      if (!isActive())
+         return Double.NaN;
+      return visualizer.getPointCloudHeight(x, y, radius);
+   }
+
    @Override
    public List<ROS2Topic<?>> getTopics()
    {

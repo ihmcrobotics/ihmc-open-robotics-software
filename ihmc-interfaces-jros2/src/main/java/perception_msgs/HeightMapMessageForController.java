@@ -10,9 +10,17 @@ import us.ihmc.jros2.ROS2Message;
 
 /**
 This message is part of the IHMC height map module
+A crop of the height map around the robot for the controller. Each cell is a little-endian int16, where
+height = height_offset + height_resolution * value and NO_DATA_VALUE means unknown. The cells are deflate-compressed
+so a map fits in a few IP fragments: one lost fragment drops the whole best-effort sample.
 <p>Source (perception_msgs/HeightMapMessageForController):
 <pre>{@code
 # This message is part of the IHMC height map module
+# A crop of the height map around the robot for the controller. Each cell is a little-endian int16, where
+# height = height_offset + height_resolution * value and NO_DATA_VALUE means unknown. The cells are deflate-compressed
+# so a map fits in a few IP fragments: one lost fragment drops the whole best-effort sample.
+
+int16 NO_DATA_VALUE=-32768
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint64 sequence_id
@@ -32,15 +40,21 @@ float64 cell_size_in_meters
 # Cells per axis
 int32 cells_per_axis
 
-# List of heights, which correspond to the list of keys
-float32[] heights
+# Height in meters of a cell with value 0
+float32 height_offset
 
+# Meters per quantization step
+float32 height_resolution
+
+# Deflate-compressed int16 cells, ordered by key
+byte[] compressed_heights
 }</pre>
 */
 public class HeightMapMessageForController implements ROS2Message<HeightMapMessageForController>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::HeightMapMessageForController_";
 
+   public static final short NO_DATA_VALUE = -32768;
    /**
       Unique ID used to identify this message, should preferably be consecutively increasing.
    */
@@ -66,15 +80,23 @@ public class HeightMapMessageForController implements ROS2Message<HeightMapMessa
    */
    private int cells_per_axis_;
    /**
-      List of heights, which correspond to the list of keys
+      Height in meters of a cell with value 0
    */
-   private final IDLFloatSequence heights_;
+   private float height_offset_;
+   /**
+      Meters per quantization step
+   */
+   private float height_resolution_;
+   /**
+      Deflate-compressed int16 cells, ordered by key
+   */
+   private final IDLByteSequence compressed_heights_;
 
    public HeightMapMessageForController()
    {
       grid_center_x_ = (double) 0.0;
       grid_center_y_ = (double) 0.0;
-      heights_ = new IDLFloatSequence();
+      compressed_heights_ = new IDLByteSequence();
 
    }
 
@@ -95,7 +117,9 @@ public class HeightMapMessageForController implements ROS2Message<HeightMapMessa
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // width_in_meters_
       currentAlignment += 8 + CDRBuffer.alignment(currentAlignment, 8); // cell_size_in_meters_
       currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // cells_per_axis_
-      currentAlignment += heights_.calculateSizeBytes(currentAlignment);
+      currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // height_offset_
+      currentAlignment += 4 + CDRBuffer.alignment(currentAlignment, 4); // height_resolution_
+      currentAlignment += compressed_heights_.calculateSizeBytes(currentAlignment);
 
       return currentAlignment - initialAlignment;
    }
@@ -109,7 +133,9 @@ public class HeightMapMessageForController implements ROS2Message<HeightMapMessa
       buffer.writeDouble(width_in_meters_);
       buffer.writeDouble(cell_size_in_meters_);
       buffer.writeInt(cells_per_axis_);
-      heights_.serialize(buffer);
+      buffer.writeFloat(height_offset_);
+      buffer.writeFloat(height_resolution_);
+      compressed_heights_.serialize(buffer);
 
    }
 
@@ -122,7 +148,9 @@ public class HeightMapMessageForController implements ROS2Message<HeightMapMessa
       width_in_meters_ = buffer.readDouble();
       cell_size_in_meters_ = buffer.readDouble();
       cells_per_axis_ = buffer.readInt();
-      heights_.deserialize(buffer);
+      height_offset_ = buffer.readFloat();
+      height_resolution_ = buffer.readFloat();
+      compressed_heights_.deserialize(buffer);
 
    }
 
@@ -135,7 +163,9 @@ public class HeightMapMessageForController implements ROS2Message<HeightMapMessa
       width_in_meters_ = from.width_in_meters_;
       cell_size_in_meters_ = from.cell_size_in_meters_;
       cells_per_axis_ = from.cells_per_axis_;
-      heights_.set(from.heights_);
+      height_offset_ = from.height_offset_;
+      height_resolution_ = from.height_resolution_;
+      compressed_heights_.set(from.compressed_heights_);
 
    }
 
@@ -199,9 +229,29 @@ public class HeightMapMessageForController implements ROS2Message<HeightMapMessa
       this.cells_per_axis_ = cells_per_axis_;
    }
 
-   public IDLFloatSequence getHeights()
+   public float getHeightOffset()
    {
-      return heights_;
+      return height_offset_;
+   }
+
+   public void setHeightOffset(float height_offset_)
+   {
+      this.height_offset_ = height_offset_;
+   }
+
+   public float getHeightResolution()
+   {
+      return height_resolution_;
+   }
+
+   public void setHeightResolution(float height_resolution_)
+   {
+      this.height_resolution_ = height_resolution_;
+   }
+
+   public IDLByteSequence getCompressedHeights()
+   {
+      return compressed_heights_;
    }
 
 
@@ -210,6 +260,8 @@ public class HeightMapMessageForController implements ROS2Message<HeightMapMessa
    {
       java.lang.StringBuilder builder = new java.lang.StringBuilder();
       builder.append("HeightMapMessageForController {");
+      builder.append("NO_DATA_VALUE=");
+      builder.append(NO_DATA_VALUE);
       builder.append("sequence_id_=");
       builder.append(sequence_id_);
       builder.append("grid_center_x_=");
@@ -222,8 +274,12 @@ public class HeightMapMessageForController implements ROS2Message<HeightMapMessa
       builder.append(cell_size_in_meters_);
       builder.append("cells_per_axis_=");
       builder.append(cells_per_axis_);
-      builder.append("heights_=");
-      builder.append(heights_);
+      builder.append("height_offset_=");
+      builder.append(height_offset_);
+      builder.append("height_resolution_=");
+      builder.append(height_resolution_);
+      builder.append("compressed_heights_=");
+      builder.append(compressed_heights_);
 
       builder.append("}");
       return builder.toString();

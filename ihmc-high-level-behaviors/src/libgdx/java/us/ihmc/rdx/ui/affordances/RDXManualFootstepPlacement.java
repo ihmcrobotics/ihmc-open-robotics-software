@@ -25,7 +25,6 @@ import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -74,18 +73,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltips);
       stepChecker = footstepPlan.getStepChecker();
 
-      RDX3DPanelToolbarButton leftFootButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      leftFootButton.loadAndSetIcon("icons/leftFoot.png");
-      leftFootButton.setTooltipText("Place left footstep (R)");
-      leftFootButton.setOnPressed(() -> createNewFootstep(RobotSide.LEFT));
-
-      RDX3DPanelToolbarButton rightFootButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      rightFootButton.loadAndSetIcon("icons/rightFoot.png");
-      rightFootButton.setTooltipText("Place right footstep (T)");
-      rightFootButton.setOnPressed(() -> createNewFootstep(RobotSide.RIGHT));
-
-      RDXBaseUI.getInstance().getKeyBindings().register("Place left footstep", "R");
-      RDXBaseUI.getInstance().getKeyBindings().register("Place right footstep", "T");
       RDXBaseUI.getInstance().getKeyBindings().register("Delete last interactable footstep", "Delete");
       RDXBaseUI.getInstance().getKeyBindings().register("Cancel footstep placement", "Escape");
    }
@@ -105,19 +92,15 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
-      boolean panel3DIsHovered = latestInput != null && latestInput.isWindowHovered();
-
-      if (ImGui.button(labels.get("Left")) || (panel3DIsHovered && ImGui.isKeyPressed('R')))
+      if (ImGui.button(labels.get("Left")))
       {
          createNewFootstep(RobotSide.LEFT);
       }
-      ImGuiTools.previousWidgetTooltip("R");
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Right")) || (panel3DIsHovered && ImGui.isKeyPressed('T')))
+      if (ImGui.button(labels.get("Right")))
       {
          createNewFootstep(RobotSide.RIGHT);
       }
-      ImGuiTools.previousWidgetTooltip("T");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Square Up")))
       {

@@ -23,10 +23,11 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
    private double defaultContactThresholdForceHigh = 100;
    private double defaultContactCoPThreshold = 0.01;
    private double defaultContactWindowDuration = 0.05; // previous WBCC-specific window size = 0.03s, estimator-specific window size = 0.025s
+   private double defaultFlightWindowDuration = 0.01; // previous WBCC-specific window size = 0.03s, estimator-specific window size = 0.025s
    private boolean defaultUseJacobianTranspose = false;
    private double defaultHorizontalVelocityThreshold = 0.5;
    private double defaultVerticalVelocityThreshold = 0.125;
-   private double defaultVerticalVelocityHighThreshold = 0.3;
+   private double defaultVerticalVelocityHighThreshold = 0.6;
    private double defaultJacobianDeterminantSingularityThreshold = 2e-3;
    // The historical behavior: velocity gate on, no inertial compensation, no relative check.
    private boolean defaultUseVelocityGate = true;
@@ -89,6 +90,11 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
    public void setDefaultContactWindowDuration(double window)
    {
       this.defaultContactWindowDuration = window;
+   }
+
+   public void setDefaultFlightWindowDuration(double window)
+   {
+      this.defaultFlightWindowDuration = window;
    }
 
    /**
@@ -236,6 +242,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
                                             contactForceThresholdHigh,
                                             contactCoPThreshold,
                                             defaultContactWindowDuration,
+                                            defaultFlightWindowDuration,
                                             switchDT,
                                             compensateGravity,
                                             horizontalVelocityThreshold,

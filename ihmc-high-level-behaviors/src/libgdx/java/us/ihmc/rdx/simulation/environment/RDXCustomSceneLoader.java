@@ -11,10 +11,7 @@ public class RDXCustomSceneLoader
       EMPTY_ROOM,
       ROUGH_TERRAIN,
       EXPLOSIVE_BREACHING,
-      DISPOSE_BOTTLE,
-      ROOM_WITH_OBJECTS,
-      MANIPULATION_2X4,
-      NAVIGATION_BARRIER;
+      ROOMS;
    }
 
    public static String getEnvironmentName(RDXDemoScene demoScene)
@@ -22,10 +19,9 @@ public class RDXCustomSceneLoader
       return switch (demoScene)
       {
          case EXPLOSIVE_BREACHING -> "BreachingDemo.json";
-         case DISPOSE_BOTTLE -> "DisposeBottle.json";
-         case ROOM_WITH_OBJECTS -> "RoomWithObjects.json";
-         case ROUGH_TERRAIN -> "HarderTerrain.json";
-         case EMPTY_ROOM -> "EmptyRoom.json";
+         case ROOMS -> "Rooms.json";
+         case ROUGH_TERRAIN -> "StairsAndCinderBlockPath.json";
+         case EMPTY_ROOM -> "EmptyRoomPullDoor.json";
          default -> "FlatGround.json";
       };
    }

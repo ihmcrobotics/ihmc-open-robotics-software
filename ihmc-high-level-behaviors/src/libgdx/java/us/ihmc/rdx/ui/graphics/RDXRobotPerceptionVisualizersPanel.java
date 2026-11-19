@@ -20,11 +20,11 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    protected final ROS2Node ros2Node;
    protected final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator;
 
-   // Common — always present
+   // Common - always present
    protected final RDXROS2RobotVisualizer robotVisualizer;
    protected final RDXROS2KSTRobotVisualizer kinematicsStreamingSolutionVisualizer;
 
-   // Optional — may be null in some robots
+   // Optional - may be null in some robots
    protected RDXROS2ColoredPointCloudVisualizer experimentalCameraColoredPointCloudVisualizer;
    protected RDXROS2ImageMessageVisualizer experimentalCameraLeftColorImageVisualizer;
    protected RDXROS2ImageMessageVisualizer experimentalCameraRightColorImageVisualizer;
@@ -93,6 +93,32 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    public void destroy()
    {
       super.destroy();
+   }
+
+   private static final double POINT_CLOUD_HEIGHT_RADIUS = 0.05;
+
+   public double getPointCloudHeight(double x, double y)
+   {
+      return getPointCloudHeight(x, y, POINT_CLOUD_HEIGHT_RADIUS);
+   }
+
+   /**
+    * Median world Z of the camera point clouds near the given world XY.
+    * Checks the stepping camera first. Returns NaN when no active point cloud covers that spot.
+    */
+   public double getPointCloudHeight(double x, double y, double radius)
+   {
+      for (RDXROS2ColoredPointCloudVisualizer pointCloudVisualizer : new RDXROS2ColoredPointCloudVisualizer[] {steppingCameraColoredPointCloudVisualizer,
+                                                                                                             experimentalCameraColoredPointCloudVisualizer})
+      {
+         if (pointCloudVisualizer == null)
+            continue;
+
+         double height = pointCloudVisualizer.getPointCloudHeight(x, y, radius);
+         if (!Double.isNaN(height))
+            return height;
+      }
+      return Double.NaN;
    }
 
    // Getters for common/optional visualizers

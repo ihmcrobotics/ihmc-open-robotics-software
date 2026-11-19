@@ -9,6 +9,7 @@ public class HighLevelControllerStateCommand implements Command<HighLevelControl
    private long sequenceId;
    private HighLevelControllerName highLevelControllerName;
    private double trajectoryTime;
+   private boolean keepUpperBodyPose;
 
    @Override
    public void clear()
@@ -16,6 +17,7 @@ public class HighLevelControllerStateCommand implements Command<HighLevelControl
       sequenceId = 0;
       highLevelControllerName = null;
       trajectoryTime = 0.0;
+      keepUpperBodyPose = false;
    }
 
    @Override
@@ -24,6 +26,7 @@ public class HighLevelControllerStateCommand implements Command<HighLevelControl
       sequenceId = other.sequenceId;
       highLevelControllerName = other.getHighLevelControllerName();
       trajectoryTime = other.trajectoryTime;
+      keepUpperBodyPose = other.keepUpperBodyPose;
    }
 
    @Override
@@ -32,6 +35,7 @@ public class HighLevelControllerStateCommand implements Command<HighLevelControl
       sequenceId = message.getSequenceId();
       highLevelControllerName = HighLevelControllerName.fromByte(message.getHighLevelControllerName());
       trajectoryTime = message.getTrajectoryTime();
+      keepUpperBodyPose = message.getKeepUpperBodyPose();
    }
 
    public void setHighLevelControllerName(HighLevelControllerName highLevelControllerName)
@@ -52,6 +56,17 @@ public class HighLevelControllerStateCommand implements Command<HighLevelControl
    public double getTrajectoryTime()
    {
       return trajectoryTime;
+   }
+
+   public void setKeepUpperBodyPose(boolean keepUpperBodyPose)
+   {
+      this.keepUpperBodyPose = keepUpperBodyPose;
+   }
+
+   /** Whether the arms, spine and neck should hold their current pose in the new state instead of going to its home pose */
+   public boolean getKeepUpperBodyPose()
+   {
+      return keepUpperBodyPose;
    }
 
    @Override

@@ -25,6 +25,7 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class WalkingControllerState extends HighLevelControllerState
@@ -41,6 +42,7 @@ public class WalkingControllerState extends HighLevelControllerState
    private final boolean deactivateAccelerationIntegrationInWBC;
 
    private boolean requestIntegratorReset = false;
+   private BooleanProvider keepUpperBodyPose = () -> false;
    private final YoBoolean yoRequestingIntegratorReset = new YoBoolean("RequestingIntegratorReset", registry);
 
    private final BooleanParameter useCoPObjective = new BooleanParameter("UseCenterOfPressureObjectiveFromPlanner", registry, false);
@@ -162,6 +164,15 @@ public class WalkingControllerState extends HighLevelControllerState
    public void onEntry()
    {
       initialize();
+
+      if (keepUpperBodyPose.getValue())
+         walkingController.holdUpperBodyPose();
+   }
+
+   /** When this is true on entry, the arms, spine and neck hold where they are instead of going home */
+   public void setKeepUpperBodyPose(BooleanProvider keepUpperBodyPose)
+   {
+      this.keepUpperBodyPose = keepUpperBodyPose;
    }
 
    @Override

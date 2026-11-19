@@ -1,8 +1,14 @@
 package us.ihmc.rdx.simulation.environment.object;
 
 import us.ihmc.rdx.simulation.environment.object.objects.*;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXProceduralGroundObject;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXPyramidSlopeObject;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXPyramidStairsObject;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXRandomHeightFieldObject;
+import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXUnevenTilesObject;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class RDXEnvironmentObjectLibrary
 {
@@ -16,11 +22,16 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXMediumCinderBlockRoughed.FACTORY);
       objectFactories.add(RDXLargeCinderBlockRoughed.FACTORY);
       objectFactories.add(RDXPalletObject.FACTORY);
+      objectFactories.add(RDXStairsObject.FACTORY);
+      objectFactories.add(RDXPyramidStairsObject.FACTORY);
+      objectFactories.add(RDXPyramidSlopeObject.FACTORY);
+      objectFactories.add(RDXUnevenTilesObject.FACTORY);
+      objectFactories.add(RDXRandomHeightFieldObject.FACTORY);
+      objectFactories.add(RDXProceduralGroundObject.FACTORY);
+      objectFactories.add(RDXWorkPlatformObject.FACTORY);
       objectFactories.add(RDXRightJerseyBarrierObject.FACTORY);
       objectFactories.add(RDXLeftJerseyBarrierObject.FACTORY);
-      objectFactories.add(RDXStairsObject.FACTORY);
       objectFactories.add(RDXWallObject.FACTORY);
-      objectFactories.add(RDXWorkPlatformObject.FACTORY);
       objectFactories.add(RDXPersonObject.FACTORY);
       objectFactories.add(RDXOrangeShirtPersonObject.FACTORY);
       objectFactories.add(RDXGreenShirtPersonObject.FACTORY);
@@ -41,8 +52,10 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDX2x4Object.FACTORY);
       objectFactories.add(RDXCerealBoxObject.FACTORY);
       objectFactories.add(RDXBottleObject.FACTORY);
-      objectFactories.add(RDXBucketObject.FACTORY);
       objectFactories.add(RDXTrowelObject.FACTORY);
+      objectFactories.add(RDXBucketObject.FACTORY);
+      objectFactories.add(RDXSektionCabinetObject.FACTORY);
+      objectFactories.sort(Comparator.comparing(RDXEnvironmentObjectFactory::getName, String.CASE_INSENSITIVE_ORDER));
    }
 
    public static ArrayList<RDXEnvironmentObjectFactory> getObjectFactories()
