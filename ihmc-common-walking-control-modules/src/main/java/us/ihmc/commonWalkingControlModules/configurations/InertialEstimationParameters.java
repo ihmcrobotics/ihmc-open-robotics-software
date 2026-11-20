@@ -81,6 +81,17 @@ public interface InertialEstimationParameters
    }
 
    /**
+    * [TMECH] Time alignment of the measurement-equation inputs, see
+    * {@code us.ihmc.commonWalkingControlModules.parameterEstimation.InertialMeasurementAligner}: OFF (default, the
+    * current samples of q, qd, tau and w against a filtered backward-difference qdd), MIDPOINT or CENTRAL (all inputs
+    * through the same filter chain as qdd, so the regressor pairs torque and acceleration of the same instant).
+    */
+   default String getMeasurementAlignmentMode()
+   {
+      return "OFF";
+   }
+
+   /**
     * Whether the estimator should subscribe to the VR grasp-intent stream that drives the per-limb adaptation gate
     * (and, when enabled, switch the gate on). Default false so tests/sim create no ROS2 node; a robot-specific
     * implementation enables it for VR deployment. See {@code InertialParameterManager.INERTIAL_ADAPTATION_TOPIC}.

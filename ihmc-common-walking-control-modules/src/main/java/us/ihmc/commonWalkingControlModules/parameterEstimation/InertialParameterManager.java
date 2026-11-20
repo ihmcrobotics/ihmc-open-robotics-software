@@ -155,6 +155,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final DMatrixRMaj jointVelocitiesContainer;
    private final FilteredFiniteDifferenceYoVariable[] jointAccelerations;
+   /** [TMECH] Null unless -Dalex.inertiaEstimator.alignMode=MIDPOINT|CENTRAL; see {@link InertialMeasurementAligner}. */
+   private final InertialMeasurementAligner measurementAligner;
+   private final DMatrixRMaj alignConfiguration;
+   private final DMatrixRMaj alignVelocity;
 
    private final Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets;
    private final RigidBodyBasics[] regressorModelBodiesToProcess;
@@ -458,6 +462,26 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       for (int i = 0; i < measurementNames.length; i++)
          jointAccelerations[i] = new FilteredFiniteDifferenceYoVariable("jointAcceleration_" + measurementNames[i], "", accelerationCalculationAlpha, dt, registry);
 
+      InertialMeasurementAligner.Mode alignMode = InertialMeasurementAligner.parseMode(inertialEstimationParameters.getMeasurementAlignmentMode());
+      if (alignMode != InertialMeasurementAligner.Mode.OFF)
+      {
+         int nq = 0;
+         for (us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly joint : controllerRobotModel.getRootJoint().subtreeArray())
+            nq += joint.getConfigurationMatrixSize();
+         int rootConfigurationSize = controllerRobotModel.getRootJoint().getConfigurationMatrixSize();
+         measurementAligner = new InertialMeasurementAligner(alignMode, nq, nDoFs, rootConfigurationSize, accelerationCalculationAlpha, dt);
+         alignConfiguration = new DMatrixRMaj(nq, 1);
+         alignVelocity = new DMatrixRMaj(nDoFs, 1);
+         LogTools.info("InertialParameterManager: measurement alignment " + alignMode + " (q, qd, tau, w through the qdd filter chain, bfAccel "
+                       + inertialEstimationParameters.getBreakFrequencyForAccelerationCalculation() + " Hz)");
+      }
+      else
+      {
+         measurementAligner = null;
+         alignConfiguration = null;
+         alignVelocity = null;
+      }
+
       String[] estimateNames = inertialEstimationParameters.getEstimateNames();
       estimate = new YoMatrix("", nParameters, 1, estimateNames, null, registry);
       DoubleProvider defaultEstimateFilteringAlpha = () -> clearEstimateFilterMemory ? 0.0
@@ -609,7 +633,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       }
       diagTime = toolbox.getYoTime();
       diagVelocities = new DMatrixRMaj(nDoFs, 1);
-      diagOneDoFJoints = MultiBodySystemTools.filterJoints(modelHandler.getRobotModel(RobotModelTask.CONTROLLER).getRootJoint().subtreeArray(),
+      diagOneDoFJoints = MultiBodySystemTools.filterJoints(modelHandler.getRobotModel(RobotModelTask.REGRESSOR).getRootJoint().subtreeArray(),
                                                            OneDoFJointBasics.class);
       int nEstimated = 0;
       for (Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption> set : basisSets)
@@ -665,10 +689,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          appendColumn(s, inverseDynamicsCalculator.getJointTauMatrix());
          appendColumn(s, contactGeneralizedForce);
          appendColumn(s, excludeBias.getValue() ? biasWindowFilter.getZero() : biasWindowFilter.getBias());
-         modelHandler.extractJointsState(RobotModelTask.CONTROLLER, JointStateType.VELOCITY, diagVelocities);
+         // The REGRESSOR model holds exactly the state the regressor was evaluated at (aligned or not).
+         modelHandler.extractJointsState(RobotModelTask.REGRESSOR, JointStateType.VELOCITY, diagVelocities);
          appendColumn(s, diagVelocities);
-         for (FilteredFiniteDifferenceYoVariable acceleration : jointAccelerations)
-            s.append(',').append(acceleration.getValue());
+         modelHandler.extractJointsState(RobotModelTask.REGRESSOR, JointStateType.ACCELERATION, diagVelocities);
+         appendColumn(s, diagVelocities);
          for (OneDoFJointBasics joint : diagOneDoFJoints)
             s.append(',').append(joint.getQ());
          for (RobotSide side : RobotSide.values)
@@ -763,6 +788,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          updateContactJacobians();
          updateContactWrenches();
          updateWholeSystemTorques();
+         if (measurementAligner != null)
+            alignMeasurement();
          if (measurementBiasInjection != null)  // SIM-ONLY: emulate persistent hardware measurement bias
             CommonOps_DDRM.addEquals(wholeSystemTorques, measurementBiasInjection);
 
@@ -1224,8 +1251,31 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       graspNubDistance.set(graspCalculator.getDistance());
    }
 
+   /** [TMECH] Replace this tick's raw torques and foot wrenches by their aligned versions; see {@link InertialMeasurementAligner}. */
+   private void alignMeasurement()
+   {
+      modelHandler.extractJointsState(RobotModelTask.CONTROLLER, JointStateType.CONFIGURATION, alignConfiguration);
+      modelHandler.extractJointsState(RobotModelTask.CONTROLLER, JointStateType.VELOCITY, alignVelocity);
+      measurementAligner.update(alignConfiguration, alignVelocity, wholeSystemTorques, contactWrenches);
+      wholeSystemTorques.set(measurementAligner.getEffort());
+      for (RobotSide side : RobotSide.values)
+         contactWrenches.get(side).set(measurementAligner.getWrench(side));
+   }
+
    private void updateRegressorAndInverseDynamicsModels()
    {
+      if (measurementAligner != null)
+      {
+         for (RobotModelTask task : new RobotModelTask[] {RobotModelTask.REGRESSOR, RobotModelTask.INVERSE_DYNAMICS})
+         {
+            modelHandler.insertJointsState(task, JointStateType.CONFIGURATION, measurementAligner.getConfiguration());
+            modelHandler.insertJointsState(task, JointStateType.VELOCITY, measurementAligner.getVelocity());
+            modelHandler.insertJointsState(task, JointStateType.ACCELERATION, measurementAligner.getAcceleration());
+            modelHandler.getRobotModel(task).updateFrames();
+         }
+         return;
+      }
+
       modelHandler.copyJointsState(RobotModelTask.CONTROLLER, RobotModelTask.REGRESSOR, JointStateType.CONFIGURATION);
       modelHandler.copyJointsState(RobotModelTask.CONTROLLER, RobotModelTask.REGRESSOR, JointStateType.VELOCITY);
       modelHandler.copyJointsState(RobotModelTask.CONTROLLER, RobotModelTask.INVERSE_DYNAMICS, JointStateType.CONFIGURATION);
