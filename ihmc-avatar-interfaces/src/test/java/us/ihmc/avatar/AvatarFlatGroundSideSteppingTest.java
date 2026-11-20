@@ -93,6 +93,11 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       return 0.13;
    }
 
+   protected double getForceMagnitude1()
+   {
+      return Double.NaN;
+   }
+
    protected double getForceDuration1()
    {
       return 0.1;
@@ -111,6 +116,11 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
    protected double getForcePercentageOfWeight2()
    {
       return 0.13;
+   }
+
+   protected double getForceMagnitude2()
+   {
+      return Double.NaN;
    }
 
    protected double getForceDuration2()
@@ -210,13 +220,17 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
 
-      magnitude1 = 80; //TODO: overwritten
+      double forceMagnitude1 = getForceMagnitude1();
+      if (Double.isFinite(forceMagnitude1))
+         magnitude1 = forceMagnitude1;
       LogTools.info("Force magnitude = " + magnitude1 + "N along " + forceDirection1.toString());
       pushRobotController.applyForceDelayed(firstPushCondition, delay1, forceDirection1, magnitude1, duration1);
       success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
 
-      magnitude2 = 80; //TODO:overwritten
+      double forceMagnitude2 = getForceMagnitude2();
+      if (Double.isFinite(forceMagnitude2))
+         magnitude2 = forceMagnitude2;
       LogTools.info("Force magnitude = " + magnitude2 + "N along " + forceDirection2.toString());
       pushRobotController.applyForceDelayed(secondPushCondition, delay2, forceDirection2, magnitude2, duration2);
       success = simulationTestHelper.simulateNow(2.0);
