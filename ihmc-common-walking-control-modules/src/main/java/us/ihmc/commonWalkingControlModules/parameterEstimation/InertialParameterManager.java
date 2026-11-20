@@ -251,6 +251,25 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoBoolean areParametersPhysicallyConsistent;
 
    /**
+    * [TMECH] Offline-analysis dump, default off: {@code -DinertialEstimator.diagDump=/path/file.csv} writes, every
+    * {@code -DinertialEstimator.diagDumpEvery} (default 1) estimator ticks, the whole measurement equation -- the measured
+    * torques z, the torque from the known (nominal) model, the summed contact term (sum J^T w), the bias, the compact
+    * regressor of the estimated bodies, joint positions, velocities and filtered accelerations, the foot wrenches -- plus
+    * the filter's estimate and the controller model's inertia of each estimated body. With it the residual at ANY
+    * parameter vector (e.g. the ground truth) can be recomputed offline: r(pi) = z - tauNom - Y pi + contact - bias.
+    * Logging only: nothing here feeds back into the estimator.
+    */
+   private static final String DIAG_DUMP_PATH = System.getProperty("inertialEstimator.diagDump");
+   private static final int DIAG_DUMP_EVERY = Integer.getInteger("inertialEstimator.diagDumpEvery", 1);
+   private java.io.PrintWriter diagWriter = null;
+   private DoubleProvider diagTime = null;
+   private DMatrixRMaj diagVelocities = null;
+   private OneDoFJointBasics[] diagOneDoFJoints = null;
+   private int[] diagEstimatedBodyIndices = null;
+   private long diagTick = 0;
+   private final StringBuilder diagLine = new StringBuilder(16384);
+
+   /**
     * Whether the estimator has ever written its estimate into the controller's robot model, i.e. whether pass-through
     * has been on at any point. Used by {@link #resetEstimator()} to know whether the controller model needs restoring
     * to nominal -- if the estimator never touched it, it must be left well alone.
@@ -571,6 +590,113 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       areParametersPhysicallyConsistent = new YoBoolean("areParametersPhysicallyConsistent", registry);
       areParametersPhysicallyConsistent.set(false);
+
+      if (DIAG_DUMP_PATH != null)
+         openDiagnosticDump(toolbox, measurementNames, estimateNames, nDoFs);
+   }
+
+   /** [TMECH] See {@link #DIAG_DUMP_PATH}. Writes the header; rows are appended by {@link #writeDiagnosticDump()}. */
+   private void openDiagnosticDump(HighLevelHumanoidControllerToolbox toolbox, String[] measurementNames, String[] estimateNames, int nDoFs)
+   {
+      try
+      {
+         diagWriter = new java.io.PrintWriter(new java.io.BufferedWriter(new java.io.FileWriter(DIAG_DUMP_PATH), 1 << 20));
+      }
+      catch (java.io.IOException e)
+      {
+         LogTools.error("InertialParameterManager: cannot open diagnostic dump " + DIAG_DUMP_PATH + ": " + e.getMessage());
+         return;
+      }
+      diagTime = toolbox.getYoTime();
+      diagVelocities = new DMatrixRMaj(nDoFs, 1);
+      diagOneDoFJoints = MultiBodySystemTools.filterJoints(modelHandler.getRobotModel(RobotModelTask.CONTROLLER).getRootJoint().subtreeArray(),
+                                                           OneDoFJointBasics.class);
+      int nEstimated = 0;
+      for (Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption> set : basisSets)
+         if (!set.isEmpty())
+            nEstimated++;
+      diagEstimatedBodyIndices = new int[nEstimated];
+      for (int i = 0, b = 0; i < basisSets.length; i++)
+         if (!basisSets[i].isEmpty())
+            diagEstimatedBodyIndices[b++] = i;
+
+      StringBuilder h = new StringBuilder("t,held,innov,innovThresh");
+      for (String prefix : new String[] {"z_", "tauNom_", "contact_", "bias_", "qd_", "qdd_"})
+         for (String name : measurementNames)
+            h.append(',').append(prefix).append(name);
+      for (OneDoFJointBasics joint : diagOneDoFJoints)
+         h.append(",q_").append(joint.getName());
+      for (RobotSide side : RobotSide.values)
+         for (String axis : new String[] {"wx", "wy", "wz", "fx", "fy", "fz"})
+            h.append(",w").append(side.getCamelCaseName()).append('_').append(axis);
+      for (int r = 0; r < nDoFs; r++)
+         for (int c = 0; c < regressor.getNumCols(); c++)
+            h.append(",Y_").append(measurementNames[r]).append("__").append(estimateNames[c].replaceAll(".*_LINK_", "").replaceAll("[^A-Za-z0-9]", ""))
+             .append("_b").append(c / RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+      for (String prefix : new String[] {"est_", "filt_"})
+         for (String name : estimateNames)
+            h.append(',').append(prefix).append(name);
+      for (int b = 0; b < nEstimated; b++)
+         for (String name : new String[] {"m", "cx", "cy", "cz", "Ixx", "Ixy", "Ixz", "Iyy", "Iyz", "Izz"})
+            h.append(",ctrl").append(b).append('_').append(name);
+      diagWriter.println(h);
+      Runtime.getRuntime().addShutdownHook(new Thread(() ->
+      {
+         synchronized (diagLine)
+         {
+            diagWriter.flush();
+         }
+      }));
+      LogTools.info("InertialParameterManager: diagnostic dump -> " + DIAG_DUMP_PATH + " (every " + DIAG_DUMP_EVERY + " ticks)");
+   }
+
+   /** [TMECH] One dump row; see {@link #DIAG_DUMP_PATH}. Call after the filter update of this tick. */
+   private void writeDiagnosticDump()
+   {
+      if (diagWriter == null || (diagTick++ % DIAG_DUMP_EVERY) != 0)
+         return;
+      synchronized (diagLine)
+      {
+         StringBuilder s = diagLine;
+         s.setLength(0);
+         s.append(diagTime.getValue()).append(',').append(holdParametersAtNominal.getValue() ? 1 : 0).append(',').append(normalizedInnovation.getValue())
+          .append(',').append(normalizedInnovationThreshold.getValue());
+         appendColumn(s, wholeSystemTorques);
+         appendColumn(s, inverseDynamicsCalculator.getJointTauMatrix());
+         appendColumn(s, contactGeneralizedForce);
+         appendColumn(s, excludeBias.getValue() ? biasWindowFilter.getZero() : biasWindowFilter.getBias());
+         modelHandler.extractJointsState(RobotModelTask.CONTROLLER, JointStateType.VELOCITY, diagVelocities);
+         appendColumn(s, diagVelocities);
+         for (FilteredFiniteDifferenceYoVariable acceleration : jointAccelerations)
+            s.append(',').append(acceleration.getValue());
+         for (OneDoFJointBasics joint : diagOneDoFJoints)
+            s.append(',').append(joint.getQ());
+         for (RobotSide side : RobotSide.values)
+            appendColumn(s, contactWrenches.get(side));
+         for (int r = 0; r < regressor.getNumRows(); r++)
+            for (int c = 0; c < regressor.getNumCols(); c++)
+               s.append(',').append(regressor.get(r, c));
+         appendColumn(s, estimate);
+         appendColumn(s, filteredEstimate);
+         RigidBodyBasics[] controllerBodies = modelHandler.getBodyArray(RobotModelTask.CONTROLLER);
+         for (int index : diagEstimatedBodyIndices)
+         {
+            SpatialInertiaReadOnly inertia = controllerBodies[index].getInertia();
+            s.append(',').append(inertia.getMass());
+            s.append(',').append(inertia.getCenterOfMassOffset().getX()).append(',').append(inertia.getCenterOfMassOffset().getY())
+             .append(',').append(inertia.getCenterOfMassOffset().getZ());
+            s.append(',').append(inertia.getMomentOfInertia().getM00()).append(',').append(inertia.getMomentOfInertia().getM01())
+             .append(',').append(inertia.getMomentOfInertia().getM02()).append(',').append(inertia.getMomentOfInertia().getM11())
+             .append(',').append(inertia.getMomentOfInertia().getM12()).append(',').append(inertia.getMomentOfInertia().getM22());
+         }
+         diagWriter.println(s);
+      }
+   }
+
+   private static void appendColumn(StringBuilder s, org.ejml.data.DMatrix column)
+   {
+      for (int r = 0; r < column.getNumRows(); r++)
+         s.append(',').append(column.get(r, 0));
    }
 
    public void update()
@@ -696,6 +822,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          // whole point. Reading it at the top would sample the PREVIOUS tick's residual instead.
          if (tareProcessInProgress.getValue() && biasWindowFilter.update(residual))
             finishTareProcess();  // window full: the bias has just been accumulated
+
+         writeDiagnosticDump();  // [TMECH] no-op unless -DinertialEstimator.diagDump is set
 
          // Pack smoothed estimate back into estimate robot bodies
          RegressorTools.packRigidBodies(basisSets, filteredEstimate, modelHandler.getBodyArray(RobotModelTask.ESTIMATE));
