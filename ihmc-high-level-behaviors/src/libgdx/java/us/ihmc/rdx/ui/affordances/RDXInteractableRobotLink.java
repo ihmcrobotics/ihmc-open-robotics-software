@@ -25,6 +25,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * An interactable robot link is a link on the robot that the user can
@@ -51,6 +52,8 @@ public class RDXInteractableRobotLink
    private final SideDependentList<Boolean> isVRHovering = new SideDependentList<>(false, false);
    private final SideDependentList<Boolean> isVRPointing = new SideDependentList<>(false, false);
    private final Notification becomesModified = new Notification();
+   /** Keeps the modified gizmo's pose within limits, as a transform to world it changes in place. Does nothing by default. */
+   private Consumer<RigidBodyTransform> poseConstraint = transformToWorld -> { };
 
    /** For when the graphic, the link, and control frame are all the same. */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
@@ -85,6 +88,10 @@ public class RDXInteractableRobotLink
       if (!modified) // Ensure the gizmo is at the hand when not modified
       {
          selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(syncedControlFrame.getTransformToRoot());
+      }
+      else
+      {
+         applyPoseConstraint();
       }
       selectablePose3DGizmo.getPoseGizmo().update();
       for (RDXRobotCollidable robotCollidable : robotCollidables)
@@ -226,6 +233,13 @@ public class RDXInteractableRobotLink
          modified = true;
       }
 
+      // Before the action can run, so it only ever sees a pose within the limits
+      if (modified)
+      {
+         applyPoseConstraint();
+         selectablePose3DGizmo.getPoseGizmo().update();
+      }
+
       if (selectablePose3DGizmo.isSelected() && executeMotionKeyPressed)
       {
          actionExecutor.run();
@@ -319,6 +333,21 @@ public class RDXInteractableRobotLink
    public Notification getBecomesModified()
    {
       return becomesModified;
+   }
+
+   /**
+    * Sets a constraint that keeps the modified gizmo within limits, like the pelvis height or the torso orientation the
+    * robot's policy was trained for. It gets the gizmo's transform to world and changes it in place.
+    */
+   public void setPoseConstraint(Consumer<RigidBodyTransform> poseConstraint)
+   {
+      this.poseConstraint = poseConstraint;
+   }
+
+   private void applyPoseConstraint()
+   {
+      // The gizmo's parent is the root frame, so its transform to parent is its transform to world
+      poseConstraint.accept(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
    }
 
    public void setActionExecutor(Runnable actionExecutor)
