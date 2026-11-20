@@ -149,9 +149,9 @@ final class JointKFParameters
                                          + "the stacked NIS excess is process noise (Q too small) rather than pair noise (R).", 1.0, registry);
       offAxisOnAxisFraction = create("offAxisOnAxisFraction", LIVE + "How much of the off-axis noise law's inflation (arm 6) "
                                                 + "lands on the joint-informative (on-axis) directions of a pair: extra * ((I - P) + f P), P the "
-                                                + "projector onto colspace(J_e). 1 (default) = isotropic, the original law; 0 = off-axis "
-                                                + "directions only, so the rigidity violation de-weights only the rows that carry no joint "
-                                                + "information. No effect without an off-axis provider.", 1.0, registry);
+                                                + "projector onto colspace(J_e). 1 = isotropic, the original law; 0 (default, arm 6 since "
+                                                + "2026-11-12) = off-axis directions only, so the rigidity violation de-weights only the rows "
+                                                + "that carry no joint information. No effect without an off-axis provider.", 0.0, registry);
 
       encoderVar = create("encoderVar", BOOT + "Fallback encoder position variance (rad^2) for joints with no "
                                         + "wired per-joint noise.", ENCODER_VAR, registry);

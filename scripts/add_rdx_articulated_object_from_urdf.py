@@ -688,7 +688,8 @@ def main() -> None:
             visual_file = None
             if scene is not None:
                 visual_file = f"{name}.glb"
-                scene.export(str(staging / visual_file), file_type="glb")
+                # With normals: without them the renderer cannot shade curved surfaces smoothly
+                scene.export(str(staging / visual_file), file_type="glb", include_normals=True)
             pieces = collision_pieces(part, convex=not args.no_convex)
             collision_files = []
             for index, piece in enumerate(pieces):

@@ -151,11 +151,12 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    /**
     * Both feet below the contact threshold for at most this long (s) is a short flight, not hanging: the filter keeps
     * integrating the IMU (no contact or kinematic-velocity updates) instead of zeroing the base velocity and
-    * re-anchoring with zero velocity afterwards. 0 (the default) keeps the original immediate hold. In the 11/05 replay
+    * re-anchoring with zero velocity afterwards. 0 keeps the original immediate hold; default 0.15 s. In the 11/05 replay
     * the RL gait's fast steps briefly drop both foot switches below 0.5 for ~60 ms at 0.87 m/s; the hold then reset
     * the velocity to zero mid-stride (a 14 cm/s RMS error over the following 3 s).
     */
    private final YoDouble yoNoContactHoldDelay = new YoDouble("invariantNoContactHoldDelay", registry);
+   public static final double DEFAULT_NO_CONTACT_HOLD_DELAY = 0.15; // s
    private final YoDouble yoNoContactDuration = new YoDouble("invariantNoContactDuration", registry);
    private final YoBoolean yoShortFlight = new YoBoolean("invariantShortFlight", registry);
    private static final double CONTACT_HOLD_THRESHOLD = 0.5; // both feet below -> base translation will be unobservable
@@ -300,9 +301,10 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     * Array-observed kinematic-velocity noise: the kinematic velocity assumes a rigid leg, and the IMU array measures
     * how badly that leg is violating rigidity right now (fast off-axis residual of its IMU pairs, previous tick).
     * On 11/05 that violation predicted the per-foot kinematic-velocity error (Spearman +0.55..+0.63, top quintile
-    * 3x the bottom). R_v gets gain * violation^2 on its diagonal. 0 (default) = off.
+    * 3x the bottom). R_v gets gain * violation^2 on its diagonal. 0 = off; default 30 (arm 6, A20), inert without an off-axis provider.
     */
    private final YoDouble yoKinematicVelocityArrayViolationGain = new YoDouble("invariantKinematicVelocityArrayViolationGain", registry);
+   public static final double DEFAULT_KINEMATIC_VELOCITY_ARRAY_VIOLATION_GAIN = 30.0;
    private final SideDependentList<YoDouble> yoKinematicVelocityArrayViolation = new SideDependentList<>(new YoDouble("invariantKinematicVelocityArrayViolationLeft", registry),
                                                                                                          new YoDouble("invariantKinematicVelocityArrayViolationRight", registry));
    private java.util.function.ToDoubleFunction<RobotSide> legViolationSource = null;
@@ -551,7 +553,60 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     * considering cost 0.5% of the path in horizontal error on 11/05; the MuJoCo jumps came from NIS 9-8000 updates.
     */
    private final YoDouble yoKinematicVelocityPositionConsiderNIS = new YoDouble("invariantKinematicVelocityPositionConsiderNIS", registry);
+   /** Height of each contact anchor and their difference: on stairs the feet stand a step apart (diagnostic). */
+   private final YoDouble yoContactAnchorHeightDifference = new YoDouble("invariantContactAnchorHeightDifference", registry);
+   private final YoDouble yoContactAnchorHeightLeft = new YoDouble("invariantContactAnchorHeightLeft", registry);
+   private final YoDouble yoContactAnchorHeightRight = new YoDouble("invariantContactAnchorHeightRight", registry);
+   private final us.ihmc.euclid.tuple3D.Vector3D contactAnchorLeft = new us.ihmc.euclid.tuple3D.Vector3D();
+   private final us.ihmc.euclid.tuple3D.Vector3D contactAnchorRight = new us.ihmc.euclid.tuple3D.Vector3D();
    private final RotationMatrix yawAuditRotation = new RotationMatrix();
+
+   /**
+    * Height audit (diagnostic): per tick, the base height change made by each phase (predict, gravity, contact,
+    * kinematic velocity), the part of it a rotation correction makes by rotating the world position about the origin
+    * (right-invariant retraction p+ = dR p + J xi_p), and the running totals. Added 2026-11-19 to tell where height goes
+    * on Alex002 stair logs; with the contact anchor heights it also tells whether the feet were really a step apart.
+    */
+   private final String[] heightAuditPhases = {"Predict", "Gravity", "Contact", "KinematicVelocity"};
+   private final YoDouble[] yoHeightChange = new YoDouble[heightAuditPhases.length];
+   private final YoDouble[] yoHeightChangeFromRotation = new YoDouble[heightAuditPhases.length];
+   private final YoDouble[] yoHeightChangeIntegrated = new YoDouble[heightAuditPhases.length];
+   private final YoDouble[] yoHeightChangeFromRotationIntegrated = new YoDouble[heightAuditPhases.length];
+   {
+      for (int i = 0; i < heightAuditPhases.length; i++)
+      {
+         yoHeightChange[i] = new YoDouble("invariantHeightChange" + heightAuditPhases[i], registry);
+         yoHeightChangeFromRotation[i] = new YoDouble("invariantHeightChangeFromRotation" + heightAuditPhases[i], registry);
+         yoHeightChangeIntegrated[i] = new YoDouble("invariantHeightChangeIntegrated" + heightAuditPhases[i], registry);
+         yoHeightChangeFromRotationIntegrated[i] = new YoDouble("invariantHeightChangeFromRotationIntegrated" + heightAuditPhases[i], registry);
+      }
+   }
+   private final RotationMatrix heightAuditRotationBefore = new RotationMatrix();
+   private final RotationMatrix heightAuditRotationAfter = new RotationMatrix();
+   private final us.ihmc.euclid.tuple3D.Vector3D heightAuditPositionBefore = new us.ihmc.euclid.tuple3D.Vector3D();
+   private final us.ihmc.euclid.tuple3D.Vector3D heightAuditPositionAfter = new us.ihmc.euclid.tuple3D.Vector3D();
+   private final us.ihmc.euclid.tuple3D.Vector3D heightAuditRotated = new us.ihmc.euclid.tuple3D.Vector3D();
+
+   private void heightAuditBefore()
+   {
+      ekf.getRotation(heightAuditRotationBefore);
+      ekf.getState().getBasePosition(heightAuditPositionBefore);
+   }
+
+   private void heightAuditAfter(int phase)
+   {
+      ekf.getRotation(heightAuditRotationAfter);
+      ekf.getState().getBasePosition(heightAuditPositionAfter);
+      double change = heightAuditPositionAfter.getZ() - heightAuditPositionBefore.getZ();
+      // dR = R_after R_before^T applied to the position before: the height change a pure rotation correction makes.
+      heightAuditRotationBefore.inverseTransform(heightAuditPositionBefore, heightAuditRotated);
+      heightAuditRotationAfter.transform(heightAuditRotated);
+      double fromRotation = heightAuditRotated.getZ() - heightAuditPositionBefore.getZ();
+      yoHeightChange[phase].set(change);
+      yoHeightChangeFromRotation[phase].set(fromRotation);
+      yoHeightChangeIntegrated[phase].add(change);
+      yoHeightChangeFromRotationIntegrated[phase].add(fromRotation);
+   }
 
    private double auditYaw()
    {
@@ -793,7 +848,12 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       this.imuBiasProvider = Objects.requireNonNull(imuBiasProvider, "imuBiasProvider must not be null (use ZeroIMUBiasProvider)");
 
       ekf = new InvariantEKF(NUMBER_OF_CONTACTS, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration, true, true);
-      yoKinematicVelocityErrorModel.set(KinematicVelocityErrorModel.WHITE);
+      // Defaults = the recommended configuration (2026-11-20, A20 retune on 11/05 mocap): Gauss-Markov KV error state
+      // (tau 0.1 s, sigma 0.03 m/s), short-flight hold 0.15 s, leg-violation gain 30 (inert without the off-axis
+      // artifact: the violation is NaN until an off-axis provider is installed, so arm 4 is unaffected).
+      yoKinematicVelocityErrorModel.set(KinematicVelocityErrorModel.STATE);
+      yoNoContactHoldDelay.set(DEFAULT_NO_CONTACT_HOLD_DELAY);
+      yoKinematicVelocityArrayViolationGain.set(DEFAULT_KINEMATIC_VELOCITY_ARRAY_VIOLATION_GAIN);
       yoKinematicVelocityErrorTimeConstant.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_TIME_CONSTANT);
       yoKinematicVelocityTouchdownVerticalWindow.set(0.1);
       yoKinematicVelocityPositionConsiderHorizontalOnly.set(true);
@@ -1292,7 +1352,9 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          heldLastTick = false;
       }
 
+      heightAuditBefore();
       ekf.predict(angularVelocity, linearAcceleration, dt);
+      heightAuditAfter(0);
 
       // Gravity-leveling: the roll/pitch anchor the contact update cannot provide (its Jacobian has a zero
       // rotation block). Diagnostic refreshed every tick; update applied only when quasi-static.
@@ -1300,13 +1362,16 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoYawChangeKinematicVelocity.set(0.0);
       yoYawChangeGravity.set(0.0);
       double yawBefore = auditYaw();
+      heightAuditBefore();
       updateGravityLeveling();
+      heightAuditAfter(1);
       recordYawChange(yoYawChangeGravity, yawBefore);
 
       // Knob 1 (measurement covariance): inflate a swing foot's contact FK noise so it stops dragging the
       // base velocity, while a stance foot keeps constraining it.
       yoContactPBaseTrace.set(covarianceBlockTrace(ekf.getState().basePositionTangentIndex()));
       yawBefore = auditYaw();
+      heightAuditBefore();
       ekf.setContactNISGate(yoContactNISGate.getDoubleValue());
       for (RobotSide side : RobotSide.values)
       {
@@ -1352,13 +1417,21 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          yoContactCorrectionPosNorm.get(side).set(ekf.getLastCorrectionPositionNorm());
       }
       recordYawChange(yoYawChangeContact, yawBefore);
+      heightAuditAfter(2);
       yawBefore = auditYaw();
+      heightAuditBefore();
       ekf.setKinematicVelocityHeadingConsider(yoKinematicVelocityHeadingConsider.getValue());
       ekf.setKinematicVelocityNISGate(yoKinematicVelocityNISGate.getDoubleValue());
       ekf.setKinematicVelocityPositionConsider(yoKinematicVelocityPositionConsider.getValue());
       ekf.setKinematicVelocityPositionConsiderHorizontalOnly(yoKinematicVelocityPositionConsiderHorizontalOnly.getValue());
       ekf.setKinematicVelocityPositionConsiderNIS(yoKinematicVelocityPositionConsiderNIS.getDoubleValue());
+      ekf.getState().getContactPosition(contactIndex(RobotSide.LEFT), contactAnchorLeft);
+      ekf.getState().getContactPosition(contactIndex(RobotSide.RIGHT), contactAnchorRight);
+      yoContactAnchorHeightLeft.set(contactAnchorLeft.getZ());
+      yoContactAnchorHeightRight.set(contactAnchorRight.getZ());
+      yoContactAnchorHeightDifference.set(contactAnchorLeft.getZ() - contactAnchorRight.getZ());
       updateKinematicVelocity();
+      heightAuditAfter(3);
       recordYawChange(yoYawChangeKinematicVelocity, yawBefore);
       int r = ekf.getState().rotationTangentIndex();
       yoYawStd.set(Math.sqrt(Math.max(0.0, ekf.getState().getCovariance().get(r + 2, r + 2))));

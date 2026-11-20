@@ -5,6 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiTableFlags;
 import imgui.internal.ImGui;
@@ -16,10 +18,13 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.RDXFocusBasedCamera;
 import us.ihmc.rdx.RDXKeyBindings;
 import us.ihmc.rdx.RDXSettings;
 import us.ihmc.rdx.imgui.ImGuiFrequencyDisplay;
@@ -39,8 +44,13 @@ import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridResourceDirectory;
+import us.ihmc.tools.io.HybridResourceFile;
+import us.ihmc.tools.io.JSONFileTools;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 /**
@@ -122,6 +132,8 @@ public class RDXBaseUI
    private ImGuiSliderDoubleWrapper pointLightIntensitySlider;
    private ImGuiSliderDoubleWrapper directionalLightIntensitySlider;
    private final RDXImGuiLayoutManager layoutManager;
+   private static final String CAMERA_FILE_NAME = "Camera.json";
+   private HybridResourceFile cameraFile;
    private final RDXKeyBindings keyBindings = new RDXKeyBindings();
    private long renderIndex = 0;
    private final double isoZoomOut = 0.7;
@@ -204,10 +216,90 @@ public class RDXBaseUI
          return true;
       });
       layoutManager.getSaveListeners().add(imGuiWindowAndDockSystem::saveConfiguration);
+      // The 3D view's camera is part of the layout, so saving a layout keeps the view too
+      layoutManager.getLayoutDirectoryUpdatedListeners().add(directory -> cameraFile = new HybridResourceFile(directory, CAMERA_FILE_NAME));
+      layoutManager.getLoadListeners().add(this::loadCamera);
+      layoutManager.getSaveListeners().add(this::saveCamera);
       layoutManager.applyLayoutDirectory();
 
       primary3DPanel = new RDX3DPanel(VIEW_3D_WINDOW_NAME, ANTI_ALIASING, true);
       primary3DPanel.setBackgroundShade((float) view3DBackgroundShade.get());
+   }
+
+   /**
+    * Puts the primary 3D view's camera where the layout saved it. A layout without a saved camera leaves the camera
+    * where the application put it. Never fails the layout load.
+    */
+   private boolean loadCamera(ImGuiConfigurationLocation location)
+   {
+      if (cameraFile == null || primary3DPanel.getCamera3D() == null)
+         return true;
+
+      boolean loaded = loadCameraFrom(location);
+      // The user's home layout may predate saving the camera; fall back to the one in version control
+      if (!loaded && !location.isVersionControl())
+         loadCameraFrom(ImGuiConfigurationLocation.VERSION_CONTROL);
+      return true;
+   }
+
+   private boolean loadCameraFrom(ImGuiConfigurationLocation location)
+   {
+      cameraFile.setMode(location.toHybridResourceMode());
+      // A version controlled layout is read from the classpath, which only has a camera saved before the last build.
+      // Read the file it was saved to instead, so a saved camera is used on the next start without rebuilding.
+      Path savedFile = cameraFile.getFileForWriting();
+      if (savedFile != null && Files.isRegularFile(savedFile))
+      {
+         try (InputStream inputStream = Files.newInputStream(savedFile))
+         {
+            JSONFileTools.load(inputStream, this::applyCamera);
+            LogTools.info("Loaded the 3D view camera from {}", savedFile);
+            return true;
+         }
+         catch (IOException e)
+         {
+            LogTools.error("Could not read {}: {}", savedFile, e.getMessage());
+         }
+      }
+      return cameraFile.getInputStream(inputStream -> JSONFileTools.load(inputStream, root ->
+      {
+         applyCamera(root);
+         LogTools.info("Loaded the 3D view camera from {}", cameraFile.getLocationOfResourceForReading());
+      }));
+   }
+
+   private void applyCamera(JsonNode root)
+   {
+      JsonNode focusPoint = root.get("focusPoint");
+      JsonNode cameraPosition = root.get("cameraPosition");
+      if (focusPoint == null || cameraPosition == null)
+         return;
+      RDXFocusBasedCamera camera = primary3DPanel.getCamera3D();
+      camera.setCameraFocusPoint(new Point3D(focusPoint.get("x").asDouble(), focusPoint.get("y").asDouble(), focusPoint.get("z").asDouble()));
+      camera.changeCameraPosition(cameraPosition.get("x").asDouble(), cameraPosition.get("y").asDouble(), cameraPosition.get("z").asDouble());
+   }
+
+   private void saveCamera(ImGuiConfigurationLocation location)
+   {
+      if (cameraFile == null || primary3DPanel.getCamera3D() == null)
+         return;
+
+      RDXFocusBasedCamera camera = primary3DPanel.getCamera3D();
+      cameraFile.setMode(location.toHybridResourceMode());
+      Path file = cameraFile.getFileForWriting();
+      FileTools.ensureDirectoryExists(file.getParent(), DefaultExceptionHandler.PRINT_STACKTRACE);
+      LogTools.info("Saving the 3D view camera to {}", file);
+      JSONFileTools.save(file, root ->
+      {
+         ObjectNode focusPoint = root.putObject("focusPoint");
+         focusPoint.put("x", camera.getFocusPointPose().getPosition().getX());
+         focusPoint.put("y", camera.getFocusPointPose().getPosition().getY());
+         focusPoint.put("z", camera.getFocusPointPose().getPosition().getZ());
+         ObjectNode cameraPosition = root.putObject("cameraPosition");
+         cameraPosition.put("x", camera.getCameraPose().getPosition().getX());
+         cameraPosition.put("y", camera.getCameraPose().getPosition().getY());
+         cameraPosition.put("z", camera.getCameraPose().getPosition().getZ());
+      });
    }
 
    /**
