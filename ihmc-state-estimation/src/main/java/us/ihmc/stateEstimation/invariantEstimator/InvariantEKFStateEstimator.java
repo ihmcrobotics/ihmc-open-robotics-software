@@ -151,11 +151,12 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
    /**
     * Both feet below the contact threshold for at most this long (s) is a short flight, not hanging: the filter keeps
     * integrating the IMU (no contact or kinematic-velocity updates) instead of zeroing the base velocity and
-    * re-anchoring with zero velocity afterwards. 0 (the default) keeps the original immediate hold. In the 11/05 replay
+    * re-anchoring with zero velocity afterwards. 0 keeps the original immediate hold; default 0.15 s. In the 11/05 replay
     * the RL gait's fast steps briefly drop both foot switches below 0.5 for ~60 ms at 0.87 m/s; the hold then reset
     * the velocity to zero mid-stride (a 14 cm/s RMS error over the following 3 s).
     */
    private final YoDouble yoNoContactHoldDelay = new YoDouble("invariantNoContactHoldDelay", registry);
+   public static final double DEFAULT_NO_CONTACT_HOLD_DELAY = 0.15; // s
    private final YoDouble yoNoContactDuration = new YoDouble("invariantNoContactDuration", registry);
    private final YoBoolean yoShortFlight = new YoBoolean("invariantShortFlight", registry);
    private static final double CONTACT_HOLD_THRESHOLD = 0.5; // both feet below -> base translation will be unobservable
@@ -300,9 +301,10 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     * Array-observed kinematic-velocity noise: the kinematic velocity assumes a rigid leg, and the IMU array measures
     * how badly that leg is violating rigidity right now (fast off-axis residual of its IMU pairs, previous tick).
     * On 11/05 that violation predicted the per-foot kinematic-velocity error (Spearman +0.55..+0.63, top quintile
-    * 3x the bottom). R_v gets gain * violation^2 on its diagonal. 0 (default) = off.
+    * 3x the bottom). R_v gets gain * violation^2 on its diagonal. 0 = off; default 30 (arm 6, A20), inert without an off-axis provider.
     */
    private final YoDouble yoKinematicVelocityArrayViolationGain = new YoDouble("invariantKinematicVelocityArrayViolationGain", registry);
+   public static final double DEFAULT_KINEMATIC_VELOCITY_ARRAY_VIOLATION_GAIN = 30.0;
    private final SideDependentList<YoDouble> yoKinematicVelocityArrayViolation = new SideDependentList<>(new YoDouble("invariantKinematicVelocityArrayViolationLeft", registry),
                                                                                                          new YoDouble("invariantKinematicVelocityArrayViolationRight", registry));
    private java.util.function.ToDoubleFunction<RobotSide> legViolationSource = null;
@@ -846,7 +848,12 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       this.imuBiasProvider = Objects.requireNonNull(imuBiasProvider, "imuBiasProvider must not be null (use ZeroIMUBiasProvider)");
 
       ekf = new InvariantEKF(NUMBER_OF_CONTACTS, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration, true, true);
-      yoKinematicVelocityErrorModel.set(KinematicVelocityErrorModel.WHITE);
+      // Defaults = the recommended configuration (2026-11-20, A20 retune on 11/05 mocap): Gauss-Markov KV error state
+      // (tau 0.1 s, sigma 0.03 m/s), short-flight hold 0.15 s, leg-violation gain 30 (inert without the off-axis
+      // artifact: the violation is NaN until an off-axis provider is installed, so arm 4 is unaffected).
+      yoKinematicVelocityErrorModel.set(KinematicVelocityErrorModel.STATE);
+      yoNoContactHoldDelay.set(DEFAULT_NO_CONTACT_HOLD_DELAY);
+      yoKinematicVelocityArrayViolationGain.set(DEFAULT_KINEMATIC_VELOCITY_ARRAY_VIOLATION_GAIN);
       yoKinematicVelocityErrorTimeConstant.set(DEFAULT_KINEMATIC_VELOCITY_ERROR_TIME_CONSTANT);
       yoKinematicVelocityTouchdownVerticalWindow.set(0.1);
       yoKinematicVelocityPositionConsiderHorizontalOnly.set(true);
