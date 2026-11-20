@@ -47,9 +47,12 @@ public class ZuluEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    @Tag("humanoid-rough-terrain-slow")
    public void testUpSlopeExperimentalPhysicsEngine(TestInfo testInfo) throws Exception
    {
+      swingDuration = 1.0;
+      transferDuration = 0.5;
       maxStepLength = 0.25;
       heightOffset = 0.0;
       torsoPitch = 0.50;
+      disableToeOff = true;
       testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true, disableToeOff);
    }
 
