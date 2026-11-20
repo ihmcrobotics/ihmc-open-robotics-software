@@ -1,0 +1,425 @@
+package us.ihmc.stateEstimation.invariantEstimator;
+
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+
+import us.ihmc.euclid.lieGroup.SO3LieGroupTools;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+
+/**
+ * Discrete-time prediction (propagation) step for the world-centric right-invariant EKF on SE_k(3).
+ *
+ * <p>Inputs are the bias-corrected body-frame angular velocity ω and specific force a (an upstream
+ * joint-space EKF owns the biases), gravity g, and the timestep Δt. The mean uses the exact discrete
+ * update with the SO(3) integration coefficients Γ₀/Γ₁/Γ₂; the covariance uses
+ * {@code P⁺ = Φ P Φᵀ + Q_d} with the state-independent transition Φ and the group adjoint mapping
+ * the process noise.</p>
+ *
+ * <p>Mean update (φ = ωΔt):
+ * <pre>
+ *   R⁺ = R · exp(φ)
+ *   v⁺ = v + g·Δt + R · Γ₁(φ) · a · Δt
+ *   p⁺ = p + v·Δt + ½·g·Δt² + R · Γ₂(φ) · a · Δt²
+ *   dᵢ⁺ = dᵢ
+ * </pre>
+ * Covariance: Φ = exp(A_c Δt) (depends only on g and Δt); Q_d = Φ · Ad_X · Q_c · Ad_Xᵀ · Φᵀ · Δt.</p>
+ *
+ * <p>The covariance is linearized about the prior state, so {@link #predict} propagates P
+ * <em>before</em> overwriting X with the mean update.</p>
+ *
+ * <p><b>Gyro bias state</b> (optional, see {@link InvariantState#hasGyroBias}). The caller corrects ω with the
+ * state's own b̂_g. With {@code δb = b̂_g − b_g}, the corrected rate is off by −δb, which enters the group error as
+ * {@code ξ̇ = A_c ξ − Ad_X̂·[δb; 0; …; 0]} (Hartley et al., "imperfect" InEKF). Discretized to first order:
+ * {@code Φ_ξb = −Φ_g·Ad_X̂·E·Δt}, E selecting the rotation columns, and a random walk σ_b² on the bias block.
+ * While the bias is inactive both are zero and the block is decoupled.</p>
+ *
+ * <p><b>Kinematic-velocity error state</b> (optional, see {@link InvariantState#hasKinematicVelocityBias}). The error of
+ * the kinematic body-velocity measurement is not white: against motion capture it stays correlated for 50-200 ms
+ * while the measurement arrives at 1 kHz, so treating it as white counts one error hundreds of times. It is modelled
+ * as a first-order Gauss-Markov process {@code ḃ_v = −b_v/τ + w}, {@code E[w wᵀ] = (2σ²/τ)·I}, which has stationary
+ * standard deviation σ: {@code Φ_bb = e^{−Δt/τ}·I}, no coupling into the group (it is a measurement error, not a
+ * state of the robot). While inactive, Φ_bb = I, no noise, and the block is decoupled.</p>
+ */
+public class InvariantPropagator
+{
+   private final int numberOfContacts;
+   private final int groupTangentSize;
+   /** Tangent index of the gyro bias block, or -1 without one. */
+   private final int gyroBiasIndex;
+   private boolean gyroBiasActive = false;
+   private double gyroBiasRandomWalkVariance = 0.0;
+   /** Tangent index of the kinematic-velocity error block, or -1 without one. */
+   private final int kinematicVelocityBiasIndex;
+   private boolean kinematicVelocityBiasActive = false;
+   private double kinematicVelocityBiasTimeConstant = Double.NaN;
+   /** Ad_X̂ of the group part alone ((9+3N)²); embedded in {@link #adjoint} with an identity bias block. */
+   private final DMatrixRMaj groupAdjoint;
+   /** World-frame gravity g = (0, 0, -|g|). Set from the robot process's gravity, never hard-coded here. */
+   private final Vector3D gravity = new Vector3D();
+
+   /** Continuous process-noise covariance Q_c (m×m); the contact-slip blocks may be retuned per tick. */
+   private final DMatrixRMaj processNoise;
+
+   /** Tangent-space start index of contact i's 3×3 block in Q_c (and P): 9 + 3i. */
+   private static final int FIRST_CONTACT_TANGENT_INDEX = 9;
+
+   // Pre-allocated work matrices (m×m) to keep predict() allocation-free.
+   private final DMatrixRMaj Phi;
+   private final DMatrixRMaj adjoint;
+   private final DMatrixRMaj processNoiseDiscrete;
+   private final DMatrixRMaj tempA;
+   private final DMatrixRMaj tempB;
+
+   // Pre-allocated 3D temporaries for the mean update.
+   private final Vector3D phi = new Vector3D();
+   private final RotationMatrix rotation = new RotationMatrix();
+   private final RotationMatrix rotationIncrement = new RotationMatrix();
+   private final RotationMatrix newRotation = new RotationMatrix();
+   private final Vector3D velocity = new Vector3D();
+   private final Vector3D position = new Vector3D();
+   private final Vector3D newVelocity = new Vector3D();
+   private final Vector3D newPosition = new Vector3D();
+   private final Vector3D term = new Vector3D();
+   private final Matrix3D gammaMatrix = new Matrix3D();
+   private final Matrix3D hatGravity = new Matrix3D();
+
+   // Pre-allocated scratch for the allocation-free SEK3_Utils.adjoint call in predictCovariance().
+   private final RotationMatrix adjointRotation = new RotationMatrix();
+   private final Vector3D adjointColumn = new Vector3D();
+   private final Matrix3D adjointHat = new Matrix3D();
+
+   /**
+    * @param numberOfContacts the number of contact columns N (≥ 0).
+    * @param gyroVariance     continuous angular-velocity noise variance σ_ω² (rad²/s).
+    * @param accelVariance    continuous specific-force noise variance σ_a² (m²/s³).
+    * @param contactVariance  continuous contact-slip noise variance σ_c² (m²/s).
+    * @param gravitationalAcceleration the process gravity (m/s²); sign not considered, g is always (0, 0, −|g|).
+    */
+   public InvariantPropagator(int numberOfContacts, double gyroVariance, double accelVariance, double contactVariance, double gravitationalAcceleration)
+   {
+      this(numberOfContacts, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration, false);
+   }
+
+   /** @param withGyroBias sizes Φ, Q and P for the gyro bias block of {@link InvariantState#InvariantState(int, boolean)}. */
+   public InvariantPropagator(int numberOfContacts,
+                              double gyroVariance,
+                              double accelVariance,
+                              double contactVariance,
+                              double gravitationalAcceleration,
+                              boolean withGyroBias)
+   {
+      this(numberOfContacts, gyroVariance, accelVariance, contactVariance, gravitationalAcceleration, withGyroBias, false);
+   }
+
+   /**
+    * @param withKinematicVelocityBias sizes Φ, Q and P for the kinematic-velocity error block of
+    *                                  {@link InvariantState#InvariantState(int, boolean, boolean)}.
+    */
+   public InvariantPropagator(int numberOfContacts,
+                              double gyroVariance,
+                              double accelVariance,
+                              double contactVariance,
+                              double gravitationalAcceleration,
+                              boolean withGyroBias,
+                              boolean withKinematicVelocityBias)
+   {
+      if (numberOfContacts < 0)
+         throw new IllegalArgumentException("numberOfContacts must be >= 0, was " + numberOfContacts);
+      requireNonNegativeFinite("gyroVariance", gyroVariance);
+      requireNonNegativeFinite("accelVariance", accelVariance);
+      requireNonNegativeFinite("contactVariance", contactVariance);
+
+      this.numberOfContacts = numberOfContacts;
+      gravity.set(0.0, 0.0, -Math.abs(gravitationalAcceleration));
+
+      groupTangentSize = 3 + 3 * (2 + numberOfContacts); // 9 + 3N
+      gyroBiasIndex = withGyroBias ? groupTangentSize : -1;
+      kinematicVelocityBiasIndex = withKinematicVelocityBias ? groupTangentSize + (withGyroBias ? 3 : 0) : -1;
+      int m = groupTangentSize + (withGyroBias ? 3 : 0) + (withKinematicVelocityBias ? 3 : 0);
+      groupAdjoint = new DMatrixRMaj(groupTangentSize, groupTangentSize);
+
+      processNoise = new DMatrixRMaj(m, m);
+      Phi = new DMatrixRMaj(m, m);
+      adjoint = new DMatrixRMaj(m, m);
+      processNoiseDiscrete = new DMatrixRMaj(m, m);
+      tempA = new DMatrixRMaj(m, m);
+      tempB = new DMatrixRMaj(m, m);
+
+      buildProcessNoise(gyroVariance, accelVariance, contactVariance);
+   }
+
+   /**
+    * Retunes contact i's continuous slip-noise variance σ_{c,i}² in Q_c, in place. The soft contact
+    * handling calls this each tick to inflate a swing foot's anchor noise (so it re-anchors softly on
+    * touchdown) and restore it in stance. Isotropic: writes {@code variance·I} on contact i's 3×3 block.
+    *
+    * @param contactIndex the contact index i in [0, N).
+    * @param variance     the continuous slip variance σ_{c,i}² (m²/s), ≥ 0.
+    */
+   public void setContactSlipVariance(int contactIndex, double variance)
+   {
+      if (contactIndex < 0 || contactIndex >= numberOfContacts)
+         throw new IndexOutOfBoundsException("contactIndex must be in [0, " + numberOfContacts + "), was " + contactIndex);
+      requireNonNegativeFinite("variance", variance);
+
+      int block = FIRST_CONTACT_TANGENT_INDEX + 3 * contactIndex;
+      for (int j = 0; j < 3; j++)
+         processNoise.set(block + j, block + j, variance);
+   }
+
+   /**
+    * Couples (or decouples) the gyro bias block and sets its continuous random-walk variance σ_b² ((rad/s)²/s).
+    * Inactive: Φ_ξb = 0 and no bias process noise, so b̂_g and its covariance do not move.
+    */
+   public void setGyroBias(boolean active, double randomWalkVariance)
+   {
+      if (gyroBiasIndex < 0)
+      {
+         if (active)
+            throw new IllegalStateException("built without a gyro bias state");
+         return;
+      }
+      requireNonNegativeFinite("randomWalkVariance", randomWalkVariance);
+      gyroBiasActive = active;
+      gyroBiasRandomWalkVariance = randomWalkVariance;
+      for (int j = 0; j < 3; j++)
+         processNoise.set(gyroBiasIndex + j, gyroBiasIndex + j, active ? randomWalkVariance : 0.0);
+   }
+
+   public boolean isGyroBiasActive()
+   {
+      return gyroBiasActive;
+   }
+
+   /**
+    * Couples (or decouples) the kinematic-velocity error block as a Gauss-Markov process with time constant τ (s) and
+    * stationary standard deviation σ (m/s): Q_c = 2σ²/τ on the block. Inactive: Φ_bb = I and no noise.
+    */
+   public void setKinematicVelocityBias(boolean active, double timeConstant, double standardDeviation)
+   {
+      setKinematicVelocityBias(active, timeConstant, standardDeviation, standardDeviation);
+   }
+
+   /**
+    * As {@link #setKinematicVelocityBias(boolean, double, double)} with separate stationary standard deviations for the
+    * horizontal (x, y) and vertical (z) body axes. The vertical error is both smaller (innovation σ_z 1.6 cm/s against
+    * 2.8-3.7 in x/y on the 10/13 log) and more harmful to model: a z error state lets the residual accelerometer z bias
+    * be explained as measurement error, and the vertical velocity then follows the IMU (b̂_z grew in proportion to τ,
+    * +1.2 mm/s at τ = 0.05 s, and the height drift with it).
+    */
+   public void setKinematicVelocityBias(boolean active, double timeConstant, double horizontalStandardDeviation, double verticalStandardDeviation)
+   {
+      if (kinematicVelocityBiasIndex < 0)
+      {
+         if (active)
+            throw new IllegalStateException("built without a kinematic-velocity error state");
+         return;
+      }
+      if (active && !(timeConstant > 0.0 && Double.isFinite(timeConstant)))
+         throw new IllegalArgumentException("timeConstant must be positive and finite, was " + timeConstant);
+      requireNonNegativeFinite("horizontalStandardDeviation", horizontalStandardDeviation);
+      requireNonNegativeFinite("verticalStandardDeviation", verticalStandardDeviation);
+      kinematicVelocityBiasActive = active;
+      kinematicVelocityBiasTimeConstant = timeConstant;
+      for (int j = 0; j < 3; j++)
+      {
+         double std = j < 2 ? horizontalStandardDeviation : verticalStandardDeviation;
+         processNoise.set(kinematicVelocityBiasIndex + j, kinematicVelocityBiasIndex + j, active ? 2.0 * std * std / timeConstant : 0.0);
+      }
+   }
+
+   public boolean isKinematicVelocityBiasActive()
+   {
+      return kinematicVelocityBiasActive;
+   }
+
+   /**
+    * @throws IllegalArgumentException if {@code value} is negative OR non-finite. {@code value < 0.0} alone
+    *                                  would miss NaN (every comparison with NaN is false), which would
+    *                                  otherwise write straight into the process-noise diagonal and poison Q.
+    */
+   private static void requireNonNegativeFinite(String name, double value)
+   {
+      if (!(value >= 0.0))
+         throw new IllegalArgumentException(name + " must be finite and >= 0, was " + value);
+   }
+
+   /**
+    * Propagates the state forward by Δt. Covariance is propagated first (about the prior X),
+    * then the mean.
+    *
+    * @param state             the state to update in place. Modified.
+    * @param angularVelocity   bias-corrected body-frame ω. Not modified.
+    * @param linearAcceleration bias-corrected body-frame specific force a. Not modified.
+    * @param dt                the timestep Δt (> 0).
+    */
+   public void predict(InvariantState state, Vector3DReadOnly angularVelocity, Vector3DReadOnly linearAcceleration, double dt)
+   {
+      predictCovariance(state, dt);
+      predictMean(state, angularVelocity, linearAcceleration, dt);
+      if (kinematicVelocityBiasIndex >= 0 && kinematicVelocityBiasActive)
+      {
+         // The Gauss-Markov mean decays with the same e^{−Δt/τ} as Φ_bb. Leaving b̂_v constant while Φ shrinks its
+         // error claims a pull toward zero the estimate never gets, and the unobservable v + b_v direction then
+         // drifts apart without bound (seen in replay: v and −b̂_v both ran to 17 m/s while P said 2 cm/s).
+         state.getKinematicVelocityBias().scale(Math.exp(-dt / kinematicVelocityBiasTimeConstant));
+      }
+   }
+
+   /** Mean update R⁺/v⁺/p⁺ using Γ₀/Γ₁/Γ₂; contacts unchanged. */
+   private void predictMean(InvariantState state, Vector3DReadOnly angularVelocity, Vector3DReadOnly linearAcceleration, double dt)
+   {
+      phi.setAndScale(dt, angularVelocity);
+
+      state.getRotation(rotation);
+      state.getBaseVelocity(velocity);
+      state.getBasePosition(position);
+
+      // p⁺ = p + v·Δt + ½·g·Δt² + R·Γ₂(φ)·a·Δt²   (uses prior v, so compute before v is overwritten)
+      SO3LieGroupTools.gamma2(phi, gammaMatrix);
+      gammaMatrix.transform(linearAcceleration, term); // term = Γ₂·a
+      rotation.transform(term);                        // term = R·Γ₂·a
+      newPosition.set(position);
+      newPosition.scaleAdd(dt, velocity, newPosition);           // + v·Δt
+      newPosition.scaleAdd(0.5 * dt * dt, gravity, newPosition); // + ½·g·Δt²
+      newPosition.scaleAdd(dt * dt, term, newPosition);          // + R·Γ₂·a·Δt²
+
+      // v⁺ = v + g·Δt + R·Γ₁(φ)·a·Δt
+      SO3LieGroupTools.leftJacobian(phi, gammaMatrix);
+      gammaMatrix.transform(linearAcceleration, term); // term = Γ₁·a
+      rotation.transform(term);                        // term = R·Γ₁·a
+      newVelocity.set(velocity);
+      newVelocity.scaleAdd(dt, gravity, newVelocity);  // + g·Δt
+      newVelocity.scaleAdd(dt, term, newVelocity);     // + R·Γ₁·a·Δt
+
+      // R⁺ = R·exp(φ)
+      SO3LieGroupTools.exp(phi, rotationIncrement);
+      newRotation.set(rotation);
+      newRotation.multiply(rotationIncrement);
+
+      state.setRotation(newRotation);
+      state.setBaseVelocity(newVelocity);
+      state.setBasePosition(newPosition);
+      // contact columns are static in the world frame, propagation model is to simply keep them the same.
+
+   }
+
+   /** Covariance update P⁺ = Φ P Φᵀ + Q_d, linearized about the prior X. */
+   private void predictCovariance(InvariantState state, double dt)
+   {
+      buildStateTransition(dt);
+      SEK3Utils.adjoint(state.getGroupElement(), groupAdjoint, adjointRotation, adjointColumn, adjointHat);
+      if (adjoint.getNumRows() == groupTangentSize)
+      {
+         adjoint.set(groupAdjoint);
+      }
+      else
+      {
+         // Ad on the group block, identity on the Euclidean blocks (their noise is body-frame, not transported).
+         adjoint.zero();
+         CommonOps_DDRM.insert(groupAdjoint, adjoint, 0, 0);
+         for (int j = groupTangentSize; j < adjoint.getNumRows(); j++)
+            adjoint.set(j, j, 1.0);
+      }
+      if (kinematicVelocityBiasIndex >= 0 && kinematicVelocityBiasActive)
+      {
+         // Gauss-Markov decay; a measurement error, so no coupling to the group block.
+         double decay = Math.exp(-dt / kinematicVelocityBiasTimeConstant);
+         for (int j = 0; j < 3; j++)
+            Phi.set(kinematicVelocityBiasIndex + j, kinematicVelocityBiasIndex + j, decay);
+      }
+      if (gyroBiasIndex >= 0)
+      {
+         if (gyroBiasActive)
+         {
+            // Φ_ξb = −Φ_g·Ad_X̂·E·Δt: Φ_g times the rotation columns of Ad, into the group rows of the bias columns.
+            for (int r = 0; r < groupTangentSize; r++)
+            {
+               for (int c = 0; c < 3; c++)
+               {
+                  double sum = 0.0;
+                  for (int k = 0; k < groupTangentSize; k++)
+                     sum += Phi.get(r, k) * groupAdjoint.get(k, c);
+                  Phi.set(r, gyroBiasIndex + c, -sum * dt);
+               }
+            }
+         }
+      }
+
+      // Q_d = Φ · Ad · Q_c · Adᵀ · Φᵀ · Δt
+      CommonOps_DDRM.mult(adjoint, processNoise, tempA);           // Ad·Q_c
+      CommonOps_DDRM.multTransB(tempA, adjoint, tempB);            // Ad·Q_c·Adᵀ
+      CommonOps_DDRM.mult(Phi, tempB, tempA);                     // Φ·(Ad·Q_c·Adᵀ)
+      CommonOps_DDRM.multTransB(tempA, Phi, processNoiseDiscrete); // Φ·Ad·Q_c·Adᵀ·Φᵀ
+      CommonOps_DDRM.scale(dt, processNoiseDiscrete);             // × Δt
+
+      // P⁺ = Φ·P·Φᵀ + Q_d
+      DMatrixRMaj covariance = state.getCovariance();
+      CommonOps_DDRM.mult(Phi, covariance, tempA);  // Φ·P
+      CommonOps_DDRM.multTransB(tempA, Phi, tempB); // Φ·P·Φᵀ
+      CommonOps_DDRM.add(tempB, processNoiseDiscrete, covariance); // write back into P
+
+      // P is symmetric only to round-off after the mult/multTransB pair above; JointKFUpdate and
+      // JointKFPrediction both symmetrize their covariance writes for the same reason (round-off
+      // asymmetry compounds tick over tick and can eventually break a downstream Cholesky), and
+      // InvariantUpdater already symmetrizes its own S before decomposing it -- this was the one
+      // covariance write in the package that didn't follow that pattern.
+      symmetrize(covariance);
+   }
+
+   /** In-place symmetrization A &lt;- 0.5 (A + Aᵀ). Allocation-free. */
+   private static void symmetrize(DMatrixRMaj a)
+   {
+      for (int i = 0; i < a.numRows; i++)
+      {
+         for (int j = i + 1; j < a.numCols; j++)
+         {
+            double avg = 0.5 * (a.get(i, j) + a.get(j, i));
+            a.set(i, j, avg);
+            a.set(j, i, avg);
+         }
+      }
+   }
+
+   /** Builds the state-independent transition Φ = exp(A_c Δt) into {@link #Phi}. */
+   private void buildStateTransition(double dt)
+   {
+      CommonOps_DDRM.setIdentity(Phi);
+      SO3LieGroupTools.hat(gravity, hatGravity);
+
+      setScaledBlock(Phi, 3, 0, hatGravity, dt);
+      setScaledBlock(Phi, 6, 0, hatGravity, 0.5 * dt * dt);
+      addScaledIdentity(Phi, 6, 3, dt);
+   }
+
+   /** Builds the continuous process-noise covariance Q_c into {@link #processNoise}. */
+   private void buildProcessNoise(double gyroVariance, double accelVariance, double contactVariance)
+   {
+      processNoise.zero();
+      addScaledIdentity(processNoise, 0,0, gyroVariance);
+      addScaledIdentity(processNoise, 3,3, accelVariance);
+      // p block (6,6) carries no direct noise
+      for (int i = 0; i < numberOfContacts; i++)
+         addScaledIdentity(processNoise, 9 + 3 * i, 9 + 3 * i, contactVariance);
+
+   }
+
+   /** Adds scale·I into the 3×3 block of {@code dest} at (row0, col0). */
+   private static void addScaledIdentity(DMatrixRMaj dest, int row0, int col0, double scale)
+   {
+      for (int j = 0; j < 3; j++)
+         dest.add(row0 + j, col0 + j, scale);
+   }
+
+   /** Writes scale·block into the 3×3 block of {@code dest} at (row0, col0). */
+   private static void setScaledBlock(DMatrixRMaj dest, int row0, int col0, Matrix3DReadOnly block, double scale)
+   {
+      for (int r = 0; r < 3; r++)
+         for (int c = 0; c < 3; c++)
+            dest.set(row0 + r, col0 + c, scale * block.getElement(r,c));
+   }
+}

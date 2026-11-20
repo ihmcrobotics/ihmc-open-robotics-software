@@ -1,0 +1,447 @@
+package us.ihmc.stateEstimation.invariantEstimator;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+
+import org.ejml.data.DMatrixRMaj;
+import org.junit.jupiter.api.Test;
+
+import gnu.trove.map.hash.TObjectDoubleHashMap;
+
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.robotModels.FullRobotModelTestTools.RandomFullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.stateEstimation.IMUBasedJointStateEstimatorParameters;
+import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter;
+import us.ihmc.stateEstimation.jointLevel.JointLevelKFTestSupport;
+import us.ihmc.stateEstimation.jointLevel.SettableTestIMU;
+import us.ihmc.stateEstimation.jointLevel.SettableTestSensorMap;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+
+/**
+ * "Full filter" tests of {@link InvariantMainStateEstimator} — the InEKF floating-base estimator wrapping a
+ * {@link JointLevelKFPreFilter} pre-filter, which is what actually runs on the robot. Built on a synthetic
+ * {@link RandomFullHumanoidRobotModel} + a hand-fed {@link SettableTestSensorMap}, with no SCS simulation.
+ *
+ * <p>Because the model geometry is random (not a realistic standing posture), every scenario is made
+ * self-consistent by construction: a forced constant contact probability (so behavior does not depend on
+ * where random feet land), and either a fully static equilibrium, a pure base rotation in no-contact hold,
+ * or a gravity-consistent hang. These lock in the assembled-pipeline behavior and the NaN hardening.</p>
+ */
+public class InvariantMainStateEstimatorTest
+{
+   private static final double DT = 1.0e-3;
+   private static final ReferenceFrame WORLD = ReferenceFrame.getWorldFrame();
+
+   /** Everything a scenario needs to drive and read one assembled estimator. */
+   private static final class Rig
+   {
+      RandomFullHumanoidRobotModel model;
+      OneDoFJointBasics[] joints;
+      SettableTestSensorMap sensorMap;
+      SettableTestIMU pelvisIMU;
+      List<SettableTestIMU> imus;
+      JointLevelKFPreFilter preFilter;
+      YoRegistry preFilterRegistry = new YoRegistry("preFilter");
+      InvariantMainStateEstimator main;
+      InvariantEKF ekf;
+
+      void doControl()
+      {
+         main.doControl();
+      }
+   }
+
+   /**
+    * Assembles the model, sensors, pre-filter over both leg IMU pairs, and the main estimator; seeds the base
+    * at {@code baseOrientation} and forces both feet to {@code contactProbability}. If {@code poisonLegImu} is
+    * true, the left-foot IMU's bias covariance is corrupted before the pre-filter is built (NaN regression).
+    */
+   private static Rig buildRig(long seed, RotationMatrix baseOrientation, double contactProbability, boolean poisonLegImu)
+   {
+      Rig rig = new Rig();
+      Random random = new Random(seed);
+      rig.model = new RandomFullHumanoidRobotModel(random);
+      rig.joints = rig.model.getOneDoFJoints();
+
+      // A fixed, mild static posture; velocities zero. Geometry is random regardless of q.
+      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, rig.joints);
+      for (OneDoFJointBasics joint : rig.joints)
+         joint.setQd(0.0);
+      rig.model.getRootJoint().setJointConfigurationToZero();
+      rig.model.getElevator().updateFramesRecursively();
+
+      rig.pelvisIMU = new SettableTestIMU("pelvisIMU", rig.model.getPelvis());
+      SettableTestIMU leftFootIMU = new SettableTestIMU("leftFootIMU", rig.model.getFoot(RobotSide.LEFT));
+      SettableTestIMU rightFootIMU = new SettableTestIMU("rightFootIMU", rig.model.getFoot(RobotSide.RIGHT));
+      if (poisonLegImu)
+         leftFootIMU.setBiasProcessNoiseCovarianceNonFinite();
+      rig.imus = Arrays.asList(rig.pelvisIMU, leftFootIMU, rightFootIMU);
+      List<IMUSensorReadOnly> imuOutputs = new ArrayList<>(rig.imus);
+
+      rig.sensorMap = new SettableTestSensorMap(imuOutputs, Arrays.asList(rig.joints));
+      for (OneDoFJointBasics joint : rig.joints)
+         rig.sensorMap.setPosition(joint, joint.getQ()); // encoder = model q
+
+      List<IMUBasedJointStateEstimatorParameters> pairParameters = new ArrayList<>();
+      pairParameters.add(new IMUBasedJointStateEstimatorParameters("leftLeg", true, "pelvisIMU", "leftFootIMU", 0.0, 0.0));
+      pairParameters.add(new IMUBasedJointStateEstimatorParameters("rightLeg", true, "pelvisIMU", "rightFootIMU", 0.0, 0.0));
+      List<RigidBodyBasics> feet = Arrays.asList(rig.model.getFoot(RobotSide.LEFT), rig.model.getFoot(RobotSide.RIGHT));
+      rig.preFilter = JointLevelKFTestSupport.newPreFilter(rig.sensorMap, pairParameters, feet, DT, rig.preFilterRegistry);
+
+      rig.main = new InvariantMainStateEstimator(rig.model,
+                                                 rig.sensorMap,
+                                                 "pelvisIMU",
+                                                 null,   // centerOfMassDataHolder — supported
+                                                 DT,
+                                                 1.0e-4, // gyroVariance
+                                                 1.0e-3, // accelVariance
+                                                 1.0e-6, // contactVariance
+                                                 1.0e-6, // contactMeasurementVariance
+                                                 1.0,    // initialCovariance
+                                                 -9.81,  // gravitationalAcceleration
+                                                 false,  // enableYawSeeding
+                                                 rig.preFilter);
+      rig.main.getInvariantEKFStateEstimator().setContactProbabilityProvider(constantContact(contactProbability));
+      rig.ekf = rig.main.getInvariantEKFStateEstimator().getInvariantEKF();
+
+      RigidBodyTransform baseTransform = new RigidBodyTransform();
+      baseTransform.getRotation().set(baseOrientation);
+      rig.main.initializeEstimator(baseTransform, new TObjectDoubleHashMap<>());
+      return rig;
+   }
+
+   /**
+    * Yaw seeding is a runtime switch: the constructor only sets its initial state, and turning it on mid-run must
+    * re-anchor rather than act on stale anchors -- in static equilibrium the base must stay at identity either way.
+    */
+   @Test
+   public void testYawSeedingIsARuntimeSwitch()
+   {
+      Rig rig = buildRig(4003L, new RotationMatrix(), 1.0, false); // built with seeding off
+      setGravityConsistentAccel(rig);
+      for (SettableTestIMU imu : rig.imus)
+         imu.setAngularVelocity(0.0, 0.0, 0.0);
+
+      us.ihmc.yoVariables.variable.YoVariable flag = rig.main.getYoRegistry().findVariable("invariantYawSeedingEnabled");
+      assertTrue(flag != null, "invariantYawSeedingEnabled must be published");
+      assertEquals(0.0, flag.getValueAsDouble(), 0.0, "initial state comes from the constructor");
+
+      for (int k = 0; k < 300; k++)
+         rig.doControl();
+      flag.setValueFromDouble(1.0);
+      for (int k = 0; k < 700; k++)
+         rig.doControl();
+
+      RotationMatrix rotation = new RotationMatrix();
+      rig.ekf.getRotation(rotation);
+      assertTrue(rotation.distance(new RotationMatrix()) < 1.0e-3, "switching seeding on in a static stance must not move the base");
+   }
+
+   @Test
+   public void testStaticEquilibriumStaysPutAndFinite()
+   {
+      Rig rig = buildRig(4001L, new RotationMatrix(), 1.0, false); // identity base, feet in contact
+      setGravityConsistentAccel(rig);                              // stationary specific force
+      for (SettableTestIMU imu : rig.imus)
+         imu.setAngularVelocity(0.0, 0.0, 0.0);
+
+      for (int k = 0; k < 1000; k++)
+         rig.doControl();
+
+      RotationMatrix rotation = new RotationMatrix();
+      rig.ekf.getRotation(rotation);
+      assertTrue(rotation.distance(new RotationMatrix()) < 1.0e-3, "base orientation stays at identity in static equilibrium");
+
+      Vector3D velocity = new Vector3D();
+      rig.ekf.getBaseVelocity(velocity);
+      assertTrue(velocity.norm() < 1.0e-2, "base velocity stays near zero in static equilibrium: " + velocity.norm());
+
+      // Leg-joint estimates track the fed encoders and are written onto the model.
+      for (OneDoFJointBasics joint : rig.joints)
+      {
+         if (!rig.preFilter.containsJoint(joint))
+            continue;
+         double encoder = joint.getQ();
+         assertEquals(encoder, rig.preFilter.getEstimatedJointPosition(joint), 5.0e-3, "leg-joint estimate tracks encoder: " + joint.getName());
+      }
+
+      assertPipelineFinite(rig, "static equilibrium");
+
+      // Onboard consistency monitor: the stance channels ran, so their rolling ANIS/d is defined.
+      YoRegistry invariantRegistry = rig.main.getInvariantEKFStateEstimator().getYoRegistry();
+      for (String channel : new String[] {"invariantAnisContact", "invariantAnisKinematicVelocity"})
+      {
+         double anis = ((YoDouble) invariantRegistry.findVariable(channel)).getValue();
+         assertTrue(Double.isFinite(anis) && anis >= 0.0, channel + " = " + anis);
+      }
+      double anisGravity = ((YoDouble) invariantRegistry.findVariable("invariantAnisGravity")).getValue();
+      assertTrue(Double.isNaN(anisGravity) || anisGravity >= 0.0, "invariantAnisGravity = " + anisGravity);
+      assertTrue(Double.isFinite(((YoDouble) rig.preFilterRegistry.findVariable("jointKFAnisEncoder")).getValue()));
+   }
+
+   @Test
+   public void testNoContactRotationIntegrates()
+   {
+      Rig rig = buildRig(4002L, new RotationMatrix(), 0.0, false); // no contact → hold mode
+      double rate = 0.2; // rad/s about world Y
+      int ticks = 1000;   // 1.0 s
+      for (int k = 0; k < ticks; k++)
+      {
+         setRigidRotationGyros(rig, 0.0, rate, 0.0);
+         rig.doControl();
+      }
+      RotationMatrix rotation = new RotationMatrix();
+      rig.ekf.getRotation(rotation);
+      double sweptAngle = rotation.distance(new RotationMatrix());
+      double expected = rate * ticks * DT;
+      assertEquals(expected, sweptAngle, 2.0e-2, "no-contact orientation integrates the gyro (swept angle)");
+      assertPipelineFinite(rig, "no-contact rotation");
+   }
+
+   @Test
+   public void testHangingUnderGravityIsCompensated()
+   {
+      RotationMatrix tilt = new RotationMatrix();
+      tilt.setToRollOrientation(Math.toRadians(20.0)); // hang tilted 20° about x
+      Rig rig = buildRig(4003L, tilt, 0.0, false);     // no contact → hold mode
+      setGravityConsistentAccel(rig);                  // specific force a hanging IMU reads at this tilt
+      for (SettableTestIMU imu : rig.imus)
+         imu.setAngularVelocity(0.0, 0.0, 0.0);
+
+      Vector3D startPosition = new Vector3D();
+      rig.ekf.getBasePosition(startPosition);
+
+      for (int k = 0; k < 1000; k++)
+         rig.doControl();
+
+      RotationMatrix rotation = new RotationMatrix();
+      rig.ekf.getRotation(rotation);
+      assertTrue(rotation.distance(tilt) < 1.0e-3, "orientation stays at the hang tilt (gyro is zero)");
+
+      Vector3D velocity = new Vector3D();
+      rig.ekf.getBaseVelocity(velocity);
+      assertTrue(velocity.norm() < 1.0e-3, "base velocity held near zero while hanging: " + velocity.norm());
+
+      Vector3D endPosition = new Vector3D();
+      rig.ekf.getBasePosition(endPosition);
+      endPosition.sub(startPosition);
+      assertTrue(endPosition.norm() < 1.0e-3, "gravity compensation keeps the hanging base in place (drift " + endPosition.norm() + ")");
+
+      assertPipelineFinite(rig, "hanging under gravity");
+   }
+
+   /**
+    * Initialized level while actually hanging pitched 11 deg (Alex on the hoist, 2026-10-13): with the gyro bias as a
+    * state, the start-up tilt alignment must put the 11 deg into the attitude, not into the bias. Without it the
+    * leveling correction leaks into the bias.
+    */
+   @Test
+   public void testPitchedHangStartAlignsTiltNotGyroBias()
+   {
+      double[] withAlignment = runPitchedHangStart(true);
+      assertEquals(Math.toRadians(11.0), withAlignment[0], Math.toRadians(0.2), "pitch aligned to the accelerometer");
+      assertTrue(withAlignment[1] < 2.0e-3, "max gyro bias norm while hanging: " + withAlignment[1]);
+
+      double[] withoutAlignment = runPitchedHangStart(false);
+      assertTrue(withoutAlignment[1] > 3.0e-3 && withAlignment[1] < 0.2 * withoutAlignment[1],
+                 "control: without the alignment the bias absorbs the tilt (" + withoutAlignment[1] + " vs " + withAlignment[1] + ")");
+   }
+
+   /** @return {final pitch, max gyro bias norm over 5 s} of a level-initialized filter hanging at 11 deg pitch. */
+   private static double[] runPitchedHangStart(boolean alignment)
+   {
+      Rig rig = buildRig(4006L, new RotationMatrix(), 0.0, false); // initialized level, no contact
+      InvariantEKFStateEstimator estimator = rig.main.getInvariantEKFStateEstimator();
+      estimator.setEstimateGyroBias(true);
+      estimator.setStartupTiltAlignment(alignment);
+      RotationMatrix truePose = new RotationMatrix();
+      truePose.setToPitchOrientation(Math.toRadians(11.0));
+      Vector3D specificForceInPelvis = new Vector3D(0.0, 0.0, 9.81);
+      truePose.inverseTransform(specificForceInPelvis);
+      for (SettableTestIMU imu : rig.imus)
+      {
+         // The model still sits at the level initial pose here, so pelvis-to-IMU is the mounting alone.
+         FrameVector3D specificForce = new FrameVector3D(rig.model.getRootJoint().getFrameAfterJoint(), specificForceInPelvis);
+         specificForce.changeFrame(imu.getMeasurementFrame());
+         imu.setLinearAcceleration(specificForce);
+         imu.setAngularVelocity(0.0, 0.0, 0.0);
+      }
+
+      double maxBias = 0.0;
+      for (int k = 0; k < 5000; k++)
+      {
+         rig.doControl();
+         maxBias = Math.max(maxBias, rig.ekf.getGyroBias().norm());
+      }
+      RotationMatrix rotation = new RotationMatrix();
+      rig.ekf.getRotation(rotation);
+      assertPipelineFinite(rig, "pitched hang start");
+      return new double[] {rotation.getPitch(), maxBias};
+   }
+
+   @Test
+   public void testFreeFallDoesNotRunAwayOrFail()
+   {
+      Rig rig = buildRig(4004L, new RotationMatrix(), 0.0, false); // no contact → hold mode
+      for (SettableTestIMU imu : rig.imus)
+      {
+         imu.setAngularVelocity(0.0, 0.0, 0.0);
+         imu.setLinearAcceleration(0.0, 0.0, 0.0); // weightless: zero specific force
+      }
+      Vector3D startPosition = new Vector3D();
+      rig.ekf.getBasePosition(startPosition);
+
+      for (int k = 0; k < 2000; k++)
+      {
+         rig.doControl();
+         Vector3D velocity = new Vector3D();
+         rig.ekf.getBaseVelocity(velocity);
+         assertTrue(velocity.norm() < 1.0e-6, "held velocity does not ramp in free fall: " + velocity.norm());
+      }
+      Vector3D endPosition = new Vector3D();
+      rig.ekf.getBasePosition(endPosition);
+      endPosition.sub(startPosition);
+      assertTrue(endPosition.norm() < 2.0e-2, "free-fall base position drift stays bounded (no runaway): " + endPosition.norm());
+      assertPipelineFinite(rig, "free fall");
+   }
+
+   @Test
+   public void testPoisonedLegImuDoesNotFailPipeline()
+   {
+      Rig rig = buildRig(4005L, new RotationMatrix(), 1.0, true); // left-foot IMU covariance poisoned before build
+      setGravityConsistentAccel(rig);
+      for (SettableTestIMU imu : rig.imus)
+         imu.setAngularVelocity(0.0, 0.0, 0.0);
+
+      for (int k = 0; k < 500; k++)
+         rig.doControl(); // must not throw (a NaN bias would blow up ekf.predict)
+
+      RotationMatrix rotation = new RotationMatrix();
+      rig.ekf.getRotation(rotation);
+      assertTrue(Double.isFinite(rotation.distance(new RotationMatrix())), "InEKF orientation finite despite a poisoned leg IMU");
+      assertPipelineFinite(rig, "poisoned leg IMU");
+   }
+
+   // ---------------------------------------------------------------------------------------------------------
+
+   /**
+    * invariantNoContactHoldDelay: a no-contact gap shorter than the delay is a short flight (the 11/05 RL gait drops both
+    * foot switches for ~60 ms at 0.87 m/s), so the base velocity keeps integrating; longer than the delay it is held as
+    * before. With the default 0 the hold is immediate.
+    */
+   @Test
+   public void testShortFlightKeepsTheVelocity()
+   {
+      assertEquals(0.5, velocityAfterNoContact(0.15, 60), 1.0e-2, "a 60 ms flight under a 150 ms delay keeps v");
+      assertEquals(0.0, velocityAfterNoContact(0.0, 60), 1.0e-9, "default: held immediately");
+      assertEquals(0.0, velocityAfterNoContact(0.15, 200), 1.0e-9, "past the delay: held");
+   }
+
+   /** @return v_x after the filter, in contact and at rest, is given v_x = 0.5 and then loses both feet for n ticks. */
+   private static double velocityAfterNoContact(double delay, int n)
+   {
+      Rig rig = buildRig(4011L, new RotationMatrix(), 1.0, false);
+      double[] probability = {1.0};
+      rig.main.getInvariantEKFStateEstimator().setContactProbabilityProvider(new ContactProbabilityProvider()
+      {
+         @Override
+         public void update()
+         {
+         }
+
+         @Override
+         public double getContactProbability(RobotSide side)
+         {
+            return probability[0];
+         }
+      });
+      ((YoDouble) rig.main.getInvariantEKFStateEstimator().getYoRegistry().findVariable("invariantNoContactHoldDelay")).set(delay);
+      setGravityConsistentAccel(rig);
+      for (SettableTestIMU imu : rig.imus)
+         imu.setAngularVelocity(0.0, 0.0, 0.0);
+      for (int k = 0; k < 500; k++)
+         rig.doControl();
+      rig.ekf.getState().setBaseVelocity(new Vector3D(0.5, 0.0, 0.0));
+      probability[0] = 0.0;
+      for (int k = 0; k < n; k++)
+         rig.doControl();
+      Vector3D velocity = new Vector3D();
+      rig.ekf.getBaseVelocity(velocity);
+      assertPipelineFinite(rig, "short flight");
+      return velocity.getX();
+   }
+
+   /** Sets every IMU's specific force to the true stationary reading at its current orientation: g_up in world. */
+   private static void setGravityConsistentAccel(Rig rig)
+   {
+      for (SettableTestIMU imu : rig.imus)
+      {
+         FrameVector3D specificForce = new FrameVector3D(WORLD, 0.0, 0.0, 9.81);
+         specificForce.changeFrame(imu.getMeasurementFrame());
+         imu.setLinearAcceleration(specificForce);
+      }
+   }
+
+   /** Sets every IMU's gyro to the body-frame projection of a common world angular velocity (rigid rotation). */
+   private static void setRigidRotationGyros(Rig rig, double wx, double wy, double wz)
+   {
+      for (SettableTestIMU imu : rig.imus)
+      {
+         FrameVector3D omega = new FrameVector3D(WORLD, wx, wy, wz);
+         omega.changeFrame(imu.getMeasurementFrame());
+         imu.setAngularVelocity(omega.getX(), omega.getY(), omega.getZ());
+      }
+   }
+
+   private static void assertPipelineFinite(Rig rig, String scenario)
+   {
+      RotationMatrix rotation = new RotationMatrix();
+      rig.ekf.getRotation(rotation);
+      Vector3D velocity = new Vector3D();
+      rig.ekf.getBaseVelocity(velocity);
+      Vector3D position = new Vector3D();
+      rig.ekf.getBasePosition(position);
+      assertTrue(Double.isFinite(rotation.distance(new RotationMatrix())) && velocity.norm() >= 0.0 && Double.isFinite(position.norm()),
+                 "InEKF base estimate finite (" + scenario + ")");
+
+      DMatrixRMaj covariance = rig.ekf.getState().getCovariance();
+      for (int i = 0; i < covariance.getNumElements(); i++)
+         assertTrue(Double.isFinite(covariance.get(i)), "InEKF covariance finite (" + scenario + ") at index " + i);
+      for (int r = 0; r < covariance.numRows; r++)
+         for (int c = r + 1; c < covariance.numCols; c++)
+            assertTrue(Math.abs(covariance.get(r, c) - covariance.get(c, r)) < 1.0e-6, "InEKF covariance symmetric (" + scenario + ")");
+   }
+
+   private static ContactProbabilityProvider constantContact(double probability)
+   {
+      return new ContactProbabilityProvider()
+      {
+         @Override
+         public void update()
+         {
+         }
+
+         @Override
+         public double getContactProbability(RobotSide side)
+         {
+            return probability;
+         }
+      };
+   }
+}

@@ -33,6 +33,8 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.stateEstimation.jointLevel.ProprioceptivePreFilter;
+import us.ihmc.stateEstimation.jointLevel.ProprioceptivePreFilterFactory;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.DistributedIMUBasedCenterOfMassStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.MomentumStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.SimpleMomentumStateUpdater;
@@ -61,7 +63,9 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final PelvisRotationalStateUpdaterInterface pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
    private final MomentumStateUpdater momentumStateUpdater;
-   private final IMUBiasStateEstimator imuBiasStateEstimator;
+   /** False keeps the momentum estimator out of the logged tree (it still runs); see StateEstimatorParameters#logMomentumEstimator. */
+   private final boolean logMomentumEstimator;
+   private final ProprioceptivePreFilter preFilter;
    private final IMUYawDriftEstimator imuYawDriftEstimator;
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
@@ -152,12 +156,14 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                                                                       registry,
                                                                                       stateEstimatorParameters.cancelGravityFromAccelerationMeasurement());
 
-      imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs,
+      preFilter = ProprioceptivePreFilterFactory.create(sensorOutputMap,
+                                                        stateEstimatorParameters,
+                                                        imuProcessedOutputs,
                                                         feet.keySet(),
+                                                        inverseDynamicsStructure.getElevator(), // enables the JOINT_KF mass-matrix process noise
                                                         gravitationalAcceleration,
                                                         cancelGravityFromAccelerationMeasurement,
                                                         estimatorDT,
-                                                        stateEstimatorParameters,
                                                         registry);
       imuYawDriftEstimator = new IMUYawDriftEstimator(inverseDynamicsStructure,
                                                       footSwitches,
@@ -166,7 +172,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                                       stateEstimatorParameters,
                                                       registry);
 
-      jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMap, stateEstimatorParameters, registry);
+      jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMap, preFilter, registry);
 
       if (forceSensorDataHolderToUpdate != null)
       {
@@ -188,7 +194,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       {
          pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure,
                                                                                  imusToUse,
-                                                                                 imuBiasStateEstimator,
+                                                                                 preFilter,
                                                                                  imuYawDriftEstimator,
                                                                                  estimatorDT,
                                                                                  registry);
@@ -201,7 +207,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
       pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure,
                                                               imusToUse,
-                                                              imuBiasStateEstimator,
+                                                              preFilter,
                                                               cancelGravityFromAccelerationMeasurement,
                                                               footSwitches,
                                                               centerOfPressureDataHolderFromController,
@@ -244,8 +250,12 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
             throw new IllegalArgumentException("Unhandled mode: " + stateEstimatorParameters.getMomentumEstimatorMode());
       }
 
-      if (momentumStateUpdater != null)
+      logMomentumEstimator = stateEstimatorParameters.logMomentumEstimator();
+      if (momentumStateUpdater != null && logMomentumEstimator)
          registry.addChild(momentumStateUpdater.getRegistry());
+      else if (momentumStateUpdater != null)
+         // Off the tree, the parameter loader never reaches its parameters (SIMPLE and WRENCH_BASED have some): defaults.
+         new us.ihmc.yoVariables.parameters.DefaultParameterReader().readParametersInRegistry(momentumStateUpdater.getRegistry());
 
       copVisualizer = new CenterOfPressureVisualizer(footSwitches, registry);
 
@@ -283,6 +293,8 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    @Override
    public void initialize()
    {
+      // Phase 1 must run before every updateJointState() call; JointStateUpdater.initialize() calls it.
+      preFilter.computeJointState();
       jointStateUpdater.initialize();
       if (pelvisRotationalStateUpdater != null)
       {
@@ -297,7 +309,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       if (momentumStateUpdater != null)
          momentumStateUpdater.initialize();
 
-      imuBiasStateEstimator.initialize();
+      preFilter.initialize();
       imuYawDriftEstimator.initialize();
    }
 
@@ -325,6 +337,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          LogTools.debug("Estimator went to {}", operatingMode.getEnumValue());
       }
 
+      preFilter.computeJointState(); // phase 1: before joint outputs are consumed
       jointStateUpdater.updateJointState();
 
       if (pelvisRotationalStateUpdater != null)
@@ -353,7 +366,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       yoRootTwist.setMatchingFrame(rootJoint.getJointTwist());
 
       List<RigidBodyBasics> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
-      imuBiasStateEstimator.compute(trustedFeet);
+      preFilter.computeImuBiases(trustedFeet); // phase 2: after the trust decision
 
       if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {
@@ -451,7 +464,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       group.addChild(forceSensorStateUpdater.getSCS2YoGraphics());
       group.addChild(pelvisLinearStateUpdater.getSCS2YoGraphics());
       group.addChild(pelvisPoseHistoryCorrection.getSCS2YoGraphics());
-      if (momentumStateUpdater != null)
+      if (momentumStateUpdater != null && logMomentumEstimator)
          group.addChild(momentumStateUpdater.getSCS2YoGraphics());
       if (copVisualizer != null)
          group.addChild(copVisualizer.getSCS2YoGraphics());

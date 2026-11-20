@@ -51,6 +51,7 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.stateEstimation.invariantEstimator.InvariantContactSource;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -111,6 +112,13 @@ public class AvatarMultiThreadingFactory
    private final OptionalFactoryField<Map<HighLevelControllerName, StateEstimatorMode>> estimatorModeMapReference = new OptionalFactoryField<>("estimatorModeMapReference");
    private final List<Runnable> preEstimatorRunnables = new ArrayList<>();
    private final List<Runnable> postEstimatorRunnables = new ArrayList<>();
+   private final boolean useInvariantMainEstimator;
+   private final InvariantContactSource invariantContactSource;
+   /** Applied to every joint-level KF the estimator builds (e.g. to install the redundancy-observed pair-noise law); null for none. */
+   private final java.util.function.Consumer<us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter> jointLevelKFConfigurator;
+   /** Seconds of start-up standing for the invariant filter's held accelerometer bias; NaN or <= 0 disables. */
+   private final double invariantStaticAccelerometerBiasWindow;
+   private final us.ihmc.stateEstimation.invariantEstimator.InvariantGyroBiasSource invariantGyroBiasSource;
 
    // Controller
    private final HighLevelHumanoidControllerFactory avatarControllerFactory;
@@ -160,8 +168,49 @@ public class AvatarMultiThreadingFactory
                                       double masterThreadDt,
                                       TimestampProvider monotonicTimeProvider,
                                       YoRegistry registry,
-                                      YoVariableServer yoVariableServer)
+                                      YoVariableServer yoVariableServer,
+                                      boolean useInvariantMainEstimator,
+                                      InvariantContactSource invariantContactSource)
    {
+      this(robotModel, fullRobotModel, hardwareCommunicationInterface, lowLevelOutputProcessor, sensorReaderFactory, standPrepStateFactory,
+           freezeStateFactory, affinity, useRealtimeThreads, useMultiThreading, period, masterThreadDt, monotonicTimeProvider, registry,
+           yoVariableServer, useInvariantMainEstimator, invariantContactSource, null, Double.NaN, us.ihmc.stateEstimation.invariantEstimator.InvariantGyroBiasSource.PROVIDER);
+   }
+
+   /**
+    * @param jointLevelKFConfigurator               applied to every joint-level KF the estimator builds, before it
+    *                                               starts (e.g. installs the redundancy-observed pair-noise law); null
+    *                                               for none.
+    * @param invariantStaticAccelerometerBiasWindow seconds of start-up standing over which the invariant main
+    *                                               estimator estimates, then holds, its accelerometer bias; NaN or <= 0
+    *                                               disables (the joint-level KF itself publishes a zero accelerometer bias).
+    * @param invariantGyroBiasSource                where the invariant main estimator's gyro bias comes from (the
+    *                                               joint-level provider's, rest-measured, or its own filter state).
+    */
+   public AvatarMultiThreadingFactory(DRCRobotModel robotModel,
+                                      FullHumanoidRobotModel fullRobotModel,
+                                      HardwareCommunicationInterface hardwareCommunicationInterface,
+                                      AvatarLowLevelOutputProcessor lowLevelOutputProcessor,
+                                      SensorReaderFactory sensorReaderFactory,
+                                      HighLevelControllerStateFactory standPrepStateFactory,
+                                      HighLevelControllerStateFactory freezeStateFactory,
+                                      AvatarAffinityInterface affinity,
+                                      boolean useRealtimeThreads,
+                                      boolean useMultiThreading,
+                                      MonotonicTime period,
+                                      double masterThreadDt,
+                                      TimestampProvider monotonicTimeProvider,
+                                      YoRegistry registry,
+                                      YoVariableServer yoVariableServer,
+                                      boolean useInvariantMainEstimator,
+                                      InvariantContactSource invariantContactSource,
+                                      java.util.function.Consumer<us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter> jointLevelKFConfigurator,
+                                      double invariantStaticAccelerometerBiasWindow,
+                                      us.ihmc.stateEstimation.invariantEstimator.InvariantGyroBiasSource invariantGyroBiasSource)
+   {
+      this.invariantGyroBiasSource = invariantGyroBiasSource;
+      this.jointLevelKFConfigurator = jointLevelKFConfigurator;
+      this.invariantStaticAccelerometerBiasWindow = invariantStaticAccelerometerBiasWindow;
       this.masterRobotModel = robotModel;
       this.masterFullRobotModel = fullRobotModel;
       this.period = period;
@@ -174,6 +223,8 @@ public class AvatarMultiThreadingFactory
       this.useMultiThreading = useMultiThreading;
       this.rootRegistry = registry;
       this.yoVariableServer = yoVariableServer;
+      this.useInvariantMainEstimator = useInvariantMainEstimator;
+      this.invariantContactSource = invariantContactSource;
 
       masterContext = new HumanoidRobotContextData(masterFullRobotModel);
 
@@ -260,6 +311,11 @@ public class AvatarMultiThreadingFactory
       avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(estimatorContextDataFactory);
       avatarEstimatorThreadFactory.setGravity(GRAVITY);
+      avatarEstimatorThreadFactory.setUseInvariantStateEstimator(useInvariantMainEstimator);
+      avatarEstimatorThreadFactory.setInvariantContactSource(invariantContactSource);
+      avatarEstimatorThreadFactory.setJointLevelKFConfigurator(jointLevelKFConfigurator);
+      avatarEstimatorThreadFactory.setInvariantStaticAccelerometerBiasWindow(invariantStaticAccelerometerBiasWindow);
+      avatarEstimatorThreadFactory.setInvariantGyroBiasSource(invariantGyroBiasSource);
       //      if (secondaryEstimatorFactory != null)
       //         avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryEstimatorFactory);
       StateEstimatorController stateEstimator = avatarEstimatorThreadFactory.getMainStateEstimator();

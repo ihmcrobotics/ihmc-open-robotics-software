@@ -102,6 +102,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvi
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorControllerFactory;
+import us.ihmc.stateEstimation.invariantEstimator.InvariantContactSource;
 import us.ihmc.tools.factories.FactoryFieldNotSetException;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
@@ -195,6 +196,14 @@ public class SCS2AvatarSimulationFactory
          "headingAndVelocityEvaluationScriptParameters");
    private final OptionalFactoryField<StateEstimatorControllerFactory> secondaryStateEstimatorFactory = new OptionalFactoryField<>(
          "SecondaryStateEstimatorFactory");
+   /** When true, the invariant InEKF replaces the DRC estimator as the main floating-base estimator. */
+   private boolean useInvariantMainStateEstimator = false;
+   private boolean invariantMainEstimatorYawSeeding = true;
+   /** Contact source for the invariant main estimator; forwarded to the estimator thread factory (shared by sim and hardware). */
+   private InvariantContactSource invariantMainEstimatorContactSource = InvariantContactSource.FOOT_SWITCHES;
+   private java.util.function.Consumer<us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter> jointLevelKFConfigurator = null;
+   private double invariantStaticAccelerometerBiasWindow = Double.NaN;
+   private us.ihmc.stateEstimation.invariantEstimator.InvariantGyroBiasSource invariantGyroBiasSource = us.ihmc.stateEstimation.invariantEstimator.InvariantGyroBiasSource.PROVIDER;
    private final OptionalFactoryField<Boolean> createIKStreamingRealTimeController = new OptionalFactoryField<>(
          "createIKStreamingRealTimeController",
          false);
@@ -541,7 +550,18 @@ public class SCS2AvatarSimulationFactory
       avatarEstimatorThreadFactory.setGravity(gravity.get());
       if (secondaryStateEstimatorFactory.hasBeenSet())
          avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryStateEstimatorFactory.get());
+      if (useInvariantMainStateEstimator)
+      {
+         avatarEstimatorThreadFactory.setUseInvariantStateEstimator(true);
+         avatarEstimatorThreadFactory.setInvariantEstimatorYawSeeding(invariantMainEstimatorYawSeeding);
+         avatarEstimatorThreadFactory.setInvariantContactSource(invariantMainEstimatorContactSource);
+         avatarEstimatorThreadFactory.setInvariantStaticAccelerometerBiasWindow(invariantStaticAccelerometerBiasWindow);
+         avatarEstimatorThreadFactory.setInvariantGyroBiasSource(invariantGyroBiasSource);
+         avatarEstimatorThreadFactory.setJointLevelKFConfigurator(jointLevelKFConfigurator);
+      }
       estimatorThread = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
+      // The hardware process does this in setupHighLevelControllerCallback; the simulation does not call that.
+      estimatorThread.attachControllerStateToMainEstimator(highLevelHumanoidControllerFactory.get());
    }
 
    private void setupControllerThread()
@@ -1254,6 +1274,51 @@ public class SCS2AvatarSimulationFactory
    public void setSecondaryStateEstimatorFactory(StateEstimatorControllerFactory secondaryStateEstimatorFactory)
    {
       this.secondaryStateEstimatorFactory.set(secondaryStateEstimatorFactory);
+   }
+
+   /**
+    * Replaces the DRC main state estimator with the contact-aided right-invariant InEKF. Joints are still
+    * read from the processed sensor output (good-enough FK); the InEKF drives the floating base.
+    */
+   public void setUseInvariantMainStateEstimator(boolean useInvariantMainStateEstimator)
+   {
+      this.useInvariantMainStateEstimator = useInvariantMainStateEstimator;
+   }
+
+   /** Enables/disables foot-referenced yaw seeding when the invariant InEKF is the main estimator (default true). */
+   public void setInvariantMainEstimatorYawSeeding(boolean invariantMainEstimatorYawSeeding)
+   {
+      this.invariantMainEstimatorYawSeeding = invariantMainEstimatorYawSeeding;
+   }
+
+   /**
+    * Selects the invariant main estimator's contact-probability source: production foot switches
+    * ({@link InvariantContactSource#FOOT_SWITCHES}, default; joint-torque based on Alex, independent of the
+    * filter's own base estimate) or the built-in kinematic height detector
+    * ({@link InvariantContactSource#KINEMATIC_DETECTOR}, circular when the filter is main; A/B only). This is
+    * forwarded to the shared estimator thread factory, so the same source runs in sim and on hardware.
+    */
+   /** Same as the hardware threading factory's: applied to every joint-level KF the estimator builds. */
+   public void setJointLevelKFConfigurator(java.util.function.Consumer<us.ihmc.stateEstimation.jointLevel.JointLevelKFPreFilter> configurator)
+   {
+      this.jointLevelKFConfigurator = configurator;
+   }
+
+   /** Same as the hardware threading factory's: held start-up accelerometer bias for the invariant main estimator. */
+   public void setInvariantStaticAccelerometerBiasWindow(double windowSeconds)
+   {
+      this.invariantStaticAccelerometerBiasWindow = windowSeconds;
+   }
+
+   /** Same as the hardware threading factory's: where the invariant main estimator's gyro bias comes from. */
+   public void setInvariantGyroBiasSource(us.ihmc.stateEstimation.invariantEstimator.InvariantGyroBiasSource invariantGyroBiasSource)
+   {
+      this.invariantGyroBiasSource = invariantGyroBiasSource;
+   }
+
+   public void setInvariantMainEstimatorContactSource(InvariantContactSource invariantMainEstimatorContactSource)
+   {
+      this.invariantMainEstimatorContactSource = invariantMainEstimatorContactSource;
    }
 
    public void setComponentFootstepGeneratorParameters(boolean useHeadingAndVelocityScript,
