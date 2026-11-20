@@ -551,7 +551,60 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
     * considering cost 0.5% of the path in horizontal error on 11/05; the MuJoCo jumps came from NIS 9-8000 updates.
     */
    private final YoDouble yoKinematicVelocityPositionConsiderNIS = new YoDouble("invariantKinematicVelocityPositionConsiderNIS", registry);
+   /** Height of each contact anchor and their difference: on stairs the feet stand a step apart (diagnostic). */
+   private final YoDouble yoContactAnchorHeightDifference = new YoDouble("invariantContactAnchorHeightDifference", registry);
+   private final YoDouble yoContactAnchorHeightLeft = new YoDouble("invariantContactAnchorHeightLeft", registry);
+   private final YoDouble yoContactAnchorHeightRight = new YoDouble("invariantContactAnchorHeightRight", registry);
+   private final us.ihmc.euclid.tuple3D.Vector3D contactAnchorLeft = new us.ihmc.euclid.tuple3D.Vector3D();
+   private final us.ihmc.euclid.tuple3D.Vector3D contactAnchorRight = new us.ihmc.euclid.tuple3D.Vector3D();
    private final RotationMatrix yawAuditRotation = new RotationMatrix();
+
+   /**
+    * Height audit (diagnostic): per tick, the base height change made by each phase (predict, gravity, contact,
+    * kinematic velocity), the part of it a rotation correction makes by rotating the world position about the origin
+    * (right-invariant retraction p+ = dR p + J xi_p), and the running totals. Added 2026-11-19 to tell where height goes
+    * on Alex002 stair logs; with the contact anchor heights it also tells whether the feet were really a step apart.
+    */
+   private final String[] heightAuditPhases = {"Predict", "Gravity", "Contact", "KinematicVelocity"};
+   private final YoDouble[] yoHeightChange = new YoDouble[heightAuditPhases.length];
+   private final YoDouble[] yoHeightChangeFromRotation = new YoDouble[heightAuditPhases.length];
+   private final YoDouble[] yoHeightChangeIntegrated = new YoDouble[heightAuditPhases.length];
+   private final YoDouble[] yoHeightChangeFromRotationIntegrated = new YoDouble[heightAuditPhases.length];
+   {
+      for (int i = 0; i < heightAuditPhases.length; i++)
+      {
+         yoHeightChange[i] = new YoDouble("invariantHeightChange" + heightAuditPhases[i], registry);
+         yoHeightChangeFromRotation[i] = new YoDouble("invariantHeightChangeFromRotation" + heightAuditPhases[i], registry);
+         yoHeightChangeIntegrated[i] = new YoDouble("invariantHeightChangeIntegrated" + heightAuditPhases[i], registry);
+         yoHeightChangeFromRotationIntegrated[i] = new YoDouble("invariantHeightChangeFromRotationIntegrated" + heightAuditPhases[i], registry);
+      }
+   }
+   private final RotationMatrix heightAuditRotationBefore = new RotationMatrix();
+   private final RotationMatrix heightAuditRotationAfter = new RotationMatrix();
+   private final us.ihmc.euclid.tuple3D.Vector3D heightAuditPositionBefore = new us.ihmc.euclid.tuple3D.Vector3D();
+   private final us.ihmc.euclid.tuple3D.Vector3D heightAuditPositionAfter = new us.ihmc.euclid.tuple3D.Vector3D();
+   private final us.ihmc.euclid.tuple3D.Vector3D heightAuditRotated = new us.ihmc.euclid.tuple3D.Vector3D();
+
+   private void heightAuditBefore()
+   {
+      ekf.getRotation(heightAuditRotationBefore);
+      ekf.getState().getBasePosition(heightAuditPositionBefore);
+   }
+
+   private void heightAuditAfter(int phase)
+   {
+      ekf.getRotation(heightAuditRotationAfter);
+      ekf.getState().getBasePosition(heightAuditPositionAfter);
+      double change = heightAuditPositionAfter.getZ() - heightAuditPositionBefore.getZ();
+      // dR = R_after R_before^T applied to the position before: the height change a pure rotation correction makes.
+      heightAuditRotationBefore.inverseTransform(heightAuditPositionBefore, heightAuditRotated);
+      heightAuditRotationAfter.transform(heightAuditRotated);
+      double fromRotation = heightAuditRotated.getZ() - heightAuditPositionBefore.getZ();
+      yoHeightChange[phase].set(change);
+      yoHeightChangeFromRotation[phase].set(fromRotation);
+      yoHeightChangeIntegrated[phase].add(change);
+      yoHeightChangeFromRotationIntegrated[phase].add(fromRotation);
+   }
 
    private double auditYaw()
    {
@@ -1292,7 +1345,9 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          heldLastTick = false;
       }
 
+      heightAuditBefore();
       ekf.predict(angularVelocity, linearAcceleration, dt);
+      heightAuditAfter(0);
 
       // Gravity-leveling: the roll/pitch anchor the contact update cannot provide (its Jacobian has a zero
       // rotation block). Diagnostic refreshed every tick; update applied only when quasi-static.
@@ -1300,13 +1355,16 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
       yoYawChangeKinematicVelocity.set(0.0);
       yoYawChangeGravity.set(0.0);
       double yawBefore = auditYaw();
+      heightAuditBefore();
       updateGravityLeveling();
+      heightAuditAfter(1);
       recordYawChange(yoYawChangeGravity, yawBefore);
 
       // Knob 1 (measurement covariance): inflate a swing foot's contact FK noise so it stops dragging the
       // base velocity, while a stance foot keeps constraining it.
       yoContactPBaseTrace.set(covarianceBlockTrace(ekf.getState().basePositionTangentIndex()));
       yawBefore = auditYaw();
+      heightAuditBefore();
       ekf.setContactNISGate(yoContactNISGate.getDoubleValue());
       for (RobotSide side : RobotSide.values)
       {
@@ -1352,13 +1410,21 @@ public class InvariantEKFStateEstimator implements StateEstimatorController
          yoContactCorrectionPosNorm.get(side).set(ekf.getLastCorrectionPositionNorm());
       }
       recordYawChange(yoYawChangeContact, yawBefore);
+      heightAuditAfter(2);
       yawBefore = auditYaw();
+      heightAuditBefore();
       ekf.setKinematicVelocityHeadingConsider(yoKinematicVelocityHeadingConsider.getValue());
       ekf.setKinematicVelocityNISGate(yoKinematicVelocityNISGate.getDoubleValue());
       ekf.setKinematicVelocityPositionConsider(yoKinematicVelocityPositionConsider.getValue());
       ekf.setKinematicVelocityPositionConsiderHorizontalOnly(yoKinematicVelocityPositionConsiderHorizontalOnly.getValue());
       ekf.setKinematicVelocityPositionConsiderNIS(yoKinematicVelocityPositionConsiderNIS.getDoubleValue());
+      ekf.getState().getContactPosition(contactIndex(RobotSide.LEFT), contactAnchorLeft);
+      ekf.getState().getContactPosition(contactIndex(RobotSide.RIGHT), contactAnchorRight);
+      yoContactAnchorHeightLeft.set(contactAnchorLeft.getZ());
+      yoContactAnchorHeightRight.set(contactAnchorRight.getZ());
+      yoContactAnchorHeightDifference.set(contactAnchorLeft.getZ() - contactAnchorRight.getZ());
       updateKinematicVelocity();
+      heightAuditAfter(3);
       recordYawChange(yoYawChangeKinematicVelocity, yawBefore);
       int r = ekf.getState().rotationTangentIndex();
       yoYawStd.set(Math.sqrt(Math.max(0.0, ekf.getState().getCovariance().get(r + 2, r + 2))));
