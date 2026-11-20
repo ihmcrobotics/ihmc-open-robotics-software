@@ -187,4 +187,19 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    {
       set(HeightMapParameters.fillBlendStartDistance, fillBlendStartDistance);
    }
+
+   default void setOutlierFilter(boolean outlierFilter)
+   {
+      set(HeightMapParameters.outlierFilter, outlierFilter);
+   }
+
+   default void setOutlierHeightThreshold(double outlierHeightThreshold)
+   {
+      set(HeightMapParameters.outlierHeightThreshold, outlierHeightThreshold);
+   }
+
+   default void setOutlierMinSurfaceSize(double outlierMinSurfaceSize)
+   {
+      set(HeightMapParameters.outlierMinSurfaceSize, outlierMinSurfaceSize);
+   }
 }

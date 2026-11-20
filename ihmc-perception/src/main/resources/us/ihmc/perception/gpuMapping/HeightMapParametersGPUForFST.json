@@ -97,5 +97,16 @@
     "value": 0.1,
     "lowerBound": 0.0,
     "upperBound": 2.0
+  },
+  "Outlier filter": true,
+  "Outlier height threshold": {
+    "value": 0.03,
+    "lowerBound": 0.0,
+    "upperBound": 0.2
+  },
+  "Outlier min surface size": {
+    "value": 0.08,
+    "lowerBound": 0.0,
+    "upperBound": 0.3
   }
 }

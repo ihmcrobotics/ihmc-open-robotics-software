@@ -661,6 +661,89 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
     }
 }
 
+/**
+ * @brief Outlier filter KERNEL: One thread per global cell.
+ *
+ * Removes small protrusions from the global map: measured cells that stand above most of the measured cells around them, on
+ * a raised surface too small to be real terrain. Most are depth points on the robot's own body that got past the body
+ * collision filter, such as along the edges of a limb. Once the robot turns or walks away, the camera never sees those cells
+ * again, so no measurement would replace them. The neighbor checks in icpCorrespondenceKernel only keep outliers out of the
+ * alignment, not out of the map.
+ *
+ * Each measured cell within radiusCells that is no more than heightThreshold below a cell, so at its height or above,
+ * supports it. A cell is removed when fewer than minSupport cells support it and most of the measured cells around it are
+ * lower. So a raised surface keeps its cells if it covers more than minSupport cells within the radius; the caller sizes the
+ * radius so a real surface's square corner, a quarter of the disk, has that many. Cells below their surroundings, such as
+ * along the foot of a step, are supported by the higher cells and never removed. A protrusion surrounded only by unseen
+ * cells is kept, as there's nothing measured to compare it to.
+ *
+ * Reads a copy of the map from before this pass, so removing one cell doesn't change the outcome for its neighbors. Removed
+ * cells are marked unseen, which the unseen cell fill then fills from the measured cells around them and the next real
+ * measurement replaces outright.
+ */
+extern "C"
+__global__ void heightMapOutlierFilterKernel(const float* __restrict__ sourceMeanMap, size_t pitchSourceMean,
+                                             const float* __restrict__ sourceVarianceMap, size_t pitchSourceVariance,
+                                             float* __restrict__ globalMeanMap, size_t pitchGlobalMean,
+                                             float* __restrict__ globalVarianceMap, size_t pitchGlobalVariance,
+                                             const int cellsPerAxis,
+                                             const int radiusCells,
+                                             const int minSupport,
+                                             const float heightThreshold,
+                                             const float defaultValue)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (x >= cellsPerAxis || y >= cellsPerAxis)
+        return;
+
+    const float* varianceRow = (const float*)((const char*)sourceVarianceMap + x * pitchSourceVariance);
+    if (varianceRow[y] < 0.0f)
+        return; // Unseen, nothing to remove
+
+    const float* meanRow = (const float*)((const char*)sourceMeanMap + x * pitchSourceMean);
+    const float lowestSupportingHeight = meanRow[y] - heightThreshold;
+    const int radiusSquared = radiusCells * radiusCells;
+
+    int support = 0;
+    int lower = 0;
+    for (int dx = -radiusCells; dx <= radiusCells; ++dx)
+    {
+        int neighborX = x + dx;
+        if (neighborX < 0 || neighborX >= cellsPerAxis)
+            continue;
+
+        const float* neighborMeanRow = (const float*)((const char*)sourceMeanMap + neighborX * pitchSourceMean);
+        const float* neighborVarianceRow = (const float*)((const char*)sourceVarianceMap + neighborX * pitchSourceVariance);
+
+        for (int dy = -radiusCells; dy <= radiusCells; ++dy)
+        {
+            int neighborY = y + dy;
+            if ((dx == 0 && dy == 0) || neighborY < 0 || neighborY >= cellsPerAxis || dx * dx + dy * dy > radiusSquared)
+                continue;
+            if (neighborVarianceRow[neighborY] < 0.0f)
+                continue; // Unseen
+
+            if (neighborMeanRow[neighborY] >= lowestSupportingHeight)
+            {
+                if (++support >= minSupport)
+                    return; // Enough of a surface to be real
+            }
+            else
+            {
+                lower++;
+            }
+        }
+    }
+
+    if (lower <= support)
+        return;
+
+    ((float*)((char*)globalMeanMap + x * pitchGlobalMean))[y] = defaultValue;
+    ((float*)((char*)globalVarianceMap + x * pitchGlobalVariance))[y] = INVALID_CELL_VARIANCE;
+}
+
 extern "C"
 __global__ void heightMapEmptyRegistrationKernel(float *localMap, size_t pitchLocal,
                                                  float *globalMap, size_t pitchGlobal,

@@ -54,6 +54,9 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final DoubleStoredPropertyKey icpConvergenceYawDegrees = keys.addDoubleKey("ICP convergence yaw degrees");
    public static final BooleanStoredPropertyKey fillUnseenCells = keys.addBooleanKey("Fill unseen cells");
    public static final DoubleStoredPropertyKey fillBlendStartDistance = keys.addDoubleKey("Fill blend start distance");
+   public static final BooleanStoredPropertyKey outlierFilter = keys.addBooleanKey("Outlier filter");
+   public static final DoubleStoredPropertyKey outlierHeightThreshold = keys.addDoubleKey("Outlier height threshold");
+   public static final DoubleStoredPropertyKey outlierMinSurfaceSize = keys.addDoubleKey("Outlier min surface size");
 
    /**
     * Loads this property set.

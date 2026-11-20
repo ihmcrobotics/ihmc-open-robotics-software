@@ -86,6 +86,7 @@ public class HeightMapExtractor
    private final CUDAKernel icpCorrespondenceKernel;
    private final CUDAKernel icpApplyCorrectionKernel;
    private final CUDAKernel registerKernel;
+   private final CUDAKernel outlierFilterKernel;
    private final CUDAKernel planOffsetKernel;
    private final CUDAKernel emptyRegisterKernel;
    private final CUDAKernel nearestValidCellInitKernel;
@@ -156,6 +157,7 @@ public class HeightMapExtractor
          icpCorrespondenceKernel = heightMapProgram.loadKernel("icpCorrespondenceKernel");
          icpApplyCorrectionKernel = heightMapProgram.loadKernel("icpApplyCorrectionKernel");
          registerKernel = heightMapProgram.loadKernel("heightMapRegistrationKernel");
+         outlierFilterKernel = heightMapProgram.loadKernel("heightMapOutlierFilterKernel");
          planOffsetKernel = heightMapProgram.loadKernel("planOffsetKernel");
          emptyRegisterKernel = heightMapProgram.loadKernel("heightMapEmptyRegistrationKernel");
          nearestValidCellInitKernel = heightMapProgram.loadKernel("nearestValidCellInitKernel");
@@ -171,6 +173,7 @@ public class HeightMapExtractor
          icpCorrespondenceKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          icpApplyCorrectionKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          registerKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
+         outlierFilterKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          planOffsetKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          emptyRegisterKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          nearestValidCellInitKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
@@ -562,6 +565,13 @@ public class HeightMapExtractor
          checkCUDAError();
       }
 
+      // ---------- Remove outliers from the global map ----------
+      // After registration, so this frame's data is filtered too, and before the unseen cell fill, which fills the removed cells
+      if (heightMapParameters.getOutlierFilter())
+      {
+         removeOutliers();
+      }
+
       float zeroValueForEmptySpaces = 0.0f;
       // ---------- Run the registration kernel for an empty global height map ----------
       {
@@ -632,6 +642,48 @@ public class HeightMapExtractor
 
       // Save sensorOrigin as previous for next update
       previousSensorToWorld.set(sensorToWorldTransform);
+   }
+
+   /**
+    * Removes small protrusions from the global map, marking their cells unseen. See heightMapOutlierFilterKernel in
+    * HeightMapExtractor.cu. Most are depth points on the robot's own body that got past the body collision filter. Once the
+    * camera stops seeing those cells, such as after turning in place, no measurement would replace them.
+    * <p>
+    * A raised surface is kept if it covers at least a square {@link HeightMapParameters#outlierMinSurfaceSize} wide, so real
+    * objects smaller than that are removed too.
+    * </p>
+    */
+   void removeOutliers()
+   {
+      double minSurfaceSizeInCells = heightMapParameters.getOutlierMinSurfaceSize() / heightMapParameters.getCellSize();
+      // The cells of a square the min size wide are each supported by the square's other cells
+      int minSupport = (int) Math.round(minSurfaceSizeInCells * minSurfaceSizeInCells) - 1;
+      if (minSupport <= 0)
+         return;
+      // Within 1.5 sides, a square's cells all see each other, and a real surface's square corner, a quarter of the disk,
+      // still has more than minSupport cells
+      int radiusCells = (int) Math.ceil(1.5 * minSurfaceSizeInCells);
+
+      globalMeanMap.copyTo(previousGlobalMeanMap);
+      globalVarianceMap.copyTo(previousGlobalVarianceMap);
+
+      int gridSizeXY = (globalCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      dim3 gridDim = new dim3(gridSizeXY, gridSizeXY, 1);
+
+      outlierFilterKernel.withPointer(previousGlobalMeanMap.data()).withLong(previousGlobalMeanMap.step());
+      outlierFilterKernel.withPointer(previousGlobalVarianceMap.data()).withLong(previousGlobalVarianceMap.step());
+      outlierFilterKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
+      outlierFilterKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
+      outlierFilterKernel.withInt(globalCellsPerAxis);
+      outlierFilterKernel.withInt(radiusCells);
+      outlierFilterKernel.withInt(minSupport);
+      outlierFilterKernel.withFloat((float) heightMapParameters.getOutlierHeightThreshold());
+      outlierFilterKernel.withFloat(resetOffset);
+
+      outlierFilterKernel.run(stream, gridDim, blockSize, 0);
+
+      gridDim.close();
+      checkCUDAError();
    }
 
    /**
@@ -772,6 +824,7 @@ public class HeightMapExtractor
       icpCorrespondenceKernel.close();
       icpApplyCorrectionKernel.close();
       registerKernel.close();
+      outlierFilterKernel.close();
       planOffsetKernel.close();
       emptyRegisterKernel.close();
       nearestValidCellInitKernel.close();
@@ -894,5 +947,17 @@ public class HeightMapExtractor
    public GpuMat getHeightMap()
    {
       return globalMeanMap;
+   }
+
+   /** Each global cell's variance, or {@code INVALID_CELL_VARIANCE} if it holds no real data. */
+   GpuMat getHeightMapVariance()
+   {
+      return globalVarianceMap;
+   }
+
+   /** Waits for the GPU work queued by this extractor to finish. */
+   void synchronize()
+   {
+      CUDATools.checkCUDAError(cudaStreamSynchronize(stream));
    }
 }

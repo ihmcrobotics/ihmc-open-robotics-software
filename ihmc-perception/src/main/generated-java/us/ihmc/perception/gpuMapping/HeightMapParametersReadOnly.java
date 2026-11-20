@@ -189,4 +189,19 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    {
       return get(fillBlendStartDistance);
    }
+
+   default boolean getOutlierFilter()
+   {
+      return get(outlierFilter);
+   }
+
+   default double getOutlierHeightThreshold()
+   {
+      return get(outlierHeightThreshold);
+   }
+
+   default double getOutlierMinSurfaceSize()
+   {
+      return get(outlierMinSurfaceSize);
+   }
 }
