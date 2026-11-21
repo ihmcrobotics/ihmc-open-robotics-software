@@ -159,6 +159,35 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final InertialMeasurementAligner measurementAligner;
    private final DMatrixRMaj alignConfiguration;
    private final DMatrixRMaj alignVelocity;
+   /**
+    * [TMECH] Innovation-adaptive process noise, default off (-Dalex.inertiaEstimator.innovBoost=true). A low-Q (smooth) filter
+    * cannot follow an unannounced payload change: the payload's gravity torque needs the first moment m c to jump, which in
+    * the (mass, CoM) parameterization means moving the slow CoM channel. While the normalized innovation runs well above its
+    * own running baseline (fast EMA / slow EMA between innovBoostRatio = r0,r1, default 3,10), each diagonal entry of Q is
+    * blended from its base value toward innovBoostQ (= qAlpha,qOther per body, default the paper tuning 0.01,1.0) by the weight
+    * w in [0, 1]. Steady state keeps the smooth base Q; a real change gets the agile one. innovBoostTau = fast,slow EMA time
+    * constants [s] (default 0.05,2.0). The slow baseline is fed min(nu, r0 * baseline) so a transient cannot drag it up.
+    */
+   private static final boolean INNOV_BOOST = Boolean.getBoolean("alex.inertiaEstimator.innovBoost");
+   private static final double[] INNOV_BOOST_Q = parseDoubles(System.getProperty("alex.inertiaEstimator.innovBoostQ", "0.01,1.0"), 2);
+   private static final double[] INNOV_BOOST_RATIO = parseDoubles(System.getProperty("alex.inertiaEstimator.innovBoostRatio", "3,10"), 2);
+   private static final double[] INNOV_BOOST_TAU = parseDoubles(System.getProperty("alex.inertiaEstimator.innovBoostTau", "0.05,2.0"), 2);
+   private double innovationFast = Double.NaN;
+   private double innovationSlow = Double.NaN;
+   private YoDouble innovationBoostWeight = null;
+   private DMatrixRMaj boostedProcessCovariance = null;
+
+   private static double[] parseDoubles(String csv, int n)
+   {
+      String[] parts = csv.split(",");
+      if (parts.length != n)
+         throw new IllegalArgumentException("expected " + n + " comma-separated values, got '" + csv + "'");
+      double[] out = new double[n];
+      for (int i = 0; i < n; i++)
+         out[i] = Double.parseDouble(parts[i].trim());
+      return out;
+   }
+
    /** [TMECH] -Dalex.inertiaEstimator.contactFromLegs: foot wrenches from the leg rows of the measurement equation. */
    private final boolean contactFromLegTorques;
    private final SideDependentList<int[]> legDofIndices = new SideDependentList<>();
@@ -488,6 +517,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          alignVelocity = null;
       }
 
+      if (INNOV_BOOST)
+      {
+         innovationBoostWeight = new YoDouble("innovationBoostWeight", registry);
+         boostedProcessCovariance = new DMatrixRMaj(nParameters, nParameters);
+         LogTools.info("InertialParameterManager: innovation-adaptive Q ON (target qAlpha " + INNOV_BOOST_Q[0] + ", others " + INNOV_BOOST_Q[1]
+                       + ", ratio " + INNOV_BOOST_RATIO[0] + ".." + INNOV_BOOST_RATIO[1] + ", tau " + INNOV_BOOST_TAU[0] + "/" + INNOV_BOOST_TAU[1] + " s)");
+      }
       contactFromLegTorques = inertialEstimationParameters.getContactWrenchFromLegTorques();
       if (contactFromLegTorques)
       {
@@ -675,7 +711,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          if (!basisSets[i].isEmpty())
             diagEstimatedBodyIndices[b++] = i;
 
-      StringBuilder h = new StringBuilder("t,held,innov,innovThresh");
+      StringBuilder h = new StringBuilder("t,held,innov,innovThresh,boost");
       for (String prefix : new String[] {"z_", "tauNom_", "contact_", "bias_", "qd_", "qdd_"})
          for (String name : measurementNames)
             h.append(',').append(prefix).append(name);
@@ -715,7 +751,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          StringBuilder s = diagLine;
          s.setLength(0);
          s.append(diagTime.getValue()).append(',').append(holdParametersAtNominal.getValue() ? 1 : 0).append(',').append(normalizedInnovation.getValue())
-          .append(',').append(normalizedInnovationThreshold.getValue());
+          .append(',').append(normalizedInnovationThreshold.getValue()).append(',').append(innovationBoostWeight == null ? 0.0 : innovationBoostWeight.getValue());
          appendColumn(s, wholeSystemTorques);
          appendColumn(s, inverseDynamicsCalculator.getJointTauMatrix());
          appendColumn(s, contactGeneralizedForce);
@@ -1118,8 +1154,43 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private void updateFilterCovariances()
    {
-      filter.setProcessCovariance(covarianceHelper.getProcessCovariance());
+      DMatrixRMaj processCovariance = covarianceHelper.getProcessCovariance();
+      if (INNOV_BOOST)
+         processCovariance = boostProcessCovariance(processCovariance);
+      filter.setProcessCovariance(processCovariance);
       filter.setMeasurementCovariance(covarianceHelper.getMeasurementCovariance());
+   }
+
+   /** [TMECH] See {@link #INNOV_BOOST}. Uses the previous tick's normalized innovation. */
+   private DMatrixRMaj boostProcessCovariance(DMatrixRMaj base)
+   {
+      double nu = normalizedInnovation.getValue();
+      if (!Double.isFinite(nu) || nu < 0.0)
+         nu = 0.0;
+      double h = dtSeconds;
+      double aFast = Math.exp(-h / INNOV_BOOST_TAU[0]);
+      double aSlow = Math.exp(-h / INNOV_BOOST_TAU[1]);
+      if (Double.isNaN(innovationFast))
+      {
+         innovationFast = nu;
+         innovationSlow = nu;
+      }
+      innovationFast = aFast * innovationFast + (1.0 - aFast) * nu;
+      innovationSlow = aSlow * innovationSlow + (1.0 - aSlow) * Math.min(nu, INNOV_BOOST_RATIO[0] * Math.max(innovationSlow, 1.0e-12));
+      double ratio = innovationFast / Math.max(innovationSlow, 1.0e-12);
+      double w = Math.max(0.0, Math.min(1.0, (ratio - INNOV_BOOST_RATIO[0]) / (INNOV_BOOST_RATIO[1] - INNOV_BOOST_RATIO[0])));
+      innovationBoostWeight.set(w);
+      if (w <= 0.0)
+         return base;
+      boostedProcessCovariance.set(base);
+      for (int i = 0; i < base.getNumRows(); i++)
+      {
+         double target = (i % RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY) == 0 ? INNOV_BOOST_Q[0] : INNOV_BOOST_Q[1];
+         double q = base.get(i, i);
+         if (target > q)
+            boostedProcessCovariance.set(i, i, q + w * (target - q));
+      }
+      return boostedProcessCovariance;
    }
 
    /**
