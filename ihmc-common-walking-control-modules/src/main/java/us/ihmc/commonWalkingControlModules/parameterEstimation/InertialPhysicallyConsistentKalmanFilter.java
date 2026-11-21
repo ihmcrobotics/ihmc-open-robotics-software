@@ -86,6 +86,13 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
    /** [TMECH] Structured payload process noise, see InertialEstimationParameters#getPayloadProcessNoisePoint. */
    private final double[][] payloadQPoints;
    private final double payloadQVariance;
+   private int payloadDebugTicks = Integer.getInteger("alex.inertiaEstimator.payloadQDebug", 0);
+   /**
+    * ALPHA_T (default): the payload direction in the (mass, CoM) channels only, v = [1/(2m), 0...0, (p - c)/m], i.e. mass and CoM
+    * moving together toward p with the inertia shape left to its prior. JACOBIAN: the full first-order theta image of a point
+    * mass at p, which also needs large inertia-shape (d, s) changes that the paper's inertia prior cancels (no effect in EST8 H).
+    */
+   private final boolean payloadQJacobian = "JACOBIAN".equalsIgnoreCase(System.getProperty("alex.inertiaEstimator.payloadQMode", "ALPHA_T"));
    private final DMatrixRMaj payloadJacobian = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
    private final DMatrixRMaj payloadDirectionPi = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1);
    private final DMatrixRMaj payloadDirectionTheta = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1);
@@ -594,6 +601,25 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
          if (p == null)
             continue;
          double px = p[0], py = p[1], pz = p[2];
+         if (!payloadQJacobian)
+         {
+            DMatrixRMaj pi = inertialParameters.get(b).getParameterVectorPiBasis();
+            double m = Math.max(pi.get(0, 0), 1.0e-3);
+            payloadDirectionTheta.zero();
+            payloadDirectionTheta.set(0, 0, 0.5 / m);
+            payloadDirectionTheta.set(7, 0, (px - pi.get(1, 0) / m) / m);
+            payloadDirectionTheta.set(8, 0, (py - pi.get(2, 0) / m) / m);
+            payloadDirectionTheta.set(9, 0, (pz - pi.get(3, 0) / m) / m);
+            if (payloadDebugTicks > 0)
+            {
+               inertialParameters.get(b).packThetaToPiBasisJacobian(payloadJacobian);
+               LogTools.info(String.format("payloadQ debug: m %.3f c (%.3f %.3f %.3f) dm/dalpha %.4g  dh/dt diag %.4g %.4g %.4g (expect 2m, m)", m, pi.get(1, 0) / m,
+                                           pi.get(2, 0) / m, pi.get(3, 0) / m, payloadJacobian.get(0, 0), payloadJacobian.get(1, 7), payloadJacobian.get(2, 8),
+                                           payloadJacobian.get(3, 9)));
+            }
+            addPayloadProcessNoise(b * n, n);
+            continue;
+         }
          payloadDirectionPi.set(0, 0, 1.0);
          payloadDirectionPi.set(1, 0, px);
          payloadDirectionPi.set(2, 0, py);
@@ -608,7 +634,21 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
          if (!payloadSolver.setA(payloadJacobian))
             continue;
          payloadSolver.solve(payloadDirectionPi, payloadDirectionTheta);
-         int base = b * n;
+         addPayloadProcessNoise(b * n, n);
+      }
+   }
+
+   private void addPayloadProcessNoise(int base, int n)
+   {
+      {
+         if (payloadDebugTicks-- > 0)
+         {
+            StringBuilder sb = new StringBuilder("payloadQ debug: v_theta =");
+            for (int i = 0; i < n; i++)
+               sb.append(String.format(" %.4g", payloadDirectionTheta.get(i, 0)));
+            sb.append(String.format(" | Q00 before %.4g", processCovariance.get(base, base)));
+            LogTools.info(sb.toString());
+         }
          for (int i = 0; i < n; i++)
             for (int j = 0; j < n; j++)
                processCovariance.add(base + i, base + j, payloadQVariance * payloadDirectionTheta.get(i, 0) * payloadDirectionTheta.get(j, 0));
