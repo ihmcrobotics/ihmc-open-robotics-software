@@ -103,6 +103,23 @@ public interface InertialEstimationParameters
    }
 
    /**
+    * [TMECH] Structured payload process noise: a picked-up payload changes mass AND CoM together, along "add mass at the
+    * hand point p". The physically consistent EKF adds {@code sigma^2 v v^T} to Q each tick, with v the theta-space image of
+    * d(pi)/d(m at p). This keeps that one direction agile while every other direction keeps its (small) base Q. Agility
+    * only, no prior: it does not pull the estimate toward p. Point in the body's inertia frame, or null (default) for none.
+    */
+   default double[] getPayloadProcessNoisePoint(String bodyName)
+   {
+      return null;
+   }
+
+   /** [TMECH] sigma^2 of {@link #getPayloadProcessNoisePoint} [kg^2 per estimator tick]; 0 (default) = off. */
+   default double getPayloadProcessNoiseVariance()
+   {
+      return 0.0;
+   }
+
+   /**
     * Whether the estimator should subscribe to the VR grasp-intent stream that drives the per-limb adaptation gate
     * (and, when enabled, switch the gate on). Default false so tests/sim create no ROS2 node; a robot-specific
     * implementation enables it for VR deployment. See {@code InertialParameterManager.INERTIAL_ADAPTATION_TOPIC}.

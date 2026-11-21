@@ -83,6 +83,13 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
    // InertialEstimationParameters.getCoMLoadCouplingPoint.
    private final double[][] comCouplingPoints;
    private boolean hasCoMCoupling = false;
+   /** [TMECH] Structured payload process noise, see InertialEstimationParameters#getPayloadProcessNoisePoint. */
+   private final double[][] payloadQPoints;
+   private final double payloadQVariance;
+   private final DMatrixRMaj payloadJacobian = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+   private final DMatrixRMaj payloadDirectionPi = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1);
+   private final DMatrixRMaj payloadDirectionTheta = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1);
+   private final org.ejml.interfaces.linsol.LinearSolverDense<DMatrixRMaj> payloadSolver = org.ejml.dense.row.factory.LinearSolverFactory_DDRM.lu(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
    private final DMatrixRMaj priorTargetTheta;      // prior pseudo-measurement target (zero, except coupled first moments)
    private final DMatrixRMaj priorDeltaContainer;   // theta - target
 
@@ -186,6 +193,7 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
       }
 
       java.util.List<double[]> comCouplingList = new java.util.ArrayList<>();
+      java.util.List<double[]> payloadQList = new java.util.ArrayList<>();
       java.util.List<String> estimatedBodyNames = new java.util.ArrayList<>();
       nBodies = 0;
       RigidBodyReadOnly[] modelBodies = model.getRootBody().subtreeArray();
@@ -213,6 +221,7 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
             }
             inertialParameters.add(bodyParameters);
             comCouplingList.add(parameters.getCoMLoadCouplingPoint(modelBodies[i].getName()));
+            payloadQList.add(parameters.getPayloadProcessNoisePoint(modelBodies[i].getName()));
             inertialParametersPiBasisWatchers.add(new YoMatrix("pi_" + modelBodies[i].getName() + "_", 10, 1, RigidBodyInertialParametersTools.getNamesForPiBasis(), null, registry));
             inertialParametersThetaBasisWatchers.add(new YoMatrix("theta_" + modelBodies[i].getName() + "_", 10, 1, RigidBodyInertialParametersTools.getNamesForThetaBasis(), null, registry));
             String[] eigenNames = new String[RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
@@ -229,6 +238,13 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
       }
 
       comCouplingPoints = comCouplingList.toArray(new double[0][]);
+      payloadQPoints = payloadQList.toArray(new double[0][]);
+      payloadQVariance = parameters.getPayloadProcessNoiseVariance();
+      if (payloadQVariance > 0.0)
+         for (int b = 0; b < payloadQPoints.length; b++)
+            if (payloadQPoints[b] != null)
+               LogTools.info("InertialPhysicallyConsistentKalmanFilter: payload process noise " + payloadQVariance + " kg^2/tick along mass at ("
+                             + String.format("%.3f, %.3f, %.3f", payloadQPoints[b][0], payloadQPoints[b][1], payloadQPoints[b][2]) + ") for body " + b);
       if (LOG_DET_PRIOR && parameters.useGeneralizedPhysicalConsistency() && parameters.useExponentialEigenvalueParameterization())
          throw new RuntimeException("priorMetric=LOGDET is implemented for the log-Cholesky deviation only");
       if (LOG_DET_PRIOR && parameters.useGeneralizedPhysicalConsistency())
@@ -560,6 +576,43 @@ class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter impl
 
       state.set(updatedState);
       covariance.set(updatedCovariance);
+   }
+
+   /**
+    * [TMECH] Add the structured payload process noise (see {@link #payloadQPoints}) to this tick's Q, which the manager re-sets
+    * every tick, so nothing accumulates. v_theta = (d pi / d theta)^-1 v_pi with v_pi = d(pi)/d(m) of a point mass at p.
+    */
+   @Override
+   public void preSolveHook()
+   {
+      if (payloadQVariance <= 0.0)
+         return;
+      int n = RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY;
+      for (int b = 0; b < nBodies; b++)
+      {
+         double[] p = payloadQPoints[b];
+         if (p == null)
+            continue;
+         double px = p[0], py = p[1], pz = p[2];
+         payloadDirectionPi.set(0, 0, 1.0);
+         payloadDirectionPi.set(1, 0, px);
+         payloadDirectionPi.set(2, 0, py);
+         payloadDirectionPi.set(3, 0, pz);
+         payloadDirectionPi.set(4, 0, py * py + pz * pz);
+         payloadDirectionPi.set(5, 0, -px * py);
+         payloadDirectionPi.set(6, 0, -px * pz);
+         payloadDirectionPi.set(7, 0, px * px + pz * pz);
+         payloadDirectionPi.set(8, 0, -py * pz);
+         payloadDirectionPi.set(9, 0, px * px + py * py);
+         inertialParameters.get(b).packThetaToPiBasisJacobian(payloadJacobian);
+         if (!payloadSolver.setA(payloadJacobian))
+            continue;
+         payloadSolver.solve(payloadDirectionPi, payloadDirectionTheta);
+         int base = b * n;
+         for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+               processCovariance.add(base + i, base + j, payloadQVariance * payloadDirectionTheta.get(i, 0) * payloadDirectionTheta.get(j, 0));
+      }
    }
 
    /** Before the update step, low-pass filter the measurement residual to reduce the effect of contact impulses on acceleration, wrench, and joint torques. */
