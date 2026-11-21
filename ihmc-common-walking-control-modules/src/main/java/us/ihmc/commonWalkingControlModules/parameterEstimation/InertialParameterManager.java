@@ -159,6 +159,12 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final InertialMeasurementAligner measurementAligner;
    private final DMatrixRMaj alignConfiguration;
    private final DMatrixRMaj alignVelocity;
+   /** [TMECH] -Dalex.inertiaEstimator.contactFromLegs: foot wrenches from the leg rows of the measurement equation. */
+   private final boolean contactFromLegTorques;
+   private final SideDependentList<int[]> legDofIndices = new SideDependentList<>();
+   private final DMatrixRMaj legJacobianTranspose = new DMatrixRMaj(Wrench.SIZE, Wrench.SIZE);
+   private final DMatrixRMaj legTorqueGap = new DMatrixRMaj(Wrench.SIZE, 1);
+   private final org.ejml.interfaces.linsol.LinearSolverDense<DMatrixRMaj> legSolver = org.ejml.dense.row.factory.LinearSolverFactory_DDRM.lu(Wrench.SIZE);
 
    private final Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets;
    private final RigidBodyBasics[] regressorModelBodiesToProcess;
@@ -482,6 +488,31 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          alignVelocity = null;
       }
 
+      contactFromLegTorques = inertialEstimationParameters.getContactWrenchFromLegTorques();
+      if (contactFromLegTorques)
+      {
+         for (RobotSide side : RobotSide.values)
+         {
+            int[] idx = new int[Wrench.SIZE];
+            int n = 0;
+            for (JointBasics joint : legJoints.get(side))
+            {
+               if (joint == controllerRobotModel.getRootJoint())
+                  continue;
+               for (int i : jointIndexHandler.getJointIndices(joint))
+               {
+                  if (n >= Wrench.SIZE)
+                     throw new RuntimeException("contactFromLegs needs exactly 6 leg DoFs per side");
+                  idx[n++] = i;
+               }
+            }
+            if (n != Wrench.SIZE)
+               throw new RuntimeException("contactFromLegs needs exactly 6 leg DoFs per side, got " + n);
+            legDofIndices.put(side, idx);
+         }
+         LogTools.info("InertialParameterManager: foot wrenches from the leg rows of the measurement equation (contactFromLegs)");
+      }
+
       String[] estimateNames = inertialEstimationParameters.getEstimateNames();
       estimate = new YoMatrix("", nParameters, 1, estimateNames, null, registry);
       DoubleProvider defaultEstimateFilteringAlpha = () -> clearEstimateFilterMemory ? 0.0
@@ -796,6 +827,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          updateRegressorAndInverseDynamicsModels();
          inverseDynamicsCalculator.compute();
          regressorCalculator.compute(regressorModelBodiesToProcess);
+         if (contactFromLegTorques)
+            computeContactWrenchesFromLegRows();
 
          for (int i = 0; i < regressorModelBodiesToProcess.length; i++)
             regressorBlocks[i].set(regressorCalculator.getJointTorqueRegressorMatrixBlock(regressorModelBodiesToProcess[i]));
@@ -1249,6 +1282,28 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       graspCalculator.computeFromKnownSqueeze(leftNubPosition, rightNubPosition, knownGraspSqueeze, handContactWrenches);
       graspSqueezeApplied.set(graspCalculator.getSqueeze());
       graspNubDistance.set(graspCalculator.getDistance());
+   }
+
+   /**
+    * [TMECH] See {@link #contactFromLegTorques}: per foot, solve {@code J_leg^T w = tau_nom,leg - tau_leg} with the 6x6 leg block of
+    * the contact Jacobian, the nominal inverse dynamics of this tick (already at the aligned state) and the measured leg torques.
+    */
+   private void computeContactWrenchesFromLegRows()
+   {
+      DMatrixRMaj tauNominal = inverseDynamicsCalculator.getJointTauMatrix();
+      for (RobotSide side : RobotSide.values)
+      {
+         int[] idx = legDofIndices.get(side);
+         DMatrixRMaj jacobian = fullContactJacobians.get(side);
+         for (int r = 0; r < Wrench.SIZE; r++)
+         {
+            for (int c = 0; c < Wrench.SIZE; c++)
+               legJacobianTranspose.set(c, r, jacobian.get(r, idx[c]));
+            legTorqueGap.set(r, 0, tauNominal.get(idx[r], 0) - wholeSystemTorques.get(idx[r], 0));
+         }
+         if (legSolver.setA(legJacobianTranspose))
+            legSolver.solve(legTorqueGap, contactWrenches.get(side));
+      }
    }
 
    /** [TMECH] Replace this tick's raw torques and foot wrenches by their aligned versions; see {@link InertialMeasurementAligner}. */

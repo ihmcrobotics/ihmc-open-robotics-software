@@ -92,6 +92,17 @@ public interface InertialEstimationParameters
    }
 
    /**
+    * [TMECH] Derive the foot contact wrenches inside the estimator from the leg rows of its own measurement equation,
+    * {@code J_leg^T w = tau_nom,leg(q, qd, qdd) - tau_leg}, instead of reading the foot switches. The leg rows carry no
+    * estimated-body columns, so this uses only the known model and the measured leg torques: no ankle F/T sensor is
+    * needed, the legs' own weight and inertia are included, and the timing is that of the (aligned) torque. Default false.
+    */
+   default boolean getContactWrenchFromLegTorques()
+   {
+      return false;
+   }
+
+   /**
     * Whether the estimator should subscribe to the VR grasp-intent stream that drives the per-limb adaptation gate
     * (and, when enabled, switch the gate on). Default false so tests/sim create no ROS2 node; a robot-specific
     * implementation enables it for VR deployment. See {@code InertialParameterManager.INERTIAL_ADAPTATION_TOPIC}.
