@@ -45,7 +45,13 @@ public class InertialMeasurementAligner
       MIDHOLD,
       /** As CENTRAL for q and qd, but the torques and foot wrenches are the mean of the samples at t_k and t_{k-1}: for a
        * per-tick zero-order hold, the mean over the central-difference window [t_{k-2}, t_k]. */
-      CENHOLD
+      CENHOLD,
+      /**
+       * CENTRAL timing for q, qd and the foot wrenches (the wrench is a state-like quantity: the contact force the dynamics
+       * produce at the sampled instant), CENHOLD timing for the joint torques (a zero-order hold of the controller output):
+       * the per-signal timing the EST8 lag scans found consistent in sim with ankle F/T sensors.
+       */
+      CENSPLIT
    }
 
    private final Mode mode;
@@ -122,7 +128,7 @@ public class InertialMeasurementAligner
       }
 
       double h = dt.getValue();
-      boolean central = mode == Mode.CENTRAL || mode == Mode.CENHOLD;
+      boolean central = mode == Mode.CENTRAL || mode == Mode.CENHOLD || mode == Mode.CENSPLIT;
       if (central)
       {
          qRaw.set(qPrev);
@@ -145,13 +151,14 @@ public class InertialMeasurementAligner
       {
          case CENTRAL -> 0.0;
          case MIDHOLD -> 1.0;
-         default -> 0.5;  // MIDPOINT, CENHOLD
+         default -> 0.5;  // MIDPOINT, CENHOLD, CENSPLIT
       };
+      double cNowWrench = mode == Mode.CENSPLIT ? 0.0 : cNow;
       for (int i = 0; i < v.getNumRows(); i++)
          tauRaw.set(i, 0, cNow * tau.get(i, 0) + (1.0 - cNow) * tauPrev.get(i, 0));
       for (RobotSide side : RobotSide.values)
          for (int i = 0; i < 6; i++)
-            wRaw.get(side).set(i, 0, cNow * w.get(side).get(i, 0) + (1.0 - cNow) * wPrev.get(side).get(i, 0));
+            wRaw.get(side).set(i, 0, cNowWrench * w.get(side).get(i, 0) + (1.0 - cNowWrench) * wPrev.get(side).get(i, 0));
 
       // The same first-order low-pass on every signal (root pose rows excepted).
       double a = samples == 0 ? 0.0 : alpha.getValue();
