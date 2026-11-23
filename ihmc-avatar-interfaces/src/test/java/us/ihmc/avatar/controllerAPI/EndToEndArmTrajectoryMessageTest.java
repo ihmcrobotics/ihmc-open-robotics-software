@@ -160,7 +160,13 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       SCS2AvatarTestingSimulationFactory testSimulationFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
                                                                                                                                        simulationTestingParameters);
       testSimulationFactory.setEnableSimulatedRobotDamping(isRobotJointDampingEnabled());
+      configureSimulationFactory(testSimulationFactory);
       simulationTestHelper = testSimulationFactory.createAvatarTestingSimulation();
+   }
+
+   /** Extension point for subclasses to tweak the simulation factory (e.g. swap physics engine) before the simulation is built. No-op by default. */
+   protected void configureSimulationFactory(SCS2AvatarTestingSimulationFactory testSimulationFactory)
+   {
    }
 
    @Test

@@ -2,11 +2,13 @@ package us.ihmc.zulu.controllerAPI;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import us.ihmc.zulu.ZuluVersion;
 import us.ihmc.zulu.ZuluRobotModel;
 import us.ihmc.avatar.controllerAPI.EndToEndPelvisOrientationTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 
@@ -96,5 +98,17 @@ public class ZuluEndToEndPelvisOrientationTest extends EndToEndPelvisOrientation
    public String getSimpleRobotName()
    {
       return CITools.getSimpleRobotNameFor(SimpleRobotNameKeys.ZULU);
+   }
+
+   // TRIAL: forcing the Mujoco physics engine (instead of the default contact-point engine) for
+   // controller-api-2 tests only. See conversation with Nick 2026-08-17.
+   @Override
+   protected void configureSimulationFactory(SCS2AvatarTestingSimulationFactory testSimulationFactory, TestInfo testInfo)
+   {
+      if (testInfo.getTags().contains("controller-api-2"))
+      {
+         testSimulationFactory.setUseMujocoPhysicsEngine(true);
+         testSimulationFactory.setSimulationDT(0.001);
+      }
    }
 }

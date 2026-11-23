@@ -13,6 +13,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.CenterOfMassHeightControlState;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.heightPlanning.HeightOffsetHandler;
@@ -55,6 +56,25 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
    private SCS2AvatarTestingSimulation simulationTestHelper;
 
+   protected SCS2AvatarTestingSimulation createSimulationTestHelper()
+   {
+      return createSimulationTestHelper(null);
+   }
+
+   protected SCS2AvatarTestingSimulation createSimulationTestHelper(CommonAvatarEnvironmentInterface environment)
+   {
+      SCS2AvatarTestingSimulationFactory testSimulationFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                        environment,
+                                                                                                                                        simulationTestingParameters);
+      configureSimulationFactory(testSimulationFactory);
+      return testSimulationFactory.createAvatarTestingSimulation();
+   }
+
+   /** Extension point for subclasses to tweak the simulation factory (e.g. swap physics engine) before the simulation is built. No-op by default. */
+   protected void configureSimulationFactory(SCS2AvatarTestingSimulationFactory testSimulationFactory)
+   {
+   }
+
    @Test
    public void testSingleWaypoint() throws Exception
    {
@@ -62,7 +82,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       Random random = new Random(564574L);
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
 
       List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
@@ -136,9 +156,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
-                                                                                            new FlatGroundEnvironment(),
-                                                                                            simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper(new FlatGroundEnvironment());
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
@@ -180,7 +198,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       Random random = new Random(564574L);
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
@@ -222,7 +240,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
@@ -271,9 +289,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
-                                                                                            new FlatGroundEnvironment(),
-                                                                                            simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper(new FlatGroundEnvironment());
       simulationTestHelper.start();
       simulationTestHelper.setCamera(new Point3D(0.4, 0.0, 1.2), new Point3D(0.4, 12.0, 1.2));
       ThreadTools.sleep(1000);
@@ -318,9 +334,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       YoRegistry testRegistry = new YoRegistry("testStreaming");
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
-                                                                                            new FlatGroundEnvironment(),
-                                                                                            simulationTestingParameters);
+      simulationTestHelper = createSimulationTestHelper(new FlatGroundEnvironment());
       simulationTestHelper.start();
       simulationTestHelper.getRootRegistry().addChild(testRegistry);
 
