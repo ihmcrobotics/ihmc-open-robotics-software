@@ -94,4 +94,13 @@ public class LeRobotIntegerStatisticsCalculator
    {
       return max;
    }
+
+   public void mergeFrom(LeRobotIntegerStatisticsCalculator other)
+   {
+      count += other.count;
+      sum += other.sum;
+      sumSquares += other.sumSquares;
+      min = Math.min(min, other.min);
+      max = Math.max(max, other.max);
+   }
 }
