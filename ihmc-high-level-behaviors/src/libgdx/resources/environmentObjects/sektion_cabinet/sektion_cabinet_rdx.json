@@ -1,0 +1,30 @@
+{
+  "urdf": "sektion_cabinet.urdf",
+  "excludeContacts": [
+    {
+      "body1": "cabinet",
+      "body2": "door_left_link",
+      "reason": "movable joint"
+    },
+    {
+      "body1": "cabinet",
+      "body2": "door_right_link",
+      "reason": "movable joint"
+    },
+    {
+      "body1": "cabinet",
+      "body2": "drawer_bottom",
+      "reason": "movable joint"
+    },
+    {
+      "body1": "cabinet",
+      "body2": "drawer_top",
+      "reason": "movable joint"
+    },
+    {
+      "body1": "door_right_link",
+      "body2": "drawer_bottom",
+      "reason": "shallow overlap, 0.5 mm at door_left_joint=-1.57, door_right_joint=1.57, drawer_bottom_joint=0.4"
+    }
+  ]
+}

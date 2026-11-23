@@ -13,7 +13,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXInteractableObjectLibrary;
-import us.ihmc.rdx.simulation.environment.object.objects.RDXArticulatedDoorObject;
 import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXProceduralGroundObject;
 import us.ihmc.rdx.simulation.environment.object.objects.terrain.RDXProceduralTerrainObject;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -58,8 +57,8 @@ import java.util.regex.Pattern;
  * Objects without one keep their box or sphere. Only classes registered in
  * {@link RDXInteractableObjectLibrary} are free bodies. Everything else is mocap, so contact
  * cannot move it and it adds no degrees of freedom. Dragging a free object writes its joint
- * pose while it is selected. An
- * articulated door is a separate mechanism (welded frame, hinged panel, sprung lever). Adding or
+ * pose while it is selected. An {@link RDXMujocoArticulatedObject}, such as the articulated door
+ * or an object built from a URDF, is its own jointed mechanism with a welded root. Adding or
  * removing an object rebuilds the world XML and recompiles, keeping the robot state.
  */
 public class RDXMujocoObjectCollisionSync implements Controller
@@ -74,14 +73,15 @@ public class RDXMujocoObjectCollisionSync implements Controller
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final Set<String> warnedUnsupportedTypes = new HashSet<>();
    private final Set<String> warnedMissingHulls = new HashSet<>();
-   private final RigidBodyTransform collisionToWorld = new RigidBodyTransform();
    private final Quaternion quaternion = new Quaternion();
 
-   private final AtomicReference<List<RDXArticulatedDoorObject.Dynamics>> doorCommands = new AtomicReference<>(List.of());
-   private final Map<String, double[]> simulatedDoorJoints = new ConcurrentHashMap<>();
+   private final AtomicReference<List<RDXMujocoArticulatedDynamics>> articulatedCommands = new AtomicReference<>(List.of());
+   /** Joint positions of each articulated object, written by physics and applied on the UI thread. */
+   private final Map<String, double[]> simulatedArticulatedJoints = new ConcurrentHashMap<>();
    /** World pose of each dynamic object's collision body, written by physics and applied on the UI thread. */
    private final Map<String, double[]> simulatedObjectPoses = new ConcurrentHashMap<>();
-   private final Map<String, RDXArticulatedDoorObject.JointIds> doorIds = new HashMap<>();
+   /** What each articulated object bound against the compiled model. Cleared on every recompile. */
+   private final Map<String, Object> articulatedBindings = new HashMap<>();
 
    private MujocoPhysicsEngine physicsEngine;
    private Robot robot;
@@ -121,13 +121,15 @@ public class RDXMujocoObjectCollisionSync implements Controller
    public void syncFrom(RDXEnvironmentBuilder environmentBuilder)
    {
       List<RDXMujocoCollisionShape> shapes = new ArrayList<>();
-      List<RDXArticulatedDoorObject.Dynamics> doors = new ArrayList<>();
+      List<RDXMujocoArticulatedDynamics> articulated = new ArrayList<>();
       for (RDXEnvironmentObject object : environmentBuilder.getAllObjects())
       {
-         if (object instanceof RDXArticulatedDoorObject door)
+         if (object instanceof RDXMujocoArticulatedObject articulatedObject)
          {
-            applySimulatedDoorJoints(door);
-            doors.add(door.captureDynamics());
+            double[] jointPositions = simulatedArticulatedJoints.get(baseName(object));
+            if (jointPositions != null)
+               articulatedObject.applySimulatedJointPositions(jointPositions);
+            articulated.add(articulatedObject.captureDynamics());
             continue;
          }
          applySimulatedObjectPose(object);
@@ -135,7 +137,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
          if (shape != null)
             shapes.add(shape);
       }
-      doorCommands.set(List.copyOf(doors));
+      articulatedCommands.set(List.copyOf(articulated));
       // Adding or removing the ground changes the shapes, which triggers the recompile that reads this
       environment.setReplaceFlatGround(environmentBuilder.getAllObjects().stream().anyMatch(RDXProceduralGroundObject.class::isInstance));
 
@@ -152,8 +154,8 @@ public class RDXMujocoObjectCollisionSync implements Controller
          return;
 
       List<RDXMujocoCollisionShape> shapes = environment.getObjectCollisions();
-      List<RDXArticulatedDoorObject.Dynamics> doors = doorCommands.get();
-      String structureKey = structureKey(shapes, doors);
+      List<RDXMujocoArticulatedDynamics> articulated = articulatedCommands.get();
+      String structureKey = structureKey(shapes, articulated);
       if (!fingerJointCollisions.isEmpty())
          structureKey = structureKey + "hands\n";
       MujocoMultiBodyDynamicsWorld world = physicsEngine.getDynamicsWorld();
@@ -162,12 +164,12 @@ public class RDXMujocoObjectCollisionSync implements Controller
          return;
 
       if (!structureKey.equals(compiledStructureKey))
-         recompile(world, shapes, doors, structureKey);
+         recompile(world, shapes, articulated, structureKey);
       else
       {
          writePoses(model, world.getData(), shapes);
          fingerJointCollisions.writeConfiguration(robot, model, world.getData());
-         syncDynamicDoors(model, world.getData(), doors, false);
+         syncArticulated(model, world.getData(), articulated, false);
       }
    }
 
@@ -179,7 +181,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
 
    private void recompile(MujocoMultiBodyDynamicsWorld world,
                           List<RDXMujocoCollisionShape> shapes,
-                          List<RDXArticulatedDoorObject.Dynamics> doors,
+                          List<RDXMujocoArticulatedDynamics> articulated,
                           String structureKey)
    {
       try
@@ -187,8 +189,8 @@ public class RDXMujocoObjectCollisionSync implements Controller
          if (baseWorldXml == null && !loadBaseWorldXml())
             return;
 
-         copyMeshAssets(shapes, doors);
-         String xml = injectObjectGeoms(baseWorldXml, shapes, doors);
+         copyMeshAssets(shapes, articulated);
+         String xml = injectObjectGeoms(baseWorldXml, shapes, articulated);
          mjModel model = world.getModel();
          mjData data = world.getData();
          int nq = Math.toIntExact(model.nq());
@@ -213,16 +215,18 @@ public class RDXMujocoObjectCollisionSync implements Controller
          mjData recompiledData = world.getData();
          int fingerDofs = fingerJointCollisions.addedDofCount();
          int dynamicObjects = dynamicObjectCount(shapes);
-         // A free joint is 7 qpos and 6 qvel. Door hinges stay 1 and 1, two of them per door.
-         int expectedNq = preservedNq + fingerDofs + 7 * dynamicObjects + 2 * doors.size();
-         int expectedNv = preservedNv + fingerDofs + 6 * dynamicObjects + 2 * doors.size();
+         // A free joint is 7 qpos and 6 qvel. Articulated hinges and slides are 1 and 1 each.
+         int articulatedDofs = articulatedDofCount(articulated);
+         int expectedNq = preservedNq + fingerDofs + 7 * dynamicObjects + articulatedDofs;
+         int expectedNv = preservedNv + fingerDofs + 6 * dynamicObjects + articulatedDofs;
          if (recompiled.nq() != expectedNq || recompiled.nv() != expectedNv)
          {
             physicsSyncBroken = true;
             LogTools.error("MuJoCo recompile nq/nv " + recompiled.nq() + "/" + recompiled.nv()
                            + " did not match the robot plus " + fingerDofs + " finger joint(s), "
-                           + dynamicObjects + " free object(s), and " + doors.size()
-                           + " door(s) (" + expectedNq + "/" + expectedNv + "). Robot state was not restored.");
+                           + dynamicObjects + " free object(s), and " + articulated.size()
+                           + " articulated object(s) with " + articulatedDofs + " joint(s) (" + expectedNq + "/" + expectedNv
+                           + "). Robot state was not restored.");
             return;
          }
 
@@ -235,18 +239,18 @@ public class RDXMujocoObjectCollisionSync implements Controller
          recompiled.opt().gravity().put(2, gravityZ);
          world.setTimestep(timestep);
          world.writeOptions(physicsEngine.getOptions());
-         doorIds.clear();
+         articulatedBindings.clear();
          // The mesh frame is only known after compiling, so place the collisions before the first
          // step rather than leaving them one tick off the visual.
          writePoses(recompiled, recompiledData, shapes);
-         syncDynamicDoors(recompiled, recompiledData, doors, true);
+         syncArticulated(recompiled, recompiledData, articulated, true);
          fingerJointCollisions.writeConfiguration(robot, recompiled, recompiledData);
          rebindJointAddresses(recompiled);
          Mujoco.mj_forward(recompiled, recompiledData);
          rebindDiagnostics(world);
          compiledStructureKey = structureKey;
          missingGeomRetries = 0;
-         LogTools.info("MuJoCo environment now includes {} RDX object collision(s) and {} dynamic door(s)", shapes.size(), doors.size());
+         LogTools.info("MuJoCo environment now includes {} RDX object collision(s) and {} articulated object(s)", shapes.size(), articulated.size());
       }
       catch (RuntimeException | IOException exception)
       {
@@ -272,8 +276,9 @@ public class RDXMujocoObjectCollisionSync implements Controller
             }
             if (shape.isSelected())
                writeFreeJoint(model, data, jointId, shape);
-            else
-               simulatedObjectPoses.put(shape.getBodyName(), readFreeJoint(model, data, jointId));
+            // Also record the held pose, so releasing the object starts from where it was held
+            // rather than flashing back for a frame to where it was before it was selected
+            simulatedObjectPoses.put(shape.getBodyName(), readFreeJoint(model, data, jointId));
             continue;
          }
 
@@ -338,7 +343,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
       }
    }
 
-   private void copyMeshAssets(List<RDXMujocoCollisionShape> shapes, List<RDXArticulatedDoorObject.Dynamics> doors) throws IOException
+   private void copyMeshAssets(List<RDXMujocoCollisionShape> shapes, List<RDXMujocoArticulatedDynamics> articulated) throws IOException
    {
       File workingDirectory = worldXmlFile.getParentFile();
       for (RDXMujocoCollisionShape shape : shapes)
@@ -347,11 +352,10 @@ public class RDXMujocoObjectCollisionSync implements Controller
             continue;
          copyMesh(workingDirectory, shape.getMeshResourcePath(), shape.getMeshFileName());
       }
-      for (RDXArticulatedDoorObject.Dynamics door : doors)
+      for (RDXMujocoArticulatedDynamics object : articulated)
       {
-         copyMesh(workingDirectory, door.getPanelMeshPath(), door.panelMeshFileName());
-         for (int piece = 0; piece < door.getLeverMeshPaths().size(); piece++)
-            copyMesh(workingDirectory, door.getLeverMeshPaths().get(piece), door.leverMeshFileName(piece));
+         for (Map.Entry<String, String> mesh : object.getMeshFiles().entrySet())
+            copyMesh(workingDirectory, mesh.getValue(), mesh.getKey());
       }
    }
 
@@ -389,9 +393,9 @@ public class RDXMujocoObjectCollisionSync implements Controller
 
    private String injectObjectGeoms(String baseXml,
                                     List<RDXMujocoCollisionShape> shapes,
-                                    List<RDXArticulatedDoorObject.Dynamics> doors)
+                                    List<RDXMujocoArticulatedDynamics> articulated)
    {
-      String xml = injectMeshAssets(withoutBakedObjectGeoms(baseXml), shapes, doors);
+      String xml = injectMeshAssets(withoutBakedObjectGeoms(baseXml), shapes, articulated);
       int end = xml.lastIndexOf(WORLD_BODY_END);
       if (end < 0)
          throw new IllegalStateException("MuJoCo world XML has no </worldbody>");
@@ -404,23 +408,23 @@ public class RDXMujocoObjectCollisionSync implements Controller
             geoms.append(toBodyXml(shape));
          geoms.append("    <!-- /rdx-environment-collisions -->\n");
       }
-      if (!doors.isEmpty())
+      if (!articulated.isEmpty())
       {
-         geoms.append("    <!-- rdx-articulated-doors -->\n");
-         for (RDXArticulatedDoorObject.Dynamics door : doors)
-            door.appendBodies(geoms);
-         geoms.append("    <!-- /rdx-articulated-doors -->\n");
+         geoms.append("    <!-- rdx-articulated-objects -->\n");
+         for (RDXMujocoArticulatedDynamics object : articulated)
+            object.appendBodies(geoms);
+         geoms.append("    <!-- /rdx-articulated-objects -->\n");
       }
       xml = xml.substring(0, end) + geoms + xml.substring(end);
       xml = fingerJointCollisions.injectInto(xml, robot.getRobotDefinition());
-      if (doors.isEmpty())
+      StringBuilder excludes = new StringBuilder();
+      for (RDXMujocoArticulatedDynamics object : articulated)
+         object.appendExcludes(excludes);
+      if (excludes.isEmpty())
          return xml;
 
       StringBuilder contact = new StringBuilder();
-      contact.append("  <contact>\n");
-      for (RDXArticulatedDoorObject.Dynamics door : doors)
-         door.appendExcludes(contact);
-      contact.append("  </contact>\n");
+      contact.append("  <contact>\n").append(excludes).append("  </contact>\n");
       int mujocoEnd = xml.lastIndexOf("</mujoco>");
       if (mujocoEnd < 0)
          throw new IllegalStateException("MuJoCo world XML has no </mujoco>");
@@ -429,7 +433,7 @@ public class RDXMujocoObjectCollisionSync implements Controller
 
    private static String injectMeshAssets(String baseXml,
                                           List<RDXMujocoCollisionShape> shapes,
-                                          List<RDXArticulatedDoorObject.Dynamics> doors)
+                                          List<RDXMujocoArticulatedDynamics> articulated)
    {
       StringBuilder assets = new StringBuilder();
       for (RDXMujocoCollisionShape shape : shapes)
@@ -454,8 +458,8 @@ public class RDXMujocoObjectCollisionSync implements Controller
             assets.append("\"/>\n");
          }
       }
-      for (RDXArticulatedDoorObject.Dynamics door : doors)
-         door.appendAssets(assets);
+      for (RDXMujocoArticulatedDynamics object : articulated)
+         object.appendAssets(assets);
       if (assets.isEmpty())
          return baseXml;
 
@@ -589,49 +593,59 @@ public class RDXMujocoObjectCollisionSync implements Controller
       return count;
    }
 
-   private void applySimulatedDoorJoints(RDXArticulatedDoorObject door)
+   /** Matches the {@code rdx_<name>_<index>} base name each articulated snapshot uses. */
+   private static String baseName(RDXEnvironmentObject object)
    {
-      if (door.isJointPositionOverridden())
-         return;
-      String baseName = "rdx_" + door.getPascalCasedName() + "_" + door.getObjectIndex();
-      double[] angles = simulatedDoorJoints.get(baseName);
-      if (angles == null)
-         return;
-      if (Math.abs(door.getHingeAngle() - angles[0]) > CHANGE_EPSILON)
-         door.setHingeAngleFromInteraction(angles[0]);
-      if (Math.abs(door.getLeverAngle() - angles[1]) > CHANGE_EPSILON)
-         door.setLeverAngleFromInteraction(angles[1]);
+      return "rdx_" + object.getPascalCasedName() + "_" + object.getObjectIndex();
    }
 
-   private void syncDynamicDoors(mjModel model,
-                                 mjData data,
-                                 List<RDXArticulatedDoorObject.Dynamics> doors,
-                                 boolean seedFromCommand)
+   private static int articulatedDofCount(List<RDXMujocoArticulatedDynamics> articulated)
    {
-      for (RDXArticulatedDoorObject.Dynamics door : doors)
+      int count = 0;
+      for (RDXMujocoArticulatedDynamics object : articulated)
+         count += object.getDegreesOfFreedom();
+      return count;
+   }
+
+   private void syncArticulated(mjModel model,
+                                mjData data,
+                                List<RDXMujocoArticulatedDynamics> articulated,
+                                boolean seedFromCommand)
+   {
+      for (RDXMujocoArticulatedDynamics object : articulated)
       {
-         RDXArticulatedDoorObject.JointIds ids = doorIds.get(door.getBaseName());
-         if (ids == null)
+         Object binding = articulatedBindings.get(object.getBaseName());
+         if (binding == null)
          {
-            ids = RDXArticulatedDoorObject.JointIds.resolve(model, door.getBaseName());
-            if (ids == null)
+            binding = object.bind(model);
+            if (binding == null)
             {
                if (seedFromCommand)
-                  LogTools.warn("Dynamic door {} is missing from the MuJoCo model", door.getBaseName());
+                  LogTools.warn("Articulated object {} is missing from the MuJoCo model", object.getBaseName());
                continue;
             }
-            doorIds.put(door.getBaseName(), ids);
+            articulatedBindings.put(object.getBaseName(), binding);
          }
-         simulatedDoorJoints.put(door.getBaseName(), door.syncJoints(model, data, ids, seedFromCommand));
+         simulatedArticulatedJoints.put(object.getBaseName(), object.syncJoints(model, data, binding, seedFromCommand));
       }
    }
 
    private RDXMujocoCollisionShape toCollisionShape(RDXEnvironmentObject object)
    {
+      return toCollisionShape(object, warnedMissingHulls, warnedUnsupportedTypes);
+   }
+
+   /**
+    * The collision MuJoCo simulates for {@code object}, in the world frame, or null when it has none.
+    * The sets hold what was already warned about, so each warning is logged once.
+    */
+   public static RDXMujocoCollisionShape toCollisionShape(RDXEnvironmentObject object, Set<String> warnedMissingHulls, Set<String> warnedUnsupportedTypes)
+   {
       Shape3DBasics geometry = object.getCollisionGeometryObject();
       if (geometry == null)
          return null;
 
+      RigidBodyTransform collisionToWorld = new RigidBodyTransform();
       String name = "rdx_" + object.getPascalCasedName() + "_" + object.getObjectIndex();
       boolean dynamic = RDXInteractableObjectLibrary.isInteractable(object);
       double mass = object.getMass();
@@ -716,13 +730,13 @@ public class RDXMujocoObjectCollisionSync implements Controller
       return true;
    }
 
-   private static String structureKey(List<RDXMujocoCollisionShape> shapes, List<RDXArticulatedDoorObject.Dynamics> doors)
+   private static String structureKey(List<RDXMujocoCollisionShape> shapes, List<RDXMujocoArticulatedDynamics> articulated)
    {
       StringBuilder key = new StringBuilder();
       for (RDXMujocoCollisionShape shape : shapes)
          key.append(shape.structureKey()).append('\n');
-      for (RDXArticulatedDoorObject.Dynamics door : doors)
-         key.append(door.structureKey()).append('\n');
+      for (RDXMujocoArticulatedDynamics object : articulated)
+         key.append(object.structureKey()).append('\n');
       return key.toString();
    }
 

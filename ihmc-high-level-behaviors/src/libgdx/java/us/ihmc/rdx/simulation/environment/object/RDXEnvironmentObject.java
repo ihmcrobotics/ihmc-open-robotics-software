@@ -44,8 +44,19 @@ public class RDXEnvironmentObject extends RDXSimpleObject
       return objectIndex;
    }
 
+   /** False for objects the environment builder never picks, such as the floor. */
+   public boolean isSelectable()
+   {
+      return true;
+   }
+
    /** Extra controls shown in the environment panel while this object is selected. */
    public void renderImGuiWidgets()
+   {
+   }
+
+   /** Called when the environment builder removes this object, to drop anything it registered outside the builder. */
+   public void removedFromEnvironment()
    {
    }
 }
