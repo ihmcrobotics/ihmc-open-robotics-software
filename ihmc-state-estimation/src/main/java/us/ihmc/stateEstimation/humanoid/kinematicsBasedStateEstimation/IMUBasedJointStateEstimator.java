@@ -12,6 +12,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUBasedJointStateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.filters.BacklashProcessingYoVariable;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -31,6 +32,7 @@ public class IMUBasedJointStateEstimator
 {
    private final YoRegistry registry;
    private final BooleanProvider enableOutput;
+   private final BooleanProvider enablePositionOutput;
    private final IMUBasedJointVelocityEstimator velocityEstimator;
    private final DoubleProvider velocityBreakFrequency;
    private final DoubleProvider positionBreakFrequency;
@@ -57,7 +59,8 @@ public class IMUBasedJointStateEstimator
       String name = parameters.getEstimatorName() + getClass().getSimpleName();
       registry = new YoRegistry(name);
 
-      enableOutput = new BooleanParameter(name + "EnableOutput", registry, parameters.isOuputEnabled());
+      enableOutput = new BooleanParameter(name + "EnableOutput", registry, parameters.isOutputEnabled());
+      enablePositionOutput = new BooleanParameter(name + "EnablePositionOutput", registry, parameters.isPositionOutputEnabled());
 
       velocityEstimator = new IMUBasedJointVelocityEstimator(parentIMU, childIMU, registry);
 
@@ -97,8 +100,8 @@ public class IMUBasedJointStateEstimator
    {
       velocityEstimator.compute();
 
-      double alphaVelocity = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(velocityBreakFrequency.getValue(), estimatorDT);
-      double alphaPosition = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(positionBreakFrequency.getValue(), estimatorDT);
+      double alphaVelocity = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(velocityBreakFrequency.getValue(), estimatorDT);
+      double alphaPosition = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(positionBreakFrequency.getValue(), estimatorDT);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -140,7 +143,7 @@ public class IMUBasedJointStateEstimator
 
    public double getEstimatedJointPosition(OneDoFJointBasics joint)
    {
-      if (!enableOutput.getValue())
+      if (!(enableOutput.getValue() && enablePositionOutput.getValue()))
          return Double.NaN;
 
       int jointIndex = jointToIndexMap.get(joint);

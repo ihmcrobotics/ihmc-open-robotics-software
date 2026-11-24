@@ -4,6 +4,7 @@ public class IMUBasedJointStateEstimatorParameters
 {
    private final String estimatorName;
    private final boolean enableOutput;
+   private final boolean enablePositionOutput;
    private final String parentIMUName, childIMUName;
    private final double breakFrequencyForVelocityEstimation;
    private final double breakFrequencyForPositionEstimation;
@@ -15,8 +16,20 @@ public class IMUBasedJointStateEstimatorParameters
                                                 double breakFrequencyForVelocityEstimation,
                                                 double breakFrequencyForPositionEstimation)
    {
+      this(estimatorName, enableOutput, enableOutput, parentIMUName, childIMUName, breakFrequencyForVelocityEstimation, breakFrequencyForPositionEstimation);
+   }
+
+   public IMUBasedJointStateEstimatorParameters(String estimatorName,
+                                                boolean enableOutput,
+                                                boolean enablePositionOutput,
+                                                String parentIMUName,
+                                                String childIMUName,
+                                                double breakFrequencyForVelocityEstimation,
+                                                double breakFrequencyForPositionEstimation)
+   {
       this.estimatorName = estimatorName;
       this.enableOutput = enableOutput;
+      this.enablePositionOutput = enablePositionOutput;
       this.parentIMUName = parentIMUName;
       this.childIMUName = childIMUName;
       this.breakFrequencyForVelocityEstimation = breakFrequencyForVelocityEstimation;
@@ -28,9 +41,14 @@ public class IMUBasedJointStateEstimatorParameters
       return estimatorName;
    }
 
-   public boolean isOuputEnabled()
+   public boolean isOutputEnabled()
    {
       return enableOutput;
+   }
+
+   public boolean isPositionOutputEnabled()
+   {
+      return enablePositionOutput;
    }
 
    public String getParentIMUName()
