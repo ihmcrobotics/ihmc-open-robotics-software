@@ -40,6 +40,7 @@ import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -48,6 +49,7 @@ import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
@@ -69,6 +71,8 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 /**
  * This class is responsible for creating the estimator, controller, and optionally step generator and IK streaming modules.
@@ -263,19 +267,6 @@ public class AvatarMultiThreadingFactory
       avatarEstimatorThreadFactory.setGravity(GRAVITY);
       //      if (secondaryEstimatorFactory != null)
       //         avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryEstimatorFactory);
-      boolean alexExternalPoseDefault = "alex".equalsIgnoreCase(robotModel.getSimpleRobotName());
-      boolean externalPoseEnabled = Boolean.parseBoolean(System.getProperty("ihmc.estimator.externalPose.enabled",
-                                                                            Boolean.toString(alexExternalPoseDefault)));
-      if (externalPoseEnabled)
-      {
-         var communicator = new us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator(
-               estimatorAsyncROS2Node, robotModel.getSimpleRobotName());
-         estimatorAsyncROS2Node.createSubscriptionSampler(
-               us.ihmc.communication.StateEstimatorAPI.getTopic(ihmc_common_msgs.StampedPosePacket.class, robotModel.getSimpleRobotName()),
-               communicator::receivedPacket);
-         avatarEstimatorThreadFactory.setExternalPelvisCorrectorSubscriber(communicator);
-         LogTools.warn("External pelvis pose corrections enabled for the hardware estimator");
-      }
       StateEstimatorController stateEstimator = avatarEstimatorThreadFactory.getMainStateEstimator();
       mainStateEstimator = stateEstimator;
 
@@ -1063,6 +1054,27 @@ public class AvatarMultiThreadingFactory
    public StateEstimatorController getMainStateEstimator()
    {
       return mainStateEstimator;
+   }
+
+   /** Configure before build/start. The estimator model remains independent of the selected controller-output model. */
+   public void configureEstimatorOutputModel(FullHumanoidRobotModel outputModel,
+                                             OutputProcessor processor,
+                                             Consumer<HumanoidRobotContextData> contextTransformer)
+   {
+      avatarEstimator.configureOutputModel(outputModel, processor, contextTransformer);
+   }
+
+   public SensorOutputMapReadOnly getEstimatorSensorOutput()
+   {
+      return avatarEstimator.getSensorReader().getProcessedSensorOutputMap();
+   }
+
+   public void configureEstimatorOutputModel(FullHumanoidRobotModel outputModel,
+                                             OutputProcessor processor,
+                                             Consumer<HumanoidRobotContextData> transformer,
+                                             BooleanSupplier active)
+   {
+      avatarEstimator.configureOutputModel(outputModel, processor, transformer, active);
    }
 
    public void addPreEstimatorThreadRunnable(Runnable runnable)
