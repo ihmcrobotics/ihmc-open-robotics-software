@@ -26,9 +26,10 @@ public class SyncedYOLOv8ModelParameters
 
    public SyncedYOLOv8ModelParameters(LatestTimestampModifiable executorParameters, YOLOv8ModelInfo modelInfo)
    {
-      this.modelInfo = modelInfo;
+      // Keep class names and per-class settings tied to one metadata snapshot.
+      this.modelInfo = new YOLOv8ModelInfo(modelInfo);
 
-      int objectClassCount = modelInfo.getDetectableObjectClasses().size();
+      int objectClassCount = this.modelInfo.getDetectableObjectClasses().size();
       ignoredObjectClasses = new CRDTBidirectionalBooleanArray(executorParameters, objectClassCount);
       Arrays.fill(ignoredObjectClasses.getValue(), false);
       confidenceThresholds = new CRDTBidirectionalFloatArray(executorParameters, objectClassCount);
