@@ -29,7 +29,7 @@ import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.LinkedHashMap;
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static us.ihmc.zed.ZEDTools.throwOnError;
@@ -87,7 +87,17 @@ public class ZEDImageSensor extends ImageSensor
    private long lastGrabTimestamp;
 
    private boolean positionalTrackingEnabled = false;
-   private final LinkedHashMap<Long, RigidBodyTransform> trackedPosesBySequence = new LinkedHashMap<>();
+   private static final int TRACKED_POSE_BUFFER_SIZE = 120;
+   private static final long NO_SEQUENCE = -1L;
+   /** Ring buffer of recent tracked poses, slot = sequence % size. Preallocated so each grab writes in place. */
+   private final RigidBodyTransform[] trackedPoseBuffer = new RigidBodyTransform[TRACKED_POSE_BUFFER_SIZE];
+   /** Grab sequence held by each slot of {@link #trackedPoseBuffer}, or {@link #NO_SEQUENCE} if empty. */
+   private final long[] trackedPoseSequences = new long[TRACKED_POSE_BUFFER_SIZE];
+   {
+      for (int i = 0; i < TRACKED_POSE_BUFFER_SIZE; i++)
+         trackedPoseBuffer[i] = new RigidBodyTransform();
+      Arrays.fill(trackedPoseSequences, NO_SEQUENCE);
+   }
 
    /** Valid tracked left-camera pose for the current grab, or null on tracking loss. */
    protected RigidBodyTransform getTrackedPoseForCurrentGrab()
@@ -98,10 +108,15 @@ public class ZEDImageSensor extends ImageSensor
    /** Independent SDK left-camera pose for an exact image grab; null if tracking was not valid. */
    public RigidBodyTransform getTrackedPoseForSequence(long sequence)
    {
-      synchronized (trackedPosesBySequence)
+      if (sequence < 0L)
+         return null;
+      synchronized (trackedPoseBuffer)
       {
-         RigidBodyTransform pose = trackedPosesBySequence.get(sequence);
-         return pose == null ? null : new RigidBodyTransform(pose);
+         int slot = (int) (sequence % TRACKED_POSE_BUFFER_SIZE);
+         // A different sequence in the slot means this grab had no valid pose or was already overwritten.
+         if (trackedPoseSequences[slot] != sequence)
+            return null;
+         return new RigidBodyTransform(trackedPoseBuffer[slot]);
       }
    }
 
@@ -415,11 +430,11 @@ public class ZEDImageSensor extends ImageSensor
                                          });
             if (trackingState == SL_POSITIONAL_TRACKING_STATE_OK && !euclidRotation.containsNaN() && !euclidTranslation.containsNaN())
             {
-               synchronized (trackedPosesBySequence)
+               synchronized (trackedPoseBuffer)
                {
-                  trackedPosesBySequence.put(grabSequenceNumber, new RigidBodyTransform(trackedSensorFrame.getReferenceFrame().getTransformToWorldFrame()));
-                  while (trackedPosesBySequence.size() > 120)
-                     trackedPosesBySequence.remove(trackedPosesBySequence.keySet().iterator().next());
+                  int slot = (int) (grabSequenceNumber % TRACKED_POSE_BUFFER_SIZE);
+                  trackedPoseBuffer[slot].set(trackedSensorFrame.getReferenceFrame().getTransformToWorldFrame());
+                  trackedPoseSequences[slot] = grabSequenceNumber;
                }
             }
          }
@@ -563,9 +578,9 @@ public class ZEDImageSensor extends ImageSensor
     */
    protected boolean restartPositionalTracking()
    {
-      synchronized (trackedPosesBySequence)
+      synchronized (trackedPoseBuffer)
       {
-         trackedPosesBySequence.clear();
+         Arrays.fill(trackedPoseSequences, NO_SEQUENCE);
       }
       try (SL_PositionalTrackingParameters parameters = new SL_PositionalTrackingParameters())
       {
