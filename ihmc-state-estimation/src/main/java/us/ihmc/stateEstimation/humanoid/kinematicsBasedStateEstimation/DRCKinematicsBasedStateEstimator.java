@@ -37,6 +37,8 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfM
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.MomentumStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.SimpleMomentumStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.WrenchBasedMomentumStateUpdater;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ekf.EKFPelvisPoseCorrection;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ekf.EKFPoseFusionParameters;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -64,9 +66,13 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final IMUBiasStateEstimator imuBiasStateEstimator;
    private final IMUYawDriftEstimator imuYawDriftEstimator;
 
-   private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
+   /** The native pelvis pose corrector, then the EKF pelvis pose correction; {@link PelvisPoseCorrectionMode} sets which run. */
+   private final PelvisPoseCorrectionSeries pelvisPoseCorrections;
+   private final PelvisPoseHistoryCorrectionInterface nativePelvisPoseCorrection;
+   private final EKFPelvisPoseCorrection ekfPelvisPoseCorrection;
 
    private final double estimatorDT;
+   private final double gravityMagnitude;
 
    private boolean visualizeMeasurementFrames = false;
    private final List<IMUSensorReadOnly> imusToVisualize;
@@ -100,6 +106,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                            ForceSensorDataHolder forceSensorDataHolderToUpdate)
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
+      gravityMagnitude = Math.abs(gravitationalAcceleration);
       this.sensorOutput = sensorOutputMap;
       this.footSwitchList = new ArrayList<>(footSwitches.values());
 
@@ -117,20 +124,29 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          parameters.setMaxTranslationalCorrectionSpeed(0.5);
          parameters.setMaxRotationalCorrectionSpeed(0.5);
 
-         this.pelvisPoseHistoryCorrection = new NewPelvisPoseHistoryCorrection(inverseDynamicsStructure,
-                                                                               stateEstimatorParameters.getEstimatorDT(),
-                                                                               registry,
-                                                                               null,
-                                                                               1000,
-                                                                               parameters);
+         nativePelvisPoseCorrection = new NewPelvisPoseHistoryCorrection(inverseDynamicsStructure,
+                                                                         stateEstimatorParameters.getEstimatorDT(),
+                                                                         registry,
+                                                                         null,
+                                                                         1000,
+                                                                         parameters);
       }
       else
       {
-         this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure,
-                                                                            stateEstimatorParameters.getEstimatorDT(),
-                                                                            registry,
-                                                                            1000);
+         nativePelvisPoseCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure,
+                                                                      stateEstimatorParameters.getEstimatorDT(),
+                                                                      registry,
+                                                                      1000);
       }
+      ekfPelvisPoseCorrection = new EKFPelvisPoseCorrection(rootJoint,
+                                                            sensorOutputMap::getMonotonicTime,
+                                                            new EKFPoseFusionParameters(),
+                                                            estimatorDT,
+                                                            registry);
+      pelvisPoseCorrections = new PelvisPoseCorrectionSeries(new StampedPosePacketValidator(rootJoint, registry));
+      pelvisPoseCorrections.addCorrection(nativePelvisPoseCorrection);
+      pelvisPoseCorrections.addCorrection(ekfPelvisPoseCorrection);
+      setPelvisPoseCorrectionMode(PelvisPoseCorrectionMode.NATIVE);
 
       List<IMUSensorReadOnly> imuProcessedOutputs = new ArrayList<>();
       List<IMUSensorReadOnly> imusToUseForMomentumEstimate = new ArrayList<>();
@@ -347,18 +363,20 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
             break;
       }
 
+      // The IMU biases are estimated from the uncorrected pelvis state, so this runs before the pelvis pose correction.
+      List<RigidBodyBasics> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
+      imuBiasStateEstimator.compute(trustedFeet);
+
+      if (usePelvisCorrector.getBooleanValue())
+      {
+         pelvisPoseCorrections.doControl(sensorOutput.getWallTime());
+      }
+
+      // After the pelvis pose correction, so the center of mass and momentum are computed from the corrected state.
       if (momentumStateUpdater != null)
          momentumStateUpdater.update();
 
       yoRootTwist.setMatchingFrame(rootJoint.getJointTwist());
-
-      List<RigidBodyBasics> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
-      imuBiasStateEstimator.compute(trustedFeet);
-
-      if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
-      {
-         pelvisPoseHistoryCorrection.doControl(sensorOutput.getWallTime());
-      }
 
       updateVisualizers();
    }
@@ -406,7 +424,28 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
-      pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+      pelvisPoseCorrections.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+   }
+
+   /**
+    * Sets which pelvis pose corrections are active. The default is {@link PelvisPoseCorrectionMode#NATIVE}. Each correction's
+    * active yo-variable can still be changed at runtime afterwards.
+    */
+   public void setPelvisPoseCorrectionMode(PelvisPoseCorrectionMode mode)
+   {
+      mode.apply(nativePelvisPoseCorrection, ekfPelvisPoseCorrection);
+   }
+
+   /** The native pelvis pose corrector and the EKF pelvis pose correction, run in that order. */
+   public PelvisPoseCorrectionSeries getPelvisPoseCorrections()
+   {
+      return pelvisPoseCorrections;
+   }
+
+   /** The EKF pelvis pose correction, the second stage of {@link #getPelvisPoseCorrections()}. */
+   public EKFPelvisPoseCorrection getEKFPelvisPoseCorrection()
+   {
+      return ekfPelvisPoseCorrection;
    }
 
    @Override
@@ -450,7 +489,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(forceSensorStateUpdater.getSCS2YoGraphics());
       group.addChild(pelvisLinearStateUpdater.getSCS2YoGraphics());
-      group.addChild(pelvisPoseHistoryCorrection.getSCS2YoGraphics());
+      group.addChild(pelvisPoseCorrections.getSCS2YoGraphics());
       if (momentumStateUpdater != null)
          group.addChild(momentumStateUpdater.getSCS2YoGraphics());
       if (copVisualizer != null)

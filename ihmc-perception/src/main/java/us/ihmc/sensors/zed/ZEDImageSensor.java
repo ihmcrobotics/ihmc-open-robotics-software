@@ -29,6 +29,7 @@ import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static us.ihmc.zed.ZEDTools.throwOnError;
@@ -86,6 +87,39 @@ public class ZEDImageSensor extends ImageSensor
    private long lastGrabTimestamp;
 
    private boolean positionalTrackingEnabled = false;
+   private static final int TRACKED_POSE_BUFFER_SIZE = 120;
+   private static final long NO_SEQUENCE = -1L;
+   /** Ring buffer of recent tracked poses, slot = sequence % size. Preallocated so each grab writes in place. */
+   private final RigidBodyTransform[] trackedPoseBuffer = new RigidBodyTransform[TRACKED_POSE_BUFFER_SIZE];
+   /** Grab sequence held by each slot of {@link #trackedPoseBuffer}, or {@link #NO_SEQUENCE} if empty. */
+   private final long[] trackedPoseSequences = new long[TRACKED_POSE_BUFFER_SIZE];
+   {
+      for (int i = 0; i < TRACKED_POSE_BUFFER_SIZE; i++)
+         trackedPoseBuffer[i] = new RigidBodyTransform();
+      Arrays.fill(trackedPoseSequences, NO_SEQUENCE);
+   }
+
+   /** Valid tracked left-camera pose for the current grab, or null on tracking loss. */
+   protected RigidBodyTransform getTrackedPoseForCurrentGrab()
+   {
+      return getTrackedPoseForSequence(grabSequenceNumber);
+   }
+
+   /** Independent SDK left-camera pose for an exact image grab; null if tracking was not valid. */
+   public RigidBodyTransform getTrackedPoseForSequence(long sequence)
+   {
+      if (sequence < 0L)
+         return null;
+      synchronized (trackedPoseBuffer)
+      {
+         int slot = (int) (sequence % TRACKED_POSE_BUFFER_SIZE);
+         // A different sequence in the slot means this grab had no valid pose or was already overwritten.
+         if (trackedPoseSequences[slot] != sequence)
+            return null;
+         return new RigidBodyTransform(trackedPoseBuffer[slot]);
+      }
+   }
+
    private final MutableReferenceFrame trackedSensorFrame;
    private final RigidBodyTransform trackedPoseOffset = new RigidBodyTransform();
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
@@ -351,8 +385,6 @@ public class ZEDImageSensor extends ImageSensor
       {
          // Grab images now
          returnCode = sl_grab(cameraID, zedRuntimeParameters);
-         RigidBodyTransform leftSensorTransformAtGrab = leftSensorFrame.getTransformToWorldFrame();
-         RigidBodyTransform rightSensorTransformAtGrab = rightSensorFrame.getTransformToWorldFrame();
          Instant grabTime = Instant.now();
          if (returnCode == SL_ERROR_CODE_END_OF_SVOFILE_REACHED)
          {
@@ -385,7 +417,7 @@ public class ZEDImageSensor extends ImageSensor
          // Update tracked position if tracking enabled
          if (positionalTrackingEnabled)
          {
-            sl_get_position(cameraID, sensorRotation, sensorTranslation, SL_REFERENCE_FRAME_WORLD);
+            int trackingState = sl_get_position(cameraID, sensorRotation, sensorTranslation, SL_REFERENCE_FRAME_WORLD);
 
             Quaternion euclidRotation = new Quaternion(sensorRotation.x(), sensorRotation.y(), sensorRotation.z(), sensorRotation.w());
             Vector3D euclidTranslation = new Vector3D(sensorTranslation.x(), sensorTranslation.y(), sensorTranslation.z());
@@ -396,7 +428,23 @@ public class ZEDImageSensor extends ImageSensor
                                             transformToWorld.prependOrientation(trackedPoseOffset.getRotation());
                                             transformToWorld.prependTranslation(trackedPoseOffset.getTranslation());
                                          });
+            if (trackingState == SL_POSITIONAL_TRACKING_STATE_OK && !euclidRotation.containsNaN() && !euclidTranslation.containsNaN())
+            {
+               synchronized (trackedPoseBuffer)
+               {
+                  int slot = (int) (grabSequenceNumber % TRACKED_POSE_BUFFER_SIZE);
+                  trackedPoseBuffer[slot].set(trackedSensorFrame.getReferenceFrame().getTransformToWorldFrame());
+                  trackedPoseSequences[slot] = grabSequenceNumber;
+               }
+            }
          }
+
+         if (!updateSensorFrameForGrab(sl_get_image_timestamp(cameraID)))
+            return false;
+
+         // Snapshot this grab's pose after updating tracking, before another grab can change it.
+         RigidBodyTransform leftSensorTransformAtGrab = new RigidBodyTransform(leftSensorFrame.getTransformToWorldFrame());
+         RigidBodyTransform rightSensorTransformAtGrab = new RigidBodyTransform(rightSensorFrame.getTransformToWorldFrame());
 
          // Retrieve the grabbed depth image
          Pointer depthImagePointer = slMatPointers[DEPTH_IMAGE_KEY];
@@ -439,6 +487,12 @@ public class ZEDImageSensor extends ImageSensor
       }
 
       lastGrabFailed = false;
+      return true;
+   }
+
+   /** Called after acquisition and before immutable image poses are captured. False drops this grab. */
+   protected boolean updateSensorFrameForGrab(long imageTimestamp)
+   {
       return true;
    }
 
@@ -516,6 +570,50 @@ public class ZEDImageSensor extends ImageSensor
    public void enablePositionalTracking(boolean enable)
    {
       positionalTrackingEnabled = enable;
+   }
+
+   /**
+    * Fresh positional-tracking session without closing the RGB-D camera or its streaming connection.
+    * Call only from the sensor's grab thread, before {@link #grab()}, never from a UI or ROS callback.
+    */
+   protected boolean restartPositionalTracking()
+   {
+      synchronized (trackedPoseBuffer)
+      {
+         Arrays.fill(trackedPoseSequences, NO_SEQUENCE);
+      }
+      try (SL_PositionalTrackingParameters parameters = new SL_PositionalTrackingParameters())
+      {
+         SL_PositionalTrackingParameters current = sl_get_positional_tracking_parameters(cameraID);
+         if (current == null || current.isNull())
+            throw new IllegalStateException("ZED tracking parameters unavailable");
+         // Copy before disabling: the SDK owns the pointer returned by its parameter getter.
+         parameters.enable_area_memory(current.enable_area_memory());
+         parameters.enable_pose_smoothing(current.enable_pose_smoothing());
+         parameters.set_floor_as_origin(current.set_floor_as_origin());
+         parameters.set_as_static(current.set_as_static());
+         parameters.enable_imu_fusion(current.enable_imu_fusion());
+         parameters.depth_min_range(current.depth_min_range());
+         parameters.set_gravity_as_origin(current.set_gravity_as_origin());
+         parameters.mode(current.mode());
+         parameters.enable_localization_only(current.enable_localization_only());
+         parameters.enable_2d_ground_mode(current.enable_2d_ground_mode());
+         parameters.initial_world_rotation().x(0).y(0).z(0).w(1);
+         parameters.initial_world_position().x(0).y(0).z(0);
+         if (positionalTrackingEnabled)
+            sl_disable_positional_tracking(cameraID, "");
+         positionalTrackingEnabled = false;
+         throwOnError(sl_enable_positional_tracking(cameraID, parameters, ""));
+         positionalTrackingEnabled = true;
+         trackedSensorFrame.update(transform -> transform.set(trackedPoseOffset));
+         return true;
+      }
+      catch (ZEDException | RuntimeException exception)
+      {
+         positionalTrackingEnabled = false;
+         LogTools.error("Could not restart ZED positional tracking: {}", exception.getMessage());
+         return false;
+      }
    }
 
    @Override

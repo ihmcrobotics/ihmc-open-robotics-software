@@ -34,6 +34,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionInterface
 {
    private final YoBoolean enableProcessNewPackets;
+   /** Whether a {@link PelvisPoseCorrectionSeries} runs this correction. */
+   private final YoBoolean active;
 
    private static final boolean ENABLE_GRAPHICS = true;
 
@@ -124,6 +126,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
       this.registry = new YoRegistry("newPelvisPoseHistoryCorrection");
       parentRegistry.addChild(registry);
+      active = new YoBoolean("nativePelvisPoseCorrectionActive", registry);
+      active.set(true);
 
       enableProcessNewPackets = new YoBoolean("enableProcessNewPackets", registry);
       enableProcessNewPackets.set(true);
@@ -370,6 +374,18 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
+   }
+
+   @Override
+   public boolean isActive()
+   {
+      return active.getValue();
+   }
+
+   @Override
+   public void setActive(boolean active)
+   {
+      this.active.set(active);
    }
 
    @Override
