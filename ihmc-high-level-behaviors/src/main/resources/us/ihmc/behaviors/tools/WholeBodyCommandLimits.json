@@ -1,0 +1,12 @@
+{
+  "title" : "Whole-body command limits",
+  "Pelvis minimum height" : 0.6,
+  "Pelvis home height" : 0.91,
+  "Pelvis maximum height" : 1.2,
+  "Torso minimum roll" : -0.5,
+  "Torso maximum roll" : 0.5,
+  "Torso minimum pitch" : -0.5,
+  "Torso maximum pitch" : 0.5,
+  "Torso minimum yaw" : -1.0,
+  "Torso maximum yaw" : 1.0
+}

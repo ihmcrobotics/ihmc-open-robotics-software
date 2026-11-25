@@ -361,6 +361,44 @@ public class ImGuiTools
       ImGui.popFont();
    }
 
+   /**
+    * A square, frame-height button showing a circular-arrow refresh icon, drawn so it needs no icon font.
+    *
+    * @param hiddenLabel a unique ImGui ID, such as {@code labels.getHidden("Refresh")}
+    * @return true when clicked
+    */
+   public static boolean refreshButton(String hiddenLabel)
+   {
+      float size = ImGui.getFrameHeight();
+      boolean clicked = ImGui.button(hiddenLabel, size, size);
+
+      float centerX = ImGui.getItemRectMinX() + 0.5f * size;
+      float centerY = ImGui.getItemRectMinY() + 0.5f * size;
+      float radius = 0.28f * size;
+      float thickness = Math.max(1.0f, 0.09f * size);
+      int color = ImGui.getColorU32(ImGuiCol.Text);
+
+      // Clockwise arc with a gap at the top right, then an arrowhead at its end pointing along it
+      float startAngle = (float) (-0.30 * Math.PI);
+      float endAngle = (float) (1.35 * Math.PI);
+      ImGui.getWindowDrawList().pathArcTo(centerX, centerY, radius, startAngle, endAngle, 20);
+      ImGui.getWindowDrawList().pathStroke(color, 0, thickness);
+
+      float endX = centerX + radius * (float) Math.cos(endAngle);
+      float endY = centerY + radius * (float) Math.sin(endAngle);
+      float tangentX = -(float) Math.sin(endAngle);
+      float tangentY = (float) Math.cos(endAngle);
+      float normalX = (float) Math.cos(endAngle);
+      float normalY = (float) Math.sin(endAngle);
+      float headLength = 0.22f * size;
+      float headHalfWidth = 0.15f * size;
+      ImGui.getWindowDrawList().addTriangleFilled(endX + tangentX * headLength, endY + tangentY * headLength,
+                                                  endX + normalX * headHalfWidth, endY + normalY * headHalfWidth,
+                                                  endX - normalX * headHalfWidth, endY - normalY * headHalfWidth,
+                                                  color);
+      return clicked;
+   }
+
    public static void previousWidgetTooltip(String tooltipText)
    {
       if (ImGui.isItemHovered())

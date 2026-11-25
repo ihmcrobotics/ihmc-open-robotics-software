@@ -206,6 +206,14 @@ public class RDXHardwareControlStateManager
          sendHomePose();
    }
 
+   /** Called after the home pose is sent, so widgets can show the home values as their desired values */
+   private Runnable homePoseSentListener = () -> { };
+
+   public void setHomePoseSentListener(Runnable homePoseSentListener)
+   {
+      this.homePoseSentListener = homePoseSentListener;
+   }
+
    public void sendHomePose()
    {
       double trajectoryTime = 3.0;
@@ -238,6 +246,7 @@ public class RDXHardwareControlStateManager
       controllerHelper.publishToController(homeHead);
 
       RDXBaseUI.pushNotification("Commanding home pose...");
+      homePoseSentListener.run();
    }
 
    public void sendRLModelSelectionRequest()

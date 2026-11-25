@@ -12,6 +12,7 @@ import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.tools.WholeBodyCommandLimits;
 import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.log.LogTools;
@@ -22,6 +23,7 @@ import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.LocomotionParameters;
@@ -44,7 +46,8 @@ import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
 import us.ihmc.rdx.ui.hands.RDXHandInterface.HandAction;
 import us.ihmc.rdx.ui.hands.RDXHandManager;
 import us.ihmc.rdx.ui.interactable.RDXHumanoidDoFsWidgets;
-import us.ihmc.rdx.ui.interactable.RDXPelvisHeightSlider;
+import us.ihmc.rdx.ui.interactable.RDXPelvisAndTorsoSliders;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -104,7 +107,11 @@ public class RDXTeleoperationManager extends RDXPanel
    private final RDXTeleoperationParameters teleoperationParameters;
    private final RDXHardwareControlStateManager hardwareControlStateManager;
 
-   private final RDXPelvisHeightSlider pelvisHeightSlider;
+   /** The pelvis height and torso orientation the robot's whole-body policy was trained for */
+   private final WholeBodyCommandLimits wholeBodyCommandLimits;
+   private final RDXPelvisAndTorsoSliders pelvisAndTorsoSliders;
+   /** The chest interactable's pose with its orientation clamped to the torso limits */
+   private final MutableReferenceFrame clampedChestFrame = new MutableReferenceFrame("clampedChestCommand", ReferenceFrame.getWorldFrame());
    private final RDXHumanoidDoFsWidgets dofsWidgets;
    private final RDXDesiredRobot desiredRobot;
    private RDXRobotCollisionModel avoidanceCollisionModel;
@@ -182,6 +189,7 @@ public class RDXTeleoperationManager extends RDXPanel
 
       teleoperationParameters = new RDXTeleoperationParameters(robotModel.getSimpleRobotName());
       teleoperationParameters.load();
+      wholeBodyCommandLimits = WholeBodyCommandLimits.forRobot(robotModel.getSimpleRobotName());
 
       desiredRobot = new RDXDesiredRobot(robotModel);
       desiredRobot.setSceneLevels(RDXSceneLevel.VIRTUAL);
@@ -208,7 +216,13 @@ public class RDXTeleoperationManager extends RDXPanel
                                      interactableHands,
                                      wholeBodyIKManager::getEnabled);
 
-      pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, ros2Helper, teleoperationParameters);
+      pelvisAndTorsoSliders = new RDXPelvisAndTorsoSliders(syncedRobot, ros2Helper, teleoperationParameters, wholeBodyCommandLimits);
+      // The sliders also hear home commands on the controller topic; this covers the Home button even if a node does not hear its own messages
+      hardwareControlStateManager.setHomePoseSentListener(() ->
+      {
+         pelvisAndTorsoSliders.homePelvisHeight();
+         pelvisAndTorsoSliders.homeTorso();
+      });
       dofsWidgets = new RDXHumanoidDoFsWidgets(syncedRobot, ros2Helper, teleoperationParameters);
 
       RDXBaseUI.getInstance().getKeyBindings().register("Delete all Interactables", "Escape");
@@ -219,7 +233,7 @@ public class RDXTeleoperationManager extends RDXPanel
       this.baseUI = baseUI;
       desiredRobot.create();
       dofsWidgets.getDesiredRobot().create();
-      pelvisHeightSlider.create();
+      pelvisAndTorsoSliders.create();
 
       locomotionManager.create(baseUI);
 
@@ -255,6 +269,8 @@ public class RDXTeleoperationManager extends RDXPanel
                                                             processChestCommand();
                                                          }
                                                       });
+                  // The gizmo cannot leave the torso orientations the policy was trained for
+                  interactableChest.setPoseConstraint(this::constrainChestPose);
                   allInteractableRobotLinks.add(interactableChest);
                }
                else
@@ -275,6 +291,8 @@ public class RDXTeleoperationManager extends RDXPanel
                                                              processPelvis6DCommand();
                                                           }
                                                        });
+                  // The gizmo cannot leave the pelvis heights the policy was trained for
+                  interactablePelvis.setPoseConstraint(this::constrainPelvisPose);
                   allInteractableRobotLinks.add(interactablePelvis);
                }
                else
@@ -392,9 +410,16 @@ public class RDXTeleoperationManager extends RDXPanel
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderResetSimulationOverlay);
       if (teleportSimulationCallback != null)
       {
-         double spawnYaw = syncedRobot.getRobotModel().getDefaultRobotInitialSetup().getInitialYaw();
-         new RDXTeleportRobotTool().create(baseUI, teleportGroundTruthTerrain, spawnYaw, this::teleportSimulation);
+         new RDXTeleportRobotTool().create(baseUI, teleportGroundTruthTerrain, this::getPelvisYawInWorld, this::teleportSimulation);
       }
+   }
+
+   /** Where the teleport arrow starts, so it points the way the robot faces now. */
+   private double getPelvisYawInWorld()
+   {
+      FramePose3D pelvisPose = new FramePose3D(syncedRobot.getReferenceFrames().getPelvisFrame());
+      pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
+      return pelvisPose.getYaw();
    }
 
    private void teleportSimulation(Pose3DReadOnly midFeetGoal)
@@ -416,7 +441,7 @@ public class RDXTeleoperationManager extends RDXPanel
       hardwareControlStateManager.update();
       desiredRobot.update();
       dofsWidgets.getDesiredRobot().update();
-      pelvisHeightSlider.update();
+      pelvisAndTorsoSliders.update();
 
       locomotionManager.update();
       armManager.update(interactablesEnabled.get());
@@ -519,8 +544,27 @@ public class RDXTeleoperationManager extends RDXPanel
    private void processPelvis6DCommand()
    {
       RDXBaseUI.pushNotification("Commanding pelvis  trajectory...");
-      ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
-                                                                                        interactablePelvis.getPose()));
+      // The gizmo is kept within the limits, but the robot may have moved since
+      FramePose3D desiredPelvisPose = new FramePose3D(interactablePelvis.getPose());
+      desiredPelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
+      wholeBodyCommandLimits.clampPelvisHeight(desiredPelvisPose, syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame());
+      ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(), desiredPelvisPose));
+   }
+
+   /** Keeps the pelvis gizmo, given as its transform to world, within the height limits in the walking frame */
+   private void constrainPelvisPose(RigidBodyTransform pelvisToWorld)
+   {
+      FramePose3D pelvisPose = new FramePose3D(ReferenceFrame.getWorldFrame(), pelvisToWorld);
+      if (wholeBodyCommandLimits.clampPelvisHeight(pelvisPose, syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame()))
+         pelvisPose.get(pelvisToWorld);
+   }
+
+   /** Keeps the chest gizmo, given as its transform to world, within the torso orientation limits in the walking frame */
+   private void constrainChestPose(RigidBodyTransform chestToWorld)
+   {
+      FrameQuaternion chestOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), chestToWorld.getRotation());
+      if (wholeBodyCommandLimits.clampTorsoOrientation(chestOrientation, syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame()))
+         chestToWorld.getRotation().set(chestOrientation);
    }
 
    private void processChestCommand()
@@ -529,7 +573,15 @@ public class RDXTeleoperationManager extends RDXPanel
       SpineJointName[] spineJointNamesArray = syncedRobot.getRobotModel().getJointMap().getSpineJointNames();
       double[] desiredSpineJointValues = new double[spineJointNamesArray.length];
 
-      FramePose3D chestInPelvisFrame = new FramePose3D(interactableChest.getPose());
+      // The gizmo is kept within the limits, but the robot may have moved since
+      FramePose3D desiredChestPose = new FramePose3D(interactableChest.getPose());
+      desiredChestPose.changeFrame(ReferenceFrame.getWorldFrame());
+      FrameQuaternion desiredChestOrientation = new FrameQuaternion(desiredChestPose.getOrientation());
+      wholeBodyCommandLimits.clampTorsoOrientation(desiredChestOrientation, syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame());
+      desiredChestPose.getOrientation().set(desiredChestOrientation);
+      clampedChestFrame.update(transformToWorld -> desiredChestPose.get(transformToWorld));
+
+      FramePose3D chestInPelvisFrame = new FramePose3D(clampedChestFrame.getReferenceFrame());
       chestInPelvisFrame.changeFrame(syncedRobot.getReferenceFrames().getPelvisFrame());
 
       double desiredYaw = chestInPelvisFrame.getYaw();
@@ -553,7 +605,7 @@ public class RDXTeleoperationManager extends RDXPanel
                desiredSpineJointValues[i] = 0.0; // fallback
          }
       }
-      ros2Helper.publishToController(HumanoidMessageTools.createChestHybridTrajectoryMessage(interactableChest.getPoseGizmo().getGizmoFrame(),
+      ros2Helper.publishToController(HumanoidMessageTools.createChestHybridTrajectoryMessage(clampedChestFrame.getReferenceFrame(),
                                                                                              syncedRobot.getReferenceFrames().getPelvisFrame(),
                                                                                              desiredSpineJointValues,
                                                                                              teleoperationParameters.getTrajectoryTime()));
@@ -713,11 +765,7 @@ public class RDXTeleoperationManager extends RDXPanel
          ImGui.spacing();
          ImGui.separator();
          ImGui.spacing();
-         ImGui.text("Pelvis Height:");
-         ImGui.sameLine();
-         ImGui.setCursorPosX(widgetStartX);
-         ImGui.setNextItemWidth(-1);
-         pelvisHeightSlider.renderImGuiWidgets();
+         pelvisAndTorsoSliders.renderImGuiWidgets(widgetStartX);
       }
    }
 
@@ -797,7 +845,7 @@ public class RDXTeleoperationManager extends RDXPanel
       {
          desiredRobot.getRenderables(renderables, pool, sceneLevels);
          dofsWidgets.getDesiredRobot().getRenderables(renderables, pool, sceneLevels);
-         pelvisHeightSlider.getRenderables(renderables, pool, sceneLevels);
+         pelvisAndTorsoSliders.getRenderables(renderables, pool, sceneLevels);
 
          if (showGraphics.get())
          {
@@ -821,7 +869,7 @@ public class RDXTeleoperationManager extends RDXPanel
    {
       locomotionManager.deleteAll();
       dofsWidgets.reset();
-      pelvisHeightSlider.disablePreview();
+      pelvisAndTorsoSliders.disablePreview();
 
       for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
          robotPartInteractable.delete();
@@ -834,7 +882,7 @@ public class RDXTeleoperationManager extends RDXPanel
       locomotionManager.destroy();
       armManager.destroy();
       dofsWidgets.destroy();
-      pelvisHeightSlider.destroy();
+      pelvisAndTorsoSliders.destroy();
    }
 
    public ImBoolean getInteractablesEnabled()
